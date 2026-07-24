@@ -28,14 +28,13 @@
     }
   },
   "$defs": {
-    "description_block": {
-      "description": "A paragraph of prose. Joined with the next block by a blank line; this reproduces preformatted content (e.g. CtsCmd's ASCII-art tables) byte-for-byte too, since any blank lines within such a block round-trip through the same join, without needing a distinct verbatim representation.",
-      "type": "string",
-      "minLength": 1
+    "description_line": {
+      "description": "A single line of the help text, with no embedded newline. The lines are joined with a newline to reconstruct the original text verbatim (including preformatted content, e.g. CtsCmd's ASCII-art tables); a blank line in the source is represented as an empty string, so an empty string is allowed.",
+      "type": "string"
     },
     "description": {
       "type": "array",
-      "items": { "$ref": "#/$defs/description_block" }
+      "items": { "$ref": "#/$defs/description_line" }
     },
     "argument": {
       "description": "Structured, best-effort metadata alongside the verbatim argN prose kept in the command's own description; the source's argN convention is inconsistent per-command (some omit type, some omit a separate description line, one uses a union type), so type and description are not always present, and type is free text rather than a closed set.",

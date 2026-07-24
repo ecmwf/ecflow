@@ -15,9 +15,17 @@
       "implementation": "AbortCmd",
       "summary": "Mark task as aborted. For use in the '.ecf' script file *only*",
       "description": [
-        "Mark task as aborted. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1 = (optional) string(reason)\n         Optionally provide a reason why the abort was raised",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.",
-        "Usage:\n  ecflow_client --abort=reasonX"
+        "Mark task as aborted. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "  arg1 = (optional) string(reason)",
+        "         Optionally provide a reason why the abort was raised",
+        "",
+        "If this task command is a zombie, then the default action will be to *block*.",
+        "The default can be overridden by using zombie attributes.",
+        "Otherwise the blocking period is defined by ECF_TIMEOUT.",
+        "",
+        "Usage:",
+        "  ecflow_client --abort=reasonX"
       ],
       "arguments": [
         {
@@ -37,42 +45,109 @@
       "summary": "Alter the node according to the options.",
       "description": [
         "Alter the node according to the options.",
+        "",
         "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]",
-        "arg2 = For delete:\n       [ variable | time | today | date  | day | cron | event | meter | late | generic |\n         queue | label | trigger | complete | repeat | limit | inlimit | limit_path |\n         zombie | aviso | mirror ]",
-        "       For change:\n       [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter |\n         label | trigger  | complete | repeat | limit_max | limit_value | defstatus |\n         late | time | today | aviso | mirror ]",
-        "       For add:\n       [ variable | time | today | date | day | zombie | event | meter | late | limit |\n         inlimit | label | aviso | mirror ]",
-        "       For set_flag or clear_flag:\n       [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed |\n         statuscmd_failed | killcmd_failed | no_script | killed | status | late |\n         message complete | queue_limit | task_waiting | locked | zombie | archived |\n         restored | threshold | log_error | checkpt_error ]",
-        "       For sort:\n       [ event | meter | label | variable| limit | all ]",
+        "",
+        "arg2 = For delete:",
+        "       [ variable | time | today | date  | day | cron | event | meter | late | generic |",
+        "         queue | label | trigger | complete | repeat | limit | inlimit | limit_path |",
+        "         zombie | aviso | mirror ]",
+        "",
+        "       For change:",
+        "       [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter |",
+        "         label | trigger  | complete | repeat | limit_max | limit_value | defstatus |",
+        "         late | time | today | aviso | mirror ]",
+        "",
+        "       For add:",
+        "       [ variable | time | today | date | day | zombie | event | meter | late | limit |",
+        "         inlimit | label | aviso | mirror ]",
+        "",
+        "       For set_flag or clear_flag:",
+        "       [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed |",
+        "         statuscmd_failed | killcmd_failed | no_script | killed | status | late |",
+        "         message complete | queue_limit | task_waiting | locked | zombie | archived |",
+        "         restored | threshold | log_error | checkpt_error ]",
+        "",
+        "       For sort:",
+        "       [ event | meter | label | variable| limit | all ]",
+        "",
         "arg3 = [ <name> | <value> ]",
+        "",
         "arg4 = <new-value>",
+        "",
         "arg5 = <path> (<path> (...)) - at least one node path required.",
+        "",
         "*Important Notes*",
+        "",
         " * All paths must start with a leading '/' character.",
+        "",
         " * To update, create or remove server variables use '/' for path.",
+        "",
         " * When updating unnamed attributes (Repeat, Trigger, Complete, ...) the name/arg3 is not necessary.",
+        "",
         " * After changing the clock the suite needs to be re-queued for the change to take effect.",
-        " * When adding or updating node attributes (e.g. variable, meter, event, label, limits, late)\n   the name (arg3) and value (arg4) must be quoted.",
+        "",
+        " * When adding or updating node attributes (e.g. variable, meter, event, label, limits, late)",
+        "   the name (arg3) and value (arg4) must be quoted.",
+        "",
         " * When sorting attributes, 'recursive' can be used as the value (arg3).",
-        " * When adding a meter, the value (arg4) is expected to be a comma-separated triplet\n   of numerical values the form \"<min>,<max>,<value>\" (n.b. no spaces are allowed).",
+        "",
+        " * When adding a meter, the value (arg4) is expected to be a comma-separated triplet",
+        "   of numerical values the form \"<min>,<max>,<value>\" (n.b. no spaces are allowed).",
+        "",
         " * When adding an event, the non-optional value (arg4) must be either \"set\" or \"clear\".",
-        " * When adding or updating aviso and mirror attributes, the value (arg4) is expected to be\n   a quoted list of configuration options. For example:\n   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'\n                  --url http://aviso/ --schema /path/to/schema --polling 60\"",
-        " * For both aviso and mirror, the special value \"reload\" forces reloading the configuration.\n   This is typically useful after updating variables used to configure these kind of attributes.",
+        "",
+        " * When adding or updating aviso and mirror attributes, the value (arg4) is expected to be",
+        "   a quoted list of configuration options. For example:",
+        "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"",
+        "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'",
+        "                  --url http://aviso/ --schema /path/to/schema --polling 60\"",
+        "",
+        " * For both aviso and mirror, the special value \"reload\" forces reloading the configuration.",
+        "   This is typically useful after updating variables used to configure these kind of attributes.",
+        "",
         "Usage:",
-        "   ecflow_client --alter=add variable <variable-name> \"value\" /             # add server variable\n   ecflow_client --alter=add variable <variable-name> \"value\" /path/to/node # add node variable",
+        "",
+        "   ecflow_client --alter=add variable <variable-name> \"value\" /             # add server variable",
+        "   ecflow_client --alter=add variable <variable-name> \"value\" /path/to/node # add node variable",
+        "",
         "   ecflow_client --alter=add time \"+00:20\" /path/to/node",
+        "",
         "   ecflow_client --alter=add date \"01.*.*\" /path/to/node",
+        "",
         "   ecflow_client --alter=add day \"sunday\"  /path/to/node",
+        "",
         "   ecflow_client --alter=add label <label-name> \"label_value\" /path/to/node",
+        "",
         "   ecflow_client --alter=add event <event-name> \"set\"|\"clear\" /path/to/node",
+        "",
         "   ecflow_client --alter=add meter <meter-name> \"<min>,<max>,value\" /path/to/node",
+        "",
         "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node",
+        "",
         "   ecflow_client --alter=add limit mars \"100\" /path/to/node",
+        "",
         "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node",
+        "",
         "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node",
+        "",
         "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node",
-        "   # zombie attributes have the following structure:\n     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"\n      client_side_action = \"fob\" | \"fail\" | \"block\"\n      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" | \"queue\"\n      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60",
-        "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail",
-        "   ecflow_client --alter=delete variable FRED /path/to/node  # delete variable FRED\n   ecflow_client --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode\n"
+        "",
+        "   # zombie attributes have the following structure:",
+        "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`",
+        "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"",
+        "      client_side_action = \"fob\" | \"fail\" | \"block\"",
+        "      server_side_action = \"adopt\" | \"delete\" | \"kill\"",
+        "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" | \"queue\"",
+        "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60",
+        "",
+        "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail",
+        "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail",
+        "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail",
+        "",
+        "   ecflow_client --alter=delete variable FRED /path/to/node  # delete variable FRED",
+        "   ecflow_client --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode",
+        ""
       ]
     },
     {
@@ -82,10 +157,42 @@
       "implementation": "PathsCmd",
       "summary": "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).",
       "description": [
-        "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).\nSaves the suite/family nodes to disk, and then removes the child nodes from the definition.\nThis saves memory in the server, when dealing with huge definitions that are not needed.\nIt improves time taken to checkpoint and reduces network bandwidth.\nIf the node is re-queued or begun, the child nodes are automatically restored.\nUse --restore to reload the archived nodes manually\nCare must be taken if you have trigger reference to the archived nodes\nThe nodes are saved to the file ECF_HOME/<hostname>.<port>.<ECF_NAME>.check,\nwhere '/' has been replaced with ':' in ECF_NAME",
-        "Nodes like (family and suites) can also to automatically archived by using,\nthe 'autoarchive' attribute. The attribute is only applied once the node is complete",
-        "suite autoarchive\n family f1\n    autoarchive +01:00 # archive one hour after complete\n    task t1\n endfamily\n family f2\n     autoarchive 01:00 # archive at 1 am in morning after complete\n    task t1\n endfamily\n family f3\n    autoarchive 10     # archive 10 days after complete\n    task t1\n endfamily\n family f4\n    autoarchive 0      # archive immediately (upto 60s) after complete\n    task t1\n  endfamily\nendsuite",
-        "Usage::\n   --archive=/s1           # archive suite s1\n   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2\n   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
+        "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).",
+        "Saves the suite/family nodes to disk, and then removes the child nodes from the definition.",
+        "This saves memory in the server, when dealing with huge definitions that are not needed.",
+        "It improves time taken to checkpoint and reduces network bandwidth.",
+        "If the node is re-queued or begun, the child nodes are automatically restored.",
+        "Use --restore to reload the archived nodes manually",
+        "Care must be taken if you have trigger reference to the archived nodes",
+        "The nodes are saved to the file ECF_HOME/<hostname>.<port>.<ECF_NAME>.check,",
+        "where '/' has been replaced with ':' in ECF_NAME",
+        "",
+        "Nodes like (family and suites) can also to automatically archived by using,",
+        "the 'autoarchive' attribute. The attribute is only applied once the node is complete",
+        "",
+        "suite autoarchive",
+        " family f1",
+        "    autoarchive +01:00 # archive one hour after complete",
+        "    task t1",
+        " endfamily",
+        " family f2",
+        "     autoarchive 01:00 # archive at 1 am in morning after complete",
+        "    task t1",
+        " endfamily",
+        " family f3",
+        "    autoarchive 10     # archive 10 days after complete",
+        "    task t1",
+        " endfamily",
+        " family f4",
+        "    autoarchive 0      # archive immediately (upto 60s) after complete",
+        "    task t1",
+        "  endfamily",
+        "endsuite",
+        "",
+        "Usage::",
+        "   --archive=/s1           # archive suite s1",
+        "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2",
+        "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
       ]
     },
     {
@@ -95,7 +202,18 @@
       "implementation": "BeginCmd",
       "summary": "Begin playing the definition in the server.",
       "description": [
-        "Begin playing the definition in the server.\nExpects zero or a single quoted string.\n  arg1 = suite-name | Nothing | force\n         play the chosen suite, if no arg specified, play all suites, in the definition\n         force means reset the begin status on the suites and bypass checks.\n         This is only required if suite-name is provide as the first argument\n         Using force can cause the creation of zombies\nUsage:\n--begin                     # will begin all suites\n--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted\n--begin=\"mySuite\"         # begin playing suite of name 'mySuite'\n--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check"
+        "Begin playing the definition in the server.",
+        "Expects zero or a single quoted string.",
+        "  arg1 = suite-name | Nothing | force",
+        "         play the chosen suite, if no arg specified, play all suites, in the definition",
+        "         force means reset the begin status on the suites and bypass checks.",
+        "         This is only required if suite-name is provide as the first argument",
+        "         Using force can cause the creation of zombies",
+        "Usage:",
+        "--begin                     # will begin all suites",
+        "--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted",
+        "--begin=\"mySuite\"         # begin playing suite of name 'mySuite'",
+        "--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check"
       ]
     },
     {
@@ -105,7 +223,14 @@
       "implementation": "ClientHandleCmd",
       "summary": "Add a set of suites, to an existing handle.",
       "description": [
-        "Add a set of suites, to an existing handle.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\n   arg2 = names            # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10\nAn error is returned if the handle had not previously been registered\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+        "Add a set of suites, to an existing handle.",
+        "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
+        "   arg2 = names            # should be a list of suite names, names not in the definition are ignored",
+        "Usage:",
+        "   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10",
+        "An error is returned if the handle had not previously been registered",
+        "The handle is created with --ch_register command",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -115,7 +240,14 @@
       "implementation": "ClientHandleCmd",
       "summary": "Change an existing handle so that new suites can be added automatically.",
       "description": [
-        "Change an existing handle so that new suites can be added automatically.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\n   arg2 = true | false     # true means add new suites to my list, when they are created\nUsage:\n --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it\n --ch_auto_add=10 false    # modify handle 10 so that no new suites are added\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+        "Change an existing handle so that new suites can be added automatically.",
+        "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
+        "   arg2 = true | false     # true means add new suites to my list, when they are created",
+        "Usage:",
+        " --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it",
+        " --ch_auto_add=10 false    # modify handle 10 so that no new suites are added",
+        "The handle is created with --ch_register command",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -125,7 +257,14 @@
       "implementation": "ClientHandleCmd",
       "summary": "Drop/de-register the client handle.",
       "description": [
-        "Drop/de-register the client handle.\nUn-used handle should be dropped otherwise they will stay, in the server.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\nUsage:\n   --ch_drop=10            # drop the client handle 10\nAn error is returned if the handle had not previously been registered\nThe handle stored on the local client is set to zero\nTo list all suites and handles use --ch_suites"
+        "Drop/de-register the client handle.",
+        "Un-used handle should be dropped otherwise they will stay, in the server.",
+        "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
+        "Usage:",
+        "   --ch_drop=10            # drop the client handle 10",
+        "An error is returned if the handle had not previously been registered",
+        "The handle stored on the local client is set to zero",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -135,7 +274,15 @@
       "implementation": "ClientHandleCmd",
       "summary": "Drop/de-register all handles associated with the given user.",
       "description": [
-        "Drop/de-register all handles associated with the given user.\nIf no user provided will drop for current user. Client must ensure un-used handle are dropped\notherwise they will stay, in the server.\n   arg1 = user           # The user to be drooped, if left empty drop current user \nUsage:\n   --ch_drop_user=ma0    # drop all handles associated with user ma0\n   --ch_drop_user        # drop all handles associated with current user\nAn error is returned if no registered handles\nTo list all suites and handles use --ch_suites"
+        "Drop/de-register all handles associated with the given user.",
+        "If no user provided will drop for current user. Client must ensure un-used handle are dropped",
+        "otherwise they will stay, in the server.",
+        "   arg1 = user           # The user to be drooped, if left empty drop current user ",
+        "Usage:",
+        "   --ch_drop_user=ma0    # drop all handles associated with user ma0",
+        "   --ch_drop_user        # drop all handles associated with current user",
+        "An error is returned if no registered handles",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -145,7 +292,23 @@
       "implementation": "ClientHandleCmd",
       "summary": "Register interest in a set of suites.",
       "description": [
-        "Register interest in a set of suites.\nIf a definition has lots of suites, but the client. is only interested in a small subset,\nThen using this command can reduce network bandwidth and synchronisation will be quicker.\nThis command will create a client handle, which must be used for any other changes.\nThe newly created handle can be shown with the --ch_suites command\nDeleted suites will stay registered, and must be explicitly removed/dropped.\nNote: Suites can be registered before they are loaded into the server\nThis command affects news() and sync() commands\n   arg1 = true | false           # true means add new suites to my list, when they are created\n   arg2 = names                  # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites\n   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only\n   --ch_register=false           # register handle, suites will be added later on\n   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites\n                                 # The client handle as the first argument is typically used by GUI/python                                 # When the client handle is no zero, then it is dropped first\nTo list all suites and handles use --ch_suites"
+        "Register interest in a set of suites.",
+        "If a definition has lots of suites, but the client. is only interested in a small subset,",
+        "Then using this command can reduce network bandwidth and synchronisation will be quicker.",
+        "This command will create a client handle, which must be used for any other changes.",
+        "The newly created handle can be shown with the --ch_suites command",
+        "Deleted suites will stay registered, and must be explicitly removed/dropped.",
+        "Note: Suites can be registered before they are loaded into the server",
+        "This command affects news() and sync() commands",
+        "   arg1 = true | false           # true means add new suites to my list, when they are created",
+        "   arg2 = names                  # should be a list of suite names, names not in the definition are ignored",
+        "Usage:",
+        "   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites",
+        "   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only",
+        "   --ch_register=false           # register handle, suites will be added later on",
+        "   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites",
+        "                                 # The client handle as the first argument is typically used by GUI/python                                 # When the client handle is no zero, then it is dropped first",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -155,7 +318,13 @@
       "implementation": "ClientHandleCmd",
       "summary": "Remove a set of suites, from an existing handle.",
       "description": [
-        "Remove a set of suites, from an existing handle.\n   arg1 = handle(integer)   # The handle must be an integer that is > 0\n   arg2 = names             # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+        "Remove a set of suites, from an existing handle.",
+        "   arg1 = handle(integer)   # The handle must be an integer that is > 0",
+        "   arg2 = names             # should be a list of suite names, names not in the definition are ignored",
+        "Usage:",
+        "   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10",
+        "The handle is created with --ch_register command",
+        "To list all suites and handles use --ch_suites"
       ]
     },
     {
@@ -173,7 +342,15 @@
       "implementation": "PathsCmd",
       "summary": "Checks the expression and limits in the server. Will also check trigger references.",
       "description": [
-        "Checks the expression and limits in the server. Will also check trigger references.\nTrigger expressions that reference paths that don't exist, will be reported as errors.\n(Note: On the client side unresolved paths in trigger expressions must\nhave an associated 'extern' specified)\n  arg = [ _all_ | / | list of node paths ]\nUsage:\n  --check=_all_           # Checks all the suites\n  --check=/               # Checks all the suites\n  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
+        "Checks the expression and limits in the server. Will also check trigger references.",
+        "Trigger expressions that reference paths that don't exist, will be reported as errors.",
+        "(Note: On the client side unresolved paths in trigger expressions must",
+        "have an associated 'extern' specified)",
+        "  arg = [ _all_ | / | list of node paths ]",
+        "Usage:",
+        "  --check=_all_           # Checks all the suites",
+        "  --check=/               # Checks all the suites",
+        "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
       ]
     },
     {
@@ -183,7 +360,11 @@
       "implementation": "CtsNodeCmd",
       "summary": "Test hierarchical Job generation only, for chosen Node.",
       "description": [
-        "Test hierarchical Job generation only, for chosen Node.\nThe jobs are generated independent of the dependencies\nThis will generate the jobs *only*, i.e. no job submission. Used for checking job generation only\n  arg = node path | arg = NULL\n     If no node path specified generates for all Tasks in the definition. For Test only"
+        "Test hierarchical Job generation only, for chosen Node.",
+        "The jobs are generated independent of the dependencies",
+        "This will generate the jobs *only*, i.e. no job submission. Used for checking job generation only",
+        "  arg = node path | arg = NULL",
+        "     If no node path specified generates for all Tasks in the definition. For Test only"
       ]
     },
     {
@@ -193,7 +374,38 @@
       "implementation": "CheckPtCmd",
       "summary": "Forces the definition file in the server to be written to disk *or* allow mode,",
       "description": [
-        "Forces the definition file in the server to be written to disk *or* allow mode,\ninterval and alarm to be changed.\nWhenever the check pt file is written to disk, it is measured.\nIf the time to save to disk is greater than the default of 30 seconds,\nthen an alarm is raised. This can be seen in the GUI as a late flag on the server.\nOnce the late flag has been set it will need to manually cleared in the GUI\nor by using --alter functionality\nNote excessive save times can interfere with job scheduling.\nThe alarm threshold can be changed. See below.\n   arg1 = (optional) mode [ never | on_time | on_time:<integer> | always | <integer>]\n     never     : Never check point the definition in the server\n     on_time   : Turn on automatic check pointing at interval stored on server\n     on_time<integer> : Turn on automatic check point, with the specified interval in seconds\n     alarm<integer>   : Modify the alarm notification time for check pt saving to disk\n     always    : Check point at any change in node tree, *NOT* recommended for large definitions\n     <integer> : This specifies the interval in seconds when server should automatically check pt.\n                 This will only take effect of mode is on_time/CHECK_ON_TIME\n                 Should ideally be a value greater than 60 seconds, default is 120 seconds\nUsage:\n  --check_pt\n    Immediately check point the definition held in the server\n  --check_pt=never\n    Switch off check pointing\n  --check_pt=on_time\n    Start automatic check pointing at the interval stored in the server\n  --check_pt=180\n    Change the check pt interval to 180 seconds\n  --check_pt=on_time:90\n    Change mode and interval, to automatic check pointing every 90 seconds\n  --check_pt=alarm:35\n    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds\n    set the late flag on the server."
+        "Forces the definition file in the server to be written to disk *or* allow mode,",
+        "interval and alarm to be changed.",
+        "Whenever the check pt file is written to disk, it is measured.",
+        "If the time to save to disk is greater than the default of 30 seconds,",
+        "then an alarm is raised. This can be seen in the GUI as a late flag on the server.",
+        "Once the late flag has been set it will need to manually cleared in the GUI",
+        "or by using --alter functionality",
+        "Note excessive save times can interfere with job scheduling.",
+        "The alarm threshold can be changed. See below.",
+        "   arg1 = (optional) mode [ never | on_time | on_time:<integer> | always | <integer>]",
+        "     never     : Never check point the definition in the server",
+        "     on_time   : Turn on automatic check pointing at interval stored on server",
+        "     on_time<integer> : Turn on automatic check point, with the specified interval in seconds",
+        "     alarm<integer>   : Modify the alarm notification time for check pt saving to disk",
+        "     always    : Check point at any change in node tree, *NOT* recommended for large definitions",
+        "     <integer> : This specifies the interval in seconds when server should automatically check pt.",
+        "                 This will only take effect of mode is on_time/CHECK_ON_TIME",
+        "                 Should ideally be a value greater than 60 seconds, default is 120 seconds",
+        "Usage:",
+        "  --check_pt",
+        "    Immediately check point the definition held in the server",
+        "  --check_pt=never",
+        "    Switch off check pointing",
+        "  --check_pt=on_time",
+        "    Start automatic check pointing at the interval stored in the server",
+        "  --check_pt=180",
+        "    Change the check pt interval to 180 seconds",
+        "  --check_pt=on_time:90",
+        "    Change mode and interval, to automatic check pointing every 90 seconds",
+        "  --check_pt=alarm:35",
+        "    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds",
+        "    set the late flag on the server."
       ]
     },
     {
@@ -203,9 +415,19 @@
       "implementation": "CompleteCmd",
       "summary": "Mark task as complete. For use in the '.ecf' script file *only*",
       "description": [
-        "Mark task as complete. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.\nThe init command allows variables to be added, and complete command\nallows for them to be removed.\n  arg1(--remove)(optional) = a list of variables to removed from this task",
-        "Usage:\n  ecflow_client --complete\n  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
+        "Mark task as complete. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "",
+        "If this task command is a zombie, then the default action will be to *block*.",
+        "The default can be overridden by using zombie attributes.",
+        "Otherwise the blocking period is defined by ECF_TIMEOUT.",
+        "The init command allows variables to be added, and complete command",
+        "allows for them to be removed.",
+        "  arg1(--remove)(optional) = a list of variables to removed from this task",
+        "",
+        "Usage:",
+        "  ecflow_client --complete",
+        "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
       ],
       "arguments": [
         {
@@ -242,7 +464,16 @@
       "implementation": "DeleteCmd",
       "summary": "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.",
       "description": [
-        "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.\n  arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted tasks\n  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt\n  arg3 = node paths | _all_         # _all_ means delete all suites\n                                    # node paths must start with a leading '/'\nUsage:\n  --delete=_all_                    # Delete all suites in server. Use with care.\n  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt\n  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted\n  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
+        "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.",
+        "  arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted tasks",
+        "  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt",
+        "  arg3 = node paths | _all_         # _all_ means delete all suites",
+        "                                    # node paths must start with a leading '/'",
+        "Usage:",
+        "  --delete=_all_                    # Delete all suites in server. Use with care.",
+        "  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt",
+        "  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted",
+        "  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
       ]
     },
     {
@@ -252,7 +483,12 @@
       "implementation": "PathsCmd",
       "summary": "Returns the edit history associated with a Node.",
       "description": [
-        "Returns the edit history associated with a Node.\nCan also be used to clear the edit history.\nUsage::\n   --edit_history=/s1/f1/t1  # return history of changes for the given node\n   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.\n"
+        "Returns the edit history associated with a Node.",
+        "Can also be used to clear the edit history.",
+        "Usage::",
+        "   --edit_history=/s1/f1/t1  # return history of changes for the given node",
+        "   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.",
+        ""
       ]
     },
     {
@@ -262,12 +498,55 @@
       "implementation": "EditScriptCmd",
       "summary": "Allows user to edit, pre-process and submit the script.",
       "description": [
-        "Allows user to edit, pre-process and submit the script.\nWill allow pre-processing of arbitrary file with 'pre_process_file' option\n arg1 = path to task  # The path to the task/alias\n arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]\n    edit : will return the script file to standard out. The script will\n           include used variables enclosed between %comment/%end at the\n           start of the file\n    pre_process: Will return the script file to standard out.The script will\n                 include used variables enclosed between %comment/%end at the\n                 start of the file and with all %include expanded\n    submit: Will extract the used variables from the supplied file, i.e\n            between the %comment/%end and use these them to generate the\n            job using the ecf file accessible from the server\n    pre_process_file: Will pre process the user supplied file.\n                      Will expand includes,variable substitution,\n                      remove manual & comment sections.\n    submit_file: Like submit, but the supplied file, is submitted by the server\n                 The last 2 options allow complete freedom to debug the script file\n arg3 = [ path_to_script_file ]\n          needed for option [  pre_process_file | submit_file ]\n arg4 = create_alias (optional) default value is false, for use with 'submit_file' option\n arg5 = no_run (optional) default value is false, i.e immediately run the alias\n        is no_run is specified the alias in only created\nUsage:\n--edit_script=/path/to/task edit > script_file\n   server returns script with the used variables to standard out\n   The user can choose to edit this file",
-        "--edit_script=/path/to/task pre_process > pre_processed_script_file\n  server will pre process the ecf file accessible from the server\n  (i.e expand all %includes) and return the file to standard out",
-        "--edit_script=/path/to/task submit script_file\n  Will extract the used variables in the 'script_file' and will uses these\n  variables during variable substitution of the ecf file accessible by the\n  server. This is then submitted as a job",
-        "--edit_script=/path/to/task pre_process_file file_to_pre_process\n  The server will pre-process the user supplied file and return the contents\n  to standard out. This pre-processing is the same as job file processing,\n  but on a arbitrary file",
-        "--edit_script=/path/to/task submit_file file_to_submit\n  Will extract the used variables in the 'file_to_submit' and will uses these\n  variables during variable substitution, the file is then submitted for job\n  generation by the server",
-        "--edit_script=/path/to/task submit_file file_to_submit create_alias\n  Like the the previous example but will create and run as an alias"
+        "Allows user to edit, pre-process and submit the script.",
+        "Will allow pre-processing of arbitrary file with 'pre_process_file' option",
+        " arg1 = path to task  # The path to the task/alias",
+        " arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]",
+        "    edit : will return the script file to standard out. The script will",
+        "           include used variables enclosed between %comment/%end at the",
+        "           start of the file",
+        "    pre_process: Will return the script file to standard out.The script will",
+        "                 include used variables enclosed between %comment/%end at the",
+        "                 start of the file and with all %include expanded",
+        "    submit: Will extract the used variables from the supplied file, i.e",
+        "            between the %comment/%end and use these them to generate the",
+        "            job using the ecf file accessible from the server",
+        "    pre_process_file: Will pre process the user supplied file.",
+        "                      Will expand includes,variable substitution,",
+        "                      remove manual & comment sections.",
+        "    submit_file: Like submit, but the supplied file, is submitted by the server",
+        "                 The last 2 options allow complete freedom to debug the script file",
+        " arg3 = [ path_to_script_file ]",
+        "          needed for option [  pre_process_file | submit_file ]",
+        " arg4 = create_alias (optional) default value is false, for use with 'submit_file' option",
+        " arg5 = no_run (optional) default value is false, i.e immediately run the alias",
+        "        is no_run is specified the alias in only created",
+        "Usage:",
+        "--edit_script=/path/to/task edit > script_file",
+        "   server returns script with the used variables to standard out",
+        "   The user can choose to edit this file",
+        "",
+        "--edit_script=/path/to/task pre_process > pre_processed_script_file",
+        "  server will pre process the ecf file accessible from the server",
+        "  (i.e expand all %includes) and return the file to standard out",
+        "",
+        "--edit_script=/path/to/task submit script_file",
+        "  Will extract the used variables in the 'script_file' and will uses these",
+        "  variables during variable substitution of the ecf file accessible by the",
+        "  server. This is then submitted as a job",
+        "",
+        "--edit_script=/path/to/task pre_process_file file_to_pre_process",
+        "  The server will pre-process the user supplied file and return the contents",
+        "  to standard out. This pre-processing is the same as job file processing,",
+        "  but on a arbitrary file",
+        "",
+        "--edit_script=/path/to/task submit_file file_to_submit",
+        "  Will extract the used variables in the 'file_to_submit' and will uses these",
+        "  variables during variable substitution, the file is then submitted for job",
+        "  generation by the server",
+        "",
+        "--edit_script=/path/to/task submit_file file_to_submit create_alias",
+        "  Like the the previous example but will create and run as an alias"
       ]
     },
     {
@@ -277,10 +556,21 @@
       "implementation": "EventCmd",
       "summary": "Change event. For use in the '.ecf' script file *only*",
       "description": [
-        "Change event. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string | int)     = event-name",
+        "Change event. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "  arg1(string | int)     = event-name",
+        "",
         "  arg2(string)(optional) = [ set | clear] default value is set",
-        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
-        "Usage:\n  ecflow_client --event=ev       # set the event, default since event initial value is clear\n  ecflow_client --event=ev set   # set the event, explicit\n  ecflow_client --event=ev clear # clear the event, use when event initial value is set\n"
+        "",
+        "If this task command is a zombie, then the default action will be to *fob*,",
+        "i.e allow the ecflow client command to complete without an error",
+        "The default can be overridden by using zombie attributes.",
+        "",
+        "Usage:",
+        "  ecflow_client --event=ev       # set the event, default since event initial value is clear",
+        "  ecflow_client --event=ev set   # set the event, explicit",
+        "  ecflow_client --event=ev clear # clear the event, use when event initial value is set",
+        ""
       ],
       "arguments": [
         {
@@ -307,7 +597,13 @@
       "implementation": "CFileCmd",
       "summary": "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]",
       "description": [
-        "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]\nBy default will return the script.\n  arg1 = path to node\n  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]\n         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill\n         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat\n  arg3 = (optional) max_lines = 10000 <default>"
+        "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]",
+        "By default will return the script.",
+        "  arg1 = path to node",
+        "  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]",
+        "         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill",
+        "         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat",
+        "  arg3 = (optional) max_lines = 10000 <default>"
       ]
     },
     {
@@ -317,8 +613,35 @@
       "implementation": "ForceCmd",
       "summary": "Force a node to a given state, or set its event.",
       "description": [
-        "Force a node to a given state, or set its event.\nWhen a task is set to complete, it may be automatically re-queued if it has\nmultiple future time dependencies. However each time we force a complete it will\nexpire any time based attribute on that node. When the last time based attribute\nexpires, the node will stay in a complete state.\nThis behaviour allow Repeat values to be incremented interactively.\nA repeat attribute is incremented when all the child nodes are complete\nin this case the child nodes are automatically re-queued.\n  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]\n  arg2 = (optional) recursive\n         Applies state to node and recursively to all its children\n  arg3 = (optional) full\n         Set repeat variables to last value, only works in conjunction\n         with recursive option\n  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'\nUsage:\n  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1\nEffect:\n  Consider the effect of forcing complete when the current time is at 09:00\n  suite s1\n     task t1; time 12:00             # will complete straight away\n     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt",
-        "  --force=complete /s1/t1 /s1/t2\n  When we have a time range(i.e as shown with task t2), it is re-queued and the\n  next time slot is incremented for each complete, until it expires, and the task completes.\n  Use the Why command, to show next run time (i.e. next time slot)"
+        "Force a node to a given state, or set its event.",
+        "When a task is set to complete, it may be automatically re-queued if it has",
+        "multiple future time dependencies. However each time we force a complete it will",
+        "expire any time based attribute on that node. When the last time based attribute",
+        "expires, the node will stay in a complete state.",
+        "This behaviour allow Repeat values to be incremented interactively.",
+        "A repeat attribute is incremented when all the child nodes are complete",
+        "in this case the child nodes are automatically re-queued.",
+        "  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]",
+        "  arg2 = (optional) recursive",
+        "         Applies state to node and recursively to all its children",
+        "  arg3 = (optional) full",
+        "         Set repeat variables to last value, only works in conjunction",
+        "         with recursive option",
+        "  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'",
+        "Usage:",
+        "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete",
+        "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task",
+        "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1",
+        "Effect:",
+        "  Consider the effect of forcing complete when the current time is at 09:00",
+        "  suite s1",
+        "     task t1; time 12:00             # will complete straight away",
+        "     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt",
+        "",
+        "  --force=complete /s1/t1 /s1/t2",
+        "  When we have a time range(i.e as shown with task t2), it is re-queued and the",
+        "  next time slot is incremented for each complete, until it expires, and the task completes.",
+        "  Use the Why command, to show next run time (i.e. next time slot)"
       ]
     },
     {
@@ -336,7 +659,21 @@
       "implementation": "FreeDepCmd",
       "summary": "Free dependencies for a node. Defaults to triggers",
       "description": [
-        "Free dependencies for a node. Defaults to triggers\nAfter freeing the time related dependencies (i.e time,today,cron)\nthe next time slot will be missed.\n  arg1 = (optional) trigger\n  arg2 = (optional) all\n         Free trigger, date and all time dependencies\n  arg3 = (optional) date\n         Free date dependencies\n  arg4 = (optional) time\n         Free all time dependencies i.e time, day, today, cron\n  arg5 = List of paths. At least one required. Must start with a leading '/'\nUsage:\n  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2\n  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1\n  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
+        "Free dependencies for a node. Defaults to triggers",
+        "After freeing the time related dependencies (i.e time,today,cron)",
+        "the next time slot will be missed.",
+        "  arg1 = (optional) trigger",
+        "  arg2 = (optional) all",
+        "         Free trigger, date and all time dependencies",
+        "  arg3 = (optional) date",
+        "         Free date dependencies",
+        "  arg4 = (optional) time",
+        "         Free all time dependencies i.e time, day, today, cron",
+        "  arg5 = List of paths. At least one required. Must start with a leading '/'",
+        "Usage:",
+        "  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2",
+        "  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1",
+        "  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
       ]
     },
     {
@@ -346,7 +683,13 @@
       "implementation": "CtsNodeCmd",
       "summary": "Get the suite definition or node tree in form that is re-parse able",
       "description": [
-        "Get the suite definition or node tree in form that is re-parse able\nGet all suite node tree's from the server and write to standard out.\nThe output is parse-able, and can be used to re-load the definition\n  arg = NULL | arg = node path\nUsage:\n  --get     # gets the definition from the server,and writes to standard out\n  --get=/s1 # gets the suite from the server,and writes to standard out"
+        "Get the suite definition or node tree in form that is re-parse able",
+        "Get all suite node tree's from the server and write to standard out.",
+        "The output is parse-able, and can be used to re-load the definition",
+        "  arg = NULL | arg = node path",
+        "Usage:",
+        "  --get     # gets the definition from the server,and writes to standard out",
+        "  --get=/s1 # gets the suite from the server,and writes to standard out"
       ]
     },
     {
@@ -356,7 +699,13 @@
       "implementation": "CtsNodeCmd",
       "summary": "Get state data. For the whole suite definition or individual nodes.",
       "description": [
-        "Get state data. For the whole suite definition or individual nodes.\nThis will include event, meter, node state, trigger and time state.\nThe output is written to standard out.\n  arg = NULL | arg = node path\nUsage:\n  --get_state     # gets the definition from the server,and writes to standard out\n  --get_state=/s1 # gets the suite from the server,and writes to standard out"
+        "Get state data. For the whole suite definition or individual nodes.",
+        "This will include event, meter, node state, trigger and time state.",
+        "The output is written to standard out.",
+        "  arg = NULL | arg = node path",
+        "Usage:",
+        "  --get_state     # gets the definition from the server,and writes to standard out",
+        "  --get_state=/s1 # gets the suite from the server,and writes to standard out"
       ]
     },
     {
@@ -366,7 +715,16 @@
       "implementation": "GroupCTSCmd",
       "summary": "Allows a series of ';' separated commands to be grouped and executed as one.",
       "description": [
-        "Allows a series of ';' separated commands to be grouped and executed as one.\nSome commands like halt, shutdown and terminate will prompt the user. To bypass the prompt\nprovide 'yes' as an additional parameter. See example below.\n  arg = string\nUsage:\n   --group=\"halt=yes; reloadwsfile; restart;\"\n                                 # halt server,bypass the confirmation prompt,\n                                 # reload white list file, restart server\n   --group=\"get; show\"           # get server defs, and write to standard output\n   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
+        "Allows a series of ';' separated commands to be grouped and executed as one.",
+        "Some commands like halt, shutdown and terminate will prompt the user. To bypass the prompt",
+        "provide 'yes' as an additional parameter. See example below.",
+        "  arg = string",
+        "Usage:",
+        "   --group=\"halt=yes; reloadwsfile; restart;\"",
+        "                                 # halt server,bypass the confirmation prompt,",
+        "                                 # reload white list file, restart server",
+        "   --group=\"get; show\"           # get server defs, and write to standard output",
+        "   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
       ]
     },
     {
@@ -376,7 +734,18 @@
       "implementation": "CtsCmd",
       "summary": "Stop server communication with jobs, and new job scheduling.",
       "description": [
-        "Stop server communication with jobs, and new job scheduling.\nAlso stops automatic check pointing\n  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n  --halt=yes\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
+        "Stop server communication with jobs, and new job scheduling.",
+        "Also stops automatic check pointing",
+        "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.",
+        "  --halt=yes",
+        "The following table shows server behaviour in the different states.",
+        "|----------------------------------------------------------------------------------|",
+        "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |",
+        "|--------------|--------------|--------------|---------------|---------------------|",
+        "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |",
+        "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |",
+        "|      HALTED  |    yes       |      no      |      no       |      no             |",
+        "|--------------|--------------|--------------|---------------|---------------------|"
       ]
     },
     {
@@ -386,9 +755,19 @@
       "implementation": "InitCmd",
       "summary": "Mark task as started(active). For use in the '.ecf' script file *only*",
       "description": [
-        "Mark task as started(active). For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables.\n  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n                         Using remote id allows the jobs to be killed\n  arg2(--add)(optional)= add/update variables as name value pairs",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.",
-        "Usage:\n  ecflow_client --init=$$\n  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
+        "Mark task as started(active). For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables.",
+        "  arg1(string)         = process_or_remote_id The process id of the job or remote_id",
+        "                         Using remote id allows the jobs to be killed",
+        "  arg2(--add)(optional)= add/update variables as name value pairs",
+        "",
+        "If this task command is a zombie, then the default action will be to *block*.",
+        "The default can be overridden by using zombie attributes.",
+        "Otherwise the blocking period is defined by ECF_TIMEOUT.",
+        "",
+        "Usage:",
+        "  ecflow_client --init=$$",
+        "  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
       ],
       "arguments": [
         {
@@ -415,7 +794,12 @@
       "implementation": "CtsNodeCmd",
       "summary": "Job submission for chosen Node *based* on dependencies.",
       "description": [
-        "Job submission for chosen Node *based* on dependencies.\nThe server traverses the node tree every 60 seconds, and if the dependencies are free\ndoes job generation and submission. Sometimes the user may free time/date dependencies\nto avoid waiting for the server poll, this commands allows early job generation\n  arg = node path | arg = NULL\n     If no node path specified generates for full definition."
+        "Job submission for chosen Node *based* on dependencies.",
+        "The server traverses the node tree every 60 seconds, and if the dependencies are free",
+        "does job generation and submission. Sometimes the user may free time/date dependencies",
+        "to avoid waiting for the server poll, this commands allows early job generation",
+        "  arg = node path | arg = NULL",
+        "     If no node path specified generates for full definition."
       ]
     },
     {
@@ -425,7 +809,15 @@
       "implementation": "PathsCmd",
       "summary": "Kills the job associated with the node.",
       "description": [
-        "Kills the job associated with the node.\nIf a family or suite is selected, will kill hierarchically.\nKill uses the ECF_KILL_CMD variable. After variable substitution it is invoked as a command.\nThe command should be written in such a way that the output is written to %ECF_JOB%.kill\nas this allow the --file command to report the output: .e.e.\n /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1::\nUsage::\n   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2\n   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
+        "Kills the job associated with the node.",
+        "If a family or suite is selected, will kill hierarchically.",
+        "Kill uses the ECF_KILL_CMD variable. After variable substitution it is invoked as a command.",
+        "The command should be written in such a way that the output is written to %ECF_JOB%.kill",
+        "as this allow the --file command to report the output: .e.e.",
+        " /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1::",
+        "Usage::",
+        "   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2",
+        "   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
       ]
     },
     {
@@ -435,9 +827,18 @@
       "implementation": "LabelCmd",
       "summary": "Change Label. For use in the '.ecf' script file *only*",
       "description": [
-        "Change Label. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1 = label-name\n  arg2 = The new label value\n         The labels values can be single or multi-line(space separated quoted strings)",
-        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
-        "Usage:\n  ecflow_client --label=progressed merlin"
+        "Change Label. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "  arg1 = label-name",
+        "  arg2 = The new label value",
+        "         The labels values can be single or multi-line(space separated quoted strings)",
+        "",
+        "If this task command is a zombie, then the default action will be to *fob*,",
+        "i.e allow the ecflow client command to complete without an error",
+        "The default can be overridden by using zombie attributes.",
+        "",
+        "Usage:",
+        "  ecflow_client --label=progressed merlin"
       ],
       "arguments": [
         {
@@ -459,7 +860,23 @@
       "implementation": "LoadDefsCmd",
       "summary": "Check and load definition or checkpoint file into server.",
       "description": [
-        "Check and load definition or checkpoint file into server.\nThe loaded definition will be checked for valid trigger and complete expressions,\nadditionally in-limit references to limits will be validated.\nIf the server already has the 'suites' of the same name, then a error message is issued.\nThe suite's can be overwritten if the force option is used.\nTo just check the definition and not send to server, use 'check_only'\nThis command can also be used to load a checkpoint file into the server\n  arg1 = path to the definition file or checkpoint file\n  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all\nUsage:\n--load=/my/home/exotic.def               # will error if suites of same name exists\n--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n--load=/my/home/exotic.def check_only    # Just check, don't send to server\n--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server\n--load=host1.3141.check                  # Load checkpoint file to the server\n--load=host1.3141.check print            # print definition to standard out in defs format\n"
+        "Check and load definition or checkpoint file into server.",
+        "The loaded definition will be checked for valid trigger and complete expressions,",
+        "additionally in-limit references to limits will be validated.",
+        "If the server already has the 'suites' of the same name, then a error message is issued.",
+        "The suite's can be overwritten if the force option is used.",
+        "To just check the definition and not send to server, use 'check_only'",
+        "This command can also be used to load a checkpoint file into the server",
+        "  arg1 = path to the definition file or checkpoint file",
+        "  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all",
+        "Usage:",
+        "--load=/my/home/exotic.def               # will error if suites of same name exists",
+        "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server",
+        "--load=/my/home/exotic.def check_only    # Just check, don't send to server",
+        "--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server",
+        "--load=host1.3141.check                  # Load checkpoint file to the server",
+        "--load=host1.3141.check print            # print definition to standard out in defs format",
+        ""
       ]
     },
     {
@@ -469,7 +886,36 @@
       "implementation": "LogCmd",
       "summary": "Get,clear,flush or create a new log file.",
       "description": [
-        "Get,clear,flush or create a new log file.\nThe user must ensure that a valid path is specified.\nSpecifying '--log=get' with a large number of lines from the server,\ncan consume a lot of **memory**. The log file can be a very large file,\nhence we use a default of 100 lines, optionally the number of lines can be specified.\n arg1 = [ get | clear | flush | new | path ]\n  get -   Outputs the log file to standard out.\n          defaults to return the last 100 lines\n          The second argument can specify how many lines to return\n  clear - Clear the log file of its contents.\n  flush - Flush and close the log file. (only temporary) next time\n          server writes to log, it will be opened again. Hence it best\n          to halt the server first\n  new -   Flush and close the existing log file, and start using the\n          the path defined for ECF_LOG. By changing this variable\n          a new log file path can be used\n          Alternatively an explicit path can also be provided\n          in which case ECF_LOG is also updated\n  path -  Returns the path name to the existing log file\n arg2 = [ new_path | optional last n lines ]\n         if get specified can specify lines to get. Value must be convertible to an integer\n         Otherwise if arg1 is 'new' then the second argument must be a path\nUsage:\n  --log=get                        # Write the last 100 lines of the log file to standard out\n  --log=get 200                    # Write the last 200 lines of the log file to standard out\n  --log=clear                      # Clear the log file. The log is now empty\n  --log=flush                      # Flush and close log file, next request will re-open log file\n  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG\n  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable\n"
+        "Get,clear,flush or create a new log file.",
+        "The user must ensure that a valid path is specified.",
+        "Specifying '--log=get' with a large number of lines from the server,",
+        "can consume a lot of **memory**. The log file can be a very large file,",
+        "hence we use a default of 100 lines, optionally the number of lines can be specified.",
+        " arg1 = [ get | clear | flush | new | path ]",
+        "  get -   Outputs the log file to standard out.",
+        "          defaults to return the last 100 lines",
+        "          The second argument can specify how many lines to return",
+        "  clear - Clear the log file of its contents.",
+        "  flush - Flush and close the log file. (only temporary) next time",
+        "          server writes to log, it will be opened again. Hence it best",
+        "          to halt the server first",
+        "  new -   Flush and close the existing log file, and start using the",
+        "          the path defined for ECF_LOG. By changing this variable",
+        "          a new log file path can be used",
+        "          Alternatively an explicit path can also be provided",
+        "          in which case ECF_LOG is also updated",
+        "  path -  Returns the path name to the existing log file",
+        " arg2 = [ new_path | optional last n lines ]",
+        "         if get specified can specify lines to get. Value must be convertible to an integer",
+        "         Otherwise if arg1 is 'new' then the second argument must be a path",
+        "Usage:",
+        "  --log=get                        # Write the last 100 lines of the log file to standard out",
+        "  --log=get 200                    # Write the last 200 lines of the log file to standard out",
+        "  --log=clear                      # Clear the log file. The log is now empty",
+        "  --log=flush                      # Flush and close log file, next request will re-open log file",
+        "  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG",
+        "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable",
+        ""
       ]
     },
     {
@@ -479,9 +925,17 @@
       "implementation": "MeterCmd",
       "summary": "Change meter. For use in the '.ecf' script file *only*",
       "description": [
-        "Change meter. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string) = meter-name\n  arg2(int)    = the new meter value",
-        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
-        "Usage:\n  ecflow_client --meter=my_meter 20"
+        "Change meter. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "  arg1(string) = meter-name",
+        "  arg2(int)    = the new meter value",
+        "",
+        "If this task command is a zombie, then the default action will be to *fob*,",
+        "i.e allow the ecflow client command to complete without an error",
+        "The default can be overridden by using zombie attributes.",
+        "",
+        "Usage:",
+        "  ecflow_client --meter=my_meter 20"
       ],
       "arguments": [
         {
@@ -504,9 +958,24 @@
       "implementation": "CtsNodeCmd",
       "summary": "Used to print state of the definition returned from the server to standard output.",
       "description": [
-        "Used to print state of the definition returned from the server to standard output.\nThe node state is shown in the comments.\nThis is the format used in the check point file, but with indentation.\nSince this is essentially the defs format with state in the comments,it allows the definition to be migrated to future version of ecflow.\nThe output includes edit history but excludes externs.\nWhen the definition is reloaded *NO* checking is done.",
-        "The following shows a summary of the features associated with each choice:\n                       --get  --get_state  --migrate\nAuto generate externs    Yes    Yes          No\nChecking on reload       Yes    Yes          No\nEdit History             No     No           Yes\nShow trigger AST         No     Yes          No",
-        "Usage:\n    --migrate         # show all suites\n    --migrate=/s1     # show state for suite s1\n"
+        "Used to print state of the definition returned from the server to standard output.",
+        "The node state is shown in the comments.",
+        "This is the format used in the check point file, but with indentation.",
+        "Since this is essentially the defs format with state in the comments,it allows the definition to be migrated to future version of ecflow.",
+        "The output includes edit history but excludes externs.",
+        "When the definition is reloaded *NO* checking is done.",
+        "",
+        "The following shows a summary of the features associated with each choice:",
+        "                       --get  --get_state  --migrate",
+        "Auto generate externs    Yes    Yes          No",
+        "Checking on reload       Yes    Yes          No",
+        "Edit History             No     No           Yes",
+        "Show trigger AST         No     Yes          No",
+        "",
+        "Usage:",
+        "    --migrate         # show all suites",
+        "    --migrate=/s1     # show state for suite s1",
+        ""
       ]
     },
     {
@@ -515,9 +984,7 @@
       "visibility": "internal",
       "implementation": "MoveCmd",
       "summary": "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api.",
-      "description": [
-        "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api."
-      ]
+      "description": ["The move command is an internal cmd, Called by the plug cmd. Does not appear on public api."]
     },
     {
       "name": "msg",
@@ -526,7 +993,10 @@
       "implementation": "LogMessageCmd",
       "summary": "Writes the input string to the log file.",
       "description": [
-        "Writes the input string to the log file.\n  arg1 = string\nUsage:\n  --msg=\"place me in the log file\""
+        "Writes the input string to the log file.",
+        "  arg1 = string",
+        "Usage:",
+        "  --msg=\"place me in the log file\""
       ]
     },
     {
@@ -536,7 +1006,11 @@
       "implementation": "CSyncCmd",
       "summary": "Returns true if state of server definition changed.",
       "description": [
-        "Returns true if state of server definition changed.\n*Important* for use with c++/python interface only.\nRequires Given a client handle, change and modify number determine if server changed since last call\nThis relies on user calling sync after news to update the locally stored modify and change numbers.\nThese numbers are then used in the next call to news."
+        "Returns true if state of server definition changed.",
+        "*Important* for use with c++/python interface only.",
+        "Requires Given a client handle, change and modify number determine if server changed since last call",
+        "This relies on user calling sync after news to update the locally stored modify and change numbers.",
+        "These numbers are then used in the next call to news."
       ]
     },
     {
@@ -546,10 +1020,29 @@
       "implementation": "OrderNodeCmd",
       "summary": "Re-orders the nodes held by the server",
       "description": [
-        "Re-orders the nodes held by the server\n  arg1 = node path\n  arg2 = [ top | bottom | alpha | order | up | down | runtime]\nIt should be noted that in the absence of triggers and time/date dependencies,\nthe tasks are submitted in order.\nThis changes the order and hence affects the submission order::",
-        "   o top     raises the node within its parent, so that it is first\n   o bottom  lowers the node within its parent, so that it is last\n   o alpha   Arranges for all the peers of selected note to be sorted alphabetically (case-insensitive)\n   o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)\n   o up      Moves the selected node up one place amongst its peers\n   o down    Moves the selected node down one place amongst its peers",
-        "   o runtime Orders the nodes according to state change runtime\n             for families by accumulated runtime of its children\n             useful to submit the task that take longer earlier",
-        "This command can fail because:\n- The node path does not exist in the server\n- The order_type is not does not match one of arg2\nUsage:\n  --order=/suite/f1 top  # move node f1 to the top"
+        "Re-orders the nodes held by the server",
+        "  arg1 = node path",
+        "  arg2 = [ top | bottom | alpha | order | up | down | runtime]",
+        "It should be noted that in the absence of triggers and time/date dependencies,",
+        "the tasks are submitted in order.",
+        "This changes the order and hence affects the submission order::",
+        "",
+        "   o top     raises the node within its parent, so that it is first",
+        "   o bottom  lowers the node within its parent, so that it is last",
+        "   o alpha   Arranges for all the peers of selected note to be sorted alphabetically (case-insensitive)",
+        "   o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)",
+        "   o up      Moves the selected node up one place amongst its peers",
+        "   o down    Moves the selected node down one place amongst its peers",
+        "",
+        "   o runtime Orders the nodes according to state change runtime",
+        "             for families by accumulated runtime of its children",
+        "             useful to submit the task that take longer earlier",
+        "",
+        "This command can fail because:",
+        "- The node path does not exist in the server",
+        "- The order_type is not does not match one of arg2",
+        "Usage:",
+        "  --order=/suite/f1 top  # move node f1 to the top"
       ]
     },
     {
@@ -559,7 +1052,14 @@
       "implementation": "CtsCmd",
       "summary": "Check if server is running on given host/port. Result reported to standard output.",
       "description": [
-        "Check if server is running on given host/port. Result reported to standard output.\nUsage:\n  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144\n  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,\n                                  # otherwise default port of 3141\n  --ping                          # Check if server alive by using environment variables\n                                  # ECF_HOST and ECF_PORT\nIf ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
+        "Check if server is running on given host/port. Result reported to standard output.",
+        "Usage:",
+        "  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144",
+        "  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,",
+        "                                  # otherwise default port of 3141",
+        "  --ping                          # Check if server alive by using environment variables",
+        "                                  # ECF_HOST and ECF_PORT",
+        "If ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
       ]
     },
     {
@@ -569,7 +1069,21 @@
       "implementation": "PlugCmd",
       "summary": "Plug command is used to move nodes.",
       "description": [
-        "Plug command is used to move nodes.\nThe destination node can be on another server In which case the destination\npath should be of the form '<host>:<port>/suite/family/task\n  arg1 = path to source node\n  arg2 = path to the destination node\nThis command can fail because:\n- Source node is in a 'active' or 'submitted' state\n- Another user already has an lock\n- source/destination paths do not exist on the corresponding servers\n- If the destination node path is empty, i.e. only host:port is specified,\n  then the source node must correspond to a suite.\n- If the source node is added as a child, then its name must be unique\n  amongst its peers\nUsage:\n  --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)"
+        "Plug command is used to move nodes.",
+        "The destination node can be on another server In which case the destination",
+        "path should be of the form '<host>:<port>/suite/family/task",
+        "  arg1 = path to source node",
+        "  arg2 = path to the destination node",
+        "This command can fail because:",
+        "- Source node is in a 'active' or 'submitted' state",
+        "- Another user already has an lock",
+        "- source/destination paths do not exist on the corresponding servers",
+        "- If the destination node path is empty, i.e. only host:port is specified,",
+        "  then the source node must correspond to a suite.",
+        "- If the source node is added as a child, then its name must be unique",
+        "  amongst its peers",
+        "Usage:",
+        "  --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)"
       ]
     },
     {
@@ -579,9 +1093,54 @@
       "implementation": "QueryCmd",
       "summary": "Query the status of attributes",
       "description": [
-        "Query the status of attributes\n i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking\n - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out\n - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n - repeat    returns current value as a string to standard out\n - event     return 'set' | 'clear' to standard out\n - meter     return value of the meter to standard out\n - limit     return current value of limit to standard out\n - limit_max return limit max value to standard out\n - label     return new value otherwise the old value\n - variable  return value of the variable, repeat or generated variable to standard out,\n             will search up the node tree. When path is '/', the variable is looked up on the\n             server itself, i.e. 'ecflow_client --query variable /:name'\n - trigger   returns 'true' if the expression is true, otherwise 'false'",
-        "If this command is called within a '.ecf' script we will additionally log the task calling this command\nThis is required to aid debugging for excessive use of this command\nThe command will fail if the node path to the attribute does not exist in the definition and if:\n - repeat   The repeat is not found\n - event    The event is not found\n - meter    The meter is not found\n - limit/limit_max The limit is not found\n - label    The label is not found\n - variable No user or generated variable or repeat of that name found on node or its parents,\n            or (when path is '/') no user or server variable of that name found on the server\n - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\nArguments:\n  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]\n  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable.\n         path '/' represents the server itself, and can only be used with 'state' or 'variable'\n  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat",
-        "Usage:\n ecflow_client --query state /                                     # return top level state to standard out\n ecflow_client --query state /path/to/node                         # return node state to standard out\n ecflow_client --query dstate /path/to/node                        # state that can included suspended\n ecflow_client --query repeat /path/to/node                        # return the current value as a string\n ecflow_client --query repeat /path/to/node prev                   # return the previous value as a string\n ecflow_client --query repeat /path/to/node next                   # return the next value as a string\n ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n ecflow_client --query limit /path/to/task/with/limit:limit_name   # returns the current value of the limit to standard out\n ecflow_client --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out\n ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out\n ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n ecflow_client --query variable /:var_name                         # returns the server variable value to standard out\n ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
+        "Query the status of attributes",
+        " i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking",
+        " - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out",
+        " - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out",
+        " - repeat    returns current value as a string to standard out",
+        " - event     return 'set' | 'clear' to standard out",
+        " - meter     return value of the meter to standard out",
+        " - limit     return current value of limit to standard out",
+        " - limit_max return limit max value to standard out",
+        " - label     return new value otherwise the old value",
+        " - variable  return value of the variable, repeat or generated variable to standard out,",
+        "             will search up the node tree. When path is '/', the variable is looked up on the",
+        "             server itself, i.e. 'ecflow_client --query variable /:name'",
+        " - trigger   returns 'true' if the expression is true, otherwise 'false'",
+        "",
+        "If this command is called within a '.ecf' script we will additionally log the task calling this command",
+        "This is required to aid debugging for excessive use of this command",
+        "The command will fail if the node path to the attribute does not exist in the definition and if:",
+        " - repeat   The repeat is not found",
+        " - event    The event is not found",
+        " - meter    The meter is not found",
+        " - limit/limit_max The limit is not found",
+        " - label    The label is not found",
+        " - variable No user or generated variable or repeat of that name found on node or its parents,",
+        "            or (when path is '/') no user or server variable of that name found on the server",
+        " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid",
+        "Arguments:",
+        "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]",
+        "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable.",
+        "         path '/' represents the server itself, and can only be used with 'state' or 'variable'",
+        "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat",
+        "",
+        "Usage:",
+        " ecflow_client --query state /                                     # return top level state to standard out",
+        " ecflow_client --query state /path/to/node                         # return node state to standard out",
+        " ecflow_client --query dstate /path/to/node                        # state that can included suspended",
+        " ecflow_client --query repeat /path/to/node                        # return the current value as a string",
+        " ecflow_client --query repeat /path/to/node prev                   # return the previous value as a string",
+        " ecflow_client --query repeat /path/to/node next                   # return the next value as a string",
+        " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out",
+        " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out",
+        " ecflow_client --query limit /path/to/task/with/limit:limit_name   # returns the current value of the limit to standard out",
+        " ecflow_client --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out",
+        " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out",
+        " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out",
+        " ecflow_client --query variable /:var_name                         # returns the server variable value to standard out",
+        " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise",
+        ""
       ]
     },
     {
@@ -591,10 +1150,37 @@
       "implementation": "QueueCmd",
       "summary": "QueueCmd. For use in the '.ecf' script file *only*",
       "description": [
-        "QueueCmd. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string) = queue-name:\n  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]\n     active: returns the first queued/aborted step, the return string is the queue value from the definition\n     no_of_aborted: returns number of aborted steps as a string, i.e 10\n     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n                This is only valid for complete and aborted steps\n  arg4(string) = path: (optional). The path where the queue is defined.\n                 By default we search for the queue up the node tree.",
-        "If this task command is a zombie, then the default action will be to *block*,\nThe default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will\nsearch for the queue up the node hierarchy. If no queue found, command fails",
-        "Usage:\nstep=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone",
-        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }\n"
+        "QueueCmd. For use in the '.ecf' script file *only*",
+        "Hence the context is supplied via environment variables",
+        "  arg1(string) = queue-name:",
+        "  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]",
+        "     active: returns the first queued/aborted step, the return string is the queue value from the definition",
+        "     no_of_aborted: returns number of aborted steps as a string, i.e 10",
+        "     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors",
+        "  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)",
+        "                This is only valid for complete and aborted steps",
+        "  arg4(string) = path: (optional). The path where the queue is defined.",
+        "                 By default we search for the queue up the node tree.",
+        "",
+        "If this task command is a zombie, then the default action will be to *block*,",
+        "The default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will",
+        "search for the queue up the node hierarchy. If no queue found, command fails",
+        "",
+        "Usage:",
+        "step=\"\"",
+        "QNAME=\"my_queue_name\"",
+        "while [1 == 1 ] ; do",
+        "   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed",
+        "   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active",
+        "   if [[ $step == \"<NULL>\" ]] ; then",
+        "        break;",
+        "   fi",
+        "   ...",
+        "   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed",
+        "done",
+        "",
+        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }",
+        ""
       ],
       "arguments": [
         {
@@ -633,18 +1219,53 @@
       "summary": "Reload the server custom password file.",
       "description": [
         "Reload the server custom password file.",
-        "The custom password file (authentication) is used by the server to authenticate a 'user' by\nverifying if the password provided by the user matches the one held by the server. This\nparticular file is used for authentication of users that explicitly specify the user name\n(either via the environment variable ECF_USER or the --user option).",
-        "This mechanism should be used when most users use the machine login name, but a few users\nspecify their own user name, in which case the password must also be explicitly provided.",
-        "The file path is specified as the ECF_CUSTOM_PASSWD environment variable, both for the\nclient and server, and is loaded only by the server on *startup*. This means that the file\ncontents can be updated (i.e., add/remove users), but the file location cannot change during\nthe server execution.",
+        "",
+        "The custom password file (authentication) is used by the server to authenticate a 'user' by",
+        "verifying if the password provided by the user matches the one held by the server. This",
+        "particular file is used for authentication of users that explicitly specify the user name",
+        "(either via the environment variable ECF_USER or the --user option).",
+        "",
+        "This mechanism should be used when most users use the machine login name, but a few users",
+        "specify their own user name, in which case the password must also be explicitly provided.",
+        "",
+        "The file path is specified as the ECF_CUSTOM_PASSWD environment variable, both for the",
+        "client and server, and is loaded only by the server on *startup*. This means that the file",
+        "contents can be updated (i.e., add/remove users), but the file location cannot change during",
+        "the server execution.",
+        "",
         "The server automatically loads the password file content as part of the startup procedure.",
-        "The ECF_CUSTOM_PASSWD environment variable is used to specify the password file location,\nconsidering that\n - On the server the default file name is <host>.<port>.ecf.custom_passwd\n - On the client the default file name is ecf.custom_passwd",
+        "",
+        "The ECF_CUSTOM_PASSWD environment variable is used to specify the password file location,",
+        "considering that",
+        " - On the server the default file name is <host>.<port>.ecf.custom_passwd",
+        " - On the client the default file name is ecf.custom_passwd",
+        "",
         "The format of the file is same for client and server:",
-        "\n4.5.0\n# comment\n<user> <host> <port> <passwd> # comment",
+        "",
+        "",
+        "4.5.0",
+        "# comment",
+        "<user> <host> <port> <passwd> # comment",
+        "",
         "The following is an example",
-        "4.5.0 # the version\nfred machine1 3142 xxyyyd\nfred machine2 3133 xxyyyd # comment\nbill machine2 3133 xxyggyyd",
-        "Notice that the same user may appear multiple times (associated with different host/port).\nThis allows the client to use the same password file to contact multiple servers.",
-        "For the password authentication to work, ensure the following:\n - The password is defined for the client and server\n - On the server, add at least the server administrator to the password file\n   Note: If an empty password file (i.e., containing just the version) is used,\n         no user is allowed access.\n - On the client, the password file should be readable only by the 'user' itself",
-        "Usage:\n --reloadcustompasswdfile"
+        "",
+        "4.5.0 # the version",
+        "fred machine1 3142 xxyyyd",
+        "fred machine2 3133 xxyyyd # comment",
+        "bill machine2 3133 xxyggyyd",
+        "",
+        "Notice that the same user may appear multiple times (associated with different host/port).",
+        "This allows the client to use the same password file to contact multiple servers.",
+        "",
+        "For the password authentication to work, ensure the following:",
+        " - The password is defined for the client and server",
+        " - On the server, add at least the server administrator to the password file",
+        "   Note: If an empty password file (i.e., containing just the version) is used,",
+        "         no user is allowed access.",
+        " - On the client, the password file should be readable only by the 'user' itself",
+        "",
+        "Usage:",
+        " --reloadcustompasswdfile"
       ]
     },
     {
@@ -655,18 +1276,53 @@
       "summary": "Reload the server password file.",
       "description": [
         "Reload the server password file.",
-        "The password file (authentication) is used by the server to authenticate a 'user' by\nverifying if the password provided by the user matches the one held by the server.\nThe password file is also used on the client to automatically load the password for the\n'user' when connecting to the server.",
+        "",
+        "The password file (authentication) is used by the server to authenticate a 'user' by",
+        "verifying if the password provided by the user matches the one held by the server.",
+        "The password file is also used on the client to automatically load the password for the",
+        "'user' when connecting to the server.",
+        "",
         "When the server is configured to use a password file, then ALL users must have a password.",
-        "The file path is specified as the ECF_PASSWD environment variable, both for the client and\nserver, and is loaded only by the server on *startup*. This means that the file contents\ncan be updated (i.e., add/remove users), but the file location cannot change during the\nserver execution.",
+        "",
+        "The file path is specified as the ECF_PASSWD environment variable, both for the client and",
+        "server, and is loaded only by the server on *startup*. This means that the file contents",
+        "can be updated (i.e., add/remove users), but the file location cannot change during the",
+        "server execution.",
+        "",
         "The server automatically loads the password file content as part of the startup procedure.",
-        "The ECF_PASSWD environment variable is used to specify the password file location,\nconsidering that\n - On the server, the default file name is <host>.<port>.ecf.passwd\n - On the client, the default file name is ecf.passwd",
+        "",
+        "The ECF_PASSWD environment variable is used to specify the password file location,",
+        "considering that",
+        " - On the server, the default file name is <host>.<port>.ecf.passwd",
+        " - On the client, the default file name is ecf.passwd",
+        "",
         "The format of the file is same for client and server:",
-        "\n4.5.0\n# comment\n<user> <host> <port> <passwd> # comment",
+        "",
+        "",
+        "4.5.0",
+        "# comment",
+        "<user> <host> <port> <passwd> # comment",
+        "",
         "The following is an example",
-        "4.5.0 # the version\nfred machine1 3142 xxyyyd\nfred machine2 3133 xxyyyd # comment\nbill machine2 3133 xxyggyyd",
-        "\nNotice that the same user may appear multiple times (associated with different host/port).\nThis allows the client to use the same password file to contact multiple servers.",
-        "For the password authentication to work, ensure the following:\n - The password is defined for the client and server\n - On the server, add at least the server administrator to the password file\n   Note: If an empty password file (i.e., containing just the version) is used,\n         no user is allowed access.\n - On the client, the password file should be readable only by the 'user' itself",
-        "Usage:\n --reloadpasswdfile"
+        "",
+        "4.5.0 # the version",
+        "fred machine1 3142 xxyyyd",
+        "fred machine2 3133 xxyyyd # comment",
+        "bill machine2 3133 xxyggyyd",
+        "",
+        "",
+        "Notice that the same user may appear multiple times (associated with different host/port).",
+        "This allows the client to use the same password file to contact multiple servers.",
+        "",
+        "For the password authentication to work, ensure the following:",
+        " - The password is defined for the client and server",
+        " - On the server, add at least the server administrator to the password file",
+        "   Note: If an empty password file (i.e., containing just the version) is used,",
+        "         no user is allowed access.",
+        " - On the client, the password file should be readable only by the 'user' itself",
+        "",
+        "Usage:",
+        " --reloadpasswdfile"
       ]
     },
     {
@@ -677,16 +1333,46 @@
       "summary": "Reload the white list file.",
       "description": [
         "Reload the white list file.",
-        "The white list file (authorisation) is used to verify if a 'user' is allowed to perform a\nspecific command.",
-        "The file path is specified as the ECF_LISTS variable, and loaded only once by the server\n(on *startup*). This means that the file contents can be updated, but the file location\ncannot change during the server execution.",
-        "The ECF_LISTS variable can be used as follows:\n  - if ECF_LISTS is not specified, or if it is specified with value `ecf.lists`,\n    then the server will use the value `<host>.<port>.ecf.lists`\n  - if ECF_LISTS is specified to be a path, such as /var/tmp/ecf.lists,\n    then the server will use this path to reload the white list file",
-        "The server automatically loads the white list file content as part of the startup procedure,\nconsidering that if the file is not present or is empty (i.e., just contains the version\nnumber) then all users have read/write access.",
+        "",
+        "The white list file (authorisation) is used to verify if a 'user' is allowed to perform a",
+        "specific command.",
+        "",
+        "The file path is specified as the ECF_LISTS variable, and loaded only once by the server",
+        "(on *startup*). This means that the file contents can be updated, but the file location",
+        "cannot change during the server execution.",
+        "",
+        "The ECF_LISTS variable can be used as follows:",
+        "  - if ECF_LISTS is not specified, or if it is specified with value `ecf.lists`,",
+        "    then the server will use the value `<host>.<port>.ecf.lists`",
+        "  - if ECF_LISTS is specified to be a path, such as /var/tmp/ecf.lists,",
+        "    then the server will use this path to reload the white list file",
+        "",
+        "The server automatically loads the white list file content as part of the startup procedure,",
+        "considering that if the file is not present or is empty (i.e., just contains the version",
+        "number) then all users have read/write access.",
+        "",
         "The reload operation will fail if file does not exist or if the content is invalid.",
+        "",
         "Expected format for this file is:",
-        "\n# all characters after the first # in a line are considered comments and are discarded\n# empty lines are also discarded",
-        "4.4.14  # the version number is mandatory, even if no users are specified\n# Users with read/write access\nuser1\nuser2   # comment\n*       # use this form if you want all users to have read/write access",
-        "# Users with read  access, must have - before user name\n-user3  # comment\n-user4\n-*      # use this form if you want all users to have read access",
-        "\nUsage:\n --reloadwsfile"
+        "",
+        "",
+        "# all characters after the first # in a line are considered comments and are discarded",
+        "# empty lines are also discarded",
+        "",
+        "4.4.14  # the version number is mandatory, even if no users are specified",
+        "# Users with read/write access",
+        "user1",
+        "user2   # comment",
+        "*       # use this form if you want all users to have read/write access",
+        "",
+        "# Users with read  access, must have - before user name",
+        "-user3  # comment",
+        "-user4",
+        "-*      # use this form if you want all users to have read access",
+        "",
+        "",
+        "Usage:",
+        " --reloadwsfile"
       ]
     },
     {
@@ -696,9 +1382,33 @@
       "implementation": "ReplaceNodeCmd",
       "summary": "Replaces a node in the server, with the given path",
       "description": [
-        "Replaces a node in the server, with the given path\nCan also be used to add nodes in the server\n  arg1 = path to node\n         must exist in the client defs(arg2). This is also the node we want to\n         replace in the server\n  arg2 = path to client definition file\n         provides the definition of the new node\n  arg3 = (optional) [ parent | false ] (default = parent)\n         create parent families or suite as needed, when arg1 does not\n         exist in the server\n  arg4 = (optional) force (default = false) \n         Force the replacement even if it causes zombies to be created\nReplace can fail if:\n- The node path(arg1) does not exist in the provided client definition(arg2)\n- The client definition(arg2) must be free of errors\n- If the third argument is not provided, then node path(arg1) must exist in the server\n- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used",
-        "Replace will preserve the suspended status, if this is not required please re-queue first\nAfter replace is done, we check trigger expressions. These are reported to standard output.\nIt is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\nPlease note, you can use --check to check trigger expression and limits in the server.\nFor more information use --help check.",
-        "Usage:\n  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1\n  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted"
+        "Replaces a node in the server, with the given path",
+        "Can also be used to add nodes in the server",
+        "  arg1 = path to node",
+        "         must exist in the client defs(arg2). This is also the node we want to",
+        "         replace in the server",
+        "  arg2 = path to client definition file",
+        "         provides the definition of the new node",
+        "  arg3 = (optional) [ parent | false ] (default = parent)",
+        "         create parent families or suite as needed, when arg1 does not",
+        "         exist in the server",
+        "  arg4 = (optional) force (default = false) ",
+        "         Force the replacement even if it causes zombies to be created",
+        "Replace can fail if:",
+        "- The node path(arg1) does not exist in the provided client definition(arg2)",
+        "- The client definition(arg2) must be free of errors",
+        "- If the third argument is not provided, then node path(arg1) must exist in the server",
+        "- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used",
+        "",
+        "Replace will preserve the suspended status, if this is not required please re-queue first",
+        "After replace is done, we check trigger expressions. These are reported to standard output.",
+        "It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.",
+        "Please note, you can use --check to check trigger expression and limits in the server.",
+        "For more information use --help check.",
+        "",
+        "Usage:",
+        "  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1",
+        "  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted"
       ]
     },
     {
@@ -708,8 +1418,20 @@
       "implementation": "RequeueNodeCmd",
       "summary": "Re queues the specified node(s)",
       "description": [
-        "Re queues the specified node(s)\n  If any child of the specified node(s) is in a suspended state, this state is cleared\nRepeats are reset to their starting values, relative time attributes are reset.\n  arg1 = (optional) [ abort | force ]\n         abort  = re-queue only aborted tasks below node\n         force  = Force the re-queueing even if there are nodes that are active or submitted\n         <null> = Checks if any tasks are in submitted or active states below the node\n                  if so does nothing. Otherwise re-queues the node.\n  arg2 = list of node paths. The node paths must begin with a leading '/' character",
-        "Usage:\n  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1\n  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.\n  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
+        "Re queues the specified node(s)",
+        "  If any child of the specified node(s) is in a suspended state, this state is cleared",
+        "Repeats are reset to their starting values, relative time attributes are reset.",
+        "  arg1 = (optional) [ abort | force ]",
+        "         abort  = re-queue only aborted tasks below node",
+        "         force  = Force the re-queueing even if there are nodes that are active or submitted",
+        "         <null> = Checks if any tasks are in submitted or active states below the node",
+        "                  if so does nothing. Otherwise re-queues the node.",
+        "  arg2 = list of node paths. The node paths must begin with a leading '/' character",
+        "",
+        "Usage:",
+        "  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1",
+        "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.",
+        "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
       ]
     },
     {
@@ -719,7 +1441,15 @@
       "implementation": "CtsCmd",
       "summary": "Start job scheduling, communication with jobs, and respond to all requests.",
       "description": [
-        "Start job scheduling, communication with jobs, and respond to all requests.\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
+        "Start job scheduling, communication with jobs, and respond to all requests.",
+        "The following table shows server behaviour in the different states.",
+        "|----------------------------------------------------------------------------------|",
+        "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |",
+        "|--------------|--------------|--------------|---------------|---------------------|",
+        "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |",
+        "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |",
+        "|      HALTED  |    yes       |      no      |      no       |      no             |",
+        "|--------------|--------------|--------------|---------------|---------------------|"
       ]
     },
     {
@@ -729,10 +1459,33 @@
       "implementation": "PathsCmd",
       "summary": "Manually restore archived nodes.",
       "description": [
-        "Manually restore archived nodes.\nRestore will fail if:\n  - Node has not been archived\n  - Node has children, (since archived nodes have no children)\n  - If the file ECF_HOME/<host>.<port>.<ECF_NAME>.check does not exist\nNodes can be restored manually(as in this command) but also automatically",
-        "Automatic restore is done using the 'autorestore' attribute.\nOnce the node containing the 'autorestore' completes, the attribute is applied",
-        " suite s\n   family farchive_now\n     autoarchive 0      # archive immediately after complete\n     task tx\n   endfamily\n   family frestore_from_task\n     task t1\n        trigger ../farchive_now<flag>archived\n        autorestore ../farchive_now  # call autorestore when t1 completes\n   endfamily\n endsuite",
-        "In this example task '/s/frestore_from_task/t1' is only triggered if 'farchive_now'\nis archived, then when t1 completes it will restore family 'farchive_now'\nUsage::\n   --restore=/s1/f1   # restore family /s1/f1\n   --restore=/s1 /s2  # restore suites /s1 and /s2"
+        "Manually restore archived nodes.",
+        "Restore will fail if:",
+        "  - Node has not been archived",
+        "  - Node has children, (since archived nodes have no children)",
+        "  - If the file ECF_HOME/<host>.<port>.<ECF_NAME>.check does not exist",
+        "Nodes can be restored manually(as in this command) but also automatically",
+        "",
+        "Automatic restore is done using the 'autorestore' attribute.",
+        "Once the node containing the 'autorestore' completes, the attribute is applied",
+        "",
+        " suite s",
+        "   family farchive_now",
+        "     autoarchive 0      # archive immediately after complete",
+        "     task tx",
+        "   endfamily",
+        "   family frestore_from_task",
+        "     task t1",
+        "        trigger ../farchive_now<flag>archived",
+        "        autorestore ../farchive_now  # call autorestore when t1 completes",
+        "   endfamily",
+        " endsuite",
+        "",
+        "In this example task '/s/frestore_from_task/t1' is only triggered if 'farchive_now'",
+        "is archived, then when t1 completes it will restore family 'farchive_now'",
+        "Usage::",
+        "   --restore=/s1/f1   # restore family /s1/f1",
+        "   --restore=/s1 /s2  # restore suites /s1 and /s2"
       ]
     },
     {
@@ -742,7 +1495,9 @@
       "implementation": "CtsCmd",
       "summary": "Ask the server to load the definition from an check pt file.",
       "description": [
-        "Ask the server to load the definition from an check pt file.\nThe server must be halted and the definition in the server must be deleted\nfirst, otherwise an error is returned"
+        "Ask the server to load the definition from an check pt file.",
+        "The server must be halted and the definition in the server must be deleted",
+        "first, otherwise an error is returned"
       ]
     },
     {
@@ -752,7 +1507,11 @@
       "implementation": "PathsCmd",
       "summary": "Resume the given node. This allows job generation for the given node, or any child node.",
       "description": [
-        "Resume the given node. This allows job generation for the given node, or any child node.\nUsage::\n   --resume=/s1/f1/t1   # resume task s1/f1/t1\n   --resume=/s1 /s2     # resume suites /s1 and /s2\n"
+        "Resume the given node. This allows job generation for the given node, or any child node.",
+        "Usage::",
+        "   --resume=/s1/f1/t1   # resume task s1/f1/t1",
+        "   --resume=/s1 /s2     # resume suites /s1 and /s2",
+        ""
       ]
     },
     {
@@ -762,7 +1521,29 @@
       "implementation": "RunNodeCmd",
       "summary": "Ignore triggers, limits, time or date dependencies, just run the Task.",
       "description": [
-        "Ignore triggers, limits, time or date dependencies, just run the Task.\nWhen a job completes, it may be automatically re-queued if it has a cron\nor multiple time dependencies. If we have multiple time based attributes,\nthen each run, will expire the time.\nWhen we run before the time, we want to avoid re-running the task then\na flag is set, so that it is not automatically re-queued.\nA repeat attribute is incremented when all the child nodes are complete\nin this case the child nodes are automatically re-queued.\nHence this command can be aid, in allowing a Repeat attribute to be incremented\n  arg1 = (optional)force\n         Forcibly run, even if there are nodes that are active or submitted\n         This can result in zombie creation\n  arg2 = node path(s). The paths must begin with a leading '/' character.\n         If the path is /suite/family will recursively run all tasks\n         When providing multiple paths avoid running the same task twice\nExample:\n  --run=/suite/t1                    # run task t1\nEffect:\n     task t1; time 12:00             # will complete if run manually\n     task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n When we have a time range(i.e as shown with task t2), then next time slot\n is incremented for each run, until it expires, and the task completes.\n Use the Why command, to show next run time (i.e. next time slot)"
+        "Ignore triggers, limits, time or date dependencies, just run the Task.",
+        "When a job completes, it may be automatically re-queued if it has a cron",
+        "or multiple time dependencies. If we have multiple time based attributes,",
+        "then each run, will expire the time.",
+        "When we run before the time, we want to avoid re-running the task then",
+        "a flag is set, so that it is not automatically re-queued.",
+        "A repeat attribute is incremented when all the child nodes are complete",
+        "in this case the child nodes are automatically re-queued.",
+        "Hence this command can be aid, in allowing a Repeat attribute to be incremented",
+        "  arg1 = (optional)force",
+        "         Forcibly run, even if there are nodes that are active or submitted",
+        "         This can result in zombie creation",
+        "  arg2 = node path(s). The paths must begin with a leading '/' character.",
+        "         If the path is /suite/family will recursively run all tasks",
+        "         When providing multiple paths avoid running the same task twice",
+        "Example:",
+        "  --run=/suite/t1                    # run task t1",
+        "Effect:",
+        "     task t1; time 12:00             # will complete if run manually",
+        "     task t2; time 10:00 13:00 01:00 # will run 4 times before completing",
+        " When we have a time range(i.e as shown with task t2), then next time slot",
+        " is incremented for each run, until it expires, and the task completes.",
+        " Use the Why command, to show next run time (i.e. next time slot)"
       ]
     },
     {
@@ -772,13 +1553,37 @@
       "implementation": "CtsCmd",
       "summary": "Generates gnuplot files that show the server load graphically.",
       "description": [
-        "Generates gnuplot files that show the server load graphically.\nThis is done by parsing the log file. If no log file is provided,\nthen the log file path is obtained from the server. If the returned\nlog file path is not accessible an error is returned\nThis command produces a three files in the CWD.\n    o <host>.<port>.gnuplot.dat\n    o <host>.<port>.gnuplot.script\n    o <host>.<port>.png",
-        "The generated script can be manually changed, to see different rendering\neffects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'",
+        "Generates gnuplot files that show the server load graphically.",
+        "This is done by parsing the log file. If no log file is provided,",
+        "then the log file path is obtained from the server. If the returned",
+        "log file path is not accessible an error is returned",
+        "This command produces a three files in the CWD.",
+        "    o <host>.<port>.gnuplot.dat",
+        "    o <host>.<port>.gnuplot.script",
+        "    o <host>.<port>.png",
+        "",
+        "The generated script can be manually changed, to see different rendering",
+        "effects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'",
+        "",
         "  arg1 = <optional> path to log file",
-        "If the path to log file is known, it is *preferable* to use this,\nrather than requesting the log path from the server.",
-        "Usage:\n   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n   --server_load                    # Log file path is requested from server\n                                    # which is then used to generate gnuplot files\n                                    # *AVOID* if log file path is accessible",
+        "",
+        "If the path to log file is known, it is *preferable* to use this,",
+        "rather than requesting the log path from the server.",
+        "",
+        "Usage:",
+        "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files",
+        "   --server_load                    # Log file path is requested from server",
+        "                                    # which is then used to generate gnuplot files",
+        "                                    # *AVOID* if log file path is accessible",
+        "",
         "Now use any png viewer to see the output i.e",
-        "> display   <host>.<port>.png\n> feh       <host>.<port>.png\n> eog       <host>.<port>.png\n> xdg-open  <host>.<port>.png\n> w3m       <host>.<port>.png\n"
+        "",
+        "> display   <host>.<port>.png",
+        "> feh       <host>.<port>.png",
+        "> eog       <host>.<port>.png",
+        "> xdg-open  <host>.<port>.png",
+        "> w3m       <host>.<port>.png",
+        ""
       ]
     },
     {
@@ -788,7 +1593,11 @@
       "implementation": "ServerVersionCmd",
       "summary": "Returns the version number of the server",
       "description": [
-        "Returns the version number of the server\nUsage:\n  --server_version\n    Writes the version to standard output\n"
+        "Returns the version number of the server",
+        "Usage:",
+        "  --server_version",
+        "    Writes the version to standard output",
+        ""
       ]
     },
     {
@@ -798,9 +1607,39 @@
       "implementation": "ShowCmd",
       "summary": "Used to print state of the definition returned from the server to standard output.",
       "description": [
-        "Used to print state of the definition returned from the server to standard output.\nThis command can *only* be used in a group command, and will only work if it is\npreceded with a get command. See examples below.\n   arg1 = [ defs | state | migrate ] \nThe output of show has several options: i.e\n  o no arguments: With no arguments, print the definition structure to standard output\n    Extern's are automatically added, allowing the output to be reloaded into the server\n    i.e --group=\"get ; show\"\n  o state:\n    This will output definition structure along with all the state information.\n    This will include the trigger expressions, abstract syntax tree as comments.\n    Excludes the edit history\n  o migrate:\n    This will output definition structure along with all the state information.\n    The node state is shown in the comments.\n    This format allows the definition to be migrated to future version of ecflow.\n    The output includes edit history but excludes externs.\n    When the definition is reloaded *NO* checking is done.",
-        "The following shows a summary of the features associated with each choice\n                        DEFS          STATE      MIGRATE\nAuto generate externs   Yes           Yes        No\nChecking on reload      Yes           Yes        No\nEdit History            No            No         Yes\ntrigger AST             No            Yes        No",
-        "Usage:\n    --group=\"get ; show\"\n    --group=\"get ; show defs\"    # same as the previous example\n    --group=\"get ; show state\"   # Show all state for the node tree\n    --group=\"get ; show migrate\" # Shows state and allows migration\n    --group=\"get=/s1; show\"      # show state for the node only\n    --group=\"get=/s1; show state\""
+        "Used to print state of the definition returned from the server to standard output.",
+        "This command can *only* be used in a group command, and will only work if it is",
+        "preceded with a get command. See examples below.",
+        "   arg1 = [ defs | state | migrate ] ",
+        "The output of show has several options: i.e",
+        "  o no arguments: With no arguments, print the definition structure to standard output",
+        "    Extern's are automatically added, allowing the output to be reloaded into the server",
+        "    i.e --group=\"get ; show\"",
+        "  o state:",
+        "    This will output definition structure along with all the state information.",
+        "    This will include the trigger expressions, abstract syntax tree as comments.",
+        "    Excludes the edit history",
+        "  o migrate:",
+        "    This will output definition structure along with all the state information.",
+        "    The node state is shown in the comments.",
+        "    This format allows the definition to be migrated to future version of ecflow.",
+        "    The output includes edit history but excludes externs.",
+        "    When the definition is reloaded *NO* checking is done.",
+        "",
+        "The following shows a summary of the features associated with each choice",
+        "                        DEFS          STATE      MIGRATE",
+        "Auto generate externs   Yes           Yes        No",
+        "Checking on reload      Yes           Yes        No",
+        "Edit History            No            No         Yes",
+        "trigger AST             No            Yes        No",
+        "",
+        "Usage:",
+        "    --group=\"get ; show\"",
+        "    --group=\"get ; show defs\"    # same as the previous example",
+        "    --group=\"get ; show state\"   # Show all state for the node tree",
+        "    --group=\"get ; show migrate\" # Shows state and allows migration",
+        "    --group=\"get=/s1; show\"      # show state for the node only",
+        "    --group=\"get=/s1; show state\""
       ]
     },
     {
@@ -810,7 +1649,17 @@
       "implementation": "CtsCmd",
       "summary": "Stop server from scheduling new jobs.",
       "description": [
-        "Stop server from scheduling new jobs.\n  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n  --shutdown=yes\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
+        "Stop server from scheduling new jobs.",
+        "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e",
+        "  --shutdown=yes",
+        "The following table shows server behaviour in the different states.",
+        "|----------------------------------------------------------------------------------|",
+        "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |",
+        "|--------------|--------------|--------------|---------------|---------------------|",
+        "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |",
+        "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |",
+        "|      HALTED  |    yes       |      no      |      no       |      no             |",
+        "|--------------|--------------|--------------|---------------|---------------------|"
       ]
     },
     {
@@ -844,7 +1693,23 @@
       "implementation": "PathsCmd",
       "summary": "Shows the status of a job associated with a task, in %ECF_JOB%.stat file",
       "description": [
-        "Shows the status of a job associated with a task, in %ECF_JOB%.stat file\nIf a family or suite is selected, will invoke status command hierarchically.\nStatus uses the ECF_STATUS_CMD variable. After variable substitution it is invoked as a command.\nThe command should be written in such a way that the output is written to %ECF_JOB%.stat\nThis will allow the output of status command to be shown by the --file command\ni.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\nIf the process id cannot be found on the remote system, then the status command can also\narrange for the task to be aborted\nThe status command can fail for the following reasons:\n - ECF_STATUS_CMD not found\n - variable substitution fails\n - state is active but it can't find process id, i.e. ECF_RID\n - the status command does not exit cleanly\nWhen this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI\nUsage::\n   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
+        "Shows the status of a job associated with a task, in %ECF_JOB%.stat file",
+        "If a family or suite is selected, will invoke status command hierarchically.",
+        "Status uses the ECF_STATUS_CMD variable. After variable substitution it is invoked as a command.",
+        "The command should be written in such a way that the output is written to %ECF_JOB%.stat",
+        "This will allow the output of status command to be shown by the --file command",
+        "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::",
+        "If the process id cannot be found on the remote system, then the status command can also",
+        "arrange for the task to be aborted",
+        "The status command can fail for the following reasons:",
+        " - ECF_STATUS_CMD not found",
+        " - variable substitution fails",
+        " - state is active but it can't find process id, i.e. ECF_RID",
+        " - the status command does not exit cleanly",
+        "When this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI",
+        "Usage::",
+        "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat",
+        "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
       ]
     },
     {
@@ -862,7 +1727,11 @@
       "implementation": "PathsCmd",
       "summary": "Suspend the given node. This prevents job generation for the given node, or any child node.",
       "description": [
-        "Suspend the given node. This prevents job generation for the given node, or any child node.\nUsage::\n   --suspend=/s1/f1/t1   # suspend task s1/f1/t1\n   --suspend=/s1 /s2     # suspend suites /s1 and /s2\n"
+        "Suspend the given node. This prevents job generation for the given node, or any child node.",
+        "Usage::",
+        "   --suspend=/s1/f1/t1   # suspend task s1/f1/t1",
+        "   --suspend=/s1 /s2     # suspend suites /s1 and /s2",
+        ""
       ]
     },
     {
@@ -872,7 +1741,12 @@
       "implementation": "CSyncCmd",
       "summary": "Incrementally synchronise the local definition with the one in the server.",
       "description": [
-        "Incrementally synchronise the local definition with the one in the server.\n*Important* for use with c++/python interface only.\nPreference should be given to this method as only the changes are returned.\nThis reduces the network bandwidth required to keep in sync with the server\nRequires a client handle, change and modify number, to get the incremental changes from server.\nThe change in server state is then and merged with the client definition."
+        "Incrementally synchronise the local definition with the one in the server.",
+        "*Important* for use with c++/python interface only.",
+        "Preference should be given to this method as only the changes are returned.",
+        "This reduces the network bandwidth required to keep in sync with the server",
+        "Requires a client handle, change and modify number, to get the incremental changes from server.",
+        "The change in server state is then and merged with the client definition."
       ]
     },
     {
@@ -882,7 +1756,13 @@
       "implementation": "CSyncCmd",
       "summary": "Incrementally synchronise the local definition with the one in the server.",
       "description": [
-        "Incrementally synchronise the local definition with the one in the server.\n*Important* for use with c++/python interface only.\nSame as sync, but will *always* sync with suite clock if it has changed.\nPreference should be given to this method as only the changes are returned.\nThis reduces the network bandwidth required to keep in sync with the server\nRequires a client handle, change and modify number, to get the incremental changes from server.\nThe change in server state is then and merged with the client definition."
+        "Incrementally synchronise the local definition with the one in the server.",
+        "*Important* for use with c++/python interface only.",
+        "Same as sync, but will *always* sync with suite clock if it has changed.",
+        "Preference should be given to this method as only the changes are returned.",
+        "This reduces the network bandwidth required to keep in sync with the server",
+        "Requires a client handle, change and modify number, to get the incremental changes from server.",
+        "The change in server state is then and merged with the client definition."
       ]
     },
     {
@@ -892,7 +1772,9 @@
       "implementation": "CSyncCmd",
       "summary": "Returns the full definition from the server.",
       "description": [
-        "Returns the full definition from the server.\n*Important* for use with c++/python interface only.\nRequires a client_handle. The returned definition is stored on the client."
+        "Returns the full definition from the server.",
+        "*Important* for use with c++/python interface only.",
+        "Requires a client_handle. The returned definition is stored on the client."
       ]
     },
     {
@@ -902,7 +1784,9 @@
       "implementation": "CtsCmd",
       "summary": "Terminate the server.",
       "description": [
-        "Terminate the server.\n  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n  --terminate=yes"
+        "Terminate the server.",
+        "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e",
+        "  --terminate=yes"
       ]
     },
     {
@@ -912,8 +1796,12 @@
       "implementation": "CtsWaitCmd",
       "summary": "Evaluates an expression, and block while the expression is false.",
       "description": [
-        "Evaluates an expression, and block while the expression is false.\nFor use in the '.ecf' file *only*, hence the context is supplied via environment variables\n  arg1 = string(expression)",
-        "Usage:\n  ecflow_client --wait=\"/suite/taskx == complete\""
+        "Evaluates an expression, and block while the expression is false.",
+        "For use in the '.ecf' file *only*, hence the context is supplied via environment variables",
+        "  arg1 = string(expression)",
+        "",
+        "Usage:",
+        "  ecflow_client --wait=\"/suite/taskx == complete\""
       ],
       "arguments": [
         {
@@ -931,7 +1819,16 @@
       "implementation": "CtsNodeCmd",
       "summary": "Show the reason why a node is not running.",
       "description": [
-        "Show the reason why a node is not running.\nCan only be used with the group command. The group command must include a \n'get' command(i.e returns the server defs)\nThe why command take a optional string argument representing a node path\nWill return reason why the node is holding and for all its children.\nIf no arguments supplied will report on all nodes\n  arg = node path | arg = NULL\nUsage:\n  --group=\"get; why\"               # returns why for all holding nodes\n  --group=\"get; why=/suite/family\" # returns why for a specific node"
+        "Show the reason why a node is not running.",
+        "Can only be used with the group command. The group command must include a ",
+        "'get' command(i.e returns the server defs)",
+        "The why command take a optional string argument representing a node path",
+        "Will return reason why the node is holding and for all its children.",
+        "If no arguments supplied will report on all nodes",
+        "  arg = node path | arg = NULL",
+        "Usage:",
+        "  --group=\"get; why\"               # returns why for all holding nodes",
+        "  --group=\"get; why=/suite/family\" # returns why for a specific node"
       ]
     },
     {
@@ -941,7 +1838,8 @@
       "implementation": "CtsCmd",
       "summary": "Returns the list of zombies from the server.",
       "description": [
-        "Returns the list of zombies from the server.\nResults reported to standard output."
+        "Returns the list of zombies from the server.",
+        "Results reported to standard output."
       ]
     },
     {
@@ -951,7 +1849,12 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and sets to adopt.",
       "description": [
-        "Locates the task in the servers list of zombies, and sets to adopt.\nNext time a child command (init,event,meter,label,abort,complete,wait queue) communicates with the server, the password on the zombie is adopted by the task.\nThis is only allowed if the process id matches, otherwise an error is issued.\nThe zombie reference stored in the server is then deleted.\n  args = list of task paths, at least one expected\n  --zombie_adopt=/path/to/task  /path/to/task2"
+        "Locates the task in the servers list of zombies, and sets to adopt.",
+        "Next time a child command (init,event,meter,label,abort,complete,wait queue) communicates with the server, the password on the zombie is adopted by the task.",
+        "This is only allowed if the process id matches, otherwise an error is issued.",
+        "The zombie reference stored in the server is then deleted.",
+        "  args = list of task paths, at least one expected",
+        "  --zombie_adopt=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -961,7 +1864,13 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and sets flags to block it.",
       "description": [
-        "Locates the task in the servers list of zombies, and sets flags to block it.\nThis is default behaviour of the child commands(init,abort,complete,wait,queue)\nwhen the server cannot match the passwords. Each child commands will continue\nattempting to connect to the server for 24 hours, and will then return an error.\nThe connection timeout can be configured with environment ECF_TIMEOUT\n  args = list of task paths, at least one expected\n  --zombie_block=/path/to/task  /path/to/task2"
+        "Locates the task in the servers list of zombies, and sets flags to block it.",
+        "This is default behaviour of the child commands(init,abort,complete,wait,queue)",
+        "when the server cannot match the passwords. Each child commands will continue",
+        "attempting to connect to the server for 24 hours, and will then return an error.",
+        "The connection timeout can be configured with environment ECF_TIMEOUT",
+        "  args = list of task paths, at least one expected",
+        "  --zombie_block=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -971,7 +1880,14 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and sets to fail.",
       "description": [
-        "Locates the task in the servers list of zombies, and sets to fail.\nNext time a child command (init,event,meter,label,abort,complete) which matches zombie, communicates with the server, will be set to fail.\nDepending on the job setup this may force a abort, the abort will also fail.\nHence job structure should use 'set -e' in the error trapping functions to prevent\ninfinite recursion.\nThe references to the zombie in the server is automatically deleted after 1 hour\n  args = list of task paths, at least one expected\n  --zombie_fail=/path/to/task  /path/to/task2"
+        "Locates the task in the servers list of zombies, and sets to fail.",
+        "Next time a child command (init,event,meter,label,abort,complete) which matches zombie, communicates with the server, will be set to fail.",
+        "Depending on the job setup this may force a abort, the abort will also fail.",
+        "Hence job structure should use 'set -e' in the error trapping functions to prevent",
+        "infinite recursion.",
+        "The references to the zombie in the server is automatically deleted after 1 hour",
+        "  args = list of task paths, at least one expected",
+        "  --zombie_fail=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -981,7 +1897,14 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and sets to fob.",
       "description": [
-        "Locates the task in the servers list of zombies, and sets to fob.\nThis default behaviour of the child commands(label,event,meter) is to fob\nNext time the child commands (init,event,meter,label,abort,complete,wait,queue) communicate\nwith the server, they will complete successfully (but without updating the node tree)\nallowing the job to finish.\nThe references to the zombie in the server is automatically deleted after 1 hour\n  args = list of task paths, at least one expected\n  --zombie_fob=/path/to/task1 /path/to/task2"
+        "Locates the task in the servers list of zombies, and sets to fob.",
+        "This default behaviour of the child commands(label,event,meter) is to fob",
+        "Next time the child commands (init,event,meter,label,abort,complete,wait,queue) communicate",
+        "with the server, they will complete successfully (but without updating the node tree)",
+        "allowing the job to finish.",
+        "The references to the zombie in the server is automatically deleted after 1 hour",
+        "  args = list of task paths, at least one expected",
+        "  --zombie_fob=/path/to/task1 /path/to/task2"
       ]
     },
     {
@@ -991,7 +1914,13 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and sets flags to kill",
       "description": [
-        "Locates the task in the servers list of zombies, and sets flags to kill\nThe kill is done using ECF_KILL_CMD, but using the process_id from the zombie\nThe job is allowed to continue until the kill is received\nCan only kill zombies that have an associated Task, hence path zombies\nmust be killed manually.\n  arg = list of task paths, at least one expected\n  --zombie_kill=/path/to/task  /path/to/task2"
+        "Locates the task in the servers list of zombies, and sets flags to kill",
+        "The kill is done using ECF_KILL_CMD, but using the process_id from the zombie",
+        "The job is allowed to continue until the kill is received",
+        "Can only kill zombies that have an associated Task, hence path zombies",
+        "must be killed manually.",
+        "  arg = list of task paths, at least one expected",
+        "  --zombie_kill=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -1001,7 +1930,11 @@
       "implementation": "ZombieCmd",
       "summary": "Locates the task in the servers list of zombies, and removes it.",
       "description": [
-        "Locates the task in the servers list of zombies, and removes it.\nSince a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)\nthe zombie may reappear\n  args = list of task paths, at least one expected\n  --zombie_remove=/path/to/task  /path/to/task2"
+        "Locates the task in the servers list of zombies, and removes it.",
+        "Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)",
+        "the zombie may reappear",
+        "  args = list of task paths, at least one expected",
+        "  --zombie_remove=/path/to/task  /path/to/task2"
       ]
     }
   ],
@@ -1010,43 +1943,33 @@
       "name": "host",
       "kind": "global-option",
       "summary": "When specified overrides the environment variable ECF_HOST and default host: 'localhost'",
-      "description": [
-        "When specified overrides the environment variable ECF_HOST and default host: 'localhost'"
-      ]
+      "description": ["When specified overrides the environment variable ECF_HOST and default host: 'localhost'"]
     },
     {
       "name": "port",
       "kind": "global-option",
       "summary": "When specified overrides the environment variable ECF_PORT and default port: '3141'",
-      "description": [
-        "When specified overrides the environment variable ECF_PORT and default port: '3141'"
-      ]
+      "description": ["When specified overrides the environment variable ECF_PORT and default port: '3141'"]
     },
     {
       "name": "user",
       "kind": "global-option",
       "summary": "Specifies the user name used to contact the server. Must be used in combination with option --password.",
-      "description": [
-        "Specifies the user name used to contact the server. Must be used in combination with option --password."
-      ],
+      "description": ["Specifies the user name used to contact the server. Must be used in combination with option --password."],
       "pairs_with": "password"
     },
     {
       "name": "password",
       "kind": "global-option",
       "summary": "Specifies the password used to contact the server. Must be used in combination with option --user.",
-      "description": [
-        "Specifies the password used to contact the server. Must be used in combination with option --user."
-      ],
+      "description": ["Specifies the password used to contact the server. Must be used in combination with option --user."],
       "pairs_with": "user"
     },
     {
       "name": "rid",
       "kind": "global-option",
       "summary": "When specified overrides the environment variable ECF_RID. Can only be used for task commands.",
-      "description": [
-        "When specified overrides the environment variable ECF_RID. Can only be used for task commands."
-      ]
+      "description": ["When specified overrides the environment variable ECF_RID. Can only be used for task commands."]
     },
     {
       "name": "ssl",
@@ -1054,7 +1977,8 @@
       "requires": "ECF_OPENSSL",
       "summary": "Enables the use of SSL when contacting the server.",
       "description": [
-        "Enables the use of SSL when contacting the server.\nWhen specified overrides the environment variable ECF_SSL."
+        "Enables the use of SSL when contacting the server.",
+        "When specified overrides the environment variable ECF_SSL."
       ]
     },
     {
@@ -1062,7 +1986,8 @@
       "kind": "global-option",
       "summary": "Enables communication over HTTP between client/server.",
       "description": [
-        "Enables communication over HTTP between client/server.\n"
+        "Enables communication over HTTP between client/server.",
+        ""
       ]
     },
     {
@@ -1070,31 +1995,29 @@
       "kind": "global-option",
       "summary": "Enables communication over HTTPS between client/server.",
       "description": [
-        "Enables communication over HTTPS between client/server.\n"
+        "Enables communication over HTTPS between client/server.",
+        ""
       ]
     },
     {
       "name": "help",
       "kind": "global-option",
       "summary": "Produce help message",
-      "description": [
-        "Produce help message"
-      ]
+      "description": ["Produce help message"]
     },
     {
       "name": "version",
       "kind": "global-option",
       "summary": "Show ecflow client version number, and version of the boost library used",
-      "description": [
-        "Show ecflow client version number, and version of the boost library used"
-      ]
+      "description": ["Show ecflow client version number, and version of the boost library used"]
     },
     {
       "name": "debug",
       "kind": "global-option",
       "summary": "Enables the display of client environment settings and execution details.",
       "description": [
-        "Enables the display of client environment settings and execution details.\nHas the same effect as setting environment variable ECF_DEBUG_CLIENT."
+        "Enables the display of client environment settings and execution details.",
+        "Has the same effect as setting environment variable ECF_DEBUG_CLIENT."
       ]
     },
     {
@@ -1102,9 +2025,7 @@
       "kind": "command-option",
       "command": "init",
       "summary": "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.",
-      "description": [
-        "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command."
-      ]
+      "description": ["Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command."]
     },
     {
       "name": "remove",

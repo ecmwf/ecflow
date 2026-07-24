@@ -87,9 +87,10 @@ public:
     /// @brief Returns the full description text registered for a command or option.
     ///
     /// Checks commands first, then options, matching @ref find_command and
-    /// @ref find_option order. The entry's "description" blocks are joined the
-    /// same way the paragraphs were originally separated in the C++ source: a
-    /// blank line between blocks. This reproduces preformatted content as is.
+    /// @ref find_option order. The entry's "description" array holds one line
+    /// per element (a blank line is an empty string); the lines are joined with
+    /// a newline, reconstructing the original text verbatim, preformatted
+    /// content included.
     ///
     /// @param name Exact command or option name to look up, e.g. "abort".
     /// @return The reconstructed description text, or std::nullopt if @p name

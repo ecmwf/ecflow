@@ -47,11 +47,13 @@ std::optional<std::string> HelpCatalog::description_for(const std::string& name)
     }
 
     std::string text;
-    for (const auto& block : entry->at("description")) {
-        if (!text.empty()) {
-            text += "\n\n";
+    bool first = true;
+    for (const auto& line : entry->at("description")) {
+        if (!first) {
+            text += "\n";
         }
-        text += block.get<std::string>();
+        first = false;
+        text += line.get<std::string>();
     }
     return text;
 }

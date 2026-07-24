@@ -81,6 +81,13 @@ def check_cross_references(manifest):
                 f"environment variable '{variable['name']}' overridable_by unknown global-option '{overridable_by}'"
             )
 
+    # A description holds one line per array element; no element may contain an embedded newline.
+    for kind, entries in (("command", manifest.get("commands", [])), ("option", manifest.get("options", []))):
+        for entry in entries:
+            for index, line in enumerate(entry.get("description", [])):
+                if "\n" in line:
+                    problems.append(f"{kind} '{entry['name']}' description line {index} contains an embedded newline")
+
     return problems
 
 

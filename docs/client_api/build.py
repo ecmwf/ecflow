@@ -166,10 +166,11 @@ def load_description_file(name):
         return f""
 
 
-def join_description(blocks):
-    # Reproduces HelpCatalog::description_for(): blocks are joined by a blank line, the same rule
-    # used to originally split the C++ source's paragraphs, including for pre-formatted content.
-    return "\n\n".join(blocks)
+def join_description(lines):
+    # Reproduces HelpCatalog::description_for(): the description holds one line per element (a blank
+    # line is an empty string), joined by a newline to reconstruct the original text verbatim,
+    # including pre-formatted content.
+    return "\n".join(lines)
 
 
 def format_env_var(var):

@@ -122,6 +122,32 @@ BOOST_AUTO_TEST_CASE(test_description_for_command_and_option) {
     BOOST_CHECK(!ecf::HelpCatalog::description_for("no-such-name").has_value());
 }
 
+BOOST_AUTO_TEST_CASE(test_description_for_joins_lines_with_newline) {
+    ECF_NAME_THIS_TEST();
+
+    // The description holds one line per array element; description_for() joins them with a single
+    // newline, so the reconstruction equals the elements joined by '\n', verbatim.
+    const nlohmann::json* entry = ecf::HelpCatalog::find_command("abort");
+    BOOST_REQUIRE(entry != nullptr);
+
+    std::string expected;
+    bool first = true;
+    for (const auto& line : entry->at("description")) {
+        if (!first) {
+            expected += "\n";
+        }
+        first = false;
+        expected += line.get<std::string>();
+    }
+
+    std::optional<std::string> actual = ecf::HelpCatalog::description_for("abort");
+    BOOST_REQUIRE(actual.has_value());
+    BOOST_CHECK_EQUAL(*actual, expected);
+
+    // A blank line between paragraphs is stored as an empty element and reappears as "\n\n".
+    BOOST_CHECK(actual->find("\n\n") != std::string::npos);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
