@@ -256,8 +256,11 @@ The zombie handling is the same as for ``InitCmd``.
 
             Mark task as aborted. For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables
-              arg1 = (optional) string(reason)
-                     Optionally provide a reason why the abort was raised
+
+            Argument(s):
+
+                reason: (optional) string
+                    # Optionally provide a reason why the abort was raised
 
             If this task command is a zombie, then the default action will be to *block*.
             The default can be overridden by using zombie attributes.
@@ -379,7 +382,11 @@ variables as the job finishes. The zombie handling is the same as for ``InitCmd`
             Otherwise the blocking period is defined by ECF_TIMEOUT.
             The init command allows variables to be added, and complete command
             allows for them to be removed.
-              arg1(--remove)(optional) = a list of variables to removed from this task
+
+            Argument(s):
+
+                --remove: (optional)
+                    # A list of space separated variables to removed from this task
 
             Usage:
 
@@ -519,7 +526,11 @@ synchronisation on the state of other nodes.
 
             Evaluates an expression, and block while the expression is false.
             For use in the '.ecf' file *only*, hence the context is supplied via environment variables
-              arg1 = string(expression)
+
+            Argument(s):
+
+                expression: string
+                    # The expression to be evaluated.
 
             Usage:
 
@@ -652,9 +663,14 @@ complete without error); this can be overridden with zombie attributes.
 
             Change event. For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables
-              arg1(string | int)     = event-name
 
-              arg2(string)(optional) = [ set | clear] default value is set
+            Argument(s):
+
+                event-name: string | int
+                    # The name of the event to be set or cleared.
+
+                state: (optional) string
+                    # [ set | clear], default value is set
 
             If this task command is a zombie, then the default action will be to *fob*,
             i.e allow the ecflow client command to complete without an error
@@ -806,9 +822,16 @@ zombie attributes, and the blocking period is bounded by ``ECF_TIMEOUT``.
 
             Mark task as started(active). For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables.
-              arg1(string)         = process_or_remote_id The process id of the job or remote_id
-                                     Using remote id allows the jobs to be killed
-              arg2(--add)(optional)= add/update variables as name value pairs
+
+            Argument(s):
+
+                process_or_remote_id: string
+                    # The process id of the job or remote_id.
+                    # Using remote id allows the jobs to be killed.
+
+                --add: (optional)
+                    # add/update variables as name value pairs
+                    # a list of space separated variables to add/update on this task
 
             If this task command is a zombie, then the default action will be to *block*.
             The default can be overridden by using zombie attributes.
@@ -958,9 +981,14 @@ zombie action is to *fob*.
 
             Change Label. For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables
-              arg1 = label-name
-              arg2 = The new label value
-                     The labels values can be single or multi-line(space separated quoted strings)
+
+            Argument(s):
+
+                label-name
+                    # The name of the label to be set.
+
+                value
+                    # The new label value. Can be single or multi-line (space separated quoted strings).
 
             If this task command is a zombie, then the default action will be to *fob*,
             i.e allow the ecflow client command to complete without an error
@@ -1072,8 +1100,14 @@ zombie action is to *fob*.
 
             Change meter. For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables
-              arg1(string) = meter-name
-              arg2(int)    = the new meter value
+
+            Argument(s):
+
+                meter-name: string
+                    # The name of the meter to be set.
+
+                value: int
+                    # The new meter value
 
             If this task command is a zombie, then the default action will be to *fob*,
             i.e allow the ecflow client command to complete without an error
@@ -1197,15 +1231,25 @@ The ``active`` and ``no_of_aborted`` actions return a string; the others return 
 
             QueueCmd. For use in the '.ecf' script file *only*
             Hence the context is supplied via environment variables
-              arg1(string) = queue-name:
-              arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]
-                 active: returns the first queued/aborted step, the return string is the queue value from the definition
-                 no_of_aborted: returns number of aborted steps as a string, i.e 10
-                 reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors
-              arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)
-                            This is only valid for complete and aborted steps
-              arg4(string) = path: (optional). The path where the queue is defined.
-                             By default we search for the queue up the node tree.
+
+            Argument(s):
+
+                queue-name: string
+                    # The name of the queue to be used.
+
+                action: string
+                    # [active | aborted | complete | no_of_aborted | reset ]
+                    # active: returns the first queued/aborted step, the return string is the queue value from the definition
+                    # no_of_aborted: returns number of aborted steps as a string, i.e 10
+                    # reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors
+
+                step: string
+                    # The value returned from `step=$(ecflow_client --queue=queue_name active)`
+                    # This is only valid for complete and aborted steps
+
+                path: (optional) string
+                    # The path where the queue is defined.
+                    # By default we search for the queue up the node tree.
 
             If this task command is a zombie, then the default action will be to *block*,
             The default can be overridden by using zombie attributes.
@@ -1863,11 +1907,13 @@ starts. The ``force`` flag is stored in ``force_``; the request below is for ``-
 
             Begin playing the definition in the server.
             Expects zero or a single quoted string.
-              arg1 = suite-name | Nothing | force
-                     play the chosen suite, if no arg specified, play all suites, in the definition
-                     force means reset the begin status on the suites and bypass checks.
-                     This is only required if suite-name is provide as the first argument
-                     Using force can cause the creation of zombies
+
+            Argument(s):
+
+                suite-name: (optional)
+                    # The name of the selected suite; if not specified, means all suites.
+                    # Including `--force` in the value means reset the begin status and bypass checks.
+                    # Important: using `--force` might cause the appearance of zombies.
 
             Usage:
 
@@ -1976,11 +2022,22 @@ the line limit by ``max_lines_``. The reply is always a string.
 
             Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]
             By default will return the script.
-              arg1 = path to node
-              arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]
-                     kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill
-                     stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat
-              arg3 = (optional) max_lines = 10000 <default>
+
+            Argument(s):
+
+                path: <path>
+                    # The path to the node
+
+                kind: (optional) [ script<default> | job | jobout | manual | kill | stat ]
+                    # `script`: returns the script file, e.g., %ECF_JOB%.ecf
+                    # `job`: returns the pre-processed job script
+                    # `jobout`: returns the job output/log, e.g., %ECF_JOB%.out
+                    # `manual`: returns the job manual
+                    # `kill`: returns the output of ECF_KILL_CMD, e.g., %ECF_JOB%.kill
+                    # `stat`: returns the output of ECF_STATUS_CMD, e.g., %ECF_JOB%.stat
+
+                max_lines: (optional)
+                    # default is 10000
 
     .. tab:: Request
 
@@ -2091,15 +2148,19 @@ save-time alarm. Called with no argument it checkpoints immediately.
             or by using --alter functionality
             Note excessive save times can interfere with job scheduling.
             The alarm threshold can be changed. See below.
-               arg1 = (optional) mode [ never | on_time | on_time:<integer> | always | <integer>]
-                 never     : Never check point the definition in the server
-                 on_time   : Turn on automatic check pointing at interval stored on server
-                 on_time<integer> : Turn on automatic check point, with the specified interval in seconds
-                 alarm<integer>   : Modify the alarm notification time for check pt saving to disk
-                 always    : Check point at any change in node tree, *NOT* recommended for large definitions
-                 <integer> : This specifies the interval in seconds when server should automatically check pt.
-                             This will only take effect of mode is on_time/CHECK_ON_TIME
-                             Should ideally be a value greater than 60 seconds, default is 120 seconds
+
+            Argument(s):
+
+                mode: (optional) [ never | on_time | on_time:<integer> | always | <integer>]
+                    # never     : Never check point the definition in the server
+                    # on_time   : Turn on automatic check pointing at interval stored on server
+                    # on_time<integer> : Turn on automatic check point, with the specified interval in seconds
+                    # alarm<integer>   : Modify the alarm notification time for check pt saving to disk
+                    # always    : Check point at any change in node tree, *NOT* recommended for large definitions
+                    # <integer> : This specifies the interval in seconds when server should automatically check pt.
+                    #
+                    # This only takes effect if mode is on_time/CHECK_ON_TIME
+                    # The default value is 120 seconds, and should be greater than 60 seconds
 
             Usage:
 
@@ -2272,8 +2333,15 @@ track a chosen subset of suites and receive only their changes. The operation is
             Deleted suites will stay registered, and must be explicitly removed/dropped.
             Note: Suites can be registered before they are loaded into the server
             This command affects news() and sync() commands
-               arg1 = true | false           # true means add new suites to my list, when they are created
-               arg2 = names                  # should be a list of suite names, names not in the definition are ignored
+
+            Argument(s):
+
+                auto-add: true | false
+                    # `true` means add any new suites to user list, when they are created
+
+                names
+                    # A space separated list of suite names.
+                    # Note: names not in the definition are ignored.
 
             Usage:
 
@@ -2283,18 +2351,24 @@ track a chosen subset of suites and receive only their changes. The operation is
                 --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites
                                               # The client handle as the first argument is typically used by GUI/python
                                               # When the client handle is no zero, then it is dropped first
+
             To list all suites and handles use --ch_suites</pre>
             <pre id="ecf-h-clienthandlecmd-ch-drop" class="ecf-help-panel" hidden>ch_drop
             -------
 
             Drop/de-register the client handle.
             Un-used handle should be dropped otherwise they will stay, in the server.
-               arg1 = handle(integer)  # The handle must be an integer that is &gt; 0
+
+            Argument(s):
+
+                handle: integer
+                    # The handle value (must be an integer &gt; 0)
 
             Usage:
 
                 --ch_drop=10            # drop the client handle 10
-            An error is returned if the handle had not previously been registered
+
+            An error is returned if the handle was not previously been registered.
             The handle stored on the local client is set to zero
             To list all suites and handles use --ch_suites</pre>
             <pre id="ecf-h-clienthandlecmd-ch-drop-user" class="ecf-help-panel" hidden>ch_drop_user
@@ -2303,24 +2377,37 @@ track a chosen subset of suites and receive only their changes. The operation is
             Drop/de-register all handles associated with the given user.
             If no user provided will drop for current user. Client must ensure un-used handle are dropped
             otherwise they will stay, in the server.
-               arg1 = user           # The user to be drooped, if left empty drop current user 
+
+            Argument(s):
+
+                user
+                    # The user to be dropped; if empty, means drop current user
 
             Usage:
 
                 --ch_drop_user=ma0    # drop all handles associated with user ma0
                 --ch_drop_user        # drop all handles associated with current user
+
             An error is returned if no registered handles
             To list all suites and handles use --ch_suites</pre>
             <pre id="ecf-h-clienthandlecmd-ch-add" class="ecf-help-panel" hidden>ch_add
             ------
 
             Add a set of suites, to an existing handle.
-               arg1 = handle(integer)  # The handle must be an integer that is &gt; 0
-               arg2 = names            # should be a list of suite names, names not in the definition are ignored
+
+            Argument(s):
+
+                handle: integer
+                    # The handle value (must be an integer &gt; 0)
+
+                names
+                    # A space separated list of suite names.
+                    # Note: names not in the definition are ignored.
 
             Usage:
 
                 --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10
+
             An error is returned if the handle had not previously been registered
             The handle is created with --ch_register command
             To list all suites and handles use --ch_suites</pre>
@@ -2328,8 +2415,15 @@ track a chosen subset of suites and receive only their changes. The operation is
             ------
 
             Remove a set of suites, from an existing handle.
-               arg1 = handle(integer)   # The handle must be an integer that is &gt; 0
-               arg2 = names             # should be a list of suite names, names not in the definition are ignored
+
+            Argument(s):
+
+                handle: integer
+                    # The handle value (must be an integer &gt; 0)
+
+                names
+                    # A space separated list of suite names.
+                    # Note: names not in the definition are ignored.
 
             Usage:
 
@@ -2342,13 +2436,20 @@ track a chosen subset of suites and receive only their changes. The operation is
             -----------
 
             Change an existing handle so that new suites can be added automatically.
-               arg1 = handle(integer)  # The handle must be an integer that is &gt; 0
-               arg2 = true | false     # true means add new suites to my list, when they are created
+
+            Argument(s):
+
+                handle: integer
+                    # The handle value (must be an integer &gt; 0)
+
+                auto-add: true | false
+                    # `true` means add new suites to my list, when they are created
 
             Usage:
 
                 --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it
                 --ch_auto_add=10 false    # modify handle 10 so that no new suites are added
+
             The handle is created with --ch_register command
             To list all suites and handles use --ch_suites</pre>
             <pre id="ecf-h-clienthandlecmd-ch-suites" class="ecf-help-panel" hidden>ch_suites
@@ -2745,7 +2846,11 @@ return a string or a structured reply, as noted in the table:
             --------
 
             Stop server from scheduling new jobs.
-              arg1 = yes(optional) # use to bypass confirmation prompt,i.e
+
+            Argument(s):
+
+                confirm: (optional)
+                    # value must be &quot;yes&quot;; bypasses the confirmation prompt
 
             Usage:
 
@@ -2764,7 +2869,11 @@ return a string or a structured reply, as noted in the table:
 
             Stop server communication with jobs, and new job scheduling.
             Also stops automatic check pointing
-              arg1 = yes(optional) # use to bypass confirmation prompt,i.e.
+
+            Argument(s):
+
+                confirm: (optional)
+                    # value must be &quot;yes&quot;; bypasses the confirmation prompt
 
             Usage:
 
@@ -2782,7 +2891,11 @@ return a string or a structured reply, as noted in the table:
             ---------
 
             Terminate the server.
-              arg1 = yes(optional) # use to bypass confirmation prompt.i.e
+
+            Argument(s):
+
+                confirm: (optional)
+                    # value must be &quot;yes&quot;; bypasses the confirmation prompt
 
             Usage:
 
@@ -2872,7 +2985,11 @@ return a string or a structured reply, as noted in the table:
             The generated script can be manually changed, to see different rendering
             effects. i.e. just run &#x27;gnuplot &lt;host&gt;.&lt;port&gt;.gnuplot.script&#x27;
 
-              arg1 = &lt;optional&gt; path to log file
+            Argument(s):
+
+                log: (optional) path
+                    # The path to the log file.
+                    # If not provided, the log file path is requested from the server.
 
             If the path to log file is known, it is *preferable* to use this,
             rather than requesting the log path from the server.
@@ -3433,10 +3550,18 @@ Removes nodes from the server. The paths are carried in ``paths_`` and the ``for
             ------
 
             Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.
-              arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted tasks
-              arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt
-              arg3 = node paths | _all_         # _all_ means delete all suites
-                                                # node paths must start with a leading '/'
+
+            Argument(s):
+
+                force: (optional) [ force | yes ]
+                    # Use this parameter to bypass checks, i.e. for active or submitted tasks
+
+                confirm: (optional)
+                    # value must be "yes"; bypasses the confirmation prompt
+
+                target: node paths | _all_
+                    # The value `_all_` means delete all suites.
+                    # The node paths must start with a leading '/'.
 
             Usage:
 
@@ -3547,27 +3672,44 @@ underlies the "edit script" workflow in ``ecflow_ui``.
 
             Allows user to edit, pre-process and submit the script.
             Will allow pre-processing of arbitrary file with 'pre_process_file' option
-             arg1 = path to task  # The path to the task/alias
-             arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]
-                edit : will return the script file to standard out. The script will
-                       include used variables enclosed between %comment/%end at the
-                       start of the file
-                pre_process: Will return the script file to standard out.The script will
-                             include used variables enclosed between %comment/%end at the
-                             start of the file and with all %include expanded
-                submit: Will extract the used variables from the supplied file, i.e
-                        between the %comment/%end and use these them to generate the
-                        job using the ecf file accessible from the server
-                pre_process_file: Will pre process the user supplied file.
-                                  Will expand includes,variable substitution,
-                                  remove manual & comment sections.
-                submit_file: Like submit, but the supplied file, is submitted by the server
-                             The last 2 options allow complete freedom to debug the script file
-             arg3 = [ path_to_script_file ]
-                      needed for option [  pre_process_file | submit_file ]
-             arg4 = create_alias (optional) default value is false, for use with 'submit_file' option
-             arg5 = no_run (optional) default value is false, i.e immediately run the alias
-                    is no_run is specified the alias in only created
+
+            Argument(s):
+
+                path to task
+                    # The path to the task/alias
+
+                action: [ edit | pre_process | submit | pre_process_file | submit_file ]
+                    # edit : Returns the script file to standard out. The script will
+                    # include used variables enclosed between %comment/%end at the
+                    # start of the file
+                    #
+                    # pre_process: Returns the script file to standard out. The script will
+                    # include used variables enclosed between %comment/%end at the
+                    # start of the file and with all %include expanded
+                    #
+                    # submit: Extracts the used variables from the supplied file, i.e
+                    # between the %comment/%end and use these them to generate the
+                    # job using the ecf file accessible from the server
+                    #
+                    # pre_process_file: Pre-process the user supplied file, 
+                    # expanding includes, performing variable substitution,
+                    # removing manual & comment sections.
+                    #
+                    # submit_file: Like submit, but the supplied file is submitted by the server.
+                    #
+                    # Options `pre_process_file` and `submit_file` facilitate debugging the script file
+
+                path_to_script_file: (optional)
+                    # The path to the script file
+                    # Required for options `pre_process_file` and `submit_file`
+
+                create_alias: (optional)
+                    # If specified, will create an alias for the task and submit the job using this alias
+                    # Default value is false, to be used in combination with `submit_file` option
+
+                no_run: (optional)
+                    # If specified, will create an alias for the task but will not submit the job
+                    # Default value is false, to be used in combination with `submit_file` option
 
             Usage:
 
@@ -3693,13 +3835,21 @@ holds the requested state or event, and ``recursive_`` / ``setRepeatToLastValue_
             This behaviour allow Repeat values to be incremented interactively.
             A repeat attribute is incremented when all the child nodes are complete
             in this case the child nodes are automatically re-queued.
-              arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]
-              arg2 = (optional) recursive
-                     Applies state to node and recursively to all its children
-              arg3 = (optional) full
-                     Set repeat variables to last value, only works in conjunction
-                     with recursive option
-              arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'
+
+            Argument(s):
+
+                state: [ unknown | complete | queued | submitted | active | aborted | clear | set ]
+                    # The state to be set. If the state is either `set` or `clear`, then the event is updated.
+
+                recursive: (optional)
+                    # Applies state to node, and recursively to all its children
+
+                full: (optional)
+                    # Set repeat variables to last value, only works in conjunction
+                    # with recursive option
+
+                path: <path> | <path>:<event>
+                    # The path to a node or event. The path must begin with '/'
 
             Usage:
 
@@ -3824,14 +3974,21 @@ flags select which dependency kinds are freed.
             Free dependencies for a node. Defaults to triggers
             After freeing the time related dependencies (i.e time,today,cron)
             the next time slot will be missed.
-              arg1 = (optional) trigger
-              arg2 = (optional) all
-                     Free trigger, date and all time dependencies
-              arg3 = (optional) date
-                     Free date dependencies
-              arg4 = (optional) time
-                     Free all time dependencies i.e time, day, today, cron
-              arg5 = List of paths. At least one required. Must start with a leading '/'
+
+            Argument(s):
+
+                all: (optional)
+                    # Free trigger, date and all time dependencies
+
+                date: (optional)
+                    # Free date dependencies
+
+                time: (optional)
+                    # Free all time dependencies i.e time, day, today, cron
+
+                paths
+                    # A space separated list of paths.
+                    # At least one path must be provided. Paths must start with a leading '/'
 
             Usage:
 
@@ -3942,7 +4099,12 @@ group originated on the command line.
             Allows a series of ';' separated commands to be grouped and executed as one.
             Some commands like halt, shutdown and terminate will prompt the user. To bypass the prompt
             provide 'yes' as an additional parameter. See example below.
-              arg = string
+
+            Argument(s):
+
+                arg: string
+                    # A string of ';' separated commands. Each command is the same as if it was
+                    # provided on the command line. The string must be quoted.
 
             Usage:
 
@@ -4060,8 +4222,14 @@ serialized definition and can be large; it is truncated below.
             The suite's can be overwritten if the force option is used.
             To just check the definition and not send to server, use 'check_only'
             This command can also be used to load a checkpoint file into the server
-              arg1 = path to the definition file or checkpoint file
-              arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all
+
+            Argument(s):
+
+               path: <path>
+                    # The path to the definition file or checkpoint file.
+
+                mode: (optional) [ force | check_only | print | stats ]
+                    # The default value is to apply none of the mode options.
 
             Usage:
 
@@ -4172,28 +4340,37 @@ and ``new`` return the generic reply.
             log
             ---
 
-            Get,clear,flush or create a new log file.
+            Get, clear, flush or create a new log file.
             The user must ensure that a valid path is specified.
             Specifying '--log=get' with a large number of lines from the server,
             can consume a lot of **memory**. The log file can be a very large file,
             hence we use a default of 100 lines, optionally the number of lines can be specified.
-             arg1 = [ get | clear | flush | new | path ]
-              get -   Outputs the log file to standard out.
-                      defaults to return the last 100 lines
-                      The second argument can specify how many lines to return
-              clear - Clear the log file of its contents.
-              flush - Flush and close the log file. (only temporary) next time
-                      server writes to log, it will be opened again. Hence it best
-                      to halt the server first
-              new -   Flush and close the existing log file, and start using the
-                      the path defined for ECF_LOG. By changing this variable
-                      a new log file path can be used
-                      Alternatively an explicit path can also be provided
-                      in which case ECF_LOG is also updated
-              path -  Returns the path name to the existing log file
-             arg2 = [ new_path | optional last n lines ]
-                     if get specified can specify lines to get. Value must be convertible to an integer
-                     Otherwise if arg1 is 'new' then the second argument must be a path
+
+            Argument(s):
+
+                action: [ get | clear | flush | new | path ]
+                    # get: Outputs the log file to standard out.
+                    # defaults to return the last 100 lines
+                    # The second argument can specify how many lines to return
+                    #
+                    # clear: Clear the log file of its contents.
+                    #
+                    # flush: Flush and close the log file. (only temporary) next time
+                    # server writes to log, it will be opened again. Hence it best
+                    # to halt the server first
+                    #
+                    # new: Flush and close the existing log file, and start using the
+                    # the path defined for ECF_LOG. By changing this variable
+                    # a new log file path can be used
+                    # Alternatively an explicit path can also be provided
+                    # in which case ECF_LOG is also updated
+                    #
+                    # path: Returns the path name to the existing log file
+
+                value: (optional) [ new_path | optional last n lines ]
+                    # If 'get' is specified, the value specifies lines to get.
+                    # The value must be an integer.
+                    # If 'new' is specified, the value specifies a new path
 
             Usage:
 
@@ -4304,7 +4481,11 @@ Writes an arbitrary message into the server log file, useful for annotating oper
             ---
 
             Writes the input string to the log file.
-              arg1 = string
+
+            Argument(s):
+
+                message: string
+                    # The message to be written to the log file.
 
             Usage:
 
@@ -4433,8 +4614,14 @@ attributes, evaluation order. The ordering is carried by ``option_``.
             -----
 
             Re-orders the nodes held by the server
-              arg1 = node path
-              arg2 = [ top | bottom | alpha | order | up | down | runtime]
+
+            Argument(s):
+
+                node: path
+                    # The path to the node to be re-ordered.
+
+                sort-type: [ top | bottom | alpha | order | up | down | runtime]
+
             It should be noted that in the absence of triggers and time/date dependencies,
             the tasks are submitted in order.
             This changes the order and hence affects the submission order::
@@ -4910,8 +5097,15 @@ Moves a node subtree to a new parent, possibly on a different server. Internally
             Plug command is used to move nodes.
             The destination node can be on another server In which case the destination
             path should be of the form '<host>:<port>/suite/family/task
-              arg1 = path to source node
-              arg2 = path to the destination node
+
+            Argument(s):
+
+                source: path
+                    # The path to the source node
+
+                destination: path
+                    # The path to the destination node
+
             This command can fail because:
             - Source node is in a 'active' or 'submitted' state
             - Another user already has an lock
@@ -5051,11 +5245,17 @@ inside scripts to branch on a node's state.
              - variable No user or generated variable or repeat of that name found on node or its parents,
                         or (when path is '/') no user or server variable of that name found on the server
              - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid
-            Arguments:
-              arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]
-              arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable.
-                     path '/' represents the server itself, and can only be used with 'state' or 'variable'
-              arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat
+
+            Argument(s):
+
+                attribute: [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]
+                    # The kind of the attribute to be queried.
+
+                target: <path> | <path>:name
+                    # The path to the node or the node and attribute name.
+
+                value: trigger expression | prev | next
+                    # The values `prev` and `next` are only used when the attribute is a repeat
 
             Usage:
 
@@ -5270,12 +5470,17 @@ Requeues nodes so that they may run again. ``option_`` encodes the modifier (``0
             Re queues the specified node(s)
               If any child of the specified node(s) is in a suspended state, this state is cleared
             Repeats are reset to their starting values, relative time attributes are reset.
-              arg1 = (optional) [ abort | force ]
-                     abort  = re-queue only aborted tasks below node
-                     force  = Force the re-queueing even if there are nodes that are active or submitted
-                     <null> = Checks if any tasks are in submitted or active states below the node
-                              if so does nothing. Otherwise re-queues the node.
-              arg2 = list of node paths. The node paths must begin with a leading '/' character
+
+            Argument(s):
+
+                mode: (optional) [ abort | force ]
+                    # abort  = re-queue only aborted tasks below node
+                    # force  = Force the re-queueing even if there are nodes that are active or submitted
+                    # <null> = Checks if any tasks are in submitted or active states below the node,
+                    #          and if so does nothing. Otherwise, re-queues the node.
+
+                node: path
+                    # A space separared list of node paths. Paths must begin with a leading '/' character
 
             Usage:
 
@@ -5387,12 +5592,18 @@ ignored.
             A repeat attribute is incremented when all the child nodes are complete
             in this case the child nodes are automatically re-queued.
             Hence this command can be aid, in allowing a Repeat attribute to be incremented
-              arg1 = (optional)force
-                     Forcibly run, even if there are nodes that are active or submitted
-                     This can result in zombie creation
-              arg2 = node path(s). The paths must begin with a leading '/' character.
-                     If the path is /suite/family will recursively run all tasks
-                     When providing multiple paths avoid running the same task twice
+
+            Argument(s):
+
+                force: (optional)
+                    # Forcibly run, even if there are nodes that are active or submitted
+                    # This might cause the appearance of zombie
+
+                node: path
+                    # A space separared list of node paths.
+                    # The paths must begin with a leading '/' character.
+                    # If the path points to a suite or a family, all tasks will be run recursively.
+                    # When providing multiple paths avoid running the same task twice
 
             Usage:
 
@@ -5605,21 +5816,27 @@ not part of the serialized payload, so the request carries only the base-class `
             Used to print state of the definition returned from the server to standard output.
             This command can *only* be used in a group command, and will only work if it is
             preceded with a get command. See examples below.
-               arg1 = [ defs | state | migrate ] 
-            The output of show has several options: i.e
-              o no arguments: With no arguments, print the definition structure to standard output
-                Extern's are automatically added, allowing the output to be reloaded into the server
-                i.e --group="get ; show"
-              o state:
-                This will output definition structure along with all the state information.
-                This will include the trigger expressions, abstract syntax tree as comments.
-                Excludes the edit history
-              o migrate:
-                This will output definition structure along with all the state information.
-                The node state is shown in the comments.
-                This format allows the definition to be migrated to future version of ecflow.
-                The output includes edit history but excludes externs.
-                When the definition is reloaded *NO* checking is done.
+
+            Argument(s):
+
+                output: (optional) [ defs | state | migrate ]
+                    # defs:
+                    #    Return the definition structure only, without any state information.
+                    #    Necessary `extern`s are automatically added, allowing the output to be
+                    #    reloaded into the server e.g., --group="get ; show"
+                    #    This is the default if no `output` argument is provided.
+                    #
+                    # state:
+                    #    Return definition structure along with all the state information.
+                    #    Output includes the trigger expressions' abstract syntax tree (as comment).
+                    #    Does not include the edit history
+                    #
+                    # migrate:
+                    #    Return definition structure along with all the state information.
+                    #    The node state is shown in the comments.
+                    #    Use this format to migrate the definition to future version of ecflow.
+                    #    The output includes edit history but excludes externs.
+                    #    When the definition is reloaded *NO* checking is done.
 
             The following shows a summary of the features associated with each choice
                                     DEFS          STATE      MIGRATE

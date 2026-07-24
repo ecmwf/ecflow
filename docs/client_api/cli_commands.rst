@@ -150,7 +150,7 @@ Commands
 
     * - :ref:`log_cli`
       - :term:`user command`
-      - Get,clear,flush or create a new log file.
+      - Get, clear, flush or create a new log file.
 
     * - :ref:`meter_cli`
       - :term:`child command`
