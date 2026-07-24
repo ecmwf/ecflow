@@ -54,6 +54,10 @@ def check_cross_references(manifest):
     if dupes := duplicates(topic_names):
         problems.append(f"duplicate topic name(s): {', '.join(sorted(dupes))}")
 
+    definition_names = [definition["name"] for definition in manifest.get("definitions", [])]
+    if dupes := duplicates(definition_names):
+        problems.append(f"duplicate definition-item name(s): {', '.join(sorted(dupes))}")
+
     known_commands = set(command_names)
     known_options = set(option_names)
     pairs_with = {}
@@ -82,7 +86,11 @@ def check_cross_references(manifest):
             )
 
     # A description holds one line per array element; no element may contain an embedded newline.
-    for kind, entries in (("command", manifest.get("commands", [])), ("option", manifest.get("options", []))):
+    for kind, entries in (
+        ("command", manifest.get("commands", [])),
+        ("option", manifest.get("options", [])),
+        ("definition item", manifest.get("definitions", [])),
+    ):
         for entry in entries:
             for index, line in enumerate(entry.get("description", [])):
                 if "\n" in line:
@@ -121,7 +129,8 @@ def main():
         f"({len(manifest.get('commands', []))} commands, "
         f"{len(manifest.get('options', []))} options, "
         f"{len(manifest.get('environment_variables', []))} environment variables, "
-        f"{len(manifest.get('topics', []))} topics)"
+        f"{len(manifest.get('topics', []))} topics, "
+        f"{len(manifest.get('definitions', []))} definition items)"
     )
     return 0
 

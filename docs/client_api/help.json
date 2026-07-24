@@ -20,6 +20,10 @@
     {
       "name": "option",
       "summary": "One line summary of options"
+    },
+    {
+      "name": "definition",
+      "summary": "List all definition-file items"
     }
   ],
   "commands": [
@@ -2453,5 +2457,6 @@
       "applies_to": "task",
       "description": "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
     }
-  ]
+  ],
+  "definitions": []
 }

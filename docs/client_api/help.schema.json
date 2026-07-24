@@ -4,7 +4,7 @@
   "title": "ecflow_client help manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "topics", "commands", "options", "environment_variables"],
+  "required": ["schema_version", "topics", "commands", "options", "environment_variables", "definitions"],
   "properties": {
     "schema_version": {
       "type": "integer",
@@ -25,6 +25,11 @@
     "environment_variables": {
       "type": "array",
       "items": { "$ref": "#/$defs/environment_variable" }
+    },
+    "definitions": {
+      "description": "Items that can appear in a suite definition (.def) file: node types (suite, family, task, ...) and node attributes (trigger, cron, limit, ...). Reached via 'ecflow_client --help=defs/<name>', a namespace distinct from commands/options/topics so that names which happen to collide with an existing command or topic (e.g. the 'event' attribute vs. the '--event' command) are never ambiguous.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/definition_item" }
     }
   },
   "$defs": {
@@ -149,6 +154,34 @@
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "definition_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "summary", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "node: one of the five node-hierarchy types (definition, suite, family, task, alias). attribute: attaches to a node, per attaches_to.",
+          "enum": ["node", "attribute"]
+        },
+        "attaches_to": {
+          "description": "Required, and only meaningful, when kind is attribute: free text naming which node type(s) the attribute may appear on, e.g. 'Suite, Family, Task, and Alias'.",
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "description": { "$ref": "#/$defs/description" }
+      },
+      "if": {
+        "properties": { "kind": { "const": "attribute" } }
+      },
+      "then": {
+        "required": ["attaches_to"]
+      },
+      "else": {
+        "not": { "required": ["attaches_to"] }
       }
     }
   }
