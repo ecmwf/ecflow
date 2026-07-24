@@ -296,6 +296,15 @@ The list of commands, amongst other details, can be displayed by using the optio
 
     ecflow_client --help
 
+The elements that can appear in a suite definition file (node types and attributes, such as
+``trigger`` or ``cron``) are listed and documented the same way, using ``--help=definition``
+and ``--help=defs/<item>`` respectively.
+
+.. code-block:: shell
+
+    ecflow_client --help=definition
+    ecflow_client --help=defs/trigger
+
 
 .. toctree::
     :maxdepth: 1
