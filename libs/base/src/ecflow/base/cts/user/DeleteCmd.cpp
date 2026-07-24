@@ -165,24 +165,9 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* th
     }
 }
 
-static const char* delete_node_desc() {
-    return "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.\n"
-           "  arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted "
-           "tasks\n"
-           "  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt\n"
-           "  arg3 = node paths | _all_         # _all_ means delete all suites\n"
-           "                                    # node paths must start with a leading '/'\n"
-           "Usage:\n"
-           "  --delete=_all_                    # Delete all suites in server. Use with care.\n"
-           "  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt\n"
-           "  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted\n"
-           "  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt";
-}
-
 void DeleteCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsApi::delete_node_arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       delete_node_desc());
+                       boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

@@ -128,10 +128,6 @@ Commands
       - :term:`user command`
       - Stop server communication with jobs, and new job scheduling.
 
-    * - :ref:`help_cli`
-      - :term:`user command`
-      - Produce help message
-
     * - :ref:`init_cli`
       - :term:`child command`
       - Mark task as started(active). For use in the '.ecf' script file *only*
@@ -154,7 +150,7 @@ Commands
 
     * - :ref:`log_cli`
       - :term:`user command`
-      - Get,clear,flush or create a new log file.
+      - Get, clear, flush or create a new log file.
 
     * - :ref:`meter_cli`
       - :term:`child command`
@@ -203,10 +199,6 @@ Commands
     * - :ref:`reloadwsfile_cli`
       - :term:`user command`
       - Reload the white list file.
-
-    * - :ref:`remove_cli`
-      - :term:`user command`
-      - remove variables i.e name name2
 
     * - :ref:`replace_cli`
       - :term:`user command`
@@ -292,10 +284,6 @@ Commands
       - :term:`user command`
       - Terminate the server.
 
-    * - :ref:`version_cli`
-      - :term:`user command`
-      - Show ecflow client version number, and version of the boost library used
-
     * - :ref:`wait_cli`
       - :term:`child command`
       - Evaluates an expression, and block while the expression is false.
@@ -366,7 +354,6 @@ Commands
     get_state <api/get_state.rst>
     group <api/group.rst>
     halt <api/halt.rst>
-    help <api/help.rst>
     init <api/init.rst>
     job_gen <api/job_gen.rst>
     kill <api/kill.rst>
@@ -385,7 +372,6 @@ Commands
     reloadcustompasswdfile <api/reloadcustompasswdfile.rst>
     reloadpasswdfile <api/reloadpasswdfile.rst>
     reloadwsfile <api/reloadwsfile.rst>
-    remove <api/remove.rst>
     replace <api/replace.rst>
     requeue <api/requeue.rst>
     restart <api/restart.rst>
@@ -407,7 +393,6 @@ Commands
     sync_clock <api/sync_clock.rst>
     sync_full <api/sync_full.rst>
     terminate <api/terminate.rst>
-    version <api/version.rst>
     wait <api/wait.rst>
     why <api/why.rst>
     zombie_adopt <api/zombie_adopt.rst>

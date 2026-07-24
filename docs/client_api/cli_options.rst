@@ -17,6 +17,9 @@ Options
     * - :ref:`debug_cli`
       - Enables the display of client environment settings and execution details.
 
+    * - :ref:`help_cli`
+      - Produce help message
+
     * - :ref:`host_cli`
       - When specified overrides the environment variable ECF_HOST and default host: 'localhost'
 
@@ -32,14 +35,20 @@ Options
     * - :ref:`port_cli`
       - When specified overrides the environment variable ECF_PORT and default port: '3141'
 
+    * - :ref:`remove_cli`
+      - remove variables i.e name name2
+
     * - :ref:`rid_cli`
-      - When specified overrides the environment variable ECF_RID. Can only be used for child commands.
+      - When specified overrides the environment variable ECF_RID. Can only be used for task commands.
 
     * - :ref:`ssl_cli`
       - Enables the use of SSL when contacting the server.
 
     * - :ref:`user_cli`
       - Specifies the user name used to contact the server. Must be used in combination with option --password.
+
+    * - :ref:`version_cli`
+      - Show ecflow client version number, and version of the boost library used
 
 
 .. toctree::
@@ -48,11 +57,14 @@ Options
 
     add (option) <api/add.rst>
     debug (option) <api/debug.rst>
+    help (option) <api/help.rst>
     host (option) <api/host.rst>
     http (option) <api/http.rst>
     https (option) <api/https.rst>
     password (option) <api/password.rst>
     port (option) <api/port.rst>
+    remove (option) <api/remove.rst>
     rid (option) <api/rid.rst>
     ssl (option) <api/ssl.rst>
     user (option) <api/user.rst>
+    version (option) <api/version.rst>

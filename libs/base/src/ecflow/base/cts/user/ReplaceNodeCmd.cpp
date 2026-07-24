@@ -181,39 +181,9 @@ void ReplaceNodeCmd::print_only(std::string& os) const {
 const char* ReplaceNodeCmd::arg() {
     return CtsApi::replace_arg();
 }
-const char* ReplaceNodeCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Replaces a node in the server, with the given path\n"
-           "Can also be used to add nodes in the server\n"
-           "  arg1 = path to node\n"
-           "         must exist in the client defs(arg2). This is also the node we want to\n"
-           "         replace in the server\n"
-           "  arg2 = path to client definition file\n"
-           "         provides the definition of the new node\n"
-           "  arg3 = (optional) [ parent | false ] (default = parent)\n"
-           "         create parent families or suite as needed, when arg1 does not\n"
-           "         exist in the server\n"
-           "  arg4 = (optional) force (default = false) \n"
-           "         Force the replacement even if it causes zombies to be created\n"
-           "Replace can fail if:\n"
-           "- The node path(arg1) does not exist in the provided client definition(arg2)\n"
-           "- The client definition(arg2) must be free of errors\n"
-           "- If the third argument is not provided, then node path(arg1) must exist in the server\n"
-           "- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used\n\n"
-           "Replace will preserve the suspended status, if this is not required please re-queue first\n"
-           "After replace is done, we check trigger expressions. These are reported to standard output.\n"
-           "It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\n"
-           "Please note, you can use --check to check trigger expression and limits in the server.\n"
-           "For more information use --help check.\n\n"
-           "Usage:\n"
-           "  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1\n"
-           "  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted";
-}
 
 void ReplaceNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ReplaceNodeCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       ReplaceNodeCmd::desc());
+    desc.add_options()(ReplaceNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             boost::program_options::variables_map& vm,

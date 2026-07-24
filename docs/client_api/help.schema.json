@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ecflow.readthedocs.io/schemas/help-manifest.json",
+  "title": "ecflow_client help manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "topics", "commands", "options", "environment_variables"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "topics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/topic" }
+    },
+    "commands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "options": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/option" }
+    },
+    "environment_variables": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/environment_variable" }
+    }
+  },
+  "$defs": {
+    "description_line": {
+      "description": "A single line of the help text, with no embedded newline. The lines are joined with a newline to reconstruct the original text verbatim (including preformatted content, e.g. CtsCmd's ASCII-art tables); a blank line in the source is represented as an empty string, so an empty string is allowed.",
+      "type": "string"
+    },
+    "description": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/description_line" }
+    },
+    "argument": {
+      "description": "Structured, best-effort metadata alongside the verbatim argN prose kept in the command's own description; the source's argN convention is inconsistent per-command (some omit type, some omit a separate description line, one uses a union type), so type and description are not always present, and type is free text rather than a closed set.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "optional"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": {
+          "description": "Free text matching whatever the source literally shows in parentheses, e.g. string, int, any, or a union such as 'string | int'. Absent when the source shows no type at all.",
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": { "type": "boolean" },
+        "description": {
+          "description": "Absent when the source gives no separate elaboration beyond the name/value itself.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "visibility", "implementation", "summary", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "Task and user are the only two command kinds; there is no third 'child' category.",
+          "enum": ["task", "user"]
+        },
+        "visibility": {
+          "description": "public: usable standalone; group-only: usable only inside --group (e.g. why, show); internal: never registered in CtsCmdRegistry (e.g. MoveCmd).",
+          "enum": ["public", "group-only", "internal"]
+        },
+        "implementation": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "description": { "$ref": "#/$defs/description" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/argument" }
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "summary", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "global-option: registered once, applies regardless of command; command-option: registered locally by one command.",
+          "enum": ["global-option", "command-option"]
+        },
+        "command": {
+          "description": "Required, and only meaningful, when kind is command-option: names the single owning command.",
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "description": { "$ref": "#/$defs/description" },
+        "requires": {
+          "description": "Build-feature flag gating this option, e.g. ECF_OPENSSL.",
+          "type": "string",
+          "minLength": 1
+        },
+        "pairs_with": {
+          "description": "Name of another option that must be supplied alongside this one; the reference must be symmetric.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": {
+        "properties": { "kind": { "const": "command-option" } }
+      },
+      "then": {
+        "required": ["command"]
+      },
+      "else": {
+        "not": { "required": ["command"] }
+      }
+    },
+    "environment_variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "required", "applies_to", "description"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "type": { "enum": ["string", "int", "any"] },
+        "required": { "enum": ["mandatory", "optional"] },
+        "applies_to": {
+          "description": "both: every command; task: task commands only, in addition to the both entries.",
+          "enum": ["both", "task"]
+        },
+        "requires": {
+          "description": "Build-feature flag gating this variable, e.g. ECF_OPENSSL.",
+          "type": "string",
+          "minLength": 1
+        },
+        "overridable_by": {
+          "description": "Name of the global-option whose value can substitute for this variable (e.g. ECF_HOST is overridable_by host). Today's Help.cpp marks exactly these as mandatory*/optional*; absence means no CLI override exists.",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "summary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

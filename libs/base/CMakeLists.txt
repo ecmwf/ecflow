@@ -21,6 +21,7 @@ set(test_srcs
   test/TestDeleteNodeCmd.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
+  test/TestHelpCatalog.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp

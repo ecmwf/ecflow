@@ -20,6 +20,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Enumerate.hpp"
@@ -616,123 +617,13 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
 const char* AlterCmd::arg() {
     return CtsApi::alterArg();
 }
-const char* AlterCmd::desc() {
-
-    return
-        /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8//////////9
-        "Alter the node according to the options.\n"
-        "\n"
-        "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
-        "\n"
-        "arg2 = For delete:\n"
-        "       [ variable | time | today | date  | day | cron | event | meter | late | generic |\n"
-        "         queue | label | trigger | complete | repeat | limit | inlimit | limit_path |\n"
-        "         zombie | aviso | mirror ]\n"
-        "\n"
-        "       For change:\n"
-        "       [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter |\n"
-        "         label | trigger  | complete | repeat | limit_max | limit_value | defstatus |\n"
-        "         late | time | today | aviso | mirror ]\n"
-        "\n"
-        "       For add:\n"
-        "       [ variable | time | today | date | day | zombie | event | meter | late | limit |\n"
-        "         inlimit | label | aviso | mirror ]\n"
-        "\n"
-        "       For set_flag or clear_flag:\n"
-        "       [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed |\n"
-        "         statuscmd_failed | killcmd_failed | no_script | killed | status | late |\n"
-        "         message complete | queue_limit | task_waiting | locked | zombie | archived |\n"
-        "         restored | threshold | log_error | checkpt_error ]\n"
-        "\n"
-        "       For sort:\n"
-        "       [ event | meter | label | variable| limit | all ]\n"
-        "\n"
-        "arg3 = [ <name> | <value> ]\n"
-        "\n"
-        "arg4 = <new-value>\n"
-        "\n"
-        "arg5 = <path> (<path> (...)) - at least one node path required.\n"
-        "\n"
-        "*Important Notes*\n"
-        "\n"
-        " * All paths must start with a leading '/' character.\n"
-        "\n"
-        " * To update, create or remove server variables use '/' for path.\n"
-        "\n"
-        " * When updating unnamed attributes (Repeat, Trigger, Complete, ...) the name/arg3 is not necessary.\n"
-        "\n"
-        " * After changing the clock the suite needs to be re-queued for the change to take effect.\n"
-        "\n"
-        " * When adding or updating node attributes (e.g. variable, meter, event, label, limits, late)\n"
-        "   the name (arg3) and value (arg4) must be quoted.\n"
-        "\n"
-        " * When sorting attributes, 'recursive' can be used as the value (arg3).\n"
-        "\n"
-        " * When adding a meter, the value (arg4) is expected to be a comma-separated triplet\n"
-        "   of numerical values the form \"<min>,<max>,<value>\" (n.b. no spaces are allowed).\n"
-        "\n"
-        " * When adding an event, the non-optional value (arg4) must be either \"set\" or \"clear\".\n"
-        "\n"
-        " * When adding or updating aviso and mirror attributes, the value (arg4) is expected to be\n"
-        "   a quoted list of configuration options. For example:\n"
-        "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
-        "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } "
-        "}'\n"
-        "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
-        "\n"
-        " * For both aviso and mirror, the special value \"reload\" forces reloading the configuration.\n"
-        "   This is typically useful after updating variables used to configure these kind of attributes.\n"
-        "\n"
-        "Usage:\n"
-        "\n"
-        "   ecflow_client --alter=add variable <variable-name> \"value\" /             # add server variable\n"
-        "   ecflow_client --alter=add variable <variable-name> \"value\" /path/to/node # add node variable\n"
-        "\n"
-        "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add date \"01.*.*\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add day \"sunday\"  /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add label <label-name> \"label_value\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add event <event-name> \"set\"|\"clear\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add meter <meter-name> \"<min>,<max>,value\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node\n"
-        "\n"
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node\n"
-        "\n"
-        "   # zombie attributes have the following structure:\n"
-        "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
-        "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"\n"
-        "      client_side_action = \"fob\" | \"fail\" | \"block\"\n"
-        "      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n"
-        "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" "
-        "| \"queue\"\n"
-        "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60\n"
-        "\n"
-        "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n"
-        "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n"
-        "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail\n"
-        "\n"
-        "   ecflow_client --alter=delete variable FRED /path/to/node  # delete variable FRED\n"
-        "   ecflow_client --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode\n";
-}
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
     // Important: this option is, in practice, multi-token (and thus should use
     // po::value<std::vector<std::string>>()->multitoken()). However, because of the special handling
     // necessary to allow positional values, such as "--help", a custom `style_parser` is used
     // instead when parsing the CLI options -- see ClientOptions for details.
-    desc.add_options()(AlterCmd::arg(), boost::program_options::value<std::vector<std::string>>(), AlterCmd::desc());
+    desc.add_options()(AlterCmd::arg(), boost::program_options::value<std::vector<std::string>>());
 }
 void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
@@ -810,7 +701,8 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << AlterCmd::desc();
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1063,7 +955,8 @@ AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& att
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << AlterCmd::desc();
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1294,7 +1187,7 @@ AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& att
             }
             ss << valid[i];
         }
-        ss << "]\n" << AlterCmd::desc();
+        ss << "]\n" << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1760,7 +1653,7 @@ ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const {
             }
             ss << valid[i];
         }
-        ss << "]\n" << AlterCmd::desc();
+        ss << "]\n" << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
     return theFlagType;
@@ -1790,7 +1683,8 @@ void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << AlterCmd::desc();
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
 }
@@ -1813,9 +1707,10 @@ void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,
     std::string value;
     if (options.size() == 3) {
         if (options[2] != "recursive") {
-            throw std::runtime_error(MESSAGE("AlterCmd: sort: Expected third argument to be 'recursive' but found '"
-                                             << options[2] << "\n"
-                                             << AlterCmd::desc()));
+            throw std::runtime_error(
+                MESSAGE("AlterCmd: sort: Expected third argument to be 'recursive' but found '"
+                        << options[2] << "\n"
+                        << HelpCatalog::description_for("alter").value_or(HelpCatalog::not_provided)));
         }
         value = "recursive";
     }

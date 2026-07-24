@@ -253,112 +253,36 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
 //     return do_authenticate(as, cmd, absNodePath_);
 // }
 
-static const char* job_gen_only_desc() {
-    return "Test hierarchical Job generation only, for chosen Node.\n"
-           "The jobs are generated independent of the dependencies\n"
-           "This will generate the jobs *only*, i.e. no job submission. Used for checking job generation only\n"
-           "  arg = node path | arg = NULL\n"
-           "     If no node path specified generates for all Tasks in the definition. For Test only";
-}
-
-static const char* job_gen_desc() { // dependency_dependent_job_submission
-    return "Job submission for chosen Node *based* on dependencies.\n"
-           "The server traverses the node tree every 60 seconds, and if the dependencies are free\n"
-           "does job generation and submission. Sometimes the user may free time/date dependencies\n"
-           "to avoid waiting for the server poll, this commands allows early job generation\n"
-           "  arg = node path | arg = NULL\n"
-           "     If no node path specified generates for full definition.";
-}
-
-static const char* why_desc() {
-    return "Show the reason why a node is not running.\n"
-           "Can only be used with the group command. The group command must include a \n"
-           "'get' command(i.e returns the server defs)\n"
-           "The why command take a optional string argument representing a node path\n"
-           "Will return reason why the node is holding and for all its children.\n"
-           "If no arguments supplied will report on all nodes\n"
-           "  arg = node path | arg = NULL\n"
-           "Usage:\n"
-           "  --group=\"get; why\"               # returns why for all holding nodes\n"
-           "  --group=\"get; why=/suite/family\" # returns why for a specific node";
-}
-
-static const char* get_desc() {
-    return "Get the suite definition or node tree in form that is re-parse able\n"
-           "Get all suite node tree's from the server and write to standard out.\n"
-           "The output is parse-able, and can be used to re-load the definition\n"
-           "  arg = NULL | arg = node path\n"
-           "Usage:\n"
-           "  --get     # gets the definition from the server,and writes to standard out\n"
-           "  --get=/s1 # gets the suite from the server,and writes to standard out";
-}
-
-static const char* get_state_desc() {
-    return "Get state data. For the whole suite definition or individual nodes.\n"
-           "This will include event, meter, node state, trigger and time state.\n"
-           "The output is written to standard out.\n"
-           "  arg = NULL | arg = node path\n"
-           "Usage:\n"
-           "  --get_state     # gets the definition from the server,and writes to standard out\n"
-           "  --get_state=/s1 # gets the suite from the server,and writes to standard out";
-}
-
-const char* migrate_desc() {
-    return "Used to print state of the definition returned from the server to standard output.\n"
-           "The node state is shown in the comments.\n"
-           "This is the format used in the check point file, but with indentation.\n"
-           "Since this is essentially the defs format with state in the comments,"
-           "it allows the definition to be migrated to future version of ecflow.\n"
-           "The output includes edit history but excludes externs.\n"
-           "When the definition is reloaded *NO* checking is done.\n"
-           "\n"
-           "The following shows a summary of the features associated with each choice:\n"
-           "                       --get  --get_state  --migrate\n"
-           "Auto generate externs    Yes    Yes          No\n"
-           "Checking on reload       Yes    Yes          No\n"
-           "Edit History             No     No           Yes\n"
-           "Show trigger AST         No     Yes          No\n\n"
-           "Usage:\n"
-           "    --migrate         # show all suites\n"
-           "    --migrate=/s1     # show state for suite s1\n";
-}
-
 void CtsNodeCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsNodeCmd::GET: {
             desc.add_options()(CtsApi::getArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               get_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::GET_STATE: {
             desc.add_options()(CtsApi::get_state_arg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               get_state_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::MIGRATE: {
             desc.add_options()(CtsApi::migrate_arg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               migrate_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::JOB_GEN: {
             desc.add_options()(CtsApi::job_genArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               job_gen_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {
             desc.add_options()(CtsApi::checkJobGenOnlyArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               job_gen_only_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::WHY: {
             desc.add_options()(CtsApi::whyArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               why_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsNodeCmd::NO_CMD:

@@ -17,6 +17,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -333,20 +334,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 const char* CFileCmd::arg() {
     return CtsApi::fileArg();
 }
-const char* CFileCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "By default will return the script.\n"
-           "  arg1 = path to node\n"
-           "  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill\n"
-           "         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat\n"
-           "  arg3 = (optional) max_lines = 10000 <default>";
-}
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), CFileCmd::desc());
+    desc.add_options()(CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
@@ -358,7 +348,8 @@ void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     if (args.size() < 1) {
         throw std::runtime_error(MESSAGE("CFileCmd: At least one arguments expected for File. Found "
                                          << args.size() << "\n"
-                                         << CFileCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("file").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     std::string pathToNode = args[0];

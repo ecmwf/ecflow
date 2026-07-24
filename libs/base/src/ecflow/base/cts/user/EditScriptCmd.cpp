@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/File.hpp"
@@ -291,58 +292,9 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
 const char* EditScriptCmd::arg() {
     return CtsApi::edit_script_arg();
 }
-const char* EditScriptCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Allows user to edit, pre-process and submit the script.\n"
-           "Will allow pre-processing of arbitrary file with 'pre_process_file' option\n"
-           " arg1 = path to task  # The path to the task/alias\n"
-           " arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]\n"
-           "    edit : will return the script file to standard out. The script will\n"
-           "           include used variables enclosed between %comment/%end at the\n"
-           "           start of the file\n"
-           "    pre_process: Will return the script file to standard out.The script will\n"
-           "                 include used variables enclosed between %comment/%end at the\n"
-           "                 start of the file and with all %include expanded\n"
-           "    submit: Will extract the used variables from the supplied file, i.e\n"
-           "            between the %comment/%end and use these them to generate the\n"
-           "            job using the ecf file accessible from the server\n"
-           "    pre_process_file: Will pre process the user supplied file.\n"
-           "                      Will expand includes,variable substitution,\n"
-           "                      remove manual & comment sections.\n"
-           "    submit_file: Like submit, but the supplied file, is submitted by the server\n"
-           "                 The last 2 options allow complete freedom to debug the script file\n"
-           " arg3 = [ path_to_script_file ]\n"
-           "          needed for option [  pre_process_file | submit_file ]\n"
-           " arg4 = create_alias (optional) default value is false, for use with 'submit_file' option\n"
-           " arg5 = no_run (optional) default value is false, i.e immediately run the alias\n"
-           "        is no_run is specified the alias in only created\n"
-           "Usage:\n"
-           "--edit_script=/path/to/task edit > script_file\n"
-           "   server returns script with the used variables to standard out\n"
-           "   The user can choose to edit this file\n\n"
-           "--edit_script=/path/to/task pre_process > pre_processed_script_file\n"
-           "  server will pre process the ecf file accessible from the server\n"
-           "  (i.e expand all %includes) and return the file to standard out\n\n"
-           "--edit_script=/path/to/task submit script_file\n"
-           "  Will extract the used variables in the 'script_file' and will uses these\n"
-           "  variables during variable substitution of the ecf file accessible by the\n"
-           "  server. This is then submitted as a job\n\n"
-           "--edit_script=/path/to/task pre_process_file file_to_pre_process\n"
-           "  The server will pre-process the user supplied file and return the contents\n"
-           "  to standard out. This pre-processing is the same as job file processing,\n"
-           "  but on a arbitrary file\n\n"
-           "--edit_script=/path/to/task submit_file file_to_submit\n"
-           "  Will extract the used variables in the 'file_to_submit' and will uses these\n"
-           "  variables during variable substitution, the file is then submitted for job\n"
-           "  generation by the server\n\n"
-           "--edit_script=/path/to/task submit_file file_to_submit create_alias\n"
-           "  Like the the previous example but will create and run as an alias";
-}
 
 void EditScriptCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(EditScriptCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       EditScriptCmd::desc());
+    desc.add_options()(EditScriptCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
@@ -353,7 +305,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     }
 
     if (args.size() < 2) {
-        throw std::runtime_error(MESSAGE("EditScriptCmd:At least 2 arguments required:\n" << EditScriptCmd::desc()));
+        throw std::runtime_error(
+            MESSAGE("EditScriptCmd:At least 2 arguments required:\n"
+                    << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
     }
 
     std::string path_to_task          = args[0];
@@ -397,7 +351,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             }
             ss << edit_types[i];
         }
-        ss << "]\n" << EditScriptCmd::desc();
+        ss << "]\n" << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
 
@@ -409,7 +363,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         else {
             throw std::runtime_error(
                 MESSAGE("When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
-                        << EditScriptCmd::desc()));
+                        << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
         }
     }
 
@@ -426,7 +380,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     if ((create_alias || !run_alias) && edit_type != EditScriptCmd::SUBMIT_USER_FILE) {
         throw std::runtime_error(
             MESSAGE("The create_alias option is only valid when the second argument is 'submit_file' \n"
-                    << EditScriptCmd::desc()));
+                    << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
     }
 
     if (args.size() >= 3 && args.size() <= 5) {
@@ -468,7 +422,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         }
     }
 
-    throw std::runtime_error(MESSAGE("Wrong number of arguments specified\n" << EditScriptCmd::desc()));
+    throw std::runtime_error(
+        MESSAGE("Wrong number of arguments specified\n"
+                << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
 }
 
 std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c) {

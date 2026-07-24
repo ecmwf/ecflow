@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-import os
-import re
 import pathlib
-import subprocess
+import sys
 
-cmd_type_terms = {"child": "child command", "user": "user command", "option": ""}
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from validate_help_manifest import check_cross_references, check_schema, load_json  # noqa: E402
+
+cmd_type_terms = {"task": "child command", "user": "user command"}
+
+# Mirrors Help.cpp's CommandFilter::known_options exactly: the set of names for which
+# show_command_help() suppresses the environment-variable banner. This disagrees with the
+# manifest's own options[] array in both directions ('help'/'version'/'remove' are manifest
+# options but are absent here, so they still get the banner; there is no equivalent entry for
+# every manifest option) -- a pre-existing Help.cpp quirk tracked as Future Work, not something
+# for build.py to paper over.
+KNOWN_OPTIONS = {"add", "debug", "host", "password", "port", "rid", "ssl", "user", "http", "https"}
 
 # Maps each ecflow_client command name to the C++ command class section (anchor) that documents its
 # wire-level protocol in command_internals.rst. Several classes implement many command-line options, so the
@@ -100,12 +111,6 @@ PROTOCOL_ANCHORS = {
 }
 
 
-def run_command(cmd):
-    print(f"*** Executing: {cmd}")
-    p = subprocess.run(cmd, capture_output=True, text=True)
-    return p.stdout, p.stderr
-
-
 class Entry:
     def __init__(self, name, type, desc):
         self.name = name
@@ -116,24 +121,38 @@ class Entry:
         return f"Entry('{self.name}', '{self.type}', '{self.desc}')"
 
 
-def load_help_table(command):
-    entries = []
-    o, _ = run_command(command)
-    o = o.split("\n")
-    for line in o:
-        m = re.search(r"""(\S+)\s+(child|user|option)\s+(.*)""", line)
-        if m and m.groups and len(m.groups()) == 3:
-            entry = Entry(m.group(1), m.group(2), m.group(3))
-            entries.append(entry)
-    return entries
+def load_manifest():
+    manifest = load_json(HERE / "help.json")
+    schema = load_json(HERE / "help.schema.json")
+
+    schema_errors = check_schema(manifest, schema)
+    if schema_errors:
+        for error in schema_errors:
+            location = "/".join(str(part) for part in error.path) or "<root>"
+            print(f"help.json: {location}: {error.message}", file=sys.stderr)
+        sys.exit(f"{len(schema_errors)} schema violation(s) found in help.json; aborting docs build.")
+
+    reference_problems = check_cross_references(manifest)
+    if reference_problems:
+        for problem in reference_problems:
+            print(f"help.json: {problem}", file=sys.stderr)
+        sys.exit(f"{len(reference_problems)} cross-reference problem(s) found in help.json; aborting docs build.")
+
+    return manifest
 
 
-def load_commands():
-    return load_help_table(["ecflow_client", "--help=summary"])
+def load_commands(manifest):
+    # 'internal' commands (e.g. move, constructed on the fly by PlugCmd) are never registered in
+    # CtsCmdRegistry and have no CLI-reachable --help output; they are intentionally undocumented,
+    # matching today's behaviour.
+    visible = [command for command in manifest["commands"] if command["visibility"] != "internal"]
+    entries = [Entry(command["name"], command["kind"], command["summary"]) for command in visible]
+    return sorted(entries, key=lambda entry: entry.name)
 
 
-def load_options():
-    return load_help_table(["ecflow_client", "--help=option"])
+def load_options(manifest):
+    entries = [Entry(option["name"], option["kind"], option["summary"]) for option in manifest["options"]]
+    return sorted(entries, key=lambda entry: entry.name)
 
 
 def load_description_file(name):
@@ -147,13 +166,69 @@ def load_description_file(name):
         return f""
 
 
-def render_single_page_rst(name):
+def join_description(lines):
+    # Reproduces HelpCatalog::description_for(): the description holds one line per element (a blank
+    # line is an empty string), joined by a newline to reconstruct the original text verbatim,
+    # including pre-formatted content.
+    return "\n".join(lines)
+
+
+def format_env_var(var):
+    required = var["required"]
+    if var.get("overridable_by"):
+        required += "*"
+    return f"  {var['name']} <{var['type']}> [{required}]\n    {var['description']}\n"
+
+
+def render_client_env_description(env_vars):
+    txt = "The client considers, for both user and task commands, the following environment variables:\n\n"
+    for var in env_vars:
+        if var["applies_to"] == "both":
+            txt += format_env_var(var)
+    txt += (
+        "\nThe options marked with (*) must be specified in order for the client to communicate\n"
+        "with the server, either by setting the environment variables or by specifying the\n"
+        "command line options.\n"
+    )
+    return txt
+
+
+def render_task_env_description(env_vars):
+    txt = "The following environment variables are used specifically by task commands:\n\n"
+    for var in env_vars:
+        if var["applies_to"] == "task":
+            txt += format_env_var(var)
+    txt += "\nThe scripts are expected to export the mandatory variables, typically in shared include files\n"
+    return txt
+
+
+def render_help_output(manifest, name):
+    # Reproduces Documentation::show_command_help()'s output byte-for-byte, without invoking the
+    # built ecflow_client binary: the name banner, the manifest description, and (for anything other
+    # than an option) the environment-variable sections that show_command_help() appends.
+    commands_by_name = {command["name"]: command for command in manifest["commands"]}
+    options_by_name = {option["name"]: option for option in manifest["options"]}
+
+    entry = commands_by_name.get(name) or options_by_name[name]
+    is_option = name in KNOWN_OPTIONS
+    is_task_command = name in commands_by_name and commands_by_name[name]["kind"] == "task"
+
+    description = join_description(entry["description"])
+    txt = f"\n{name}\n{'-' * len(name)}\n\n{description}\n\n"
+    if not is_option:
+        txt += render_client_env_description(manifest["environment_variables"])
+        if is_task_command:
+            txt += "\n" + render_task_env_description(manifest["environment_variables"])
+    return txt
+
+
+def render_single_page_rst(manifest, name):
 
     description = load_description_file(name)
     description_title = "Description"
     description_header = "" if not description else f"\n.. rubric:: {description_title}\n\n"
 
-    output, _ = run_command(["ecflow_client", f"--help={name}"])
+    output = render_help_output(manifest, name)
     output = '\n'.join(['   ' + line for line in output.split('\n')]) + '\n' # prefix each line of the output with the necessary indentation
     output_title = f"Output of :code:`--help={name}`"
     output_header = f"\n.. rubric:: {output_title}\n\n"
@@ -188,27 +263,6 @@ The following help text is generated by :code:`ecflow_client --help={name}`
 {protocol_seealso}
 """
 
-    return txt
-
-
-def render_user_option_rst():
-    title = f"user"
-    txt = f"""
-.. _user_cli:
-
-{title}
-{"/" * len(title)}
-
-::
-
-   
-   user
-   ----
-   
-   Specifies the user name used to contact the server. Must be used in combination with option --password.
-   
-   
-"""
     return txt
 
 
@@ -337,16 +391,18 @@ Options
 
 if __name__ == "__main__":
 
+    manifest = load_manifest()
+
     # Render and store index.rst
     content = render_index_rst()
     with open("index.rst", "w") as f:
         f.write(content)
 
-    command_entries = load_commands()
+    command_entries = load_commands(manifest)
     with open("cli_commands.rst", "w") as f:
         f.write(render_commands_rst(command_entries))
 
-    option_entries = load_options()
+    option_entries = load_options(manifest)
     with open("cli_options.rst", "w") as f:
         f.write(render_options_rst(option_entries))
 
@@ -355,14 +411,11 @@ if __name__ == "__main__":
 
     # Render and store each of the command/option.rst
     for entry in command_entries:
-        content = render_single_page_rst(entry.name)
+        content = render_single_page_rst(manifest, entry.name)
         with open(f"api/{entry.name}.rst", "w") as f:
             f.write(content)
 
     for entry in option_entries:
-        if entry.name == "user":
-            content = render_user_option_rst()
-        else:
-            content = render_single_page_rst(entry.name)
+        content = render_single_page_rst(manifest, entry.name)
         with open(f"api/{entry.name}.rst", "w") as f:
             f.write(content)

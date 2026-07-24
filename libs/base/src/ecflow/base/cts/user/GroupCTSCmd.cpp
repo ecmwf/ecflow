@@ -386,21 +386,9 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
 const char* GroupCTSCmd::arg() {
     return CtsApi::groupArg();
 }
-const char* GroupCTSCmd::desc() {
-    return "Allows a series of ';' separated commands to be grouped and executed as one.\n"
-           "Some commands like halt, shutdown and terminate will prompt the user. To bypass the prompt\n"
-           "provide 'yes' as an additional parameter. See example below.\n"
-           "  arg = string\n"
-           "Usage:\n"
-           "   --group=\"halt=yes; reloadwsfile; restart;\"\n"
-           "                                 # halt server,bypass the confirmation prompt,\n"
-           "                                 # reload white list file, restart server\n"
-           "   --group=\"get; show\"           # get server defs, and write to standard output\n"
-           "   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output";
-}
 
 void GroupCTSCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>(), GroupCTSCmd::desc());
+    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>());
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

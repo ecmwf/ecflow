@@ -17,6 +17,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -71,8 +72,7 @@ ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
 }
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), QueryCmd::desc());
+    desc.add_options()(QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
@@ -109,9 +109,10 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
                 << query_type << " args size = " << args.size() << " expected 2 arguments"));
         }
         if (attribute.empty()) {
-            throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: "
-                                             << query_type << " path+attribute: " << path_and_name << "\n"
-                                             << QueryCmd::desc()));
+            throw std::runtime_error(
+                MESSAGE("QueryCmd: no attribute specified: query type: "
+                        << query_type << " path+attribute: " << path_and_name << "\n"
+                        << HelpCatalog::description_for("query").value_or(HelpCatalog::not_provided)));
         }
     }
     else if (query_type == "trigger") {
@@ -125,8 +126,9 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             }
         }
         if (attribute.empty()) {
-            throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: trigger\n"
-                                             << QueryCmd::desc()));
+            throw std::runtime_error(
+                MESSAGE("QueryCmd: no attribute specified: query type: trigger\n"
+                        << HelpCatalog::description_for("query").value_or(HelpCatalog::not_provided)));
         }
     }
     else if (query_type == "state" || query_type == "dstate") {
@@ -177,65 +179,6 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
 
 const char* QueryCmd::arg() {
     return CtsApi::queryArg();
-}
-
-const char* QueryCmd::desc() {
-    return "Query the status of attributes\n"
-           " i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking\n"
-           " - state     return [unknown | complete | queued |             aborted | submitted | active] to standard "
-           "out\n"
-           " - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard "
-           "out\n"
-           " - repeat    returns current value as a string to standard out\n"
-           " - event     return 'set' | 'clear' to standard out\n"
-           " - meter     return value of the meter to standard out\n"
-           " - limit     return current value of limit to standard out\n"
-           " - limit_max return limit max value to standard out\n"
-           " - label     return new value otherwise the old value\n"
-           " - variable  return value of the variable, repeat or generated variable to standard out,\n"
-           "             will search up the node tree. When path is '/', the variable is looked up on the\n"
-           "             server itself, i.e. 'ecflow_client --query variable /:name'\n"
-           " - trigger   returns 'true' if the expression is true, otherwise 'false'\n\n"
-           "If this command is called within a '.ecf' script we will additionally log the task calling this command\n"
-           "This is required to aid debugging for excessive use of this command\n"
-           "The command will fail if the node path to the attribute does not exist in the definition and if:\n"
-           " - repeat   The repeat is not found\n"
-           " - event    The event is not found\n"
-           " - meter    The meter is not found\n"
-           " - limit/limit_max The limit is not found\n"
-           " - label    The label is not found\n"
-           " - variable No user or generated variable or repeat of that name found on node or its parents,\n"
-           "            or (when path is '/') no user or server variable of that name found on the server\n"
-           " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
-           "Arguments:\n"
-           "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]\n"
-           "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable.\n"
-           "         path '/' represents the server itself, and can only be used with 'state' or 'variable'\n"
-           "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat\n\n"
-           "Usage:\n"
-           " ecflow_client --query state /                                     # return top level state to standard "
-           "out\n"
-           " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
-           " ecflow_client --query dstate /path/to/node                        # state that can included suspended\n"
-           " ecflow_client --query repeat /path/to/node                        # return the current value as a string\n"
-           " ecflow_client --query repeat /path/to/node prev                   # return the previous value as a "
-           "string\n"
-           " ecflow_client --query repeat /path/to/node next                   # return the next value as a string\n"
-           " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
-           " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the "
-           "meter to standard out\n"
-           " ecflow_client --query limit /path/to/task/with/limit:limit_name   # returns the current value of the "
-           "limit to standard out\n"
-           " ecflow_client --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit "
-           "to standard out\n"
-           " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the "
-           "label to standard out\n"
-           " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to "
-           "standard out\n"
-           " ecflow_client --query variable /:var_name                         # returns the server variable value "
-           "to standard out\n"
-           " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if "
-           "expression evaluates false otherwise\n";
 }
 
 STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {

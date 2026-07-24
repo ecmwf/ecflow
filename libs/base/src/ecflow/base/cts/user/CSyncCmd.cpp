@@ -170,49 +170,22 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
 
 void CSyncCmd::addOption(boost::program_options::options_description& desc) const {
     if (api_ == CSyncCmd::NEWS) {
-        desc.add_options()(
-            CtsApi::newsArg(),
-            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
-            "Returns true if state of server definition changed.\n"
-            "*Important* for use with c++/python interface only.\n"
-            "Requires Given a client handle, change and modify number determine if server changed since last call\n"
-            "This relies on user calling sync after news to update the locally stored modify and change numbers.\n"
-            "These numbers are then used in the next call to news.");
+        desc.add_options()(CtsApi::newsArg(), boost::program_options::value<std::vector<unsigned int>>()->multitoken());
         return;
     }
 
     if (api_ == CSyncCmd::SYNC) {
-        desc.add_options()(
-            CtsApi::syncArg(),
-            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
-            "Incrementally synchronise the local definition with the one in the server.\n"
-            "*Important* for use with c++/python interface only.\n"
-            "Preference should be given to this method as only the changes are returned.\n"
-            "This reduces the network bandwidth required to keep in sync with the server\n"
-            "Requires a client handle, change and modify number, to get the incremental changes from server.\n"
-            "The change in server state is then and merged with the client definition.");
+        desc.add_options()(CtsApi::syncArg(), boost::program_options::value<std::vector<unsigned int>>()->multitoken());
         return;
     }
 
     if (api_ == CSyncCmd::SYNC_CLOCK) {
-        desc.add_options()(
-            CtsApi::sync_clock_arg(),
-            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
-            "Incrementally synchronise the local definition with the one in the server.\n"
-            "*Important* for use with c++/python interface only.\n"
-            "Same as sync, but will *always* sync with suite clock if it has changed.\n"
-            "Preference should be given to this method as only the changes are returned.\n"
-            "This reduces the network bandwidth required to keep in sync with the server\n"
-            "Requires a client handle, change and modify number, to get the incremental changes from server.\n"
-            "The change in server state is then and merged with the client definition.");
+        desc.add_options()(CtsApi::sync_clock_arg(),
+                           boost::program_options::value<std::vector<unsigned int>>()->multitoken());
         return;
     }
 
-    desc.add_options()(CtsApi::sync_full_arg(),
-                       boost::program_options::value<unsigned int>(),
-                       "Returns the full definition from the server.\n"
-                       "*Important* for use with c++/python interface only.\n"
-                       "Requires a client_handle. The returned definition is stored on the client.");
+    desc.add_options()(CtsApi::sync_full_arg(), boost::program_options::value<unsigned int>());
 }
 
 void CSyncCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

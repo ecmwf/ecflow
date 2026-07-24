@@ -442,301 +442,83 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-static const char* server_load_desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Generates gnuplot files that show the server load graphically.\n"
-           "This is done by parsing the log file. If no log file is provided,\n"
-           "then the log file path is obtained from the server. If the returned\n"
-           "log file path is not accessible an error is returned\n"
-           "This command produces a three files in the CWD.\n"
-           "    o <host>.<port>.gnuplot.dat\n"
-           "    o <host>.<port>.gnuplot.script\n"
-           "    o <host>.<port>.png\n\n"
-           "The generated script can be manually changed, to see different rendering\n"
-           "effects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'\n\n"
-           "  arg1 = <optional> path to log file\n\n"
-           "If the path to log file is known, it is *preferable* to use this,\n"
-           "rather than requesting the log path from the server.\n\n"
-           "Usage:\n"
-           "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n"
-           "   --server_load                    # Log file path is requested from server\n"
-           "                                    # which is then used to generate gnuplot files\n"
-           "                                    # *AVOID* if log file path is accessible\n\n"
-           "Now use any png viewer to see the output i.e\n\n"
-           "> display   <host>.<port>.png\n"
-           "> feh       <host>.<port>.png\n"
-           "> eog       <host>.<port>.png\n"
-           "> xdg-open  <host>.<port>.png\n"
-           "> w3m       <host>.<port>.png\n";
-}
-
 void CtsCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES: {
-            desc.add_options()(CtsApi::zombieGetArg(),
-                               "Returns the list of zombies from the server.\n"
-                               "Results reported to standard output.");
+            desc.add_options()(CtsApi::zombieGetArg(), "");
             break;
         }
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: {
-            desc.add_options()(CtsApi::restoreDefsFromCheckPtArg(),
-                               "Ask the server to load the definition from an check pt file.\n"
-                               "The server must be halted and the definition in the server must be deleted\n"
-                               "first, otherwise an error is returned");
+            desc.add_options()(CtsApi::restoreDefsFromCheckPtArg(), "");
             break;
         }
         case CtsCmd::RESTART_SERVER: {
-            desc.add_options()(CtsApi::restartServerArg(),
-                               "Start job scheduling, communication with jobs, and respond to all requests.\n"
-                               "The following table shows server behaviour in the different states.\n"
-                               "|----------------------------------------------------------------------------------|\n"
-                               "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|\n"
-                               "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n"
-                               "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n"
-                               "|      HALTED  |    yes       |      no      |      no       |      no             |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|");
+            desc.add_options()(CtsApi::restartServerArg(), "");
             break;
         }
         case CtsCmd::SHUTDOWN_SERVER: {
             desc.add_options()(CtsApi::shutdownServerArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               "Stop server from scheduling new jobs.\n"
-                               "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
-                               "  --shutdown=yes\n"
-                               "The following table shows server behaviour in the different states.\n"
-                               "|----------------------------------------------------------------------------------|\n"
-                               "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|\n"
-                               "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n"
-                               "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n"
-                               "|      HALTED  |    yes       |      no      |      no       |      no             |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|");
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsCmd::HALT_SERVER: {
             desc.add_options()(CtsApi::haltServerArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               "Stop server communication with jobs, and new job scheduling.\n"
-                               "Also stops automatic check pointing\n"
-                               "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
-                               "  --halt=yes\n"
-                               "The following table shows server behaviour in the different states.\n"
-                               "|----------------------------------------------------------------------------------|\n"
-                               "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|\n"
-                               "|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n"
-                               "|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n"
-                               "|      HALTED  |    yes       |      no      |      no       |      no             |\n"
-                               "|--------------|--------------|--------------|---------------|---------------------|");
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsCmd::TERMINATE_SERVER: {
             desc.add_options()(CtsApi::terminateServerArg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               "Terminate the server.\n"
-                               "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
-                               "  --terminate=yes");
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsCmd::RELOAD_WHITE_LIST_FILE: {
-            desc.add_options()(
-                CtsApi::reloadwsfileArg(),
-                "Reload the white list file.\n"
-                "\n"
-                "The white list file (authorisation) is used to verify if a 'user' is allowed to perform a\n"
-                "specific command.\n"
-                "\n"
-                "The file path is specified as the ECF_LISTS variable, and loaded only once by the server\n"
-                "(on *startup*). This means that the file contents can be updated, but the file location\n"
-                "cannot change during the server execution.\n"
-                "\n"
-                "The ECF_LISTS variable can be used as follows:\n"
-                "  - if ECF_LISTS is not specified, or if it is specified with value `ecf.lists`,\n"
-                "    then the server will use the value `<host>.<port>.ecf.lists`\n"
-                "  - if ECF_LISTS is specified to be a path, such as /var/tmp/ecf.lists,\n"
-                "    then the server will use this path to reload the white list file\n"
-                "\n"
-                "The server automatically loads the white list file content as part of the startup procedure,\n"
-                "considering that if the file is not present or is empty (i.e., just contains the version\n"
-                "number) then all users have read/write access.\n"
-                "\n"
-                "The reload operation will fail if file does not exist or if the content is invalid.\n"
-                "\n"
-                "Expected format for this file is:\n"
-                "\n"
-                "\n"
-                "# all characters after the first # in a line are considered comments and are discarded\n"
-                "# empty lines are also discarded\n"
-                "\n"
-                "4.4.14  # the version number is mandatory, even if no users are specified\n"
-                "# Users with read/write access\n"
-                "user1\n"
-                "user2   # comment\n"
-                "*       # use this form if you want all users to have read/write access\n"
-                "\n"
-                "# Users with read  access, must have - before user name\n"
-                "-user3  # comment\n"
-                "-user4\n"
-                "-*      # use this form if you want all users to have read access\n"
-                "\n"
-                "\n"
-                "Usage:\n"
-                " --reloadwsfile");
+            desc.add_options()(CtsApi::reloadwsfileArg(), "");
             break;
         }
         case CtsCmd::RELOAD_PASSWD_FILE: {
-            desc.add_options()(
-                CtsApi::reloadpasswdfile_arg(),
-                "Reload the server password file.\n"
-                "\n"
-                "The password file (authentication) is used by the server to authenticate a 'user' by\n"
-                "verifying if the password provided by the user matches the one held by the server.\n"
-                "The password file is also used on the client to automatically load the password for the\n"
-                "'user' when connecting to the server.\n"
-                "\n"
-                "When the server is configured to use a password file, then ALL users must have a password.\n"
-                "\n"
-                "The file path is specified as the ECF_PASSWD environment variable, both for the client and\n"
-                "server, and is loaded only by the server on *startup*. This means that the file contents\n"
-                "can be updated (i.e., add/remove users), but the file location cannot change during the\n"
-                "server execution.\n"
-                "\n"
-                "The server automatically loads the password file content as part of the startup procedure.\n"
-                "\n"
-                "The ECF_PASSWD environment variable is used to specify the password file location,\n"
-                "considering that\n"
-                " - On the server, the default file name is <host>.<port>.ecf.passwd\n"
-                " - On the client, the default file name is ecf.passwd\n"
-                "\n"
-                "The format of the file is same for client and server:\n"
-                "\n"
-                "\n"
-                "4.5.0\n"
-                "# comment\n"
-                "<user> <host> <port> <passwd> # comment\n"
-                "\n"
-                "The following is an example\n"
-                "\n"
-                "4.5.0 # the version\n"
-                "fred machine1 3142 xxyyyd\n"
-                "fred machine2 3133 xxyyyd # comment\n"
-                "bill machine2 3133 xxyggyyd\n"
-                "\n"
-                "\n"
-                "Notice that the same user may appear multiple times (associated with different host/port).\n"
-                "This allows the client to use the same password file to contact multiple servers.\n"
-                "\n"
-                "For the password authentication to work, ensure the following:\n"
-                " - The password is defined for the client and server\n"
-                " - On the server, add at least the server administrator to the password file\n"
-                "   Note: If an empty password file (i.e., containing just the version) is used,\n"
-                "         no user is allowed access.\n"
-                " - On the client, the password file should be readable only by the 'user' itself\n"
-                "\n"
-                "Usage:\n"
-                " --reloadpasswdfile");
+            desc.add_options()(CtsApi::reloadpasswdfile_arg(), "");
             break;
         }
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE: {
-            desc.add_options()(
-                CtsApi::reloadcustompasswdfile_arg(),
-                "Reload the server custom password file.\n"
-                "\n"
-                "The custom password file (authentication) is used by the server to authenticate a 'user' by\n"
-                "verifying if the password provided by the user matches the one held by the server. This\n"
-                "particular file is used for authentication of users that explicitly specify the user name\n"
-                "(either via the environment variable ECF_USER or the --user option).\n"
-                "\n"
-                "This mechanism should be used when most users use the machine login name, but a few users\n"
-                "specify their own user name, in which case the password must also be explicitly provided.\n"
-                "\n"
-                "The file path is specified as the ECF_CUSTOM_PASSWD environment variable, both for the\n"
-                "client and server, and is loaded only by the server on *startup*. This means that the file\n"
-                "contents can be updated (i.e., add/remove users), but the file location cannot change during\n"
-                "the server execution.\n"
-                "\n"
-                "The server automatically loads the password file content as part of the startup procedure.\n"
-                "\n"
-                "The ECF_CUSTOM_PASSWD environment variable is used to specify the password file location,\n"
-                "considering that\n"
-                " - On the server the default file name is <host>.<port>.ecf.custom_passwd\n"
-                " - On the client the default file name is ecf.custom_passwd\n"
-                "\n"
-                "The format of the file is same for client and server:\n\n"
-                "\n"
-                "4.5.0\n"
-                "# comment\n"
-                "<user> <host> <port> <passwd> # comment\n"
-                "\n"
-                "The following is an example\n"
-                "\n"
-                "4.5.0 # the version\n"
-                "fred machine1 3142 xxyyyd\n"
-                "fred machine2 3133 xxyyyd # comment\n"
-                "bill machine2 3133 xxyggyyd\n"
-                "\n"
-                "Notice that the same user may appear multiple times (associated with different host/port).\n"
-                "This allows the client to use the same password file to contact multiple servers.\n"
-                "\n"
-                "For the password authentication to work, ensure the following:\n"
-                " - The password is defined for the client and server\n"
-                " - On the server, add at least the server administrator to the password file\n"
-                "   Note: If an empty password file (i.e., containing just the version) is used,\n"
-                "         no user is allowed access.\n"
-                " - On the client, the password file should be readable only by the 'user' itself\n"
-                "\n"
-                "Usage:\n"
-                " --reloadcustompasswdfile");
+            desc.add_options()(CtsApi::reloadcustompasswdfile_arg(), "");
             break;
         }
 
         case CtsCmd::FORCE_DEP_EVAL: {
-            desc.add_options()(CtsApi::forceDependencyEvalArg(), "Force dependency evaluation. Used for DEBUG only.");
+            desc.add_options()(CtsApi::forceDependencyEvalArg(), "");
             break;
         }
         case CtsCmd::PING: {
-            desc.add_options()(
-                CtsApi::pingServerArg(),
-                "Check if server is running on given host/port. Result reported to standard output.\n"
-                "Usage:\n"
-                "  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144\n"
-                "  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,\n"
-                "                                  # otherwise default port of 3141\n"
-                "  --ping                          # Check if server alive by using environment variables\n"
-                "                                  # ECF_HOST and ECF_PORT\n"
-                "If ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141");
+            desc.add_options()(CtsApi::pingServerArg(), "");
             break;
         }
         case CtsCmd::STATS: {
-            desc.add_options()(CtsApi::statsArg(), "Returns the server statistics as a string.");
+            desc.add_options()(CtsApi::statsArg(), "");
             break;
         }
         case CtsCmd::STATS_SERVER: {
-            desc.add_options()(CtsApi::stats_server_arg(),
-                               "Returns the server statistics as a struct and string. For test use only.");
+            desc.add_options()(CtsApi::stats_server_arg(), "");
             break;
         }
         case CtsCmd::STATS_RESET: {
-            desc.add_options()(CtsApi::stats_reset_arg(), "Resets the server statistics.");
+            desc.add_options()(CtsApi::stats_reset_arg(), "");
             break;
         }
         case CtsCmd::SUITES: {
-            desc.add_options()(CtsApi::suitesArg(), "Returns the list of suites, in the order defined in the server.");
+            desc.add_options()(CtsApi::suitesArg(), "");
             break;
         }
         case CtsCmd::DEBUG_SERVER_ON: {
-            desc.add_options()(CtsApi::debug_server_on_arg(), "Enables debug output from the server");
+            desc.add_options()(CtsApi::debug_server_on_arg(), "");
             break;
         }
         case CtsCmd::DEBUG_SERVER_OFF: {
-            desc.add_options()(CtsApi::debug_server_off_arg(), "Disables debug output from the server");
+            desc.add_options()(CtsApi::debug_server_off_arg(), "");
             break;
         }
         case CtsCmd::SERVER_LOAD: {
             desc.add_options()(CtsApi::server_load_arg(),
-                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                               server_load_desc());
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
         case CtsCmd::NO_CMD:

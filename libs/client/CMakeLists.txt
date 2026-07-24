@@ -54,6 +54,7 @@ set(test_srcs
   # Sources
   test/TestClient_main.cpp # test entry point
   test/TestClientOptions.cpp
+  test/TestHelp.cpp
   test/TestClientInterface.cpp
   test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp

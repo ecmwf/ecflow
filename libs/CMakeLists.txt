@@ -15,6 +15,25 @@ configure_file(
   core/src/ecflow/core/ecflow_source_build_dir.h.in
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h)
 
+#
+# Embed the CLI help manifest (docs/client_api/help.json) as a C++ header.
+#
+# A build-time custom command is used instead of configure_file(), so the
+# header regenerates whenever the manifest changes, without requiring a full
+# CMake reconfigure.
+#
+set(ecflow_client_help_manifest ${ecflow_SOURCE_DIR}/docs/client_api/help.json)
+set(ecflow_client_help_generated_header
+    ${CMAKE_BINARY_DIR}/generated/src/ecflow/base/generated_client_help.hpp)
+add_custom_command(
+  OUTPUT ${ecflow_client_help_generated_header}
+  COMMAND ${CMAKE_COMMAND}
+          -DMANIFEST=${ecflow_client_help_manifest}
+          -DOUTPUT=${ecflow_client_help_generated_header}
+          -P ${ecflow_SOURCE_DIR}/cmake/GenerateClientHelp.cmake
+  DEPENDS ${ecflow_client_help_manifest} ${ecflow_SOURCE_DIR}/cmake/GenerateClientHelp.cmake
+  COMMENT "Generating embedded CLI help manifest header from docs/client_api/help.json")
+
 set(srcs
   # Attribute -- Headers
   attribute/src/ecflow/attribute/AutoArchiveAttr.hpp
@@ -66,7 +85,9 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.hpp
   base/src/ecflow/base/Cmd.hpp
   base/src/ecflow/base/Connection.hpp
+  ${ecflow_client_help_generated_header}
   base/src/ecflow/base/Gnuplot.hpp
+  base/src/ecflow/base/HelpCatalog.hpp
   base/src/ecflow/base/HttpClient.hpp
   base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
@@ -147,6 +168,7 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
+  base/src/ecflow/base/HelpCatalog.cpp
   base/src/ecflow/base/HttpClient.cpp
   base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp

@@ -80,25 +80,10 @@ STC_Cmd_ptr InitCmd::doHandleRequest(AbstractServer* as) const {
 const char* InitCmd::arg() {
     return TaskApi::initArg();
 }
-const char* InitCmd::desc() {
-    return "Mark task as started(active). For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables.\n"
-           "  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n"
-           "                         Using remote id allows the jobs to be killed\n"
-           "  arg2(--add)(optional)= add/update variables as name value pairs\n\n"
-           "If this child command is a zombie, then the default action will be to *block*.\n"
-           "The default can be overridden by using zombie attributes.\n"
-           "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
-           "Usage:\n"
-           "  ecflow_client --init=$$\n"
-           "  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task";
-}
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>(), InitCmd::desc())(
-        "add",
-        boost::program_options::value<std::vector<std::string>>()->multitoken(),
-        "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
+    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>())(
+        "add", boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

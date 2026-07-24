@@ -170,43 +170,9 @@ std::string QueueCmd::handle_queue(QueueAttr& queue_attr) const {
 const char* QueueCmd::arg() {
     return TaskApi::queue_arg();
 }
-const char* QueueCmd::desc() {
-    return "QueueCmd. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n"
-           "  arg1(string) = queue-name:\n"
-           "  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]\n"
-           "     active: returns the first queued/aborted step, the return string is the queue value from the "
-           "definition\n"
-           "     no_of_aborted: returns number of aborted steps as a string, i.e 10\n"
-           "     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n"
-           "  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n"
-           "                This is only valid for complete and aborted steps\n"
-           "  arg4(string) = path: (optional). The path where the queue is defined.\n"
-           "                 By default we search for the queue up the node tree.\n\n"
-           "If this child command is a zombie, then the default action will be to *block*,\n"
-           "The default can be overridden by using zombie attributes."
-           "If the path to the queue is not defined, then this command will\n"
-           "search for the queue up the node hierarchy. If no queue found, command fails\n\n"
-           "Usage:\n"
-           "step=\"\"\n"
-           "QNAME=\"my_queue_name\"\n"
-           "while [1 == 1 ] ; do\n"
-           "   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps "
-           "processed\n"
-           "   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n"
-           "   if [[ $step == \"<NULL>\" ]] ; then\n"
-           "        break;\n"
-           "   fi\n"
-           "   ...\n"
-           "   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\n"
-           "done\n"
-           "\n"
-           "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }\n";
-}
 
 void QueueCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        QueueCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), QueueCmd::desc());
+    desc.add_options()(QueueCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
