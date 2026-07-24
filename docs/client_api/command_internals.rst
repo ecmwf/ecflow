@@ -240,7 +240,7 @@ The zombie handling is the same as for ``InitCmd``.
 
         .. code-block:: shell
 
-            ecflow_client --abort=reasonX
+            ecflow_client --abort=<some-reason>
             # a bare --abort is valid; the server substitutes a default reason
             ecflow_client --abort
 
@@ -265,7 +265,7 @@ The zombie handling is the same as for ``InitCmd``.
 
             Usage:
 
-                --abort=reasonX
+                --abort=<some-reason>
 
     .. tab:: Request
 
@@ -1208,7 +1208,8 @@ The ``active`` and ``no_of_aborted`` actions return a string; the others return 
                              By default we search for the queue up the node tree.
 
             If this task command is a zombie, then the default action will be to *block*,
-            The default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will
+            The default can be overridden by using zombie attributes.
+            If the path to the queue is not defined, then this command will
             search for the queue up the node hierarchy. If no queue found, command fails
 
             Usage:

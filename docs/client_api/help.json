@@ -41,7 +41,7 @@
         "",
         "Usage:",
         "",
-        "    --abort=reasonX"
+        "    --abort=<some-reason>"
       ],
       "arguments": [
         {
@@ -1226,7 +1226,8 @@
         "                 By default we search for the queue up the node tree.",
         "",
         "If this task command is a zombie, then the default action will be to *block*,",
-        "The default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will",
+        "The default can be overridden by using zombie attributes.",
+        "If the path to the queue is not defined, then this command will",
         "search for the queue up the node hierarchy. If no queue found, command fails",
         "",
         "Usage:",
@@ -2194,13 +2195,14 @@
       "type": "int",
       "required": "mandatory",
       "applies_to": "task",
-      "description": "The run number of the job (defined by the server, and used in job/output file name generation."
+      "description": "The run number of the job (defined by the server, and used in job/output file name generation)."
     },
     {
       "name": "ECF_RID",
       "type": "string",
       "required": "mandatory",
       "applies_to": "task",
+      "overridable_by": "rid",
       "description": "The process identifier. Supports identifying zombies and automated killing of running jobs"
     },
     {
@@ -2215,7 +2217,7 @@
       "type": "any",
       "required": "optional",
       "applies_to": "task",
-      "description": "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUTs wait."
+      "description": "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUT's wait."
     },
     {
       "name": "NO_ECF",
