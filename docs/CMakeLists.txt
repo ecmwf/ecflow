@@ -56,6 +56,8 @@ add_custom_command(
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
   COMMAND
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/update_internal.py
+  COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_BINARY_DIR}/client_api/api
       ${CMAKE_CURRENT_SOURCE_DIR}/client_api/api
@@ -75,6 +77,8 @@ add_custom_command(
   USES_TERMINAL
   DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/update_internal.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/command_internals.rst
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.json
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.schema.json
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/validate_help_manifest.py
