@@ -2585,7 +2585,7 @@
       "name": "autocancel",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Schedules a node for permanent removal a given time after it completes; unlike autoarchive, there is no way to bring it back.",
+      "summary": "Schedules a node for permanent removal a given time after it completes.",
       "description": [
         "Schedules a node for permanent removal a given time after it completes. Unlike autoarchive, there is no way to bring it back.",
         "",
@@ -2636,7 +2636,7 @@
       "name": "aviso",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Subscribes to an external Aviso notification as a trigger -- the node is queued when a matching notification is received.",
+      "summary": "Subscribes to an external Aviso notification as a trigger.",
       "description": [
         "Subscribes to an external Aviso notification as a trigger -- the node is queued when a matching notification is received.",
         "",
@@ -2850,7 +2850,7 @@
       "name": "edit",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Defines a user variable on the node, inherited by all descendants unless shadowed by a same-named variable lower in the tree.",
+      "summary": "Defines a user variable on a node.",
       "description": [
         "Defines a user variable on the node, inherited by all descendants unless shadowed/overridden by a same-named variable lower in the tree.",
         "",
@@ -2881,7 +2881,7 @@
       "name": "event",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "A boolean flag associated with a node that can be set via ecflow_client --event by a job and used in triggers by other nodes.",
+      "summary": "A boolean flag associated with a node.",
       "description": [
         "A boolean flag associated with a node that can be set via ecflow_client --event by a job and used in triggers by other nodes.",
         "",
@@ -2912,7 +2912,7 @@
       "name": "extern",
       "kind": "attribute",
       "attaches_to": "Defs (root only)",
-      "summary": "Declares that a path referenced by a trigger elsewhere in this file is defined outside of it, suppressing \"unresolved reference\" errors.",
+      "summary": "Declares a path defined in another file that can be referenced by a trigger in this file.",
       "description": [
         "Declares that a path (and optionally a specific attribute on it) referenced by a trigger elsewhere in this file is defined outside of it. This suppresses \"unresolved reference\" errors.",
         "",
@@ -2986,7 +2986,7 @@
       "name": "label",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "A named, free-text string a job can update at runtime (via ecflow_client --label) for display purposes; has no effect on scheduling.",
+      "summary": "A named, free-text string a job can update at runtime for display purposes.",
       "description": [
         "A named, free-text string a job can update at runtime (via ecflow_client --label) for display purposes. A label has no effect on scheduling.",
         "",
@@ -3011,7 +3011,7 @@
       "name": "late",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Flags a task as \"late\" if it spends too long submitted, becomes active too late in the day, or completes too late; purely advisory.",
+      "summary": "Flags a task as \"late\" if it spends too long submitted, becomes active too late in the day, or completes too late.",
       "description": [
         "Flags a task as \"late\" if it spends too long submitted, or becomes active too late in the day, or completes too late. This is purely advisory and does not alter scheduling.",
         "",
@@ -3074,7 +3074,7 @@
       "name": "meter",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "A named integer progress gauge that a job can update at runtime (via ecflow_client --meter); can be used in a trigger expression.",
+      "summary": "A named integer progress gauge that a job can update at runtime.",
       "description": [
         "A named integer progress gauge that a job can update at runtime (via ecflow_client --meter). A meter can be used as part of a trigger expression.",
         "",
@@ -3103,7 +3103,7 @@
       "name": "mirror",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally, so other local nodes can be triggered by the remote node's completion.",
+      "summary": "Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally.",
       "description": [
         "Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally. This allows other local nodes to be triggered by a remote node's completion.",
         "",
@@ -3141,7 +3141,7 @@
       "name": "queue",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "A named list of string \"steps\" consumed sequentially by repeated job submissions; a lighter-weight alternative to repeat for driving a job through a fixed work list.",
+      "summary": "A named list of sequential steps to be consumed by repeated job submissions.",
       "description": [
         "A named list of string \"steps\" consumed sequentially by repeated job submissions. This attribute is a lighter-weight alternative to repeat for driving a job through a fixed work list.",
         "",
@@ -3168,7 +3168,7 @@
       "name": "repeat",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Turns a node into a \"for loop\", re-queuing itself and advancing a generated variable through a range or list of values each time it completes.",
+      "summary": "Enables iteration over a sequence of a sequence of values re-queuing the associated node.",
       "description": [
         "Turns a node into a \"for loop\", allowing it to re-queue itself and advance a generated variable through a range or list of values each time it completes. A node may have at most one repeat.",
         "",
@@ -3220,7 +3220,7 @@
       "name": "time",
       "kind": "attribute",
       "attaches_to": "Family / Task / Alias",
-      "summary": "A time-of-day dependency keeping a node from executing before a single time of day, or before each slot of a repeating series within a day.",
+      "summary": "A dependency keeping a node from executing until a specified time or series of times within a day.",
       "description": [
         "A time-of-day dependency keeps a node from executing before a single time of day, or before each slot of a start/end/increment series that repeats within a day and then is exhausted. Unlike cron, a time attribute does not repeat across days -- that can be achieved by using a repeat on the node to re-queue it for the next day.",
         "",
@@ -3309,7 +3309,7 @@
       "name": "zombie",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",
-      "summary": "Specifies how the server should react to a zombie job (a running job whose process identifier, password, or path no longer matches what the server expects).",
+      "summary": "Specifies the handling of zombie jobs.",
       "description": [
         "Specifies how the server should react to a zombie job (i.e. a running job whose process identifier, password, or path no longer matches what the server expects).",
         "",

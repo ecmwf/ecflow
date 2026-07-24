@@ -177,6 +177,34 @@ const std::string& client_task_env_description() {
     return instance;
 }
 
+///
+/// @brief Returns every definition-item name from the manifest, sorted alphabetically.
+///
+/// @details Definition items (node types and attributes documented in
+/// docs/ug/user_manual/definition_file_format.rst) are not Boost-registered options, so they are
+/// read directly from ecf::HelpCatalog::manifest() rather than from a Help::descriptions_t.
+///
+/// @return The sorted list of names.
+///
+std::vector<std::string> sorted_definition_item_names() {
+    std::vector<std::string> names;
+    for (const auto& item : ecf::HelpCatalog::manifest().at("definitions")) {
+        names.push_back(item.at("name").get<std::string>());
+    }
+    std::sort(names.begin(), names.end());
+    return names;
+}
+
+///
+/// @brief Returns a fixed-width label for a definition-item's kind, for column-aligned listings.
+///
+/// @param[in] item Manifest entry taken from the "definitions" array; must contain "kind".
+/// @return "node     " or "attribute", both nine characters wide.
+///
+std::string get_definition_item_kind(const nlohmann::json& item) {
+    return item.at("kind").get<std::string>() == "node" ? "node     " : "attribute";
+}
+
 int get_options_max_width(const Help::descriptions_t& options) {
     size_t vec_size  = options.size();
     size_t max_width = 0;
@@ -211,6 +239,9 @@ private:
     void show_command_help(std::ostream& os, const std::string& command) const;
     void show_all_commands(std::ostream& os, std::string_view title) const;
     void show_all_options(std::ostream& os) const;
+    void show_definition_items_summary(std::ostream& os, std::string_view title) const;
+    void show_definition_item_help(std::ostream& os, const std::string& name) const;
+    void show_all_definitions(std::ostream& os, std::string_view title) const;
 
     template <typename PREDICATE>
     void show_table(std::ostream& os, PREDICATE select, size_t columns) const;
@@ -239,7 +270,8 @@ private:
 
 void Documentation::show(std::ostream& os, const std::string& topic) const {
     // WARNING!!
-    //   This assumes that there are no user/task commands named: 'summary', 'all', 'task', 'user'
+    //   This assumes that there are no user/task commands named:
+    //   'summary', 'all', 'task', 'user', 'option', 'definition'
     //
 
     if (topic.empty()) {
@@ -260,6 +292,15 @@ void Documentation::show(std::ostream& os, const std::string& topic) const {
     else if (topic == "option") {
         show_options_summary(os, "\nEcflow generic options:\n");
     }
+    else if (topic == "definition") {
+        show_definition_items_summary(os, "\nEcflow definition items:\n");
+    }
+    else if (topic.rfind("defs/", 0) == 0) {
+        // A dedicated prefix, rather than a bare name, so that a definition-file item whose name
+        // collides with an existing command (e.g. the "event" attribute vs. the --event command)
+        // is always unambiguous; bare command/option/topic lookups above are unaffected.
+        show_definition_item_help(os, topic.substr(5));
+    }
     else {
         show_command_help(os, topic);
     }
@@ -271,15 +312,19 @@ void Documentation::show_help(std::ostream& os) const {
     os << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
 
     os << "Try:\n\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=task      # One line summary of task commands\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=all         # List all commands, verbosely\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=summary     # One line summary of all commands\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=task        # One line summary of task commands\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=user        # One line summary of user command\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=<command>   # Detailed help on a specific <command>\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=definition  # List all definition-file items\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=defs/<item> # Detailed help on a specific definition <item>\n\n";
 
     show_all_commands(os, "Commands:");
 
     show_all_options(os);
+
+    show_all_definitions(os, "Definition:");
 }
 
 void Documentation::show_list_options(std::ostream& os) const {
@@ -423,8 +468,69 @@ void Documentation::show_all_commands(std::ostream& os, std::string_view title) 
 }
 
 void Documentation::show_all_options(std::ostream& os) const {
-    os << "Generic Options:\n";
+    os << "Options:\n";
     show_table(os, CommandFilter::is_option, 8);
+}
+
+void Documentation::show_definition_items_summary(std::ostream& os, std::string_view title) const {
+    os << title << '\n';
+
+    std::vector<std::string> names = sorted_definition_item_names();
+
+    size_t max_width = 0;
+    for (const auto& name : names) {
+        max_width = std::max(max_width, name.size());
+    }
+    max_width += 1;
+
+    for (const auto& name : names) {
+        const nlohmann::json* item = ecf::HelpCatalog::find_definition_item(name);
+        std::string first_line =
+            ecf::HelpCatalog::summary_for_definition_item(name).value_or(ecf::HelpCatalog::not_provided);
+
+        os << "  " << std::left << std::setw(static_cast<int>(max_width)) << name << " ";
+        os << get_definition_item_kind(*item) << " ";
+        os << first_line << "\n";
+    }
+    os << "\n";
+}
+
+void Documentation::show_definition_item_help(std::ostream& os, const std::string& name) const {
+    if (ecf::HelpCatalog::find_definition_item(name)) {
+        os << "\n";
+        os << name << "\n";
+        for (size_t i = 0; i < name.size(); i++) {
+            os << "-";
+        }
+        os << "\n\n";
+        os << ecf::HelpCatalog::description_for_definition_item(name).value_or(ecf::HelpCatalog::not_provided);
+        os << "\n\n";
+    }
+    else {
+        // Same-category fallback: an unknown "defs/<name>" lists the valid definition items,
+        // not the command list, since that is what the user was actually asking about.
+        show_definition_items_summary(os, "No matching definition item found, please choose from:");
+    }
+}
+
+void Documentation::show_all_definitions(std::ostream& os, std::string_view title) const {
+    os << title << "\n";
+
+    std::vector<std::string> names = sorted_definition_item_names();
+
+    size_t max_width = 0;
+    for (const auto& name : names) {
+        max_width = std::max(max_width, name.size());
+    }
+    max_width += 1;
+
+    for (size_t i = 0; i < names.size(); i++) {
+        if (i == 0 || i % 5 == 0) {
+            os << "\n   ";
+        }
+        os << std::left << std::setw(static_cast<int>(max_width)) << names[i];
+    }
+    os << "\n\n";
 }
 
 } // namespace
