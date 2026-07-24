@@ -1,11 +1,26 @@
 {
   "schema_version": 1,
   "topics": [
-    { "name": "all", "summary": "List all commands, verbosely" },
-    { "name": "summary", "summary": "One line summary of all commands" },
-    { "name": "task", "summary": "One line summary of task commands" },
-    { "name": "user", "summary": "One line summary of user command" },
-    { "name": "option", "summary": "One line summary of options" }
+    {
+      "name": "all",
+      "summary": "List all commands, verbosely"
+    },
+    {
+      "name": "summary",
+      "summary": "One line summary of all commands"
+    },
+    {
+      "name": "task",
+      "summary": "One line summary of task commands"
+    },
+    {
+      "name": "user",
+      "summary": "One line summary of user command"
+    },
+    {
+      "name": "option",
+      "summary": "One line summary of options"
+    }
   ],
   "commands": [
     {
@@ -26,7 +41,7 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --abort=reasonX"
+        "    --abort=reasonX"
       ],
       "arguments": [
         {
@@ -35,8 +50,7 @@
           "optional": true,
           "description": "Optionally provide a reason why the abort was raised"
         }
-      ],
-      "usage": ["ecflow_client --abort=reasonX"]
+      ]
     },
     {
       "name": "alter",
@@ -109,46 +123,45 @@
         "",
         "Usage:",
         "",
-        "   ecflow_client --alter=add variable <variable-name> \"value\" /             # add server variable",
-        "   ecflow_client --alter=add variable <variable-name> \"value\" /path/to/node # add node variable",
+        "    --alter=add variable <variable-name> \"value\" /             # add server variable",
+        "    --alter=add variable <variable-name> \"value\" /path/to/node # add node variable",
         "",
-        "   ecflow_client --alter=add time \"+00:20\" /path/to/node",
+        "    --alter=add time \"+00:20\" /path/to/node",
         "",
-        "   ecflow_client --alter=add date \"01.*.*\" /path/to/node",
+        "    --alter=add date \"01.*.*\" /path/to/node",
         "",
-        "   ecflow_client --alter=add day \"sunday\"  /path/to/node",
+        "    --alter=add day \"sunday\"  /path/to/node",
         "",
-        "   ecflow_client --alter=add label <label-name> \"label_value\" /path/to/node",
+        "    --alter=add label <label-name> \"label_value\" /path/to/node",
         "",
-        "   ecflow_client --alter=add event <event-name> \"set\"|\"clear\" /path/to/node",
+        "    --alter=add event <event-name> \"set\"|\"clear\" /path/to/node",
         "",
-        "   ecflow_client --alter=add meter <meter-name> \"<min>,<max>,value\" /path/to/node",
+        "    --alter=add meter <meter-name> \"<min>,<max>,value\" /path/to/node",
         "",
-        "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node",
+        "    --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node",
         "",
-        "   ecflow_client --alter=add limit mars \"100\" /path/to/node",
+        "    --alter=add limit mars \"100\" /path/to/node",
         "",
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node",
+        "    --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node",
         "",
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node",
+        "    --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node",
         "",
-        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node",
+        "    --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node",
         "",
-        "   # zombie attributes have the following structure:",
-        "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`",
-        "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"",
-        "      client_side_action = \"fob\" | \"fail\" | \"block\"",
-        "      server_side_action = \"adopt\" | \"delete\" | \"kill\"",
-        "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" | \"queue\"",
-        "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60",
+        "    # zombie attributes have the following structure:",
+        "      `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`",
+        "       zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"",
+        "       client_side_action = \"fob\" | \"fail\" | \"block\"",
+        "       server_side_action = \"adopt\" | \"delete\" | \"kill\"",
+        "       child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" | \"queue\"",
+        "       zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60",
         "",
-        "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail",
-        "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail",
-        "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail",
+        "    --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail",
+        "    --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail",
+        "    --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail",
         "",
-        "   ecflow_client --alter=delete variable FRED /path/to/node  # delete variable FRED",
-        "   ecflow_client --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode",
-        ""
+        "    --alter=delete variable FRED /path/to/node  # delete variable FRED",
+        "    --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode"
       ]
     },
     {
@@ -192,9 +205,9 @@
         "",
         "Usage:",
         "",
-        "   --archive=/s1           # archive suite s1",
-        "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2",
-        "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
+        "    --archive=/s1           # archive suite s1",
+        "    --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2",
+        "    --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
       ]
     },
     {
@@ -214,10 +227,10 @@
         "",
         "Usage:",
         "",
-        "--begin                     # will begin all suites",
-        "--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted",
-        "--begin=\"mySuite\"         # begin playing suite of name 'mySuite'",
-        "--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check"
+        "    --begin                     # will begin all suites",
+        "    --begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted",
+        "    --begin=\"mySuite\"         # begin playing suite of name 'mySuite'",
+        "    --begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check"
       ]
     },
     {
@@ -233,7 +246,7 @@
         "",
         "Usage:",
         "",
-        "   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10",
+        "    --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10",
         "An error is returned if the handle had not previously been registered",
         "The handle is created with --ch_register command",
         "To list all suites and handles use --ch_suites"
@@ -252,8 +265,8 @@
         "",
         "Usage:",
         "",
-        " --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it",
-        " --ch_auto_add=10 false    # modify handle 10 so that no new suites are added",
+        "    --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it",
+        "    --ch_auto_add=10 false    # modify handle 10 so that no new suites are added",
         "The handle is created with --ch_register command",
         "To list all suites and handles use --ch_suites"
       ]
@@ -271,7 +284,7 @@
         "",
         "Usage:",
         "",
-        "   --ch_drop=10            # drop the client handle 10",
+        "    --ch_drop=10            # drop the client handle 10",
         "An error is returned if the handle had not previously been registered",
         "The handle stored on the local client is set to zero",
         "To list all suites and handles use --ch_suites"
@@ -291,8 +304,8 @@
         "",
         "Usage:",
         "",
-        "   --ch_drop_user=ma0    # drop all handles associated with user ma0",
-        "   --ch_drop_user        # drop all handles associated with current user",
+        "    --ch_drop_user=ma0    # drop all handles associated with user ma0",
+        "    --ch_drop_user        # drop all handles associated with current user",
         "An error is returned if no registered handles",
         "To list all suites and handles use --ch_suites"
       ]
@@ -317,11 +330,12 @@
         "",
         "Usage:",
         "",
-        "   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites",
-        "   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only",
-        "   --ch_register=false           # register handle, suites will be added later on",
-        "   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites",
-        "                                 # The client handle as the first argument is typically used by GUI/python                                 # When the client handle is no zero, then it is dropped first",
+        "    --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites",
+        "    --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only",
+        "    --ch_register=false           # register handle, suites will be added later on",
+        "    --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites",
+        "                                  # The client handle as the first argument is typically used by GUI/python",
+        "                                  # When the client handle is no zero, then it is dropped first",
         "To list all suites and handles use --ch_suites"
       ]
     },
@@ -338,8 +352,10 @@
         "",
         "Usage:",
         "",
-        "   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10",
+        "    --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10",
+        "",
         "The handle is created with --ch_register command",
+        "",
         "To list all suites and handles use --ch_suites"
       ]
     },
@@ -366,9 +382,9 @@
         "",
         "Usage:",
         "",
-        "  --check=_all_           # Checks all the suites",
-        "  --check=/               # Checks all the suites",
-        "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
+        "    --check=_all_           # Checks all the suites",
+        "    --check=/               # Checks all the suites",
+        "    --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
       ]
     },
     {
@@ -413,19 +429,19 @@
         "",
         "Usage:",
         "",
-        "  --check_pt",
-        "    Immediately check point the definition held in the server",
-        "  --check_pt=never",
-        "    Switch off check pointing",
-        "  --check_pt=on_time",
-        "    Start automatic check pointing at the interval stored in the server",
-        "  --check_pt=180",
-        "    Change the check pt interval to 180 seconds",
-        "  --check_pt=on_time:90",
-        "    Change mode and interval, to automatic check pointing every 90 seconds",
-        "  --check_pt=alarm:35",
-        "    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds",
-        "    set the late flag on the server."
+        "    --check_pt",
+        "      Immediately check point the definition held in the server",
+        "    --check_pt=never",
+        "      Switch off check pointing",
+        "    --check_pt=on_time",
+        "      Start automatic check pointing at the interval stored in the server",
+        "    --check_pt=180",
+        "      Change the check pt interval to 180 seconds",
+        "    --check_pt=on_time:90",
+        "      Change mode and interval, to automatic check pointing every 90 seconds",
+        "    --check_pt=alarm:35",
+        "      Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds",
+        "      set the late flag on the server."
       ]
     },
     {
@@ -447,8 +463,8 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --complete",
-        "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
+        "    --complete",
+        "    --complete --remove name1 name2 # delete variables name1 and name2 on the task"
       ],
       "arguments": [
         {
@@ -456,10 +472,6 @@
           "optional": true,
           "description": "a list of variables to removed from this task"
         }
-      ],
-      "usage": [
-        "ecflow_client --complete",
-        "ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
       ]
     },
     {
@@ -493,10 +505,10 @@
         "",
         "Usage:",
         "",
-        "  --delete=_all_                    # Delete all suites in server. Use with care.",
-        "  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt",
-        "  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted",
-        "  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
+        "    --delete=_all_                    # Delete all suites in server. Use with care.",
+        "    --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt",
+        "    --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted",
+        "    --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
       ]
     },
     {
@@ -511,9 +523,8 @@
         "",
         "Usage:",
         "",
-        "   --edit_history=/s1/f1/t1  # return history of changes for the given node",
-        "   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.",
-        ""
+        "    --edit_history=/s1/f1/t1  # return history of changes for the given node",
+        "    --edit_history=clear      # clear/purge *ALL* edit history from all nodes."
       ]
     },
     {
@@ -549,31 +560,31 @@
         "",
         "Usage:",
         "",
-        "--edit_script=/path/to/task edit > script_file",
-        "   server returns script with the used variables to standard out",
-        "   The user can choose to edit this file",
+        "    --edit_script=/path/to/task edit > script_file",
+        "       server returns script with the used variables to standard out",
+        "       The user can choose to edit this file",
         "",
-        "--edit_script=/path/to/task pre_process > pre_processed_script_file",
-        "  server will pre process the ecf file accessible from the server",
-        "  (i.e expand all %includes) and return the file to standard out",
+        "    --edit_script=/path/to/task pre_process > pre_processed_script_file",
+        "      server will pre process the ecf file accessible from the server",
+        "      (i.e expand all %includes) and return the file to standard out",
         "",
-        "--edit_script=/path/to/task submit script_file",
-        "  Will extract the used variables in the 'script_file' and will uses these",
-        "  variables during variable substitution of the ecf file accessible by the",
-        "  server. This is then submitted as a job",
+        "    --edit_script=/path/to/task submit script_file",
+        "      Will extract the used variables in the 'script_file' and will uses these",
+        "      variables during variable substitution of the ecf file accessible by the",
+        "      server. This is then submitted as a job",
         "",
-        "--edit_script=/path/to/task pre_process_file file_to_pre_process",
-        "  The server will pre-process the user supplied file and return the contents",
-        "  to standard out. This pre-processing is the same as job file processing,",
-        "  but on a arbitrary file",
+        "    --edit_script=/path/to/task pre_process_file file_to_pre_process",
+        "      The server will pre-process the user supplied file and return the contents",
+        "      to standard out. This pre-processing is the same as job file processing,",
+        "      but on a arbitrary file",
         "",
-        "--edit_script=/path/to/task submit_file file_to_submit",
-        "  Will extract the used variables in the 'file_to_submit' and will uses these",
-        "  variables during variable substitution, the file is then submitted for job",
-        "  generation by the server",
+        "    --edit_script=/path/to/task submit_file file_to_submit",
+        "      Will extract the used variables in the 'file_to_submit' and will uses these",
+        "      variables during variable substitution, the file is then submitted for job",
+        "      generation by the server",
         "",
-        "--edit_script=/path/to/task submit_file file_to_submit create_alias",
-        "  Like the the previous example but will create and run as an alias"
+        "    --edit_script=/path/to/task submit_file file_to_submit create_alias",
+        "      Like the the previous example but will create and run as an alias"
       ]
     },
     {
@@ -595,10 +606,9 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --event=ev       # set the event, default since event initial value is clear",
-        "  ecflow_client --event=ev set   # set the event, explicit",
-        "  ecflow_client --event=ev clear # clear the event, use when event initial value is set",
-        ""
+        "    --event=ev       # set the event, default since event initial value is clear",
+        "    --event=ev set   # set the event, explicit",
+        "    --event=ev clear # clear the event, use when event initial value is set"
       ],
       "arguments": [
         {
@@ -611,11 +621,6 @@
           "type": "string",
           "optional": true
         }
-      ],
-      "usage": [
-        "ecflow_client --event=ev       # set the event, default since event initial value is clear",
-        "ecflow_client --event=ev set   # set the event, explicit",
-        "ecflow_client --event=ev clear # clear the event, use when event initial value is set"
       ]
     },
     {
@@ -659,19 +664,22 @@
         "",
         "Usage:",
         "",
-        "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete",
-        "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task",
-        "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1",
-        "Effect:",
-        "  Consider the effect of forcing complete when the current time is at 09:00",
-        "  suite s1",
-        "     task t1; time 12:00             # will complete straight away",
-        "     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt",
+        "    --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete",
+        "    --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task",
+        "    --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1",
         "",
-        "  --force=complete /s1/t1 /s1/t2",
-        "  When we have a time range(i.e as shown with task t2), it is re-queued and the",
-        "  next time slot is incremented for each complete, until it expires, and the task completes.",
-        "  Use the Why command, to show next run time (i.e. next time slot)"
+        "Effect:",
+        "",
+        "    Consider the effect of applying `--force=complete /s1/t1 /s1/t2` at 09:00",
+        "",
+        "      suite s1",
+        "        task t1; time 12:00             # will complete straight away",
+        "        task t2; time 10:00 13:00 01:00 # will complete on fourth attempt",
+        "",
+        "    Specifying a time range, as shown with task t2, means the task is re-queued and the",
+        "    next time slot is incremented for each complete, until it expires, and the task completes.",
+        "",
+        "    Use the Why command, to show next run time (i.e. next time slot)"
       ]
     },
     {
@@ -703,9 +711,9 @@
         "",
         "Usage:",
         "",
-        "  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2",
-        "  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1",
-        "  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
+        "    --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2",
+        "    --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1",
+        "    --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
       ]
     },
     {
@@ -722,8 +730,8 @@
         "",
         "Usage:",
         "",
-        "  --get     # gets the definition from the server,and writes to standard out",
-        "  --get=/s1 # gets the suite from the server,and writes to standard out"
+        "    --get     # gets the definition from the server,and writes to standard out",
+        "    --get=/s1 # gets the suite from the server,and writes to standard out"
       ]
     },
     {
@@ -740,8 +748,8 @@
         "",
         "Usage:",
         "",
-        "  --get_state     # gets the definition from the server,and writes to standard out",
-        "  --get_state=/s1 # gets the suite from the server,and writes to standard out"
+        "    --get_state     # gets the definition from the server,and writes to standard out",
+        "    --get_state=/s1 # gets the suite from the server,and writes to standard out"
       ]
     },
     {
@@ -758,11 +766,15 @@
         "",
         "Usage:",
         "",
-        "   --group=\"halt=yes; reloadwsfile; restart;\"",
-        "                                 # halt server,bypass the confirmation prompt,",
-        "                                 # reload white list file, restart server",
-        "   --group=\"get; show\"           # get server defs, and write to standard output",
-        "   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
+        "    --group=\"halt=yes; reloadwsfile; restart;\"",
+        "        # halt server,bypass the confirmation prompt,",
+        "        # reload white list file, restart server",
+        "",
+        "    --group=\"get; show\"",
+        "        # get server defs, and write to standard output",
+        "",
+        "    --group=\"get=/s1; show state\"",
+        "        # get suite 's1', and write state to standard output"
       ]
     },
     {
@@ -775,7 +787,11 @@
         "Stop server communication with jobs, and new job scheduling.",
         "Also stops automatic check pointing",
         "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.",
-        "  --halt=yes",
+        "",
+        "Usage:",
+        "",
+        "    --halt=yes",
+        "",
         "The following table shows server behaviour in the different states.",
         "|----------------------------------------------------------------------------------|",
         "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |",
@@ -805,8 +821,8 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --init=$$",
-        "  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
+        "    --init=$$",
+        "    --init=$$ --add name=value name2=value2 # add/update variables to task"
       ],
       "arguments": [
         {
@@ -820,10 +836,6 @@
           "optional": true,
           "description": "add/update variables as name value pairs"
         }
-      ],
-      "usage": [
-        "ecflow_client --init=$$",
-        "ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
       ]
     },
     {
@@ -857,8 +869,8 @@
         "",
         "Usage:",
         "",
-        "   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2",
-        "   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
+        "    --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2",
+        "    --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
       ]
     },
     {
@@ -880,7 +892,7 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --label=progressed merlin"
+        "    --label=progressed merlin"
       ],
       "arguments": [
         {
@@ -892,8 +904,7 @@
           "optional": false,
           "description": "The labels values can be single or multi-line(space separated quoted strings)"
         }
-      ],
-      "usage": ["ecflow_client --label=progressed merlin"]
+      ]
     },
     {
       "name": "load",
@@ -914,13 +925,12 @@
         "",
         "Usage:",
         "",
-        "--load=/my/home/exotic.def               # will error if suites of same name exists",
-        "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server",
-        "--load=/my/home/exotic.def check_only    # Just check, don't send to server",
-        "--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server",
-        "--load=host1.3141.check                  # Load checkpoint file to the server",
-        "--load=host1.3141.check print            # print definition to standard out in defs format",
-        ""
+        "    --load=/my/home/exotic.def               # will error if suites of same name exists",
+        "    --load=/my/home/exotic.def force         # overwrite suite's of same name in the server",
+        "    --load=/my/home/exotic.def check_only    # Just check, don't send to server",
+        "    --load=/my/home/exotic.def stats         # Show defs statistics, don't send to server",
+        "    --load=host1.3141.check                  # Load checkpoint file to the server",
+        "    --load=host1.3141.check print            # print definition to standard out in defs format"
       ]
     },
     {
@@ -955,13 +965,12 @@
         "",
         "Usage:",
         "",
-        "  --log=get                        # Write the last 100 lines of the log file to standard out",
-        "  --log=get 200                    # Write the last 200 lines of the log file to standard out",
-        "  --log=clear                      # Clear the log file. The log is now empty",
-        "  --log=flush                      # Flush and close log file, next request will re-open log file",
-        "  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG",
-        "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable",
-        ""
+        "    --log=get                        # Write the last 100 lines of the log file to standard out",
+        "    --log=get 200                    # Write the last 200 lines of the log file to standard out",
+        "    --log=clear                      # Clear the log file. The log is now empty",
+        "    --log=flush                      # Flush and close log file, next request will re-open log file",
+        "    --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG",
+        "    --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable"
       ]
     },
     {
@@ -982,7 +991,7 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --meter=my_meter 20"
+        "    --meter=my_meter 20"
       ],
       "arguments": [
         {
@@ -995,8 +1004,7 @@
           "type": "int",
           "optional": false
         }
-      ],
-      "usage": ["ecflow_client --meter=my_meter 20"]
+      ]
     },
     {
       "name": "migrate",
@@ -1022,8 +1030,7 @@
         "Usage:",
         "",
         "    --migrate         # show all suites",
-        "    --migrate=/s1     # show state for suite s1",
-        ""
+        "    --migrate=/s1     # show state for suite s1"
       ]
     },
     {
@@ -1046,7 +1053,7 @@
         "",
         "Usage:",
         "",
-        "  --msg=\"place me in the log file\""
+        "    --msg=\"place me in the log file\""
       ]
     },
     {
@@ -1094,7 +1101,7 @@
         "",
         "Usage:",
         "",
-        "  --order=/suite/f1 top  # move node f1 to the top"
+        "    --order=/suite/f1 top  # move node f1 to the top"
       ]
     },
     {
@@ -1108,11 +1115,11 @@
         "",
         "Usage:",
         "",
-        "  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144",
-        "  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,",
-        "                                  # otherwise default port of 3141",
-        "  --ping                          # Check if server alive by using environment variables",
-        "                                  # ECF_HOST and ECF_PORT",
+        "    --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144",
+        "    --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,",
+        "                                    # otherwise default port of 3141",
+        "    --ping                          # Check if server alive by using environment variables",
+        "                                    # ECF_HOST and ECF_PORT",
         "If ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
       ]
     },
@@ -1139,7 +1146,7 @@
         "",
         "Usage:",
         "",
-        "  --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)"
+        "    --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)"
       ]
     },
     {
@@ -1183,21 +1190,20 @@
         "",
         "Usage:",
         "",
-        " ecflow_client --query state /                                     # return top level state to standard out",
-        " ecflow_client --query state /path/to/node                         # return node state to standard out",
-        " ecflow_client --query dstate /path/to/node                        # state that can included suspended",
-        " ecflow_client --query repeat /path/to/node                        # return the current value as a string",
-        " ecflow_client --query repeat /path/to/node prev                   # return the previous value as a string",
-        " ecflow_client --query repeat /path/to/node next                   # return the next value as a string",
-        " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out",
-        " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out",
-        " ecflow_client --query limit /path/to/task/with/limit:limit_name   # returns the current value of the limit to standard out",
-        " ecflow_client --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out",
-        " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out",
-        " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out",
-        " ecflow_client --query variable /:var_name                         # returns the server variable value to standard out",
-        " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise",
-        ""
+        "    --query state /                                     # return top level state to standard out",
+        "    --query state /path/to/node                         # return node state to standard out",
+        "    --query dstate /path/to/node                        # state that can included suspended",
+        "    --query repeat /path/to/node                        # return the current value as a string",
+        "    --query repeat /path/to/node prev                   # return the previous value as a string",
+        "    --query repeat /path/to/node next                   # return the next value as a string",
+        "    --query event /path/to/task/with/event:event_name   # return set | clear to standard out",
+        "    --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out",
+        "    --query limit /path/to/task/with/limit:limit_name   # returns the current value of the limit to standard out",
+        "    --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out",
+        "    --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out",
+        "    --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out",
+        "    --query variable /:var_name                         # returns the server variable value to standard out",
+        "    --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise"
       ]
     },
     {
@@ -1237,8 +1243,7 @@
         "   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed",
         "done",
         "",
-        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }",
-        ""
+        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
       ],
       "arguments": [
         {
@@ -1264,9 +1269,6 @@
           "optional": true,
           "description": "(optional). The path where the queue is defined.\nBy default we search for the queue up the node tree."
         }
-      ],
-      "usage": [
-        "step=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone\n\ntrap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
       ]
     },
     {
@@ -1324,7 +1326,7 @@
         "",
         "Usage:",
         "",
-        " --reloadcustompasswdfile"
+        "    --reloadcustompasswdfile"
       ]
     },
     {
@@ -1382,7 +1384,7 @@
         "",
         "Usage:",
         "",
-        " --reloadpasswdfile"
+        "    --reloadpasswdfile"
       ]
     },
     {
@@ -1432,7 +1434,7 @@
         "",
         "Usage:",
         "",
-        " --reloadwsfile"
+        "    --reloadwsfile"
       ]
     },
     {
@@ -1468,8 +1470,8 @@
         "",
         "Usage:",
         "",
-        "  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1",
-        "  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted"
+        "    --replace=/suite/f1/t1 /tmp/client.def parent      # Add/replace node tree /suite/f1/t1",
+        "    --replace=/suite/f1/t1 /tmp/client.def false force # replace t1 even if its active or submitted"
       ]
     },
     {
@@ -1491,9 +1493,9 @@
         "",
         "Usage:",
         "",
-        "  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1",
-        "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.",
-        "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
+        "    --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1",
+        "    --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.",
+        "    --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
       ]
     },
     {
@@ -1548,8 +1550,8 @@
         "",
         "Usage:",
         "",
-        "   --restore=/s1/f1   # restore family /s1/f1",
-        "   --restore=/s1 /s2  # restore suites /s1 and /s2"
+        "    --restore=/s1/f1   # restore family /s1/f1",
+        "    --restore=/s1 /s2  # restore suites /s1 and /s2"
       ]
     },
     {
@@ -1575,9 +1577,8 @@
         "",
         "Usage:",
         "",
-        "   --resume=/s1/f1/t1   # resume task s1/f1/t1",
-        "   --resume=/s1 /s2     # resume suites /s1 and /s2",
-        ""
+        "    --resume=/s1/f1/t1   # resume task s1/f1/t1",
+        "    --resume=/s1 /s2     # resume suites /s1 and /s2"
       ]
     },
     {
@@ -1602,14 +1603,20 @@
         "  arg2 = node path(s). The paths must begin with a leading '/' character.",
         "         If the path is /suite/family will recursively run all tasks",
         "         When providing multiple paths avoid running the same task twice",
-        "Example:",
+        "",
+        "Usage:",
+        "",
         "  --run=/suite/t1                    # run task t1",
+        "",
         "Effect:",
+        "",
         "     task t1; time 12:00             # will complete if run manually",
         "     task t2; time 10:00 13:00 01:00 # will run 4 times before completing",
-        " When we have a time range(i.e as shown with task t2), then next time slot",
-        " is incremented for each run, until it expires, and the task completes.",
-        " Use the Why command, to show next run time (i.e. next time slot)"
+        "",
+        "    Specifying a time range, as shown with task t2, means the next time slot",
+        "    is incremented for each run, until it expires, and the task completes.",
+        "",
+        "    Use the Why command, to show next run time (i.e. next time slot)"
       ]
     },
     {
@@ -1623,10 +1630,11 @@
         "This is done by parsing the log file. If no log file is provided,",
         "then the log file path is obtained from the server. If the returned",
         "log file path is not accessible an error is returned",
-        "This command produces a three files in the CWD.",
-        "    o <host>.<port>.gnuplot.dat",
-        "    o <host>.<port>.gnuplot.script",
-        "    o <host>.<port>.png",
+        "This command produces a three files in the CWD:",
+        "",
+        "    - <host>.<port>.gnuplot.dat",
+        "    - <host>.<port>.gnuplot.script",
+        "    - <host>.<port>.png",
         "",
         "The generated script can be manually changed, to see different rendering",
         "effects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'",
@@ -1638,10 +1646,10 @@
         "",
         "Usage:",
         "",
-        "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files",
-        "   --server_load                    # Log file path is requested from server",
-        "                                    # which is then used to generate gnuplot files",
-        "                                    # *AVOID* if log file path is accessible",
+        "    --server_load=/path/to_log_file  # Parses log and generate gnuplot files",
+        "    --server_load                    # Log file path is requested from server",
+        "                                     # which is then used to generate gnuplot files",
+        "                                     # *AVOID* if log file path is accessible",
         "",
         "Now use any png viewer to see the output i.e",
         "",
@@ -1649,8 +1657,7 @@
         "> feh       <host>.<port>.png",
         "> eog       <host>.<port>.png",
         "> xdg-open  <host>.<port>.png",
-        "> w3m       <host>.<port>.png",
-        ""
+        "> w3m       <host>.<port>.png"
       ]
     },
     {
@@ -1664,9 +1671,8 @@
         "",
         "Usage:",
         "",
-        "  --server_version",
-        "    Writes the version to standard output",
-        ""
+        "    --server_version",
+        "      Writes the version to standard output"
       ]
     },
     {
@@ -1721,7 +1727,11 @@
       "description": [
         "Stop server from scheduling new jobs.",
         "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e",
-        "  --shutdown=yes",
+        "",
+        "Usage:",
+        "",
+        "    --shutdown=yes",
+        "",
         "The following table shows server behaviour in the different states.",
         "|----------------------------------------------------------------------------------|",
         "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |",
@@ -1780,8 +1790,8 @@
         "",
         "Usage:",
         "",
-        "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat",
-        "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
+        "    --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat",
+        "    --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
       ]
     },
     {
@@ -1803,9 +1813,8 @@
         "",
         "Usage:",
         "",
-        "   --suspend=/s1/f1/t1   # suspend task s1/f1/t1",
-        "   --suspend=/s1 /s2     # suspend suites /s1 and /s2",
-        ""
+        "    --suspend=/s1/f1/t1   # suspend task s1/f1/t1",
+        "    --suspend=/s1 /s2     # suspend suites /s1 and /s2"
       ]
     },
     {
@@ -1860,7 +1869,10 @@
       "description": [
         "Terminate the server.",
         "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e",
-        "  --terminate=yes"
+        "",
+        "Usage:",
+        "",
+        "    --terminate=yes"
       ]
     },
     {
@@ -1876,7 +1888,7 @@
         "",
         "Usage:",
         "",
-        "  ecflow_client --wait=\"/suite/taskx == complete\""
+        "    --wait=\"/suite/taskx == complete\""
       ],
       "arguments": [
         {
@@ -1884,8 +1896,7 @@
           "type": "string",
           "optional": false
         }
-      ],
-      "usage": ["ecflow_client --wait=\"/suite/taskx == complete\""]
+      ]
     },
     {
       "name": "why",
@@ -1904,8 +1915,8 @@
         "",
         "Usage:",
         "",
-        "  --group=\"get; why\"               # returns why for all holding nodes",
-        "  --group=\"get; why=/suite/family\" # returns why for a specific node"
+        "    --group=\"get; why\"               # returns why for all holding nodes",
+        "    --group=\"get; why=/suite/family\" # returns why for a specific node"
       ]
     },
     {
@@ -1931,7 +1942,10 @@
         "This is only allowed if the process id matches, otherwise an error is issued.",
         "The zombie reference stored in the server is then deleted.",
         "  args = list of task paths, at least one expected",
-        "  --zombie_adopt=/path/to/task  /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_adopt=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -1947,7 +1961,10 @@
         "attempting to connect to the server for 24 hours, and will then return an error.",
         "The connection timeout can be configured with environment ECF_TIMEOUT",
         "  args = list of task paths, at least one expected",
-        "  --zombie_block=/path/to/task  /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_block=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -1964,7 +1981,10 @@
         "infinite recursion.",
         "The references to the zombie in the server is automatically deleted after 1 hour",
         "  args = list of task paths, at least one expected",
-        "  --zombie_fail=/path/to/task  /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_fail=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -1981,7 +2001,10 @@
         "allowing the job to finish.",
         "The references to the zombie in the server is automatically deleted after 1 hour",
         "  args = list of task paths, at least one expected",
-        "  --zombie_fob=/path/to/task1 /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_fob=/path/to/task1 /path/to/task2"
       ]
     },
     {
@@ -1997,7 +2020,10 @@
         "Can only kill zombies that have an associated Task, hence path zombies",
         "must be killed manually.",
         "  arg = list of task paths, at least one expected",
-        "  --zombie_kill=/path/to/task  /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_kill=/path/to/task  /path/to/task2"
       ]
     },
     {
@@ -2011,7 +2037,10 @@
         "Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)",
         "the zombie may reappear",
         "  args = list of task paths, at least one expected",
-        "  --zombie_remove=/path/to/task  /path/to/task2"
+        "",
+        "Usage:",
+        "",
+        "    --zombie_remove=/path/to/task  /path/to/task2"
       ]
     }
   ],
@@ -2062,19 +2091,13 @@
       "name": "http",
       "kind": "global-option",
       "summary": "Enables communication over HTTP between client/server.",
-      "description": [
-        "Enables communication over HTTP between client/server.",
-        ""
-      ]
+      "description": ["Enables communication over HTTP between client/server."]
     },
     {
       "name": "https",
       "kind": "global-option",
       "summary": "Enables communication over HTTPS between client/server.",
-      "description": [
-        "Enables communication over HTTPS between client/server.",
-        ""
-      ]
+      "description": ["Enables communication over HTTPS between client/server."]
     },
     {
       "name": "help",
