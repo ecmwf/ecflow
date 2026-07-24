@@ -25,6 +25,7 @@
         "Otherwise the blocking period is defined by ECF_TIMEOUT.",
         "",
         "Usage:",
+        "",
         "  ecflow_client --abort=reasonX"
       ],
       "arguments": [
@@ -189,7 +190,8 @@
         "  endfamily",
         "endsuite",
         "",
-        "Usage::",
+        "Usage:",
+        "",
         "   --archive=/s1           # archive suite s1",
         "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2",
         "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
@@ -209,7 +211,9 @@
         "         force means reset the begin status on the suites and bypass checks.",
         "         This is only required if suite-name is provide as the first argument",
         "         Using force can cause the creation of zombies",
+        "",
         "Usage:",
+        "",
         "--begin                     # will begin all suites",
         "--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted",
         "--begin=\"mySuite\"         # begin playing suite of name 'mySuite'",
@@ -226,7 +230,9 @@
         "Add a set of suites, to an existing handle.",
         "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
         "   arg2 = names            # should be a list of suite names, names not in the definition are ignored",
+        "",
         "Usage:",
+        "",
         "   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10",
         "An error is returned if the handle had not previously been registered",
         "The handle is created with --ch_register command",
@@ -243,7 +249,9 @@
         "Change an existing handle so that new suites can be added automatically.",
         "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
         "   arg2 = true | false     # true means add new suites to my list, when they are created",
+        "",
         "Usage:",
+        "",
         " --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it",
         " --ch_auto_add=10 false    # modify handle 10 so that no new suites are added",
         "The handle is created with --ch_register command",
@@ -260,7 +268,9 @@
         "Drop/de-register the client handle.",
         "Un-used handle should be dropped otherwise they will stay, in the server.",
         "   arg1 = handle(integer)  # The handle must be an integer that is > 0",
+        "",
         "Usage:",
+        "",
         "   --ch_drop=10            # drop the client handle 10",
         "An error is returned if the handle had not previously been registered",
         "The handle stored on the local client is set to zero",
@@ -278,7 +288,9 @@
         "If no user provided will drop for current user. Client must ensure un-used handle are dropped",
         "otherwise they will stay, in the server.",
         "   arg1 = user           # The user to be drooped, if left empty drop current user ",
+        "",
         "Usage:",
+        "",
         "   --ch_drop_user=ma0    # drop all handles associated with user ma0",
         "   --ch_drop_user        # drop all handles associated with current user",
         "An error is returned if no registered handles",
@@ -302,7 +314,9 @@
         "This command affects news() and sync() commands",
         "   arg1 = true | false           # true means add new suites to my list, when they are created",
         "   arg2 = names                  # should be a list of suite names, names not in the definition are ignored",
+        "",
         "Usage:",
+        "",
         "   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites",
         "   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only",
         "   --ch_register=false           # register handle, suites will be added later on",
@@ -321,7 +335,9 @@
         "Remove a set of suites, from an existing handle.",
         "   arg1 = handle(integer)   # The handle must be an integer that is > 0",
         "   arg2 = names             # should be a list of suite names, names not in the definition are ignored",
+        "",
         "Usage:",
+        "",
         "   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10",
         "The handle is created with --ch_register command",
         "To list all suites and handles use --ch_suites"
@@ -347,7 +363,9 @@
         "(Note: On the client side unresolved paths in trigger expressions must",
         "have an associated 'extern' specified)",
         "  arg = [ _all_ | / | list of node paths ]",
+        "",
         "Usage:",
+        "",
         "  --check=_all_           # Checks all the suites",
         "  --check=/               # Checks all the suites",
         "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
@@ -392,7 +410,9 @@
         "     <integer> : This specifies the interval in seconds when server should automatically check pt.",
         "                 This will only take effect of mode is on_time/CHECK_ON_TIME",
         "                 Should ideally be a value greater than 60 seconds, default is 120 seconds",
+        "",
         "Usage:",
+        "",
         "  --check_pt",
         "    Immediately check point the definition held in the server",
         "  --check_pt=never",
@@ -426,6 +446,7 @@
         "  arg1(--remove)(optional) = a list of variables to removed from this task",
         "",
         "Usage:",
+        "",
         "  ecflow_client --complete",
         "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
       ],
@@ -469,7 +490,9 @@
         "  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt",
         "  arg3 = node paths | _all_         # _all_ means delete all suites",
         "                                    # node paths must start with a leading '/'",
+        "",
         "Usage:",
+        "",
         "  --delete=_all_                    # Delete all suites in server. Use with care.",
         "  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt",
         "  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted",
@@ -485,7 +508,9 @@
       "description": [
         "Returns the edit history associated with a Node.",
         "Can also be used to clear the edit history.",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --edit_history=/s1/f1/t1  # return history of changes for the given node",
         "   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.",
         ""
@@ -521,7 +546,9 @@
         " arg4 = create_alias (optional) default value is false, for use with 'submit_file' option",
         " arg5 = no_run (optional) default value is false, i.e immediately run the alias",
         "        is no_run is specified the alias in only created",
+        "",
         "Usage:",
+        "",
         "--edit_script=/path/to/task edit > script_file",
         "   server returns script with the used variables to standard out",
         "   The user can choose to edit this file",
@@ -567,6 +594,7 @@
         "The default can be overridden by using zombie attributes.",
         "",
         "Usage:",
+        "",
         "  ecflow_client --event=ev       # set the event, default since event initial value is clear",
         "  ecflow_client --event=ev set   # set the event, explicit",
         "  ecflow_client --event=ev clear # clear the event, use when event initial value is set",
@@ -628,7 +656,9 @@
         "         Set repeat variables to last value, only works in conjunction",
         "         with recursive option",
         "  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'",
+        "",
         "Usage:",
+        "",
         "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete",
         "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task",
         "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1",
@@ -670,7 +700,9 @@
         "  arg4 = (optional) time",
         "         Free all time dependencies i.e time, day, today, cron",
         "  arg5 = List of paths. At least one required. Must start with a leading '/'",
+        "",
         "Usage:",
+        "",
         "  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2",
         "  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1",
         "  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
@@ -687,7 +719,9 @@
         "Get all suite node tree's from the server and write to standard out.",
         "The output is parse-able, and can be used to re-load the definition",
         "  arg = NULL | arg = node path",
+        "",
         "Usage:",
+        "",
         "  --get     # gets the definition from the server,and writes to standard out",
         "  --get=/s1 # gets the suite from the server,and writes to standard out"
       ]
@@ -703,7 +737,9 @@
         "This will include event, meter, node state, trigger and time state.",
         "The output is written to standard out.",
         "  arg = NULL | arg = node path",
+        "",
         "Usage:",
+        "",
         "  --get_state     # gets the definition from the server,and writes to standard out",
         "  --get_state=/s1 # gets the suite from the server,and writes to standard out"
       ]
@@ -719,7 +755,9 @@
         "Some commands like halt, shutdown and terminate will prompt the user. To bypass the prompt",
         "provide 'yes' as an additional parameter. See example below.",
         "  arg = string",
+        "",
         "Usage:",
+        "",
         "   --group=\"halt=yes; reloadwsfile; restart;\"",
         "                                 # halt server,bypass the confirmation prompt,",
         "                                 # reload white list file, restart server",
@@ -766,6 +804,7 @@
         "Otherwise the blocking period is defined by ECF_TIMEOUT.",
         "",
         "Usage:",
+        "",
         "  ecflow_client --init=$$",
         "  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
       ],
@@ -815,7 +854,9 @@
         "The command should be written in such a way that the output is written to %ECF_JOB%.kill",
         "as this allow the --file command to report the output: .e.e.",
         " /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1::",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2",
         "   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
       ]
@@ -838,6 +879,7 @@
         "The default can be overridden by using zombie attributes.",
         "",
         "Usage:",
+        "",
         "  ecflow_client --label=progressed merlin"
       ],
       "arguments": [
@@ -869,7 +911,9 @@
         "This command can also be used to load a checkpoint file into the server",
         "  arg1 = path to the definition file or checkpoint file",
         "  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all",
+        "",
         "Usage:",
+        "",
         "--load=/my/home/exotic.def               # will error if suites of same name exists",
         "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server",
         "--load=/my/home/exotic.def check_only    # Just check, don't send to server",
@@ -908,7 +952,9 @@
         " arg2 = [ new_path | optional last n lines ]",
         "         if get specified can specify lines to get. Value must be convertible to an integer",
         "         Otherwise if arg1 is 'new' then the second argument must be a path",
+        "",
         "Usage:",
+        "",
         "  --log=get                        # Write the last 100 lines of the log file to standard out",
         "  --log=get 200                    # Write the last 200 lines of the log file to standard out",
         "  --log=clear                      # Clear the log file. The log is now empty",
@@ -935,6 +981,7 @@
         "The default can be overridden by using zombie attributes.",
         "",
         "Usage:",
+        "",
         "  ecflow_client --meter=my_meter 20"
       ],
       "arguments": [
@@ -973,6 +1020,7 @@
         "Show trigger AST         No     Yes          No",
         "",
         "Usage:",
+        "",
         "    --migrate         # show all suites",
         "    --migrate=/s1     # show state for suite s1",
         ""
@@ -995,7 +1043,9 @@
       "description": [
         "Writes the input string to the log file.",
         "  arg1 = string",
+        "",
         "Usage:",
+        "",
         "  --msg=\"place me in the log file\""
       ]
     },
@@ -1041,7 +1091,9 @@
         "This command can fail because:",
         "- The node path does not exist in the server",
         "- The order_type is not does not match one of arg2",
+        "",
         "Usage:",
+        "",
         "  --order=/suite/f1 top  # move node f1 to the top"
       ]
     },
@@ -1053,7 +1105,9 @@
       "summary": "Check if server is running on given host/port. Result reported to standard output.",
       "description": [
         "Check if server is running on given host/port. Result reported to standard output.",
+        "",
         "Usage:",
+        "",
         "  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144",
         "  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,",
         "                                  # otherwise default port of 3141",
@@ -1082,7 +1136,9 @@
         "  then the source node must correspond to a suite.",
         "- If the source node is added as a child, then its name must be unique",
         "  amongst its peers",
+        "",
         "Usage:",
+        "",
         "  --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)"
       ]
     },
@@ -1126,6 +1182,7 @@
         "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat",
         "",
         "Usage:",
+        "",
         " ecflow_client --query state /                                     # return top level state to standard out",
         " ecflow_client --query state /path/to/node                         # return node state to standard out",
         " ecflow_client --query dstate /path/to/node                        # state that can included suspended",
@@ -1167,6 +1224,7 @@
         "search for the queue up the node hierarchy. If no queue found, command fails",
         "",
         "Usage:",
+        "",
         "step=\"\"",
         "QNAME=\"my_queue_name\"",
         "while [1 == 1 ] ; do",
@@ -1265,6 +1323,7 @@
         " - On the client, the password file should be readable only by the 'user' itself",
         "",
         "Usage:",
+        "",
         " --reloadcustompasswdfile"
       ]
     },
@@ -1322,6 +1381,7 @@
         " - On the client, the password file should be readable only by the 'user' itself",
         "",
         "Usage:",
+        "",
         " --reloadpasswdfile"
       ]
     },
@@ -1370,8 +1430,8 @@
         "-user4",
         "-*      # use this form if you want all users to have read access",
         "",
-        "",
         "Usage:",
+        "",
         " --reloadwsfile"
       ]
     },
@@ -1407,6 +1467,7 @@
         "For more information use --help check.",
         "",
         "Usage:",
+        "",
         "  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1",
         "  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted"
       ]
@@ -1429,6 +1490,7 @@
         "  arg2 = list of node paths. The node paths must begin with a leading '/' character",
         "",
         "Usage:",
+        "",
         "  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1",
         "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.",
         "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
@@ -1483,7 +1545,9 @@
         "",
         "In this example task '/s/frestore_from_task/t1' is only triggered if 'farchive_now'",
         "is archived, then when t1 completes it will restore family 'farchive_now'",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --restore=/s1/f1   # restore family /s1/f1",
         "   --restore=/s1 /s2  # restore suites /s1 and /s2"
       ]
@@ -1508,7 +1572,9 @@
       "summary": "Resume the given node. This allows job generation for the given node, or any child node.",
       "description": [
         "Resume the given node. This allows job generation for the given node, or any child node.",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --resume=/s1/f1/t1   # resume task s1/f1/t1",
         "   --resume=/s1 /s2     # resume suites /s1 and /s2",
         ""
@@ -1571,6 +1637,7 @@
         "rather than requesting the log path from the server.",
         "",
         "Usage:",
+        "",
         "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files",
         "   --server_load                    # Log file path is requested from server",
         "                                    # which is then used to generate gnuplot files",
@@ -1594,7 +1661,9 @@
       "summary": "Returns the version number of the server",
       "description": [
         "Returns the version number of the server",
+        "",
         "Usage:",
+        "",
         "  --server_version",
         "    Writes the version to standard output",
         ""
@@ -1634,6 +1703,7 @@
         "trigger AST             No            Yes        No",
         "",
         "Usage:",
+        "",
         "    --group=\"get ; show\"",
         "    --group=\"get ; show defs\"    # same as the previous example",
         "    --group=\"get ; show state\"   # Show all state for the node tree",
@@ -1707,7 +1777,9 @@
         " - state is active but it can't find process id, i.e. ECF_RID",
         " - the status command does not exit cleanly",
         "When this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat",
         "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
       ]
@@ -1728,7 +1800,9 @@
       "summary": "Suspend the given node. This prevents job generation for the given node, or any child node.",
       "description": [
         "Suspend the given node. This prevents job generation for the given node, or any child node.",
-        "Usage::",
+        "",
+        "Usage:",
+        "",
         "   --suspend=/s1/f1/t1   # suspend task s1/f1/t1",
         "   --suspend=/s1 /s2     # suspend suites /s1 and /s2",
         ""
@@ -1801,6 +1875,7 @@
         "  arg1 = string(expression)",
         "",
         "Usage:",
+        "",
         "  ecflow_client --wait=\"/suite/taskx == complete\""
       ],
       "arguments": [
@@ -1826,7 +1901,9 @@
         "Will return reason why the node is holding and for all its children.",
         "If no arguments supplied will report on all nodes",
         "  arg = node path | arg = NULL",
+        "",
         "Usage:",
+        "",
         "  --group=\"get; why\"               # returns why for all holding nodes",
         "  --group=\"get; why=/suite/family\" # returns why for a specific node"
       ]
