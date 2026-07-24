@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(test_manifest_parses_and_has_expected_top_level_shape) {
     BOOST_CHECK(manifest.at("commands").is_array());
     BOOST_CHECK(manifest.at("options").is_array());
     BOOST_CHECK(manifest.at("environment_variables").is_array());
+    BOOST_CHECK(manifest.at("definitions").is_array());
 }
 
 BOOST_AUTO_TEST_CASE(test_manifest_contains_known_entries) {
@@ -52,6 +53,9 @@ BOOST_AUTO_TEST_CASE(test_manifest_contains_known_entries) {
     BOOST_CHECK(has_name(manifest.at("options"), "host"));
     BOOST_CHECK(has_name(manifest.at("environment_variables"), "ECF_HOST"));
     BOOST_CHECK(has_name(manifest.at("topics"), "summary"));
+    BOOST_CHECK(has_name(manifest.at("topics"), "definition"));
+    BOOST_CHECK(has_name(manifest.at("definitions"), "trigger"));
+    BOOST_CHECK(has_name(manifest.at("definitions"), "task"));
 }
 
 BOOST_AUTO_TEST_CASE(test_manifest_is_parsed_once_and_cached) {
@@ -120,6 +124,65 @@ BOOST_AUTO_TEST_CASE(test_description_for_command_and_option) {
     BOOST_CHECK(!option_description->empty());
 
     BOOST_CHECK(!ecf::HelpCatalog::description_for("no-such-name").has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_find_definition_item_by_exact_name) {
+    ECF_NAME_THIS_TEST();
+
+    const nlohmann::json* found = ecf::HelpCatalog::find_definition_item("trigger");
+    BOOST_REQUIRE(found != nullptr);
+    BOOST_CHECK_EQUAL(found->at("kind").get<std::string>(), "attribute");
+
+    const nlohmann::json* node = ecf::HelpCatalog::find_definition_item("task");
+    BOOST_REQUIRE(node != nullptr);
+    BOOST_CHECK_EQUAL(node->at("kind").get<std::string>(), "node");
+
+    BOOST_CHECK(ecf::HelpCatalog::find_definition_item("no-such-definition-item") == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(test_summary_and_description_for_definition_item) {
+    ECF_NAME_THIS_TEST();
+
+    std::optional<std::string> attribute_summary = ecf::HelpCatalog::summary_for_definition_item("trigger");
+    BOOST_REQUIRE(attribute_summary.has_value());
+    BOOST_CHECK_EQUAL(*attribute_summary,
+                      ecf::HelpCatalog::find_definition_item("trigger")->at("summary").get<std::string>());
+
+    std::optional<std::string> node_summary = ecf::HelpCatalog::summary_for_definition_item("task");
+    BOOST_REQUIRE(node_summary.has_value());
+    BOOST_CHECK_EQUAL(*node_summary, ecf::HelpCatalog::find_definition_item("task")->at("summary").get<std::string>());
+
+    std::optional<std::string> attribute_description = ecf::HelpCatalog::description_for_definition_item("trigger");
+    BOOST_REQUIRE(attribute_description.has_value());
+    BOOST_CHECK(!attribute_description->empty());
+
+    BOOST_CHECK(!ecf::HelpCatalog::summary_for_definition_item("no-such-definition-item").has_value());
+    BOOST_CHECK(!ecf::HelpCatalog::description_for_definition_item("no-such-definition-item").has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_definition_item_lookup_never_resolves_a_colliding_command) {
+    ECF_NAME_THIS_TEST();
+
+    // "event"/"label"/"meter"/"queue"/"complete" are both task commands and definition-item
+    // attribute names; the two lookup families must stay independent so that a name collision
+    // never lets one resolve the other's entry.
+    for (const std::string& name : {"event", "label", "meter", "queue", "complete"}) {
+        const nlohmann::json* command = ecf::HelpCatalog::find_command(name);
+        BOOST_REQUIRE_MESSAGE(command != nullptr, "expected '" << name << "' to still be a command");
+        BOOST_CHECK_EQUAL(command->at("kind").get<std::string>(), "task");
+
+        const nlohmann::json* definition_item = ecf::HelpCatalog::find_definition_item(name);
+        BOOST_REQUIRE_MESSAGE(definition_item != nullptr, "expected '" << name << "' to also be a definition item");
+        BOOST_CHECK_EQUAL(definition_item->at("kind").get<std::string>(), "attribute");
+
+        // summary_for()/description_for() (command/option lookup) must not see the definition item,
+        // and must return the same text as before this collision-safe lookup family existed.
+        BOOST_CHECK_EQUAL(*ecf::HelpCatalog::summary_for(name), command->at("summary").get<std::string>());
+    }
+
+    // "task" is both a topic ("list task commands") and a definition-item node type.
+    BOOST_REQUIRE(ecf::HelpCatalog::find_topic("task") != nullptr);
+    BOOST_REQUIRE(ecf::HelpCatalog::find_definition_item("task") != nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(test_description_for_joins_lines_with_newline) {

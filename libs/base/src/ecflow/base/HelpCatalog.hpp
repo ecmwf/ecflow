@@ -71,6 +71,21 @@ public:
     static const nlohmann::json* find_topic(const std::string& name);
 
     ///
+    /// @brief Finds a definition-file item entry by exact name.
+    ///
+    /// Definition items (node types and attributes documented in
+    /// docs/ug/user_manual/definition_file_format.rst) live in their own manifest array,
+    /// reached via the CLI's "defs/<name>" help-topic prefix rather than a bare
+    /// command/option name lookup, so that an item name colliding with an existing
+    /// command (e.g. the "event" attribute vs. the --event command) is never ambiguous.
+    ///
+    /// @param name Exact definition-item name to look up, e.g. "trigger".
+    /// @return Pointer to the matching manifest entry, valid for the remaining lifetime
+    ///         of the process, or nullptr if no definition item has this name.
+    ///
+    static const nlohmann::json* find_definition_item(const std::string& name);
+
+    ///
     /// @brief Returns the one-line summary registered for a command or option.
     ///
     /// Checks commands first, then options, matching @ref find_command and
@@ -99,6 +114,32 @@ public:
     static std::optional<std::string> description_for(const std::string& name);
 
     ///
+    /// @brief Returns the one-line summary registered for a definition-file item.
+    ///
+    /// Parallel to @ref summary_for, but resolved only against @ref find_definition_item,
+    /// never against commands or options -- so an item name that happens to collide with
+    /// an existing command or option is never resolved by the wrong lookup.
+    ///
+    /// @param name Exact definition-item name to look up, e.g. "trigger".
+    /// @return The entry's "summary" field, or std::nullopt if @p name matches no
+    ///         definition item in the manifest.
+    ///
+    static std::optional<std::string> summary_for_definition_item(const std::string& name);
+
+    ///
+    /// @brief Returns the full description text registered for a definition-file item.
+    ///
+    /// Parallel to @ref description_for, but resolved only against @ref find_definition_item,
+    /// never against commands or options. Joins the entry's "description" lines the same
+    /// way @ref description_for does.
+    ///
+    /// @param name Exact definition-item name to look up, e.g. "trigger".
+    /// @return The reconstructed description text, or std::nullopt if @p name matches no
+    ///         definition item in the manifest.
+    ///
+    static std::optional<std::string> description_for_definition_item(const std::string& name);
+
+    ///
     /// @brief Placeholder text for a command or option with no manifest entry.
     ///
     /// Rendered in place of a description whenever @ref summary_for or
@@ -111,6 +152,7 @@ public:
 private:
     static const nlohmann::json* find_by_name(const nlohmann::json& array, const std::string& name);
     static const nlohmann::json* entry_for(const std::string& name);
+    static std::string join_description(const nlohmann::json& description);
 };
 
 } // namespace ecf

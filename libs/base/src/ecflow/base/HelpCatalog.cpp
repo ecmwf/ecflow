@@ -33,6 +33,10 @@ const nlohmann::json* HelpCatalog::find_topic(const std::string& name) {
     return find_by_name(manifest().at("topics"), name);
 }
 
+const nlohmann::json* HelpCatalog::find_definition_item(const std::string& name) {
+    return find_by_name(manifest().at("definitions"), name);
+}
+
 std::optional<std::string> HelpCatalog::summary_for(const std::string& name) {
     if (const nlohmann::json* entry = entry_for(name)) {
         return entry->at("summary").get<std::string>();
@@ -45,10 +49,28 @@ std::optional<std::string> HelpCatalog::description_for(const std::string& name)
     if (!entry) {
         return std::nullopt;
     }
+    return join_description(entry->at("description"));
+}
 
+std::optional<std::string> HelpCatalog::summary_for_definition_item(const std::string& name) {
+    if (const nlohmann::json* entry = find_definition_item(name)) {
+        return entry->at("summary").get<std::string>();
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> HelpCatalog::description_for_definition_item(const std::string& name) {
+    const nlohmann::json* entry = find_definition_item(name);
+    if (!entry) {
+        return std::nullopt;
+    }
+    return join_description(entry->at("description"));
+}
+
+std::string HelpCatalog::join_description(const nlohmann::json& description) {
     std::string text;
     bool first = true;
-    for (const auto& line : entry->at("description")) {
+    for (const auto& line : description) {
         if (!first) {
             text += "\n";
         }
