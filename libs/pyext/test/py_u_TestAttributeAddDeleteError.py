@@ -20,7 +20,8 @@ from ecflow import (
 
 @pytest.fixture
 def suite():
-    return Defs().add_suite("s1")
+    defs = Defs()
+    yield defs.add_suite("s1")
 
 
 def test_suite_disallows_today_string(suite):

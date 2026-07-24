@@ -21,7 +21,7 @@ def suite_task():
     family = suite.add_family("family")
     family.add_repeat(ecf.RepeatDate("REPEAT", 20010101, 20010102, 1))
     task = family.add_task("task")
-    return suite, family, task
+    return defs, suite, family, task
 
 
 SUITE_GENERATED_VAR_NAMES = [
@@ -65,7 +65,7 @@ TASK_GENERATED_VAR_NAMES = [
 
 
 def test_retrieve_suite_generated_variables_using_variable_list(suite_task):
-    suite, _, _ = suite_task
+    _, suite, _, _ = suite_task
     vars = ecf.VariableList()
     suite.get_generated_variables(vars)
     names = {v.name() for v in vars}
@@ -75,7 +75,7 @@ def test_retrieve_suite_generated_variables_using_variable_list(suite_task):
 
 
 def test_retrieve_suite_generated_variables_using_python_list(suite_task):
-    suite, _, _ = suite_task
+    _, suite, _, _ = suite_task
     vars = suite.get_generated_variables()
     names = {v.name() for v in vars}
 
@@ -84,7 +84,7 @@ def test_retrieve_suite_generated_variables_using_python_list(suite_task):
 
 
 def test_retrieve_family_generated_variables_using_variable_list(suite_task):
-    _, family, _ = suite_task
+    _, _, family, _ = suite_task
     vars = ecf.VariableList()
     family.get_generated_variables(vars)
     names = {v.name() for v in vars}
@@ -94,7 +94,7 @@ def test_retrieve_family_generated_variables_using_variable_list(suite_task):
 
 
 def test_retrieve_family_generated_variables_using_python_list(suite_task):
-    _, family, _ = suite_task
+    _, _, family, _ = suite_task
     vars = family.get_generated_variables()
     names = {v.name() for v in vars}
 
@@ -103,7 +103,7 @@ def test_retrieve_family_generated_variables_using_python_list(suite_task):
 
 
 def test_retrieve_task_generated_variables_using_variable_list(suite_task):
-    _, _, task = suite_task
+    _, _, _, task = suite_task
     vars = ecf.VariableList()
     task.get_generated_variables(vars)
     names = {v.name() for v in vars}
@@ -113,7 +113,7 @@ def test_retrieve_task_generated_variables_using_variable_list(suite_task):
 
 
 def test_retrieve_task_generated_variables_using_python_list(suite_task):
-    _, _, task = suite_task
+    _, _, _, task = suite_task
     vars = task.get_generated_variables()
     names = {v.name() for v in vars}
 

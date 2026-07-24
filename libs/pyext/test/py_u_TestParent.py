@@ -42,7 +42,7 @@ def populated_definition():
 
     defs = Defs()
     defs.add_suite(suite)
-    return suite, family, family2, task, t1
+    return defs, suite, family, family2, task, t1
 
 
 def test_unattached_nodes_have_no_parent_or_defs():
@@ -60,7 +60,7 @@ def test_unattached_nodes_have_no_parent_or_defs():
 
 
 def test_attached_node_paths(populated_definition):
-    suite, family, family2, task, t1 = populated_definition
+    _, suite, family, family2, task, t1 = populated_definition
 
     assert t1.get_abs_node_path() == _abs_node_path(t1), (
         "Expected " + t1.get_abs_node_path() + " but got " + _abs_node_path(t1)

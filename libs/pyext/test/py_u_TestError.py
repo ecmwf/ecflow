@@ -545,7 +545,8 @@ def test_cannot_add_same_family_to_two_suites():
     suite = defs3.add_suite("s1")
     family = suite.add_family("f1")
     with pytest.raises(RuntimeError):
-        new_suite = Defs().add_suite("s2")
+        new_defs = Defs()
+        new_suite = new_defs.add_suite("s2")
         new_suite.add_family(family)
 
 
@@ -560,20 +561,23 @@ def test_cannot_add_same_task_to_two_containers():
 
 def test_cannot_add_two_autocancel_on_same_node():
     with pytest.raises(RuntimeError):
-        suite = Defs().add_suite("s1")
+        defs = Defs()
+        suite = defs.add_suite("s1")
         suite.add_autocancel(3)
         suite.add_autocancel(4)
 
 
 def test_cannot_add_autocancel_and_autoarchive_together():
     with pytest.raises(RuntimeError):
-        suite = Defs().add_suite("s1")
+        defs = Defs()
+        suite = defs.add_suite("s1")
         suite.add_autoarchive(3)
         suite.add_autocancel(4)
 
 
 def test_cannot_add_two_autorestore_on_same_node():
     with pytest.raises(RuntimeError):
-        suite = Defs().add_suite("s1")
+        defs = Defs()
+        suite = defs.add_suite("s1")
         suite.add_autorestore(["/s1"])
         suite.add_autorestore(["/s1"])
