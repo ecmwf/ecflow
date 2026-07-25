@@ -39,6 +39,7 @@
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/ExprParser.hpp"
+#include "ecflow/node/ExprParserV2.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using json = nlohmann::ordered_json;
@@ -101,16 +102,36 @@ static ParseResult parse_v1(const std::string& expr) {
 ///
 /// @brief Parses @p expr with the V2 ExprParser and returns a full ParseResult.
 ///
-/// @details This function will delegate to the ecf::expression::v2::ExprParser once
-/// Phase 2 introduces that implementation. During Phase 0 it is intentionally absent
-/// and the test suite references only parse_v1.
+/// @details The ExprDuplicate cache is flushed before each call so every invocation is a
+/// deterministic first-parse.
 ///
 /// @param[in] expr Trigger/complete expression string to parse.
 /// @return A ParseResult describing whether parsing succeeded and the rendered AST.
 ///
-// NOTE: parse_v2 is defined here as a forward declaration comment so the diff harness
-// below already shows the intended structure. It is activated in Phase 2.
-// static ParseResult parse_v2(const std::string& expr);
+static ParseResult parse_v2(const std::string& expr) {
+    ExprDuplicate reclaim;
+
+    ParseResult result;
+    ecf::expression::v2::ExprParser parser(expr);
+    result.accepted = parser.doParse(result.error);
+    if (result.accepted) {
+        AstTop* ast = parser.getAst();
+        if (ast == nullptr) {
+            result.accepted = false;
+            result.error    = "V2 parser returned no AST";
+        }
+        else {
+            std::ostringstream ss_flat;
+            ast->print_flat(ss_flat, false);
+            result.flat = ss_flat.str();
+
+            std::ostringstream ss_bracketed;
+            ast->print_flat(ss_bracketed, true);
+            result.bracketed = ss_bracketed.str();
+        }
+    }
+    return result;
+}
 
 ///
 /// @brief Loads and returns the JSON corpus from the test-data directory.
@@ -299,6 +320,119 @@ BOOST_AUTO_TEST_CASE(test_v1_corpus_invalid_rejection) {
                                                   << unexpected_accepts << " unexpectedly accepted");
     BOOST_REQUIRE_MESSAGE(unexpected_accepts == 0,
                           unexpected_accepts << " invalid corpus expression(s) were incorrectly accepted by V1");
+}
+
+// ============================================================================
+// V1 vs V2 differential tests
+// ============================================================================
+
+///
+/// @brief Differential test: V1 and V2 must produce identical results for all canonical expressions.
+///
+/// For each expression, both parsers are run (with the cache flushed between calls) and their
+/// accept/reject outcome, plain flat rendering, and fully-bracketed flat rendering are compared
+/// byte-for-byte.
+///
+BOOST_AUTO_TEST_CASE(test_v1_v2_canonical_differential) {
+    ECF_NAME_THIS_TEST();
+
+    std::size_t failures = 0;
+    for (const auto& expr : k_canonical_expressions) {
+        const ParseResult r1 = parse_v1(expr);
+        const ParseResult r2 = parse_v2(expr);
+
+        bool ok = (r1.accepted == r2.accepted);
+        if (r1.accepted && r2.accepted) {
+            ok = ok && (r1.flat == r2.flat) && (r1.bracketed == r2.bracketed);
+        }
+
+        if (!ok) {
+            ++failures;
+            BOOST_ERROR("V1/V2 mismatch for canonical expression: '" << expr << "'"
+                        << "\n  V1 accepted=" << r1.accepted << " flat='" << r1.flat << "'"
+                        << "\n  V2 accepted=" << r2.accepted << " flat='" << r2.flat << "'"
+                        << (r1.accepted != r2.accepted ? "\n  error: " + (r1.accepted ? r2.error : r1.error) : ""));
+        }
+    }
+
+    BOOST_REQUIRE_MESSAGE(failures == 0,
+                          failures << " canonical expression(s) show V1/V2 mismatch");
+}
+
+///
+/// @brief Differential test: V1 and V2 must produce identical results for all valid corpus expressions.
+///
+BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_valid_differential) {
+    ECF_NAME_THIS_TEST();
+
+    json corpus             = load_corpus();
+    const auto& entries     = corpus.at("valid_expressions");
+    std::size_t checked     = 0;
+    std::size_t failures    = 0;
+
+    for (const auto& entry : entries) {
+        const std::string expr = entry.at("expression").get<std::string>();
+
+        const ParseResult r1 = parse_v1(expr);
+        const ParseResult r2 = parse_v2(expr);
+
+        bool ok = (r1.accepted == r2.accepted);
+        if (r1.accepted && r2.accepted) {
+            ok = ok && (r1.flat == r2.flat) && (r1.bracketed == r2.bracketed);
+        }
+
+        if (!ok) {
+            ++failures;
+            if (failures <= 10) {
+                BOOST_ERROR("V1/V2 mismatch for corpus expression: '" << expr << "'"
+                            << "\n  V1 accepted=" << r1.accepted << " flat='" << r1.flat << "'"
+                            << "\n  V2 accepted=" << r2.accepted << " flat='" << r2.flat << "'");
+            }
+        }
+        ++checked;
+    }
+
+    BOOST_TEST_MESSAGE("V1/V2 corpus valid: compared " << checked << " expression(s), " << failures << " mismatch(es)");
+    BOOST_REQUIRE_MESSAGE(failures == 0,
+                          failures << " valid corpus expression(s) show V1/V2 mismatch");
+}
+
+///
+/// @brief Differential test: V1 and V2 must agree on rejecting all invalid corpus expressions.
+///
+BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_invalid_differential) {
+    ECF_NAME_THIS_TEST();
+
+    json corpus                 = load_corpus();
+    const auto& rejections      = corpus.at("invalid_expressions");
+    std::size_t checked         = 0;
+    std::size_t failures        = 0;
+
+    for (const auto& entry : rejections) {
+        const std::string expr = entry.at("expression").get<std::string>();
+
+        const ParseResult r1 = parse_v1(expr);
+        const ParseResult r2 = parse_v2(expr);
+
+        // Both must reject.  A V2 acceptance when V1 rejects is a regression.
+        if (r2.accepted && !r1.accepted) {
+            ++failures;
+            BOOST_ERROR("V2 accepted an expression that V1 rejected (invalid corpus): '" << expr
+                        << "'  V2 flat: " << r2.flat);
+        }
+        // A V2 rejection when V1 accepts is also a mismatch (parser became too strict).
+        if (!r2.accepted && r1.accepted) {
+            ++failures;
+            BOOST_ERROR("V2 rejected an expression that V1 accepted (invalid corpus): '" << expr
+                        << "'  V2 error: " << r2.error);
+        }
+        ++checked;
+    }
+
+    BOOST_TEST_MESSAGE("V1/V2 corpus invalid: compared " << checked << " expression(s), "
+                                                         << failures << " mismatch(es)");
+    BOOST_REQUIRE_MESSAGE(failures == 0,
+                          failures << " invalid corpus expression(s) show V1/V2 accept/reject mismatch");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

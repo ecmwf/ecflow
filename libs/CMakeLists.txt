@@ -379,6 +379,7 @@ set(srcs
   node/src/ecflow/node/ExprDuplicate.hpp
   node/src/ecflow/node/ExprParser.hpp
   node/src/ecflow/node/ExprParserV1.hpp
+  node/src/ecflow/node/ExprParserV2.hpp
   node/src/ecflow/node/Expression.hpp
   node/src/ecflow/node/Family.hpp
   node/src/ecflow/node/Flag.hpp
@@ -465,6 +466,7 @@ set(srcs
   node/src/ecflow/node/ExprAstVisitor.cpp
   node/src/ecflow/node/ExprDuplicate.cpp
   node/src/ecflow/node/ExprParserV1.cpp
+  node/src/ecflow/node/ExprParserV2.cpp
   node/src/ecflow/node/Expression.cpp
   node/src/ecflow/node/Family.cpp
   node/src/ecflow/node/Flag.cpp
