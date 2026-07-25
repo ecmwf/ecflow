@@ -378,6 +378,7 @@ set(srcs
   node/src/ecflow/node/ExprAstVisitor.hpp
   node/src/ecflow/node/ExprDuplicate.hpp
   node/src/ecflow/node/ExprParser.hpp
+  node/src/ecflow/node/ExprParserV1.hpp
   node/src/ecflow/node/Expression.hpp
   node/src/ecflow/node/Family.hpp
   node/src/ecflow/node/Flag.hpp
@@ -405,6 +406,7 @@ set(srcs
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
+  node/src/ecflow/node/SimpleExprParser.hpp
   node/src/ecflow/node/Submittable.hpp
   node/src/ecflow/node/Suite.hpp
   node/src/ecflow/node/SuiteChanged.hpp
@@ -462,7 +464,7 @@ set(srcs
   node/src/ecflow/node/ExprAst.cpp
   node/src/ecflow/node/ExprAstVisitor.cpp
   node/src/ecflow/node/ExprDuplicate.cpp
-  node/src/ecflow/node/ExprParser.cpp
+  node/src/ecflow/node/ExprParserV1.cpp
   node/src/ecflow/node/Expression.cpp
   node/src/ecflow/node/Family.cpp
   node/src/ecflow/node/Flag.cpp
@@ -491,6 +493,7 @@ set(srcs
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
+  node/src/ecflow/node/SimpleExprParser.cpp
   node/src/ecflow/node/Submittable.cpp
   node/src/ecflow/node/Suite.cpp
   node/src/ecflow/node/SuiteChanged.cpp
