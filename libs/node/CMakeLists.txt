@@ -195,6 +195,27 @@ if (ENABLE_ALL_TESTS)
 
 
   set(test_srcs
+    test/v1_v2/ExprParserV1V2Benchmark.cpp
+  )
+  ecbuild_add_test(
+    TARGET
+      p_expr_v1_v2
+    LABELS
+      performance nightly
+    ARGS
+      --data-dir ${CMAKE_SOURCE_DIR}/.scratch/checkpoint-expression-data
+    SOURCES
+      ${test_srcs}
+    LIBS
+      ecflow_all
+      nlohmann::json
+  )
+  target_clangformat(p_expr_v1_v2
+    CONDITION ENABLE_TESTS
+  )
+
+
+  set(test_srcs
     # Headers
     test/parser/PersistHelper.hpp
     test/parser/TemporaryFile.hpp
