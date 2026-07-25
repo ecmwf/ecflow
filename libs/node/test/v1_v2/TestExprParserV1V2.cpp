@@ -53,10 +53,10 @@ using json = nlohmann::ordered_json;
 ///
 struct ParseResult
 {
-    bool accepted;          ///< true when the expression is accepted by the parser.
-    std::string flat;       ///< print_flat() result; empty when @c accepted is false.
-    std::string bracketed;  ///< print_flat(add_brackets=true) result; empty when @c accepted is false.
-    std::string error;      ///< diagnostic message set when @c accepted is false.
+    bool accepted;         ///< true when the expression is accepted by the parser.
+    std::string flat;      ///< print_flat() result; empty when @c accepted is false.
+    std::string bracketed; ///< print_flat(add_brackets=true) result; empty when @c accepted is false.
+    std::string error;     ///< diagnostic message set when @c accepted is false.
 };
 
 // ============================================================================
@@ -139,8 +139,7 @@ static ParseResult parse_v2(const std::string& expr) {
 /// @return The loaded JSON object.
 ///
 static json load_corpus() {
-    const std::string path =
-        ecf::File::test_data("libs/node/test/expressions/data/corpus.json", "expressions");
+    const std::string path = ecf::File::test_data("libs/node/test/expressions/data/corpus.json", "expressions");
     std::ifstream in(path);
     BOOST_REQUIRE_MESSAGE(in.good(), "Cannot open corpus file: " << path);
     json j;
@@ -234,22 +233,19 @@ BOOST_AUTO_TEST_CASE(test_v1_canonical_consistency) {
             continue;
         }
 
-        BOOST_CHECK_MESSAGE(r1.accepted == r2.accepted,
-                            "V1 parse outcome not deterministic for: '" << expr << "'");
+        BOOST_CHECK_MESSAGE(r1.accepted == r2.accepted, "V1 parse outcome not deterministic for: '" << expr << "'");
         BOOST_CHECK_MESSAGE(r1.flat == r2.flat,
-                            "V1 plain flat not deterministic for: '" << expr
-                                                                     << "'\n  run1: " << r1.flat
+                            "V1 plain flat not deterministic for: '" << expr << "'\n  run1: " << r1.flat
                                                                      << "\n  run2: " << r2.flat);
         BOOST_CHECK_MESSAGE(r1.bracketed == r2.bracketed,
-                            "V1 bracketed flat not deterministic for: '" << expr
-                                                                         << "'\n  run1: " << r1.bracketed
+                            "V1 bracketed flat not deterministic for: '" << expr << "'\n  run1: " << r1.bracketed
                                                                          << "\n  run2: " << r2.bracketed);
-        if (r1.flat != r2.flat || r1.bracketed != r2.bracketed)
+        if (r1.flat != r2.flat || r1.bracketed != r2.bracketed) {
             ++failures;
+        }
     }
 
-    BOOST_REQUIRE_MESSAGE(failures == 0,
-                          failures << " canonical expression(s) failed V1 consistency check");
+    BOOST_REQUIRE_MESSAGE(failures == 0, failures << " canonical expression(s) failed V1 consistency check");
 }
 
 ///
@@ -261,10 +257,10 @@ BOOST_AUTO_TEST_CASE(test_v1_canonical_consistency) {
 BOOST_AUTO_TEST_CASE(test_v1_corpus_valid_consistency) {
     ECF_NAME_THIS_TEST();
 
-    json corpus             = load_corpus();
-    const auto& entries     = corpus.at("valid_expressions");
-    std::size_t checked     = 0;
-    std::size_t failures    = 0;
+    json corpus          = load_corpus();
+    const auto& entries  = corpus.at("valid_expressions");
+    std::size_t checked  = 0;
+    std::size_t failures = 0;
 
     for (const auto& entry : entries) {
         const std::string expr = entry.at("expression").get<std::string>();
@@ -287,8 +283,7 @@ BOOST_AUTO_TEST_CASE(test_v1_corpus_valid_consistency) {
     }
 
     BOOST_TEST_MESSAGE("Corpus valid: checked " << checked << " expression(s), " << failures << " failure(s)");
-    BOOST_REQUIRE_MESSAGE(failures == 0,
-                          failures << " valid corpus expression(s) failed V1 consistency check");
+    BOOST_REQUIRE_MESSAGE(failures == 0, failures << " valid corpus expression(s) failed V1 consistency check");
 }
 
 ///
@@ -316,8 +311,8 @@ BOOST_AUTO_TEST_CASE(test_v1_corpus_invalid_rejection) {
         ++checked;
     }
 
-    BOOST_TEST_MESSAGE("Corpus invalid: checked " << checked << " expression(s), "
-                                                  << unexpected_accepts << " unexpectedly accepted");
+    BOOST_TEST_MESSAGE("Corpus invalid: checked " << checked << " expression(s), " << unexpected_accepts
+                                                  << " unexpectedly accepted");
     BOOST_REQUIRE_MESSAGE(unexpected_accepts == 0,
                           unexpected_accepts << " invalid corpus expression(s) were incorrectly accepted by V1");
 }
@@ -348,15 +343,15 @@ BOOST_AUTO_TEST_CASE(test_v1_v2_canonical_differential) {
 
         if (!ok) {
             ++failures;
-            BOOST_ERROR("V1/V2 mismatch for canonical expression: '" << expr << "'"
+            BOOST_ERROR("V1/V2 mismatch for canonical expression: '"
+                        << expr << "'"
                         << "\n  V1 accepted=" << r1.accepted << " flat='" << r1.flat << "'"
                         << "\n  V2 accepted=" << r2.accepted << " flat='" << r2.flat << "'"
                         << (r1.accepted != r2.accepted ? "\n  error: " + (r1.accepted ? r2.error : r1.error) : ""));
         }
     }
 
-    BOOST_REQUIRE_MESSAGE(failures == 0,
-                          failures << " canonical expression(s) show V1/V2 mismatch");
+    BOOST_REQUIRE_MESSAGE(failures == 0, failures << " canonical expression(s) show V1/V2 mismatch");
 }
 
 ///
@@ -365,10 +360,10 @@ BOOST_AUTO_TEST_CASE(test_v1_v2_canonical_differential) {
 BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_valid_differential) {
     ECF_NAME_THIS_TEST();
 
-    json corpus             = load_corpus();
-    const auto& entries     = corpus.at("valid_expressions");
-    std::size_t checked     = 0;
-    std::size_t failures    = 0;
+    json corpus          = load_corpus();
+    const auto& entries  = corpus.at("valid_expressions");
+    std::size_t checked  = 0;
+    std::size_t failures = 0;
 
     for (const auto& entry : entries) {
         const std::string expr = entry.at("expression").get<std::string>();
@@ -384,17 +379,18 @@ BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_valid_differential) {
         if (!ok) {
             ++failures;
             if (failures <= 10) {
-                BOOST_ERROR("V1/V2 mismatch for corpus expression: '" << expr << "'"
+                BOOST_ERROR("V1/V2 mismatch for corpus expression: '"
+                            << expr << "'"
                             << "\n  V1 accepted=" << r1.accepted << " flat='" << r1.flat << "'"
-                            << "\n  V2 accepted=" << r2.accepted << " flat='" << r2.flat << "'");
+                            << "\n  V2 accepted=" << r2.accepted << " flat='" << r2.flat << "'"
+                            << " error='" << r2.error << "'");
             }
         }
         ++checked;
     }
 
     BOOST_TEST_MESSAGE("V1/V2 corpus valid: compared " << checked << " expression(s), " << failures << " mismatch(es)");
-    BOOST_REQUIRE_MESSAGE(failures == 0,
-                          failures << " valid corpus expression(s) show V1/V2 mismatch");
+    BOOST_REQUIRE_MESSAGE(failures == 0, failures << " valid corpus expression(s) show V1/V2 mismatch");
 }
 
 ///
@@ -403,10 +399,10 @@ BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_valid_differential) {
 BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_invalid_differential) {
     ECF_NAME_THIS_TEST();
 
-    json corpus                 = load_corpus();
-    const auto& rejections      = corpus.at("invalid_expressions");
-    std::size_t checked         = 0;
-    std::size_t failures        = 0;
+    json corpus            = load_corpus();
+    const auto& rejections = corpus.at("invalid_expressions");
+    std::size_t checked    = 0;
+    std::size_t failures   = 0;
 
     for (const auto& entry : rejections) {
         const std::string expr = entry.at("expression").get<std::string>();
@@ -418,21 +414,20 @@ BOOST_AUTO_TEST_CASE(test_v1_v2_corpus_invalid_differential) {
         if (r2.accepted && !r1.accepted) {
             ++failures;
             BOOST_ERROR("V2 accepted an expression that V1 rejected (invalid corpus): '" << expr
-                        << "'  V2 flat: " << r2.flat);
+                                                                                         << "'  V2 flat: " << r2.flat);
         }
         // A V2 rejection when V1 accepts is also a mismatch (parser became too strict).
         if (!r2.accepted && r1.accepted) {
             ++failures;
-            BOOST_ERROR("V2 rejected an expression that V1 accepted (invalid corpus): '" << expr
-                        << "'  V2 error: " << r2.error);
+            BOOST_ERROR("V2 rejected an expression that V1 accepted (invalid corpus): '"
+                        << expr << "'  V2 error: " << r2.error);
         }
         ++checked;
     }
 
-    BOOST_TEST_MESSAGE("V1/V2 corpus invalid: compared " << checked << " expression(s), "
-                                                         << failures << " mismatch(es)");
-    BOOST_REQUIRE_MESSAGE(failures == 0,
-                          failures << " invalid corpus expression(s) show V1/V2 accept/reject mismatch");
+    BOOST_TEST_MESSAGE("V1/V2 corpus invalid: compared " << checked << " expression(s), " << failures
+                                                         << " mismatch(es)");
+    BOOST_REQUIRE_MESSAGE(failures == 0, failures << " invalid corpus expression(s) show V1/V2 accept/reject mismatch");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
