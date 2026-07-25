@@ -144,6 +144,31 @@ target_clangformat(u_expressions
 )
 
 
+set(test_srcs
+  # Sources
+  test/v1_v2/TestExprParserV1V2.cpp
+  test/v1_v2/TestExprParserV1V2_main.cpp # test entry point
+)
+ecbuild_add_test(
+  TARGET
+    u_expr_v1_v2
+  LABELS
+    unit nightly fast
+  SOURCES
+    ${test_srcs}
+  LIBS
+    ecflow_all
+    test_scaffold
+    nlohmann::json
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  TEST_DEPENDS
+    u_node
+)
+target_clangformat(u_expr_v1_v2
+  CONDITION ENABLE_TESTS
+)
+
+
 if (ENABLE_ALL_TESTS)
   set(test_srcs
     test/TestSingleExprParse.cpp
