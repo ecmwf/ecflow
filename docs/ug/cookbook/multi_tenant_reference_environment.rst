@@ -187,7 +187,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
    podman run -d \
        --name revproxy --hostname revproxy \
        --network inner --ip 172.30.0.2 \
-       -p 8080:8080 -p 3141:8443 \
+       -p 3141:443 \
        -v ./revproxy/server:/usr/share/nginx/html/server \
        -v ./revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf \
        revproxy
@@ -199,7 +199,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
    podman run -d \
        --name authotron --hostname authotron \
        --network inner --ip 172.30.0.3 \
-       -p 8081:8081 \
+       -p 8080:8080 \
        -v ./authotron/config.yaml:/app/config.yaml \
        eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
 
@@ -211,7 +211,8 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
        --name ecflow-server --hostname ecflow-server \
        --network inner --ip 172.30.0.4 \
        --platform linux/amd64 \
-       -p 8888:8888 -p 8889:8889 \
+       -p 8888:8888 \
+       -p 8889:8889 \
        -v /home/<user>/<host>:/home/<user>/<host> \
        -e ECFLOW_WORKSPACE_DIR=/home/<user>/<host> \
        eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
