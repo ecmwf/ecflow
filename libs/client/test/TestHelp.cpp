@@ -177,6 +177,89 @@ BOOST_AUTO_TEST_CASE(test_env_banner_ssl_visibility_follows_openssl_build) {
 #endif
 }
 
+BOOST_AUTO_TEST_CASE(test_help_definition_lists_all_definition_items) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("definition");
+    BOOST_CHECK(contains(out, "Ecflow definition items:"));
+    // "task" is a node type, "trigger" is an attribute; both must appear in the listing.
+    BOOST_CHECK(contains(out, "task"));
+    BOOST_CHECK(contains(out, "trigger"));
+    BOOST_CHECK(contains(out, "node"));
+    BOOST_CHECK(contains(out, "attribute"));
+}
+
+BOOST_AUTO_TEST_CASE(test_help_defs_item_renders_detail_without_env_banner) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("defs/trigger");
+    // Name banner plus the manifest description.
+    BOOST_CHECK(contains(out, "trigger"));
+    BOOST_CHECK(contains(out, "A boolean expression keeping the node from executing"));
+    // A definition item is not a CLI command, so it gets no environment-variable footer.
+    BOOST_CHECK(!contains(out, client_env_banner));
+    BOOST_CHECK(!contains(out, task_env_banner));
+}
+
+BOOST_AUTO_TEST_CASE(test_help_defs_unknown_falls_back_to_definition_item_list) {
+    ECF_NAME_THIS_TEST();
+
+    // Falls back to the definition-item list (not the command list), since that is what the
+    // user was actually asking about.
+    std::string out = render("defs/no-such-item");
+    BOOST_CHECK(contains(out, "No matching definition item found"));
+    BOOST_CHECK(contains(out, "trigger"));
+}
+
+BOOST_AUTO_TEST_CASE(test_bare_help_mentions_definition_topic_and_lists_items) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("");
+    BOOST_CHECK(contains(out, "--help=definition"));
+    BOOST_CHECK(contains(out, "--help=defs/<item>"));
+    BOOST_CHECK(contains(out, "Definition:"));
+    BOOST_CHECK(contains(out, "trigger"));
+}
+
+BOOST_AUTO_TEST_CASE(test_defs_prefix_never_collides_with_a_same_named_command) {
+    ECF_NAME_THIS_TEST();
+
+    // event/label/meter/queue/complete are both task commands and definition-item attribute
+    // names. A bare render(name) must keep showing the command (unchanged), while
+    // render("defs/" + name) must reach the attribute -- exercising, through the full CLI
+    // rendering path, the same collision-safety guarantee HelpCatalog's own test covers at the
+    // manifest-lookup level.
+    struct Case
+    {
+        std::string name;
+        std::string attribute_fingerprint;
+    };
+    const std::vector<Case> cases = {
+        {"event", "event's initial value is true"},
+        {"label", "Double-quoted initial text"},
+        {"meter", "GUI display hint"},
+        {"queue", "lighter-weight alternative to repeat"},
+        {"complete", "AND-continuation"},
+    };
+
+    for (const auto& c : cases) {
+        std::string command_out = render(c.name);
+        BOOST_CHECK_MESSAGE(contains(command_out, "Argument(s):"), c.name << ": expected the command's help");
+        BOOST_CHECK_MESSAGE(!contains(command_out, c.attribute_fingerprint),
+                            c.name << ": command help unexpectedly contains attribute-only text");
+
+        std::string attribute_out = render("defs/" + c.name);
+        BOOST_CHECK_MESSAGE(contains(attribute_out, c.attribute_fingerprint),
+                            c.name << ": expected the attribute's detail");
+        BOOST_CHECK_MESSAGE(!contains(attribute_out, "Argument(s):"),
+                            c.name << ": attribute detail unexpectedly contains the command's Argument(s) block");
+    }
+
+    // "task" is both a topic (list task commands) and a definition-item node type.
+    BOOST_CHECK(contains(render("task"), "Ecflow task client commands:"));
+    BOOST_CHECK(contains(render("defs/task"), "A leaf node in the node hierarchy."));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

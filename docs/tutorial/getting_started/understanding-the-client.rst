@@ -34,11 +34,14 @@ To configure the client (CLI and Python API) to contact a server on the given *h
 
            ecflow_client --help
 
-           ecflow_client --help child  # to list the task (child) commands
-           ecflow_client --help user   # to list the user commands
+           ecflow_client --help=task   # to list the task commands
+           ecflow_client --help=user   # to list the user commands
 
-           ecflow_client --help init   # get details of the init (child) command
-           ecflow_client --help load   # get details of the load (user) command
+           ecflow_client --help=init   # get details of the init (task) command
+           ecflow_client --help=load   # get details of the load (user) command
+
+           ecflow_client --help=definition    # to list the suite definition file items
+           ecflow_client --help=defs/trigger  # get details of the trigger definition item
 
         To assess the connectivity to a server, explicitly define the :code:`--port` and :code:`--host` options, and use the :code:`--ping` command:
 
@@ -66,7 +69,7 @@ To configure the client (CLI and Python API) to contact a server on the given *h
 
 #. List the available commands of :term:`ecflow_client` using the :code:`--help` option.
 
-#. Take the opportunity to learn about the different command categories (e.g. child commands, user commands).
+#. Take the opportunity to learn about the different command categories (e.g. task commands, user commands).
 
    - Use the :code:`--help` option with the :term:`ecflow_client` to explore the available command categories.
 
