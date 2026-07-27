@@ -139,18 +139,15 @@ ecflow_add_test(
 )
 
 
-set(test_srcs
-  # Sources
-  test/v1_v2/TestExprParserV1V2.cpp
-  test/v1_v2/TestExprParserV1V2_main.cpp # test entry point
-)
 ecbuild_add_test(
   TARGET
-    u_expr_v1_v2
+    u_expressions_parser
   LABELS
     unit nightly fast
   SOURCES
-    ${test_srcs}
+    # Sources
+    test/expressions/TestExpressionsParser.cpp
+    test/expressions/TestExpressionsParser_main.cpp # test entry point
   LIBS
     ecflow_all
     test_scaffold
@@ -159,7 +156,7 @@ ecbuild_add_test(
   TEST_DEPENDS
     u_node
 )
-target_clangformat(u_expr_v1_v2
+target_clangformat(u_expressions_parser
   CONDITION ENABLE_TESTS
 )
 
@@ -189,23 +186,37 @@ if (ENABLE_ALL_TESTS)
   )
 
 
-  set(test_srcs
-    test/v1_v2/ExprParserV1V2Benchmark.cpp
-  )
   ecbuild_add_test(
     TARGET
-      p_expr_v1_v2
+      p_expressions_parser_benchmark
     LABELS
-      performance nightly
+      performance
     ARGS
-      --data-dir ${CMAKE_SOURCE_DIR}/.scratch/checkpoint-expression-data
+      --data-dir ${CMAKE_CURRENT_SOURCE_DIR}/test/expressions/data/scratch/checkpoints
     SOURCES
-      ${test_srcs}
+      test/expressions/ExpressionsParserBenchmark.cpp
     LIBS
       ecflow_all
       nlohmann::json
   )
-  target_clangformat(p_expr_v1_v2
+  target_clangformat(p_expressions_parser_benchmark
+    CONDITION ENABLE_TESTS
+  )
+
+  ecbuild_add_test(
+    TARGET
+      p_defs_check_benchmark
+    LABELS
+      performance
+    ARGS
+      --data-dir ${CMAKE_CURRENT_SOURCE_DIR}/test/expressions/data/scratch/checkpoints
+    SOURCES
+      test/expressions/DefsCheckBenchmark.cpp
+    LIBS
+      ecflow_all
+      nlohmann::json
+  )
+  target_clangformat(p_defs_check_benchmark
     CONDITION ENABLE_TESTS
   )
 

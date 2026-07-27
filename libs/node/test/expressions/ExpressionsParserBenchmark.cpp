@@ -68,6 +68,21 @@ struct Timing
 };
 
 ///
+/// @brief Returns the source checkpoint filename represented by an extracted JSON dataset.
+///
+/// @param[in] dataset JSON dataset path emitted by extract_checkpoint_expression_sets.py.
+/// @return Filename with the extraction-only `.expressions.json` suffix removed.
+///
+std::string checkpoint_display_name(const fs::path& dataset) {
+    constexpr std::string_view suffix = ".expressions.json";
+    std::string name                  = dataset.filename().string();
+    if (name.size() >= suffix.size() && name.compare(name.size() - suffix.size(), suffix.size(), suffix) == 0) {
+        name.erase(name.size() - suffix.size());
+    }
+    return name;
+}
+
+///
 /// @brief Clears the process-global duplicate expression cache.
 ///
 void clear_expression_cache() {
@@ -242,10 +257,10 @@ void print_row(const fs::path& dataset,
                const Timing& v1,
                const Timing& v2) {
     const double ratio = v1.seconds == 0.0 ? 0.0 : v2.seconds / v1.seconds;
-    std::cout << "| " << dataset.filename().string() << " | " << mode << " | " << extracted << " | " << parsed << " | "
-              << rejected << " | " << unique << " | " << std::fixed << std::setprecision(6) << v1.seconds << " | "
-              << v2.seconds << " | " << std::setprecision(0) << throughput(v1) << " | " << throughput(v2) << " | "
-              << std::setprecision(3) << ratio << " |\n";
+    std::cout << "| " << checkpoint_display_name(dataset) << " | " << mode << " | " << extracted << " | " << parsed
+              << " | " << rejected << " | " << unique << " | " << std::fixed << std::setprecision(6) << v1.seconds
+              << " | " << v2.seconds << " | " << std::setprecision(0) << throughput(v1) << " | " << throughput(v2)
+              << " | " << std::setprecision(3) << ratio << " |\n";
 }
 
 } // namespace
@@ -284,6 +299,9 @@ int main(int argc, char* argv[]) {
             continue;
         }
         const std::vector<std::string> raw_unique = unique_expressions(full);
+        if (raw_unique.size() < 10) {
+            continue;
+        }
         std::vector<std::string> accepted_unique;
         std::size_t rejected_unique = 0;
         // Equivalence is independent of duplicate ordering, so preflight each distinct raw
@@ -344,5 +362,6 @@ int main(int argc, char* argv[]) {
                   unique_v1,
                   unique_v2);
     }
+
     return 0;
 }
