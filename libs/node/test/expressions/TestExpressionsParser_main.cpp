@@ -8,6 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE TestExprParserV1V2
+#define BOOST_TEST_MODULE TestExpressionsParser
 
 #include <boost/test/included/unit_test.hpp>
