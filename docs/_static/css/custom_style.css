@@ -58,14 +58,62 @@ div.rightside {
 }
 
 
-div.admonition.implementation {
+.admonition.implementation {
     background-color: #f5f5f5;
     border-left: 4px solid #bdbdbd;
 }
 
-div.admonition.implementation > .admonition-title {
+.admonition.implementation .admonition-title {
     background-color: #e0e0e0;
     color: #424242;
+}
+
+/* Collapsible variant (rendered as <details>/<summary> when the directive
+   uses an ".. extension::" marker). Remove the browser's own disclosure
+   marker (its default list-item rendering is what pushes the title down
+   onto its own line and crowds it against the admonition icon) and draw a
+   single custom arrow instead, aligned to the end of the title line. */
+.admonition.implementation > summary.admonition-summary {
+    cursor: pointer;
+    display: block;
+    list-style: none;
+}
+
+.admonition.implementation > summary.admonition-summary::-webkit-details-marker {
+    display: none;
+}
+
+.admonition.implementation > summary.admonition-summary::marker {
+    content: "";
+}
+
+.admonition.implementation > summary.admonition-summary > .admonition-title {
+    position: relative;
+    padding-right: 28px;
+}
+
+.admonition.implementation > summary.admonition-summary > .admonition-title::after {
+    content: "\25B8";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.15s ease;
+}
+
+.admonition.implementation[open] > summary.admonition-summary > .admonition-title::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* Guarantee a visible break between the last paragraph of the summary and
+   the first paragraph of the extension: padding (rather than margin) is
+   used here so the two blocks cannot end up touching through margin
+   collapsing, and the border gives an explicit visual seam between the
+   "always visible" and "on demand" parts of the box. */
+.admonition.implementation > .implementation-extension {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
 }
 
 /* Grammar (productionlist) blocks are rendered as a bare <pre> and can contain

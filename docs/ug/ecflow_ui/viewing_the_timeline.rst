@@ -116,6 +116,16 @@ any time.
 
 .. implementation::
 
+    The sequence of steps to fetch the log file considers the ``ECF_LOG``
+    path, the server host and port, and the configured transfer user.
+    The log file local or remote availability impacts the retrieval steps,
+    which may consider only the last N bytes of the log file to avoid
+    excessive data transfer.
+
+    Expand for more details.
+
+    .. extension::
+
     The file is obtained through the following sequence:
 
     1. The **ECF_LOG** value, the server host, port and the configured
@@ -188,16 +198,19 @@ pass over the log file.
 
 .. implementation::
 
-    This describes how the Timeline chart data is extracted from the log
-    file; it is not required reading in order to use the Timeline panel.
-
     Once fetched, the log file is scanned line by line and only the lines
-    recording a **state change** are considered; every other line
-    (messages, errors, or any other log entry) is ignored. A
-    state-change line has the form::
+    recording a **state change** are considered; every other line (messages,
+    errors, or any other log entry) is ignored. A line indicating a state
+    change has the form:
+
+    .. code-block:: text
 
         LOG:[22:45:30 21.4.2018]  complete: /suite/family/task
         LOG:[22:45:30 21.4.2018]  submitted: /suite/family/task job_size:16408
+
+    Expand for more details.
+
+    .. extension::
 
     For each such line, the following pieces are extracted:
 
