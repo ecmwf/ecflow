@@ -6,7 +6,7 @@ Viewing the Timeline
 The **Timeline** tab in an Info panel shows, for a given server, how the
 state of each node changed over a period of time. When the tab is first
 opened the **server log file** is fetched (it is either accessed locally
-or transferred via the network) then the file contents is parsed to
+or transferred via the network), then the file contents are parsed to
 collect the state changes of each node. The result is presented as a
 chart with one row per node and a horizontal bar showing how the state
 of the node changed across time.
@@ -16,8 +16,11 @@ particular node) it stays loaded when a different node is selected in
 the same server; selecting a node only highlights and scrolls to the
 corresponding row in the chart.
 
-Timeline chart
-==============
+Timeline view
+=============
+
+The Timeline view is selected by pressing the **Timeline view mode**
+button on the top right of the panel.
 
 Each row in the chart represents a node (suite, family or task) and is
 labelled with its path. The horizontal axis represents time, and for
@@ -31,8 +34,19 @@ lighter shade so that long-running suites remain easy to read.
 The time axis at the top of the chart shows date and time labels and can
 be used to zoom into a period (see below).
 
+.. figure:: /_static/ecflow_ui/viewing_the_timeline/viewing_the_timeline__timeline_view_mode.png
+   :width: 5.98770in
+   :height: 3.01112in
+   :align: center
+
+   Timeline view
+
+
 Duration view
 =============
+
+The Duration view is selected by pressing the **Duration view mode**
+button on the top right of the panel.
 
 The chart can be switched to a **Duration view**, which replaces the
 per-node bar with two columns showing, for each node, the duration spent
@@ -40,6 +54,13 @@ in the **submitted** and **active** states. A combo box selects whether
 the duration shown is the **first duration in period** (the duration of
 the first occurrence of the state within the displayed period) or the
 **mean duration** (the average duration across all occurrences).
+
+.. figure:: /_static/ecflow_ui/viewing_the_timeline/viewing_the_timeline__duration_view_mode.png
+   :width: 5.99340in
+   :height: 3.01112in
+   :align: center
+
+   Duration view
 
 Node details
 ============
@@ -50,21 +71,44 @@ history of state changes for the node together with summary statistics
 (minimum, mean, median and quartiles) of the time spent in each state,
 and a compact view showing one row per calendar day.
 
-The context menu also offers **Lookup in tree** (to select the node in
-the main tree) and **Copy node path**.
+.. list-table::
+   :header-rows: 1
+   :align: center
+
+   * - Overview
+     - Daily cycle
+
+   * - .. image:: /_static/ecflow_ui/viewing_the_timeline/viewing_the_timeline__timeline_details_overview.png
+          :width: 3.47400in
+          :height: 2.73330in
+          :align: center
+
+     - .. image:: /_static/ecflow_ui/viewing_the_timeline/viewing_the_timeline__timeline_details_daily_cycle.png
+          :width: 3.47400in
+          :height: 2.73330in
+          :align: center
 
 Interaction with the chart and other controls
 =============================================
 
+Context menu
+------------
+
+The chart area supports a context menu with the following options:
+
+-  **Show details**: opens the node details dialog for the selected row (see `Node details`_)
+-  **Lookup node in tree**: selects the node in the Node tree and scrolls to it
+-  **Copy node path**: copies the node path to the clipboard
+
 Zoom
 ----
 
-Click and drag on the time axis to define a zoom rectangle. When the
-mouse is released the chart zooms into the selected period. Dedicated
-zoom in/out buttons on the toolbar are also available, together with
-**Extend period to the start**, **Extend period to the end** and **Show
-full period** buttons, or explicit date/time fields to type the exact
-bounds of the period.
+Press the dedicated zoom in/out buttons on the toolbar, then click and drag
+on the time axis to define a zoom rectangle; when the mouse is released the
+chart zooms into the selected period. The selected period can also be
+adjusted using the **Extend period to the start**, **Extend period to the
+end** and **Show full period** buttons, or by adjusting the date/time fields
+with the exact bounds of the period.
 
 Filtering and sorting
 ---------------------
@@ -94,8 +138,8 @@ and, once expanded, additional details such as the file size, the time
 taken to fetch it, and whether the file had to be truncated because it
 exceeded the configured maximum size.
 
-Timeline config options
------------------------
+Timeline configuration options
+------------------------------
 
 There are some configuration options available for the Timeline panel at
 Tools > Preferences > Server settings > Server load and timeline. These
@@ -103,8 +147,17 @@ settings, which are shared with the Server load panel, control the
 maximum size of the log file that is read to build the Timeline chart,
 and can be applied globally or defined per server.
 
+Inspecting older log files
+--------------------------
+
+By default the Timeline panel fetches the current log file. To work
+with other (e.g. older or archived) log files switch to the **Archived
+log** mode and load a single (or multiple) log file(s) using the file
+load button. A preview dialog lists the chosen file(s) before they are
+loaded, so that files which cannot be parsed can be excluded.
+
 Handling the server log file
-===========================================
+============================
 
 Fetching the log file
 ---------------------
@@ -265,12 +318,3 @@ pass over the log file.
     timeline. No separate duration value is read from the log; every
     duration is computed by differencing consecutive event timestamps
     for the node.
-
-Inspecting older log files
---------------------------
-
-By default the Timeline panel fetches the current log file. To work
-with other (e.g. older or archived) log files switch to the **Archived
-log** mode and load a single (or multiple) log file(s) using the file
-load button. A preview dialog lists the chosen file(s) before they are
-loaded, so that files which cannot be parsed can be excluded.
