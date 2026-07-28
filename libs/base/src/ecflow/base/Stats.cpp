@@ -24,6 +24,7 @@ Stats::Stats(const Stats& rhs)
     : locked_by_user_(rhs.locked_by_user_),
       host_(rhs.host_),
       port_(rhs.port_),
+      protocol_(rhs.protocol_),
       up_since_(rhs.up_since_),
       version_(rhs.version_),
       request_stats_(rhs.request_stats_),
@@ -122,6 +123,7 @@ Stats& Stats::operator=(const Stats& rhs) {
     swap(locked_by_user_, tmp.locked_by_user_);
     swap(host_, tmp.host_);
     swap(port_, tmp.port_);
+    swap(protocol_, tmp.protocol_);
     swap(up_since_, tmp.up_since_);
     swap(version_, tmp.version_);
     swap(request_stats_, tmp.request_stats_);
@@ -501,6 +503,7 @@ void Stats::show(std::ostream& os) const {
     display("Status", SState::to_string(status_));
     display("Host", host_);
     display("Port", port_);
+    display("Protocol", protocol_);
     display("Up since", up_since_);
     display("Job sub' interval", job_sub_interval_, "s");
     display("ECF_HOME", ECF_HOME_);

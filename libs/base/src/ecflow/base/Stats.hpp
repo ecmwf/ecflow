@@ -51,6 +51,7 @@ struct Stats
     std::string locked_by_user_;
     std::string host_;
     std::string port_;
+    std::string protocol_;
     std::string up_since_;
     std::string version_;
     std::string request_stats_;
@@ -247,9 +248,12 @@ private:
         if (version > 0) {
             ar & process_meter_;
         }
+        if (version > 1) {
+            ar & protocol_;
+        }
     }
 };
 
-CEREAL_CLASS_VERSION(Stats, 1)
+CEREAL_CLASS_VERSION(Stats, 2)
 
 #endif /* ecflow_base_Stats_HPP */

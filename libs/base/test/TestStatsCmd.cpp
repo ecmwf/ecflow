@@ -13,10 +13,12 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 ///
@@ -50,6 +52,10 @@ int extract_number_of_suites(const std::string& report) {
 std::string extract_request_per_second(const std::string& report) {
     auto entry = extract_report_value(report, "Request/s per 1,5,15,30,60 min");
     return entry;
+}
+
+std::string extract_protocol(const std::string& report) {
+    return extract_report_value(report, "Protocol");
 }
 
 } // namespace
@@ -131,6 +137,56 @@ BOOST_AUTO_TEST_CASE(is_able_to_report_requests_per_second) {
             BOOST_CHECK_MESSAGE(false, "Unexpected exception : " << e.what() << " : " << request);
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_report_protocol) {
+
+    ecf::TestLog test_log("test_stats_cmd__reports_protocol.log");
+
+    Defs defs;
+
+    MockServer server(&defs);
+    server.stats().protocol_ = ecf::to_ui_designation(ecf::Protocol::Https);
+
+    // Execute `Stats` command
+    {
+        auto command = std::make_shared<CtsCmd>(CtsCmd::STATS);
+
+        ClientToServerRequest request;
+        request.set_cmd(command);
+
+        try {
+            auto reply = request.handleRequest(&server);
+            if (reply) {
+                BOOST_REQUIRE(reply->ok());
+
+                auto protocol = extract_protocol(reply->get_string());
+                BOOST_REQUIRE(protocol == ecf::to_ui_designation(ecf::Protocol::Https));
+            }
+        }
+        catch (std::exception& e) {
+            BOOST_CHECK_MESSAGE(false, "Unexpected exception : " << e.what() << " : " << request);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_preserve_protocol_when_serialised) {
+
+    // The `protocol_` member must survive a serialise/deserialise round trip,
+    // since `Stats` is sent from server to client over the wire using this mechanism.
+
+    Stats saved;
+    saved.protocol_ = ecf::to_ui_designation(ecf::Protocol::Https);
+
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+
+    Stats restored;
+    ecf::restore_from_string(archive_data, restored);
+
+    BOOST_REQUIRE_MESSAGE(restored.protocol_ == saved.protocol_,
+                          "protocol_ was not preserved by (de)serialisation: expected '"
+                              << saved.protocol_ << "', got '" << restored.protocol_ << "'");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

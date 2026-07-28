@@ -141,6 +141,7 @@ void to_json(ojson& j, const ::Stats& s) {
     j["status"]                    = SState::to_string(s.status_);
     j["host"]                      = s.host_;
     j["port"]                      = s.port_;
+    j["protocol"]                  = s.protocol_;
     j["up_since"]                  = s.up_since_;
     j["job_sub_interval"]          = s.job_sub_interval_;
     j["ECF_HOME"]                  = s.ECF_HOME_;
