@@ -32,3 +32,4 @@ ecFlowUI is a desktop-based graphical user interface to ecFlow. The command to s
    viewing_and_editing_variables
    viewing_dependencies
    viewing_scripts_jobs_and_output
+   viewing_the_timeline
