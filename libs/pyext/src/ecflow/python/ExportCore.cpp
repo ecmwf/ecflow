@@ -137,21 +137,35 @@ void export_Core(py::module& m) {
                     "Set debug level. debug_level > 0 will disable some warning messages");
 
     constexpr const char* nstate_state_docs =
-        "Each :term:`node` can have a status, which reflects the life cycle of a node.\n\n"
-        "It varies as follows:\n\n"
-        "- When the definition file is loaded into the :term:`ecflow_server` the :term:`task` status is "
-        ":term:`unknown`\n"
-        "- After begin command the :term:`task` s are either :term:`queued`, :term:`complete`, :term:`aborted` or "
-        ":term:`suspended` ,\n"
-        "  a suspended task means that the task is really :term:`queued` but it must be resumed by\n"
-        "  the user first before it can be :term:`submitted`. See :py:class:`ecflow.DState`\n"
-        "- Once the :term:`dependencies` are resolved a task is submitted and placed into the :term:`submitted` "
-        "state,\n"
-        "  however if the submission fails, the task is placed in a :term:`aborted` state.\n"
-        "- On a successful submission the task is placed into the :term:`active` state\n"
-        "- Before a job ends, it may send other message to the server such as:\n"
-        "  Set an :term:`event`, Change a :term:`meter`, Change a :term:`label`, send a message to log file\n\n"
-        "Jobs end by becoming either :term:`complete` or :term:`aborted`";
+        ":code:`ecflow.State` is an enumerate with the possible states of a Node\n"
+        "\n"
+        "Each :term:`node` has a state, which reflects the life cycle of a node.\n"
+        "\n"
+        "An overview of the life cycle of a node is as follows:\n"
+        "\n"
+        "- When the definition file is loaded to the :term:`ecflow_server`, the :term:`task` state is :term:`unknown`\n"
+        "\n"
+        "- After the begin command, the :term:`task` is either :term:`queued`, :term:`complete`, :term:`aborted`\n"
+        "\n"
+        "  Note: the initial :term:`task` state is determined by the :term:`defstatus` attribute.\n"
+        "  See :py:class:`ecflow.Defstatus`\n"
+        "\n"
+        "- Once the :term:`dependencies` are resolved, a task is moved to the :term:`submitted` state, and the\n"
+        "  submission process starts\n"
+        "\n"
+        "- if the submission fails, the task is moved to the :term:`aborted` state.\n"
+        "\n"
+        "- if the submission succeeds, the task is moved to the :term:`active` state\n"
+        "\n"
+        "- While the job runs, it may send other message to the server such as:\n"
+        "\n"
+        "  - Set an :term:`event`\n"
+        "  - Change a :term:`meter`\n"
+        "  - Change a :term:`label`\n"
+        "  - Send a message to log file\n"
+        "\n"
+        "- The job termination is indicated by a complete or aborted message,\n"
+        "  causing the task to move to :term:`complete` or :term:`aborted` state, accordingly.";
 
     py::enum_<NState::State>(m, "State", nstate_state_docs)
 
@@ -164,19 +178,25 @@ void export_Core(py::module& m) {
 
     py_finalize_enum(m, "State");
 
-    constexpr const char* dstate_docs = "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
-                                        "Suspended stops job generation, and hence is an attribute of a Node.\n"
-                                        "DState can be used for setting the default state of node when it is\n"
-                                        "begun or re queued. DState is used for defining :term:`defstatus`.\n"
-                                        "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.Defstatus`\n"
-                                        "The default state of a :term:`node` is :term:`queued`.\n"
-                                        "\nUsage::\n\n"
-                                        "   task = ecflow.Task('t1')\n"
-                                        "   task.add_defstatus(ecflow.DState.complete)"
-                                        "   task = ecflow.Task('t2')\n"
-                                        "   task += Defstatus('complete')\n"
-                                        "   task = Task('t3',\n"
-                                        "               Defstatus('complete')) # create in place\n";
+    constexpr const char* dstate_docs =
+        ":code:`ecflow.DState` is an enumerate, similar to :py:class:`ecflow.State`, with an additional\n"
+        ":code:`suspended` state.\n"
+        "\n"
+        "The values in this enumerate are used to create a :py:class:`ecflow.Defstatus` attribute,\n"
+        "which controls the default state of a task when it *begins* or is *requeued*.\n"
+        "\n"
+        "Note that :code:`suspended` is not one of the states a node goes through, and has no\n"
+        ":py:class:`ecflow.State` counterpart. A suspended node retains its state, which is reported\n"
+        "again once the node is resumed.\n"
+        "\n"
+        "Usage::\n"
+        "\n"
+        "   task = ecflow.Task('t1')\n"
+        "   task.add_defstatus(ecflow.DState.complete)\n"
+        "   task = ecflow.Task('t2')\n"
+        "   task += Defstatus('complete')\n"
+        "   task = Task('t3',\n"
+        "               Defstatus('complete')) # create in place\n";
 
     py::enum_<DState::State>(m, "DState", dstate_docs)
 
@@ -191,9 +211,15 @@ void export_Core(py::module& m) {
     py_finalize_enum(m, "DState");
 
     constexpr const char* defstatus_docs =
-        "A :term:`node` can be set with a default status other the :term:`queued`\n\n"
-        "The default state of a :term:`node` is :term:`queued`.\n"
-        "This defines the state to take at 'begin' or 're-queue' time\n"
+        ":code:`ecflow.Defstatus` represents the :term:`defstatus` attribute, and determines the default state of a\n"
+        ":term:`node` when it *begins* or is *requeued*.\n"
+        "\n"
+        "Unless explicitly defined by the user, the default state of a :term:`node` is :term:`queued`. \n"
+        "\n"
+        "The default state :term:`suspended` is special, in the sense that the task will adopt the state\n"
+        ":term:`queued` when it *begins* or is *requeued*, but will require an explicit user resume instruction to\n"
+        "eventually move to :term:`submitted` state.\n"
+        "\n"
         "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n";
 
     py::class_<Defstatus>(m, "Defstatus", py::dynamic_attr(), defstatus_docs)

@@ -7,21 +7,35 @@ ecflow.State
 
    Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
-Each :term:`node` can have a status, which reflects the life cycle of a node.
+:code:`ecflow.State` is an enumerate with the possible states of a Node
 
-It varies as follows:
+Each :term:`node` has a state, which reflects the life cycle of a node.
 
-- When the definition file is loaded into the :term:`ecflow_server` the :term:`task` status is :term:`unknown`
-- After begin command the :term:`task` s are either :term:`queued`, :term:`complete`, :term:`aborted` or :term:`suspended` ,
-  a suspended task means that the task is really :term:`queued` but it must be resumed by
-  the user first before it can be :term:`submitted`. See :py:class:`ecflow.DState`
-- Once the :term:`dependencies` are resolved a task is submitted and placed into the :term:`submitted` state,
-  however if the submission fails, the task is placed in a :term:`aborted` state.
-- On a successful submission the task is placed into the :term:`active` state
-- Before a job ends, it may send other message to the server such as:
-  Set an :term:`event`, Change a :term:`meter`, Change a :term:`label`, send a message to log file
+An overview of the life cycle of a node is as follows:
 
-Jobs end by becoming either :term:`complete` or :term:`aborted`
+- When the definition file is loaded to the :term:`ecflow_server`, the :term:`task` state is :term:`unknown`
+
+- After the begin command, the :term:`task` is either :term:`queued`, :term:`complete`, :term:`aborted`
+
+  Note: the initial :term:`task` state is determined by the :term:`defstatus` attribute.
+  See :py:class:`ecflow.Defstatus`
+
+- Once the :term:`dependencies` are resolved, a task is moved to the :term:`submitted` state, and the
+  submission process starts
+
+- if the submission fails, the task is moved to the :term:`aborted` state.
+
+- if the submission succeeds, the task is moved to the :term:`active` state
+
+- While the job runs, it may send other message to the server such as:
+
+  - Set an :term:`event`
+  - Change a :term:`meter`
+  - Change a :term:`label`
+  - Send a message to log file
+
+- The job termination is indicated by a complete or aborted message,
+  causing the task to move to :term:`complete` or :term:`aborted` state, accordingly.
 
 Members:
 

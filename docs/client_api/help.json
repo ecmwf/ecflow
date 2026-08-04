@@ -2829,6 +2829,8 @@
       "description": [
         "Sets the state a node is reset to at begin/re-queue time, overriding the implicit default of queued.",
         "",
+        "The defstatus value 'suspended' is particular, in the sense that, at begin/re-queue time, it sets the node to state 'queued' but requires an explicit resume instruction by the user to eventually allow the node to move to the 'submitted' state (the node is effectively *suspended* in the meantime).",
+        "",
         "Syntax",
         "  defstatus state",
         "",
