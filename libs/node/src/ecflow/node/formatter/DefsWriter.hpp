@@ -11,6 +11,9 @@
 #ifndef ecflow_node_formatter_DefsWriter_HPP
 #define ecflow_node_formatter_DefsWriter_HPP
 
+#include <algorithm>
+#include <cstdint>
+
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -55,15 +58,25 @@ private:
 
 struct Format
 {
-    bool indenting           = true;
-    int8_t indentation_width = 2;
-    int8_t indentation_level = 0;
+    bool indenting        = true;
+    int indentation_width = 2;
+    int indentation_level = 0;
 
     bool is_indenting() const { return indenting; }
     void increase_indentation() { indentation_level++; }
     void decrease_indentation() { indentation_level = std::max(0, indentation_level - 1); }
 
-    uint32_t indentation_spaces() const { return indentation_width * indentation_level; }
+    ///
+    /// @brief Determines the number of spaces that make up the current indentation.
+    ///
+    /// The product is clamped to zero before the conversion to the unsigned result type, so that a
+    /// negative indentation level can never be reinterpreted as a very large positive width.
+    ///
+    /// @return The number of spaces to emit as leading whitespace.
+    ///
+    uint32_t indentation_spaces() const {
+        return static_cast<uint32_t>(std::max(0, indentation_width * indentation_level));
+    }
 };
 
 struct FormatContext

@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <algorithm>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <string>
@@ -147,6 +149,83 @@ BOOST_AUTO_TEST_CASE(test_expression_ast_rendering) {
                             "AST rendering of expression did not match expected size.\nExpected size: "
                                 << expected.size() << "\nActual size: " << actual.size());
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_format_indentation_does_not_overflow) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    // The indentation counter must grow monotonically, and remain bounded, well beyond 128 levels.
+    // The critical iteration is the 128th: an 8-bit signed counter wraps to -128 at that point, and
+    // the negative product is converted to the unsigned return type, yielding roughly 4 billion.
+
+    constexpr int levels = 1000;
+
+    auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
+
+    // Indent is a scope guard, and decreases the indentation when destroyed. The elements are held in a
+    // std::deque because, unlike std::vector, growing it neither relocates nor destroys the existing
+    // elements; a std::vector would fire the destructor of every element it relocates while reallocating.
+    std::deque<Indent> indents;
+    for (int level = 1; level <= levels; ++level) {
+        indents.emplace_back(ctx);
+        BOOST_REQUIRE_EQUAL(ctx.format.indentation_spaces(), static_cast<uint32_t>(2 * level));
+    }
+
+    // Unwinding the indentation restores the initial level.
+    indents.clear();
+    BOOST_CHECK_EQUAL(ctx.format.indentation_spaces(), static_cast<uint32_t>(0));
+}
+
+BOOST_AUTO_TEST_CASE(test_expression_ast_rendering_with_deep_tree) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    // A chain of 'and' terms parses into a chain of AstAnd nodes, one nesting level per term.
+    // Rendering such a tree used to overflow the 8-bit indentation counter beyond depth 127,
+    // and request an allocation of approximately 4 GB for the leading whitespace of a single line.
+
+    constexpr size_t terms = 200;
+
+    Family f("f");
+
+    std::string expression;
+    for (size_t i = 0; i < terms; ++i) {
+        auto name = "t" + std::to_string(i);
+        f.add_task(name);
+        if (i > 0) {
+            expression += " and ";
+        }
+        expression += name + " == complete";
+    }
+
+    auto t = f.add_task("deep");
+    t->add_trigger(expression);
+
+    auto ast = t->triggerAst();
+    BOOST_REQUIRE(ast != nullptr);
+
+    auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
+
+    std::string actual;
+    BOOST_REQUIRE_NO_THROW(ecf::write_t(actual, *ast, ctx));
+
+    // The tree is rendered in full: a header line, one line per operator, and one line per operand.
+    // A chain of N terms contributes N-1 'and' operators, N comparison operators, and 2N operands.
+    BOOST_CHECK_EQUAL(std::count(std::begin(actual), std::end(actual), '\n'), static_cast<long>(4 * terms));
+
+    // No line is indented beyond the depth of the tree. The deepest operands sit two levels below
+    // the innermost 'and', which itself sits one level below the header.
+    size_t deepest = 0;
+    for (size_t begin = 0; begin < actual.size();) {
+        auto end    = actual.find('\n', begin);
+        auto indent = actual.find_first_not_of(' ', begin) - begin;
+        deepest     = std::max(deepest, indent);
+        begin       = (end == std::string::npos) ? actual.size() : end + 1;
+    }
+    BOOST_CHECK_LE(deepest, 2 * (terms + 3));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
