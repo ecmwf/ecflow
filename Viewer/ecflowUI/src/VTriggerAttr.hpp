@@ -45,6 +45,16 @@ public:
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
+
+    ///
+    /// @brief Renders the evaluation tree of the trigger (or complete) expression.
+    ///
+    /// The rendering is invoked from a Qt slot, which provides no exception barrier, and therefore
+    /// this function does not propagate exceptions. Whenever the expression cannot be rendered, a
+    /// diagnostic message is returned in place of the evaluation tree.
+    ///
+    /// @return The rendered evaluation tree, or a diagnostic message if the rendering failed.
+    ///
     std::string ast_str() const;
 
     static void scan(VNode* vnode, std::vector<VAttribute*>& vec);

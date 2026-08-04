@@ -10,6 +10,8 @@
 
 #include "VTriggerAttr.hpp"
 
+#include <exception>
+
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
@@ -170,18 +172,26 @@ void render_expression(Expression* e, const Node& node, STREAM& stream) {
 
 std::string VTriggerAttr::ast_str() const {
     std::string buffer;
-    ecf::stringstreambuf ss{buffer};
-    if (node_ptr node = parent_->node()) {
-        if (index_ == 0) {
-            if (Expression* e = node->get_trigger()) {
-                detail::render_expression(e, *node, ss);
+    try {
+        ecf::stringstreambuf ss{buffer};
+        if (node_ptr node = parent_->node()) {
+            if (index_ == 0) {
+                if (Expression* e = node->get_trigger()) {
+                    detail::render_expression(e, *node, ss);
+                }
+            }
+            else {
+                if (Expression* e = node->get_complete()) {
+                    detail::render_expression(e, *node, ss);
+                }
             }
         }
-        else {
-            if (Expression* e = node->get_complete()) {
-                detail::render_expression(e, *node, ss);
-            }
-        }
+    }
+    catch (const std::exception& e) {
+        // Since the rendering is invoked from a Qt slot, which provides no exception barrier of its own,
+        // letting an exception reach the event loop effectively terminates the application.
+        // Instead, we render a diagnostic message, and avoid the loss of the session.
+        return std::string("# unable to render the expression: ") + e.what() + "\n";
     }
 
     return buffer;
