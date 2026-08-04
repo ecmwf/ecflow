@@ -169,9 +169,7 @@ struct EnumTraits<AlterCmd::Change_attr_type>
 /// @return The accepted states, separated by " | ".
 ///
 static std::string valid_defstatus_states() {
-    // Note: the separator is explicitly a std::string, since ecf::algorithm::join() takes its size with
-    // std::size(), which for a character array literal includes the terminating null character.
-    return ecf::algorithm::join(DState::allStates(), std::string(" | "));
+    return ecf::algorithm::join(DState::allStates(), " | ");
 }
 
 static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s) {

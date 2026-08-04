@@ -47,6 +47,19 @@ BOOST_AUTO_TEST_CASE(test_algorithm_join) {
         auto actual = ecf::algorithm::join(tc.input, tc.delimiter);
         BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
     }
+
+    {
+        // The separator may be given as a character array literal, in which case the terminating null
+        // character must not be considered part of the separator. A null embedded in the result compares
+        // equal to an equally affected expectation, so the size is checked explicitly.
+        std::vector<std::string> input{"a", "b", "c"};
+
+        auto actual = ecf::algorithm::join(input, " | ");
+
+        BOOST_CHECK_MESSAGE(actual == "a | b | c", "Expected 'a | b | c', found '" << actual << "'");
+        BOOST_CHECK_MESSAGE(actual.size() == 9, "Expected 9 characters, found " << actual.size());
+        BOOST_CHECK_MESSAGE(actual.find('\0') == std::string::npos, "Expected no embedded null character");
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_algorithm_replace_first) {
