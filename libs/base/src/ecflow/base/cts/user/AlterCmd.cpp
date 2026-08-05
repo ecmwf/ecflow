@@ -160,6 +160,18 @@ struct EnumTraits<AlterCmd::Change_attr_type>
 
 } // namespace ecf
 
+///
+/// @brief Lists the states accepted by 'alter change defstatus', formatted for a diagnostic message.
+///
+/// The list is derived from DState, which is what the validation uses, so that the message cannot
+/// advertise a set of values different from the one actually accepted.
+///
+/// @return The accepted states, separated by " | ".
+///
+static std::string valid_defstatus_states() {
+    return ecf::algorithm::join(DState::allStates(), " | ");
+}
+
 static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s) {
     if (auto found = ecf::Enumerate<AlterCmd::Delete_attr_type>::to_enum(s); found) {
         return found.value();
@@ -1466,11 +1478,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::DEFSTATUS: {
             if (options.size() != 3) {
-                throw std::runtime_error(MESSAGE(
-                    "AlterCmd: change defstatus expected four args : change defstatus [ queued | complete | unknown "
-                    "| aborted | suspended ] <path_to_node> but found  "
-                    << (options.size() + paths.size()) << " arguments.\n"
-                    << dump_args(options, paths) << "\n"));
+                throw std::runtime_error(MESSAGE("AlterCmd: change defstatus expected four args : change defstatus [ "
+                                                 << valid_defstatus_states() << " ] <path_to_node> but found  "
+                                                 << (options.size() + paths.size()) << " arguments.\n"
+                                                 << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1625,10 +1636,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 
         case AlterCmd::DEFSTATUS: {
             if (!DState::isValid(name)) {
-                throw std::runtime_error(MESSAGE(
-                    "AlterCmd change defstatus : expected "
-                    << name
-                    << " to be a valid state,  i.e one of [ queued | complete | unknown | aborted | suspended ]\n"));
+                throw std::runtime_error(MESSAGE("AlterCmd change defstatus : expected "
+                                                 << name << " to be a valid state,  i.e one of [ "
+                                                 << valid_defstatus_states() << " ]\n"));
             }
             break;
         }

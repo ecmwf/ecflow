@@ -839,6 +839,10 @@ defstatus
 
 Sets the state a node is reset to at begin/re-queue time, overriding the implicit default of ``queued``.
 
+The defstatus value :code:`suspended` is particular, in the sense that, at begin/re-queue time, it sets the node to
+state :code:`queued` but requires an explicit resume instruction by the user to eventually allow the node to move to
+the :code:`submitted` state (the node is effectively *suspended* in the meantime).
+
 **Attaches to:** Node (Suite, Family, Task, and Alias)
 
 **Syntax**
@@ -851,7 +855,8 @@ Sets the state a node is reset to at begin/re-queue time, overriding the implici
 
    state
       One of ``unknown``, ``complete``, ``queued``, ``aborted``, ``submitted``, ``active``,
-      ``suspended``.
+      ``suspended``. Not every value is meaningful on every node type; see :ref:`defstatus`
+      for guidance.
 
 **Semantics**
 

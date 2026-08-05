@@ -1327,6 +1327,39 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_errors) {
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_defstatus_validation) {
+    ECF_NAME_THIS_TEST();
+
+    // Note: this exercises the string based constructor, which is the one that validates the given state.
+    // The enumeration based constructor used elsewhere in this file bypasses the validation.
+
+    const std::vector<std::string> paths{"/suite/t1"};
+
+    // Every state considered valid by DState must be accepted.
+    for (const auto& state : DState::allStates()) {
+        BOOST_REQUIRE_NO_THROW(AlterCmd(paths, "change", "defstatus", state, ""));
+    }
+
+    // An invalid state must be rejected, and the diagnostic must advertise the whole accepted set.
+    // A diagnostic that lists fewer states than the validation accepts leads users to believe that
+    // the missing ones are rejected.
+    try {
+        AlterCmd(paths, "change", "defstatus", "not-a-state", "");
+        BOOST_FAIL("Expected 'alter change defstatus not-a-state' to be rejected");
+    }
+    catch (const std::exception& e) {
+        const std::string diagnostic = e.what();
+        for (const auto& state : DState::allStates()) {
+            BOOST_CHECK_MESSAGE(diagnostic.find(state) != std::string::npos,
+                                "Expected the diagnostic to mention the accepted state '"
+                                    << state << "', but found: " << diagnostic);
+        }
+    }
+
+    /// Destroy singleton's to avoid valgrind from complaining
+    System::destroy();
+}
+
 BOOST_AUTO_TEST_CASE(test_destroy_log5) {
     Log::destroy();
     fs::remove("test_add_log5.log");

@@ -279,9 +279,37 @@ Glossary
            - :token:`day`
        
    defstatus
-      Defines the default :term:`status` for a task/family to be assigned to the :term:`node` when the begin command is issued.
-      
-      By default :term:`node` gets queued when you use begin on a :term:`suite`. 
+      A defstatus is a :term:`node` attribute, that determines the default state assigned to the node
+      when it *begins* or is *requeued*.
+
+      Unless explicitly defined by the user, the default state of a node is :term:`queued`.
+
+      The values for defstatus are:
+
+      - :term:`unknown`
+      - :term:`complete`
+      - :term:`queued`
+      - :term:`aborted`
+      - :term:`submitted`
+      - :term:`active`
+      - :term:`suspended`
+
+      The defstatus value 'suspended' is particular, in the sense that, at begin/re-queue time, it sets the
+      node to state 'queued' but requires an explicit resume instruction by the user to eventually allow the
+      node to move to the 'submitted' state (the node is effectively *suspended* in the meantime).
+
+      .. important::
+
+         Although valid, the use of the values 'unknown', 'submitted' and 'active' is not recommended!
+
+         For a :term:`task`, these values very likely mean the node adopts an inconsistent state (e.g. a task
+         with 'active' state, but never actually submitted).
+
+         For a :term:`suite` or a :term:`family`, the only meaningful values are 'queued', 'complete' and
+         'suspended'. The remaining values have no lasting effect: the state is assigned to the node alone,
+         is not propagated to the children, and is superseded as soon as any of the children changes state.
+
+
       defstatus is useful in preventing suites from running automatically once begun or in setting
       tasks complete so they can be run selectively. 
 
@@ -1807,7 +1835,7 @@ Glossary
 
 
    queued
-      Is a :term:`node` :term:`status`. 
+      Is a :term:`node` :term:`state`.
       
       After the begin command, the task **without** a :term:`defstatus` are placed into the queued state
       
@@ -1866,20 +1894,34 @@ Glossary
        
    shutdown
       Is a :term:`ecflow_server` state. See :term:`server states`
-      
+
+   state
+      Each :term:`node` in :term:`suite definition`, and the :term:`ecflow_server` itself, has a state (also referred to as :term:`status`).
+
+      The :term:`node` states are:
+
+      - :term:`unknown`
+      - :term:`queued`
+      - :term:`submitted`
+      - :term:`active`
+      - :term:`complete`
+      - :term:`aborted`.
+
+      The :term:`ecflow_ui` reflects the node state as the background color of the box representing the node.
+
+      The :term:`ecflow_server` states are:
+
+      - :term:`shutdown`
+      - :term:`halted`
+      - :term:`running`
+
+      The server state is reflected as the background color of the root node in :term:`ecflow_ui`
+
    status
-      Each :term:`node` in :term:`suite definition` has a status. 
-      
-      Status reflects the state of the :term:`node`. 
-      In :term:`ecflow_ui` the background colour of the text reflects the status.  
-      
-      :term:`task` status are: :term:`unknown`, :term:`queued`, :term:`submitted`, :term:`active`, :term:`complete`, :term:`aborted` and :term:`suspended`
-      
-      :term:`ecflow_server` status are: :term:`shutdown`, :term:`halted`, :term:`running` 
-      this is shown on the root node in :term:`ecflow_ui`
+      See :term:`state`
       
    submitted
-      Is a :term:`node` :term:`status`. 
+      Is a :term:`node` :term:`state`.
       
       When the :term:`task` :term:`dependencies` are resolved/free the :term:`ecflow_server` places the task into a submitted state.
       However if the :term:`ECF_JOB_CMD` fails, the task is placed into the :term:`aborted` state
@@ -1946,10 +1988,19 @@ Glossary
       It can be monitored by :term:`ecflow_ui`
    
    suspended
-      Is a :term:`node` state. A :term:`node` can be placed into the suspended state via a :term:`defstatus` or via :term:`ecflow_ui`
-      
-      A suspended :term:`node` including any of its children cannot take part in :term:`scheduling` until
-      the node is resumed.
+      This value is used to configure the default state (i.e. :term:`defstatus`) of a :term:`node`.
+
+      A :term:`node` with :term:`defstatus` set to *suspended* will, at begin/re-queue time, adopt the state
+      :code:`queued` and then require an explicit resume command by the user to eventually move to
+      the :code:`submitted` state (the node is effectively *suspended* in the meantime).
+
+      A *suspended* :term:`node`, including its children, does not take part in the :term:`scheduling` until the
+      node is resumed. Also, the job generation will not happen for *suspended* nodes.
+
+      A :term:`node` can also be *suspended* using the CLI `--suspend` command or via the context menu of the :term:`ecflow_ui`.
+
+      While a node is *suspended*, the :term:`ecflow_ui` tree view shows the *suspended* colour next to a
+      narrow strip with the colour of the underlying :term:`node` state.
 
    task
       A task represents a job that needs to be carried out. 
