@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
@@ -100,6 +101,13 @@ void test_the_server(const std::string& port) {
                                   << interval << " defs server variables, should be in sync with server");
         BOOST_REQUIRE_MESSAGE(theServer.poll_interval() == 12,
                               "Expected poll interval 12 but found " << theServer.poll_interval());
+
+        // The protocol resolved by the environment must be the one reported by the statistics, since that is
+        // what users are shown to confirm how the server is being reached.
+        const std::string expected_protocol = ecf::to_ui_designation(server_environment.protocol());
+        BOOST_REQUIRE_MESSAGE(theServer.stats().protocol_ == expected_protocol,
+                              "Expected the statistics to report protocol '" << expected_protocol << "' but found '"
+                                                                             << theServer.stats().protocol_ << "'");
 
         BOOST_REQUIRE_MESSAGE(theServer.state() == SState::HALTED,
                               "Expected halted at server start but found " << SState::to_string(theServer.state()));
