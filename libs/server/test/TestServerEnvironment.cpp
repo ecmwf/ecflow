@@ -49,16 +49,60 @@ void remove_log_file(const ServerEnvironment& serverEnv) {
 #ifdef ECF_OPENSSL
 
 ///
+/// @brief Sets or clears an environment variable, restoring its previous value on destruction.
+///
+/// Environment variables are process-wide, and the test binary runs every case in a single process. A
+/// variable left modified therefore leaks into whichever case happens to run next, making that case
+/// depend on the order in which the suites were registered. Restoring the previous value confines the
+/// modification to the scope that made it.
+///
+class ScopedEnvironmentVariable {
+public:
+    ///
+    /// @brief Applies the given value to the given variable, for the lifetime of the instance.
+    ///
+    /// @param[in] name The environment variable to modify
+    /// @param[in] value The value to apply; when empty, the variable is cleared instead
+    ///
+    ScopedEnvironmentVariable(std::string name, std::optional<std::string> value)
+        : name_(std::move(name)),
+          previous_(ecf::environment::fetch<std::string>(name_.c_str())) {
+        if (value) {
+            setenv(name_.c_str(), value.value().c_str(), 1);
+        }
+        else {
+            unsetenv(name_.c_str());
+        }
+    }
+
+    ScopedEnvironmentVariable(const ScopedEnvironmentVariable&)            = delete;
+    ScopedEnvironmentVariable& operator=(const ScopedEnvironmentVariable&) = delete;
+
+    ~ScopedEnvironmentVariable() {
+        if (previous_) {
+            setenv(name_.c_str(), previous_.value().c_str(), 1);
+        }
+        else {
+            unsetenv(name_.c_str());
+        }
+    }
+
+private:
+    std::string name_;
+    std::optional<std::string> previous_;
+};
+
+///
 /// @brief Provides a temporary certificate directory, for the lifetime of the instance.
 ///
 /// The directory holds a placeholder `server.crt`, and is registered in ECF_SSL_DIR so that it is
-/// searched in place of the certificate directory of the user running the tests. ECF_SSL is cleared,
-/// so that the outcome does not depend on the environment the tests are launched from. Both variables
-/// are restored on destruction.
+/// searched in place of the certificate directory of the user running the tests. ECF_SSL is cleared, so
+/// that the outcome does not depend on the environment the tests are launched from. Both variables are
+/// restored on destruction, and the directory is removed.
 ///
 /// Only the existence of the certificate file is relevant here: `Openssl` checks for the file when SSL
-/// is enabled, and validates its content later, when the server creates the SSL context &mdash; which
-/// these tests never reach. A placeholder therefore avoids generating a real certificate.
+/// is enabled, and validates its content later, when the server creates the SSL context, which these
+/// tests never reach. A placeholder therefore avoids generating a real certificate.
 ///
 /// @invariant The registered directory always ends with a separator, since the certificate paths are
 /// built by direct concatenation.
@@ -67,31 +111,24 @@ class TemporaryCertificate {
 public:
     explicit TemporaryCertificate(const std::string& name)
         : directory_((fs::temp_directory_path() / ("ecflow_test_ssl_" + name + "_" + Pid::getpid())).string() + "/"),
-          previous_ssl_(ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL)) {
+          ecf_ssl_(ecf::environment::ECF_SSL, std::nullopt),
+          ecf_ssl_dir_("ECF_SSL_DIR", directory_) {
         fs::create_directories(directory_);
 
         std::ofstream certificate(directory_ + "server.crt");
         certificate << "placeholder\n";
         certificate.close();
-
-        unsetenv(ecf::environment::ECF_SSL);
-        setenv("ECF_SSL_DIR", directory_.c_str(), 1);
     }
 
     TemporaryCertificate(const TemporaryCertificate&)            = delete;
     TemporaryCertificate& operator=(const TemporaryCertificate&) = delete;
 
-    ~TemporaryCertificate() {
-        unsetenv("ECF_SSL_DIR");
-        if (previous_ssl_) {
-            setenv(ecf::environment::ECF_SSL, previous_ssl_.value().c_str(), 1);
-        }
-        fs::remove_all(directory_);
-    }
+    ~TemporaryCertificate() { fs::remove_all(directory_); }
 
 private:
     std::string directory_;
-    std::optional<std::string> previous_ssl_;
+    ScopedEnvironmentVariable ecf_ssl_;
+    ScopedEnvironmentVariable ecf_ssl_dir_;
 };
 
 #endif
@@ -499,7 +536,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
     // With ECF_SSL undefined, enabling SSL is a no-operation, and the protocol must not be promoted.
     // This is the outcome reached whenever SSL is requested but no certificate is found.
 
-    unsetenv(ecf::environment::ECF_SSL);
+    ScopedEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL, std::nullopt);
 
     {
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
