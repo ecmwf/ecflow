@@ -58,6 +58,7 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;
     stats().port_                    = serverEnv.hostPort().second;
+    stats().protocol_                = ecf::Enumerate<ecf::Protocol>::to_string(serverEnv.protocol()).value();
     stats().job_sub_interval_        = serverEnv.submitJobsInterval();
     stats().checkpt_interval_        = serverEnv.checkPtInterval();
     stats().checkpt_save_time_alarm_ = serverEnv.checkpt_save_time_alarm();

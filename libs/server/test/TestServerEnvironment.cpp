@@ -15,19 +15,42 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
+
+// Imported individually, rather than the whole namespace, since the scaffold also declares a Host.
+using ecf::test::scaffold::NamedTestFile;
+using ecf::test::scaffold::WithoutTestEnvironmentVariable;
+using ecf::test::scaffold::WithTestEnvironmentVariable;
+using ecf::test::scaffold::WithTestFile;
+
+namespace {
+
+///
+/// @brief Removes the log file created by the given server environment.
+///
+/// @param[in] serverEnv The server environment whose log file is to be removed
+///
+void remove_log_file(const ServerEnvironment& serverEnv) {
+    Host host;
+    fs::remove(host.ecf_log_file(serverEnv.the_port()));
+}
+
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 
@@ -361,6 +384,110 @@ BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
 }
+
+BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_plain_by_default) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args);
+
+    BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Plain,
+                        "Expected protocol PLAIN but found " << ecf::to_ui_designation(serverEnv.protocol()));
+
+    remove_log_file(serverEnv);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_http_when_requested) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http"};
+    ServerEnvironment serverEnv(args);
+
+    BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Http,
+                        "Expected protocol HTTP but found " << ecf::to_ui_designation(serverEnv.protocol()));
+
+    remove_log_file(serverEnv);
+}
+
+#ifdef ECF_OPENSSL
+
+BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_promoted_to_ssl_when_ssl_is_enabled) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", "./");
+    WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--ssl"};
+    ServerEnvironment serverEnv(args);
+
+    BOOST_REQUIRE_MESSAGE(serverEnv.ssl(), "Expected SSL to be enabled");
+    BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Ssl,
+                        "Expected the TCP/IP protocol to be promoted to SSL, but found "
+                            << ecf::to_ui_designation(serverEnv.protocol()));
+
+    remove_log_file(serverEnv);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_promoted_to_https_when_ssl_is_enabled) {
+    ECF_NAME_THIS_TEST();
+
+    // Notice that this also pins the order in which the options are handled: the promotion only yields HTTPS
+    // because the HTTP option is processed before SSL is enabled. Were that order reversed, the protocol
+    // reported by an encrypted HTTP server would silently degrade to HTTP.
+
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", "./");
+    WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http", "--ssl"};
+    ServerEnvironment serverEnv(args);
+
+    BOOST_REQUIRE_MESSAGE(serverEnv.ssl(), "Expected SSL to be enabled");
+    BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Https,
+                        "Expected the HTTP protocol to be promoted to HTTPS, but found "
+                            << ecf::to_ui_designation(serverEnv.protocol()));
+
+    remove_log_file(serverEnv);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_not_enabled) {
+    ECF_NAME_THIS_TEST();
+
+    // With ECF_SSL undefined, enabling SSL is a no-operation, and the protocol must not be promoted.
+    // This is the outcome reached whenever SSL is requested but no certificate is found.
+
+    WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
+
+    {
+        std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+        ServerEnvironment serverEnv(args);
+
+        serverEnv.enable_ssl_if_defined();
+
+        BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
+        BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Plain,
+                            "Expected protocol to remain PLAIN but found "
+                                << ecf::to_ui_designation(serverEnv.protocol()));
+
+        remove_log_file(serverEnv);
+    }
+    {
+        std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http"};
+        ServerEnvironment serverEnv(args);
+
+        serverEnv.enable_ssl_if_defined();
+
+        BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
+        BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Http,
+                            "Expected protocol to remain HTTP but found "
+                                << ecf::to_ui_designation(serverEnv.protocol()));
+
+        remove_log_file(serverEnv);
+    }
+}
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

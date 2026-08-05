@@ -199,7 +199,7 @@ public:
     static std::string forceDependencyEval();
 
     static std::string stats();
-    static std::string stats_server(); // used in test, as serialisation subject to change
+    static std::string stats_server(); // returns the Stats struct itself; also used by the REST API
     static std::string stats_reset();
 
     static std::vector<std::string> edit_script(const std::string& path_to_task,

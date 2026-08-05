@@ -41,21 +41,89 @@ namespace ecf::test::scaffold {
  * environment variables).
  */
 
+///
+/// @brief Applies a value to an environment variable, restoring the previous value on destruction.
+///
+/// Environment variables are process-wide, and a test binary runs every case in a single process. A
+/// variable left modified therefore leaks into whichever case runs next, making that case depend on the
+/// order in which the suites happen to be registered. Restoring the previous value, rather than merely
+/// clearing the variable, confines the modification to the scope that made it.
+///
 class WithTestEnvironmentVariable {
 public:
-    WithTestEnvironmentVariable(std::string variable, std::string value)
-        : variable_(variable) {
+    ///
+    /// @brief Applies the given value to the given variable, for the lifetime of the instance.
+    ///
+    /// @param[in] variable The environment variable to modify
+    /// @param[in] value The value to apply
+    ///
+    WithTestEnvironmentVariable(std::string variable, const std::string& value)
+        : variable_(std::move(variable)),
+          previous_(fetch(variable_)) {
         setenv(variable_.c_str(), value.c_str(), 1);
     }
-    WithTestEnvironmentVariable(const WithTestEnvironmentVariable&)                = default;
-    WithTestEnvironmentVariable& operator=(const WithTestEnvironmentVariable&)     = default;
-    WithTestEnvironmentVariable(WithTestEnvironmentVariable&&) noexcept            = default;
-    WithTestEnvironmentVariable& operator=(WithTestEnvironmentVariable&&) noexcept = default;
 
-    ~WithTestEnvironmentVariable() { unsetenv(variable_.c_str()); }
+    WithTestEnvironmentVariable(const WithTestEnvironmentVariable&)            = delete;
+    WithTestEnvironmentVariable& operator=(const WithTestEnvironmentVariable&) = delete;
+
+    ~WithTestEnvironmentVariable() { restore(variable_, previous_); }
+
+protected:
+    ///
+    /// @brief Provides the current value of the given environment variable, if it is defined.
+    ///
+    /// @param[in] variable The environment variable to read
+    /// @return The current value, or an empty optional when the variable is not defined
+    ///
+    static std::optional<std::string> fetch(const std::string& variable) {
+        const char* value = getenv(variable.c_str());
+        return (value == nullptr) ? std::nullopt : std::optional<std::string>{value};
+    }
+
+    ///
+    /// @brief Restores the given environment variable to the given value, clearing it when none is given.
+    ///
+    /// @param[in] variable The environment variable to restore
+    /// @param[in] value The value to restore; when empty, the variable is cleared instead
+    ///
+    static void restore(const std::string& variable, const std::optional<std::string>& value) {
+        if (value) {
+            setenv(variable.c_str(), value.value().c_str(), 1);
+        }
+        else {
+            unsetenv(variable.c_str());
+        }
+    }
+
+    explicit WithTestEnvironmentVariable(std::string variable)
+        : variable_(std::move(variable)),
+          previous_(fetch(variable_)) {}
+
+    /// @brief Provides the name of the environment variable being managed.
+    const std::string& variable() const { return variable_; }
 
 private:
     std::string variable_;
+    std::optional<std::string> previous_;
+};
+
+///
+/// @brief Clears an environment variable, restoring the previous value on destruction.
+///
+/// This is the counterpart of WithTestEnvironmentVariable, for a test whose outcome must not depend on a
+/// variable that the environment launching the tests happens to define.
+///
+class WithoutTestEnvironmentVariable : public WithTestEnvironmentVariable {
+public:
+    ///
+    /// @brief Clears the given variable, for the lifetime of the instance.
+    ///
+    /// @param[in] variable The environment variable to clear
+    ///
+    explicit WithoutTestEnvironmentVariable(std::string variable)
+        : WithTestEnvironmentVariable(std::move(variable)) {
+        unsetenv(this->variable().c_str());
+    }
 };
 
 class NamedTestFile {

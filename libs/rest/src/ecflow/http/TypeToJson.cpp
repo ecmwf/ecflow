@@ -137,10 +137,15 @@ void to_json(ojson& j, const Repeat& a) {
 }
 
 void to_json(ojson& j, const ::Stats& s) {
+    // A server predating the reporting of the protocol leaves this empty. Null distinguishes that from a
+    // protocol that is genuinely reported, while keeping the set of keys stable across server versions.
+    const ojson protocol = s.protocol_.empty() ? ojson(nullptr) : ojson(s.protocol_);
+
     j["version"]                   = s.version_;
     j["status"]                    = SState::to_string(s.status_);
     j["host"]                      = s.host_;
     j["port"]                      = s.port_;
+    j["protocol"]                  = protocol;
     j["up_since"]                  = s.up_since_;
     j["job_sub_interval"]          = s.job_sub_interval_;
     j["ECF_HOME"]                  = s.ECF_HOME_;

@@ -80,9 +80,12 @@ public:
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl_if_defined() {
         ssl_.enable_if_defined(serverHost_, the_port());
+        update_protocol_after_ssl();
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
-    void enable_ssl(const std::string& ecf_ssl) { ssl_.enable_if_defined(serverHost_, the_port()); }
-    void enable_ssl() { ssl_.enable(serverHost_, the_port()); } // search server.crt first, then <host>.<port>.crt
+    void enable_ssl() {
+        ssl_.enable(serverHost_, the_port());
+        update_protocol_after_ssl();
+    } // search server.crt first, then <host>.<port>.crt
 #endif
 
     ecf::Protocol protocol() const { return protocol_; }
@@ -203,6 +206,21 @@ private:
     void change_dir_to_ecf_home_and_check_accesibility();
 
     bool load_whitelist_file(std::string& err) const;
+
+#ifdef ECF_OPENSSL
+    ///
+    /// @brief Promotes the protocol to reflect that SSL has been enabled.
+    ///
+    /// The underlying transport is preserved: HTTP yields HTTPS, and the custom TCP/IP protocol yields SSL.
+    /// No promotion occurs when SSL was not actually enabled, for example when no certificate was found.
+    ///
+    void update_protocol_after_ssl() {
+        if (!ssl_.enabled()) {
+            return;
+        }
+        protocol_ = (protocol_ == ecf::Protocol::Http) ? ecf::Protocol::Https : ecf::Protocol::Ssl;
+    }
+#endif
 
 private:
     ecf::Host host_name_;
