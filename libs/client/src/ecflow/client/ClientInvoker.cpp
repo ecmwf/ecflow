@@ -150,9 +150,11 @@ ClientInvoker::ClientInvoker(const std::string& host, int port)
     }
 }
 
+#ifdef ECF_OPENSSL
 std::string ClientInvoker::get_certificate() const {
     return clientEnv_.openssl().selected_crt();
 }
+#endif
 
 void ClientInvoker::set_host_port(const std::string& host, const std::string& port) {
     // Allow host and port to be overridden.
@@ -500,73 +502,77 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             return 1;
                         }
                     }
-                    else
+                    else {
 #endif
                         if (ecf::is_any_variation_of_http(clientEnv_.protocol())) {
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << std::endl;
-                        }
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<"
+                                          << std::endl;
+                            }
 
-                        const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
-                        HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
-                        try {
-                            cfg(clientEnv_, theClient);
-                        }
-                        catch (UnavailableToken& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
-                        }
+                            const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
+                            HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
+                            try {
+                                cfg(clientEnv_, theClient);
+                            }
+                            catch (UnavailableToken& e) {
+                                server_reply_.set_error_msg(e.what());
+                                return 1;
+                            }
 
-                        theClient.run();
+                            theClient.run();
 
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<"
-                                      << std::endl;
-                        }
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<"
+                                          << std::endl;
+                            }
 
-                        /// Let see how the server responded if at all.
-                        try {
-                            /// will return false if further action required
-                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTriprecorder will record in rtt_
-                                return 0; // the normal exit path
+                            /// Let see how the server responded if at all.
+                            try {
+                                /// will return false if further action required
+                                if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                    // The normal response.  RoundTriprecorder will record in rtt_
+                                    return 0; // the normal exit path
+                                }
+                            }
+                            catch (std::exception& e) {
+                                server_reply_.set_error_msg(e.what());
+                                return 1;
                             }
                         }
-                        catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
-                        }
-                    }
-                    else {
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<"
-                                      << std::endl;
-                        }
+                        else {
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now()
+                                          << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << std::endl;
+                            }
 
-                        Client theClient(
-                            io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
-                        {
+                            Client theClient(
+                                io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
+
+                            {
 #ifdef DEBUG_PERF
-                            ecf::ScopedDurationTimer my_timer("   io.run()");
+                                ecf::ScopedDurationTimer my_timer("   io.run()");
 #endif
-                            io.run();
-                        }
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<"
-                                      << std::endl;
-                        }
-
-                        /// Let see how the server responded if at all.
-                        try {
-                            /// will return false if further action required
-                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTripRecorder will record in rtt_
-                                return 0; // the normal exit path
+                                io.run();
                             }
-                        }
-                        catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
+
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<"
+                                          << std::endl;
+                            }
+
+                            /// Let see how the server responded if at all.
+                            try {
+                                /// will return false if further action required
+                                if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                    // The normal response.  RoundTripRecorder will record in rtt_
+                                    return 0; // the normal exit path
+                                }
+                            }
+                            catch (std::exception& e) {
+                                server_reply_.set_error_msg(e.what());
+                                return 1;
+                            }
                         }
 #ifdef ECF_OPENSSL
                     }

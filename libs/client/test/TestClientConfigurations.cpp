@@ -17,6 +17,10 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
+// The configurations covered by this file are all concerned with the location and selection of SSL
+// certificates, and are therefore only meaningful when ecFlow is built with SSL support.
+#ifdef ECF_OPENSSL
+
 struct MockClientInvoker
 {
     explicit MockClientInvoker(const std::string& commandline)
@@ -445,3 +449,5 @@ host1    # Another comment
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif

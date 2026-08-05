@@ -40,7 +40,14 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
 
     // Disable cert verification
     if (scheme_ == "https") {
+#ifdef ECF_OPENSSL
         client_.enable_server_certificate_verification(false);
+#else
+        // Without SSL support, the underlying HTTP library is unable to establish an HTTPS connection,
+        // and reporting this immediately is preferable to attempting the request and failing obscurely.
+        throw std::runtime_error("HttpClient::HttpClient: Unable to use HTTPS, "
+                                 "since this ecFlow was built without SSL support");
+#endif
     }
 
     if (!cmd_ptr.get()) {

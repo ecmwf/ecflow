@@ -78,7 +78,12 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
             // Setup Access/Authentication
             impl_->invoker_.set_host_port(remote_host, remote_port);
             if (ssl) {
+#ifdef ECF_OPENSSL
                 impl_->invoker_.enable_ssl();
+#else
+                throw std::runtime_error("MirrorClient: Unable to mirror " + remote_host + ":" + remote_port +
+                                         " over SSL, since this ecFlow was built without SSL support");
+#endif
             }
             if (!remote_username.empty()) {
                 impl_->invoker_.set_user_name(remote_username);

@@ -118,12 +118,12 @@ int main(int argc, char* argv[]) {
         }
 
         // Launching custom TCP/IP (SSL) server
-        if constexpr (ECF_OPENSSL == 1) {
-            if (server_environment.ssl()) {
-                BasicSslServer theServer(io, server_environment); // This throws exception, if bind address in use
-                return run(theServer);
-            }
+#ifdef ECF_OPENSSL
+        if (server_environment.ssl()) {
+            BasicSslServer theServer(io, server_environment); // This throws exception, if bind address in use
+            return run(theServer);
         }
+#endif
 
         // Launching custom TCP/IP (non-SSL) server
         BasicServer theServer(io, server_environment); // This throws exception, if bind address in use
