@@ -11,12 +11,15 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <random>
+#include <stdexcept>
 
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
@@ -37,22 +40,75 @@ const std::string API_KEY_pbkdf2  = TokenFile::generate_token();
 const std::string API_KEY_expired = TokenFile::generate_token();
 const std::string API_KEY_revoked = TokenFile::generate_token();
 
-int get_random_port(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> distrib(min, max);
-    return distrib(gen);
-}
+// The range of TCP ports considered when selecting the port used by the REST API server under test.
+//
+// Both ranges lie below the ephemeral port range allocated by the operating system (Linux allocates from
+// 32768 upwards, macOS from 49152 upwards), since a port taken from the ephemeral range may be assigned,
+// at any moment, as the source port of an unrelated outgoing connection, making it unavailable to bind.
+// The ranges are disjoint, as the test binaries for the two backends are allowed to run concurrently.
 
 #if defined(ECF_TEST_HTTP_BACKEND)
-static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(8000, 8999);
-static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
+static const int ECF_TEST_HTTP_PORT_MIN            = 20000;
+static const int ECF_TEST_HTTP_PORT_MAX            = 24999;
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
 #else
-static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(49152, 65535);
-static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
+static const int ECF_TEST_HTTP_PORT_MIN            = 25000;
+static const int ECF_TEST_HTTP_PORT_MAX            = 29999;
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
 #endif
+
+///
+/// @brief Selects a TCP port, available on the local host, from the range [@p min, @p max].
+///
+/// Candidate ports are drawn at random, and each candidate is confirmed to be available by binding to it;
+/// the first available candidate is selected. Notice that, since the candidate port is released before
+/// being handed over to the server under test, availability is not guaranteed to persist.
+///
+/// @param[in] min The lowest port number considered
+/// @param[in] max The highest port number considered
+/// @param[in] attempts The maximum number of candidate ports considered
+/// @return The selected port number
+/// @throws std::runtime_error if no available port is found within the given number of attempts
+///
+int select_available_port(int min, int max, int attempts = 100) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(min, max);
+
+    for (int i = 0; i < attempts; ++i) {
+        int candidate = distrib(gen);
+        if (ecf::EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(candidate))) {
+            return candidate;
+        }
+    }
+
+    throw std::runtime_error("Unable to find an available port in the range [" + std::to_string(min) + ", " +
+                             std::to_string(max) + "], after " + std::to_string(attempts) + " attempts");
+}
+
+///
+/// @brief Provides the TCP port used by the REST API server under test.
+///
+/// The port is selected on first use, and remains unchanged for the remainder of the test run.
+///
+/// @return The selected port number
+/// @throws std::runtime_error if no available port is found
+///
+int api_port() {
+    static const int port = select_available_port(ECF_TEST_HTTP_PORT_MIN, ECF_TEST_HTTP_PORT_MAX);
+    return port;
+}
+
+///
+/// @brief Provides the TCP port used by the REST API server under test, in textual form.
+///
+/// @return The selected port number, as a string
+/// @throws std::runtime_error if no available port is found
+///
+const std::string& api_port_str() {
+    static const std::string port = std::to_string(api_port());
+    return port;
+}
 
 std::unique_ptr<Certificate> create_certificate() {
     auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
@@ -108,7 +164,7 @@ void start_api_server() {
     api_server_started = false;
 
     api_server = std::make_unique<std::thread>([] {
-        std::string port = ECF_TEST_HTTP_PORT;
+        std::string port = api_port_str();
         fs::path cwd(fs::current_path());
         std::string tokens_file = cwd.string() + ECF_TEST_HTTP_TOKENS_FILE;
 
@@ -140,7 +196,7 @@ void start_api_server() {
     // After waiting, if the server thread has not indicated that it started, fail the test immediately.
     if (!api_server_started) {
         BOOST_FAIL("REST API server thread failed to start within 10 seconds, when attenting to bind to port " +
-                   ECF_TEST_HTTP_PORT);
+                   api_port_str());
         return;
     }
 
@@ -172,7 +228,7 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
-    httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
+    httplib::SSLClient c(API_HOST, api_port());
 
     c.enable_server_certificate_verification(false);
     // Set connection timeout
@@ -1027,7 +1083,7 @@ BOOST_AUTO_TEST_CASE(test_node_info) {
     //       HEAD is declared as an allowed method in the OPTIONS handler; cpp-httplib automatically
     //       serves HEAD by running the GET handler and stripping the response body.
     {
-        httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
+        httplib::SSLClient c(API_HOST, api_port());
         c.enable_server_certificate_verification(false);
         c.set_connection_timeout(3);
         c.set_read_timeout(5);
