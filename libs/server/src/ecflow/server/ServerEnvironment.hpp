@@ -212,11 +212,12 @@ private:
     bool load_whitelist_file(std::string& err) const;
 
 #ifdef ECF_OPENSSL
-    /// Promote `protocol_` to reflect that SSL has been enabled.
     ///
-    /// It preserves whether the underlying transport is HTTP (yielding HTTPS) or the custom
-    /// TCP/IP protocol (yielding SSL).
-    /// Does nothing if SSL was not actually enabled (e.g. no certificate found).
+    /// @brief Promotes the protocol to reflect that SSL has been enabled.
+    ///
+    /// The underlying transport is preserved: HTTP yields HTTPS, and the custom TCP/IP protocol yields SSL.
+    /// No promotion occurs when SSL was not actually enabled, for example when no certificate was found.
+    ///
     void update_protocol_after_ssl() {
         if (!ssl_.enabled()) {
             return;
