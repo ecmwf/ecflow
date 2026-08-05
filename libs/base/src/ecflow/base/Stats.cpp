@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/Collections.hpp"
 #include "ecflow/core/SState.hpp"
 
@@ -495,6 +496,13 @@ bool Stats::has_user_commands_file() const {
     return found_any(file_ecf_, file_job_, file_jobout_, file_manual_, file_cmdout_);
 }
 
+std::string Stats::protocol_designation() const {
+    if (auto protocol = ecf::Enumerate<ecf::Protocol>::to_enum(protocol_); protocol) {
+        return ecf::to_ui_designation(protocol.value());
+    }
+    return protocol_; // unrecognised, including the empty value reported by an older server
+}
+
 void Stats::show(std::ostream& os) const {
     auto display = display_stats_helper(os, Stats::width);
 
@@ -503,7 +511,7 @@ void Stats::show(std::ostream& os) const {
     display("Status", SState::to_string(status_));
     display("Host", host_);
     display("Port", port_);
-    display("Protocol", protocol_);
+    display("Protocol", protocol_designation());
     display("Up since", up_since_);
     display("Job sub' interval", job_sub_interval_, "s");
     display("ECF_HOME", ECF_HOME_);

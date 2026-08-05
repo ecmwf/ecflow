@@ -146,7 +146,9 @@ BOOST_AUTO_TEST_CASE(is_able_to_report_protocol) {
     Defs defs;
 
     MockServer server(&defs);
-    server.stats().protocol_ = ecf::to_ui_designation(ecf::Protocol::Https);
+    // SSL is chosen because its encoding (SSL) and its designation (TCP/IP with SSL) differ, so the
+    // assertion below distinguishes the stored form from the displayed one.
+    server.stats().protocol_ = ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Ssl).value();
 
     // Execute `Stats` command
     {
@@ -161,7 +163,8 @@ BOOST_AUTO_TEST_CASE(is_able_to_report_protocol) {
                 BOOST_REQUIRE(reply->ok());
 
                 auto protocol = extract_protocol(reply->get_string());
-                BOOST_REQUIRE(protocol == ecf::to_ui_designation(ecf::Protocol::Https));
+                BOOST_REQUIRE_MESSAGE(protocol == ecf::to_ui_designation(ecf::Protocol::Ssl),
+                                      "expected the report to show the designation, but found " << protocol);
             }
         }
         catch (std::exception& e) {
@@ -176,7 +179,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_preserve_protocol_when_serialised) {
     // since `Stats` is sent from server to client over the wire using this mechanism.
 
     Stats saved;
-    saved.protocol_ = ecf::to_ui_designation(ecf::Protocol::Https);
+    saved.protocol_ = ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Ssl).value();
 
     std::string archive_data;
     ecf::save_as_string(archive_data, saved);

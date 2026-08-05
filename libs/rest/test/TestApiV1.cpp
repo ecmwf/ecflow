@@ -1911,12 +1911,14 @@ BOOST_AUTO_TEST_CASE(test_server_status_reports_an_absent_protocol_as_null) {
     // present that as a protocol whose designation is the empty string.
 
     {
+        // SSL is chosen because its encoding (SSL) differs from its designation (TCP/IP with SSL): the API
+        // reports the encoding, which is stable, rather than the phrasing chosen for readability.
         Stats reported;
-        reported.protocol_ = "HTTPS";
+        reported.protocol_ = "SSL";
 
         ojson j = reported;
         BOOST_REQUIRE(j["protocol"].is_string());
-        BOOST_REQUIRE_EQUAL(j["protocol"].get<std::string>(), "HTTPS");
+        BOOST_REQUIRE_EQUAL(j["protocol"].get<std::string>(), "SSL");
     }
     {
         Stats absent; // as restored from an archive written before `protocol_` existed

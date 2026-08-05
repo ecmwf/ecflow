@@ -43,6 +43,17 @@ struct Stats
 
     void show(std::ostream& os = std::cout) const;
 
+    ///
+    /// @brief Provides the protocol in a form suitable for display.
+    ///
+    /// The protocol is stored in its encoded form, since it is also reported over the REST API, where a
+    /// stable identifier is more useful than a phrase chosen for readability.
+    ///
+    /// @return The human-readable designation of the protocol; empty when no protocol is recorded, as is
+    /// the case for a server predating the reporting of the protocol
+    ///
+    std::string protocol_designation() const;
+
     void update() { request_count_++; }
     void update_stats(int poll_interval);
     void update_for_serialisation();

@@ -104,7 +104,8 @@ void test_the_server(const std::string& port) {
 
         // The protocol resolved by the environment must be the one reported by the statistics, since that is
         // what users are shown to confirm how the server is being reached.
-        const std::string expected_protocol = ecf::to_ui_designation(server_environment.protocol());
+        const std::string expected_protocol =
+            std::string{ecf::Enumerate<ecf::Protocol>::to_string(server_environment.protocol()).value()};
         BOOST_REQUIRE_MESSAGE(theServer.stats().protocol_ == expected_protocol,
                               "Expected the statistics to report protocol '" << expected_protocol << "' but found '"
                                                                              << theServer.stats().protocol_ << "'");
