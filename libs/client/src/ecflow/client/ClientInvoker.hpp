@@ -284,7 +284,8 @@ public:
     int debug_server_off() const;
     int stats() const; // returns stats as string, server does formatting, & hence is free to change ECFLOW-880
     int stats_reset() const;
-    int stats_server() const; // for test only, as stats returned may change for each release ECFLOW-880
+    int stats_server() const; // returns the Stats struct itself; used by the REST API, so the serialised
+                              // form of Stats must remain backward compatible
     int server_version() const;
 
     int suites() const;

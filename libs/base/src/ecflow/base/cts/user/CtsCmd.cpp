@@ -409,7 +409,11 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             as->stats().show(ss); // ECFLOW-880, allow stats to be changed in server, by only returning string
             return PreAllocatedReply::string_cmd(ss.str());
         }
-        case CtsCmd::STATS_SERVER: { // Only to be used in test, as subject to change, returns Stats struct
+        // Returns the Stats struct itself, unlike STATS, which returns a rendered report.
+        // Used by the REST API (see ApiV1.cpp), which runs as a separate process and may be built from a
+        // different release, so the serialised form of Stats is part of the client/server contract: members
+        // added to Stats::serialize() must be appended last, behind a class version guard.
+        case CtsCmd::STATS_SERVER: {
             as->update_stats().stats_++;
             return PreAllocatedReply::stats_cmd(as);
         }
