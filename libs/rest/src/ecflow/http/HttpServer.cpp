@@ -214,6 +214,17 @@ void start_server(httplib::Server& http_server, const HttpServer::BoundCallback&
     const std::string proto = (opts.no_ssl ? "http" : "https");
 
     try {
+        // An unusable server declines to bind, without ever attempting to acquire the port. This is checked
+        // separately, since otherwise the failure is indistinguishable from a port already in use -- and, in
+        // the SSL case, the cause (a certificate that cannot be loaded) is unrelated to the port.
+        if (http_server.is_valid() == false) {
+            std::string reason = "Server is not in a usable state, and is unable to accept connections";
+            if (opts.no_ssl == false) {
+                reason += " (unable to load the certificate and private key found in " + opts.cert_directory + ")";
+            }
+            throw std::runtime_error(reason);
+        }
+
         // The port is acquired separately from the accept loop, so that a failure to bind is detected before
         // the server announces itself as listening, and is reported to the caller instead of being ignored.
         if (http_server.bind_to_port("0.0.0.0", opts.port) == false) {

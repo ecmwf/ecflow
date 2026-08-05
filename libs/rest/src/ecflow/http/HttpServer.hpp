@@ -31,7 +31,8 @@ public:
     ///
     /// @param[in] on_bound Notification issued once the port has been acquired; not called if the port
     /// cannot be acquired. May be empty, in which case no notification is issued.
-    /// @throws std::runtime_error if the port cannot be acquired, or if the server stops unexpectedly.
+    /// @throws std::runtime_error if the server cannot be brought into a usable state (e.g., when the certificate and
+    /// private key cannot be loaded), if the port cannot be acquired, or if the server stops unexpectedly.
     ///
     void run(const BoundCallback& on_bound = {}) const;
 

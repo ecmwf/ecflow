@@ -119,6 +119,12 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       test/TestHttp_main.cpp # test entry point
     )
 
+    #
+    # Each test provisions a SSL certificate on start-up, and uses ECF_RESTAPI_CERT_DIRECTORY to hold it.
+    # The tests below are allowed to run concurrently, and therefore must be given directories of their own.
+    # Sharing a directory causes a race condition between the tests that overwrite each other's certificate.
+    #
+
     ecbuild_add_test(
       TARGET
         s_http
@@ -126,6 +132,8 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         integration nightly slow
       SOURCES
         ${test_srcs}
+      ENVIRONMENT
+        "ECF_RESTAPI_CERT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/ssl.using_tcpip_backend"
       LIBS
         libhttp
         ecflow_all
@@ -153,6 +161,8 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         ${test_srcs}
       DEFINITIONS
         ECF_TEST_HTTP_BACKEND
+      ENVIRONMENT
+        "ECF_RESTAPI_CERT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/ssl.using_http_backend"
       LIBS
         libhttp
         ecflow_all

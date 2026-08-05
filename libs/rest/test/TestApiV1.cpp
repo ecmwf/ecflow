@@ -112,25 +112,41 @@ const std::string& api_port_str() {
     return port;
 }
 
+///
+/// @brief Provisions the certificate used by the REST API server under test.
+///
+/// The certificate is provisioned in the directory given by ECF_RESTAPI_CERT_DIRECTORY, as defined by the
+/// build system, and is removed once the test completes. The same variable directs the server under test
+/// to the certificate.
+///
+/// The ECF_RESTAPI_CERT_DIRECTORY must be provided, and be specific for the test. The sharing of this
+/// directory between multiple tests causes a race condition, where certificates can potentially be overwritten.
+/// Two concurrent provisions write server.key and server.crt in turn, and an interleaving of those writes
+/// leaves behind a certificate and a private key that do not belong together. The server is then unable to
+/// create an SSL context, and reports that as an inability to acquire the port, since bind_to_port() declines
+/// to bind a server that is not in a usable state.
+///
+/// @return The provisioned Certificate, which removes the certificate files once destroyed
+/// @throws std::runtime_error if ECF_RESTAPI_CERT_DIRECTORY is undefined or empty
+///
 std::unique_ptr<Certificate> create_certificate() {
-    auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
+    auto configured = ecf::environment::fetch("ECF_RESTAPI_CERT_DIRECTORY");
 
-    const std::string path_to_cert = (cert_dir) ? cert_dir.value() : ecf::environment::get("HOME") + "/.ecflowrc/ssl/";
+    if (!configured || configured.value().empty()) {
+        throw std::runtime_error("No valid ECF_RESTAPI_CERT_DIRECTORY provided. A certificate directory is required "
+                                 "for this test, typically provided by the build system; falling back to a "
+                                 "default/shared directory would cause a race condition with tests overwriting each "
+                                 "other's certificate.");
+    }
 
-    std::unique_ptr<Certificate> cert;
+    const std::string path_to_cert = configured.value();
+
+    fs::create_directories(path_to_cert);
+
+    auto cert = std::make_unique<Certificate>(path_to_cert);
 
     BOOST_TEST_MESSAGE("Certificates at " << path_to_cert);
 
-    if (fs::exists(path_to_cert + "/server.crt") == false || fs::exists(path_to_cert + "/server.key") == false) {
-        if (fs::exists(path_to_cert) == false) {
-            fs::create_directories(path_to_cert);
-        }
-
-        cert = std::make_unique<Certificate>(path_to_cert);
-
-        setenv("ECF_API_CERT_DIRECTORY", path_to_cert.c_str(), 1);
-        return cert;
-    }
     return cert;
 }
 
