@@ -82,10 +82,6 @@ public:
         ssl_.enable_if_defined(serverHost_, the_port());
         update_protocol_after_ssl();
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
-    void enable_ssl(const std::string& ecf_ssl) {
-        ssl_.enable_if_defined(serverHost_, the_port());
-        update_protocol_after_ssl();
-    }
     void enable_ssl() {
         ssl_.enable(serverHost_, the_port());
         update_protocol_after_ssl();
