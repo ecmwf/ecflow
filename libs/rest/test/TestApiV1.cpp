@@ -19,11 +19,13 @@
 #include "Certificate.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
+#include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
@@ -1900,6 +1902,28 @@ BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_
 
     handle_response(request("delete", "/v1/suites/test/definition", "", API_KEY), HttpStatusCode::success_no_content);
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_server_status_reports_an_absent_protocol_as_null) {
+    ECF_NAME_THIS_TEST();
+
+    // A server predating the reporting of the protocol leaves the field empty, and the JSON must not
+    // present that as a protocol whose designation is the empty string.
+
+    {
+        Stats reported;
+        reported.protocol_ = "HTTPS";
+
+        ojson j = reported;
+        BOOST_REQUIRE(j["protocol"].is_string());
+        BOOST_REQUIRE_EQUAL(j["protocol"].get<std::string>(), "HTTPS");
+    }
+    {
+        Stats absent; // as restored from an archive written before `protocol_` existed
+
+        ojson j = absent;
+        BOOST_REQUIRE_MESSAGE(j["protocol"].is_null(), "expected a null protocol but found " << j["protocol"].dump());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_statistics, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_server")) {
