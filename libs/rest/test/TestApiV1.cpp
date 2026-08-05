@@ -152,16 +152,32 @@ std::unique_ptr<TokenFile> create_token_file() {
 static std::unique_ptr<std::thread> api_server;
 
 ///
-/// @brief Flag to indicate readiness by the server thread once it successfully binds to the port
+/// @brief The state of the REST API server under test, as observed by the test.
 ///
-static std::atomic<bool> api_server_started{false};
+enum class ApiServerStatus {
+    starting, ///< The server thread has been launched, but the server is not yet accepting connections
+    ready,    ///< The server is accepting connections
+    failed,   ///< The server thread terminated with an error (for example, the port could not be bound)
+    stopped   ///< The server terminated normally
+};
+
+static std::atomic<ApiServerStatus> api_server_status{ApiServerStatus::starting};
+
+///
+/// @brief The error reported by the server thread; only meaningful once the status is @c failed.
+///
+/// The value is published by the store to @c api_server_status that accompanies it, and must not be read
+/// before that store has been observed.
+///
+static std::string api_server_error;
 
 void start_api_server() {
     if (ecf::environment::has("NO_API_SERVER")) {
         return; // terminate early, for debugging purposes
     }
 
-    api_server_started = false;
+    api_server_status = ApiServerStatus::starting;
+    api_server_error.clear();
 
     api_server = std::make_unique<std::thread>([] {
         std::string port = api_port_str();
@@ -181,27 +197,37 @@ void start_api_server() {
         };
         // clang-format on
 
-        HttpServer server(argv.size(), const_cast<char**>(argv.data()));
-
-        api_server_started = true; // Signal that server is starting (or has started)
-        server.run();
-        api_server_started = false; // Server is done (either normal shutdown or bind failure)
+        try {
+            HttpServer server(argv.size(), const_cast<char**>(argv.data()));
+            // The server reports the acquisition of the port itself, which is the only reliable indication
+            // that it is ready: a probe performed by the test cannot distinguish the server under test from
+            // an unrelated process holding the same port.
+            auto on_bound = [&] { api_server_status = ApiServerStatus::ready; };
+            server.run(on_bound);
+            api_server_status = ApiServerStatus::stopped;
+        }
+        catch (const std::exception& e) {
+            // Report the failure, rather than letting the exception escape the thread and terminate the process.
+            api_server_error  = e.what();
+            api_server_status = ApiServerStatus::failed;
+        }
     });
 
-    // Wait up to 10 seconds (100 * 100ms for the server thread to start/bind to port.
-    for (int i = 0; i < 100 && !api_server_started; ++i) {
+    // Wait up to 10 seconds (100 * 100ms) for the server to acquire the port, giving up as soon as the
+    // server thread reports a failure.
+    for (int i = 0; i < 100 && api_server_status == ApiServerStatus::starting; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    // After waiting, if the server thread has not indicated that it started, fail the test immediately.
-    if (!api_server_started) {
-        BOOST_FAIL("REST API server thread failed to start within 10 seconds, when attenting to bind to port " +
-                   api_port_str());
+    if (api_server_status == ApiServerStatus::failed) {
+        BOOST_FAIL("REST API server failed to start on port " + api_port_str() + ": " + api_server_error);
         return;
     }
 
-    // Give the server a moment to complete the bind and become ready.
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    if (api_server_status != ApiServerStatus::ready) {
+        BOOST_FAIL("REST API server did not acquire port " + api_port_str() + " within 10 seconds");
+        return;
+    }
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
@@ -306,7 +332,7 @@ struct SetupTest
 
     void teardown() {
         if (api_server && api_server->joinable()) {
-            if (api_server_started) {
+            if (api_server_status == ApiServerStatus::ready) {
                 // Request server to shut down gracefully.
                 printf("Shutting down REST API\n");
                 auto s = request("get", "/v1/shutdown");

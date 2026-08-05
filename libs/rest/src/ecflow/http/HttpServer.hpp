@@ -11,12 +11,30 @@
 #ifndef ecflow_http_HttpServer_HPP
 #define ecflow_http_HttpServer_HPP
 
+#include <functional>
+
 namespace ecf::http {
 
 class HttpServer {
 public:
+    ///
+    /// @brief Notification issued once the server has acquired the port and is able to accept connections.
+    ///
+    /// The notification is issued from the thread that calls run(), before the accept loop is entered.
+    ///
+    using BoundCallback = std::function<void()>;
+
     HttpServer(int argc, char** argv);
-    void run() const;
+
+    ///
+    /// @brief Runs the server, until it is shut down.
+    ///
+    /// @param[in] on_bound Notification issued once the port has been acquired; not called if the port
+    /// cannot be acquired. May be empty, in which case no notification is issued.
+    /// @throws std::runtime_error if the port cannot be acquired, or if the server stops unexpectedly.
+    ///
+    void run(const BoundCallback& on_bound = {}) const;
+
     ~HttpServer() = default;
 
 private:
