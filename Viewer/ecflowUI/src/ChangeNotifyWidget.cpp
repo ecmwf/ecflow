@@ -10,6 +10,7 @@
 
 #include "ChangeNotifyWidget.hpp"
 
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
@@ -69,6 +70,12 @@ void ChangeNotifyButton::slotClicked(bool) {
 }
 
 void ChangeNotifyButton::updateIcon() {
+    // No GUI operation must be performed once the application is quitting, since the Qt
+    // runtime might already be partially torn down.
+    if (!qApp || qApp->property("inQuit").toString() == "1") {
+        return;
+    }
+
     QString text = notifier_->widgetText();
     QString numText;
 
