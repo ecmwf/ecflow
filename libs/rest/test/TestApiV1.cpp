@@ -1828,15 +1828,24 @@ BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_Ap
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "+01:00");
     });
 
+    //
+    // The following update of the autocancel must never actually trigger the node cancellation (i.e. node removal).
+    //
+    // At this point of the test, /test/dynamic is COMPLETE and the server will remove the node as soon as the
+    // auto-cancel attribute is "free". The value set on creation is 1 hour. The following update makes the
+    // cancellation happen in 1 day (in terms of testing timeframe, this will never actually happen), and this is
+    // important as it ensures the explicit delete test to succeed. Otherwise, the node would be automatically removed,
+    // and the following tests would consequently fail.
+    //
     handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"0"})", API_KEY));
+        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"1"})", API_KEY));
     wait_until(
-        [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0"); });
+        [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "1"); });
 
     handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel"})", API_KEY),
                     HttpStatusCode::success_no_content);
     wait_until([] {
-        return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0");
+        return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "1");
     });
 }
 
