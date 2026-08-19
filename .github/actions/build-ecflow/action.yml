@@ -45,6 +45,32 @@ runs:
           echo "build-dir=$RUNNER_TEMP/_ecflow-build"
         } >> "$GITHUB_OUTPUT"
 
+    # Compile caching. Lives in the build action, not the workflow, so both the
+    # push/PR path and the generated cross-repo-trigger.yml path get it — the
+    # latter calls this action directly and never sees the workflow's steps.
+    #
+    # Opt-in by presence of the bucket: sccache has no default bucket and a
+    # daemon that cannot reach one refuses to start, which would fail the build.
+    # With SCCACHE_BUCKET unset both steps below no-op and the compile runs
+    # uncached, so a repo without the secret still builds.
+    - name: Set up sccache
+      if: env.SCCACHE_BUCKET != ''
+      uses: ecmwf/ci-infrastructure/actions/setup-sccache@main
+      with:
+        cache-key-suffix: ${{ inputs.cxx-compiler }}-${{ inputs.build-type }}
+
+    - name: Select compiler launcher
+      id: launcher
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -n "${{ env.SCCACHE_BUCKET }}" ]; then
+          echo "flags=-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache" >> "$GITHUB_OUTPUT"
+        else
+          echo "::notice::SCCACHE_BUCKET unset — compiling without sccache"
+          echo "flags=" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Configure ecflow
       shell: bash
       env:
@@ -53,6 +79,7 @@ runs:
         BUILD_TYPE: ${{ inputs.build-type }}
         INSTALL_PATH: ${{ steps.set-paths.outputs.install-path }}
         BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
+        LAUNCHER: ${{ steps.launcher.outputs.flags }}
       # Three flags carried over from ecflow's own .github/ci-config.yml, each
       # needed because the toolchain here is the distro's:
       #   BOOST_ROOT=/usr            cmake/Dependencies.cmake sets
@@ -68,6 +95,9 @@ runs:
       # come from the base image and the stack-deps prefix respectively.
       run: |
         set -euo pipefail
+        # Word-splitting $LAUNCHER is intended: it is either empty or a fixed pair
+        # of -D flags produced by the step above, never user input.
+        # shellcheck disable=SC2086
         cmake -S "$GITHUB_WORKSPACE" \
               -B "$BUILD_DIR" \
               -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
@@ -76,7 +106,8 @@ runs:
               -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH_IN" \
               -DBOOST_ROOT=/usr \
               -DENABLE_CONFIG_MODE_BOOST=OFF \
-              -DENABLE_STATIC_BOOST_LIBS=OFF
+              -DENABLE_STATIC_BOOST_LIBS=OFF \
+              $LAUNCHER
 
     - name: Build and install ecflow
       shell: bash
