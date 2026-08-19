@@ -1,59 +1,109 @@
-name: ci
+name: CI
 
 on:
-  # Trigger the workflow on push to main or develop, except tag creation
   push:
-    branches:
-      - 'main'
-      - 'develop'
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - ".cd/**"
-      - ".github/cd-config.yml"
+    branches: [develop, master]
+  pull_request:
 
-  # Trigger the workflow on pull request
-  pull_request: ~
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-  # Trigger the workflow manually
-  workflow_dispatch: ~
-
-  # Trigger after public PR approved for CI
-  pull_request_target:
-    types: [labeled]
+env:
+  ARTIFACT_POLL_INTERVAL: ${{ vars.ARTIFACT_POLL_INTERVAL || '60' }}
+  ARTIFACT_S3_ENDPOINT: ${{ secrets.ARTIFACT_S3_ENDPOINT }}
+  ARTIFACT_S3_BUCKET: ${{ secrets.ARTIFACT_S3_BUCKET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  # Run CI including downstream packages on self-hosted runners
-  downstream-ci:
-    name: downstream-ci
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
-    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
-    with:
-      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: |
-        clang@macos-13-arm
-      codecov_upload: true
-      clang_format: true
-      clang_format_ignore: |
-        3rdparty
-        docs
-        tools
-        releng
-        libs/client/test/data
-        libs/node/test/data
-        libs/pyext/test/data
-        libs/test/overall/data
-    secrets: inherit
+  # No pre-commit job: this repo has no .pre-commit-config.yaml yet. Add the
+  # shared ecmwf/ci-infrastructure/.github/workflows/pre-commit.yml call here
+  # once it does.
+  resolve:
+    runs-on: arc-runner-normal
+    container:
+      image: eccr.ecmwf.int/public-playground-ci/ubuntu24.04-base:latest
+    outputs:
+      build-matrix: ${{ steps.r.outputs.matrix-build }}
+    steps:
+      - id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/checkout@v6
+      - id: r
+        uses: ecmwf/ci-infrastructure/actions/resolve-deps@main
+        with:
+          current-branch: ${{ github.head_ref || github.ref_name }}
+          matrix: build
+          token: ${{ steps.mint.outputs.token }}
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          app-private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
 
-  # Build downstream packages on HPC
-  downstream-ci-hpc:
-    name: downstream-ci-hpc
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
-    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci-hpc.yml@main
-    with:
-      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: |
-        intel-2021.4.0
-        nvidia-22.11
-        aocc-4.0.0
-    secrets: inherit
+  build:
+    # Build and test share one job and one container: once ecflow is built and
+    # published we test the tree in place, rather than starting a second
+    # container that would re-checkout, re-fetch deps and re-download our own
+    # artifact. Consumers pick the artifact up as soon as the publish step runs,
+    # without waiting for the tests.
+    needs: resolve
+    name: build+test (${{ matrix.cxx-compiler }}, ${{ matrix.platform }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container || '' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.build-matrix) }}
+    steps:
+      - id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/checkout@v6
+
+      - name: Fetch resolved deps
+        id: deps
+        uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
+        with:
+          mode: download-only
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          token: ${{ steps.mint.outputs.token }}
+
+      - name: Build ecflow
+        id: build
+        uses: ./.github/actions/build-ecflow
+        with:
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+          cxx-compiler: ${{ matrix.cxx-compiler }}
+          build-type: ${{ matrix.build-type }}
+
+      - name: Publish ecflow
+        uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
+        with:
+          mode: publish
+          install-path: ${{ steps.build.outputs.install-path }}
+          artifact-name: ${{ matrix._resolved.own-artifact-name }}
+
+      - name: Print dependency table
+        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
+        with:
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          own-name: ecflow
+          own-artifact-name: ${{ matrix._resolved.own-artifact-name }}
+          own-ref: ${{ matrix._resolved.own-ref }}
+          own-platform: ${{ matrix._resolved.own-platform }}
+          own-compiler: ${{ matrix._resolved.own-compiler }}
+          own-python: ${{ matrix._resolved.own-python }}
+          own-build-type: ${{ matrix._resolved.own-build-type }}
+          own-deps-hash: ${{ matrix._resolved.own-deps-hash }}
+
+      # Run from the build tree: ecflow's tests link against it (and against
+      # static libraries that never reach the install prefix), so they cannot be
+      # run against the installed artifact.
+      - name: Test
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure
