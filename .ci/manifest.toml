@@ -49,3 +49,41 @@ action = "./.github/actions/build-ecflow"
 forwarded-inputs = ["cxx-compiler", "build-type"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
+
+# --- HPC build --------------------------------------------------------------
+# ecflow built inside a SLURM job, linking the atos-hpc-gnu ecbuild and
+# stack-deps (pybind11) artifacts. Two toolchains, matching the two the legacy
+# ci-hpc-config.yml exercised most recently; each gets its own recipe and its own
+# platform slug, because an intel-built tree is a different ABI from a gnu one
+# and the two must never share an artifact name.
+#
+# Boost, Python and Qt come from cluster modules rather than artifacts: ecflow
+# links Boost.Python against a specific interpreter and the cluster ships the
+# matched pair. pybind11 still comes from stack-deps.
+#
+# `needs` names HPC kinds only — the lanes are separate artifact universes.
+[[matrix.build-hpc.include]]
+cxx-compiler = "g++-13"
+build-type = "Release"
+runs-on = "arc-hpc-pet-vsphere-prod"
+container = "eccr.ecmwf.int/private-playground-ci/ubuntu24.04-internal-tools:latest"
+site = "hpc-batch"
+platform = "atos-hpc-gnu"
+job-script = "./.ci/hpc/build-gnu.sh"
+
+[[matrix.build-hpc.include]]
+cxx-compiler = "icpx"
+build-type = "Release"
+runs-on = "arc-hpc-pet-vsphere-prod"
+container = "eccr.ecmwf.int/private-playground-ci/ubuntu24.04-internal-tools:latest"
+site = "hpc-batch"
+platform = "atos-hpc-intel"
+job-script = "./.ci/hpc/build-intel.sh"
+
+[matrix.build-hpc]
+execution = "hpc"
+container-credentials = true
+job-script = "./.ci/hpc/build-gnu.sh"
+triggers = ["upstream-change", "rebuild-request"]
+forwarded-deps-outputs = ["cmake-prefix-path"]
+needs = ["ecbuild/build-hpc", "stack-deps/build-hpc"]
