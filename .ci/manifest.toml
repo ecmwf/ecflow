@@ -34,13 +34,19 @@ compiler-inputs = ["cxx-compiler"]
 
 # platform stays ubuntu-24.04 — the same binary-compatibility class as the other
 # repos — so the ecbuild and stack-deps artifacts built under that slug are
-# reused rather than rebuilt. The boost image differs only in the tools it
+# reused rather than rebuilt. The boost-qt6 image differs only in the tools it
 # delivers, and `container` is scheduling, not artifact identity.
+#
+# Qt6 is in that image because ENABLE_UI is ON by default and
+# cmake/Dependencies.cmake ecbuild_critical's without Qt5/6 — the runner lane
+# therefore builds ecFlowUI, exactly as the HPC lane does via `module load
+# qt/6.6.1`. Do not drop the image for a plain boost one without also passing
+# -DENABLE_UI=OFF, or configure fails.
 [[matrix.build.include]]
 cxx-compiler = "g++-13"
 build-type = "Release"
 runs-on = "arc-runner-very-large"
-container = "eccr.ecmwf.int/public-playground-ci/ubuntu24.04-gfortran13-boost:latest"
+container = "eccr.ecmwf.int/public-playground-ci/ubuntu24.04-gfortran13-boost-qt6:latest"
 platform = "ubuntu-24.04"
 
 [matrix.build]
