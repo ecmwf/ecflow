@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 European Centre for Medium-Range Weather Forecasts (ECMWF)
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# actionlint validates runs-on against GitHub's hosted labels and flags anything
+# else as unknown. These are this org's ARC scale sets and the HPC login-node
+# runner; add new ones here when a scale set is added. Kept identical to
+# ecmwf/ci-infrastructure/.github/actionlint.yaml so the files stay diffable.
+self-hosted-runner:
+  labels:
+    - arc-runner-normal
+    - arc-runner-large
+    - arc-runner-very-large
+    - arc-hpc-pet-vsphere-prod
+    - hpc
+    # Legacy: extra.yml's docker builder. Goes once that workflow retires.
+    - platform-builder-docker-xl

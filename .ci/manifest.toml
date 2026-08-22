@@ -55,6 +55,12 @@ action = "./.github/actions/build-ecflow"
 forwarded-inputs = ["cxx-compiler", "build-type"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
+# Run the suite in the fan-out too, not just on push/PR: an upstream-driven
+# build that only compiles proves nothing beyond "ecflow still links against the
+# new ecbuild". Plain `ctest` to match ci.yml's build+test job — deliberately
+# NOT the HPC recipes' `-L nightly -E s_http`, which is a cluster-specific
+# narrowing (no http server on the compute node), not the runner-lane intent.
+ctest = true
 
 # --- HPC build --------------------------------------------------------------
 # ecflow built inside a SLURM job, linking the atos-hpc-gnu ecbuild and
