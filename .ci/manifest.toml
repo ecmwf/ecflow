@@ -72,11 +72,17 @@ ctest = true
 ctest-args = "-L nightly -E 's_test|s_zombies'"
 
 # --- HPC build --------------------------------------------------------------
-# ecflow built inside a SLURM job, linking the atos-hpc-gnu ecbuild and
-# stack-deps (pybind11) artifacts. Two toolchains, matching the two the legacy
-# ci-hpc-config.yml exercised most recently; each gets its own recipe and its own
-# platform slug, because an intel-built tree is a different ABI from a gnu one
-# and the two must never share an artifact name.
+# ecflow built inside a SLURM job, linking the ecbuild and stack-deps (pybind11)
+# artifacts for its own platform. Four toolchains, one per legacy
+# ci-hpc-config.yml platform we reproduce: gnu-15.2.0, intel-2025.3.1,
+# aocc-4.0.0 and nvidia-24.11. Each gets its own recipe and its own platform
+# slug, because each builds a different ABI and they must never share an artifact
+# name. The first two run tests, the last two do not — see their recipes.
+#
+# Every recipe PINS its compiler (module + CMAKE_CXX_COMPILER). Leaving that to
+# prgenv's default is what silently gave the gnu leg the system gcc 8.5.0 against
+# a GCC 15.2 Boost, failing the link on a missing GLIBCXX_3.4.32 symbol, and gave
+# the intel leg 2021.4.0 while claiming 2025.3.1.
 #
 # Boost, Python and Qt come from cluster modules rather than artifacts: ecflow
 # links Boost.Python against a specific interpreter and the cluster ships the
@@ -100,6 +106,33 @@ container = "eccr.ecmwf.int/private-playground-ci/ubuntu24.04-internal-tools:lat
 site = "hpc-batch"
 platform = "atos-hpc-intel"
 job-script = "./.ci/hpc/build-intel.sh"
+
+# Build-only toolchains, mirroring the legacy ci-hpc-config.yml's `aocc-4.0.0`
+# and `nvidia-24.11`. That config disables testing with `ctest_options:
+# --version` — a flag that makes ctest print its version and exit, because it has
+# no way to say "no tests". Our recipes own the test invocation, so they express
+# it by simply not containing a ctest line.
+#
+# nvidia-24.11 rather than the config's nvidia-22.11: releng/buildit/build.hpc.sh
+# only knows nvidia/24.1, 24.11 and 25.11, so the 22.11 entry looks retired and
+# `module load nvidia/22.11` would fail at job start.
+[[matrix.build-hpc.include]]
+cxx-compiler = "clang++"
+build-type = "Release"
+runs-on = "arc-hpc-pet-vsphere-prod"
+container = "eccr.ecmwf.int/private-playground-ci/ubuntu24.04-internal-tools:latest"
+site = "hpc-batch"
+platform = "atos-hpc-aocc"
+job-script = "./.ci/hpc/build-aocc.sh"
+
+[[matrix.build-hpc.include]]
+cxx-compiler = "nvc++"
+build-type = "Release"
+runs-on = "arc-hpc-pet-vsphere-prod"
+container = "eccr.ecmwf.int/private-playground-ci/ubuntu24.04-internal-tools:latest"
+site = "hpc-batch"
+platform = "atos-hpc-nvidia"
+job-script = "./.ci/hpc/build-nvidia.sh"
 
 [matrix.build-hpc]
 execution = "hpc"

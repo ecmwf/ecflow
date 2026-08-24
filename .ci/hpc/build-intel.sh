@@ -21,7 +21,18 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=8
 
-module load prgenv/intel
+# Toolchain pinned to intel 2025.3.1, matching releng/buildit/build.hpc.sh's
+# load_intel2025_3() and the legacy ci-hpc-config.yml's `intel-2025.3.1` platform.
+#
+# Note prgenv/intel-llvm, NOT prgenv/intel: the latter is what this recipe used to
+# load, and it resolved to IntelLLVM 2021.4.0 while the Boost prefix hardcoded
+# below is the INTEL/2025.3 build. The job still linked, so the mismatch was
+# invisible -- but 2021.4.0 is a different row of the legacy test table
+# (`-E '(py3_|s_http)'`, i.e. Python tests disabled too), so we were running a
+# suite that toolchain is not expected to pass.
+module load prgenv/intel-llvm
+module unload intel
+module load intel/2025.3.1
 module load boost/1.90.0
 module load ninja
 module load python3/3.13.13-01
@@ -36,6 +47,7 @@ module load cmake/new
 cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=icx \
   -DCMAKE_CXX_COMPILER=icpx \
   -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DENABLE_ALL_TESTS=ON \

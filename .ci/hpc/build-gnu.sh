@@ -18,7 +18,22 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=8
 
+# Toolchain pinned to gcc 15.2.0, matching releng/buildit/build.hpc.sh's
+# load_gcc15_2() and the legacy ci-hpc-config.yml's `gnu-15.2.0` platform.
+#
+# The `module unload gcc` before the pin, and CC/CXX below, are both load-bearing.
+# Without them prgenv/gnu alone left CMake to its default search, which picked
+# /usr/bin/g++ -- the compute node's SYSTEM gcc 8.5.0 -- while this recipe links
+# the GNU/15.2 build of Boost hardcoded below. That mismatch failed the link with
+#
+#   libboost_program_options.so.1.90.0: undefined reference to
+#     `std::ios_base_library_init()@GLIBCXX_3.4.32'
+#
+# because that symbol is GCC 13+ libstdc++ and 8.5 does not have it. The intel
+# leg never hit this only because it passes CMAKE_CXX_COMPILER explicitly.
 module load prgenv/gnu
+module unload gcc
+module load gcc/15.2.0
 module load boost/1.90.0
 module load ninja
 module load python3/3.13.13-01
@@ -33,6 +48,8 @@ module load cmake/new
 cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER="$(command -v gcc)" \
+  -DCMAKE_CXX_COMPILER="$(command -v g++)" \
   -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DENABLE_ALL_TESTS=ON \
   -DENABLE_CONFIG_MODE_BOOST=OFF \
