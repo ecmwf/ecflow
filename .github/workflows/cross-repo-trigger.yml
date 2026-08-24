@@ -189,7 +189,7 @@ jobs:
         cxx-compiler: ${{ steps.m.outputs.cxx-compiler }}
         build-type: ${{ steps.m.outputs.build-type }}
     - name: Test
-      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -E u_server_authentication
+      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure
     - name: Publish
       uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
       with:

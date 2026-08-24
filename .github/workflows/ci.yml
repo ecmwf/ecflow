@@ -114,16 +114,8 @@ jobs:
       # Run from the build tree: ecflow's tests link against it (and against
       # static libraries that never reach the install prefix), so they cannot be
       # run against the installed artifact.
-      #
-      # -E u_server_authentication: that case is a placeholder that cannot pass —
-      # libs/server/test/TestAuthentication.cpp is a single
-      # BOOST_CHECK_MESSAGE(false, "Test not implemented"), added on develop by
-      # d44e163ee ("Refactor Access control"). It carries LABELS unit, so the HPC
-      # recipes never hit it (`ctest -L nightly`) and only this lane does.
-      # DROP THIS EXCLUSION once the test is implemented — the exclusion, not the
-      # stub, is what would then hide a real regression.
       - name: Test
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -E u_server_authentication
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main

@@ -61,15 +61,6 @@ needs = ["ecbuild/build", "stack-deps/build"]
 # is a cluster-specific narrowing (no http server on the compute node), not the
 # runner-lane intent.
 ctest = true
-# Kept in step with ci.yml's Test step, so the fan-out runs the same suite the
-# push/PR build does. u_server_authentication is a placeholder that cannot pass:
-# libs/server/test/TestAuthentication.cpp is a single
-# BOOST_CHECK_MESSAGE(false, "Test not implemented"), added on develop by
-# d44e163ee ("Refactor Access control"). It carries LABELS unit, so the HPC
-# recipes never hit it (`ctest -L nightly`) and only the runner lane does.
-# DROP THIS EXCLUSION once the test is implemented — the exclusion, not the stub,
-# is what would then hide a real regression.
-ctest-args = "-E u_server_authentication"
 
 # --- HPC build --------------------------------------------------------------
 # ecflow built inside a SLURM job, linking the atos-hpc-gnu ecbuild and
