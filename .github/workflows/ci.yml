@@ -119,16 +119,8 @@ jobs:
       # that pipeline actually gates on, and s_test/s_zombies (libs/test/overall)
       # are long-running system suites it deliberately skips there. The HPC lane
       # keeps its own `-E s_http` instead, per .github/ci-hpc-config.yml.
-      # py3_s_TestClientApi is excluded pending an upstream issue: it TIMES OUT
-      # (not an assertion failure) — it is one of the `integration python nightly
-      # slow` cases that start a real ecFlow server, and it only appears in this
-      # lane at all because -DENABLE_ALL_TESTS=ON registers the py3_s_* group
-      # (79 tests here, up from 72). It is the sole failure on this lane.
-      # Note the exact target name: ctest -E takes a REGEX matched against the
-      # test name, so a near-miss like `py3_s_Test_Client` would match nothing and
-      # silently leave the test running.
       - name: Test
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies' -j 8
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
