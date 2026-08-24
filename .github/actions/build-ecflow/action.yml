@@ -100,6 +100,12 @@ runs:
       # cmake/Dependencies.cmake ecbuild_critical's on "Qt5/6 not found" at
       # configure time. Pass -DENABLE_UI=OFF only if you also intend to drop that
       # coverage.
+      #
+      # ENABLE_ALL_TESTS (performance/migration/regression tests, OFF by default)
+      # is ON to match what this lane replaces: .github/ci-config.yml — the
+      # legacy downstream-ci runner config — sets it, and so do our own
+      # .ci/hpc/build-{gnu,intel}.sh. Without it this was the one lane in the
+      # rollout configuring a smaller suite than everything else.
       run: |
         set -euo pipefail
         # Word-splitting $LAUNCHER is intended: it is either empty or a fixed pair
@@ -114,6 +120,7 @@ runs:
               -DBOOST_ROOT=/usr \
               -DENABLE_CONFIG_MODE_BOOST=OFF \
               -DENABLE_STATIC_BOOST_LIBS=OFF \
+              -DENABLE_ALL_TESTS=ON \
               $LAUNCHER
 
     - name: Build and install ecflow

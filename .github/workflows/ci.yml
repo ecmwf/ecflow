@@ -114,8 +114,13 @@ jobs:
       # Run from the build tree: ecflow's tests link against it (and against
       # static libraries that never reach the install prefix), so they cannot be
       # run against the installed artifact.
+      # Filters copied from .github/ci-config.yml's ctest_options — the legacy
+      # downstream-ci runner config this lane replaces. `-L nightly` is the set
+      # that pipeline actually gates on, and s_test/s_zombies (libs/test/overall)
+      # are long-running system suites it deliberately skips there. The HPC lane
+      # keeps its own `-E s_http` instead, per .github/ci-hpc-config.yml.
       - name: Test
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies'
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main

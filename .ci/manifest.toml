@@ -61,6 +61,15 @@ needs = ["ecbuild/build", "stack-deps/build"]
 # is a cluster-specific narrowing (no http server on the compute node), not the
 # runner-lane intent.
 ctest = true
+# Kept identical to ci.yml's Test step, so the fan-out gates on the same set the
+# push/PR build does. Both copy .github/ci-config.yml's ctest_options — the
+# legacy downstream-ci runner config this lane replaces: `-L nightly` is the set
+# that pipeline gates on, and s_test/s_zombies (libs/test/overall) are the
+# long-running system suites it deliberately skips. Quoted because the shell
+# would otherwise read the `|` as a pipe.
+# NOT the HPC recipes' `-E s_http` — that is a different, cluster-specific
+# narrowing from .github/ci-hpc-config.yml (no http server on the compute node).
+ctest-args = "-L nightly -E 's_test|s_zombies'"
 
 # --- HPC build --------------------------------------------------------------
 # ecflow built inside a SLURM job, linking the atos-hpc-gnu ecbuild and
