@@ -63,5 +63,5 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
 cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_NTASKS:-8}"
 # Test selection carried over from the legacy config: the nightly label, minus
 # the s_http suite.
-ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_http'
+ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_http' -j 8
 cmake --install "${TMPDIR:-/tmp}/build"

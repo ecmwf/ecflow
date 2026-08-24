@@ -69,7 +69,10 @@ ctest = true
 # would otherwise read the `|` as a pipe.
 # NOT the HPC recipes' `-E s_http` — that is a different, cluster-specific
 # narrowing from .github/ci-hpc-config.yml (no http server on the compute node).
-ctest-args = "-L nightly -E 's_test|s_zombies'"
+# -j 8 rather than $(nproc): ecflow's suite starts real servers, so parallelism is
+# not free here, and 8 is the width its own .github/cd-config.yml already uses for
+# `ctest --output-on-failure -j 8 -L nightly`. Kept identical to ci.yml's step.
+ctest-args = "-L nightly -E 's_test|s_zombies' -j 8"
 
 # --- HPC build --------------------------------------------------------------
 # ecflow built inside a SLURM job, linking the ecbuild and stack-deps (pybind11)

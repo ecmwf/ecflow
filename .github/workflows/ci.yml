@@ -120,7 +120,7 @@ jobs:
       # are long-running system suites it deliberately skips there. The HPC lane
       # keeps its own `-E s_http` instead, per .github/ci-hpc-config.yml.
       - name: Test
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies'
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies' -j 8
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
