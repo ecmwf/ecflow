@@ -3,8 +3,8 @@
 # build-on-hpc. Module versions follow the legacy ci-hpc-config.yml's gnu-15.2.0
 # block, which is the newest toolchain that config exercised.
 #
-# ci-infrastructure wraps this file (it waits for the source transfer, unpacks
-# into node-local $TMPDIR and cds there, exports $CMAKE_PREFIX_PATH /
+# ci-infrastructure wraps this file (it unpacks the transferred source into
+# node-local $TMPDIR and cds there, exports $CMAKE_PREFIX_PATH /
 # $CI_INSTALL_PREFIX, appends the sentinel), so this script owns only its #SBATCH
 # resources, module loads and the build/test/install — and must NOT print
 # "Finished: ..." itself.
@@ -15,9 +15,9 @@
 # .github/ci-hpc-config.yml sets `parallel: 64` for every ecflow platform against
 # that tool's `ntasks` default of 1 -- so: one task, 64 CPUs, a flat 64 GB.
 #
-# The 64 GB is the load-bearing part. An earlier 8-task shape here named no
-# --mem at all and took SLURM's default, which is what killed the nvidia leg;
-# see build-nvidia.sh for the post-mortem.
+# The 64 GB is the load-bearing part: SLURM's default is far below what a 64-way
+# compile needs, and ECMWF's watch_cgroup kills the job rather than the OOM
+# killer. See build-nvidia.sh, where nvc++ makes the margin tightest.
 #SBATCH --qos=nf
 #SBATCH --gres=ssdtmp:30G
 #SBATCH --mem=64GB
@@ -29,16 +29,11 @@
 # Toolchain pinned to gcc 15.2.0, matching releng/buildit/build.hpc.sh's
 # load_gcc15_2() and the legacy ci-hpc-config.yml's `gnu-15.2.0` platform.
 #
-# The `module unload gcc` before the pin, and CC/CXX below, are both load-bearing.
-# Without them prgenv/gnu alone left CMake to its default search, which picked
-# /usr/bin/g++ -- the compute node's SYSTEM gcc 8.5.0 -- while this recipe links
-# the GNU/15.2 build of Boost hardcoded below. That mismatch failed the link with
-#
-#   libboost_program_options.so.1.90.0: undefined reference to
-#     `std::ios_base_library_init()@GLIBCXX_3.4.32'
-#
-# because that symbol is GCC 13+ libstdc++ and 8.5 does not have it. The intel
-# leg never hit this only because it passes CMAKE_CXX_COMPILER explicitly.
+# The `module unload gcc` before the pin, and CC/CXX below, are both load-bearing:
+# prgenv/gnu alone leaves CMake to its default search, which picks /usr/bin/g++ --
+# the compute node's SYSTEM gcc 8.5.0 -- while this recipe links the GNU/15.2
+# build of Boost hardcoded below. That mismatch fails the link on
+# `std::ios_base_library_init()@GLIBCXX_3.4.32`, a GCC 13+ libstdc++ symbol.
 module load prgenv/gnu
 module unload gcc
 module load gcc/15.2.0
@@ -49,26 +44,36 @@ module load qt/6.6.1
 module load cmake/new
 
 # ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH is carried over verbatim from the legacy
-# ci-hpc-config.yml's `gnu-15.2.0` block, and it is the option this leg was
-# missing. The python tests dlopen ecflow.so into the cluster's python3, whose
-# loader resolves libstdc++.so.6 to the system /lib64 copy -- gcc 8.5.0's, which
-# stops at GLIBCXX_3.4.25 -- while ecflow.so is built by gcc 15.2. All 55 py3_*
-# tests died before collecting a case:
-#
-#   ImportError: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.32' not found
-#     (required by .../libs/pyext/python3/ecflow.so)
-#
-# The C++ tests are unaffected, which is why that run came back 25/80 green.
-# ecflow reads this cache variable in libs/pyext/python3/CMakeLists.txt and
-# prepends it to LD_LIBRARY_PATH in the python tests' ctest ENVIRONMENT. The
-# path is hardcoded rather than derived, to stay the same string the legacy
-# config uses; it tracks the gcc module pinned above.
+# ci-hpc-config.yml's `gnu-15.2.0` block. The python tests dlopen ecflow.so into
+# the cluster's python3, whose loader otherwise resolves libstdc++.so.6 to the
+# system /lib64 copy -- gcc 8.5.0's, which stops at GLIBCXX_3.4.25 -- while
+# ecflow.so is built by gcc 15.2, so every py3_* test fails to import. ecflow
+# reads this cache variable in libs/pyext/python3/CMakeLists.txt and prepends it
+# to LD_LIBRARY_PATH in the python tests' ctest ENVIRONMENT. Hardcoded rather
+# than derived, to stay the same string the legacy config uses; it tracks the gcc
+# module pinned above.
 #
 # Boost and Python come from cluster modules rather than the stack-deps artifact:
 # ecflow links Boost.Python against a specific interpreter, and the cluster ships
 # the matched pair. pybind11 still comes from stack-deps via $CMAKE_PREFIX_PATH.
-# ENABLE_CONFIG_MODE_BOOST=OFF selects FindBoost over boost-config.cmake, as the
-# legacy config does.
+#
+# ENABLE_STATIC_BOOST_LIBS and ENABLE_CONFIG_MODE_BOOST are deliberately NOT
+# passed. Both default ON in CMakeLists.txt, and .github/ci-hpc-config.yml names
+# neither in any platform block -- so the legacy HPC CI links Boost statically
+# and finds it through BoostConfig.cmake. Earlier revisions of this recipe forced
+# both OFF, which is right for the RUNNER lane (see .github/actions/build-ecflow:
+# ubuntu 24.04 ships CMake 3.28, below config mode's 3.30 floor, and only shared
+# distro Boost) but was simply copied here, where neither reason holds. Forcing
+# shared Boost is what broke the nvidia leg: the NVIDIA/24.11 build of
+# libboost_context.so does not define its own assembly entry points, so every
+# executable linking it failed with
+#
+#   libboost_context.so: undefined reference to `jump_fcontext'
+#                                               `make_fcontext'
+#                                               `ontop_fcontext'
+#
+# The static libboost_context.a carries those objects, which is why the legacy
+# CI compiles this same tree against this same module without trouble.
 cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
@@ -76,8 +81,6 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -DCMAKE_CXX_COMPILER="$(command -v g++)" \
   -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DENABLE_ALL_TESTS=ON \
-  -DENABLE_CONFIG_MODE_BOOST=OFF \
-  -DENABLE_STATIC_BOOST_LIBS=OFF \
   -DBoost_ROOT=/usr/local/apps/boost/1.90.0/GNU/15.2 \
   -DBoost_INCLUDE_DIR=/usr/local/apps/boost/1.90.0/GNU/15.2/include \
   -DPython3_ROOT_DIR=/usr/local/apps/python3/3.13.13-01 \

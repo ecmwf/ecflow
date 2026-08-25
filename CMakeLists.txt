@@ -15,9 +15,9 @@
 
 cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 #
-
 # note: CMake 3.12.0+ is needed, as FindBoost fixes the setup for Boost 1.67+
 #
+
 #
 # Important: Force default build type to `Release` if no CMAKE_BUILD_TYPE is specified
 #
