@@ -12,14 +12,22 @@
 # resources, module loads and the build/test/install — and must NOT print
 # "Finished: ..." itself.
 
-# atos (hpc2020) selects on QoS rather than partition; ssdtmp sizes the
-# node-local SSD behind $TMPDIR. ecflow builds a large C++ tree plus its Python
-# extension, hence the larger allocation.
+# Resources mirror the legacy CI rather than being sized here by hand.
+# build-package-hpc's atos template (templates/macros.jinja, sbatch_atos) emits
+# `--gres=ssdtmp:30G --mem=64GB --ntasks=<n> --cpus-per-task=<parallel//n>`, and
+# .github/ci-hpc-config.yml sets `parallel: 64` for every ecflow platform against
+# that tool's `ntasks` default of 1 -- so: one task, 64 CPUs, a flat 64 GB.
+#
+# The 64 GB is the load-bearing part. An earlier 8-task shape here named no
+# --mem at all and took SLURM's default, which is what killed the nvidia leg;
+# see build-nvidia.sh for the post-mortem.
 #SBATCH --qos=nf
 #SBATCH --gres=ssdtmp:30G
+#SBATCH --mem=64GB
 #SBATCH --time=01:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=8
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
 
 # Toolchain pinned to intel 2025.3.1, matching releng/buildit/build.hpc.sh's
 # load_intel2025_3() and the legacy ci-hpc-config.yml's `intel-2025.3.1` platform.
@@ -60,7 +68,7 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
   -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
   -DCMAKE_INSTALL_PREFIX="$CI_INSTALL_PREFIX"
-cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_NTASKS:-8}"
+cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_CPUS_PER_TASK:-64}"
 # Test selection carried over from the legacy config: the nightly label, minus
 # the s_http suite.
 ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_http' -j 8
