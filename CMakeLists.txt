@@ -12,7 +12,6 @@
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
-
 cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 #
 # note: CMake 3.12.0+ is needed, as FindBoost fixes the setup for Boost 1.67+
