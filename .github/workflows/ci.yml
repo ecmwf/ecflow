@@ -100,15 +100,7 @@ jobs:
       - name: Print dependency table
         uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
         with:
-          deps-json: ${{ toJSON(matrix._resolved.deps) }}
-          own-name: ecflow
-          own-artifact-name: ${{ matrix._resolved.own-artifact-name }}
-          own-ref: ${{ matrix._resolved.own-ref }}
-          own-platform: ${{ matrix._resolved.own-platform }}
-          own-compiler: ${{ matrix._resolved.own-compiler }}
-          own-python: ${{ matrix._resolved.own-python }}
-          own-build-type: ${{ matrix._resolved.own-build-type }}
-          own-deps-hash: ${{ matrix._resolved.own-deps-hash }}
+          resolved-json: ${{ toJSON(matrix._resolved) }}
 
       # Run from the build tree: ecflow's tests link against it (and against
       # static libraries that never reach the install prefix), so they cannot be
