@@ -57,21 +57,17 @@ forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
 # Run the suite in the fan-out too, not just on push/PR: an upstream-driven
 # build that only compiles proves nothing beyond "ecflow still links against the
-# new ecbuild". Deliberately NOT the HPC recipes' `-L nightly -E s_http`, which
-# is a cluster-specific narrowing (no http server on the compute node), not the
-# runner-lane intent.
+# new ecbuild".
 ctest = true
-# Kept identical to ci.yml's Test step, so the fan-out gates on the same set the
-# push/PR build does. Both copy .github/ci-config.yml's ctest_options — the
-# legacy downstream-ci runner config this lane replaces: `-L nightly` is the set
-# that pipeline gates on, and s_test/s_zombies (libs/test/overall) are the
-# long-running system suites it deliberately skips. Quoted because the shell
-# would otherwise read the `|` as a pipe.
-# NOT the HPC recipes' `-E s_http` — that is a different, cluster-specific
-# narrowing from .github/ci-hpc-config.yml (no http server on the compute node).
-# -j 8 rather than $(nproc): ecflow's suite starts real servers, so parallelism is
-# not free here, and 8 is the width its own .github/cd-config.yml already uses for
-# `ctest --output-on-failure -j 8 -L nightly`. Kept identical to ci.yml's step.
+# Identical to ci.yml's Test step, so the fan-out gates on the same set the
+# push/PR build does. Both copy .github/ci-config.yml's ctest_options: `-L
+# nightly` is the set that config gates on, and s_test/s_zombies
+# (libs/test/overall) are the long-running system suites it skips. Quoted because
+# the shell would otherwise read the `|` as a pipe.
+# NOT the HPC recipes' `-E s_http`, which is a cluster-specific narrowing from
+# .github/ci-hpc-config.yml (no http server on the compute node).
+# -j 8 rather than $(nproc): ecflow's suite starts real servers, so parallelism
+# is not free, and 8 is the width .github/cd-config.yml already uses.
 ctest-args = "-L nightly -E 's_test|s_zombies' -j 8"
 
 # --- HPC build --------------------------------------------------------------
@@ -82,10 +78,9 @@ ctest-args = "-L nightly -E 's_test|s_zombies' -j 8"
 # slug, because each builds a different ABI and they must never share an artifact
 # name. The first two run tests, the last two do not — see their recipes.
 #
-# Every recipe PINS its compiler (module + CMAKE_CXX_COMPILER). Leaving that to
-# prgenv's default is what silently gave the gnu leg the system gcc 8.5.0 against
-# a GCC 15.2 Boost, failing the link on a missing GLIBCXX_3.4.32 symbol, and gave
-# the intel leg 2021.4.0 while claiming 2025.3.1.
+# Every recipe PINS its compiler (module + CMAKE_CXX_COMPILER): prgenv's default
+# resolves to the system compiler, which mismatches the Boost build each recipe
+# links against.
 #
 # Boost, Python and Qt come from cluster modules rather than artifacts: ecflow
 # links Boost.Python against a specific interpreter and the cluster ships the
@@ -111,14 +106,13 @@ platform = "atos-hpc-intel"
 job-script = "./.ci/hpc/build-intel.sh"
 
 # Build-only toolchains, mirroring the legacy ci-hpc-config.yml's `aocc-4.0.0`
-# and `nvidia-24.11`. That config disables testing with `ctest_options:
-# --version` — a flag that makes ctest print its version and exit, because it has
-# no way to say "no tests". Our recipes own the test invocation, so they express
-# it by simply not containing a ctest line.
+# and `nvidia-24.11`, which are build-only there too (`ctest_options: --version`,
+# that config's way of saying "no tests"). Our recipes own the test invocation,
+# so they express it by simply not containing a ctest line.
 #
 # nvidia-24.11 rather than the config's nvidia-22.11: releng/buildit/build.hpc.sh
-# only knows nvidia/24.1, 24.11 and 25.11, so the 22.11 entry looks retired and
-# `module load nvidia/22.11` would fail at job start.
+# only knows nvidia/24.1, 24.11 and 25.11, so `module load nvidia/22.11` would
+# fail at job start.
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
 build-type = "Release"

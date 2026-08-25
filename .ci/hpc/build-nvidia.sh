@@ -53,21 +53,18 @@ module load cmake/new
 #
 # ENABLE_STATIC_BOOST_LIBS and ENABLE_CONFIG_MODE_BOOST are deliberately NOT
 # passed. Both default ON in CMakeLists.txt, and .github/ci-hpc-config.yml names
-# neither in any platform block -- so the legacy HPC CI links Boost statically
-# and finds it through BoostConfig.cmake. Earlier revisions of this recipe forced
-# both OFF, which is right for the RUNNER lane (see .github/actions/build-ecflow:
-# ubuntu 24.04 ships CMake 3.28, below config mode's 3.30 floor, and only shared
-# distro Boost) but was simply copied here, where neither reason holds. Forcing
-# shared Boost is what broke the nvidia leg: the NVIDIA/24.11 build of
-# libboost_context.so does not define its own assembly entry points, so every
-# executable linking it failed with
+# neither in any platform block -- so, like the legacy HPC CI, this links Boost
+# statically and finds it through BoostConfig.cmake. Forcing them OFF is right
+# for the RUNNER lane only (see .github/actions/build-ecflow: ubuntu 24.04 ships
+# CMake 3.28, below config mode's 3.30 floor, and only shared distro Boost).
+# Here it breaks the nvidia leg: the NVIDIA/24.11 libboost_context.so defines no
+# assembly entry points, so everything linking it fails with
 #
 #   libboost_context.so: undefined reference to `jump_fcontext'
 #                                               `make_fcontext'
 #                                               `ontop_fcontext'
 #
-# The static libboost_context.a carries those objects, which is why the legacy
-# CI compiles this same tree against this same module without trouble.
+# Only the static libboost_context.a carries those objects.
 cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \

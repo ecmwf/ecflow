@@ -102,11 +102,10 @@ runs:
       # coverage.
       #
       # ENABLE_ALL_TESTS is deliberately left at its OFF default, unlike the
-      # legacy .github/ci-config.yml and our own .ci/hpc recipes. Turning it on
-      # here added the `integration python nightly slow` py3_s_* group (72 tests
-      # -> 79), and py3_s_TestClientApi in that group TIMES OUT. Tuning those
-      # timeouts is ecflow's call, not the CI rollout's, so this lane stays on the
-      # default set until they do.
+      # legacy .github/ci-config.yml and our own .ci/hpc recipes: it adds the
+      # `integration python nightly slow` py3_s_* group, in which
+      # py3_s_TestClientApi times out. Tuning those timeouts is ecflow's call, so
+      # this lane stays on the default set.
       run: |
         set -euo pipefail
         # Word-splitting $LAUNCHER is intended: it is either empty or a fixed pair
