@@ -416,7 +416,7 @@ struct Authoriser<LoadDefsCmd>
 
     static void paths(const LoadDefsCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 
-    static Allowed required(const LoadDefsCmd&) { return Allowed::WRITE; }
+    static Allowed required(const LoadDefsCmd&) { return Allowed::OWNER; }
 };
 
 template <>
@@ -488,8 +488,15 @@ struct Authoriser<PathsCmd>
     static void paths(const PathsCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
 
     static Allowed required(const PathsCmd& cmd) {
-        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
-        // action
+
+        auto is_one_of = [](const PathsCmd::Api& api, const std::initializer_list<PathsCmd::Api>& list) {
+            return std::find(list.begin(), list.end(), api) != list.end();
+        };
+
+        if (is_one_of(cmd.api(), {PathsCmd::SUSPEND, PathsCmd::RESUME, PathsCmd::KILL})) {
+            return Allowed::EXECUTE;
+        }
+
         return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
     }
 };
