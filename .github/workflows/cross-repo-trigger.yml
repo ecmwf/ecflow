@@ -115,7 +115,7 @@ jobs:
     needs:
     - resolve
     if: contains(fromJSON(inputs.from-jobs), 'ecbuild/build') || contains(fromJSON(inputs.from-jobs), 'stack-deps/build') || inputs.rebuild-request
-    name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+    name: ecflow/build (${{ matrix.platform }}, ${{ matrix['build-type'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container || '' }}
@@ -136,7 +136,7 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+        name: ecflow/build (${{ matrix.platform }}, ${{ matrix['build-type'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: start
     - uses: actions/checkout@v6
@@ -203,7 +203,7 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+        name: ecflow/build (${{ matrix.platform }}, ${{ matrix['build-type'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: finish
         conclusion: ${{ job.status }}

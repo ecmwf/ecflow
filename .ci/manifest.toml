@@ -90,19 +90,19 @@ ctest-args = "-L nightly -E 's_test|s_zombies' -j 8"
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-13"
 build-type = "Release"
-runs-on = "arc-hpc-pet-vsphere-prod"
+runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
-platform = "atos-hpc-gnu"
+platform = "hpc-atos-gnu"
 job-script = "./.ci/hpc/build-gnu.sh"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "icpx"
 build-type = "Release"
-runs-on = "arc-hpc-pet-vsphere-prod"
+runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
-platform = "atos-hpc-intel"
+platform = "hpc-atos-intel"
 job-script = "./.ci/hpc/build-intel.sh"
 
 # Build-only toolchains, mirroring the legacy ci-hpc-config.yml's `aocc-4.0.0`
@@ -116,19 +116,19 @@ job-script = "./.ci/hpc/build-intel.sh"
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
 build-type = "Release"
-runs-on = "arc-hpc-pet-vsphere-prod"
+runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
-platform = "atos-hpc-aocc"
+platform = "hpc-atos-aocc"
 job-script = "./.ci/hpc/build-aocc.sh"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "nvc++"
 build-type = "Release"
-runs-on = "arc-hpc-pet-vsphere-prod"
+runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
-platform = "atos-hpc-nvidia"
+platform = "hpc-atos-nvidia"
 job-script = "./.ci/hpc/build-nvidia.sh"
 
 [matrix.build-hpc]
