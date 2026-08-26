@@ -24,6 +24,14 @@ public:
 
     [[nodiscard]] virtual bool allows(const path_t& path, Allowed required) const   = 0;
     [[nodiscard]] virtual bool allows(const paths_t& paths, Allowed required) const = 0;
+
+    /// @brief Indicates whether the content visible through this context depends on the identity in use.
+    ///
+    /// Callers that share serialised content between clients must consult this predicate, since content
+    /// produced for one identity is only reusable for another when all identities observe the same content.
+    ///
+    /// @return true if the visible content may differ between identities, false otherwise
+    [[nodiscard]] virtual bool content_varies_by_identity() const = 0;
 };
 
 class UnrestrictedAuthorisationContext : public AuthorisationContext {
@@ -33,6 +41,8 @@ public:
 
     [[nodiscard]] bool allows(const path_t& path, Allowed required) const override { return true; }
     [[nodiscard]] bool allows(const paths_t& paths, Allowed required) const override { return true; }
+
+    [[nodiscard]] bool content_varies_by_identity() const override { return false; }
 };
 
 class ServiceAuthorisationContext : public AuthorisationContext {
@@ -52,6 +62,8 @@ public:
 
     [[nodiscard]] bool allows(const path_t& path, Allowed required) const override;
     [[nodiscard]] bool allows(const paths_t& paths, Allowed required) const override;
+
+    [[nodiscard]] bool content_varies_by_identity() const override;
 
 private:
     const Identity& identity_;

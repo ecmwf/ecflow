@@ -13,7 +13,6 @@
 #include <ecflow/node/formatter/DefsWriter.hpp>
 
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -33,13 +32,14 @@ unsigned int DefsCache::modify_change_no_          = 0;
 ecf::Identity DefsCache::identity_                 = ecf::Identity::make_none();
 
 void DefsCache::update_cache_if_state_changed(Defs* defs, const ecf::AuthorisationContext& authorisation) {
-    if (defs->server_state().variable_exists(ecf::environment::ECF_PERMISSIONS)) {
-        // If the server has defined ECF_PERMISSIONS, then we need to update the cache, as the accessible content of the
-        // defs might be different for each user, i.e. the permissions might be different for each user, and thus
-        // the defs tree 'accessible' for each user can be different.
+    if (authorisation.content_varies_by_identity()) {
+        // The cache holds the content produced for a single identity. Whenever the active authorisation
+        // rules are able to restrict content per identity, that content cannot be shared, and is therefore
+        // rebuilt for every request.
         update_cache(defs, authorisation);
     }
     else {
+        // See if there was a state change *OR* if cache is empty
         if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no() ||
             full_server_defs_as_string_.empty()) {
             update_cache(defs, authorisation);
