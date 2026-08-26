@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
     handle_response(request("delete", "/v1/server/attributes", R"({"type":"variable","name":"foo"})", API_KEY),
                     HttpStatusCode::success_no_content);
     wait_until(
-        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "bar"); });
+        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "baz"); });
 }
 
 BOOST_AUTO_TEST_CASE(test_suite) {
@@ -1435,13 +1435,13 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
                             R"({"type":"variable","name":"xfoo","value":"xbaz"})",
                             "",
                             {{"X-API-Key", API_KEY}}));
-    wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
+    wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbaz"); });
 
     handle_response(
         request("delete", "/v1/server/attributes?key=" + API_KEY, R"({"type":"variable","name":"xfoo"})", ""),
         HttpStatusCode::success_no_content);
     wait_until(
-        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
+        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbaz"); });
 
     handle_response(
         request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY_pbkdf2),
