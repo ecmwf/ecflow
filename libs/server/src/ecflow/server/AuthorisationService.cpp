@@ -53,6 +53,24 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
+bool AuthorisationService::content_varies_by_identity() const {
+    if (!good()) {
+        // Without rules, every identity observes the same content
+        return false;
+    }
+
+    bool varies = false;
+    std::visit(overload{[&varies](const UnrestrictedRules&) { varies = false; },
+                        // The white list file governs the operations each identity is allowed to perform,
+                        // but does not restrict the content visible in the Defs tree
+                        [&varies](const WhiteListRules&) { varies = false; },
+                        // Node level permissions are, by design, specific to each identity
+                        [&varies](const NodeRules&) { varies = true; }},
+               impl_->rules_);
+
+    return varies;
+}
+
 bool AuthorisationService::allows(const Identity& identity, const Defs& defs, Allowed required) const {
     return allows(identity, defs, paths_t{ROOT}, required);
 }

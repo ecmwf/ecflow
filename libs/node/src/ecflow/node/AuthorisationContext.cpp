@@ -18,6 +18,10 @@ bool ServiceAuthorisationContext::allows(const path_t& path, Allowed required) c
     return service_.allows(identity_, defs_, path, required);
 }
 
+bool ServiceAuthorisationContext::content_varies_by_identity() const {
+    return service_.content_varies_by_identity();
+}
+
 bool ServiceAuthorisationContext::allows(const paths_t& paths, Allowed required) const {
     for (const auto& path : paths) {
         if (!allows(path, required)) {

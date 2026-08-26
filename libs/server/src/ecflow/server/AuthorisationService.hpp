@@ -45,6 +45,17 @@ public:
     [[nodiscard]]
     bool good() const;
 
+    /// @brief Indicates whether the content visible to a client depends on the identity of that client.
+    ///
+    /// The Defs serialisation filters out nodes the requesting identity is not allowed to read, meaning
+    /// that the resulting content is only shareable between identities when the active rules are unable
+    /// to discriminate between them.
+    ///
+    /// @return true if the visible content may differ between identities, false if all identities observe
+    /// the same content
+    [[nodiscard]]
+    bool content_varies_by_identity() const;
+
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
      *
