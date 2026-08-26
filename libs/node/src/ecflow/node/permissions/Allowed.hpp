@@ -46,24 +46,24 @@ enum class Allowed : std::uint8_t {
                       // server level permissions that should not be overridden by node level permissions.
 };
 
-inline Allowed operator|(Allowed lhs, Allowed rhs) {
+constexpr Allowed operator|(Allowed lhs, Allowed rhs) {
     using allowed_t = std::underlying_type<Allowed>::type;
 
     return Allowed{static_cast<Allowed>(static_cast<allowed_t>(lhs) | static_cast<allowed_t>(rhs))};
 }
 
-inline Allowed operator&(Allowed lhs, Allowed rhs) {
+constexpr Allowed operator&(Allowed lhs, Allowed rhs) {
     using allowed_t = std::underlying_type<Allowed>::type;
 
     return Allowed{static_cast<Allowed>(static_cast<allowed_t>(lhs) & static_cast<allowed_t>(rhs))};
 }
 
-inline Allowed& operator|=(Allowed& lhs, Allowed rhs) {
+constexpr Allowed& operator|=(Allowed& lhs, Allowed rhs) {
     lhs = lhs | rhs;
     return lhs;
 }
 
-inline Allowed& operator&=(Allowed& lhs, Allowed rhs) {
+constexpr Allowed& operator&=(Allowed& lhs, Allowed rhs) {
     lhs = lhs & rhs;
     return lhs;
 }
@@ -75,7 +75,7 @@ inline Allowed& operator&=(Allowed& lhs, Allowed rhs) {
  * @param rhs the permissions to check for
  * @return true if lhs contains all permissions of rhs, false otherwise
  */
-inline bool contains(Allowed lhs, Allowed rhs) {
+constexpr bool contains(Allowed lhs, Allowed rhs) {
     return (lhs & rhs) == rhs;
 }
 
