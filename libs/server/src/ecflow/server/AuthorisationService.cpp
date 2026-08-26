@@ -78,10 +78,14 @@ bool AuthorisationService::allows(const Identity& identity,
     std::visit(overload{[&allowed](const UnrestrictedRules&) { allowed = true; },
                         [&allowed, &identity, &paths, &required](const WhiteListRules& rules) {
                             // Apply white list rules
-                            if (contains(required, Allowed::READ)) {
+
+                            constexpr Allowed read_mask  = Allowed::READ;
+                            constexpr Allowed write_mask = Allowed::WRITE | Allowed::EXECUTE | Allowed::OWNER;
+
+                            if ((required & read_mask) != Allowed::NONE) {
                                 allowed = rules.file_.verify_read_access(identity.username().value(), paths);
                             }
-                            else if (contains(required, Allowed::WRITE) || contains(required, Allowed::EXECUTE)) {
+                            else if ((required & write_mask) != Allowed::NONE) {
                                 allowed = rules.file_.verify_write_access(identity.username().value(), paths);
                             }
                             else {
