@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 
 std::string StcCmd::print() const {
@@ -76,10 +77,14 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
                 std::cout << "  StcCmd::handle_server_response END_OF_FILE\n";
             }
             server_reply.set_eof(); // requires further work, by ClientInvoker
-            std::string ss;
-            ss += "Error: request( ";
-            ss += cts_cmd->print_short();
-            ss += " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
+            std::string ss = failed_request_prefix(*cts_cmd);
+            if (auto explanation = ecf::explain(server_reply.diagnosis()); !explanation.empty()) {
+                ss += explanation;
+            }
+            else {
+                ss += "Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)";
+            }
+            ss += "\n";
             server_reply.set_error_msg(ss);
             break;
         }
@@ -90,10 +95,14 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
                 std::cout << "  StcCmd::handle_server_response INVALID_ARGUMENT\n";
             }
             server_reply.set_invalid_argument(); // requires further work, by ClientInvoker
-            std::string ss;
-            ss += "Error: request( ";
-            ss += cts_cmd->print_short();
-            ss += " ) failed! Server replied with: invalid_argument(Could not decode client protocol)\n";
+            std::string ss = failed_request_prefix(*cts_cmd);
+            if (auto explanation = ecf::explain(server_reply.diagnosis()); !explanation.empty()) {
+                ss += explanation;
+            }
+            else {
+                ss += "Server replied with: invalid_argument(Could not decode client protocol)";
+            }
+            ss += "\n";
             server_reply.set_error_msg(ss);
             break;
         }

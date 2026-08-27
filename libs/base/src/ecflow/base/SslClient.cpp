@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 
+#include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Message.hpp"
@@ -31,13 +32,20 @@ SslClient::SslClient(boost::asio::io_context& io,
                      Cmd_ptr cmd_ptr,
                      const std::string& host,
                      const std::string& port,
-                     time_duration_t timeout)
+                     time_duration_t timeout,
+                     ecf::ConnectionDiagnosis* diagnosis)
     : stopped_(false),
       host_(host),
       port_(port),
       connection_(io, context),
       deadline_(io),
-      timeout_(timeout) {
+      timeout_(timeout),
+      diagnosis_(diagnosis ? *diagnosis : owned_diagnosis_) {
+    diagnosis_.clear();
+    diagnosis_.client_protocol = ecf::Protocol::Ssl;
+    diagnosis_.host            = host_;
+    diagnosis_.port            = port_;
+
     /// Avoid sending a NULL request to the server
     if (!cmd_ptr.get()) {
         throw std::runtime_error("SslClient::SslClient: No request specified !");
@@ -62,8 +70,14 @@ SslClient::SslClient(boost::asio::io_context& io,
 
     // Host name resolution is performed using a resolver, where host and service
     // names(or ports) are looked up and converted into one or more end points
-    auto resolver           = resolver_t(io);
-    auto results            = resolver.resolve(host_, port_);
+    auto resolver = resolver_t(io);
+    boost::system::error_code resolve_error;
+    auto results = resolver.resolve(host_, port_, resolve_error);
+    if (resolve_error) {
+        record_failure(ecf::classify_connect_error(resolve_error), resolve_error.message());
+        throw std::runtime_error(MESSAGE("SslClient::SslClient: unable to resolve "
+                                         << host_ << ":" << port_ << " ( " << resolve_error.message() << " )"));
+    }
     auto endpoints_iterator = results.begin();
 
     // The list of end points obtained could contain both IPv4 and IPv6 end points,
@@ -80,6 +94,15 @@ SslClient::~SslClient() {
 }
 
 /// Private ==============================================================================
+
+void SslClient::record_failure(ecf::ConnectionFailure failure, const std::string& detail) {
+    diagnosis_.client_protocol             = ecf::Protocol::Ssl;
+    diagnosis_.failure                     = failure;
+    diagnosis_.host                        = host_;
+    diagnosis_.port                        = port_;
+    diagnosis_.detail                      = detail;
+    diagnosis_.protocol_mismatch_suspected = ecf::suggests_protocol_mismatch(failure);
+}
 
 // This function terminates all the actors to shut down the connection. It
 // may be called by the user of the client class, or by the class itself in
@@ -141,6 +164,8 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
             // Ran out of end points, An error occurred
             stop();
 
+            record_failure(e ? ecf::classify_connect_error(e) : ecf::ConnectionFailure::Timeout,
+                           e ? e.message() : "connect timed out");
             throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points : connection error ( "
                                              << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
                                              << " ) on " << host_ << ":" << port_));
@@ -162,6 +187,7 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
             // Ran out of end points. An error occurred.
             stop();
 
+            record_failure(ecf::classify_connect_error(e), e.message());
             throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points: connection error( "
                                              << e.message() << " ) for request( " << outbound_request_ << " ) on "
                                              << host_ << ":" << port_));
@@ -204,6 +230,10 @@ void SslClient::handle_handshake(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
+        record_failure(ecf::classify_handshake_error(e), e.message());
+
+        // The legacy wording is retained for a rejected certificate as well as for a peer that
+        // does not speak TLS: existing consumers match on it. New consumers read the diagnosis.
         inbound_response_.set_cmd(std::make_shared<ErrorCmd>(MESSAGE("SslClient::handle_handshake: error("
                                                                      << e.message() << ") on " << host_ << ":" << port_
                                                                      << " possibly non-ssl server")));
@@ -245,6 +275,7 @@ void SslClient::handle_write(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
+        record_failure(ecf::classify_read_error(e), e.message());
         throw std::runtime_error(MESSAGE("SslClient::handle_write: error (" << e.message() << " ) for request( "
                                                                             << outbound_request_ << " ) on " << host_
                                                                             << ":" << port_));
@@ -304,6 +335,7 @@ void SslClient::handle_read(const boost::system::error_code& e) {
             std::cout << "   Client::handle_read: End of File (server did not reply or mixing ssl and non-ssl)"
                       << std::endl;
 #endif
+            record_failure(ecf::ConnectionFailure::ClosedWithoutReply, e.message());
             inbound_response_.set_cmd(std::make_shared<StcCmd>(StcCmd::END_OF_FILE));
             return;
         }
@@ -319,10 +351,12 @@ void SslClient::handle_read(const boost::system::error_code& e) {
                 << "   Client::handle_read: Server replied with invalid argument (i.e could not decode client message) "
                 << std::endl;
 #endif
+            record_failure(ecf::ConnectionFailure::UndecodableReply, e.message());
             inbound_response_.set_cmd(std::make_shared<StcCmd>(StcCmd::INVALID_ARGUMENT));
             return;
         }
 
+        record_failure(ecf::classify_read_error(e), e.message());
         throw std::runtime_error(MESSAGE("Client::handle_read: connection error( "
                                          << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_
                                          << ":" << port_));
@@ -345,6 +379,7 @@ bool SslClient::handle_server_response(ServerReply& server_reply, bool debug) co
         std::cout << "  SslClient::handle_server_response" << std::endl;
     }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e. SServerLoadCmd
+    server_reply.set_diagnosis(diagnosis_);
     return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
 
@@ -370,6 +405,7 @@ void SslClient::check_deadline() {
         // asynchronous operations are cancelled.
         stop();
 
+        record_failure(ecf::ConnectionFailure::Timeout, MESSAGE("timed out after " << timeout_.count() << "ms"));
         throw std::runtime_error(MESSAGE("SslClient::check_deadline: timed out after "
                                          << timeout_.count() << "ms for request( " << outbound_request_ << " ) on "
                                          << host_ << ":" << port_));

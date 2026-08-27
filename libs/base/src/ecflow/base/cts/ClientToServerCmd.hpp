@@ -262,4 +262,15 @@ private:
     }
 };
 
+///
+/// @brief Builds the standard prefix used to report a failed request.
+///
+/// Every report of a failed request opens with this prefix, whichever transport observed the
+/// failure and whichever layer produced the explanation, so that the reports remain comparable.
+///
+/// @param[in] request The request that failed
+/// @return The prefix, ending with a single trailing space
+///
+std::string failed_request_prefix(const ClientToServerCmd& request);
+
 #endif /* ecflow_base_cts_ClientToServerCmd_HPP */

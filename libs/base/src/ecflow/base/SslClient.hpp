@@ -20,6 +20,7 @@
 ///
 
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/ssl_connection.hpp"
 
@@ -34,13 +35,26 @@ public:
     using endpoints_set_t      = resolver_t::results_type;
     using endpoints_iterator_t = endpoints_set_t::iterator;
 
-    /// Constructor starts the asynchronous connect operation.
+    ///
+    /// @brief Starts the asynchronous connect operation.
+    ///
+    /// @param[in] io        The execution context driving the asynchronous operations
+    /// @param[in] context   The initialised client-side TLS context
+    /// @param[in] cmd_ptr   The request to send; must not be null
+    /// @param[in] host      The server host name
+    /// @param[in] port      The server port
+    /// @param[in] timeout   The per-operation timeout; when zero, the timeout of @p cmd_ptr is used
+    /// @param[out] diagnosis Storage for the diagnosis of the exchange, which outlives this client;
+    ///                      when null, the diagnosis is kept internally and lost on destruction
+    /// @throws std::runtime_error if @p cmd_ptr is null, or if the endpoint cannot be resolved
+    ///
     SslClient(boost::asio::io_context& io,
               boost::asio::ssl::context& context,
               Cmd_ptr cmd_ptr,
               const std::string& host,
               const std::string& port,
-              time_duration_t timeout = std::chrono::seconds{0});
+              time_duration_t timeout             = std::chrono::seconds{0},
+              ecf::ConnectionDiagnosis* diagnosis = nullptr);
     ~SslClient();
 
     /// Client side, get the server response, handles reply from server
@@ -48,7 +62,17 @@ public:
     /// will throw std::runtime_error for errors
     bool handle_server_response(ServerReply&, bool debug) const;
 
+    ///
+    /// @brief Provides the diagnosis of the exchange performed by this client.
+    ///
+    /// @return The diagnosis of the exchange
+    ///
+    const ecf::ConnectionDiagnosis& diagnosis() const { return diagnosis_; }
+
 private:
+    /// Records a failure, together with the endpoint and the originating message.
+    void record_failure(ecf::ConnectionFailure failure, const std::string& detail);
+
     void start(endpoints_iterator_t endpoints_iterator);
     void stop();
     void check_deadline();
@@ -80,6 +104,9 @@ private:
     boost::asio::system_timer deadline_;
 
     time_duration_t timeout_;
+
+    ecf::ConnectionDiagnosis owned_diagnosis_; /// Used when the caller provides no storage
+    ecf::ConnectionDiagnosis& diagnosis_;      /// The diagnosis of the exchange, populated on failure
 };
 
 #endif /* ecflow_base_SslClient_HPP */

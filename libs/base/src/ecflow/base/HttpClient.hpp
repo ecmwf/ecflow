@@ -20,6 +20,7 @@
 
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/Connection.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 
@@ -104,6 +105,18 @@ inline std::ostream& operator<<(std::ostream& o, Status s) {
     return o;
 }
 
+///
+/// @brief Classifies an error reported by the underlying HTTP library.
+///
+/// The HTTP library reports every transport-level problem through a single error enumeration.
+/// Mapping it here is what separates "no server is listening" from "something is listening, but it
+/// is not speaking HTTP", which the library itself does not distinguish in its error message.
+///
+/// @param[in] error The error reported by the HTTP library; must not be httplib::Error::Success
+/// @return The matching failure class
+///
+ecf::ConnectionFailure classify_httplib_error(httplib::Error error);
+
 } // namespace ecf::http
 
 ///
@@ -113,11 +126,25 @@ inline std::ostream& operator<<(std::ostream& o, Status s) {
 class HttpClient {
 public:
     /// Constructor starts the asynchronous connect operation.
+    ///
+    /// @brief Prepares the HTTP request to the given endpoint.
+    ///
+    /// @param[in] cmd_ptr   The request to send; must not be null
+    /// @param[in] scheme    Either "http" or "https"
+    /// @param[in] host      The server host name
+    /// @param[in] port      The server port
+    /// @param[in] timeout   The connect, read and write timeout, in seconds
+    /// @param[out] diagnosis Storage for the diagnosis of the exchange, which outlives this client;
+    ///                      when null, the diagnosis is kept internally and lost on destruction
+    /// @throws std::runtime_error if @p cmd_ptr is null, or if HTTPS is requested by an ecFlow
+    ///         built without SSL support
+    ///
     HttpClient(Cmd_ptr cmd_ptr,
                const std::string& scheme,
                const std::string& host,
                const std::string& port,
-               int timeout = 120);
+               int timeout                         = 120,
+               ecf::ConnectionDiagnosis* diagnosis = nullptr);
 
     std::string url() const { return base_url_; }
 
@@ -138,7 +165,17 @@ public:
     /// will throw std::runtime_error for errors
     bool handle_server_response(ServerReply&, bool debug) const;
 
+    ///
+    /// @brief Provides the diagnosis of the exchange performed by this client.
+    ///
+    /// @return The diagnosis of the exchange
+    ///
+    const ecf::ConnectionDiagnosis& diagnosis() const { return diagnosis_; }
+
 private:
+    /// Records a failure, together with the endpoint and the originating message.
+    void record_failure(ecf::ConnectionFailure failure, const std::string& detail);
+
     std::string scheme_; /// the scheme to use
     std::string host_;   /// the servers name
     std::string port_;   /// the port on the server
@@ -152,6 +189,9 @@ private:
 
     ClientToServerRequest outbound_request_;  /// The request we will send to the server
     ServerToClientResponse inbound_response_; /// The response we get back from the server
+
+    ecf::ConnectionDiagnosis owned_diagnosis_; /// Used when the caller provides no storage
+    ecf::ConnectionDiagnosis& diagnosis_;      /// The diagnosis of the exchange, populated on failure
 };
 
 #endif /* ecflow_base_HttpClient_HPP */

@@ -18,6 +18,8 @@ set(test_srcs
   test/TestClientHandleCmd.cpp
   test/TestClientOptionsParser.cpp
   test/TestCmd.cpp
+  test/TestConnectionDiagnosis.cpp
+  test/TestConnectionDiagnosisAgainstPeers.cpp
   test/TestDeleteNodeCmd.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp

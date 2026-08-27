@@ -104,6 +104,7 @@ if (ENABLE_SERVER)
     test/TestClient_main.cpp # test entry point
     test/TestClientTimeout.cpp
     test/TestClientHandleCmd.cpp
+    test/TestConnectionDiagnosisAgainstServer.cpp
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
     test/TestGroupCmd.cpp
