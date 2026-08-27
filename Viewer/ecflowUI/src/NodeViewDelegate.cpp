@@ -75,6 +75,11 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent)
     noConnectBgBrush_   = QBrush(QColor(186, 16, 16, 150), Qt::Dense7Pattern);
     noConnectBandBrush_ = QBrush(QColor(186, 16, 16, 240));
 
+    // A protocol mismatch is marked in purple rather than red: the server is running and
+    // answering, so the colour that means "unavailable" would be misleading.
+    mismatchConnectBgBrush_   = QBrush(QColor(128, 40, 168, 150), Qt::Dense7Pattern);
+    mismatchConnectBandBrush_ = QBrush(QColor(128, 40, 168, 240));
+
     QImageReader imgR(":/viewer/warning.svg");
     if (imgR.canRead()) {
         QFont font;

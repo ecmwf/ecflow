@@ -400,6 +400,13 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
         QRect bandRect = QRect(0, vopt.rect.y(), 5, vopt.rect.height());
         painter->fillRect(bandRect, noConnectBandBrush_);
     }
+    // protocol mismatch
+    if (connectId == 4) {
+        QRect fullRect = QRect(0, vopt.rect.y(), painter->device()->width(), vopt.rect.height());
+        painter->fillRect(fullRect, mismatchConnectBgBrush_);
+        QRect bandRect = QRect(0, vopt.rect.y(), 5, vopt.rect.height());
+        painter->fillRect(bandRect, mismatchConnectBandBrush_);
+    }
 
     QVariant tVar = index.data(Qt::DisplayRole);
     painter->setFont(font_);
