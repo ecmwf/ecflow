@@ -125,6 +125,10 @@
     <file alias="open_file.svg">../images/open_file.svg</file>
     <file alias="output.svg">../images/output.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
+    <file alias="protocol_plain.svg">../images/protocol_plain.svg</file>
+    <file alias="protocol_ssl.svg">../images/protocol_ssl.svg</file>
+    <file alias="protocol_http.svg">../images/protocol_http.svg</file>
+    <file alias="protocol_https.svg">../images/protocol_https.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="period.svg">../images/period.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>

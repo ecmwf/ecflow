@@ -128,6 +128,7 @@
 
                         "line" : "tree.autoExpandLeafNode",
                         "line" : "tree.displayNodeType",
+                        "line" : "tree.displayConnectionBadge",
                         "line" : "tree.display_child_count",
                         "line" : "tree.indentation",
                         "line" : "tree.drawBranchLine",
