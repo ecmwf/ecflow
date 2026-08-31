@@ -45,14 +45,6 @@ runs:
           echo "build-dir=$RUNNER_TEMP/_ecflow-build"
         } >> "$GITHUB_OUTPUT"
 
-    # Compile caching. Lives in the build action, not the workflow, so both the
-    # push/PR path and the generated cross-repo-trigger.yml path get it — the
-    # latter calls this action directly and never sees the workflow's steps.
-    #
-    # Opt-in by presence of the bucket: sccache has no default bucket and a
-    # daemon that cannot reach one refuses to start, which would fail the build.
-    # With SCCACHE_BUCKET unset both steps below no-op and the compile runs
-    # uncached, so a repo without the secret still builds.
     - name: Set up sccache
       if: env.SCCACHE_BUCKET != ''
       uses: ecmwf/ci-infrastructure/actions/setup-sccache@main
@@ -80,37 +72,8 @@ runs:
         INSTALL_PATH: ${{ steps.set-paths.outputs.install-path }}
         BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
         LAUNCHER: ${{ steps.launcher.outputs.flags }}
-      # Three flags carried over from ecflow's own .github/ci-config.yml, each
-      # needed because the toolchain here is the distro's:
-      #   BOOST_ROOT=/usr            cmake/Dependencies.cmake sets
-      #                              Boost_NO_SYSTEM_PATHS=ON unconditionally, so
-      #                              the apt-installed Boost is invisible without
-      #                              an explicit root.
-      #   ENABLE_CONFIG_MODE_BOOST=OFF
-      #                              ubuntu 24.04 ships CMake 3.28, below the 3.30
-      #                              that config mode targets, so use FindBoost.
-      #   ENABLE_STATIC_BOOST_LIBS=OFF
-      #                              link the shared Boost the distro packages.
-      # OpenSSL (ENABLE_SSL, on by default) and pybind11 (ENABLE_PYTHON, likewise)
-      # come from the base image and the stack-deps prefix respectively.
-      #
-      # ENABLE_UI is likewise left at its ON default, so ecFlowUI is built here as
-      # it is on HPC. Qt6 comes from the container the manifest pins
-      # (ubuntu24.04-gfortran13-boost-qt6); on an image without it,
-      # cmake/Dependencies.cmake ecbuild_critical's on "Qt5/6 not found" at
-      # configure time. Pass -DENABLE_UI=OFF only if you also intend to drop that
-      # coverage.
-      #
-      # ENABLE_ALL_TESTS is deliberately left at its OFF default, unlike the
-      # legacy .github/ci-config.yml and our own .ci/hpc recipes: it adds the
-      # `integration python nightly slow` py3_s_* group, in which
-      # py3_s_TestClientApi times out. Tuning those timeouts is ecflow's call, so
-      # this lane stays on the default set.
       run: |
         set -euo pipefail
-        # Word-splitting $LAUNCHER is intended: it is either empty or a fixed pair
-        # of -D flags produced by the step above, never user input.
-        # shellcheck disable=SC2086
         cmake -S "$GITHUB_WORKSPACE" \
               -B "$BUILD_DIR" \
               -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
