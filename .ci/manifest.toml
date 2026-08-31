@@ -59,11 +59,14 @@ needs = ["ecbuild/build", "stack-deps/build"]
 # build that only compiles proves nothing beyond "ecflow still links against the
 # new ecbuild".
 ctest = true
-# Identical to ci.yml's Test step, so the fan-out gates on the same set the
-# push/PR build does. Both copy .github/ci-config.yml's ctest_options: `-L
-# nightly` is the set that config gates on, and s_test/s_zombies
-# (libs/test/overall) are the long-running system suites it skips. Quoted because
-# the shell would otherwise read the `|` as a pipe.
+# The one place ecflow's test invocation is written. Both lanes read it from
+# here: the generator renders cross-repo-trigger.yml's Test step from it, and
+# ci.yml's Test step runs it via `matrix._resolved['ctest-args']`, so the fan-out
+# and the push/PR build cannot gate on different sets.
+# Copied from .github/ci-config.yml's ctest_options: `-L nightly` is the set that
+# config gates on, and s_test/s_zombies (libs/test/overall) are the long-running
+# system suites it skips. Quoted because the shell would otherwise read the `|`
+# as a pipe -- this string reaches bash verbatim in both lanes.
 # NOT the HPC recipes' `-E s_http`, which is a cluster-specific narrowing from
 # .github/ci-hpc-config.yml (no http server on the compute node).
 # -j 8 rather than $(nproc): ecflow's suite starts real servers, so parallelism

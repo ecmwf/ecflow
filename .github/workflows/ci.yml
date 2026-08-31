@@ -128,12 +128,14 @@ jobs:
       # Run from the build tree: ecflow's tests link against it (and against
       # static libraries that never reach the install prefix), so they cannot be
       # run against the installed artifact.
-      # Filters copied from .github/ci-config.yml's ctest_options: `-L nightly`
-      # is the set that config gates on, and s_test/s_zombies (libs/test/overall)
-      # are long-running system suites it skips. The HPC lane keeps its own
-      # `-E s_http` instead, per .github/ci-hpc-config.yml.
+      #
+      # The filters come from .ci/manifest.toml's [matrix.build], which is also
+      # what the generated cross-repo-trigger.yml renders its Test step from —
+      # see the comment there for why this particular set. Spelling them out
+      # again here is how the two invocations drift apart.
       - name: Test
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies' -j 8
+        if: ${{ matrix._resolved.ctest }}
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure ${{ matrix._resolved['ctest-args'] }}
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
