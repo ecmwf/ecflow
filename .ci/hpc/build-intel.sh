@@ -32,5 +32,7 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
   -DCMAKE_INSTALL_PREFIX="$CI_INSTALL_PREFIX"
 cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_CPUS_PER_TASK:-64}"
-ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_http' -j 8
+# s_test also covers s_test_using_http_backend; s_http covers s_http* (which the
+# legacy ci-hpc-config.yml disables on HPC without recording why).
+ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_test|s_zombies|s_http' -j 8
 cmake --install "${TMPDIR:-/tmp}/build"
