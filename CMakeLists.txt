@@ -19,6 +19,24 @@ cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 #
 
 #
+# Ensure CMake de-duplicates the link line where the linker allows it.
+#
+# This is necessary because test target name the library that its test harness already export,
+# so the same archive is listed more than once.
+#
+#  - CMP0156 lets CMake collapse the repeats when the linker can cope without them.
+#  - CMP0179 is needed alongside it: CMP0156 alone  leaves static libraries repeated,
+#    and every archive involved here is static.
+#
+if (POLICY CMP0156) # available from CMake 3.29
+  cmake_policy( SET CMP0156 NEW )
+endif()
+if (POLICY CMP0179) # available from CMake 3.31
+  cmake_policy( SET CMP0179 NEW )
+endif()
+
+
+#
 # Important: Force default build type to `Release` if no CMAKE_BUILD_TYPE is specified
 #
 if (NOT DEFINED CMAKE_BUILD_TYPE)
