@@ -37,3 +37,9 @@ cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_CPUS_PER_TASK:-64}"
 # legacy ci-hpc-config.yml disables on HPC without recording why).
 ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure -L nightly -E 's_test|s_zombies|s_http' -j 8
 cmake --install "${TMPDIR:-/tmp}/build"
+
+# The fetcher takes the artifact from CI_INSTALL_ARCHIVE, not from the install
+# tree; .part + mv so it only ever appears complete.
+mkdir -p "$(dirname "$CI_INSTALL_ARCHIVE")"
+tar -czf "$CI_INSTALL_ARCHIVE.part" -C "$CI_INSTALL_PREFIX" .
+mv "$CI_INSTALL_ARCHIVE.part" "$CI_INSTALL_ARCHIVE"
