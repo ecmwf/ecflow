@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Marks a server configured for plain TCP/IP.
+
+  The shield is the badge shape shared by every protocol tag, so that the tags read as one family
+  and differ only in colour and in what they carry. This one is left white and empty: plain TCP/IP
+  offers no transport protection, and there is nothing to show inside.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" version="1.1">
+  <defs>
+    <linearGradient id="plainBadge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#333333"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 6 L54 14 V30 C54 44 45 55 32 59 C19 55 10 44 10 30 V14 Z"
+        fill="url(#plainBadge)" stroke="#000000" stroke-width="4"/>
+</svg>
