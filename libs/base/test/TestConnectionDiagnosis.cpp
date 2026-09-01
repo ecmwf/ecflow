@@ -131,6 +131,14 @@ BOOST_AUTO_TEST_CASE(test_connect_errors_are_classified) {
     BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::connection_refused), ConnectionFailure::ConnectionRefused);
     BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::host_unreachable), ConnectionFailure::ConnectionRefused);
     BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::network_unreachable), ConnectionFailure::ConnectionRefused);
+    BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::network_down), ConnectionFailure::ConnectionRefused);
+    BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::address_family_not_supported),
+                      ConnectionFailure::ConnectionRefused);
+    // Reported by an IPv6 loopback endpoint on a host with no IPv6 configured, which is how a
+    // stopped server presents itself on some machines
+    BOOST_CHECK_EQUAL(
+        ecf::classify_connect_error(boost::system::errc::make_error_code(boost::system::errc::address_not_available)),
+        ConnectionFailure::ConnectionRefused);
 
     BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::timed_out), ConnectionFailure::Timeout);
 
@@ -163,6 +171,33 @@ BOOST_AUTO_TEST_CASE(test_read_errors_are_classified) {
     BOOST_CHECK_EQUAL(ecf::classify_read_error(error::no_buffer_space), ConnectionFailure::Other);
 
     BOOST_CHECK_EQUAL(ecf::classify_read_error(boost::system::error_code{}), ConnectionFailure::None);
+}
+
+BOOST_AUTO_TEST_CASE(test_the_reported_connect_failure_does_not_depend_on_the_endpoint_order) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::supersedes;
+
+    // Nothing recorded yet: anything observed is an improvement
+    BOOST_CHECK(supersedes(ConnectionFailure::None, ConnectionFailure::Other));
+    BOOST_CHECK(supersedes(ConnectionFailure::None, ConnectionFailure::ConnectionRefused));
+
+    // A failure that says nothing gives way to one that says something
+    BOOST_CHECK(supersedes(ConnectionFailure::Other, ConnectionFailure::ConnectionRefused));
+    BOOST_CHECK(supersedes(ConnectionFailure::Other, ConnectionFailure::Timeout));
+
+    // ... but never the other way round. This is the case that made a stopped server report
+    // "an unrecognised reason" on hosts where "localhost" resolves to an endpoint that answers
+    // with something other than a refusal, and that endpoint happened to be tried last.
+    BOOST_CHECK(!supersedes(ConnectionFailure::ConnectionRefused, ConnectionFailure::Other));
+    BOOST_CHECK(!supersedes(ConnectionFailure::Timeout, ConnectionFailure::Other));
+
+    // Two equally uninformative failures leave the first in place
+    BOOST_CHECK(!supersedes(ConnectionFailure::Other, ConnectionFailure::Other));
+
+    // A specific failure is not displaced by another specific one: the first endpoint to give a
+    // real answer is the one reported
+    BOOST_CHECK(!supersedes(ConnectionFailure::ConnectionRefused, ConnectionFailure::Timeout));
 }
 
 BOOST_AUTO_TEST_CASE(test_only_failures_after_a_successful_connect_suggest_a_mismatch) {

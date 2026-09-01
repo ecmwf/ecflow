@@ -45,6 +45,20 @@ ConnectionFailure classify_read_error(const boost::system::error_code& error);
 ///
 bool suggests_protocol_mismatch(ConnectionFailure failure);
 
+///
+/// @brief Reports whether a newly observed connect failure should replace the one recorded.
+///
+/// A host name such as "localhost" resolves to several endpoints, which need not fail in the same
+/// way: one may refuse the connection while another is not assignable at all. The failure reported
+/// must not depend on the order the resolver happened to return them in, so a failure that says
+/// something specific replaces one that says nothing, and is never replaced by one that does not.
+///
+/// @param[in] recorded The failure recorded so far; None when nothing has been recorded yet
+/// @param[in] observed The failure just observed on another endpoint
+/// @return true when @p observed should replace @p recorded; false otherwise
+///
+bool supersedes(ConnectionFailure recorded, ConnectionFailure observed);
+
 #ifdef ECF_OPENSSL
 
 ///

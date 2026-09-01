@@ -73,6 +73,9 @@ private:
     /// Records a failure, together with the endpoint and the originating message.
     void record_failure(ecf::ConnectionFailure failure, const std::string& detail);
 
+    /// Remembers the most informative of the connect errors seen while walking the endpoints.
+    void collect_connect_error(const boost::system::error_code& error);
+
     void start(endpoints_iterator_t endpoints_iterator);
     void stop();
     void check_deadline();
@@ -104,6 +107,10 @@ private:
     boost::asio::system_timer deadline_;
 
     time_duration_t timeout_;
+
+    /// The best connect failure seen so far, and the message that produced it
+    ecf::ConnectionFailure connect_failure_{ecf::ConnectionFailure::None};
+    std::string connect_detail_;
 
     ecf::ConnectionDiagnosis owned_diagnosis_; /// Used when the caller provides no storage
     ecf::ConnectionDiagnosis& diagnosis_;      /// The diagnosis of the exchange, populated on failure

@@ -31,9 +31,18 @@ ConnectionFailure classify_connect_error(const boost::system::error_code& error)
         return ConnectionFailure::HostResolution;
     }
 
+    // address_not_available is what a loopback endpoint reports when its address family is not
+    // configured on the host -- an IPv6 "localhost" on a machine without IPv6, for one. Like the
+    // unreachable errors beside it, it means the endpoint cannot be talked to, which is what the
+    // caller needs to know; the underlying message is kept in the diagnosis detail.
+    //
+    // address_not_available is a generic error condition, not a Boost.Asio basic_error, so it is
+    // matched through the generic error condition instead of the asio namespace used by its neighbours.
+    //
     if (error == boost::asio::error::connection_refused || error == boost::asio::error::host_unreachable ||
         error == boost::asio::error::network_unreachable || error == boost::asio::error::network_down ||
-        error == boost::asio::error::address_family_not_supported) {
+        error == boost::asio::error::address_family_not_supported ||
+        error == boost::system::errc::address_not_available) {
         return ConnectionFailure::ConnectionRefused;
     }
 
@@ -85,6 +94,15 @@ bool suggests_protocol_mismatch(ConnectionFailure failure) {
             break;
     }
     return false;
+}
+
+bool supersedes(ConnectionFailure recorded, ConnectionFailure observed) {
+    if (recorded == ConnectionFailure::None) {
+        return true;
+    }
+    // Only a failure that carries information displaces one that does not; the first specific
+    // answer wins, so that the outcome does not depend on the endpoint order.
+    return recorded == ConnectionFailure::Other && observed != ConnectionFailure::Other;
 }
 
 #ifdef ECF_OPENSSL

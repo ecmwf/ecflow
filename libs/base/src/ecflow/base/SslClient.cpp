@@ -95,6 +95,18 @@ SslClient::~SslClient() {
 
 /// Private ==============================================================================
 
+void SslClient::collect_connect_error(const boost::system::error_code& error) {
+    // A host name such as "localhost" resolves to several endpoints, and they do not all fail the
+    // same way: one may refuse the connection while another is not assignable at all. Reporting
+    // whichever endpoint happened to be tried last would make the diagnosis depend on the order
+    // the resolver returned them in, which differs between machines. The first error that says
+    // something specific is kept instead, and never replaced by a later vague one.
+    if (auto failure = ecf::classify_connect_error(error); ecf::supersedes(connect_failure_, failure)) {
+        connect_failure_ = failure;
+        connect_detail_  = error.message();
+    }
+}
+
 void SslClient::record_failure(ecf::ConnectionFailure failure, const std::string& detail) {
     diagnosis_.client_protocol             = ecf::Protocol::Ssl;
     diagnosis_.failure                     = failure;
@@ -164,8 +176,13 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
             // Ran out of end points, An error occurred
             stop();
 
-            record_failure(e ? ecf::classify_connect_error(e) : ecf::ConnectionFailure::Timeout,
-                           e ? e.message() : "connect timed out");
+            if (e) {
+                collect_connect_error(e);
+                record_failure(connect_failure_, connect_detail_);
+            }
+            else {
+                record_failure(ecf::ConnectionFailure::Timeout, "connect timed out");
+            }
             throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points : connection error ( "
                                              << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
                                              << " ) on " << host_ << ":" << port_));
@@ -178,6 +195,8 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
                   << std::endl;
 #endif
 
+        collect_connect_error(e);
+
         // Some kind of error. We need to close the socket used in the previous connection attempt
         // before starting a new one.
         connection_.socket_ll().close();
@@ -187,7 +206,7 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
             // Ran out of end points. An error occurred.
             stop();
 
-            record_failure(ecf::classify_connect_error(e), e.message());
+            record_failure(connect_failure_, connect_detail_);
             throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points: connection error( "
                                              << e.message() << " ) for request( " << outbound_request_ << " ) on "
                                              << host_ << ":" << port_));

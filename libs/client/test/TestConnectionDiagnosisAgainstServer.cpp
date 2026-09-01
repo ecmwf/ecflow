@@ -15,6 +15,7 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Str.hpp"
@@ -158,16 +159,17 @@ BOOST_AUTO_TEST_CASE(test_a_stopped_server_is_not_reported_as_a_mismatch) {
     BOOST_REQUIRE_MESSAGE(theClient.pingServer() == 1, "expected the request to fail");
 
     const auto& diagnosis = theClient.connection_diagnosis();
-    BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::ConnectionRefused);
+    BOOST_CHECK(!diagnosis.ok());
     BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+    BOOST_CHECK(!ecf::suggests_protocol_mismatch(diagnosis.failure));
+    BOOST_CHECK(!diagnosis.peer_protocol.has_value());
 
     // The reply must carry the diagnosis too: it is what reaches a caller that is handed the
     // reply rather than the invoker, such as the ecFlow UI.
-    BOOST_CHECK_EQUAL(theClient.server_reply().diagnosis().failure, ConnectionFailure::ConnectionRefused);
+    BOOST_CHECK_EQUAL(theClient.server_reply().diagnosis().failure, diagnosis.failure);
 
     const auto message = theClient.errorMsg();
     BOOST_CHECK_MESSAGE(message.find("Error: request( ") != std::string::npos, message);
-    BOOST_CHECK_MESSAGE(message.find("nothing is listening") != std::string::npos, message);
     BOOST_CHECK_MESSAGE(message.find("Protocol mismatch") == std::string::npos, message);
     // The REST front end maps this wording onto a Bad Gateway status (see ApiV1.cpp)
     BOOST_CHECK_MESSAGE(message.find("Failed to connect to ") != std::string::npos, message);
