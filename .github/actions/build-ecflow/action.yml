@@ -19,6 +19,12 @@ inputs:
   build-type:
     description: 'CMake build type (e.g. Release, Debug, RelWithDebInfo)'
     required: true
+  boost-root:
+    description: >
+      Boost install prefix. Empty detects it: /usr in the Linux images, the
+      homebrew prefix on macOS.
+    required: false
+    default: ''
 
 outputs:
   install-path:
@@ -72,15 +78,36 @@ runs:
         INSTALL_PATH: ${{ steps.set-paths.outputs.install-path }}
         BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
         LAUNCHER: ${{ steps.launcher.outputs.flags }}
+        BOOST_ROOT_IN: ${{ inputs.boost-root }}
       run: |
         set -euo pipefail
+
+        # Linux finds the multiarch libdir itself; homebrew is not on that path.
+        boost_root="$BOOST_ROOT_IN"
+        if [ -z "$boost_root" ]; then
+          if [ "$(uname)" = Darwin ]; then
+            boost_root="$(brew --prefix)"
+          else
+            boost_root=/usr
+          fi
+        fi
+
+        # Never empty: bash 3.2 aborts on an empty array expansion under `set -u`.
+        boost_flags=( "-DBOOST_ROOT=$boost_root" )
+        if [ "$(uname)" = Darwin ]; then
+          boost_flags+=(
+            "-DBOOST_INCLUDEDIR=$boost_root/include"
+            "-DBOOST_LIBRARYDIR=$boost_root/lib"
+          )
+        fi
+
         cmake -S "$GITHUB_WORKSPACE" \
               -B "$BUILD_DIR" \
               -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
               -DCMAKE_CXX_COMPILER="$CXX_COMPILER" \
               -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" \
               -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH_IN" \
-              -DBOOST_ROOT=/usr \
+              "${boost_flags[@]}" \
               -DENABLE_CONFIG_MODE_BOOST=OFF \
               -DENABLE_STATIC_BOOST_LIBS=OFF \
               $LAUNCHER
@@ -91,5 +118,5 @@ runs:
         BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
       run: |
         set -euo pipefail
-        cmake --build "$BUILD_DIR" --parallel "$(nproc)"
+        cmake --build "$BUILD_DIR" --parallel "$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
         cmake --install "$BUILD_DIR"

@@ -24,6 +24,12 @@ runs-on = "arc-runner-very-large"
 container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gfortran13-boost-qt6:latest"
 platform = "ubuntu-24.04"
 
+[[matrix.build.include]]
+cxx-compiler = "clang++"
+build-type = "Release"
+runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
+platform = "macos-13-x86"
+
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]
 action = "./.github/actions/build-ecflow"
