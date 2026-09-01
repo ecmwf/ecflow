@@ -17,6 +17,8 @@
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -317,6 +319,23 @@ void ServerComThread::run() {
     if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty())) {
         isMessage   = true;
         errorString = ci_->server_reply().get_string();
+    }
+
+    // A failure that looks like a protocol mismatch, but does not yet name the peer protocol, is
+    // worth one probe: it is what turns "check both ends" into "the server speaks X". The probe
+    // opens further connections, so it runs only for that case, and only here, on the worker
+    // thread -- never on the thread serving the interface.
+    if (isMessage && ci_) {
+        const auto& diagnosis = ci_->connection_diagnosis();
+        if (diagnosis.is_protocol_mismatch() && !diagnosis.peer_protocol) {
+            try {
+                ci_->probe_protocol();
+                errorString = ecf::explain(ci_->connection_diagnosis());
+            }
+            catch (std::exception& e) {
+                UiLog(serverName_).dbg() << " protocol probe failed: " << e.what();
+            }
+        }
     }
 
     // we  failed or we have a string returned

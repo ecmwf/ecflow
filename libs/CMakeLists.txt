@@ -84,6 +84,8 @@ set(srcs
   base/src/ecflow/base/ClientOptionsParser.hpp
   base/src/ecflow/base/ClientToServerRequest.hpp
   base/src/ecflow/base/Cmd.hpp
+  base/src/ecflow/base/ConnectionDiagnosis.hpp
+  base/src/ecflow/base/ConnectionFailureMapping.hpp
   base/src/ecflow/base/Connection.hpp
   ${ecflow_client_help_generated_header}
   base/src/ecflow/base/Gnuplot.hpp
@@ -92,6 +94,7 @@ set(srcs
   base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   base/src/ecflow/base/ServerProtocol.hpp
+  base/src/ecflow/base/ServerProtocolProbe.hpp
   base/src/ecflow/base/ServerReply.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
@@ -166,11 +169,14 @@ set(srcs
   base/src/ecflow/base/Client.cpp
   base/src/ecflow/base/ClientOptionsParser.cpp
   base/src/ecflow/base/ClientToServerRequest.cpp
+  base/src/ecflow/base/ConnectionDiagnosis.cpp
+  base/src/ecflow/base/ConnectionFailureMapping.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
   base/src/ecflow/base/HelpCatalog.cpp
   base/src/ecflow/base/HttpClient.cpp
   base/src/ecflow/base/Identification.cpp
+  base/src/ecflow/base/ServerProtocolProbe.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp

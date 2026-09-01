@@ -20,10 +20,14 @@ ConnectState::ConnectState() {
 
 void ConnectState::init() {
     if (descMap.empty()) {
-        descMap[Undef]        = "";
-        descMap[Lost]         = "Connection to server lost";
-        descMap[Disconnected] = "Server is disconnected";
-        descMap[Normal]       = "Server is connected";
+        descMap[Undef]               = "";
+        descMap[Lost]                = "Connection to server lost";
+        descMap[Disconnected]        = "Server is disconnected";
+        descMap[Normal]              = "Server is connected";
+        descMap[ProtocolMismatch]    = "Client and server are configured for different protocols";
+        descMap[SslCertificateError] = "SSL certificate error";
+        descMap[VersionIncompatible] = "Server version is incompatible with the client";
+        descMap[FailedClient]        = "Could not create the client";
     }
 }
 
@@ -38,6 +42,12 @@ const std::string& ConnectState::describe() const {
 }
 void ConnectState::state(State state) {
     state_ = state;
+
+    // A state that is not a failure carries no diagnosis; leaving a stale one behind would let a
+    // later view of the server report a failure that has since been resolved.
+    if (state_ == Normal || state_ == Undef || state_ == Disconnected) {
+        diagnosis_.clear();
+    }
 
     switch (state_) {
         case Normal:

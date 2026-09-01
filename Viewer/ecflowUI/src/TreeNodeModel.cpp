@@ -1342,10 +1342,13 @@ int TreeNodeModel::serverConnectId(ConnectState::State st) const {
         case ConnectState::Disconnected:
             return 2;
         case ConnectState::VersionIncompatible:
-        case ConnectState::SslIncompatible:
         case ConnectState::SslCertificateError:
         case ConnectState::FailedClient:
             return 3;
+        // A mismatch is not the server being unavailable: it is answering, correctly, to a client
+        // configured differently. It is marked apart so that the two do not look alike.
+        case ConnectState::ProtocolMismatch:
+            return 4;
         default:
             return 0;
     }

@@ -14,6 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Message.hpp"
@@ -32,13 +33,20 @@ Client::Client(boost::asio::io_context& io,
                Cmd_ptr cmd_ptr,
                const std::string& host,
                const std::string& port,
-               time_duration_t timeout)
+               time_duration_t timeout,
+               ecf::ConnectionDiagnosis* diagnosis)
     : stopped_(false),
       host_(host),
       port_(port),
       connection_(io),
       deadline_(io),
-      timeout_(timeout) {
+      timeout_(timeout),
+      diagnosis_(diagnosis ? *diagnosis : owned_diagnosis_) {
+    diagnosis_.clear();
+    diagnosis_.client_protocol = ecf::Protocol::Plain;
+    diagnosis_.host            = host_;
+    diagnosis_.port            = port_;
+
     /// Avoid sending a NULL request to the server
     if (!cmd_ptr.get()) {
         throw std::runtime_error("Client::Client: No request specified !");
@@ -62,8 +70,14 @@ Client::Client(boost::asio::io_context& io,
 
     // Host name resolution is performed using a resolver, where host and service
     // names(or ports) are looked up and converted into one or more end points
-    auto resolver           = resolver_t(io);
-    auto results            = resolver.resolve(host_, port_);
+    auto resolver = resolver_t(io);
+    boost::system::error_code resolve_error;
+    auto results = resolver.resolve(host_, port_, resolve_error);
+    if (resolve_error) {
+        record_failure(ecf::classify_connect_error(resolve_error), resolve_error.message());
+        throw std::runtime_error(MESSAGE("Client::Client: unable to resolve " << host_ << ":" << port_ << " ( "
+                                                                              << resolve_error.message() << " )"));
+    }
     auto endpoints_iterator = results.begin();
 
     // The list of end points obtained could contain both IPv4 and IPv6 end points,
@@ -79,6 +93,33 @@ Client::~Client() {
 }
 
 /// Private ==============================================================================
+
+void Client::collect_connect_error(const boost::system::error_code& error) {
+    // Depending on the configuration, a host name such as "localhost" may resolve to several endpoints,
+    // and these endpoints do not all fail the  same way:
+    //  - one may refuse the connection;
+    //  - while another might be not assignable at all.
+    //
+    // Reporting whichever endpoint happened to be tried last would makes the diagnosis depend on the order
+    // the resolver returned them in, which differs between machines.
+    //
+    // The first error that says something specific is kept instead, and never replaced by a later vague one.
+    if (auto failure = ecf::classify_connect_error(error); ecf::supersedes(connect_failure_, failure)) {
+        connect_failure_ = failure;
+        connect_detail_  = error.message();
+    }
+}
+
+void Client::record_failure(ecf::ConnectionFailure failure, const std::string& detail) {
+    diagnosis_.client_protocol = ecf::Protocol::Plain;
+    diagnosis_.failure         = failure;
+    diagnosis_.host            = host_;
+    diagnosis_.port            = port_;
+    diagnosis_.detail          = detail;
+    // A peer that accepted the connection is listening; a failure after that point is consistent
+    // with the peer speaking another protocol.
+    diagnosis_.protocol_mismatch_suspected = ecf::suggests_protocol_mismatch(failure);
+}
 
 // This function terminates all the actors to shut down the connection. It
 // may be called by the user of the client class, or by the class itself in
@@ -139,6 +180,13 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points, An error occurred
             stop();
+            if (e) {
+                collect_connect_error(e);
+                record_failure(connect_failure_, connect_detail_);
+            }
+            else {
+                record_failure(ecf::ConnectionFailure::Timeout, "connect timed out");
+            }
             throw std::runtime_error(MESSAGE("Client::handle_connect: Ran out of end points : connection error ( "
                                              << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
                                              << " ) on " << host_ << ":" << port_));
@@ -151,6 +199,8 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
                   << std::endl;
 #endif
 
+        collect_connect_error(e);
+
         // Some kind of error. We need to close the socket used in the previous connection attempt
         // before starting a new one.
         connection_.socket_ll().close();
@@ -159,6 +209,7 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points. An error occurred.
             stop();
+            record_failure(connect_failure_, connect_detail_);
             throw std::runtime_error(MESSAGE("Client::handle_connect: Ran out of end points: connection error( "
                                              << e.message() << " ) for request( " << outbound_request_ << " ) on "
                                              << host_ << ":" << port_));
@@ -212,6 +263,7 @@ void Client::handle_write(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
+        record_failure(ecf::classify_read_error(e), e.message());
         throw std::runtime_error(MESSAGE("Client::handle_write: error (" << e.message() << " ) for request( "
                                                                          << outbound_request_ << " ) on " << host_
                                                                          << ":" << port_));
@@ -271,6 +323,7 @@ void Client::handle_read(const boost::system::error_code& e) {
             std::cout << "   Client::handle_read: End of File (server did not reply or mixing ssl and non-ssl)"
                       << std::endl;
 #endif
+            record_failure(ecf::ConnectionFailure::ClosedWithoutReply, e.message());
             inbound_response_.set_cmd(std::make_shared<StcCmd>(StcCmd::END_OF_FILE));
             return;
         }
@@ -286,10 +339,12 @@ void Client::handle_read(const boost::system::error_code& e) {
                 << "   Client::handle_read: Server replied with invalid argument (i.e could not decode client message) "
                 << std::endl;
 #endif
+            record_failure(ecf::ConnectionFailure::UndecodableReply, e.message());
             inbound_response_.set_cmd(std::make_shared<StcCmd>(StcCmd::INVALID_ARGUMENT));
             return;
         }
 
+        record_failure(ecf::classify_read_error(e), e.message());
         throw std::runtime_error(MESSAGE("Client::handle_read: connection error( "
                                          << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_
                                          << ":" << port_));
@@ -315,6 +370,7 @@ bool Client::handle_server_response(ServerReply& server_reply, bool debug) const
         std::cout << "  Client::handle_server_response" << std::endl;
     }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e. SServerLoadCmd
+    server_reply.set_diagnosis(diagnosis_);
     return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
 
@@ -340,6 +396,7 @@ void Client::check_deadline() {
         // asynchronous operations are cancelled.
         stop();
 
+        record_failure(ecf::ConnectionFailure::Timeout, MESSAGE("timed out after " << timeout_.count() << "ms"));
         throw std::runtime_error(MESSAGE("Client::check_deadline: timed out after "
                                          << timeout_.count() << "ms for request( " << outbound_request_ << " ) on "
                                          << host_ << ":" << port_));

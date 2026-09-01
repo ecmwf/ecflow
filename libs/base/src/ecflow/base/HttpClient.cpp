@@ -14,9 +14,43 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Message.hpp"
+
+namespace ecf::http {
+
+ConnectionFailure classify_httplib_error(httplib::Error error) {
+    switch (error) {
+        case httplib::Error::Success:
+            return ecf::ConnectionFailure::None;
+        case httplib::Error::Connection:
+        case httplib::Error::BindIPAddress:
+            return ecf::ConnectionFailure::ConnectionRefused;
+        case httplib::Error::ConnectionTimeout:
+        case httplib::Error::Canceled:
+            return ecf::ConnectionFailure::Timeout;
+        case httplib::Error::Read:
+        case httplib::Error::Write:
+            // The connection was established, and then failed while exchanging data. A peer that
+            // is listening but does not answer with HTTP produces exactly this.
+            return ecf::ConnectionFailure::ClosedWithoutReply;
+        case httplib::Error::SSLConnection:
+        case httplib::Error::SSLLoadingCerts:
+            return ecf::ConnectionFailure::HandshakeFailed;
+        case httplib::Error::SSLServerVerification:
+            return ecf::ConnectionFailure::CertificateRejected;
+        case httplib::Error::ExceedRedirectCount:
+        case httplib::Error::UnsupportedMultipartBoundaryChars:
+        case httplib::Error::Compression:
+        case httplib::Error::Unknown:
+            break;
+    }
+    return ecf::ConnectionFailure::Other;
+}
+
+} // namespace ecf::http
 
 static std::string make_scheme_host_port(const std::string& scheme, const std::string& host, const std::string& port) {
     return scheme + "://" + host + ":" + port;
@@ -26,13 +60,20 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
                        const std::string& scheme,
                        const std::string& host,
                        const std::string& port,
-                       int timeout)
+                       int timeout,
+                       ecf::ConnectionDiagnosis* diagnosis)
     : scheme_(scheme),
       host_(host),
       port_(port),
       base_url_(make_scheme_host_port(scheme, host, port)),
       client_(base_url_),
-      headers_() {
+      headers_(),
+      diagnosis_(diagnosis ? *diagnosis : owned_diagnosis_) {
+
+    diagnosis_.clear();
+    diagnosis_.client_protocol = (scheme_ == "https") ? ecf::Protocol::Https : ecf::Protocol::Http;
+    diagnosis_.host            = host_;
+    diagnosis_.port            = port_;
 
     client_.set_connection_timeout(std::chrono::seconds{timeout});
     client_.set_read_timeout(std::chrono::seconds{timeout});
@@ -45,8 +86,11 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
 #else
         // Without SSL support, the underlying HTTP library is unable to establish an HTTPS connection,
         // and reporting this immediately is preferable to attempting the request and failing obscurely.
-        throw std::runtime_error("HttpClient::HttpClient: Unable to use HTTPS, "
-                                 "since this ecFlow was built without SSL support");
+        static const char* no_ssl_support = "HttpClient::HttpClient: Unable to use HTTPS, "
+                                            "since this ecFlow was built without SSL support";
+        record_failure(ecf::ConnectionFailure::HandshakeFailed, no_ssl_support);
+        diagnosis_.protocol_mismatch_suspected = false;
+        throw std::runtime_error(no_ssl_support);
 #endif
     }
 
@@ -55,6 +99,17 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
     }
 
     outbound_request_.set_cmd(cmd_ptr);
+}
+
+void HttpClient::record_failure(ecf::ConnectionFailure failure, const std::string& detail) {
+    diagnosis_.client_protocol = (scheme_ == "https") ? ecf::Protocol::Https : ecf::Protocol::Http;
+    diagnosis_.failure         = failure;
+    diagnosis_.host            = host_;
+    diagnosis_.port            = port_;
+    diagnosis_.detail          = detail;
+    // The HTTP library reports a failure to connect separately from a failure to exchange data,
+    // which is what allows a mismatch to be told apart from a server that is not running.
+    diagnosis_.protocol_mismatch_suspected = ecf::suggests_protocol_mismatch(failure);
 }
 
 void HttpClient::run() {
@@ -70,11 +125,18 @@ void HttpClient::run() {
             auto response = result.value();
             ecf::restore_from_string(response.body, inbound_response_);
         }
-        else {}
+        else {
+            // The peer answered with a well-formed HTTP response, so it does speak HTTP; the
+            // request itself was refused.
+            reason_ = MESSAGE(status_);
+            record_failure(ecf::ConnectionFailure::RejectedRequest, reason_);
+            diagnosis_.peer_protocol = diagnosis_.client_protocol;
+        }
     }
     else {
         status_ = ecf::http::Status::Unknown;
-        reason_ = "No response from server";
+        reason_ = httplib::to_string(result.error());
+        record_failure(ecf::http::classify_httplib_error(result.error()), reason_);
     }
 }
 
@@ -83,10 +145,12 @@ bool HttpClient::handle_server_response(ServerReply& server_reply, bool debug) c
         std::cout << "  Client::handle_server_response" << std::endl;
     }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e., SServerLoadCmd
+    server_reply.set_diagnosis(diagnosis_);
 
     if (status_ == ecf::http::Status::OK) {
         return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
     }
 
-    throw std::runtime_error(MESSAGE("HttpClient::handle_server_response: Error: " << status_));
+    throw std::runtime_error(
+        MESSAGE("HttpClient::handle_server_response: Error: " << status_ << (reason_.empty() ? "" : " : ") << reason_));
 }

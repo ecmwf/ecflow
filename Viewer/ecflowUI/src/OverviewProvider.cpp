@@ -18,6 +18,8 @@
 #include "VNode.hpp"
 #include "VSState.hpp"
 #include "VTriggerAttr.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
@@ -109,7 +111,16 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
         f << inc << "Host    : " << server->host() << "\n";
         f << inc << "Port    : " << server->port() << "\n";
 
-        f << inc << "Protocol : " << ecf::to_ui_designation(server->protocol()) << " : enabled\n";
+        f << inc << "Client protocol : " << ecf::to_ui_designation(server->protocol()) << "\n";
+
+        // The peer protocol is stated only when it was positively determined by probing the
+        // endpoint. Naming a protocol that was merely guessed would send the reader to change the
+        // wrong setting.
+        const ecf::ConnectionDiagnosis& diagnosis = cst->diagnosis();
+        if (diagnosis.peer_protocol) {
+            f << inc << "Server protocol : " << ecf::to_ui_designation(diagnosis.peer_protocol.value())
+              << "  (determined by probing the server)\n";
+        }
 
         if (!server->user().empty()) {
             f << inc << "Custom user : " << server->user() << "\n";
@@ -130,14 +141,22 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
         else if (cst->state() == ConnectState::VersionIncompatible) {
             f << inc << "Incompatible server version! " << cst->errorMessage() << "\n";
         }
-        else if (cst->state() == ConnectState::SslIncompatible) {
-            f << inc << "Possible SSL-related incompatibility! " << cst->errorMessage() << "\n";
-        }
         else if (cst->state() == ConnectState::SslCertificateError) {
             f << inc << "SSL certificate error! " << cst->errorMessage() << "\n";
         }
         else if (cst->state() == ConnectState::FailedClient) {
             f << inc << "Client creation error! " << cst->errorMessage() << "\n";
+        }
+        else if (cst->state() == ConnectState::ProtocolMismatch) {
+            f << inc << "Last connection attempt : " << VFileInfo::formatDate(cst->lastLostTime()).toStdString()
+              << "\n";
+            f << "\n";
+            f << "Diagnosis:\n";
+            f << ecf::explain(diagnosis) << "\n";
+            if (!diagnosis.detail.empty()) {
+                f << "\n";
+                f << inc << "Low-level error : " << diagnosis.detail << "\n";
+            }
         }
         return;
     }

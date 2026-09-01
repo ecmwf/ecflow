@@ -37,6 +37,14 @@ ClientToServerCmd::ClientToServerCmd()
 
 ClientToServerCmd::~ClientToServerCmd() = default;
 
+std::string failed_request_prefix(const ClientToServerCmd& request) {
+    std::string prefix;
+    prefix += "Error: request( ";
+    prefix += request.print_short();
+    prefix += " ) failed! ";
+    return prefix;
+}
+
 bool ClientToServerCmd::equals(ClientToServerCmd* rhs) const {
     return hostname() == rhs->hostname();
 }
