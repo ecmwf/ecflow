@@ -1,0 +1,47 @@
+# Vendored; not ours to lint or format.
+exclude: '^3rdparty/'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: '^\.cd/conda/meta\.yaml$'  # conda recipe: Jinja, not YAML
+
+  # Keep `exclude` in sync with clang_format_ignore in old_CI.yml until that retires.
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v19.1.7
+    hooks:
+      - id: clang-format
+        types_or: [c, c++]
+        exclude: '^(docs|tools|releng)/|^libs/(client|node|pyext)/test/data/|^libs/test/overall/data/'
+
+  - repo: https://github.com/ecmwf/ci-infrastructure
+    rev: 2b2f347b71942501be4b964217ec7aeeb79eb27c
+    hooks:
+      - id: check-ci-approval
+
+  # Off until the tree is cleaned up; the counts are what each would rewrite today.
+  #
+  # - repo: https://github.com/pre-commit/pre-commit-hooks
+  #   rev: v6.0.0
+  #   hooks:
+  #     - id: trailing-whitespace   # 593 files
+  #     - id: end-of-file-fixer     # 326 files
+  #     - id: mixed-line-ending     # 17 files
+  #       args: [--fix=lf]
+  #
+  # ruff-format rewrites 52 of 85 files (7509 lines). ruff-check reports 1440
+  # errors, of which 730 are invalid-syntax from four Python 2 files
+  # (libs/pyext/samples/{emos_example,TestGui}.py,
+  # libs/pyext/test/data/python_includes/head.py, tools/ecflow_fuse.py) that must
+  # be ported or excluded before this can pass.
+  #
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.15.11
+  #   hooks:
+  #     - id: ruff-check
+  #       exclude: '^docs/'
+  #     - id: ruff-format
+  #       exclude: '^docs/'
