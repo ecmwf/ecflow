@@ -27,6 +27,12 @@ platform = "ubuntu-24.04"
 [[matrix.build.include]]
 cxx-compiler = "clang++"
 build-type = "Release"
+runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
+platform = "macos-13-arm"
+
+[[matrix.build.include]]
+cxx-compiler = "clang++"
+build-type = "Release"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
 platform = "macos-13-x86"
 
