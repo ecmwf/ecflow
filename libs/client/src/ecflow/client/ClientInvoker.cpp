@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/Client.hpp"
+#include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/CtsWaitCmd.hpp"
@@ -51,6 +52,7 @@
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
 #endif
@@ -338,6 +340,12 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+
+    // Every request converges here, including the paths that give up before a reply is handled.
+    // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
+    // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
+    server_reply_.set_diagnosis(diagnosis_);
+
     if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
     }
@@ -366,10 +374,29 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+
+    // Every request converges here, including the paths that give up before a reply is handled.
+    // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
+    // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
+    server_reply_.set_diagnosis(diagnosis_);
+
     if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;
+}
+
+std::string ClientInvoker::failure_message(const Cmd_ptr& cts_cmd, const std::exception& e) const {
+    // The structured explanation is preferred over the raw transport message, which names internal
+    // functions and does not say what the user is expected to do about the failure.
+    std::string message = cts_cmd ? failed_request_prefix(*cts_cmd) : std::string{};
+    if (auto explanation = ecf::explain(diagnosis_); !explanation.empty()) {
+        message += explanation;
+    }
+    else {
+        message += e.what();
+    }
+    return message;
 }
 
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
@@ -441,6 +468,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     /// of defs, and client handle in server reply However this is only done, if we are not using the
                     /// Command Level Interface(cli)
                     server_reply_.clear_for_invoke(cli());
+                    diagnosis_.clear();
 
                     if (!cts_cmd->setup_user_authentification(clientEnv_)) {
                         server_reply_.set_error_msg("Invalid custom user(ECF_USER || --user <user>) or authentication "
@@ -472,12 +500,15 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                         clientEnv_.openssl().init_for_client();
 
+                        effective_protocol_ = ecf::Protocol::Ssl;
+
                         SslClient theClient(io,
                                             clientEnv_.openssl().context(),
                                             cts_cmd,
                                             clientEnv_.host(),
                                             clientEnv_.port(),
-                                            clientEnv_.connect_timeout());
+                                            clientEnv_.connect_timeout(),
+                                            &diagnosis_);
                         {
     #ifdef DEBUG_PERF
                             ecf::ScopedDurationTimer my_timer("   io.run()");
@@ -498,7 +529,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             }
                         }
                         catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
+                            server_reply_.set_error_msg(failure_message(cts_cmd, e));
                             return 1;
                         }
                     }
@@ -510,8 +541,11 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                                           << std::endl;
                             }
 
+                            effective_protocol_ = clientEnv_.protocol();
+
                             const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
-                            HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
+                            HttpClient theClient(
+                                cts_cmd, scheme, clientEnv_.host(), clientEnv_.port(), 120, &diagnosis_);
                             try {
                                 cfg(clientEnv_, theClient);
                             }
@@ -536,7 +570,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                                 }
                             }
                             catch (std::exception& e) {
-                                server_reply_.set_error_msg(e.what());
+                                server_reply_.set_error_msg(failure_message(cts_cmd, e));
                                 return 1;
                             }
                         }
@@ -546,8 +580,14 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                                           << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << std::endl;
                             }
 
-                            Client theClient(
-                                io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
+                            effective_protocol_ = ecf::Protocol::Plain;
+
+                            Client theClient(io,
+                                             cts_cmd,
+                                             clientEnv_.host(),
+                                             clientEnv_.port(),
+                                             clientEnv_.connect_timeout(),
+                                             &diagnosis_);
 
                             {
 #ifdef DEBUG_PERF
@@ -570,7 +610,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                                 }
                             }
                             catch (std::exception& e) {
-                                server_reply_.set_error_msg(e.what());
+                                server_reply_.set_error_msg(failure_message(cts_cmd, e));
                                 return 1;
                             }
                         }
@@ -654,6 +694,16 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     }
                 }
 
+                // A peer that is listening, but is not speaking the expected protocol, will not
+                // start speaking it on a retry. Report immediately, rather than waiting out the
+                // remaining attempts.
+                if (diagnosis_.is_protocol_mismatch()) {
+                    if (clientEnv_.debug()) {
+                        std::cout << TimeStamp::now() << "ClientInvoker: " << ecf::explain(diagnosis_) << std::endl;
+                    }
+                    no_of_tries = 1; // the decrement below ends the loop
+                }
+
                 // Wait a bit before trying to connect again, but only if no_of_tries > 0
                 no_of_tries--;
                 if (no_of_tries > 0) {
@@ -667,12 +717,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
             //
             if (is_not_retrying(*cts_cmd)) {
                 std::ostringstream ss;
-                ss << TimeStamp::now() << "Request( " << cts_cmd->print_short() << " )";
+                ss << TimeStamp::now() << failed_request_prefix(*cts_cmd);
                 if (clientEnv_.denied()) {
-                    ss << " ECF_DENIED ";
+                    ss << "ECF_DENIED ";
                 }
-                ss << ", Failed to connect to " << client_env_host_port() << ". After " << connection_attempts_
-                   << " attempts. Is the server running ?\n";
+                // The wording "Failed to connect to " is matched on by the REST front end (see
+                // ApiV1.cpp), which maps it to a Bad Gateway status; keep it verbatim.
+                ss << "Failed to connect to " << client_env_host_port() << ". ";
+                if (auto explanation = ecf::explain(diagnosis_); !explanation.empty()) {
+                    ss << explanation << "\n";
+                }
+                else {
+                    ss << "After " << connection_attempts_ << " attempts. Is the server running ?\n";
+                }
                 // Only print client environment if not pinging
                 if (!cts_cmd->ping_cmd()) {
                     ss << clientEnv_.toString() << std::endl;
@@ -741,6 +798,21 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
         server_reply_.set_error_msg(ss.str());
     }
     return 1;
+}
+
+std::optional<ecf::Protocol> ClientInvoker::probe_protocol(std::chrono::milliseconds timeout) const {
+    auto found = ecf::probe_server_protocol(clientEnv_.host(), clientEnv_.port(), timeout, effective_protocol_);
+
+    diagnosis_.client_protocol = effective_protocol_;
+    diagnosis_.host            = clientEnv_.host();
+    diagnosis_.port            = clientEnv_.port();
+    diagnosis_.peer_protocol   = found;
+
+    // Keep the reply in step with the invoker, so that a caller reading either of the two never
+    // sees a stale peer protocol.
+    server_reply_.set_diagnosis(diagnosis_);
+
+    return found;
 }
 
 void ClientInvoker::reset() const {

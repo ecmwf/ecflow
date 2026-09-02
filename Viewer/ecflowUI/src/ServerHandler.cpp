@@ -279,6 +279,10 @@ void ServerHandler::createClient(bool init) {
             return;
         }
 #endif
+        if (!http_error.empty()) {
+            failedClientServer(http_error);
+            return;
+        }
 
         // Check if the server is compatible with the client. If it is fine
         // reset() will be called to connect to the server and load the defs etc.
@@ -355,7 +359,7 @@ void ServerHandler::setUser(const std::string& user) {
 bool ServerHandler::isDisabled() const {
     return (connectState_->state() == ConnectState::Disconnected ||
             connectState_->state() == ConnectState::VersionIncompatible ||
-            connectState_->state() == ConnectState::SslIncompatible ||
+            connectState_->state() == ConnectState::ProtocolMismatch ||
             connectState_->state() == ConnectState::SslCertificateError || compatibility_ == Incompatible);
 }
 
@@ -1084,13 +1088,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task, const ServerReply& server
 
     // The news reply has to be carefully checked
     if (task->type() == VTask::NewsTask) {
-        // this was a news() called to check the ssl-incompatibilty. If it works we
-        // can suppos everyting is fine and can continue with the init!!!
-        if (task->param("sslcheck") == "1") {
-            compatibleServer();
-            return;
-        }
-
         // we've just asked the server if anything has changed - has it?
         refreshFinished();
 
@@ -1299,14 +1296,8 @@ void ServerHandler::clientTaskFailed(VTask_ptr task, const std::string& errMsg, 
     }
 
     if (task->type() == VTask::NewsTask) {
-        // This was a news() called after ServerVersionTask failed!
-        if (task->param("sslcheck") == "1" && errMsg.find("possibly non-ssl server") != std::string::npos) {
-            sslIncompatibleServer(errMsg);
-        }
-        else {
-            connectionLost(errMsg);
-            refreshFinished();
-        }
+        connectionLost(errMsg);
+        refreshFinished();
     }
 
     else if (task->type() == VTask::ResetTask) {
@@ -1315,21 +1306,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task, const std::string& errMsg, 
 
     // the very first command sent to a server
     else if (task->type() == VTask::ServerVersionTask) {
-        if (serverReply.invalid_argument()) {
-            incompatibleServer("");
-        }
-        // if there is no EOF it could be an SSL incomptability issue!
-        else if (!serverReply.eof()) {
-            // but ... the error message is not make it 100% certain!
-            // So we will ask for the news! It will give back an error message
-            // that be could properly parsed to identify if it is really
-            // an SSL issue!
-            compatibility_ = Compatibility::CanBeCompatible;
-            comQueue_->addNewsTask("sslcheck", "1");
-        }
-        else {
-            connectionLost(errMsg);
-        }
+        classifyFirstContactFailure(errMsg, serverReply);
     }
     else if (task->type() == VTask::CommandTask) {
         // comQueue_->addSyncTask();
@@ -1432,27 +1409,43 @@ void ServerHandler::incompatibleServer(const std::string& version) {
     broadcast(&ServerObserver::notifyServerConnectState);
 }
 
-void ServerHandler::sslIncompatibleServer(const std::string& msg) {
+void ServerHandler::classifyFirstContactFailure(const std::string& errMsg, const ServerReply& serverReply) {
+    const ecf::ConnectionDiagnosis& diagnosis = serverReply.diagnosis();
+
+    // A rejected certificate proves the server does speak TLS, so it is never a protocol mismatch
+    // and never a reason to tell the user to check whether SSL is enabled.
+    if (diagnosis.failure == ecf::ConnectionFailure::CertificateRejected) {
+        sslCertificateError(errMsg);
+        return;
+    }
+
+    if (diagnosis.is_protocol_mismatch()) {
+        protocolMismatch(diagnosis);
+        return;
+    }
+
+    // An undecodable reply from a peer that does speak the plain ecFlow protocol is what an
+    // ecFlow 4 server looks like. Without that confirmation the same reply is equally consistent
+    // with a peer that is not an ecFlow server at all, so the claim is not made.
+    if (serverReply.invalid_argument() && diagnosis.peer_protocol &&
+        diagnosis.peer_protocol.value() == ecf::Protocol::Plain) {
+        incompatibleServer("");
+        return;
+    }
+
+    connectionLost(errMsg);
+}
+
+void ServerHandler::protocolMismatch(const ecf::ConnectionDiagnosis& diagnosis) {
     compatibility_ = Incompatible;
     stopRefreshTimer();
-    comQueue_->disable();
-
-    connectState_->state(ConnectState::SslIncompatible);
-    std::string errStr = "Cannot communicate to server.";
-#if ECF_OPENSSL
-    if (isSsl()) {
-        errStr += " Server is marked as SSL in the UI. Please check if the server is really SSL-enabled! Also check "
-                  "settings in Manage servers dialogue!";
+    if (comQueue_) {
+        comQueue_->disable();
     }
-    else {
-        errStr += " Server is marked as non-SSL in the UI. Please check if SSL is really disabled in the server! Also "
-                  "check settings in Manage servers dialogue!";
-    }
-#else
-    errStr += " ecFlow was built without SSL support but it migth be enabled in the server!";
-#endif
 
-    connectState_->errorMessage(errStr + "\n\n" + msg);
+    connectState_->state(ConnectState::ProtocolMismatch);
+    connectState_->diagnosis(diagnosis);
+    connectState_->errorMessage(ecf::explain(diagnosis));
     broadcast(&ServerObserver::notifyServerConnectState);
 }
 
@@ -1477,7 +1470,7 @@ void ServerHandler::reset() {
 
     if (connectState_->state() == ConnectState::Disconnected ||
         connectState_->state() == ConnectState::VersionIncompatible ||
-        connectState_->state() == ConnectState::SslIncompatible ||
+        connectState_->state() == ConnectState::ProtocolMismatch ||
         connectState_->state() == ConnectState::SslCertificateError ||
         connectState_->state() == ConnectState::FailedClient || compatibility_ == Incompatible) {
         return;

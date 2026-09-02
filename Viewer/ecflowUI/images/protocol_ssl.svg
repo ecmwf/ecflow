@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Marks a server configured for TCP/IP with SSL.
+
+  The same shield as the plain tag, in green, carrying the closed padlock already used elsewhere in
+  the viewer: the dark shackle and amber body are kept so that the lock stays the one users already
+  recognise, rather than a second, unfamiliar lock.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" version="1.1">
+  <defs>
+    <linearGradient id="sslBadge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#2e8b41"/>
+    </linearGradient>
+  </defs>
+  <path d="M 32 6 L54 14 V30 C54 44 45 55 32 59 C19 55 10 44 10 30 V14 Z"
+        fill="url(#sslBadge)" stroke="#1f6b30" stroke-width="5"/>
+  <g stroke="#3f3f3f" stroke-linecap="round">
+    <path d="M 25 32 V 26 a 7 7 0 0 1 14 0 V 33" fill="none" stroke-width="4"/>
+    <rect x="20" y="30" width="24" height="15" rx="2.5" fill="#ffffff" stroke-width="2"/>
+  </g>
+  <circle cx="32" cy="35.6" r="2.4" fill="#3f3f3f"/>
+  <rect x="31" y="37.6" width="2" height="4.6" rx="1" fill="#3f3f3f"/>
+</svg>

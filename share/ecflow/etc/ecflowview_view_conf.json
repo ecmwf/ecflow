@@ -53,6 +53,11 @@
                     "default": "false"
                 },
 
+                "displayConnectionBadge" : {
+                    "label" : "Show connection badge",
+                    "default": "true"
+                },
+
 				"background"  : {
 				    "label"   :  "Background colour",
                     "default" : "rgb(242,242,242)"

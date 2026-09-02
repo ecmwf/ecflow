@@ -55,6 +55,41 @@ public:
     ClientEnvironment& environment() { return clientEnv_; }
     const ClientEnvironment& environment() const { return clientEnv_; }
 
+    ///
+    /// @brief Provides the protocol of the transport that actually ran on the most recent request.
+    ///
+    /// This is not necessarily ClientEnvironment::protocol(): the transport is selected from the
+    /// SSL setting first, so an environment that both enables SSL and requests HTTP runs the SSL
+    /// transport. Diagnosing a failure requires the transport that ran, not the one configured.
+    ///
+    /// @return The protocol of the transport used by the most recent request
+    ///
+    ecf::Protocol effective_protocol() const { return effective_protocol_; }
+
+    ///
+    /// @brief Provides the structured diagnosis of the most recent request.
+    ///
+    /// The diagnosis records "no failure" when the most recent request succeeded. It remains valid
+    /// after a request that failed by throwing.
+    ///
+    /// @return The diagnosis of the most recent request
+    ///
+    const ecf::ConnectionDiagnosis& connection_diagnosis() const { return diagnosis_; }
+
+    ///
+    /// @brief Determines which protocol the configured server endpoint appears to speak, and
+    ///        records the outcome in the diagnosis of the most recent request.
+    ///
+    /// The probe is intended to be called after a request has failed, to resolve a failure whose
+    /// class alone does not identify the cause. It is never part of the normal path, and is
+    /// deliberately not invoked automatically: it opens further connections to a server that has
+    /// just failed to answer.
+    ///
+    /// @param[in] timeout The per-attempt timeout
+    /// @return The protocol determined; an empty optional when no attempt succeeded
+    ///
+    std::optional<ecf::Protocol> probe_protocol(std::chrono::milliseconds timeout = std::chrono::seconds{3}) const;
+
     /// for debug allow the current client environment to be printed
     std::string to_string() const { return clientEnv_.toString(); }
 
@@ -473,6 +508,10 @@ private:
 
     int do_invoke_cmd(Cmd_ptr) const;
 
+    /// Builds the message for a failed exchange, preferring the structured explanation over the
+    /// raw transport message, and opening with the same prefix as every other failure report.
+    std::string failure_message(const Cmd_ptr& cts_cmd, const std::exception& e) const;
+
     /// For clients that want to load an in-memory definition into the server.
     int load_in_memory_defs(const defs_ptr& clientDefs, bool force) const;
     std::string client_env_host_port() const;
@@ -509,6 +548,9 @@ private:
     /// @brief  The amount of time to wait before retrying to connect in case of failure.
     ///
     time_duration_t retry_connection_period_{RETRY_CONNECTION_PERIOD};
+
+    mutable ecf::Protocol effective_protocol_{ecf::Protocol::Plain}; // transport used by the last request
+    mutable ecf::ConnectionDiagnosis diagnosis_;                     // diagnosis of the last request
 
     mutable boost::posix_time::time_duration rtt_; // record latency for each cmd.
     mutable boost::posix_time::ptime start_time_;  // Used for time out and measuring latency
