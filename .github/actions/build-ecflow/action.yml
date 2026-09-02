@@ -110,6 +110,7 @@ runs:
               "${boost_flags[@]}" \
               -DENABLE_CONFIG_MODE_BOOST=OFF \
               -DENABLE_STATIC_BOOST_LIBS=OFF \
+              -DENABLE_ALL_TESTS=ON \
               $LAUNCHER
 
     - name: Build and install ecflow

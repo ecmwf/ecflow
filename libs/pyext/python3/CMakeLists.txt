@@ -71,11 +71,22 @@ execute_process(
   RESULT_VARIABLE _ECFLOW_HAVE_PYTEST
   OUTPUT_QUIET ERROR_QUIET)
 if( NOT _ECFLOW_HAVE_PYTEST EQUAL 0 )
-  message( WARNING
+  set( _ECFLOW_PYTEST_HINT
     "pytest was not found for ${Python3_EXECUTABLE}; the python tests "
     "(py3_u_* and py3_s_*) will fail to run. Install it with:\n"
     "    ${Python3_EXECUTABLE} -m pip install -r "
     "${CMAKE_CURRENT_SOURCE_DIR}/../test/requirements-test.txt" )
+  # ENABLE_ALL_TESTS is what CI and the .ci/hpc recipes gate the full suite on, so
+  # there a missing pytest is a broken environment, not a note: fail now rather
+  # than at ctest time, where it reads as 79 unrelated test failures.
+  # HAVE_TESTS because ecbuild_add_test() registers nothing without it, leaving
+  # nothing that could fail.
+  if( HAVE_TESTS AND ENABLE_ALL_TESTS )
+    ecbuild_critical( ${_ECFLOW_PYTEST_HINT}
+      "\nAlternatively, consider using -DENABLE_ALL_TESTS=OFF" )
+  else()
+    message( WARNING ${_ECFLOW_PYTEST_HINT} )
+  endif()
 endif()
 
 #
