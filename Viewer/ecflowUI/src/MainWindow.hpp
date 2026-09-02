@@ -69,6 +69,18 @@ public:
     static MainWindow* firstWindow();
     static void initServerSyncTb();
 
+    ///
+    /// @brief Writes the current session snapshot on behalf of SessionAutoSave.
+    ///
+    /// Resolves the active main window so that the stored top-window index stays
+    /// meaningful, then delegates to saveContents(). No write is attempted once
+    /// the application has started quitting, since the quit path performs its own
+    /// final save and may already have torn down the window contents.
+    ///
+    /// @return true if the snapshot was written; false if the write was skipped.
+    ///
+    static bool autoSave();
+
 protected Q_SLOTS:
     void on_actionNewTab_triggered();
     void on_actionNewWindow_triggered();
@@ -103,6 +115,9 @@ protected Q_SLOTS:
 private:
     void init(MainWindow*);
     void closeEvent(QCloseEvent*) override;
+    void moveEvent(QMoveEvent*) override;
+    void resizeEvent(QResizeEvent*) override;
+    void changeEvent(QEvent*) override;
     void addInfoPanelActions(QToolBar* toolbar);
     void reloadContents();
     void rerenderContents();
@@ -123,6 +138,7 @@ private:
     static void save(MainWindow*);
     static void saveContents(MainWindow*);
     static MainWindow* findWindow(QWidget* childW);
+    static MainWindow* activeMainWindow();
     static void configChanged(MainWindow*);
     static void hideServerSyncNotify(MainWindow*);
     static void cleanUpOnQuit(MainWindow*);
