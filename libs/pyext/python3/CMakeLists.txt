@@ -62,30 +62,35 @@ set_target_properties(ecflow3
 # =====================================================================
 # tests
 
-# The python tests are executed via 'python -m pytest' (see below), so
-# pytest must be available for the selected interpreter. Detect it at configure
-# time and warn early, rather than having every py3_u_* / py3_s_* test fail at run time
-# with 'No module named pytest'.
+# The python tests are executed via 'python -m pytest' (see below), so pytest
+# must be available for the selected interpreter. Detect it at configure time,
+# rather than having every py3_u_* / py3_s_* test fail at run time with
+# 'No module named pytest'.
+#
+# Presence only. The `pytest >= 8.0` in requirements-test.txt is what a fresh
+# install should get, not a floor the tests need: they run fine on the pytest 7
+# that distros ship, and enforcing it here would reject working environments.
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -c "import pytest"
   RESULT_VARIABLE _ECFLOW_HAVE_PYTEST
   OUTPUT_QUIET ERROR_QUIET)
+
+# One quoted string, not a list: ';' is CMake's list separator, so a message
+# assembled from several arguments loses any literal semicolon in it -- and
+# ecbuild_critical() replaces the separators with spaces on top of that. Hence
+# the '.' below where a ';' would read better.
 if( NOT _ECFLOW_HAVE_PYTEST EQUAL 0 )
   set( _ECFLOW_PYTEST_HINT
-    "pytest was not found for ${Python3_EXECUTABLE}; the python tests "
-    "(py3_u_* and py3_s_*) will fail to run. Install it with:\n"
-    "    ${Python3_EXECUTABLE} -m pip install -r "
-    "${CMAKE_CURRENT_SOURCE_DIR}/../test/requirements-test.txt" )
+    "pytest was not found for ${Python3_EXECUTABLE}. The python tests (py3_u_* and py3_s_*) will fail to run. Install it with:\n    ${Python3_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/../test/requirements-test.txt" )
   # ENABLE_ALL_TESTS is what CI and the .ci/hpc recipes gate the full suite on, so
   # there a missing pytest is a broken environment, not a note: fail now rather
   # than at ctest time, where it reads as 79 unrelated test failures.
   # HAVE_TESTS because ecbuild_add_test() registers nothing without it, leaving
   # nothing that could fail.
   if( HAVE_TESTS AND ENABLE_ALL_TESTS )
-    ecbuild_critical( ${_ECFLOW_PYTEST_HINT}
-      "\nAlternatively, consider using -DENABLE_ALL_TESTS=OFF" )
+    ecbuild_critical( "${_ECFLOW_PYTEST_HINT}\nAlternatively, consider using -DENABLE_ALL_TESTS=OFF" )
   else()
-    message( WARNING ${_ECFLOW_PYTEST_HINT} )
+    message( WARNING "${_ECFLOW_PYTEST_HINT}" )
   endif()
 endif()
 

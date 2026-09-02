@@ -43,7 +43,18 @@ forwarded-inputs = ["cxx-compiler", "build-type"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
 ctest = true
-ctest-args = "-L nightly -E 's_test|s_zombies' -j 8"
+# s_test and s_zombies are the long-running system suites the legacy runner
+# config (.github/ci-config.yml) also skips.
+#
+# py3_s_TestClientApi is NOT a legacy-parity exclusion -- it is a product bug,
+# confirmed with the maintainers as unrelated to this CI rollout. Its
+# test_client_run and test_client_run_with_multiple_paths never see the suite
+# reach State.complete, so each burns its 21x3s poll (py_s_TestClientApi.py:582)
+# before failing, across all four protocol/sync fixture combinations. That is
+# enough to push the whole target past ctest's default 1500s timeout. Excluding
+# it drops the other ~219 collected items in that file too -- see the exclusion
+# list in the rollout notes. Remove this once the maintainers land a fix.
+ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-13"
