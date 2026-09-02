@@ -46,6 +46,16 @@ public:
     // Used by begin/re-queue
     void reset(); // clear incremented flag, for family limited nodes.
 
+    ///
+    /// @brief Clear the 'incremented' flag of the inlimits that reference the given Limit.
+    ///
+    /// This is the counterpart of reset(), restricted to a single Limit. It is used when a Limit
+    /// is reset with the nodes currently consuming it.
+    ///
+    /// @param[in] limit The Limit whose referencing inlimits are cleared.
+    ///
+    void reset_for(const Limit* limit);
+
     // standard functions: ==============================================
     InLimitMgr& operator=(const InLimitMgr&);
     bool operator==(const InLimitMgr& rhs) const;
@@ -83,24 +93,64 @@ public:
     /// *** This will resolve the in limits first ***
     bool inLimit() const;
 
-    /// After job submission we need to increment the in limit, to indicate that a
-    /// resource is consumed.
-    /// *** This will resolve the in limits first ***
-    void
-    incrementInLimit(std::set<Limit*>& limitSet,  // The set ensure we only update once
-                     const std::string& task_path // The task that was submitted, and hence caused Limit to increment
-    );
+    ///
+    /// @brief Consumes the tokens of the inlimits held by this Node, on the Limits they reference.
+    ///
+    /// This is called after job submission, to indicate that a resource is consumed. A Limit already
+    /// present in @p limitSet is skipped, which is how an inlimit held by a task takes precedence over
+    /// an inlimit of the same Limit held by an ancestor: Node::incrementInLimit() visits the task before
+    /// walking up the parent hierarchy. An inlimit that limits a single node (i.e. -n) consumes its tokens
+    /// at most once, and records the path of this Node rather than @p task_path.
+    ///
+    /// @note The inlimit references to their Limits are resolved before the update.
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is
+    ///                         inserted so that it is updated at most once.
+    /// @param[in] task_path The path of the submitted task, recorded as consuming the Limit.
+    /// @param[in] only When not nullptr, restricts the update to the given Limit; the inlimits referencing
+    ///                 any other Limit are left untouched, and their Limits are not inserted into
+    ///                 @p limitSet.
+    ///
+    void incrementInLimit(std::set<Limit*>& limitSet, const std::string& task_path, const Limit* only = nullptr);
 
-    /// After job aborts or completes we need to decrement the in limit, to indicate that
-    /// additional resource is available.
-    /// *** This will resolve the in limits first ***
-    void decrementInLimit(std::set<Limit*>& limitSet,  // The set ensure we only update once
-                          const std::string& task_path // The task that completed or aborted. Gives up the token
-    );
-    void
-    decrementInLimitForSubmission(std::set<Limit*>& limitSet,  // The set ensure we only update once
-                                  const std::string& task_path // The task that completed or aborted. Gives up the token
-    );
+    ///
+    /// @brief Releases the tokens of the inlimits held by this Node, on the Limits they reference.
+    ///
+    /// This is called after a job aborts, completes, or is re-queued, to indicate that a resource is
+    /// available again. The precedence rules are the ones of incrementInLimit(). An inlimit that limits
+    /// a single node (i.e. -n) releases its tokens only once none of the descendant tasks is submitted
+    /// or active.
+    ///
+    /// @note The inlimit references to their Limits are resolved before the update.
+    /// @note Calling this method when no token is held is safe, and has no effect.
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is
+    ///                         inserted so that it is updated at most once.
+    /// @param[in] task_path The path of the task giving up the token; a Limit that does not record this
+    ///                      path is left unchanged.
+    ///
+    void decrementInLimit(std::set<Limit*>& limitSet, const std::string& task_path);
+
+    ///
+    /// @brief Releases the tokens of the inlimits held by this Node that limit submission only.
+    ///
+    /// This is called once a job becomes active, since an inlimit that limits submission (i.e. -s) holds
+    /// its tokens only while the job is submitted. The inlimits that do not limit submission are left
+    /// untouched. The precedence rules are the ones of incrementInLimit().
+    ///
+    /// @note The inlimit references to their Limits are resolved before the update.
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is
+    ///                         inserted so that it is updated at most once.
+    /// @param[in] task_path The path of the task giving up the token; a Limit that does not record this
+    ///                      path is left unchanged.
+    /// @param[in] only When not nullptr, restricts the update to the given Limit; the inlimits referencing
+    ///                 any other Limit are left untouched, and their Limits are not inserted into
+    ///                 @p limitSet.
+    ///
+    void decrementInLimitForSubmission(std::set<Limit*>& limitSet,
+                                       const std::string& task_path,
+                                       const Limit* only = nullptr);
 
     /// Check to see if inlimit's can reference their Limits
     void check(std::string& errorMsg, std::string& warningMsg, bool reportErrors, bool reportWarnings) const;

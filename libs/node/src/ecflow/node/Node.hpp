@@ -627,6 +627,21 @@ public:
     void changeLimitMax(const std::string& name, int maxValue);
     void changeLimitValue(const std::string& name, const std::string& value);
     void changeLimitValue(const std::string& name, int value);
+
+    ///
+    /// @brief Reset the given Limit with the nodes that are currently consuming it.
+    ///
+    /// The value and the consumed paths of the Limit are discarded, and then recomputed by replaying
+    /// the consumption rules for every submitted or active node in the definition. The whole definition
+    /// is considered, since an inlimit is allowed to reference a Limit held in another suite.
+    ///
+    /// The recomputed value is allowed to exceed the maximum value of the Limit, in the same way as
+    /// the value accumulated by increment().
+    ///
+    /// @param[in] name The name of the Limit held by this Node.
+    /// @throws std::runtime_error if the Limit cannot be found, or the definition cannot be accessed.
+    ///
+    void reset_limit_value(const std::string& name);
     void changeDefstatus(const std::string& state);
     void changeLate(const ecf::LateAttr&);
     void change_time(const std::string&, const std::string&);
@@ -830,14 +845,47 @@ protected:
     /// Should *only* be called within a task
     virtual void update_limits() = 0;
 
-    /// After job submission we need to increment the in limit, to indicate that a
-    /// resource is consumed. The set ensure we only update once during a traversal
-    void incrementInLimit(std::set<Limit*>& limitSet);
+    ///
+    /// @brief Consumes a token on each Limit referenced by the inlimits of this Node and its ancestors.
+    ///
+    /// This is called after job submission, to indicate that a resource is consumed. The traversal walks
+    /// up the parent hierarchy, and a Limit already present in @p limitSet is skipped. As a consequence,
+    /// an inlimit held by this Node takes precedence over an inlimit of the same Limit held by an ancestor.
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is inserted
+    ///                         so that it is updated at most once.
+    /// @param[in] only When not nullptr, restricts the update to the given Limit; the inlimits referencing
+    ///                 any other Limit are left untouched, and their Limits are not inserted into @p limitSet.
+    ///
+    void incrementInLimit(std::set<Limit*>& limitSet, const Limit* only = nullptr);
 
-    /// After job aborts or completes we need to decrement the in limit, to indicate that
-    /// additional resource is available. The set ensure we only update once during a traversal
+    ///
+    /// @brief Releases the token held on each Limit referenced by the inlimits of this Node and its ancestors.
+    ///
+    /// This is called after a job aborts, completes, or is re-queued, to indicate that a resource is available
+    /// again. The traversal and the precedence rules are the ones of incrementInLimit(). An inlimit that limits
+    /// a single node (i.e. -n) releases its token only once none of the descendant tasks is submitted or active.
+    ///
+    /// @note Calling this method on a Node that holds no token is safe, and has no effect.
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is inserted
+    ///                         so that it is updated at most once.
+    ///
     void decrementInLimit(std::set<Limit*>& limitSet);
-    void decrementInLimitForSubmission(std::set<Limit*>& limitSet);
+
+    ///
+    /// @brief Releases the token held on each Limit referenced by an inlimit that limits submission only.
+    ///
+    /// This is called once a job becomes active, since an inlimit that limits submission (i.e. -s) holds a
+    /// token only while the job is submitted. The inlimits that do not limit submission are left untouched.
+    /// The traversal and the precedence rules are the ones of incrementInLimit().
+    ///
+    /// @param[in,out] limitSet The Limits already updated during the traversal; each Limit found is inserted
+    ///                         so that it is updated at most once.
+    /// @param[in] only When not nullptr, restricts the update to the given Limit; the inlimits referencing
+    ///                 any other Limit are left untouched, and their Limits are not inserted into @p limitSet.
+    ///
+    void decrementInLimitForSubmission(std::set<Limit*>& limitSet, const Limit* only = nullptr);
 
     friend class InLimitMgr;
     bool check_in_limit() const { return inLimitMgr_.inLimit(); }

@@ -34,6 +34,20 @@ void InLimitMgr::reset() {
     }
 }
 
+void InLimitMgr::reset_for(const Limit* limit) {
+    if (vec_.empty()) {
+        return;
+    }
+
+    resolveInLimitReferences();
+
+    for (auto& i : vec_) {
+        if (i.limit() == limit) {
+            i.set_incremented(false);
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs) {
@@ -169,7 +183,7 @@ bool InLimitMgr::inLimit() const {
     return (inlimitsWithLimits == inlimitCount);
 }
 
-void InLimitMgr::incrementInLimit(std::set<Limit*>& limitSet, const std::string& task_path) {
+void InLimitMgr::incrementInLimit(std::set<Limit*>& limitSet, const std::string& task_path, const Limit* only) {
     // cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << endl;
 
     // *NOTE* each limit is incremented if within LIMIT, and that
@@ -201,6 +215,9 @@ void InLimitMgr::incrementInLimit(std::set<Limit*>& limitSet, const std::string&
 
     for (InLimit& inlimit : vec_) {
         Limit* limit = inlimit.limit();
+        if (only && limit != only) {
+            continue;
+        }
         if (limit && limitSet.find(limit) == limitSet.end()) {
             limitSet.insert(limit);
 
@@ -282,7 +299,9 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
     }
 }
 
-void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const std::string& task_path) {
+void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet,
+                                               const std::string& task_path,
+                                               const Limit* only) {
     if (vec_.empty()) {
         return;
     }
@@ -291,6 +310,9 @@ void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const
 
     for (InLimit& inlimit : vec_) {
         Limit* limit = inlimit.limit();
+        if (only && limit != only) {
+            continue;
+        }
         if (limit && limitSet.find(limit) == limitSet.end()) {
             limitSet.insert(limit);
             // cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT decremented " << endl;

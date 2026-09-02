@@ -928,6 +928,9 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "limit_value", "limit_name", "12") == 0,
                           "--alter should return 0\n"
                               << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "limit_value", "limit_name", "reset") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "late", "late -s +00:15 -a 20:00 -c +02:00") == 0,
                           "--alter should return 0\n"
                               << theClient.errorMsg());
@@ -1376,6 +1379,9 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
                           "--alter expected to fail\n"
                               << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "limit_value", "limit_  name", "12") == 1,
+                          "--alter expected to fail\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "limit_value", "limit_name", "current") == 1,
                           "--alter expected to fail\n"
                               << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "change", "defstatus", "complete-34") == 1,

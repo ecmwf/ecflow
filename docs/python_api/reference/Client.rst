@@ -257,7 +257,9 @@ The following describes the parameters in more detail:
    # Sets the max value of the limit. The value must be convertible to an integer
 
  change limit_value name value
-   # Sets the consumed tokens to value. The value must be convertible to an integer
+   # Sets the consumed tokens to value. The value must be convertible to an integer,
+   # or be the special value 'reset'. The special value 'reset' re-synchronises the
+   # limit with the nodes that are currently consuming it.
 
  change repeat value
    # For date repeats, the value must be an yyyymmdd formtted integer, defined in
