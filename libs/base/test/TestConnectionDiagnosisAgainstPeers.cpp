@@ -77,12 +77,15 @@ public:
     FakePeer& operator=(FakePeer&&)      = delete;
 
     ~FakePeer() {
-        boost::system::error_code ignored;
-        acceptor_.close(ignored);
+        // The acceptor, the sockets, and the vector of retained sockets are all used by the worker
+        // thread, and none of them is safe to share between threads. The worker is therefore
+        // stopped and joined first, and only then are those objects touched from this thread.
         io_.stop();
         if (worker_.joinable()) {
             worker_.join();
         }
+        boost::system::error_code ignored;
+        acceptor_.close(ignored);
     }
 
     static std::string host() { return "127.0.0.1"; }
