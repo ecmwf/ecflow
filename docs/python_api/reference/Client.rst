@@ -1119,13 +1119,14 @@ Overloaded function.
 Force a node(s) to a given state
 
 When a :term:`task` is set to :term:`complete`, it may be automatically re-queued if it has
-multiple time :term:`dependencies`. In the specific case where a task has a single
-time dependency and we want to interactively set it to :term:`complete`
-a flag is set so that it is not automatically re-queued when set to complete.
-The flag is applied up the node hierarchy until reach a node with a :term:`repeat`
-or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
-A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
-in this case the child nodes are automatically re-queued
+multiple future time :term:`dependencies`. Each force complete expires one time based
+attribute on that node, and when the last one expires, the node stays in a complete state.
+In the specific case where a task has a single time dependency, and it is set to complete
+interactively, a flag is set, so that the task is not automatically re-queued.
+The flag is applied up the :term:`node` hierarchy, until a node with a :term:`repeat` or
+:term:`cron` attribute is reached. This behaviour allows repeat values to be incremented
+interactively. A :term:`repeat` attribute is incremented when all the child nodes are
+:term:`complete`, in which case the child nodes are automatically re-queued
 ::
 
    void force_state(
@@ -1164,6 +1165,34 @@ Lets see the effect of forcing complete on the following defs
 
 In the last case (task t2) after each force complete, the next time slot is incremented.
 This can be seen by calling the Why command.
+
+Effect of forcing the state to queued:
+
+Forcing a node to :term:`queued` is a deliberately minimal operation, intended to allow a task
+to run again while preserving the output of the previous runs. It is **not** equivalent to
+requeue(). The following are reset:
+
+- the late flag, the :term:`events <event>`, and the :term:`meters <meter>` of the node (and, when
+  force_state_recursive() is used, of all its children)
+- any :term:`limit` token held by the node, which is released when the state actually changes
+
+Everything else is preserved. In particular, the following are **not** reset:
+
+- the job output counter (i.e. :term:`ECF_TRYNO`), so that the next run does not overwrite the
+  output of the previous runs
+- the aborted reason, the job password, and the process identifier
+- the node flags, such as late, aborted, killed, and jobcmd_failed
+- :term:`repeat` attributes, which retain their current value
+- time based attributes, whose next time slot is neither reset nor re-evaluated
+- queue attributes, which retain their current index
+- :term:`labels <label>`
+- the :term:`suspended` status, which is neither set nor cleared
+- the default status (i.e. :term:`defstatus`), which is not re-applied
+
+Note that user :term:`zombies <zombie>` are created for any task that is :term:`active` or
+:term:`submitted` at the time the command is issued.
+
+Use requeue() instead, when all the attributes of a node are expected to be reset.
 
 2. force_state(self: ecflow.Client, arg0: list, arg1: ecflow.State) -> None
 
@@ -1979,12 +2008,39 @@ Overloaded function.
 1. requeue(self: ecflow.Client, abs_node_path: str, option: str = '') -> None
 
 Re queues the specified :term:`node` (s)
+
+Re-queueing restores the specified :term:`node` (s), and all their children, to the state held
+before the last run. This is a comprehensive reset, and the following are reset:
+
+- the state, which is taken from the default status (i.e. :term:`defstatus`), when defined
+- the :term:`suspended` status of the children of the specified node(s). Notice that the
+  suspended status of the specified node(s) themselves is **not** cleared
+- the job output counter (i.e. :term:`ECF_TRYNO`), so that the next run writes to ``<task>.1``
+  and thus **overwrites** the output of the previous runs
+- the aborted reason, the job password, and the process identifier
+- the node flags, with the exception of the message and archived flags
+- :term:`repeat` attributes, which are reset to their starting value
+- time based attributes, whose next time slot is re-evaluated, and relative durations are reset
+- the late flag, the :term:`events <event>`, and the :term:`meters <meter>`
+- :term:`labels <label>`, but **only** those defined on suites and families, and **not** those on tasks
+- queue attributes
+- :term:`limits <limit>`, together with any limit token held by the node(s) or their children
+
+Note that the enclosing :term:`suite` must have been begun before any of its nodes can be
+re-queued. When the 'force' option is used, user :term:`zombies <zombie>` are created for any task that
+is :term:`active` or :term:`submitted` at the time the command is issued.
+
+To place a task back into the :term:`queued` state while preserving the output of the previous
+runs, and without resetting repeats, time based attributes, and flags, use
+force_state(path,State.queued) instead.
 ::
 
    void requeue(
       list paths     : A list of paths. Node paths must begin with a leading '/' character
       [(str)option=''] : option = ('' | 'abort' | 'force')
-          ''   : empty string, the default, re-queue the node
+          ''   : empty string, the default. Checks whether any task below the node is in
+                 the submitted or active state, and if so does nothing. Otherwise,
+                 re-queues the node
           abort: means re-queue only aborted tasks below node
           force: means re-queueing even if there are nodes that are active or submitted
    )
@@ -2129,16 +2185,17 @@ Overloaded function.
 
 Immediately run the jobs associated with the input :term:`node`.
 
-Ignore :term:`trigger`\ s, :term:`limit`\ s, :term:`suspended`, :term:`time` or :term:`date` dependencies,
-just run the :term:`task`.
-When a job completes, it may be automatically re-queued if it has
-multiple time :term:`dependencies`. In the specific case where a :term:`task` has a SINGLE
-time dependency and we want to avoid re running the :term:`task` then
-a flag is set so that it is not automatically re-queued when set to :term:`complete`.
-The flag is applied up the :term:`node` hierarchy until we reach a node with a :term:`repeat`
-or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
-A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
-in this case the child nodes are automatically re-queued
+Run the task, ignoring :term:`triggers <trigger>`, :term:`limits <limit>`, :term:`suspended`, :term:`time` or :term:`date` dependencies.
+When a job completes, it may be automatically re-queued if it has a :term:`cron`, or multiple
+time :term:`dependencies`. Each run expires one time based attribute, and when the last one
+expires, the task stays in a :term:`complete` state.
+In the specific case where a :term:`task` has a single time dependency, and the task is run
+before its time slot, a flag is set, so that the task is not automatically re-queued when set
+to :term:`complete`.
+The flag is applied up the :term:`node` hierarchy, until a node with a :term:`repeat` or
+:term:`cron` attribute is reached. This behaviour allows repeat values to be incremented
+interactively. A :term:`repeat` attribute is incremented when all the child nodes are
+:term:`complete`, in which case the child nodes are automatically re-queued
 ::
 
    void run(
@@ -2175,6 +2232,22 @@ Effect:
 
 In the last case (task t2) after each run the next time slot is incremented.
 This can be seen by calling the Why command.
+
+Effect on the job output:
+
+The job is submitted immediately, without passing through the :term:`queued` state, and the job
+output counter (i.e. :term:`ECF_TRYNO`) is incremented. The output of the previous runs is
+therefore preserved, in ``<task>.1``, ``<task>.2``, ``<task>.3``, and so on.
+
+No attribute of the node is reset, with the exception of the :term:`labels <label>` and of a subset of
+the node flags, which are always reset when a job is submitted. In particular, the
+:term:`events <event>`, the :term:`meters <meter>`, the :term:`repeat` attributes, and the queue attributes
+retain their current value.
+
+Use force_state(path,State.queued) to place a task back into the queued state, so that it
+honours its dependencies on the next run, while still preserving the output of the previous
+runs. Use requeue() to reset the output counter, in which case the next run **overwrites**
+``<task>.1``.
 
 2. run(self: ecflow.Client, arg0: list, arg1: bool) -> None
 

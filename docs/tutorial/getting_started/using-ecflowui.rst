@@ -87,8 +87,12 @@ The :term:`job file` and job output are available on the *Job* and *Output* tabs
 
 The tree view panel allows access to a context menu by clicking with the right mouse button on a node, which provides access to a variety of options, including:
 
-#. opening a particular task output in a separate window, via the select the *Output...* menu option.
-#. rerunning a task, family or suite, via the select the *Requeue* menu option.
+#. opening a particular task output in a separate window, by selecting the *Output...* menu option.
+#. re-queueing a task, family or suite, by selecting the *Requeue* menu option.
+
+Notice that *Requeue* is only one of the three ways of making a task run again, and it is the one
+that resets the node most thoroughly. See :ref:`tutorial-execute_rerun_and_requeue` for the
+distinction between *Execute*, *Rerun* and *Requeue*.
 
 During the execution of the suite, the nodes change colour to reflect the :term:`status` of the nodes.
 

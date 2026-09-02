@@ -206,7 +206,7 @@ Commands
 
     * - :ref:`requeue_cli`
       - :term:`user command`
-      - Re queues the specified node(s)
+      - Re-queues the specified node(s)
 
     * - :ref:`restart_cli`
       - :term:`user command`
@@ -226,7 +226,7 @@ Commands
 
     * - :ref:`run_cli`
       - :term:`user command`
-      - Ignore triggers, limits, time or date dependencies, just run the Task.
+      - Run the task, ignoring triggers, limits, suspended, time or date dependencies
 
     * - :ref:`server_load_cli`
       - :term:`user command`
