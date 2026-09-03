@@ -8,4 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/node/ExprParser.hpp"
+#define BOOST_TEST_MODULE TestExpressionsParser
+
+#include <boost/test/included/unit_test.hpp>

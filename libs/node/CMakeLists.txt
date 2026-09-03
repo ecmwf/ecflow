@@ -144,6 +144,28 @@ target_clangformat(u_expressions
 )
 
 
+ecbuild_add_test(
+  TARGET
+    u_expressions_parser
+  LABELS
+    unit nightly fast
+  SOURCES
+    # Sources
+    test/expressions/TestExpressionsParser.cpp
+    test/expressions/TestExpressionsParser_main.cpp # test entry point
+  LIBS
+    ecflow_all
+    test_scaffold
+    nlohmann::json
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  TEST_DEPENDS
+    u_node
+)
+target_clangformat(u_expressions_parser
+  CONDITION ENABLE_TESTS
+)
+
+
 if (ENABLE_ALL_TESTS)
   set(test_srcs
     test/TestSingleExprParse.cpp
@@ -165,6 +187,41 @@ if (ENABLE_ALL_TESTS)
       u_anattr
   )
   target_clangformat(u_node_single
+    CONDITION ENABLE_TESTS
+  )
+
+
+  ecbuild_add_test(
+    TARGET
+      p_expressions_parser_benchmark
+    LABELS
+      performance
+    ARGS
+      --data-dir ${CMAKE_CURRENT_SOURCE_DIR}/test/expressions/data/scratch/checkpoints
+    SOURCES
+      test/expressions/ExpressionsParserBenchmark.cpp
+    LIBS
+      ecflow_all
+      nlohmann::json
+  )
+  target_clangformat(p_expressions_parser_benchmark
+    CONDITION ENABLE_TESTS
+  )
+
+  ecbuild_add_test(
+    TARGET
+      p_defs_check_benchmark
+    LABELS
+      performance
+    ARGS
+      --data-dir ${CMAKE_CURRENT_SOURCE_DIR}/test/expressions/data/scratch/checkpoints
+    SOURCES
+      test/expressions/DefsCheckBenchmark.cpp
+    LIBS
+      ecflow_all
+      nlohmann::json
+  )
+  target_clangformat(p_defs_check_benchmark
     CONDITION ENABLE_TESTS
   )
 

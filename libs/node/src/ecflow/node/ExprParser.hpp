@@ -11,77 +11,19 @@
 #ifndef ecflow_node_ExprParser_HPP
 #define ecflow_node_ExprParser_HPP
 
-#include <memory> // for unique_ptr
-#include <string>
-
-#include "ecflow/node/ExprAst.hpp"
-
-/// This class will parse a expression and create the abstract syntax tree
-/// It will own the AST unless specifically released calling ast();
-class ExprParser {
-public:
-    explicit ExprParser(const std::string& expression);
-
-    // Disable copy (and move) semantics
-    ExprParser(const ExprParser&)                  = delete;
-    const ExprParser& operator=(const ExprParser&) = delete;
-    ExprParser(ExprParser&&)                       = delete;
-    ExprParser& operator=(ExprParser&&)            = delete;
-
-    ~ExprParser() = default;
-
-    /// Parse the expression, return true if parse OK false otherwise
-    /// if false is returned, and error message is returned
-    bool doParse(std::string& errorMsg);
-
-    /// return the Abstract syntax tree, and release memory
-    std::unique_ptr<AstTop> ast() { return std::move(ast_); }
-
-    /// return the Abstract syntax tree, without release memory
-    AstTop* getAst() const { return ast_.get(); }
-
-private:
-    std::unique_ptr<AstTop> ast_;
-    std::string expr_;
-};
-
 ///
-/// @brief This class enables quick 'simple' expression parsing without the overhead of the Boost spirit parser.
+/// @brief Public facade for the trigger/complete expression parser.
 ///
-/// This is used as a first pass to quickly parse simple expressions. A 'simple' expression is of the form:
-///  - `/path/to/node==<state>`
-///  - `/path/to/node == <state>`
-///  - `/path/to/node eq <state>`
-///  - `<number>==<number>`
-///  - `<number> == <number>`
-///  - `<number> eq <number>`
+/// @details This header re-exports the active parser implementation as the unqualified
+/// @c ExprParser name so that consumers do not depend on a parser version. The V1-only
+/// @c SimpleExprParser fast path remains available for its unit tests until V1 is removed.
 ///
-/// This optimisation significantly improves performance when a significant number of expressions are 'simple',
-/// which is typical based on empirical observations.
-///
-/// If the provided expression is not 'simple', the parsing fails and the overall parser falls back to the full boost
-/// spirit parser.
-///
-class SimpleExprParser {
-public:
-    explicit SimpleExprParser(const std::string& expression)
-        : expr_(expression) {}
 
-    // Disable copy (and move) semantics
-    SimpleExprParser(const SimpleExprParser&)            = delete;
-    SimpleExprParser& operator=(const SimpleExprParser&) = delete;
-    SimpleExprParser(SimpleExprParser&&)                 = delete;
-    SimpleExprParser& operator=(SimpleExprParser&&)      = delete;
+#include "ecflow/node/ExprParserV2.hpp"
+#include "ecflow/node/SimpleExprParser.hpp"
 
-    /// Parse the expression, return true if parse OK false otherwise
-    bool doParse();
-
-    /// return the Abstract syntax tree, and release memory
-    std::unique_ptr<AstTop> ast() { return std::move(ast_); }
-
-private:
-    const std::string& expr_;
-    std::unique_ptr<AstTop> ast_;
-};
+// ---- Active implementation ----
+using ExprParser       = ecf::expression::v2::ExprParser;   ///< @copydoc ecf::expression::v2::ExprParser
+using SimpleExprParser = ecf::expression::SimpleExprParser; ///< @copydoc ecf::expression::SimpleExprParser
 
 #endif /* ecflow_node_ExprParser_HPP */
