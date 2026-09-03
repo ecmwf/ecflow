@@ -175,12 +175,14 @@ bool ClientSuiteMgr::handle_changed(unsigned int client_handle) {
     return false;
 }
 
-void ClientSuiteMgr::collateChanges(unsigned int client_handle, DefsDelta& changes) const {
+void ClientSuiteMgr::collateChanges(unsigned int client_handle,
+                                    DefsDelta& changes,
+                                    const ecf::AuthorisationContext& ctx) const {
     // collate changes over the suites that match the client handle
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         if (clientSuites_[i].handle() == client_handle) {
-            clientSuites_[i].collateChanges(changes);
+            clientSuites_[i].collateChanges(changes, ctx);
             return;
         }
     }

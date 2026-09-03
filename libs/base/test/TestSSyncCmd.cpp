@@ -92,7 +92,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     MockServer mock_server(server_defs);
     unsigned int client_handle = 0;
     SNewsCmd news_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
-    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, Identity::make_none(), &mock_server);
 
     std::string error_msg;
     BOOST_REQUIRE_MESSAGE(server_defs->checkInvariants(error_msg),
