@@ -25,6 +25,20 @@ container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gfortran13-boost-qt6:la
 platform = "ubuntu-24.04"
 
 [[matrix.build.include]]
+cxx-compiler = "g++-13"
+build-type = "Release"
+runs-on = "arc-runner-very-large"
+container = "eccr.ecmwf.int/public-ci-images/rocky8-gfortran13-boost-qt5:latest"
+platform = "rocky-8"
+
+[[matrix.build.include]]
+cxx-compiler = "g++-10"
+build-type = "Release"
+runs-on = "arc-runner-very-large"
+container = "eccr.ecmwf.int/public-ci-images/debian11-gfortran10-boost-qt5:latest"
+platform = "debian-11"
+
+[[matrix.build.include]]
 cxx-compiler = "clang++"
 build-type = "Release"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
