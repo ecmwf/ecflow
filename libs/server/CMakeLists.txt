@@ -82,7 +82,7 @@ ecbuild_add_test(
   TARGET
     u_server_authentication
   LABELS
-    unit
+    unit nightly fast
   SOURCES
     test/TestAuthentication.cpp
     test/TestAuthentication_main.cpp
