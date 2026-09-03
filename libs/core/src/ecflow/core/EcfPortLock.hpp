@@ -18,9 +18,12 @@
 ///        IMPORTANT: This functionality is used in TESTS only.
 ///
 
-#include <fstream>
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 
 #include <boost/asio.hpp>
 
@@ -32,29 +35,31 @@ namespace ecf {
 
 class EcfPortLock {
 
-    /**
-     * Attempts to create the given lock file.
-     *
-     * \returns false, if: (1) the lock file already exists;
-     *                     (2) the lock file could not be created (e.g. due to permissions)
-     *          true, if lock file was created successfully
-     */
+    /// @brief Attempts to create the given lock file atomically.
+    ///
+    /// The file is created with an exclusive-create open, so that when several processes race to
+    /// create the same lock file exactly one of them succeeds. A check-then-create sequence would
+    /// allow two processes to both observe the file as absent and both claim the lock.
+    ///
+    /// @param[in] path The lock file path
+    /// @return true if the lock file was created by this call; false if the lock file already
+    ///         exists, or could not be created (e.g. due to permissions)
     static bool create_lock_file(const std::string& path) {
-        std::cout << " *** Checking if lock file exists: " << path << std::endl;
-        if (fs::exists(path)) {
-            std::cout << " *** Found an existing lock file! Giving up..." << std::endl;
+        std::cout << " *** Attempting to create lock file: " << path << std::endl;
+        int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
+        if (fd < 0) {
+            if (errno == EEXIST) {
+                std::cout << " *** Found an existing lock file! Giving up..." << std::endl;
+            }
+            else {
+                std::cout << " *** Unable to create a lock file (" << std::strerror(errno) << ")! Giving up..."
+                          << std::endl;
+            }
             return false;
         }
-        else {
-            std::cout << " *** Didn't find an existing lock file! Creating one NOW..." << std::endl;
-            std::ofstream lock(path);
-            if (!lock.is_open()) {
-                std::cout << " *** Unable to create a lock file! Giving up..." << std::endl;
-                return false;
-            }
-            std::cout << " *** Created lock file: " << path << std::endl;
-            return true;
-        }
+        ::close(fd);
+        std::cout << " *** Created lock file: " << path << std::endl;
+        return true;
     }
 
 public:
