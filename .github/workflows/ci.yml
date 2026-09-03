@@ -54,6 +54,8 @@ jobs:
       build-matrix: ${{ steps.r.outputs.matrix-build }}
       build-hpc-matrix: ${{ steps.r.outputs.matrix-build-hpc }}
     steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
       - id: mint
         uses: actions/create-github-app-token@v3
         with:
@@ -82,6 +84,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.resolve.outputs.build-matrix) }}
     steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
       - id: mint
         uses: actions/create-github-app-token@v3
         with:
@@ -145,6 +149,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.resolve.outputs.build-hpc-matrix) }}
     steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
       - id: mint
         uses: actions/create-github-app-token@v3
         with:
