@@ -578,6 +578,7 @@ void InfoPanel::on_actionFrozen__toggled(bool b) {
         item->item()->setFrozen(b);
     }
     updateTitle();
+    Q_EMIT settingsChanged();
 }
 
 bool InfoPanel::frozen() const {

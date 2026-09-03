@@ -112,6 +112,12 @@ void NodePanel::slotCurrentWidgetChanged(int /*index*/) {
 
     Q_EMIT currentWidgetChanged();
     // setDefaults(this);
+
+    // Tab creation, reordering and selection all end up here; the tab set
+    // and the current tab are part of the persisted session
+    if (!settingsAreRead_) {
+        Q_EMIT contentsChanged();
+    }
 }
 
 void NodePanel::slotNewTab() {
@@ -203,6 +209,10 @@ void NodePanel::slotTabTitle(DashboardTitle* t) {
 
 void NodePanel::slotTabRemoved() {
     adjustTabTitle();
+
+    if (!settingsAreRead_) {
+        Q_EMIT contentsChanged();
+    }
 }
 
 int NodePanel::tabAreaWidth() const {
@@ -338,6 +348,8 @@ void NodePanel::writeSettings(VComboSettings* vs) {
 }
 
 void NodePanel::readSettings(VComboSettings* vs) {
+    settingsAreRead_ = true;
+
     auto cnt          = vs->get<int>("tabCount", 0);
     auto currentIndex = vs->get<int>("currentTabId", -1);
 
@@ -370,6 +382,8 @@ void NodePanel::readSettings(VComboSettings* vs) {
     if (QWidget* w = currentDashboard()) {
         w->setFocus();
     }
+
+    settingsAreRead_ = false;
 
     // We emit it to trigger the whole window ui update!
     Q_EMIT currentWidgetChanged();

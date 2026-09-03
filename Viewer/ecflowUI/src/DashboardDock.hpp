@@ -60,10 +60,18 @@ public:
 
 Q_SIGNALS:
     void closeRequested();
+    ///
+    /// @brief Emitted when the dock's dimensions change.
+    ///
+    /// Dock sizes are part of the dashboard's persisted dock state, so the
+    /// owning dashboard uses this signal to schedule a session save.
+    ///
+    void layoutChanged();
 
 protected:
     void showEvent(QShowEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 };
 
 #endif /* ecflow_viewer_DashboardDock_HPP */

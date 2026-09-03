@@ -76,6 +76,8 @@ protected:
     void tabBarCommand(QString, int) override;
     Dashboard* nodeWidget(int index);
     static std::string tabSettingsId(int i);
+
+    bool settingsAreRead_{false};
 };
 
 #endif /* ecflow_viewer_NodePanel_HPP */

@@ -154,6 +154,7 @@ set(viewer_srcs
   ServerObserver.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp
+  SessionAutoSave.hpp
   SessionHandler.hpp
   SessionRenameDialog.hpp
   ShellCommand.hpp
@@ -431,6 +432,7 @@ set(viewer_srcs
   ServerListSyncWidget.cpp   
   ServerLoadItemWidget.cpp
   ServerSettingsItemWidget.cpp
+  SessionAutoSave.cpp
   SessionDialog.cpp
   SessionRenameDialog.cpp
   SessionHandler.cpp
@@ -648,6 +650,7 @@ set(viewer_moc_files
   ServerHandler.hpp
   ServerListDialog.hpp
   ServerListSyncWidget.hpp
+  SessionAutoSave.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp
   SessionRenameDialog.hpp

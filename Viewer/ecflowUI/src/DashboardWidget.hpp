@@ -66,6 +66,13 @@ Q_SIGNALS:
     void maximisedChanged(DashboardWidget*);
     void popInfoPanel(VInfo_ptr, QString);
     void dashboardCommand(VInfo_ptr, QString);
+    ///
+    /// @brief Emitted when a property persisted by writeSettings() changes.
+    ///
+    /// Subclasses emit this signal for their own persisted toggles so that the
+    /// owning dashboard can schedule a session save.
+    ///
+    void settingsChanged();
 
 protected Q_SLOTS:
     void slotDetachedToggled(bool);

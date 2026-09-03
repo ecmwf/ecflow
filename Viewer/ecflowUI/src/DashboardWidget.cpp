@@ -57,6 +57,7 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent)
 void DashboardWidget::slotDetachedToggled(bool) {
     detachedChanged();
     detachedAction_->setToolTip((detached()) ? tooltipChk : tooltipUnchk);
+    Q_EMIT settingsChanged();
 }
 
 void DashboardWidget::setDetached(bool b) {
