@@ -5,10 +5,8 @@ on:
     tags:
       - 'v?[0-9]+.[0-9]+.[0-9]+'
       - 'v?[0-9]+.[0-9]+.[0-9]+-*'
-    branches:
-      - '*'
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [labeled]
   workflow_dispatch:
 
 concurrency:
