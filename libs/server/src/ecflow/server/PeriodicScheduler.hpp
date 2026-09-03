@@ -86,6 +86,7 @@ public:
           execution_interval_(interval),
           first_(true),
           running_(false),
+          terminated_(false),
           activity_(activity) {}
 
     PeriodicScheduler(const PeriodicScheduler&)            = delete;
@@ -97,6 +98,14 @@ public:
 
     void start();
     void stop();
+
+    ///
+    /// @brief Permanently stops the periodic execution.
+    ///
+    /// The pending timer wait is cancelled, and any poll handler already
+    /// dispatched (i.e. whose timer expired before the cancellation took
+    /// effect) is prevented from re-arming the timer.
+    ///
     void terminate();
 
     void poll(const boost::system::error_code& error);
@@ -114,6 +123,7 @@ private:
 
     bool first_;
     bool running_;
+    bool terminated_;
 
     TASK& activity_;
 };
@@ -152,11 +162,18 @@ void PeriodicScheduler<TASK>::stop() {
 
 template <typename TASK>
 void PeriodicScheduler<TASK>::terminate() {
+    terminated_ = true;
     timer_.cancel();
 }
 
 template <typename TASK>
 void PeriodicScheduler<TASK>::poll(const boost::system::error_code& error) {
+    if (terminated_) {
+        // The handler was already queued when terminate() was called,
+        // so the cancellation did not reach it. Nothing to do...
+        return;
+    }
+
     if (error) {
         if (error == boost::asio::error::operation_aborted) {
             // This was intentional! Nothing to do...
