@@ -12,6 +12,7 @@
 
 #include <QLinearGradient>
 #include <QPalette>
+#include <QResizeEvent>
 
 #include "DashboardWidget.hpp"
 #include "IconProvider.hpp"
@@ -209,4 +210,9 @@ void DashboardDock::showEvent(QShowEvent* event) {
 void DashboardDock::closeEvent(QCloseEvent* event) {
     QWidget::closeEvent(event);
     Q_EMIT closeRequested();
+}
+
+void DashboardDock::resizeEvent(QResizeEvent* event) {
+    QDockWidget::resizeEvent(event);
+    Q_EMIT layoutChanged();
 }
