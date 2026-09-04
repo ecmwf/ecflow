@@ -19,34 +19,34 @@ compiler-inputs = ["cxx-compiler"]
 
 [[matrix.build.include]]
 cxx-compiler = "g++-13"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "arc-runner-very-large"
 container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gfortran13-boost-qt6:latest"
 platform = "ubuntu-24.04"
 
 [[matrix.build.include]]
 cxx-compiler = "g++-8"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "arc-runner-very-large"
 container = "eccr.ecmwf.int/public-ci-images/rocky8-gfortran8-boost-qt5:latest"
 platform = "rocky-8"
 
 [[matrix.build.include]]
 cxx-compiler = "g++-10"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "arc-runner-very-large"
 container = "eccr.ecmwf.int/public-ci-images/debian11-gfortran10-boost-qt5:latest"
 platform = "debian-11"
 
 [[matrix.build.include]]
 cxx-compiler = "clang++"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
 platform = "macos-13-arm"
 
 [[matrix.build.include]]
 cxx-compiler = "clang++"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
 platform = "macos-13-x86"
 
@@ -78,7 +78,7 @@ ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
 # toolchain: that is what invalidates the cache.
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-8"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
@@ -101,7 +101,7 @@ ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "icpx"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
@@ -116,7 +116,7 @@ ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
@@ -131,7 +131,7 @@ ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "nvc++"
-build-type = "RelWithDebInfo"
+build-type = "Release"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
