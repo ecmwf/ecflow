@@ -189,7 +189,8 @@ jobs:
       uses: ecmwf/ci-infrastructure/actions/build-on-hpc@main
       with:
         site: ${{ matrix.site }}
-        job-script: ${{ matrix.job-script || './.ci/hpc/build-gnu.sh' }}
+        job-script: ${{ matrix.job-script || './.ci/hpc/build.sh.j2' }}
+        matrix-leg: ${{ toJSON(matrix) }}
         artifact-name: ${{ steps.m.outputs.own-artifact-name }}
         cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
         work-dir: ${{ vars.HPC_CI_WORK_DIR }}

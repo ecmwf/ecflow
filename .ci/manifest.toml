@@ -70,6 +70,12 @@ ctest = true
 # list in the rollout notes. Remove this once the maintainers land a fix.
 ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
 
+# The toolchain is declared here, not buried in a per-toolchain script:
+# .ci/hpc/build.sh.j2 is rendered against these values. Note `ctest-args` is
+# stated per leg: the HPC lane's exclusion set (-E s_test|s_zombies|s_http)
+# genuinely differs from [matrix.build]'s, and having both written down is how
+# that stays a decision rather than a drift. Bump `platform` when you bump a
+# toolchain: that is what invalidates the cache.
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-8"
 build-type = "Release"
@@ -77,7 +83,21 @@ runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
 platform = "hpc-atos-gnu"
-job-script = "./.ci/hpc/build-gnu.sh"
+# gcc/old, not a version number: it is the alias for the compiler a login node
+# gives you with nothing loaded (8.5.0 today), which is what this cluster's GNU
+# builds actually target. `module avail gcc` lists no 8.5.0 to pin directly.
+# This boost/python/qt set is the one releng/buildit/build.hpc.sh's load_gcc8()
+# pairs with gcc 8.5 -- same versions load_gcc13_2() uses, bar the interpreter.
+# boost-root is a shell EXPRESSION here: the boost module ships one build per
+# compiler under .../GNU/<major>.<minor>, and it must track the gcc actually
+# loaded rather than being pinned.
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/6.6.1", "load cmake/new"]
+cc = "gcc"
+cxx = "g++"
+boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.11.8-01"
+tests = true
+ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "icpx"
@@ -86,7 +106,13 @@ runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
 platform = "hpc-atos-intel"
-job-script = "./.ci/hpc/build-intel.sh"
+modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.3.1", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
+cc = "icx"
+cxx = "icpx"
+boost-root = "/usr/local/apps/boost/1.90.0/INTEL/2025.3"
+python-root = "/usr/local/apps/python3/3.13.13-01"
+tests = true
+ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
@@ -95,7 +121,13 @@ runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
 platform = "hpc-atos-aocc"
-job-script = "./.ci/hpc/build-aocc.sh"
+modules = ["load prgenv/amd", "unload aocc", "load aocc/4.0.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
+cc = "clang"
+cxx = "clang++"
+boost-root = "/usr/local/apps/boost/1.81.0/AMD/4.0"
+python-root = "/usr/local/apps/python3/3.10.10-01"
+tests = false
+ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "nvc++"
@@ -104,12 +136,18 @@ runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
 platform = "hpc-atos-nvidia"
-job-script = "./.ci/hpc/build-nvidia.sh"
+modules = ["load prgenv/nvidia", "unload nvidia", "load nvidia/24.11", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
+cc = "nvc"
+cxx = "nvc++"
+boost-root = "/usr/local/apps/boost/1.87.0/NVIDIA/24.11"
+python-root = "/usr/local/apps/python3/3.12.9-01"
+tests = false
+ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
 
 [matrix.build-hpc]
 execution = "hpc"
 container-credentials = true
-job-script = "./.ci/hpc/build-gnu.sh"
+job-script = "./.ci/hpc/build.sh.j2"
 triggers = ["upstream-change", "rebuild-request"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build-hpc", "stack-deps/build-hpc"]
