@@ -25,10 +25,10 @@ container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gfortran13-boost-qt6:la
 platform = "ubuntu-24.04"
 
 [[matrix.build.include]]
-cxx-compiler = "g++-13"
+cxx-compiler = "g++-8"
 build-type = "Release"
 runs-on = "arc-runner-very-large"
-container = "eccr.ecmwf.int/public-ci-images/rocky8-gfortran13-boost-qt5:latest"
+container = "eccr.ecmwf.int/public-ci-images/rocky8-gfortran8-boost-qt5:latest"
 platform = "rocky-8"
 
 [[matrix.build.include]]
@@ -71,7 +71,7 @@ ctest = true
 ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
 
 [[matrix.build-hpc.include]]
-cxx-compiler = "g++-13"
+cxx-compiler = "g++-8"
 build-type = "Release"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
