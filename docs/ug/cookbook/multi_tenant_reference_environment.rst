@@ -93,6 +93,10 @@ A self-signed TLS certificate (``CN=localhost``) is generated and baked into the
 The proxy terminates TLS, redirects plain HTTP to HTTPS, and gates the ``/v1/ecflow`` location behind
 an ``auth_request`` call to ``authotron``.
 
+nginx listens on the conventional container ports 80 (HTTP) and 443 (HTTPS); the remapping to
+unprivileged host ports is done by the port publication of ``podman run``, not by the nginx
+configuration.
+
 The Auth-o-tron: ``authotron`` (172.30.0.3)
 -------------------------------------------
 
@@ -129,8 +133,8 @@ for use outside an internal development environment.
        realm: "local"
        users:
        # For testing purposes only, do not use in production
-         - username: "admin"
-           password: "somesecret"
+         - username: "<username>"
+           password: "<password>"
            # ... additional test users, following the same pattern
 
    store:
@@ -141,18 +145,22 @@ for use outside an internal development environment.
    jwt:
      exp: 3600
      iss: authotron-issuer
-     secret: authotron-secret-key
+     secret: <jwt-signing-secret>
      aud: authotron-audience
 
    include_legacy_headers: True
 
-   bind_address: 0.0.0.0:8081
+   bind_address: 0.0.0.0:8080
 
 .. warning::
-   The ``plain-provider`` passwords and the ``jwt.secret`` value above are placeholder, test-only
-   values, explicitly marked as such in the configuration file itself. They must be replaced with
-   properly generated secrets before this stack is treated as anything other than an internal
-   development reference.
+   The credentials above are redacted. The deployed configuration defines real ``plain-provider``
+   users and a real ``jwt.secret``, and neither is reproduced here.
+
+   Both are nonetheless weak: the deployed values are the example values carried in
+   ``releng/imachination/authotron/config.yaml``, so anyone with access to the repository can derive
+   them. Anyone holding ``jwt.secret`` can mint tokens that the ecFlow server accepts. They must be
+   replaced with properly generated secrets, held outside version control, before this stack is
+   treated as anything other than an internal development reference.
 
 The ecFlow server: ``ecflow-server`` (172.30.0.4)
 -------------------------------------------------
@@ -160,11 +168,27 @@ The ecFlow server: ``ecflow-server`` (172.30.0.4)
 The ecFlow server image, ``eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest``,
 is built by the separate ``releng/dockit/`` pipeline (``.github/workflows/dockit.yml``).
 
-The image currently running corresponds to ecFlow 5.18.0, revision ``33fad7437e01a8ef``.
+The image currently running corresponds to ecFlow 5.18.0, revision
+``c858b9166b1f37f235349b433def412316462a8c``, built on 2026-09-04 (image digest
+``sha256:098c7801a4e3b1a4c11cc4cf48d103cfe57e34b2ec32ee020d793f08e9b8d678``).
 
 The image entrypoint, ``/opt/local/bin/launch.sh``, starts ``ecflow_server --http --port 8888``
 followed by ``ecflow_http --no_ssl --port 8889``, both in the background. The ``ECFLOW_WORKSPACE_DIR``
 environment variable drives ``ECF_HOME`` for both processes.
+
+.. implementation::
+
+    On ``<host>``, ``ecflow_http`` does not stay up. It starts, issues a ``--news`` request as the
+    container's ``root`` user, and terminates because ``root`` is absent from ``ECF_PERMISSIONS``:
+
+    .. code-block:: none
+
+       Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions [root]
+       terminate called after throwing an instance of 'std::runtime_error'
+
+    Host port 8889 therefore accepts connections (the rootless port forwarder stays bound) but nothing
+    answers on it. The native protocol on 8888, used by ecFlow clients and the reverse proxy, is
+    unaffected. Granting ``root`` read permission in ``server_environment.cfg`` avoids the termination.
 
 Detailed deployment procedure
 =============================
@@ -187,6 +211,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
    podman run -d \
        --name revproxy --hostname revproxy \
        --network inner --ip 172.30.0.2 \
+       -p 8000:80 \
        -p 3141:443 \
        -v ./revproxy/server:/usr/share/nginx/html/server \
        -v ./revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf \
@@ -214,6 +239,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
        -p 8888:8888 \
        -p 8889:8889 \
        -v /home/<user>/<host>:/home/<user>/<host> \
+       -w /home/<user>/<host> \
        -e ECFLOW_WORKSPACE_DIR=/home/<user>/<host> \
        eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
 
@@ -228,8 +254,25 @@ proxy (the ``-k`` option is required because the certificate is self-signed):
 
 .. code-block:: shell
 
-   BASIC_TOKEN=$(echo -n 'admin:somesecret' | base64)
+   BASIC_TOKEN=$(echo -n '<username>:<password>' | base64)
    curl -k -X GET -H "Authorization: Basic ${BASIC_TOKEN}" https://<host>:3141/v1/ecflow
+
+This command exercises the authentication path only. A valid credential returns ``502``, because the
+request carries no ecFlow command payload and the server rejects the empty body:
+
+.. code-block:: none
+
+   ERR:[...] run_server:: rapidjson internal assertion failure: IsObject()
+
+The meaningful outcome is therefore the distinction between ``502`` (authentication succeeded, the
+request reached the ecFlow server) and ``401`` (authentication failed). Genuine ecFlow clients, which
+post a complete command, are served normally through the same path.
+
+.. implementation::
+
+    ``podman ps`` lists a fourth container, ``rootless-cni-infra``, alongside the three services.
+    It is not part of the stack: Podman 3 starts it automatically to hold the network namespace
+    shared by rootless CNI containers, and it is removed once the last container on ``inner`` stops.
 
 * Tear down the stack
 
@@ -244,36 +287,39 @@ proxy (the ``-k`` option is required because the certificate is self-signed):
     These commands differ from ``releng/imachination/compose.yaml`` and the instructions at
     ``releng/imachination/INSTRUCTIONS.md`` in the following ways:
 
-    - ``revproxy`` publishes host ports ``8080`` and ``3141`` instead of ``80`` and ``443``.
+    - ``revproxy`` publishes host ports ``8000`` and ``3141`` instead of ``80`` and ``443``.
 
-      While nginx still listens on container ports 8080 (HTTP) and 8443 (HTTPS) internally, host port
-      443 cannot be used because privileged ports are unavailable to the rootless container runtime on
-      this host.
+      nginx still listens on container ports 80 (HTTP) and 443 (HTTPS), but neither can be published
+      unchanged because privileged ports are unavailable to the rootless container runtime on this host.
 
       Port 3141 was chosen for the published HTTPS port as it is the conventional ecFlow port.
 
-    - ``authotron`` publishes and listens on port ``8081`` instead of ``8080``, leaving host port 8080
-      available for ``revproxy``'s HTTP listener.
+    - ``revproxy/cfgs/nginx/default.conf`` was adjusted on ``<host>`` in one place relative to the
+      committed file: the ``/v1/ecflow`` location's active ``proxy_pass`` was switched from
+      ``http://host.docker.internal:8888/v1/ecflow`` (the committed value) to the in-network address
+      ``http://172.30.0.4:8888/v1/ecflow``. This is necessary because ``host.docker.internal`` is a
+      macOS/Windows-specific feature that does not exist in Linux.
 
-    - ``revproxy/cfgs/nginx/default.conf`` was adjusted on ``<host>`` in three places relative to the
-      committed file:
-
-      - the ``listen`` directives were changed from 80/443 to 8080/8443, matching the remapped ports
-        above;
-
-      - the ``/auth`` internal location's ``proxy_pass`` was corrected from
-        ``http://172.42.0.3:8080/authenticate`` (the committed value, which points at a subnet that does
-        not match the ``inner`` network at all, and would never have worked) to
-        ``http://172.30.0.3:8081/authenticate`` (``authotron``'s actual address on ``inner``);
-
-      - the ``/v1/ecflow`` location's active ``proxy_pass`` was switched from
-        ``http://host.docker.internal:8888/v1/ecflow`` (the committed value) to the in-network address
-        ``http://172.30.0.4:8888/v1/ecflow``. This is necessary because ``host.docker.internal`` is a
-        macOS/Windows-specific feature that does not exist in Linux.
+      The ``/auth`` internal location also had to be corrected on ``<host>``, from
+      ``http://172.42.0.3:8080/authenticate`` to ``http://172.30.0.3:8080/authenticate``. That address
+      belonged to a subnet the ``inner`` network no longer uses, so the committed file could not have
+      authenticated anything. It has since been fixed in the repository, and is no longer a divergence.
 
     - ``ecflow-server``'s workspace is bind-mounted at the same absolute path on both sides
       (``/home/<user>/<host>``), rather than at the example's relative ``ecflow/workspace`` path, so
       that the mount survives independently of the git checkout.
+
+      This is what ``compose.yaml`` does when ``WORKSPACE_DIR`` is set to an absolute path: that one
+      value drives the host-side mount, the container-side mount, the working directory and
+      ``ECF_HOME`` alike.
+
+    - the containers are named after the components rather than after the Compose services. The
+      ecFlow service is named ``ecflow`` in ``compose.yaml`` but its container is named
+      ``ecflow-server`` here, matching the hostname; and the reverse proxy image is built as
+      ``revproxy`` rather than ``imachination-revproxy``.
+
+      Compose would in any case prefix its own container names with the project name, so no naming
+      scheme reproduces the Compose result exactly.
 
 
 Network exposure
@@ -293,11 +339,11 @@ TCP/3141 is intended to be reachable by end users:
      - ``revproxy`` (HTTPS, self-signed certificate)
      - Public entry point
      - Public
-   * - 8080
+   * - 8000
      - ``revproxy`` (HTTP, redirects to HTTPS)
      - Redirect helper
      - Internal-only
-   * - 8081
+   * - 8080
      - ``authotron``
      - Direct access to the authentication service
      - Internal-only
@@ -315,12 +361,12 @@ TCP/3141 is intended to be reachable by end users:
     At present, all five ports above are published to the host (bound on all interfaces),
     and reaching only 3141 from outside the host depends entirely on the perimeter firewall.
 
-    A simple improvement would be not to publish 8081, 8888 and 8889 to the host at all,
+    A simple improvement would be not to publish 8080, 8888 and 8889 to the host at all,
     since ``revproxy`` reaches ``authotron`` and ``ecflow-server`` over the ``inner``
-    network by their static IPs. Publishing ports 8081, 8888 and 8889 to the host is unnecessary
+    network by their static IPs. Publishing ports 8080, 8888 and 8889 to the host is unnecessary
     and could be dropped.
 
-    Port 8080, used for the HTTP-to-HTTPS redirect, could also be left unpublished if no plain-HTTP
+    Port 8000, used for the HTTP-to-HTTPS redirect, could also be left unpublished if no plain-HTTP
     entry point is needed.
 
 Known limitations
@@ -334,6 +380,16 @@ Known limitations
 
    This means the stack does not restart automatically after a host reboot; restarting it
    requires manually re-running (or scripting) the commands in `Detailed deployment procedure`_.
+
+.. note::
+
+   The rootless container store is located under ``/tmp`` (``/tmp/<user>/containers/storage``).
+
+   Any mechanism that clears ``/tmp`` destroys the images as well as the containers, so recovering
+   from a reboot may require pulling the images again, not merely re-running the commands.
+
+   That volume is also small relative to the ecFlow image: upgrading the image requires removing the
+   previous one first, since two copies do not fit.
 
 .. note::
 

@@ -55,8 +55,8 @@ An example `config.yaml` file, configuring the ECMWF API provider and running Au
       realm: "local"
       users:
       # For testing purposes only, do not use in production
-        - username: "someuser"
-          password: "somesecret"
+        - username: "<username>"
+          password: "<password>"
 
   store:
     enabled: false
@@ -66,7 +66,7 @@ An example `config.yaml` file, configuring the ECMWF API provider and running Au
   jwt:
     exp: 3600
     iss: authotron-issuer
-    secret: authotron-secret-key
+    secret: <jwt-signing-secret>
     aud: authotron-audience
 
   include_legacy_headers: True
