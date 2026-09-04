@@ -108,9 +108,14 @@ endif()
 set(ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH "" CACHE STRING
   "Colon-separated directories prepended to LD_LIBRARY_PATH when running the python tests")
 
+# A handful of tests assert behaviour that a given Boost introduced -- the
+# gregorian 1400-9999 year range, from 1.67.0 -- and the range our platforms span
+# straddles it (rocky 8 ships 1.66). Hand the version to the tests so they can
+# skip on the thing that actually decides, rather than on a runner or image name.
 set( _ECFLOW_PYEXT_ENVIRONMENT
   "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH}"
   "PYTHONPATH=${ECFLOW_PYTHONPATH}"
+  "ECFLOW_TEST_BOOST_VERSION=${Boost_VERSION_STRING}"
 )
 if( ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH )
   if( DEFINED ENV{LD_LIBRARY_PATH} AND NOT "$ENV{LD_LIBRARY_PATH}" STREQUAL "" )
