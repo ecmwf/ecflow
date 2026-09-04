@@ -60,22 +60,11 @@ ctest = true
 # s_test and s_zombies are the long-running system suites the legacy runner
 # config (.github/ci-config.yml) also skips.
 #
-# py3_s_TestClientApi is NOT a legacy-parity exclusion -- it is a product bug,
-# confirmed with the maintainers as unrelated to this CI rollout. Its
-# test_client_run and test_client_run_with_multiple_paths never see the suite
-# reach State.complete, so each burns its 21x3s poll (py_s_TestClientApi.py:582)
-# before failing, across all four protocol/sync fixture combinations. That is
-# enough to push the whole target past ctest's default 1500s timeout. Excluding
-# it drops the other ~219 collected items in that file too -- see the exclusion
-# list in the rollout notes. Remove this once the maintainers land a fix.
+# py3_s_TestClientApi is NOT a legacy-parity exclusion --
+# it is a timeout problem to be fixed and not part of the CI rollout.
+# I discussed it with Marcos
 ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
 
-# The toolchain is declared here, not buried in a per-toolchain script:
-# .ci/hpc/build.sh.j2 is rendered against these values. Note `ctest-args` is
-# stated per leg: the HPC lane's exclusion set (-E s_test|s_zombies|s_http)
-# genuinely differs from [matrix.build]'s, and having both written down is how
-# that stays a decision rather than a drift. Bump `platform` when you bump a
-# toolchain: that is what invalidates the cache.
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-8"
 build-type = "Release"
@@ -83,14 +72,8 @@ runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
 platform = "hpc-atos-gnu"
-# gcc/old, not a version number: it is the alias for the compiler a login node
-# gives you with nothing loaded (8.5.0 today), which is what this cluster's GNU
-# builds actually target. `module avail gcc` lists no 8.5.0 to pin directly.
-# This boost/python/qt set is the one releng/buildit/build.hpc.sh's load_gcc8()
-# pairs with gcc 8.5 -- same versions load_gcc13_2() uses, bar the interpreter.
-# boost-root is a shell EXPRESSION here: the boost module ships one build per
-# compiler under .../GNU/<major>.<minor>, and it must track the gcc actually
-# loaded rather than being pinned.
+# gcc/old, not a version number: as of now gives you 8.5.0
+# `module avail gcc` lists no 8.5.0 to pin directly.
 modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/6.6.1", "load cmake/new"]
 cc = "gcc"
 cxx = "g++"
