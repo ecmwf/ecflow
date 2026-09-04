@@ -14,15 +14,26 @@ module load prgenv/gnu
 # builds actually target. `module avail gcc` lists no 8.5.0 to pin directly.
 module unload gcc
 module load gcc/old
-# UNVERIFIED against gcc 8.5. This boost/python/qt set, and the three
-# /usr/local/apps/.../GNU/13.2 paths below, were chosen to pair with gcc/13.2.0
-# and are the only compiler-specific paths in any of these scripts. Confirm on
-# the cluster which builds exist for GNU 8.5 before merging.
+# This boost/python/qt set is the one releng/buildit/build.hpc.sh's load_gcc8()
+# pairs with gcc 8.5 -- same versions load_gcc13_2() uses, bar the interpreter.
 module load boost/1.84.0
 module load ninja
 module load python3/3.11.8-01
 module load qt/6.6.1
 module load cmake/new
+
+# The boost module ships one build per compiler, under .../GNU/<major>.<minor>.
+# Derive that from the gcc actually loaded rather than hardcoding it: a 13.2-built
+# libboost_program_options.a linked against gcc 8.5 compiles all the way through
+# and then fails on every executable with undefined references to
+# std::__throw_bad_array_new_length -- a libstdc++ symbol that only exists from
+# GCC 11 on. Fail here instead, where the message says what is wrong.
+boost_version=1.84.0
+boost_root="/usr/local/apps/boost/$boost_version/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+[ -d "$boost_root" ] || {
+  echo "no boost $boost_version build for gcc $(gcc -dumpfullversion) at $boost_root" >&2
+  exit 1
+}
 
 cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -GNinja \
@@ -31,11 +42,10 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -DCMAKE_CXX_COMPILER="$(command -v g++)" \
   -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DENABLE_ALL_TESTS=ON \
-  -DBoost_ROOT=/usr/local/apps/boost/1.84.0/GNU/13.2 \
-  -DBoost_INCLUDE_DIR=/usr/local/apps/boost/1.84.0/GNU/13.2/include \
+  -DBoost_ROOT="$boost_root" \
+  -DBoost_INCLUDE_DIR="$boost_root/include" \
   -DPython3_ROOT_DIR=/usr/local/apps/python3/3.11.8-01 \
   -DPython3_EXECUTABLE=/usr/local/apps/python3/3.11.8-01/bin/python3 \
-  -DECFLOW_PYEXT_TEST_LD_LIBRARY_PATH=/usr/local/apps/gcc/13.2.0/lib64 \
   -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
   -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
   -DCMAKE_INSTALL_PREFIX="$CI_INSTALL_PREFIX"
