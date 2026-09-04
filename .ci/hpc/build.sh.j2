@@ -1,0 +1,61 @@
+#!/bin/bash
+{% if not tests %}
+# This recipe runs no tests!
+{% endif %}
+
+#SBATCH --qos=nf
+#SBATCH --gres=ssdtmp:30G
+#SBATCH --mem=64GB
+#SBATCH --time=01:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+
+{% for m in modules %}
+module {{ m }}
+{% endfor %}
+
+# Boost and Python come from cluster modules rather than the stack-deps artifact:
+# ecflow links Boost.Python against a specific interpreter, and the cluster ships
+# the matched pair. pybind11 still comes from stack-deps via $CMAKE_PREFIX_PATH.
+#
+# The boost module ships one build per compiler. `boost-root` is a leg value that
+# may itself be a shell expression, so the gnu leg can DERIVE its path from the gcc
+# actually loaded rather than hardcoding it: a 13.2-built libboost_program_options.a
+# linked against gcc 8.5 compiles all the way through and then fails on every
+# executable with undefined references to std::__throw_bad_array_new_length -- a
+# libstdc++ symbol that only exists from GCC 11 on. The guard below fails here
+# instead, where the message says what is wrong.
+boost_root="{{ boost_root }}"
+[ -d "$boost_root" ] || {
+  echo "no boost build for this toolchain at $boost_root" >&2
+  exit 1
+}
+
+cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
+  -GNinja \
+  -DCMAKE_BUILD_TYPE={{ build_type }} \
+  -DCMAKE_C_COMPILER="$(command -v {{ cc }})" \
+  -DCMAKE_CXX_COMPILER="$(command -v {{ cxx }})" \
+  -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DENABLE_ALL_TESTS=ON \
+  -DBoost_ROOT="$boost_root" \
+  -DBoost_INCLUDE_DIR="$boost_root/include" \
+  -DPython3_ROOT_DIR={{ python_root }} \
+  -DPython3_EXECUTABLE={{ python_root }}/bin/python3 \
+  -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
+  -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
+  -DCMAKE_INSTALL_PREFIX="$CI_INSTALL_PREFIX"
+cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_CPUS_PER_TASK:-64}"
+{% if tests %}
+# s_test also covers s_test_using_http_backend; s_http covers s_http* (which the
+# legacy ci-hpc-config.yml disables on HPC without recording why).
+ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure {{ ctest_args }}
+{% endif %}
+cmake --install "${TMPDIR:-/tmp}/build"
+
+# The fetcher takes the artifact from CI_INSTALL_ARCHIVE, not from the install
+# tree; .part + mv so it only ever appears complete.
+mkdir -p "$(dirname "$CI_INSTALL_ARCHIVE")"
+tar -cf - -C "$CI_INSTALL_PREFIX" . | zstd -T0 -q -o "$CI_INSTALL_ARCHIVE.part"
+mv "$CI_INSTALL_ARCHIVE.part" "$CI_INSTALL_ARCHIVE"

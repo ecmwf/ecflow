@@ -16,10 +16,21 @@ from typing import List, Dict
 import pytest
 
 
-def _is_running_test_on(prefix):
-    """Helper to detect if running on a CI runner with a name starting with the given prefix."""
-    envvar = environ.get("RUNNER_NAME")
-    return envvar is not None and envvar.startswith(prefix)
+def _boost_older_than(major, minor):
+    """True if ecflow was built against a Boost older than the given version.
+
+    ECFLOW_TEST_BOOST_VERSION is set by libs/pyext/python3/CMakeLists.txt. When it
+    is absent -- running the file by hand rather than through ctest -- assume a
+    recent Boost and let the test run.
+    """
+    version = environ.get("ECFLOW_TEST_BOOST_VERSION")
+    if not version:
+        return False
+    try:
+        parts = tuple(int(part) for part in version.split(".")[:2])
+    except ValueError:
+        return False
+    return parts < (major, minor)
 
 
 class TestTrigger:
@@ -14157,11 +14168,8 @@ class TestClock:
         assert c.year() == 9999
 
     @pytest.mark.skipif(
-        _is_running_test_on("platform-builder-rl-86"),
-        reason=(
-            "The (1400-9999) year range restriction was introduced by Boost 1.67.0."
-            "Disabling tests for CI runners known to use previous versions of Boost."
-        ),
+        _boost_older_than(1, 67),
+        reason="The (1400-9999) year range restriction was introduced by Boost 1.67.0.",
     )
     def test_constructor_year_10000_raises(self):
         """Clock(d, m, 10000) raises IndexError (year must be <= 9999)."""
