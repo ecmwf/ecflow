@@ -19,7 +19,7 @@
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/node/Node.hpp"
 
-// defines statics utility functions used by more than one test
+// defines static utility functions used by more than one test
 class TestHelper {
 public:
     static std::string invokeRequest(Defs* defs, Cmd_ptr theCmd, bool check_change_numbers = true) {
@@ -102,10 +102,6 @@ public:
         cmd_request.set_cmd(theCmd);
 
         BOOST_CHECK_THROW(cmd_request.handleRequest(&server), std::runtime_error);
-
-        //		STC_Cmd_ptr result = cmd_request.handleRequest(&server);
-        //		BOOST_CHECK_MESSAGE( !result->ok(), "ClientToServerRequest " << cmd_request << " was expected to
-        // fail \n");
     }
 
     static void test_state(node_ptr n, NState::State expected) {

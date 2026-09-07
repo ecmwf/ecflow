@@ -46,7 +46,7 @@ using namespace ecf;
 //
 //
 // After ECFLOW-1244:
-//  - cacheing of stat of include files
+//  - caching of stat of include files
 //  - re-arranging EcfFile data member for hotness
 //  - re-arrange search for generation variables, most common first
 //  - replace ecffile_->countEcfMicro _. EcfFile::countEcfMicro(..) remove reference since function is static

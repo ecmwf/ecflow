@@ -20,24 +20,29 @@ Welcome to ecFlow's documentation
 
 .. toctree::
    :maxdepth: 1
-   :caption: Documentation
+   :caption: User Manual
 
    overview
+   install/index.rst
    quickstart.rst
    tutorial/tutorial.rst
-   client_api/index.rst
-   python_api/python_api.rst
-   rest_api.rst
-   udp_api.rst
    ug/index.rst
    glossary.rst
    faq
 
 .. toctree::
    :maxdepth: 1
-   :caption: Installation
+   :caption: Reference
 
-   install/index.rst
+   client_api/index.rst
+   python_api/python_api.rst
+   rest_api.rst
+   udp_api.rst
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About
+
    release_notes/index.rst
    support
    contributing

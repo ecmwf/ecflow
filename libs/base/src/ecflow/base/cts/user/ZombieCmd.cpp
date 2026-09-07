@@ -212,78 +212,33 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
     switch (user_action_) {
 
         case ZombieCtrlAction::FOB: {
-            desc.add_options()(
-                CtsApi::zombieFobArg(),
-                boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                "Locates the task in the servers list of zombies, and sets to fob.\n"
-                "This default behaviour of the child commands(label,event,meter) is to fob\n"
-                "Next time the child commands (init,event,meter,label,abort,complete,wait,queue) communicate\n"
-                "with the server, they will complete successfully (but without updating the node tree)\n"
-                "allowing the job to finish.\n"
-                "The references to the zombie in the server is automatically deleted after 1 hour\n"
-                "  args = list of task paths, at least one expected\n"
-                "  --zombie_fob=/path/to/task1 /path/to/task2");
+            desc.add_options()(CtsApi::zombieFobArg(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case ZombieCtrlAction::FAIL: {
             desc.add_options()(CtsApi::zombieFailArg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Locates the task in the servers list of zombies, and sets to fail.\n"
-                               "Next time a child command (init,event,meter,label,abort,complete) which "
-                               "matches zombie, communicates with the server, will be set to fail.\n"
-                               "Depending on the job setup this may force a abort, the abort will also fail.\n"
-                               "Hence job structure should use 'set -e' in the error trapping functions to prevent\n"
-                               "infinite recursion.\n"
-                               "The references to the zombie in the server is automatically deleted after 1 hour\n"
-                               "  args = list of task paths, at least one expected\n"
-                               "  --zombie_fail=/path/to/task  /path/to/task2");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case ZombieCtrlAction::ADOPT: {
             desc.add_options()(CtsApi::zombieAdoptArg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Locates the task in the servers list of zombies, and sets to adopt.\n"
-                               "Next time a child command (init,event,meter,label,abort,complete,wait queue) "
-                               "communicates with the server, the password on the zombie is adopted by the task.\n"
-                               "This is only allowed if the process id matches, otherwise an error is issued.\n"
-                               "The zombie reference stored in the server is then deleted.\n"
-                               "  args = list of task paths, at least one expected\n"
-                               "  --zombie_adopt=/path/to/task  /path/to/task2");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case ZombieCtrlAction::REMOVE: {
-            desc.add_options()(
-                CtsApi::zombieRemoveArg(),
-                boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                "Locates the task in the servers list of zombies, and removes it.\n"
-                "Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)\n"
-                "the zombie may reappear\n"
-                "  args = list of task paths, at least one expected\n"
-                "  --zombie_remove=/path/to/task  /path/to/task2");
+            desc.add_options()(CtsApi::zombieRemoveArg(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case ZombieCtrlAction::BLOCK: {
             desc.add_options()(CtsApi::zombieBlockArg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Locates the task in the servers list of zombies, and sets flags to block it.\n"
-                               "This is default behaviour of the child commands(init,abort,complete,wait,queue)\n"
-                               "when the server cannot match the passwords. Each child commands will continue\n"
-                               "attempting to connect to the server for 24 hours, and will then return an error.\n"
-                               "The connection timeout can be configured with environment ECF_TIMEOUT\n"
-                               "  args = list of task paths, at least one expected\n"
-                               "  --zombie_block=/path/to/task  /path/to/task2");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case ZombieCtrlAction::KILL: {
             desc.add_options()(CtsApi::zombieKillArg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Locates the task in the servers list of zombies, and sets flags to kill\n"
-                               "The kill is done using ECF_KILL_CMD, but using the process_id from the zombie\n"
-                               "The job is allowed to continue until the kill is received\n"
-                               "Can only kill zombies that have an associated Task, hence path zombies\n"
-                               "must be killed manually.\n"
-                               "  arg = list of task paths, at least one expected\n"
-                               "  --zombie_kill=/path/to/task  /path/to/task2");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
         default:

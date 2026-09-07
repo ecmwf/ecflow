@@ -550,7 +550,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
     for (int hour = 1; hour < 24; hour++) {
         // Update calendar every hour, then see we can match time series, in REAL
         // Update will set the local time from the computers system clock, however
-        // for testing this will need to be overriden below.
+        // for testing this will need to be overridden below.
         calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
@@ -632,7 +632,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
     ECF_NAME_THIS_TEST();
 
     // The hybrid calendar should not change the suite date.
-    // Test by updateing calendar by more than 24 hours
+    // Test by updating calendar by more than 24 hours
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;

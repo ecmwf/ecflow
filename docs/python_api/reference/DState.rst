@@ -7,18 +7,21 @@ ecflow.DState
 
    Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
-A DState is like a ecflow.State, except for the addition of SUSPENDED
+:code:`ecflow.DState` is an enumerate, similar to :py:class:`ecflow.State`, with an additional
+:code:`suspended` state.
 
-Suspended stops job generation, and hence is an attribute of a Node.
-DState can be used for setting the default state of node when it is
-begun or re queued. DState is used for defining :term:`defstatus`.
-See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.Defstatus`
-The default state of a :term:`node` is :term:`queued`.
+The values in this enumerate are used to create a :py:class:`ecflow.Defstatus` attribute,
+which controls the default state of a task when it *begins* or is *requeued*.
+
+Note that :code:`suspended` is not one of the states a node goes through, and has no
+:py:class:`ecflow.State` counterpart. A suspended node retains its state, which is reported
+again once the node is resumed.
 
 Usage::
 
    task = ecflow.Task('t1')
-   task.add_defstatus(ecflow.DState.complete)   task = ecflow.Task('t2')
+   task.add_defstatus(ecflow.DState.complete)
+   task = ecflow.Task('t2')
    task += Defstatus('complete')
    task = Task('t3',
                Defstatus('complete')) # create in place

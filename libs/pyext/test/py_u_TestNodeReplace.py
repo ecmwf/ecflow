@@ -8,34 +8,15 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
-    Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
-    JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-    Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
-    Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
-    VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
-import unittest
-import sys
-import os
-import ecflow_test_util as Test
+import pytest
+
+from ecflow import Suite, Family, Task
 
 
-class Test_replace(unittest.TestCase):
-
-    def test_replace_on_server_errors(self):
-        # expect error since nodes not attached to a definition
-        # The error should happen before we connect to the server,hence no need to start server
-        # Avoid suspending node first( since that will require node exist in the server)
-        node_vec = [Suite('s1'), Family('f1'), Task('t1')]
-        for node in node_vec:
-            print(node.name(), " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-            try:
-                node.replace_on_server("locahost:3141", suspend_node_first=False)
-                self.assertFalse(False, "Expected failure since client definition is empty")
-            except RuntimeError as e:
-                self.assertTrue("client definition is empty" in str(e), "expected 'client definition is empty' in exception message  but found:\n" + str(e))
-
-
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")
+def test_replace_on_server_errors_for_unattached_nodes():
+    # expect error since nodes are not attached to a definition.
+    # The error should happen before we connect to the server, hence no need to start server.
+    # Avoid suspending node first (since that will require node exist in the server)
+    for node in (Suite("s1"), Family("f1"), Task("t1")):
+        with pytest.raises(RuntimeError, match="client definition is empty"):
+            node.replace_on_server("locahost:3141", suspend_node_first=False)

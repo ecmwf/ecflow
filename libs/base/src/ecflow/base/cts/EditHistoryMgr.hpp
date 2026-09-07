@@ -27,7 +27,7 @@ class AbstractServer;
 /// This class is used in the following sequence of steps:
 ///   1) An object of EditHistoryMgr is created before the command is handled and retrieves before state/modify counters
 ///   2) The server handles the command and the command makes changes to the node tree (if any)
-///        n.b. this must update the list of edit_history_nodes/edit_history_node_paths in the comamnd itself
+///        n.b. this must update the list of edit_history_nodes/edit_history_node_paths in the command itself
 ///   3) The dtor of EditHistoryMgr retrieves after state/modify counters
 ///      and if there is a change in either of the counters, then adds the edit history to the nodes in the command
 ///

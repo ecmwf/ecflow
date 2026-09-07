@@ -42,6 +42,7 @@ set(test_srcs
   test/TestNodeAlgorithms.cpp
   test/TestNodeBeginRequeue.cpp
   test/TestNodeGeneratedVariables.cpp
+  test/TestNodePathAlgorithms.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
   test/TestOrder.cpp
@@ -116,6 +117,32 @@ ecbuild_add_test(
 target_clangformat(u_parser
   CONDITION ENABLE_TESTS
 )
+
+
+set(test_srcs
+  # Sources
+  test/expressions/TestExpressionsGoldenCorpus.cpp
+  test/expressions/TestExpressions_main.cpp # test entry point
+)
+ecbuild_add_test(
+  TARGET
+    u_expressions
+  LABELS
+    unit nightly fast
+  SOURCES
+    ${test_srcs}
+  LIBS
+    ecflow_all
+    test_scaffold
+    nlohmann::json
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  TEST_DEPENDS
+    u_node
+)
+target_clangformat(u_expressions
+  CONDITION ENABLE_TESTS
+)
+
 
 if (ENABLE_ALL_TESTS)
   set(test_srcs

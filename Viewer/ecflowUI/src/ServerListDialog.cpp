@@ -154,9 +154,11 @@ ServerAddDialog::ServerAddDialog(QWidget* parent)
     portEdit->setValidator(new QIntValidator(1025, 65535, this));
 
 #ifndef ECF_OPENSSL
+    // Without SSL support, the encrypted protocols cannot be used, and are therefore not offered.
     sslMessageLabel->hide();
-    sslCb->setChecked(false);
-    sslCb->setEnabled(false);
+    protocolSsl->setEnabled(false);
+    protocolHttps->setEnabled(false);
+    protocolPlain->setChecked(true);
 #else
     sslMessageLabel->setShowTypeTitle(false);
     sslMessageLabel->showWarning(
@@ -254,9 +256,10 @@ ServerEditDialog::ServerEditDialog(QString name,
     favCh->setChecked(favourite);
 
 #ifndef ECF_OPENSSL
+    // Without SSL support, the encrypted protocols cannot be used, and are therefore not offered.
     sslMessageLabel->hide();
-    sslCh->setEnabled(false);
-    sslLabel->setEnabled(false);
+    protocolSsl->setEnabled(false);
+    protocolHttps->setEnabled(false);
 #else
     sslMessageLabel->setShowTypeTitle(false);
     sslMessageLabel->showWarning(
@@ -358,10 +361,8 @@ ServerListDialog::ServerListDialog(Mode mode, ServerFilter* filter, QWidget* par
     serverView->sortByColumn(ServerListModel::NameColumn, Qt::AscendingOrder);
     serverView->setModel(sortModel_);
 
-#ifndef ECF_OPENSSL
-    // has to be called after the model was initialised
-    serverView->hideColumn(ServerListModel::SslColumn);
-#endif
+    // Notice that the protocol column is shown whether or not SSL support is available: it reports the
+    // protocol in use (TCP/IP or HTTP), which remains meaningful without the encrypted variants.
 
     // Add context menu actions to the view
     auto* sep1 = new QAction(this);

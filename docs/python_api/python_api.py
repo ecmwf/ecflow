@@ -58,6 +58,7 @@ def build_toc():
 
             for name in category["items"]:
                 t += f"""   reference/{name}\n"""
+                names.add(name)
 
             t +="""
 

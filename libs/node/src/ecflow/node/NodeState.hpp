@@ -30,7 +30,7 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
     int activeCount    = 0;
     int abortedCount   = 0;
 
-    // We don't know the order, hence we must collate first
+    // We do not know the order, hence we must collate first
     size_t theVecSize = nodeVec.size();
     for (size_t n = 0; n < theVecSize; n++) {
         NState::State theState;

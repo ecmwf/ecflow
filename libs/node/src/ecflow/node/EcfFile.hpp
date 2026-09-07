@@ -42,7 +42,7 @@ private:
 };
 
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
-/// It is used to to create the job file.
+/// It is used to create the job file.
 ///
 ///
 /// Please note the %manual is only created on request from the file cmd.

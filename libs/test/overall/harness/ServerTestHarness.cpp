@@ -93,17 +93,17 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
     for (auto s : theClientDefs.suites()) {
 
         // Always override these to correctly locate files.
-        s->addVariable(Variable(ecf::environment::ECF_HOME, ecf_home));
-        s->addVariable(Variable("ECF_CLIENT_EXE_PATH", theClientExePath));
-        s->addVariable(Variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
+        s->addVariable(Variable::new_variable(ecf::environment::ECF_HOME, ecf_home));
+        s->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", theClientExePath));
+        s->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
 
         if (s->findVariable("SLEEPTIME").empty()) {
-            s->addVariable(Variable("SLEEPTIME", "1"));
+            s->addVariable(Variable::new_variable("SLEEPTIME", "1"));
         }
 
         if (check_task_duration_less_than_server_poll_) {
             if (s->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL").empty()) {
-                s->addVariable(Variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_"));
+                s->addVariable(Variable::new_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_"));
             }
         }
         suiteName = s->name();
@@ -210,7 +210,7 @@ bool verify_attribute_verification() {
     // In  version 4.0.1: We changed the way families changed states. i.e families will now change to state complete
     // before being requeued. See ECFLOW-96 Families with loops(cron/repeat) should log complete
     // This meant that when we run the migration tests, i.e new client with old server (with new test)
-    // It would fail some the test, during verify attribute verification. ie. where we count the number of times
+    // It would fail some the test, during verify attribute verification. i.e., where we count the number of times
     // a node completes. To enable these tests to still run, we will disable verify attribute verification
     return true;
 }

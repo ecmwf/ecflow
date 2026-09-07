@@ -18,7 +18,7 @@ namespace ecf {
 ///
 /// @brief Check if a given reference type is one of the comparing types
 ///
-/// The value data member is true when the refernce type is one of the comparing types, otherwise false.
+/// The value data member is true when the reference type is one of the comparing types, otherwise false.
 ///
 /// @tparam T the reference type
 /// @tparam Xs the comparing types

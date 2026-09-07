@@ -75,19 +75,24 @@ namespace algorithm {
 /// defaults to ", " if not provided.
 ///
 /// @tparam Sequence1 A container type that supports iteration and whose elements can be converted to std::string_view.
-/// @tparam Sequence2 A string-like type.
+/// @tparam Sequence2 A string-like type, convertible to std::string_view.
 ///
 /// @param strings The sequence of string-like objects to join.
-/// @param separator The string-like object used as the separator between joined strings.
+/// @param separator The string-like object used as the separator between joined strings. A character array
+/// literal is accepted, and its terminating null character is not considered part of the separator.
 /// @return The joined string.
 ///
 template <typename Sequence1, typename Sequence2 = std::string>
 inline std::string join(const Sequence1& strings, const Sequence2& separator = ", ") {
+    // Note: the separator is measured as a std::string_view, since std::size() of a character array literal
+    // includes the terminating null character, which would otherwise be embedded in the result.
+    const std::string_view sep{separator};
+
     std::string buffer;
     auto first = true;
     for (const auto& s : strings) {
         if (!first) {
-            buffer.append(std::data(separator), std::size(separator));
+            buffer.append(sep);
         }
         buffer.append(s);
         first = false;

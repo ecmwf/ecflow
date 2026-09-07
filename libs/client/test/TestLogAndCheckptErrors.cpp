@@ -126,13 +126,13 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
 
         const Variable& var  = theClient.defs()->server_state().findVariable("ECF_LOG_ERROR");
         const Variable& var1 = theClient.defs()->server_state().findVariable("ECF_CHECKPT_ERROR");
-        BOOST_CHECK_MESSAGE(!var1.theValue().empty(), "Expected ECF_CHECKPT_ERROR to have a value");
-        BOOST_CHECK_MESSAGE(!var.theValue().empty(), "Expected ECF_LOG_ERROR to have a value");
+        BOOST_CHECK_MESSAGE(!var1.value().empty(), "Expected ECF_CHECKPT_ERROR to have a value");
+        BOOST_CHECK_MESSAGE(!var.value().empty(), "Expected ECF_LOG_ERROR to have a value");
         if (debug_me) {
-            std::cout << "->ECF_CHECKPT_ERROR=" << var1.theValue() << "\n";
+            std::cout << "->ECF_CHECKPT_ERROR=" << var1.value() << "\n";
         }
         if (debug_me) {
-            std::cout << "->ECF_LOG_ERROR =" << var.theValue() << "\n";
+            std::cout << "->ECF_LOG_ERROR =" << var.value() << "\n";
         }
 
         if (debug_me) {

@@ -16,8 +16,8 @@ display options.
 The option with the biggest impact on the view is **Tree layout style**.
 
 .. image:: /_static/ecflow_ui/customising_the_views/image1.png
-   :width: 2.8125in
-   :height: 2.60417in
+   :width: 5.25in
+   :align: center
 
 The default, **Standard**, shows a classic tree view. It uses more
 vertical space, but less horizontal space. The option
@@ -28,6 +28,7 @@ node.
 
 .. list-table::
    :header-rows: 1
+   :align: center
 
    * - Standard layout
      - Compact layout 
@@ -35,10 +36,12 @@ node.
    * - .. image:: /_static/ecflow_ui/customising_the_views/image2.png
           :width: 2.5in
           :height: 3.97917in
+          :align: center
 
      - .. image:: /_static/ecflow_ui/customising_the_views/image3.png
           :width: 2.89444in
           :height: 1.63483in
+          :align: center
 
 
 The next big decision is whether to display the node names inside our
@@ -49,16 +52,19 @@ screenshots show the names inside the status boxes:
 
 .. list-table::
    :header-rows: 1
+   :align: center
 
    * - Separate text and status rectangle
      - Text in status rectangle
 
    * - .. image:: /_static/ecflow_ui/customising_the_views/image4.png
-        :width: 2.5in
-        :height: 3.90533in
+          :width: 2.5in
+          :height: 3.90533in
+          :align: center
      - .. image:: /_static/ecflow_ui/customising_the_views/image5.png
-        :width: 2.75417in
-        :height: 2.11889in
+          :width: 2.75417in
+          :height: 2.11889in
+          :align: center
 
 In this mode, the text can be harder to read, depending on the colours
 chosen. These colours are completely configurable from the **Status**
@@ -67,25 +73,38 @@ tab in the Preferences dialogue.
 .. image:: /_static/ecflow_ui/customising_the_views/image6.png
    :width: 4.375in
    :height: 3.21834in
+   :align: center
 
 To help identify at a glance whether a node is a suite, family or task,
 there is an option to display the node type in the tree:
 
 
-.. image:: /_static/ecflow_ui/customising_the_views/image7.png
-   :width: 3.22917in
-   :height: 2.60417in
+.. list-table::
+   :header-rows: 0
+   :align: center
 
-.. image:: /_static/ecflow_ui/customising_the_views/image8.png
-   :width: 2.26042in
-   :height: 2.60417in
+   * - .. image:: /_static/ecflow_ui/customising_the_views/image7.png
+          :width: 3.22917in
+          :height: 2.60417in
+          :align: center
 
-.. image:: /_static/ecflow_ui/customising_the_views/image9.png
-   :width: 1.97917in
-   :height: 1.5153in
+     - .. image:: /_static/ecflow_ui/customising_the_views/image8.png
+          :width: 2.26042in
+          :height: 2.60417in
+          :align: center
 
+     - .. image:: /_static/ecflow_ui/customising_the_views/image9.png
+          :width: 1.97917in
+          :height: 1.5153in
+          :align: center
+
+
+Each server row also carries a badge showing the protocol it is configured for.
+This is controlled by the **Show connection badge** option, which is on by
+default; the badges themselves, and the coloured bands that mark a server which
+cannot be reached, are described in
+:ref:`communication_with_ecflow_servers`.
 
 There are plenty of other options in the **Appearance** section, and
 also complete control over the fonts in the **Fonts** section - try them
 out and give ecFlowUI the look you want!
-

@@ -28,7 +28,7 @@ namespace {
  * @return A string containing the rejection message.
  */
 std::string make_rejection_message(const std::string& reason, const ecf::Identity& identity) {
-    return std::string{"Command not accepted, due to: "} + reason + " [" + identity.username() + "]";
+    return std::string{"Command not accepted, due to: "} + reason + " [" + identity.username().value() + "]";
 }
 
 } // namespace
@@ -40,7 +40,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
             return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }
 
-        // Perform Autorisation (i.e. access rules) control
+        // Perform Authorisation (i.e. access rules) control
         if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
             return cmd_->handleRequest(as);
         }

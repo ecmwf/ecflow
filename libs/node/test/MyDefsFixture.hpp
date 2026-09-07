@@ -107,9 +107,9 @@ private:
         suite->addClock(clockAttr);
 
         suite->addAutoCancel(ecf::AutoCancelAttr(2));
-        suite->addVariable(Variable("VAR", "value"));
-        suite->addVariable(Variable("VAR1", "\"value\""));
-        suite->addVariable(Variable("ECF_FETCH", "\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\""));
+        suite->addVariable(Variable::new_variable("VAR", "value"));
+        suite->addVariable(Variable::new_variable("VAR1", "\"value\""));
+        suite->addVariable(Variable::new_variable("ECF_FETCH", "\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\""));
 
         std::vector<std::string> queue_items;
         queue_items.emplace_back("000");
@@ -222,7 +222,7 @@ private:
             fam->addDate(DateAttr(0, 0, 2009)); // 0 is equivalent to a *
             fam->addRepeat(RepeatEnumerated("AEnum", stringList));
             fam->addAutoCancel(ecf::AutoCancelAttr(ecf::TimeSlot(1, 0), true));
-            fam->addVariable(Variable("VAR", "value"));
+            fam->addVariable(Variable::new_variable("VAR", "value"));
             fam->addTime(ecf::TimeAttr(ecf::TimeSlot(0, 0), ecf::TimeSlot(10, 1), ecf::TimeSlot(0, 1), true));
             fam->addLimit(Limit(limitName, 20));
             fam->addLate(lateAttr);
@@ -233,7 +233,7 @@ private:
             task_ptr task = fam->add_task(tname);
             task->addDate(DateAttr(1, 2, 2009));
             task->addDay(DayAttr(DayAttr::MONDAY));
-            task->addVariable(Variable("VAR1", "\"value\""));
+            task->addVariable(Variable::new_variable("VAR1", "\"value\""));
             task->addEvent(Event(i));
             task->addEvent(Event(i + 1, eventName));
             task->addEvent(Event(i + 2, "my_event", true /*init value*/));
@@ -273,12 +273,12 @@ private:
             if (i == 0) {
                 std::string heirFamily = "heir_" + fname;
                 family_ptr hierFam     = fam->add_family(heirFamily);
-                hierFam->addVariable(Variable("VAR1", "value"));
+                hierFam->addVariable(Variable::new_variable("VAR1", "value"));
                 hierFam->addRepeat(RepeatString("aString", stringList));
                 hierFam->add_autoarchive(ecf::AutoArchiveAttr(ecf::TimeSlot(1, 0), true));
 
                 task_ptr task1 = hierFam->add_task(tname);
-                task1->addVariable(Variable("VAR1", "value"));
+                task1->addVariable(Variable::new_variable("VAR1", "value"));
                 task1->addEvent(Event(i));
                 task1->addEvent(Event(i + 1, eventName));
                 task1->addEvent(Event(i + 2, "my_event", true /*init value*/));

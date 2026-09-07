@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_clk_sync) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     //  suite test_clk_sync
-    //    clocl hybrid
+    //    clock hybrid
     //    task a
     //       meter myMeter 0 100
     //  endsuite
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         family_ptr fam  = suite->add_family("family");
         task_ptr task   = fam->add_task("t1");
 
-        // Don't use hybrid for day dependency as that will force node to complete if days is not the same
+        // Do not use hybrid for day dependency as that will force node to complete if days is not the same
         ClockAttr clockAttr(today, false);
         suite->addClock(clockAttr);
 

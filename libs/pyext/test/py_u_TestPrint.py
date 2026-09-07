@@ -11,8 +11,6 @@
 # This test ensures that the nodes are printed using the expected format.
 
 from ecflow import Defs, Suite, Task, Family, Client
-import ecflow_test_util as Test
-import os
 
 
 def test_print_defs():
@@ -26,8 +24,10 @@ def test_print_defs():
                 t.add_variable("NAME", "VALUE")
 
                 expected = f"#{Client().version()}\nsuite s\n  family f\n    task t\n      edit NAME 'VALUE'\n  endfamily\nendsuite\n# enddef\n"
-                actual = defs.__str__()
-                assert actual == expected, "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+                actual = str(defs)
+                assert actual == expected, (
+                    "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+                )
 
 
 def test_print_suite():
@@ -39,8 +39,10 @@ def test_print_suite():
                 t.add_variable("NAME", "VALUE")
 
                 expected = "suite s\n  family f\n    task t\n      edit NAME 'VALUE'\n  endfamily\nendsuite\n"
-                actual = s.__str__()
-                assert actual == expected, "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+                actual = str(s)
+                assert actual == expected, (
+                    "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+                )
 
 
 def test_print_family():
@@ -50,8 +52,10 @@ def test_print_family():
             t.add_variable("NAME", "VALUE")
 
             expected = "  family f\n    task t\n      edit NAME 'VALUE'\n  endfamily\n"
-            actual = f.__str__()
-            assert actual == expected, "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+            actual = str(f)
+            assert actual == expected, (
+                "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+            )
 
 
 def test_print_task():
@@ -59,16 +63,7 @@ def test_print_task():
         t.add_variable("NAME", "VALUE")
 
         expected = "  task t\n    edit NAME 'VALUE'\n"
-        actual = t.__str__()
-        assert actual == expected, "Expected:\n" + expected + "\n" + "Actual:\n" + actual
-
-
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    test_print_defs()
-    test_print_suite()
-    test_print_family()
-    test_print_task()
-
-    print("All tests pass")
+        actual = str(t)
+        assert actual == expected, (
+            "Expected:\n" + expected + "\n" + "Actual:\n" + actual
+        )

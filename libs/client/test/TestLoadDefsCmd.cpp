@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(T_LoadDefsCmd)
 // the extern node paths in the trigger expressions.
 //
 // ********************************************************************
-// In the real server, we dont store, externs
+// In the real server, we do not store, externs
 // *******************************************************************
 BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
     ECF_NAME_THIS_TEST();

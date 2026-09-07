@@ -45,8 +45,7 @@ public:
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the argument as provided to user
+    static const char* arg(); // used for argument parsing
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
@@ -55,7 +54,7 @@ private:
 private:
     std::vector<std::string> paths_;
     bool force_{false};
-    bool test_{false}; // only for test, hence we don't serialise this
+    bool test_{false}; // only for test, hence we do not serialise this
 
     friend class cereal::access;
     template <class Archive>

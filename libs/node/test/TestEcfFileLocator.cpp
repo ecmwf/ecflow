@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
     //          task task
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ecf_file_search"));
-    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+    suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
     family_ptr f1 = suite->add_family("f1");
     family_ptr f2 = f1->add_family("f2");
     family_ptr f3 = f2->add_family("f3");
@@ -284,8 +284,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "10"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");
         fam->add_task("t2");
@@ -300,18 +300,19 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     }
     {
         suite_ptr suite2 = theDefs.add_suite("suite2");
-        suite2->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite2->addVariable(Variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
+        suite2->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite2->addVariable(Variable::new_variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
         family_ptr fam = suite2->add_family("family");
-        fam->addVariable(Variable(ecf::environment::ECF_FETCH, "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"));
+        fam->addVariable(
+            Variable::new_variable(ecf::environment::ECF_FETCH, "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"));
         fam->add_task("t2");
     }
     {
         suite_ptr suite = theDefs.add_suite("suite3");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
         family_ptr fam = suite->add_family("family");
-        fam->addVariable(Variable("ECF_SCRIPT_CMD", "script_cmd -F %ECF_FILES% -I %ECF_INCLUDE%"));
+        fam->addVariable(Variable::new_variable("ECF_SCRIPT_CMD", "script_cmd -F %ECF_FILES% -I %ECF_INCLUDE%"));
         fam->add_task("t2");
     }
     // 	cerr << theDefs << "\n";
@@ -387,8 +388,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "10"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");
         fam->add_task("t2");
@@ -453,10 +454,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "10"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
-        fam->addVariable(Variable("FAMILY", "family"));
+        fam->addVariable(Variable::new_variable("FAMILY", "family"));
         fam->add_task("t1");
         fam->add_task("t2");
         fam->add_task("t3");

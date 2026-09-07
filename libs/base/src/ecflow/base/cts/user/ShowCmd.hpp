@@ -37,8 +37,7 @@ public:
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the argument as provided to user
+    static const char* arg(); // used for argument parsing
 
     // The Show Cmd is processed on the client side,
     // Likewise the doHandleRequest does nothing,

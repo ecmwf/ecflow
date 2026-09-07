@@ -8,141 +8,225 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
-    Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
-    JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-    Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
-    Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
-    VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
-import unittest
-import sys
 import os
 
+import pytest
 
-class Test_default_defs(unittest.TestCase):
-
-    def setUp(self):
-        self.file_name = 'Test_default_defs.defs'
-        defs = Defs() + Suite('s1')
-        defs.save_as_defs(self.file_name)
-
-    def test_defs_default_constructor(self):
-        defs = Defs()
-        # PrintStyle.set_style( Style.MIGRATE )
-        # print defs
-        self.assertEqual(defs.get_state(), State.unknown, "expected unknow state but found " + str(defs.get_state()))
-        self.assertEqual(defs.get_server_state(), SState.RUNNING, "expected default server state tobe running state but found " + str(defs.get_server_state()))
-        self.assertEqual(len(list(defs.suites)), 0, "expected no suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs(self.file_name)
-        self.assertEqual(defs.get_state(), State.unknown, "expected unknow state but found " + str(defs.get_state()))
-        self.assertEqual(defs.get_server_state(), SState.RUNNING, "expected default server state tobe running state but found " + str(defs.get_server_state()))
-        self.assertEqual(len(list(defs.suites)), 1, "expected 1 suites but found " + str(len(list(defs.suites))))
-
-    def tearDown(self):
-        try:
-            os.remove(self.file_name)
-        except:
-            pass
+from ecflow import Defs, Suite, State, SState, Variable, Edit
 
 
-class Test_defs_raw_constructor(unittest.TestCase):
-
-    def test_defs_raw_constructor_errors(self):
-        with self.assertRaises(RuntimeError):
-            defs = Defs("file_name.def", Suite('s1'))
-        with self.assertRaises(RuntimeError):
-            defs = Defs("file_name.def", Edit(a='b'))
-        with self.assertRaises(RuntimeError):
-            defs = Defs("file_name.def", {'a': 'b'})
-        with self.assertRaises(RuntimeError):
-            defs = Defs("file_name.def", Variable('a', 'b'))
-        with self.assertRaises(RuntimeError):
-            defs = Defs("file_name.def", [Variable('a', 'b')])
-
-    def test_defs_raw_constructor_suite_creation(self):
-        defs = Defs(Suite('s1'))
-        self.assertEqual(len(list(defs.suites)), 1, "expected 1 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs(Suite('s1'), Suite('s2'), Suite('s3'))
-        self.assertEqual(len(list(defs.suites)), 3, "expected 3 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs([Suite('s{0}'.format(i)) for i in range(1, 5)])
-        self.assertEqual(len(list(defs.suites)), 4, "expected 4 suites but found " + str(len(list(defs.suites))))
-
-    def test_defs_raw_constructor_variables(self):
-        defs = Defs(Edit(a='b'))
-        self.assertEqual(len(list(defs.user_variables)), 1, "expected 1 user variable but found " + str(len(list(defs.user_variables))))
-
-        defs = Defs(Variable('a', 'b'))
-        self.assertEqual(len(list(defs.user_variables)), 1, "expected 1 user variable but found " + str(len(list(defs.user_variables))))
-
-        defs = Defs({'a': 'a', 'b': 'b'})
-        self.assertEqual(len(list(defs.user_variables)), 2, "expected 2 user variable but found " + str(len(list(defs.user_variables))))
-
-        defs = Defs(a='a', b='b')  # uses kwy word arguments
-        self.assertEqual(len(list(defs.user_variables)), 2, "expected 2 user variable but found " + str(len(list(defs.user_variables))))
-
-        defs = Defs(Edit(a='b'), Variable('b', 'b'), {'c': 'a', 'd': 'b'}, e='a', f='b')
-        self.assertEqual(len(list(defs.user_variables)), 6, "expected 6 user variable but found " + str(len(list(defs.user_variables))))
-
-    def test_defs_raw_constructor(self):
-        defs = Defs(Suite('s1'), Edit(a='b'))
-        self.assertEqual(len(list(defs.user_variables)), 1, "expected 1 user variable but found " + str(len(list(defs.user_variables))))
-        self.assertEqual(len(list(defs.suites)), 1, "expected 1 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs(Suite('s1'), Suite('s2'), Suite('s3'), Variable('a', 'b'))
-        self.assertEqual(len(list(defs.user_variables)), 1, "expected 1 user variable but found " + str(len(list(defs.user_variables))))
-        self.assertEqual(len(list(defs.suites)), 3, "expected 3 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs([Suite('s{0}'.format(i)) for i in range(1, 5)], {'a': 'a', 'b': 'b'})
-        self.assertEqual(len(list(defs.user_variables)), 2, "expected 2 user variable but found " + str(len(list(defs.user_variables))))
-        self.assertEqual(len(list(defs.suites)), 4, "expected 4 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs(Suite('s1'), Suite('s2'), Suite('s3'), a='a', b='b')  # uses kwy word arguments
-        self.assertEqual(len(list(defs.user_variables)), 2, "expected 2 user variable but found " + str(len(list(defs.user_variables))))
-        self.assertEqual(len(list(defs.suites)), 3, "expected 3 suites but found " + str(len(list(defs.suites))))
-
-        defs = Defs(Suite('s1'), Edit(a='b'), Variable('b', 'b'), {'c': 'a', 'd': 'b'}, e='a', f='b')
-        self.assertEqual(len(list(defs.user_variables)), 6, "expected 6 user variable but found " + str(len(list(defs.user_variables))))
-        self.assertEqual(len(list(defs.suites)), 1, "expected 1 suites but found " + str(len(list(defs.suites))))
-
-    def test_defs_constructor(self):
-        defs = Defs(Suite('s1'), Edit(a='b'))
-        defs2 = Defs() + Suite('s1') + Edit(a='b')
-        defs3 = Defs()
-        defs3 += Suite('s1')
-        defs3 += Edit(a='b')
-        self.assertEqual(defs, defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2))
-        self.assertEqual(defs, defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3))
-
-        defs = Defs(Suite('s1'), Suite('s2'), Suite('s3'), Variable('a', 'b'))
-        defs2 = Defs() + Suite('s1') + Suite('s2') + Suite('s3') + Variable('a', 'b')
-        defs3 = Defs().add(Suite('s1'), Suite('s2'), Suite('s3'), Variable('a', 'b'))
-        self.assertEqual(defs, defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2))
-        self.assertEqual(defs, defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3))
-
-        defs = Defs([Suite('s{0}'.format(i)) for i in range(1, 5)], {'a': 'a'})
-        defs2 = Defs() + [Suite('s{0}'.format(i)) for i in range(1, 5)] + {'a': 'a'}
-        defs3 = Defs()
-        for i in range(1, 5):
-            defs3.add_suite('s{0}'.format(i))
-        defs3.add_variable('a', 'a')
-        self.assertEqual(defs, defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2))
-        self.assertEqual(defs, defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3))
-
-        defs = Defs(Suite('s1'), Edit(a='a'), Variable('b', 'b'), {'c': 'c'}, {'d': 'd'})
-        defs2 = Defs().add(Suite('s1'), Edit(a='a'), Variable('b', 'b'), {'c': 'c'}, {'d': 'd'})
-        defs3 = Defs()
-        defs3.add_suite('s1')
-        defs3.add_variable('a', 'a')
-        defs3.add_variable('b', 'b')
-        defs3.add_variable('c', 'c')
-        defs3.add_variable('d', 'd')
-        self.assertEqual(defs, defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2))
-        self.assertEqual(defs, defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3))
+@pytest.fixture
+def temp_defs_file(tmp_path):
+    file_name = str(tmp_path / "Test_default_defs.defs")
+    defs = Defs() + Suite("s1")
+    defs.save_as_defs(file_name)
+    yield file_name
+    try:
+        os.remove(file_name)
+    except OSError:
+        pass
 
 
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")
+def test_defs_default_constructor(temp_defs_file):
+    defs = Defs()
+    assert defs.get_state() == State.unknown, "expected unknown state but found " + str(
+        defs.get_state()
+    )
+    assert (
+        defs.get_server_state() == SState.RUNNING
+    ), "expected default server state to be running but found " + str(
+        defs.get_server_state()
+    )
+    assert len(list(defs.suites)) == 0, "expected no suites but found " + str(
+        len(list(defs.suites))
+    )
+
+    defs = Defs(temp_defs_file)
+    assert defs.get_state() == State.unknown, "expected unknown state but found " + str(
+        defs.get_state()
+    )
+    assert (
+        defs.get_server_state() == SState.RUNNING
+    ), "expected default server state to be running but found " + str(
+        defs.get_server_state()
+    )
+    assert len(list(defs.suites)) == 1, "expected 1 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_filename_and_suite_raises():
+    with pytest.raises(RuntimeError):
+        Defs("file_name.def", Suite("s1"))
+
+
+def test_defs_raw_constructor_with_filename_and_edit_raises():
+    with pytest.raises(RuntimeError):
+        Defs("file_name.def", Edit(a="b"))
+
+
+def test_defs_raw_constructor_with_filename_and_dict_raises():
+    with pytest.raises(RuntimeError):
+        Defs("file_name.def", {"a": "b"})
+
+
+def test_defs_raw_constructor_with_filename_and_variable_raises():
+    with pytest.raises(RuntimeError):
+        Defs("file_name.def", Variable("a", "b"))
+
+
+def test_defs_raw_constructor_with_filename_and_variable_list_raises():
+    with pytest.raises(RuntimeError):
+        Defs("file_name.def", [Variable("a", "b")])
+
+
+def test_defs_raw_constructor_with_single_suite():
+    defs = Defs(Suite("s1"))
+    assert len(list(defs.suites)) == 1, "expected 1 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_multiple_suites():
+    defs = Defs(Suite("s1"), Suite("s2"), Suite("s3"))
+    assert len(list(defs.suites)) == 3, "expected 3 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_suite_list():
+    defs = Defs([Suite("s{0}".format(i)) for i in range(1, 5)])
+    assert len(list(defs.suites)) == 4, "expected 4 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_edit():
+    defs = Defs(Edit(a="b"))
+    assert (
+        len(list(defs.user_variables)) == 1
+    ), "expected 1 user variable but found " + str(len(list(defs.user_variables)))
+
+
+def test_defs_raw_constructor_with_variable():
+    defs = Defs(Variable("a", "b"))
+    assert (
+        len(list(defs.user_variables)) == 1
+    ), "expected 1 user variable but found " + str(len(list(defs.user_variables)))
+
+
+def test_defs_raw_constructor_with_dict():
+    defs = Defs({"a": "a", "b": "b"})
+    assert (
+        len(list(defs.user_variables)) == 2
+    ), "expected 2 user variable but found " + str(len(list(defs.user_variables)))
+
+
+def test_defs_raw_constructor_with_kwargs():
+    defs = Defs(a="a", b="b")  # uses keyword arguments
+    assert (
+        len(list(defs.user_variables)) == 2
+    ), "expected 2 user variable but found " + str(len(list(defs.user_variables)))
+
+
+def test_defs_raw_constructor_with_mixed_variable_sources():
+    defs = Defs(Edit(a="b"), Variable("b", "b"), {"c": "a", "d": "b"}, e="a", f="b")
+    assert (
+        len(list(defs.user_variables)) == 6
+    ), "expected 6 user variable but found " + str(len(list(defs.user_variables)))
+
+
+def test_defs_raw_constructor_with_suite_and_variables():
+    defs = Defs(Suite("s1"), Edit(a="b"))
+    assert (
+        len(list(defs.user_variables)) == 1
+    ), "expected 1 user variable but found " + str(len(list(defs.user_variables)))
+    assert len(list(defs.suites)) == 1, "expected 1 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_multiple_suites_and_variable():
+    defs = Defs(Suite("s1"), Suite("s2"), Suite("s3"), Variable("a", "b"))
+    assert (
+        len(list(defs.user_variables)) == 1
+    ), "expected 1 user variable but found " + str(len(list(defs.user_variables)))
+    assert len(list(defs.suites)) == 3, "expected 3 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_suite_list_and_dict():
+    defs = Defs([Suite("s{0}".format(i)) for i in range(1, 5)], {"a": "a", "b": "b"})
+    assert (
+        len(list(defs.user_variables)) == 2
+    ), "expected 2 user variable but found " + str(len(list(defs.user_variables)))
+    assert len(list(defs.suites)) == 4, "expected 4 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_kwargs_suite_list_and_dict():
+    defs = Defs(Suite("s1"), Suite("s2"), Suite("s3"), a="a", b="b")
+    assert (
+        len(list(defs.user_variables)) == 2
+    ), "expected 2 user variable but found " + str(len(list(defs.user_variables)))
+    assert len(list(defs.suites)) == 3, "expected 3 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_raw_constructor_with_all_sources():
+    defs = Defs(
+        Suite("s1"), Edit(a="b"), Variable("b", "b"), {"c": "a", "d": "b"}, e="a", f="b"
+    )
+    assert (
+        len(list(defs.user_variables)) == 6
+    ), "expected 6 user variable but found " + str(len(list(defs.user_variables)))
+    assert len(list(defs.suites)) == 1, "expected 1 suites but found " + str(
+        len(list(defs.suites))
+    )
+
+
+def test_defs_constructor_equivalent_to_plus_operator():
+    defs = Defs(Suite("s1"), Edit(a="b"))
+    defs2 = Defs() + Suite("s1") + Edit(a="b")
+    defs3 = Defs()
+    defs3 += Suite("s1")
+    defs3 += Edit(a="b")
+    assert defs == defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2)
+    assert defs == defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3)
+
+
+def test_defs_constructor_equivalent_to_add_call():
+    defs = Defs(Suite("s1"), Suite("s2"), Suite("s3"), Variable("a", "b"))
+    defs2 = Defs() + Suite("s1") + Suite("s2") + Suite("s3") + Variable("a", "b")
+    defs3 = Defs().add(Suite("s1"), Suite("s2"), Suite("s3"), Variable("a", "b"))
+    assert defs == defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2)
+    assert defs == defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3)
+
+
+def test_defs_constructor_with_list_and_dict_variants():
+    defs = Defs([Suite("s{0}".format(i)) for i in range(1, 5)], {"a": "a"})
+    defs2 = Defs() + [Suite("s{0}".format(i)) for i in range(1, 5)] + {"a": "a"}
+    defs3 = Defs()
+    for i in range(1, 5):
+        defs3.add_suite("s{0}".format(i))
+    defs3.add_variable("a", "a")
+    assert defs == defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2)
+    assert defs == defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3)
+
+
+def test_defs_constructor_with_multiple_dict_variable_sources():
+    defs = Defs(Suite("s1"), Edit(a="a"), Variable("b", "b"), {"c": "c"}, {"d": "d"})
+    defs2 = Defs().add(
+        Suite("s1"), Edit(a="a"), Variable("b", "b"), {"c": "c"}, {"d": "d"}
+    )
+    defs3 = Defs()
+    defs3.add_suite("s1")
+    defs3.add_variable("a", "a")
+    defs3.add_variable("b", "b")
+    defs3.add_variable("c", "c")
+    defs3.add_variable("d", "d")
+    assert defs == defs2, "defs not equal\n" + str(defs) + "\n\n" + str(defs2)
+    assert defs == defs3, "defs not equal\n" + str(defs) + "\n\n" + str(defs3)

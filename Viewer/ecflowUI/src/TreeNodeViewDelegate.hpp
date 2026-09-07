@@ -21,6 +21,7 @@
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 
 class AnimationHandler;
 class PropertyMapper;
@@ -57,6 +58,14 @@ Q_SIGNALS:
 protected:
     void updateSettings() override { updateSettingsInternal(); }
 
+    ///
+    /// @brief Provides the icon marking the protocol a server is configured for.
+    ///
+    /// @param[in] protocol The protocol the server is configured for
+    /// @return The icon id, or -1 when the protocol carries no tag
+    ///
+    int protocolPixId(ecf::Protocol protocol) const;
+
     int
     renderServer(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option, QString text) const;
 
@@ -89,6 +98,9 @@ protected:
 
     int nodeRectRad_{0};
     bool drawChildCount_{true};
+
+    /// Whether the badge marking a server's protocol is drawn; set from the view settings
+    bool drawConnectionBadge_{true};
     NodeStyle nodeStyle_{ClassicNodeStyle};
 
     bool drawNodeType_{true};
@@ -103,6 +115,12 @@ protected:
     QString subFailText_{"submission failed"};
 
     TreeNodeModel* model_{nullptr};
+
+    /// Icons marking the protocol a server is configured for; -1 until registered
+    int plainPixId_{-1};
+    int sslPixId_{-1};
+    int httpPixId_{-1};
+    int httpsPixId_{-1};
 
     mutable QPixmap tmpPix_;
     mutable QPainter* tmpPainter_{nullptr};

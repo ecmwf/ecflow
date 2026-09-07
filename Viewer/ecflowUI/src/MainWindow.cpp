@@ -43,6 +43,7 @@
 #include "ServerList.hpp"
 #include "ServerListDialog.hpp"
 #include "ServerListSyncWidget.hpp"
+#include "SessionAutoSave.hpp"
 #include "SessionHandler.hpp"
 #include "ShortcutHelpDialog.hpp"
 #include "TextFormat.hpp"
@@ -396,7 +397,7 @@ void MainWindow::rerenderContents() {
 }
 
 void MainWindow::slotContentsChanged() {
-    MainWindow::saveContents(nullptr);
+    SessionAutoSave::instance()->request();
 }
 
 bool MainWindow::selectInTreeView(VInfo_ptr info) {
@@ -460,8 +461,31 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         UiLog().dbg() << "  accept close event";
         windows_.removeOne(this);
         event->accept();
+
+        // The remaining windows form a new snapshot; persist it once this
+        // window has been deleted.
+        SessionAutoSave::instance()->request();
     }
     UiLog().dbg() << "closeEvent finished";
+}
+
+// Window geometry and state are part of the session snapshot, so any change
+// to them schedules a debounced save.
+void MainWindow::moveEvent(QMoveEvent* event) {
+    QMainWindow::moveEvent(event);
+    SessionAutoSave::instance()->request();
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+    QMainWindow::resizeEvent(event);
+    SessionAutoSave::instance()->request();
+}
+
+void MainWindow::changeEvent(QEvent* event) {
+    QMainWindow::changeEvent(event);
+    if (event->type() == QEvent::WindowStateChange) {
+        SessionAutoSave::instance()->request();
+    }
 }
 
 // On quitting we need to call the destructor of all the servers shown in the gui.
@@ -615,6 +639,9 @@ bool MainWindow::aboutToQuit(MainWindow* topWin) {
 #endif
     quitStarted_ = true;
 
+    // The final save below supersedes any pending autosave
+    SessionAutoSave::instance()->abandon();
+
     // Save browser settings
     MainWindow::save(topWin);
 
@@ -654,6 +681,10 @@ bool MainWindow::aboutToQuit(MainWindow* topWin) {
 }
 
 void MainWindow::init() {
+    // Restoring geometry and state emits the same events that request an
+    // autosave; suppress them until the whole hierarchy has been rebuilt.
+    SessionAutoSave::ScopedRestore restoreGuard;
+
     SessionItem* cs = SessionHandler::instance()->current();
     assert(cs);
 
@@ -765,6 +796,27 @@ MainWindow* MainWindow::findWindow(QWidget* childW) {
 
 MainWindow* MainWindow::firstWindow() {
     return (!windows_.isEmpty()) ? (windows_[0]) : nullptr;
+}
+
+// Returns the main window that owns the active window (which may be a dialog
+// parented to it), or the first window when none is active.
+MainWindow* MainWindow::activeMainWindow() {
+    for (QWidget* w = QApplication::activeWindow(); w; w = w->parentWidget()) {
+        if (auto* win = qobject_cast<MainWindow*>(w); win && windows_.contains(win)) {
+            return win;
+        }
+    }
+    return firstWindow();
+}
+
+bool MainWindow::autoSave() {
+    if (quitStarted_ || windows_.isEmpty()) {
+        return false;
+    }
+
+    UiLog().dbg() << "MainWindow::autoSave --> saving session";
+    MainWindow::saveContents(activeMainWindow());
+    return true;
 }
 
 void MainWindow::startPreferences(QString option) {

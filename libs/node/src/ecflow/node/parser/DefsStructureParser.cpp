@@ -179,7 +179,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
 
         if (!line.empty()) {
 
-            // See if there are multi statements per line, ie task a; task b; task b # comment
+            // See if there are multi statements per line, i.e., task a; task b; task b # comment
             if (line.find(';') != std::string::npos) {
 
                 // ignore lines which have ';' but start with a comment.  i.e.
@@ -193,8 +193,8 @@ void DefsStructureParser::getNextLine(std::string& line) {
                         return;
                     }
 
-                    // Can't properly handle labels with ';'. ECFLOW-1554   label foo "a;b;c"
-                    // Just assume labels are on one line. Hence we don't support multiple labels on one line
+                    // Cannot properly handle labels with ';'. ECFLOW-1554   label foo "a;b;c"
+                    // Just assume labels are on one line. Hence we do not support multiple labels on one line
                     if (lineTokens[0] == "label") {
                         return;
                     }
@@ -215,7 +215,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 assert(!multi_statements_per_line_vec_.empty());
 
                 if (semiColonInEditVariable()) {
-                    // clear multi_statements_per_line_vec_ since we can't cope with ';' in variable value
+                    // clear multi_statements_per_line_vec_ since we cannot cope with ';' in variable value
                     // hence    edit VAR1 'A;B';   edit VAR2 "b;C"
                     // will be treated as one variable and not two
                     // TODO need more sophisticated parsing
@@ -259,7 +259,7 @@ bool DefsStructureParser::semiColonInEditVariable() {
     if (multi_statements_per_line_vec_[0].find("edit") != std::string::npos) {
         // all statements must start with a edit, else we have a semi colon inside variable
         //    edit A fred;        edit B bill         # valid
-        //    edit A 'fred;bill'; edit B 'bill;bill'  # Can't cope with this, will be ONE variable !!!!
+        //    edit A 'fred;bill'; edit B 'bill;bill'  # Cannot cope with this, will be ONE variable !!!!
         for (auto& i : multi_statements_per_line_vec_) {
             ecf::algorithm::trim(i);
             if (i.find("edit") != 0) {

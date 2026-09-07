@@ -10,128 +10,149 @@
 
 # This test ensures that sorting ecflow objects is correct.
 
-import unittest
-from ecflow import *
+import ecflow as ecf
+
+OBJECT_CTOR = {
+    "Meter": lambda name: ecf.Meter(name, 0, 100),
+    "Label": lambda name: ecf.Label(name, "value"),
+    "Variable": lambda name: ecf.Variable(name, "value"),
+    "Limit": lambda name: ecf.Limit(name, 10),
+}
 
 
-class Test_sort(unittest.TestCase):
-
-    def get_object_list(self, obj, name_list):
-        if obj == 'Meter':
-            return [Meter(name, 0, 100) for name in name_list]
-        elif obj == 'Label':
-            return [Label(name, 'value') for name in name_list]
-        elif obj == 'Variable':
-            return [Variable(name, 'value') for name in name_list]
-        elif obj == 'Limit':
-            return [Limit(name, 10) for name in name_list]
-        else:
-            return [eval(obj)(name) for name in name_list]
-
-    def test_sort_objects(self):
-        names = ['zz', 'ww', 'aa']
-        object_list = ['Task', 'Family', 'Suite', 'Event', 'Meter', 'Label', 'Variable', 'Limit']
-        for obj in object_list:
-            self.assertEqual(sorted(self.get_object_list(obj, names)), self.get_object_list(obj, sorted(names)), " sort of " + obj + " failed")
+def _make_objects(obj, names):
+    ctor = OBJECT_CTOR.get(obj, lambda name: getattr(ecf, obj)(name))
+    return [ctor(name) for name in names]
 
 
-class Test_sort_api(unittest.TestCase):
-    def test_sort_attributes_api(self):
-        nodes = [Defs(), Suite('s'), Family('f'), Task('t')]
-        sort_attr = ['event', 'meter', 'label', 'variable', 'all']
-        for attr in sort_attr:
-            for node in nodes:
-                node.sort_attributes(attr)
-                node.sort_attributes(attr, True)
-                node.sort_attributes(attr, True, ['/path', '/path2'])
-
-        sort_attr = [AttrType.event, AttrType.meter, AttrType.label, AttrType.variable, AttrType.all]
-        for attr in sort_attr:
-            for node in nodes:
-                node.sort_attributes(attr)
-                node.sort_attributes(attr, True)
-                node.sort_attributes(attr, True, ['/path', '/path2'])
-
-
-# see ECFLOW-1642
-class Test_ECFLOW_1642(unittest.TestCase):
-    def get_events(self):
-        return [Event(name) for name in
-                "foo buzz bar google zulu mason".split()]
-
-    def sorted_events(self):
-        return [Event(name) for name in
-                "bar buzz foo google mason zulu".split()]
-
-    def expected_def(self):
-        defs = Defs(Suite("mysuite",
-                          Family("fam1", self.get_events()),
-                          Family("fam2", self.sorted_events(),
-                                 Task("task1", self.sorted_events()),
-                                 ),
-                          Task("task2", self.sorted_events()),
-                          self.sorted_events()))
-        return defs
-
-    def defs_to_sort(self):
-        defs = Defs(Suite("mysuite",
-                          Family("fam1", self.get_events()),
-                          Family("fam2", self.get_events(),
-                                 Task("task1", self.get_events()),
-                                 ),
-                          Task("task2", self.get_events()),
-                          self.get_events()))
-        return defs
-
-    def test_no_sort(self):
-        defs = self.defs_to_sort()
-        defs.sort_attributes('event', True, ['/mysuite/fam1'])
-        self.assertEqual(defs, self.expected_def(), "Expected\n" + str(self.expected_def()) + "but found\n" + str(defs))
-
-    def test_no_sort2(self):
-        defs = self.defs_to_sort()
-        defs.sort_attributes(AttrType.event, True, ['/mysuite/fam1'])
-        self.assertEqual(defs, self.expected_def(), "Expected\n" + str(self.expected_def()) + "but found\n" + str(defs))
+def test_sort_objects():
+    names = ["zz", "ww", "aa"]
+    object_list = [
+        "Task",
+        "Family",
+        "Suite",
+        "Event",
+        "Meter",
+        "Label",
+        "Variable",
+        "Limit",
+    ]
+    for obj in object_list:
+        assert sorted(_make_objects(obj, names)) == _make_objects(obj, sorted(names)), (
+            " sort of " + obj + " failed"
+        )
 
 
-class Test_defs_sort(unittest.TestCase):
-    def test_defs_sort_attributes(self):
-        defs = Defs()
-        defs.add_variable("ZFRED", "/tmp/")
-        defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
-        defs.add_variable("XECF_URL_BASE", "http://www.ecmwf.int")
-        defs.add_variable("AECF_URL", "publications/manuals/sms")
-        assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"
+def test_sort_attributes_api():
+    nodes = [ecf.Defs(), ecf.Suite("s"), ecf.Family("f"), ecf.Task("t")]
+    sort_attr = ["event", "meter", "label", "variable", "all"]
+    for attr in sort_attr:
+        for node in nodes:
+            node.sort_attributes(attr)
+            node.sort_attributes(attr, True)
+            node.sort_attributes(attr, True, ["/path", "/path2"])
 
-        # sort
-        expected = ['AECF_URL', 'XECF_URL_BASE', 'YECF_URL_CMD', 'ZFRED']
-        actual = []
-        defs.sort_attributes("variable");
-        for v in defs.user_variables: actual.append(v.name())
-        assert actual == expected, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
-
-        expected = ['AECF_URL', 'XECF_URL_BASE', 'YECF_URL_CMD', 'ZFRED', 'ZZ']
-        actual = []
-        defs.add_variable("ZZ", "x")
-        defs.sort_attributes(AttrType.variable);
-        for v in defs.user_variables: actual.append(v.name())
-        assert actual == expected, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
-
-        expected = ['AA', 'AECF_URL', 'XECF_URL_BASE', 'YECF_URL_CMD', 'ZFRED', 'ZZ']
-        actual = []
-        defs.add_variable("AA", "x")
-        defs.sort_attributes("all");
-        for v in defs.user_variables: actual.append(v.name())
-        assert actual == expected, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
-
-        expected = ['AA', 'AECF_URL', 'BB', 'XECF_URL_BASE', 'YECF_URL_CMD', 'ZFRED', 'ZZ']
-        actual = []
-        defs.add_variable("BB", "x")
-        defs.sort_attributes(AttrType.all);
-        for v in defs.user_variables: actual.append(v.name())
-        assert actual == expected, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    sort_attr = [
+        ecf.AttrType.event,
+        ecf.AttrType.meter,
+        ecf.AttrType.label,
+        ecf.AttrType.variable,
+        ecf.AttrType.all,
+    ]
+    for attr in sort_attr:
+        for node in nodes:
+            node.sort_attributes(attr)
+            node.sort_attributes(attr, True)
+            node.sort_attributes(attr, True, ["/path", "/path2"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")
+def _unsorted_events():
+    return [ecf.Event(name) for name in "foo buzz bar google zulu mason".split()]
+
+
+def _sorted_events():
+    return [ecf.Event(name) for name in "bar buzz foo google mason zulu".split()]
+
+
+def _expected_defs():
+    return ecf.Defs(
+        ecf.Suite(
+            "mysuite",
+            ecf.Family("fam1", _unsorted_events()),
+            ecf.Family("fam2", _sorted_events(), ecf.Task("task1", _sorted_events())),
+            ecf.Task("task2", _sorted_events()),
+            _sorted_events(),
+        )
+    )
+
+
+def _defs_to_sort():
+    return ecf.Defs(
+        ecf.Suite(
+            "mysuite",
+            ecf.Family("fam1", _unsorted_events()),
+            ecf.Family(
+                "fam2", _unsorted_events(), ecf.Task("task1", _unsorted_events())
+            ),
+            ecf.Task("task2", _unsorted_events()),
+            _unsorted_events(),
+        )
+    )
+
+
+def test_no_sort_by_name_with_string_attr_type():
+    defs = _defs_to_sort()
+    defs.sort_attributes("event", True, ["/mysuite/fam1"])
+    assert defs == _expected_defs(), (
+        "Expected\n" + str(_expected_defs()) + "but found\n" + str(defs)
+    )
+
+
+def test_no_sort_by_name_with_enum_attr_type():
+    defs = _defs_to_sort()
+    defs.sort_attributes(ecf.AttrType.event, True, ["/mysuite/fam1"])
+    assert defs == _expected_defs(), (
+        "Expected\n" + str(_expected_defs()) + "but found\n" + str(defs)
+    )
+
+
+def test_defs_sort_attributes_by_name():
+    defs = ecf.Defs()
+    defs.add_variable("ZFRED", "/tmp/")
+    defs.add_variable(
+        "YECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%"
+    )
+    defs.add_variable("XECF_URL_BASE", "http://www.ecmwf.int")
+    defs.add_variable("AECF_URL", "publications/manuals/sms")
+    assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"
+
+    expected = ["AECF_URL", "XECF_URL_BASE", "YECF_URL_CMD", "ZFRED"]
+    defs.sort_attributes("variable")
+    actual = [v.name() for v in defs.user_variables]
+    assert actual == expected, (
+        "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    )
+
+    expected = ["AECF_URL", "XECF_URL_BASE", "YECF_URL_CMD", "ZFRED", "ZZ"]
+    defs.add_variable("ZZ", "x")
+    defs.sort_attributes(ecf.AttrType.variable)
+    actual = [v.name() for v in defs.user_variables]
+    assert actual == expected, (
+        "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    )
+
+    expected = ["AA", "AECF_URL", "XECF_URL_BASE", "YECF_URL_CMD", "ZFRED", "ZZ"]
+    defs.add_variable("AA", "x")
+    defs.sort_attributes("all")
+    actual = [v.name() for v in defs.user_variables]
+    assert actual == expected, (
+        "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    )
+
+    expected = ["AA", "AECF_URL", "BB", "XECF_URL_BASE", "YECF_URL_CMD", "ZFRED", "ZZ"]
+    defs.add_variable("BB", "x")
+    defs.sort_attributes(ecf.AttrType.all)
+    actual = [v.name() for v in defs.user_variables]
+    assert actual == expected, (
+        "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    )

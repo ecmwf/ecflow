@@ -51,8 +51,7 @@ public:
                           AbstractClientEnv* clientEnv);
 
 private:
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the command as provided to user
+    static const char* arg(); // used for argument parsing
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 

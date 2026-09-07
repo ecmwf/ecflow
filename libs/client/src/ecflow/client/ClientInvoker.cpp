@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/Client.hpp"
+#include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/CtsWaitCmd.hpp"
@@ -51,6 +52,7 @@
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
 #endif
@@ -128,8 +130,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 
 ClientInvoker::ClientInvoker(bool gui, const std::string& host, const std::string& port)
     : clientEnv_(gui, host, port),
-      retry_connection_period_(RETRY_CONNECTION_PERIOD),
-      gui_(gui) {
+      retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug()) {
         std::cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
     }
@@ -151,9 +152,11 @@ ClientInvoker::ClientInvoker(const std::string& host, int port)
     }
 }
 
+#ifdef ECF_OPENSSL
 std::string ClientInvoker::get_certificate() const {
     return clientEnv_.openssl().selected_crt();
 }
+#endif
 
 void ClientInvoker::set_host_port(const std::string& host, const std::string& port) {
     // Allow host and port to be overridden.
@@ -321,8 +324,8 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
         return 0;
     } // success
 
-    // Clear error message. For test. Don't keep previous error.
-    // i.e. if next test passes when it shouldn't the wrong message is output
+    // Clear error message. For test. Do not keep previous error.
+    // i.e. if next test passes when it should not the wrong message is output
     server_reply_.get_error_msg().clear();
 
     Cmd_ptr cts_cmd;
@@ -337,6 +340,12 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+
+    // Every request converges here, including the paths that give up before a reply is handled.
+    // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
+    // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
+    server_reply_.set_diagnosis(diagnosis_);
+
     if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
     }
@@ -365,10 +374,29 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+
+    // Every request converges here, including the paths that give up before a reply is handled.
+    // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
+    // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
+    server_reply_.set_diagnosis(diagnosis_);
+
     if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;
+}
+
+std::string ClientInvoker::failure_message(const Cmd_ptr& cts_cmd, const std::exception& e) const {
+    // The structured explanation is preferred over the raw transport message, which names internal
+    // functions and does not say what the user is expected to do about the failure.
+    std::string message = cts_cmd ? failed_request_prefix(*cts_cmd) : std::string{};
+    if (auto explanation = ecf::explain(diagnosis_); !explanation.empty()) {
+        message += explanation;
+    }
+    else {
+        message += e.what();
+    }
+    return message;
 }
 
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
@@ -419,13 +447,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     }
 
     try {
-        /// report this message at least once. So client has a clue what's going on
+        /// report this message at least once. So client has a clue what is going on
         bool report_block_client_on_home_server  = false;
         bool report_block_client_server_halted   = false;
         bool report_block_client_zombie_detected = false;
         // We do not want to loop over the sms host list indefinitely hence we use a timer.
         // The timeout period is supplied via ClientEnvironment
-        bool never_polled = true; // don't wait for the first host only subsequent ones
+        bool never_polled = true; // do not wait for the first host only subsequent ones
 
         while (true) {
             // for each host try connecting several times. To compensate for network glitches.
@@ -440,6 +468,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     /// of defs, and client handle in server reply However this is only done, if we are not using the
                     /// Command Level Interface(cli)
                     server_reply_.clear_for_invoke(cli());
+                    diagnosis_.clear();
 
                     if (!cts_cmd->setup_user_authentification(clientEnv_)) {
                         server_reply_.set_error_msg("Invalid custom user(ECF_USER || --user <user>) or authentication "
@@ -471,12 +500,15 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                         clientEnv_.openssl().init_for_client();
 
+                        effective_protocol_ = ecf::Protocol::Ssl;
+
                         SslClient theClient(io,
                                             clientEnv_.openssl().context(),
                                             cts_cmd,
                                             clientEnv_.host(),
                                             clientEnv_.port(),
-                                            clientEnv_.connect_timeout());
+                                            clientEnv_.connect_timeout(),
+                                            &diagnosis_);
                         {
     #ifdef DEBUG_PERF
                             ecf::ScopedDurationTimer my_timer("   io.run()");
@@ -497,77 +529,90 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             }
                         }
                         catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
-                        }
-                    }
-                    else
-#endif
-                        if (ecf::is_any_variation_of_http(clientEnv_.protocol())) {
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << std::endl;
-                        }
-
-                        const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
-                        HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
-                        try {
-                            cfg(clientEnv_, theClient);
-                        }
-                        catch (UnavailableToken& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
-                        }
-
-                        theClient.run();
-
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<"
-                                      << std::endl;
-                        }
-
-                        /// Let see how the server responded if at all.
-                        try {
-                            /// will return false if further action required
-                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTriprecorder will record in rtt_
-                                return 0; // the normal exit path
-                            }
-                        }
-                        catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
+                            server_reply_.set_error_msg(failure_message(cts_cmd, e));
                             return 1;
                         }
                     }
                     else {
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<"
-                                      << std::endl;
-                        }
-
-                        Client theClient(
-                            io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
-                        {
-#ifdef DEBUG_PERF
-                            ecf::ScopedDurationTimer my_timer("   io.run()");
 #endif
-                            io.run();
-                        }
-                        if (clientEnv_.debug()) {
-                            std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<"
-                                      << std::endl;
-                        }
+                        if (ecf::is_any_variation_of_http(clientEnv_.protocol())) {
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<"
+                                          << std::endl;
+                            }
 
-                        /// Let see how the server responded if at all.
-                        try {
-                            /// will return false if further action required
-                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTripRecorder will record in rtt_
-                                return 0; // the normal exit path
+                            effective_protocol_ = clientEnv_.protocol();
+
+                            const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
+                            HttpClient theClient(
+                                cts_cmd, scheme, clientEnv_.host(), clientEnv_.port(), 120, &diagnosis_);
+                            try {
+                                cfg(clientEnv_, theClient);
+                            }
+                            catch (UnavailableToken& e) {
+                                server_reply_.set_error_msg(e.what());
+                                return 1;
+                            }
+
+                            theClient.run();
+
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<"
+                                          << std::endl;
+                            }
+
+                            /// Let see how the server responded if at all.
+                            try {
+                                /// will return false if further action required
+                                if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                    // The normal response.  RoundTriprecorder will record in rtt_
+                                    return 0; // the normal exit path
+                                }
+                            }
+                            catch (std::exception& e) {
+                                server_reply_.set_error_msg(failure_message(cts_cmd, e));
+                                return 1;
                             }
                         }
-                        catch (std::exception& e) {
-                            server_reply_.set_error_msg(e.what());
-                            return 1;
+                        else {
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now()
+                                          << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << std::endl;
+                            }
+
+                            effective_protocol_ = ecf::Protocol::Plain;
+
+                            Client theClient(io,
+                                             cts_cmd,
+                                             clientEnv_.host(),
+                                             clientEnv_.port(),
+                                             clientEnv_.connect_timeout(),
+                                             &diagnosis_);
+
+                            {
+#ifdef DEBUG_PERF
+                                ecf::ScopedDurationTimer my_timer("   io.run()");
+#endif
+                                io.run();
+                            }
+
+                            if (clientEnv_.debug()) {
+                                std::cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<"
+                                          << std::endl;
+                            }
+
+                            /// Let see how the server responded if at all.
+                            try {
+                                /// will return false if further action required
+                                if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                    // The normal response.  RoundTripRecorder will record in rtt_
+                                    return 0; // the normal exit path
+                                }
+                            }
+                            catch (std::exception& e) {
+                                server_reply_.set_error_msg(failure_message(cts_cmd, e));
+                                return 1;
+                            }
                         }
 #ifdef ECF_OPENSSL
                     }
@@ -649,6 +694,16 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     }
                 }
 
+                // A peer that is listening, but is not speaking the expected protocol, will not
+                // start speaking it on a retry. Report immediately, rather than waiting out the
+                // remaining attempts.
+                if (diagnosis_.is_protocol_mismatch()) {
+                    if (clientEnv_.debug()) {
+                        std::cout << TimeStamp::now() << "ClientInvoker: " << ecf::explain(diagnosis_) << std::endl;
+                    }
+                    no_of_tries = 1; // the decrement below ends the loop
+                }
+
                 // Wait a bit before trying to connect again, but only if no_of_tries > 0
                 no_of_tries--;
                 if (no_of_tries > 0) {
@@ -662,12 +717,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
             //
             if (is_not_retrying(*cts_cmd)) {
                 std::ostringstream ss;
-                ss << TimeStamp::now() << "Request( " << cts_cmd->print_short() << " )";
+                ss << TimeStamp::now() << failed_request_prefix(*cts_cmd);
                 if (clientEnv_.denied()) {
-                    ss << " ECF_DENIED ";
+                    ss << "ECF_DENIED ";
                 }
-                ss << ", Failed to connect to " << client_env_host_port() << ". After " << connection_attempts_
-                   << " attempts. Is the server running ?\n";
+                // The wording "Failed to connect to " is matched on by the REST front end (see
+                // ApiV1.cpp), which maps it to a Bad Gateway status; keep it verbatim.
+                ss << "Failed to connect to " << client_env_host_port() << ". ";
+                if (auto explanation = ecf::explain(diagnosis_); !explanation.empty()) {
+                    ss << explanation << "\n";
+                }
+                else {
+                    ss << "After " << connection_attempts_ << " attempts. Is the server running ?\n";
+                }
                 // Only print client environment if not pinging
                 if (!cts_cmd->ping_cmd()) {
                     ss << clientEnv_.toString() << std::endl;
@@ -736,6 +798,21 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
         server_reply_.set_error_msg(ss.str());
     }
     return 1;
+}
+
+std::optional<ecf::Protocol> ClientInvoker::probe_protocol(std::chrono::milliseconds timeout) const {
+    auto found = ecf::probe_server_protocol(clientEnv_.host(), clientEnv_.port(), timeout, effective_protocol_);
+
+    diagnosis_.client_protocol = effective_protocol_;
+    diagnosis_.host            = clientEnv_.host();
+    diagnosis_.port            = clientEnv_.port();
+    diagnosis_.peer_protocol   = found;
+
+    // Keep the reply in step with the invoker, so that a caller reading either of the two never
+    // sees a stale peer protocol.
+    server_reply_.set_diagnosis(diagnosis_);
+
+    return found;
 }
 
 void ClientInvoker::reset() const {
@@ -854,7 +931,7 @@ int ClientInvoker::getDefs() const {
 
 int ClientInvoker::loadDefs(const std::string& filePath,
                             bool force,      /* true means overwrite suite of same name */
-                            bool check_only, /* client side, true means don't send to server, just check only */
+                            bool check_only, /* client side, true means do not send to server, just check only */
                             bool print,      /* client side, print the defs */
                             bool stats       /* client side, print the defs statistics */
 ) const {
@@ -1798,8 +1875,8 @@ int ClientInvoker::load_in_memory_defs(const defs_ptr& clientDefs, bool force) c
     }
 
     // Client defs  has been created in memory.
-    // warn about naff expression and unresolved in-limit references to Limit's
-    // Don't allow defs to be loaded into server, with trigger parser errors.
+    // warn about naff expression and unresolved in-limit references to Limit is
+    // Do not allow defs to be loaded into server, with trigger parser errors.
     std::string warningMsg;
     if (!clientDefs->check(server_reply_.get_error_msg(), warningMsg)) {
         if (on_error_throw_exception_) {

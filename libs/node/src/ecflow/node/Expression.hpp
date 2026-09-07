@@ -108,7 +108,7 @@ public:
     std::string expression() const { return compose_expression(vec_); }
     static std::string compose_expression(const std::vector<PartExpression>& vec);
 
-    /// Use when we want to add compose a large expression form a set of smaller ones
+    /// Use when we want to compose a large expression from a set of smaller ones
     void add(const PartExpression& t);
     void add_expr(const std::vector<PartExpression>& vec);
 

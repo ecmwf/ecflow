@@ -54,6 +54,10 @@ access.
     is just an alias that you are free to customise. The only          
     requirement is that each server **must have a unique name**.       
 
+This dialogue is also where the **protocol** used to reach each server is
+chosen. It must match the protocol the server serves; see
+:ref:`communication_with_ecflow_servers`.
+
 System server list
 ==================
 

@@ -8,32 +8,19 @@
 # nor does it submit to any jurisdiction.
 #
 
-import os
 import ecflow as ecf
-import itertools as it
-
-import ecflow_test_util as Test
 
 
-def can_create_generic_with_basic_parameters():
+def test_create_generic_with_basic_parameters():
     generic = ecf.Generic("name", [])
 
     assert generic.name() == "name"
     assert generic.values == []
-    assert generic.empty() == False
+    assert generic.empty() is False
 
 
-def can_identify_an_empty_generic():
+def test_identify_an_empty_generic():
     task = ecf.Task("t")
     generic = task.find_generic("nonexisting")
 
-    assert generic.empty() == True
-
-
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    can_create_generic_with_basic_parameters()
-    can_identify_an_empty_generic()
-
-    print("All tests pass")
+    assert generic.empty() is True

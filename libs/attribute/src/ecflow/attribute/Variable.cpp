@@ -15,39 +15,8 @@
 
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
-#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-
-// init static's
-const Variable& Variable::EMPTY() {
-    static const Variable VARIABLE = Variable();
-    return VARIABLE;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-
-Variable::Variable(const std::string& name, const std::string& value)
-    : n_(name),
-      v_(value) {
-    std::string msg;
-    if (!ecf::algorithm::is_valid_name(name, msg)) {
-        throw std::runtime_error("Variable::Variable: Invalid Variable name: " + msg);
-    }
-}
-
-void Variable::set_name(const std::string& v) {
-    std::string msg;
-    if (!ecf::algorithm::is_valid_name(v, msg)) {
-        throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
-    }
-    n_ = v;
-}
-
-int Variable::value() const {
-    // check if the value is convertible to an integer
-    return ecf::algorithm::to_int(v_, 0 /* value to return if conversion fails*/);
-}
 
 bool Variable::operator==(const Variable& rhs) const {
     if (v_ != rhs.v_) {
@@ -66,6 +35,10 @@ std::string Variable::toString() const {
     return ret;
 }
 
+std::string Variable::dump() const {
+    return MESSAGE(toString() << " value(" << value() << ")");
+}
+
 void Variable::write(std::string& ret) const {
     ret += "edit ";
     ret += n_;
@@ -82,8 +55,9 @@ void Variable::write(std::string& ret) const {
     ret += "'";
 }
 
-std::string Variable::dump() const {
-    return MESSAGE(toString() << " value(" << value() << ")");
+const Variable& Variable::EMPTY() {
+    static const Variable VARIABLE = Variable();
+    return VARIABLE;
 }
 
 template <class Archive>
@@ -91,10 +65,6 @@ void Variable::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_), CEREAL_NVP(v_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(Variable);
-
-/*
- * VariableMap
- * *********** */
 
 void VariableMap::set_value(const std::string& value) {
     for (auto& variable : variables_) {
@@ -106,5 +76,5 @@ Variable& VariableMap::operator[](const std::string& name) {
     if (auto found = index_.find(name); found != std::end(index_)) {
         return variables_[found->second];
     }
-    throw std::runtime_error("Variable not found in Map");
+    throw std::runtime_error(MESSAGE("Variable '" << name << "' not found"));
 }

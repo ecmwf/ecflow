@@ -261,7 +261,7 @@ std::string Gnuplot::create_gnuplot_script(const std::string& path_to_file,
     gnuplot_script << "set autoscale                          # scale axes automatically\n";
     gnuplot_script << "set xtic auto rotate                   # set xtics automatically\n";
     gnuplot_script << "set ytic auto                          # set ytics automatically\n";
-    //   gnuplot_script << "set origin 0,0.08                      # offset y, so that rotated xtics don't truncate,
+    //   gnuplot_script << "set origin 0,0.08                      # offset y, so that rotated xtics do not truncate,
     //   However cause title to disappear\n";
     gnuplot_script << "set title \"Server request per second\"\n";
     gnuplot_script << "set x2label \"time/min\" textcolor lt 3\n";
@@ -365,7 +365,7 @@ bool Gnuplot::extract_suite_path(const std::string& line,
             path = line.substr(forward_slash);
         }
         else {
-            // Ignore the --news command, as it doesn't have a path. This means ignore lines like:
+            // Ignore the --news command, as it does not have a path. This means ignore lines like:
             //   MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
             //                     : *Large* scale changes (new handle or suites added/removed) :NEWS]
             // Note: the /removed was being interpreted as a suite

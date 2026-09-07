@@ -287,6 +287,8 @@ protected:
     QBrush lostConnectBandBrush_;
     QBrush noConnectBgBrush_;
     QBrush noConnectBandBrush_;
+    QBrush mismatchConnectBgBrush_;
+    QBrush mismatchConnectBandBrush_;
 
     QMap<QString, AttributeRendererProc> attrRenderers_;
 

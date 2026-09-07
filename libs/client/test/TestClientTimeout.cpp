@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     ECF_NAME_THIS_TEST();
 
     //
-    // Important: This test is disabled because ClientInvoker doesn't actually allow to set an overall timeout
+    // Important: This test is disabled because ClientInvoker does not actually allow to set an overall timeout
     //            Until this functionality is available, this test cannot be effectively implemented
     //
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     // to avoid the server from loading previous test data
     InvokeServer invokeServer("Client:: ...test_client_timeout", SCPort::next());
 
-    // The timeout is configured to vary according the the client request
+    // The timeout is configured to vary according to the client request
     // however we can override for testing.
     // Here we set a timeout for 1 second, then attempt to load a very large definition into the server.
     // Note: the timeout of 1 second means we have 1 second for each communication, hence:

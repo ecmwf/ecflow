@@ -233,6 +233,6 @@ void NodeUtil::add(Node& self, const py::kwargs& kwargs) {
             throw std::runtime_error("NodeUtil::add: value must be a string or int");
         }
 
-        self.addVariable(Variable(key, value));
+        self.addVariable(Variable::new_variable(key, value));
     }
 }

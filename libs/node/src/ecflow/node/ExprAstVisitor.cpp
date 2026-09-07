@@ -94,28 +94,28 @@ AstCollateNodesVisitor::AstCollateNodesVisitor(std::set<Node*>& s)
 AstCollateNodesVisitor::~AstCollateNodesVisitor() = default;
 
 void AstCollateNodesVisitor::visitNode(AstNode* astNode) {
-    Node* referencedNode = astNode->referencedNode(); // could be expensive, hence don't call twice
+    Node* referencedNode = astNode->referencedNode(); // could be expensive, hence do not call twice
     if (referencedNode) {
         theSet_.insert(referencedNode);
     }
 }
 
 void AstCollateNodesVisitor::visitVariable(AstVariable* astVar) {
-    Node* referencedNode = astVar->referencedNode(); // could be expensive, hence don't call twice
+    Node* referencedNode = astVar->referencedNode(); // could be expensive, hence do not call twice
     if (referencedNode) {
         theSet_.insert(referencedNode);
     }
 }
 
 void AstCollateNodesVisitor::visitParentVariable(AstParentVariable* astvar) {
-    Node* referencedNode = astvar->referencedNode(); // could be expensive, hence don't call twice
+    Node* referencedNode = astvar->referencedNode(); // could be expensive, hence do not call twice
     if (referencedNode) {
         theSet_.insert(referencedNode);
     }
 }
 
 void AstCollateNodesVisitor::visitFlag(AstFlag* ast) {
-    Node* referencedNode = ast->referencedNode(); // could be expensive, hence don't call twice
+    Node* referencedNode = ast->referencedNode(); // could be expensive, hence do not call twice
     if (referencedNode) {
         theSet_.insert(referencedNode);
     }

@@ -9,12 +9,11 @@
 #
 
 import copy
-import unittest
-
 import ecflow as ecf
+import pytest
 
 
-class TestTaskVec(unittest.TestCase):
+class TestTaskVec:
     """Tests for py::class_<std::vector<task_ptr>> exposed as ecf.TaskVec in ExportTask.cpp.
 
     Exposed API
@@ -39,11 +38,11 @@ class TestTaskVec(unittest.TestCase):
     def test_default_constructor_creates_empty_vec(self):
         """TaskVec() constructs an empty vector."""
         tv = ecf.TaskVec()
-        self.assertIsInstance(tv, ecf.TaskVec)
+        assert isinstance(tv, ecf.TaskVec)
 
     def test_default_constructor_has_zero_len(self):
         """A freshly constructed TaskVec has length zero."""
-        self.assertEqual(len(ecf.TaskVec()), 0)
+        assert len(ecf.TaskVec()) == 0
 
     # ------------------------------------------------------------------
     # __len__ and append
@@ -54,7 +53,7 @@ class TestTaskVec(unittest.TestCase):
         tv = ecf.TaskVec()
         tv.append(ecf.Task("a"))
         tv.append(ecf.Task("b"))
-        self.assertEqual(len(tv), 2)
+        assert len(tv) == 2
 
     # ------------------------------------------------------------------
     # __getitem__
@@ -65,13 +64,13 @@ class TestTaskVec(unittest.TestCase):
         tv = ecf.TaskVec()
         tv.append(ecf.Task("a"))
         tv.append(ecf.Task("b"))
-        self.assertEqual(tv[0].name(), "a")
-        self.assertEqual(tv[1].name(), "b")
+        assert tv[0].name() == "a"
+        assert tv[1].name() == "b"
 
     def test_getitem_out_of_range_raises(self):
         """__getitem__ raises IndexError for an out-of-range index."""
         tv = ecf.TaskVec()
-        with self.assertRaises(IndexError):
+        with pytest.raises(IndexError):
             _ = tv[0]
 
     # ------------------------------------------------------------------
@@ -84,14 +83,14 @@ class TestTaskVec(unittest.TestCase):
         tv.append(ecf.Task("x"))
         tv.append(ecf.Task("y"))
         names = [t.name() for t in tv]
-        self.assertEqual(names, ["x", "y"])
+        assert names == ["x", "y"]
 
     def test_iter_on_empty_vec_yields_nothing(self):
         """Iterating an empty TaskVec yields no items."""
-        self.assertEqual(list(ecf.TaskVec()), [])
+        assert list(ecf.TaskVec()) == []
 
 
-class TestSubmittable(unittest.TestCase):
+class TestSubmittable:
     """Tests for py::class_<Submittable, py::bases<Node>, boost::noncopyable> exposed as ecf.Submittable in ExportTask.cpp.
 
     Exposed API
@@ -113,7 +112,7 @@ class TestSubmittable(unittest.TestCase):
 
     def test_direct_construction_raises(self):
         """Submittable cannot be instantiated directly from Python."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Submittable("s")
 
     # ------------------------------------------------------------------
@@ -123,11 +122,11 @@ class TestSubmittable(unittest.TestCase):
     def test_get_jobs_password_returns_empty_string_on_fresh_task(self):
         """A freshly created Task has an empty jobs password."""
         t = ecf.Task("t1")
-        self.assertEqual(t.get_jobs_password(), "")
+        assert t.get_jobs_password() == ""
 
     def test_get_jobs_password_returns_str(self):
         """get_jobs_password() always returns a str."""
-        self.assertIsInstance(ecf.Task("t1").get_jobs_password(), str)
+        assert isinstance(ecf.Task("t1").get_jobs_password(), str)
 
     # ------------------------------------------------------------------
     # get_process_or_remote_id()
@@ -135,11 +134,11 @@ class TestSubmittable(unittest.TestCase):
 
     def test_get_process_or_remote_id_returns_empty_string_on_fresh_task(self):
         """A freshly created Task has no process or remote id."""
-        self.assertEqual(ecf.Task("t1").get_process_or_remote_id(), "")
+        assert ecf.Task("t1").get_process_or_remote_id() == ""
 
     def test_get_process_or_remote_id_returns_str(self):
         """get_process_or_remote_id() always returns a str."""
-        self.assertIsInstance(ecf.Task("t1").get_process_or_remote_id(), str)
+        assert isinstance(ecf.Task("t1").get_process_or_remote_id(), str)
 
     # ------------------------------------------------------------------
     # get_try_no()
@@ -147,11 +146,11 @@ class TestSubmittable(unittest.TestCase):
 
     def test_get_try_no_returns_zero_string_on_fresh_task(self):
         """A freshly created Task has try number '0' as a string."""
-        self.assertEqual(ecf.Task("t1").get_try_no(), "0")
+        assert ecf.Task("t1").get_try_no() == "0"
 
     def test_get_try_no_returns_str(self):
         """get_try_no() returns a str, not an int."""
-        self.assertIsInstance(ecf.Task("t1").get_try_no(), str)
+        assert isinstance(ecf.Task("t1").get_try_no(), str)
 
     # ------------------------------------------------------------------
     # get_int_try_no()
@@ -159,16 +158,16 @@ class TestSubmittable(unittest.TestCase):
 
     def test_get_int_try_no_returns_zero_on_fresh_task(self):
         """A freshly created Task has try number 0 as an integer."""
-        self.assertEqual(ecf.Task("t1").get_int_try_no(), 0)
+        assert ecf.Task("t1").get_int_try_no() == 0
 
     def test_get_int_try_no_returns_int(self):
         """get_int_try_no() returns an int."""
-        self.assertIsInstance(ecf.Task("t1").get_int_try_no(), int)
+        assert isinstance(ecf.Task("t1").get_int_try_no(), int)
 
     def test_get_try_no_and_get_int_try_no_agree(self):
         """get_try_no() and get_int_try_no() return the same numeric value."""
         t = ecf.Task("t1")
-        self.assertEqual(int(t.get_try_no()), t.get_int_try_no())
+        assert int(t.get_try_no()) == t.get_int_try_no()
 
     # ------------------------------------------------------------------
     # get_aborted_reason()
@@ -176,14 +175,14 @@ class TestSubmittable(unittest.TestCase):
 
     def test_get_aborted_reason_returns_empty_string_on_fresh_task(self):
         """A freshly created Task has no aborted reason."""
-        self.assertEqual(ecf.Task("t1").get_aborted_reason(), "")
+        assert ecf.Task("t1").get_aborted_reason() == ""
 
     def test_get_aborted_reason_returns_str(self):
         """get_aborted_reason() always returns a str."""
-        self.assertIsInstance(ecf.Task("t1").get_aborted_reason(), str)
+        assert isinstance(ecf.Task("t1").get_aborted_reason(), str)
 
 
-class TestTask(unittest.TestCase):
+class TestTask:
     """Tests for py::class_<Task, py::bases<Submittable>, task_ptr> exposed as ecf.Task in ExportTask.cpp.
 
     Exposed API
@@ -217,36 +216,36 @@ class TestTask(unittest.TestCase):
 
     def test_ctor_str_sets_name(self):
         """Task(str) stores the name verbatim."""
-        self.assertEqual(ecf.Task("my_task").name(), "my_task")
+        assert ecf.Task("my_task").name() == "my_task"
 
     def test_ctor_str_underscore_accepted(self):
         """Underscores are valid in task names."""
         t = ecf.Task("task_1")
-        self.assertEqual(t.name(), "task_1")
+        assert t.name() == "task_1"
 
     def test_ctor_str_dot_accepted(self):
         """Dots are valid in task names."""
         t = ecf.Task("task.1")
-        self.assertEqual(t.name(), "task.1")
+        assert t.name() == "task.1"
 
     def test_ctor_str_digits_accepted(self):
         """Digit-only names are valid."""
         t = ecf.Task("123")
-        self.assertEqual(t.name(), "123")
+        assert t.name() == "123"
 
     def test_ctor_str_empty_name_raises(self):
         """An empty name raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Task("")
 
     def test_ctor_str_name_with_space_raises(self):
         """A name containing a space raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Task("bad name")
 
     def test_ctor_str_name_with_slash_raises(self):
         """A name containing a slash raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Task("bad/name")
 
     # ------------------------------------------------------------------
@@ -256,31 +255,31 @@ class TestTask(unittest.TestCase):
     def test_ctor_with_variable_list_adds_variable(self):
         """Task(str, [Variable(...)]) adds the variable to the task."""
         t = ecf.Task("t1", [ecf.Variable("X", "1")])
-        self.assertEqual(t.find_variable("X").value(), "1")
+        assert t.find_variable("X").value() == "1"
 
     def test_ctor_with_kwargs_adds_variables(self):
         """Task(str, **kwargs) adds each kwarg as a variable."""
         t = ecf.Task("t1", A="hello", B="world")
-        self.assertEqual(t.find_variable("A").value(), "hello")
-        self.assertEqual(t.find_variable("B").value(), "world")
+        assert t.find_variable("A").value() == "hello"
+        assert t.find_variable("B").value() == "world"
 
     def test_ctor_with_list_and_kwargs_adds_all(self):
         """Task(str, list, **kwargs) adds list attributes and kwarg variables."""
         t = ecf.Task("t1", [ecf.Variable("X", "1")], Y="2")
-        self.assertEqual(t.find_variable("X").value(), "1")
-        self.assertEqual(t.find_variable("Y").value(), "2")
+        assert t.find_variable("X").value() == "1"
+        assert t.find_variable("Y").value() == "2"
 
     def test_ctor_with_trigger_in_list(self):
         """Task(str, [Trigger(...)]) sets the trigger on the task."""
         t = ecf.Task("t1", [ecf.Trigger("t0 == complete")])
-        self.assertIsNotNone(t.get_trigger())
-        self.assertIn("t0 == complete", t.get_trigger().get_expression())
+        assert t.get_trigger() is not None
+        assert "t0 == complete" in t.get_trigger().get_expression()
 
     def test_ctor_with_empty_list_creates_bare_task(self):
         """Task(str, []) creates a task with no extra attributes."""
         t = ecf.Task("t1", [])
-        self.assertEqual(t.name(), "t1")
-        self.assertEqual(list(t.variables), [])
+        assert t.name() == "t1"
+        assert list(t.variables) == []
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -288,31 +287,31 @@ class TestTask(unittest.TestCase):
 
     def test_eq_two_identical_tasks_are_equal(self):
         """Two Task objects with the same name and no attributes are value-equal."""
-        self.assertEqual(ecf.Task("t1"), ecf.Task("t1"))
+        assert ecf.Task("t1") == ecf.Task("t1")
 
     def test_eq_tasks_with_different_names_are_not_equal(self):
         """Two Task objects with different names are not equal."""
-        self.assertNotEqual(ecf.Task("t1"), ecf.Task("t2"))
+        assert ecf.Task("t1") != ecf.Task("t2")
 
     def test_eq_tasks_with_different_variables_are_not_equal(self):
         """Two tasks that differ only in a variable are not equal."""
         t1 = ecf.Task("t1")
         t1.add_variable("X", "1")
         t2 = ecf.Task("t1")
-        self.assertNotEqual(t1, t2)
+        assert t1 != t2
 
     def test_ne_is_complement_of_eq(self):
         """__ne__ is the logical complement of __eq__."""
         t_a = ecf.Task("t1")
         t_b = ecf.Task("t1")
         t_c = ecf.Task("t2")
-        self.assertFalse(t_a != t_b)
-        self.assertTrue(t_a != t_c)
+        assert not t_a != t_b
+        assert t_a != t_c
 
     def test_eq_task_with_itself(self):
         """A task is equal to itself."""
         t = ecf.Task("t1")
-        self.assertEqual(t, t)
+        assert t == t
 
     # ------------------------------------------------------------------
     # __hash__
@@ -322,26 +321,26 @@ class TestTask(unittest.TestCase):
         """Two value-equal tasks kept simultaneously have different hashes."""
         t1 = ecf.Task("t1")
         t2 = ecf.Task("t1")
-        self.assertEqual(t1, t2)
-        self.assertNotEqual(hash(t1), hash(t2))
+        assert t1 == t2
+        assert hash(t1) != hash(t2)
 
     def test_hash_same_object_is_consistent(self):
         """The hash of a single task is stable across calls."""
         t = ecf.Task("t1")
-        self.assertEqual(hash(t), hash(t))
+        assert hash(t) == hash(t)
 
     def test_hash_usable_as_dict_key(self):
         """A task can be used as a dictionary key."""
         t = ecf.Task("t1")
         d = {t: "value"}
-        self.assertEqual(d[t], "value")
+        assert d[t] == "value"
 
     def test_hash_usable_in_set(self):
         """Two value-equal tasks kept simultaneously are distinct set members."""
         t1 = ecf.Task("t1")
         t2 = ecf.Task("t1")
         s = {t1, t2}
-        self.assertEqual(len(s), 2)
+        assert len(s) == 2
 
     # ------------------------------------------------------------------
     # __str__
@@ -349,19 +348,19 @@ class TestTask(unittest.TestCase):
 
     def test_str_is_a_string(self):
         """str(Task) returns a Python str."""
-        self.assertIsInstance(str(ecf.Task("t1")), str)
+        assert isinstance(str(ecf.Task("t1")), str)
 
     def test_str_is_non_empty(self):
         """str(Task) is non-empty."""
-        self.assertTrue(len(str(ecf.Task("t1"))) > 0)
+        assert len(str(ecf.Task("t1"))) > 0
 
     def test_str_contains_task_name(self):
         """str(Task) contains the task name."""
-        self.assertIn("t1", str(ecf.Task("t1")))
+        assert "t1" in str(ecf.Task("t1"))
 
     def test_str_contains_task_keyword(self):
         """str(Task) contains the 'task' keyword."""
-        self.assertIn("task", str(ecf.Task("t1")))
+        assert "task" in str(ecf.Task("t1"))
 
     # ------------------------------------------------------------------
     # __copy__
@@ -370,26 +369,26 @@ class TestTask(unittest.TestCase):
     def test_copy_is_value_equal(self):
         """copy.copy(Task) returns a value-equal instance."""
         t = ecf.Task("t1")
-        self.assertEqual(copy.copy(t), t)
+        assert copy.copy(t) == t
 
     def test_copy_is_identity_distinct(self):
         """copy.copy(Task) returns a different object."""
         t = ecf.Task("t1")
-        self.assertIsNot(copy.copy(t), t)
+        assert copy.copy(t) is not t
 
     def test_copy_is_independent(self):
         """Modifying the copy does not affect the original."""
         t = ecf.Task("t1")
         t_copy = copy.copy(t)
         t_copy.add_variable("NEW", "val")
-        self.assertTrue(t.find_variable("NEW").empty())
+        assert t.find_variable("NEW").empty()
 
     def test_copy_preserves_attributes(self):
         """copy.copy carries all attributes into the new instance."""
         t = ecf.Task("t1")
         t.add_variable("X", "42")
         t_copy = copy.copy(t)
-        self.assertEqual(t_copy.find_variable("X").value(), "42")
+        assert t_copy.find_variable("X").value() == "42"
 
     # ------------------------------------------------------------------
     # __enter__ and __exit__  (context manager)
@@ -398,23 +397,23 @@ class TestTask(unittest.TestCase):
     def test_enter_returns_task_itself(self):
         """__enter__ returns the task, enabling 'with Task(...) as t:' syntax."""
         t = ecf.Task("t1")
-        self.assertIs(t.__enter__(), t)
+        assert t.__enter__() is t
 
     def test_exit_returns_false(self):
         """__exit__ returns False (does not suppress exceptions)."""
         t = ecf.Task("t1")
-        self.assertFalse(t.__exit__(None, None, None))
+        assert not t.__exit__(None, None, None)
 
     def test_with_statement_binds_task(self):
         """The with-statement binds the task to the 'as' target."""
         with ecf.Task("t1") as t:
-            self.assertEqual(t.name(), "t1")
+            assert t.name() == "t1"
 
     def test_with_statement_allows_attribute_addition(self):
         """Attributes added inside a with-block are present after the block."""
         with ecf.Task("t1") as t:
             t.add_variable("X", "1")
-        self.assertEqual(t.find_variable("X").value(), "1")
+        assert t.find_variable("X").value() == "1"
 
     # ------------------------------------------------------------------
     # __len__  (alias count)
@@ -422,11 +421,11 @@ class TestTask(unittest.TestCase):
 
     def test_len_is_zero_for_fresh_task(self):
         """A freshly created Task has zero aliases."""
-        self.assertEqual(len(ecf.Task("t1")), 0)
+        assert len(ecf.Task("t1")) == 0
 
     def test_len_returns_int(self):
         """__len__ returns an int."""
-        self.assertIsInstance(len(ecf.Task("t1")), int)
+        assert isinstance(len(ecf.Task("t1")), int)
 
     # ------------------------------------------------------------------
     # __iter__  (over aliases)
@@ -434,7 +433,7 @@ class TestTask(unittest.TestCase):
 
     def test_iter_is_empty_for_fresh_task(self):
         """Iterating a fresh Task yields no aliases."""
-        self.assertEqual(list(ecf.Task("t1")), [])
+        assert list(ecf.Task("t1")) == []
 
     # ------------------------------------------------------------------
     # Property: aliases
@@ -442,7 +441,7 @@ class TestTask(unittest.TestCase):
 
     def test_aliases_property_is_empty_for_fresh_task(self):
         """The aliases property of a fresh Task is an empty iterable."""
-        self.assertEqual(list(ecf.Task("t1").aliases), [])
+        assert list(ecf.Task("t1").aliases) == []
 
     # ------------------------------------------------------------------
     # Property: nodes
@@ -450,15 +449,15 @@ class TestTask(unittest.TestCase):
 
     def test_nodes_property_is_empty_for_fresh_task(self):
         """The nodes property of a fresh Task is an empty iterable."""
-        self.assertEqual(list(ecf.Task("t1").nodes), [])
+        assert list(ecf.Task("t1").nodes) == []
 
     def test_nodes_and_aliases_return_same_content(self):
         """nodes and aliases properties expose the same alias range."""
         t = ecf.Task("t1")
-        self.assertEqual(list(t.nodes), list(t.aliases))
+        assert list(t.nodes) == list(t.aliases)
 
 
-class TestAlias(unittest.TestCase):
+class TestAlias:
     """Tests for py::class_<Alias, py::bases<Submittable>, alias_ptr> exposed as ecf.Alias in ExportTask.cpp.
 
     Exposed API
@@ -486,23 +485,19 @@ class TestAlias(unittest.TestCase):
 
     def test_direct_construction_raises(self):
         """Alias cannot be instantiated directly from Python."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Alias("a1")
 
     def test_class_is_accessible(self):
         """ecf.Alias is accessible as a type."""
-        self.assertTrue(hasattr(ecf, "Alias"))
-        self.assertIsInstance(ecf.Alias, type)
+        assert hasattr(ecf, "Alias")
+        assert isinstance(ecf.Alias, type)
 
     def test_alias_is_subtype_of_submittable(self):
         """Alias is registered as a subclass of Submittable in the class hierarchy."""
-        self.assertTrue(issubclass(ecf.Alias, ecf.Submittable))
+        assert issubclass(ecf.Alias, ecf.Submittable)
 
     def test_task_aliases_property_is_empty_without_server(self):
         """Without a server, a task's aliases list is always empty."""
         t = ecf.Task("t1")
-        self.assertEqual(list(t.aliases), [])
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        assert list(t.aliases) == []

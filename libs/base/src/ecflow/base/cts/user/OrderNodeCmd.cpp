@@ -77,34 +77,9 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const {
 const char* OrderNodeCmd::arg() {
     return CtsApi::orderArg();
 }
-const char* OrderNodeCmd::desc() {
-    return "Re-orders the nodes held by the server\n"
-           "  arg1 = node path\n"
-           "  arg2 = [ top | bottom | alpha | order | up | down | runtime]\n"
-           "It should be noted that in the absence of triggers and time/date dependencies,\n"
-           "the tasks are submitted in order.\n"
-           "This changes the order and hence affects the submission order::\n\n"
-           "   o top     raises the node within its parent, so that it is first\n"
-           "   o bottom  lowers the node within its parent, so that it is last\n"
-           "   o alpha   Arranges for all the peers of selected note to be sorted alphabetically (case-insensitive)\n"
-           "   o order   Arranges for all the peers of selected note to be sorted in reverse "
-           "alphabet(case-insensitive)\n"
-           "   o up      Moves the selected node up one place amongst its peers\n"
-           "   o down    Moves the selected node down one place amongst its peers\n\n"
-           "   o runtime Orders the nodes according to state change runtime\n"
-           "             for families by accumulated runtime of its children\n"
-           "             useful to submit the task that take longer earlier\n\n"
-           "This command can fail because:\n"
-           "- The node path does not exist in the server\n"
-           "- The order_type is not does not match one of arg2\n"
-           "Usage:\n"
-           "  --order=/suite/f1 top  # move node f1 to the top";
-}
 
 void OrderNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(OrderNodeCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       OrderNodeCmd::desc());
+    desc.add_options()(OrderNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[OrderNodeCmd::arg()].as<std::vector<std::string>>();

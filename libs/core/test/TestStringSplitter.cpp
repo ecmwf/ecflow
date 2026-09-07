@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_StringSplitter) {
 BOOST_AUTO_TEST_CASE(test_str_split_StringSplitter) {
     ECF_NAME_THIS_TEST();
 
-    // If end is delimeter, then preserved as empty token
+    // If end is delimiter, then preserved as empty token
 
     std::string line = "This is a string";
     std::vector<std::string> expected;

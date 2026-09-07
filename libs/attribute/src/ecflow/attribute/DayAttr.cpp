@@ -62,7 +62,7 @@ void DayAttr::calendarChanged(const ecf::Calendar& c, bool clear_at_midnight) {
     //          complete 1==1
     //          trigger 0==1
     //
-    //  ECFLOW-1550            # If children of a family with day/date are still active/submitted/queued, then don't
+    //  ECFLOW-1550            # If children of a family with day/date are still active/submitted/queued, then do not
     //  clear at midnight. repeat ....            # This is only applicable for NodeContainers, for task with day/date
     //  always CLEAR at midnight
     //	family f1
@@ -268,7 +268,7 @@ bool DayAttr::checkForRequeue(const ecf::Calendar& c) const {
         return false;
     }
 
-    // if calendar is hybrid, we can't requeue
+    // if calendar is hybrid, we cannot requeue
     if (c.hybrid()) {
         return false;
     }

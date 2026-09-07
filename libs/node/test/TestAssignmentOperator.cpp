@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
     clockAttr.set_gain_in_seconds(3600);
     s1.addClock(clockAttr);
     s1.addAutoCancel(ecf::AutoCancelAttr(2));
-    s1.addVariable(Variable("VAR", "value"));
+    s1.addVariable(Variable::new_variable("VAR", "value"));
     s1.add_task("t1");
     s1.add_family("f1");
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
 
     Task s1("s1");
     s1.addAutoCancel(ecf::AutoCancelAttr(2));
-    s1.addVariable(Variable("VAR", "value"));
+    s1.addVariable(Variable::new_variable("VAR", "value"));
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
     s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
     s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
 
     s1.addDate(DateAttr(1, 2, 2009));
     s1.addDay(DayAttr(DayAttr::MONDAY));
-    s1.addVariable(Variable("VAR1", "\"value\""));
+    s1.addVariable(Variable::new_variable("VAR1", "\"value\""));
     s1.addEvent(Event(1));
     s1.addEvent(Event(2, "eventname"));
     s1.addEvent(Event(3, "eventname2", true /* init value */));

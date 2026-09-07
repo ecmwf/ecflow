@@ -29,7 +29,7 @@ class QTimer;
 
 class PropertyMapper;
 class ServerHandler;
-class ServerUpdateData;
+struct ServerUpdateData;
 
 class ServerRefreshInfoWidget : public QWidget,
                                 public ServerObserver,

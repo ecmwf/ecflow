@@ -23,7 +23,7 @@ class Submittable;
 
 namespace ecf {
 
-// This class is used to simulate a definition file. This is usefull because:
+// This class is used to simulate a definition file. This is useful because:
 //   a/ Saves time over involving server and asking client to play definition file
 //   b/ Informs about any parser errors in the definition file
 //   c/ Informs about any deadlocks, i.e. if a suite does not complete

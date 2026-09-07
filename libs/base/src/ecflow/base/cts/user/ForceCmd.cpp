@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -208,41 +209,9 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
 const char* ForceCmd::arg() {
     return CtsApi::forceArg();
 }
-const char* ForceCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Force a node to a given state, or set its event.\n"
-           "When a task is set to complete, it may be automatically re-queued if it has\n"
-           "multiple future time dependencies. However each time we force a complete it will\n"
-           "expire any time based attribute on that node. When the last time based attribute\n"
-           "expires, the node will stay in a complete state.\n"
-           "This behaviour allow Repeat values to be incremented interactively.\n"
-           "A repeat attribute is incremented when all the child nodes are complete\n"
-           "in this case the child nodes are automatically re-queued.\n"
-           "  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]\n"
-           "  arg2 = (optional) recursive\n"
-           "         Applies state to node and recursively to all its children\n"
-           "  arg3 = (optional) full\n"
-           "         Set repeat variables to last value, only works in conjunction\n"
-           "         with recursive option\n"
-           "  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'\n"
-           "Usage:\n"
-           "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n"
-           "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n"
-           "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1\n"
-           "Effect:\n"
-           "  Consider the effect of forcing complete when the current time is at 09:00\n"
-           "  suite s1\n"
-           "     task t1; time 12:00             # will complete straight away\n"
-           "     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt\n\n"
-           "  --force=complete /s1/t1 /s1/t2\n"
-           "  When we have a time range(i.e as shown with task t2), it is re-queued and the\n"
-           "  next time slot is incremented for each complete, until it expires, and the task completes.\n"
-           "  Use the Why command, to show next run time (i.e. next time slot)";
-}
 
 void ForceCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        ForceCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), ForceCmd::desc());
+    desc.add_options()(ForceCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
@@ -254,7 +223,8 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     if (args.size() < 2) {
         throw std::runtime_error(MESSAGE("ForceCmd: At least two arguments expected for Force. Found "
                                          << args.size() << "\n"
-                                         << ForceCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("force").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     std::vector<std::string> options, paths;
@@ -262,13 +232,14 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         args, options, paths, true /*treat_colon_in_path_as_path*/); // relative order is still preserved
     if (paths.empty()) {
         throw std::runtime_error(MESSAGE("ForceCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                                         << ForceCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("force").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
     if (options.empty()) {
         throw std::runtime_error(
             MESSAGE("ForceCmd: Invalid argument list. Expected of:\n"
                     << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n"
-                    << ForceCmd::desc() << "\n"));
+                    << HelpCatalog::description_for("force").value_or(HelpCatalog::not_provided) << "\n"));
     }
 
     bool is_valid_state       = false;
@@ -293,7 +264,9 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             stateOrEvent         = options[i];
         }
         else {
-            throw std::runtime_error(MESSAGE("ForceCmd: Invalid argument \n" << ForceCmd::desc() << "\n"));
+            throw std::runtime_error(
+                MESSAGE("ForceCmd: Invalid argument \n"
+                        << HelpCatalog::description_for("force").value_or(HelpCatalog::not_provided) << "\n"));
         }
     }
 

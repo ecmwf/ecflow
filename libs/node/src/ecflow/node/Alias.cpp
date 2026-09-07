@@ -118,8 +118,8 @@ void Alias::add_alias_variable(const std::string& name, const std::string& value
         throw std::runtime_error("Alias::add_alias_variable: Variable with empty name");
     }
 
-    // The bool argument to variable, allows addition of Variable without name checking
-    addVariable(Variable(name, value, false));
+    // The following Variable is created without checking the name validity
+    addVariable(Variable(name, value));
 }
 
 node_ptr Alias::find_node_up_the_tree(const std::string& name) const {

@@ -11,16 +11,21 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <random>
+#include <stdexcept>
 
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
+#include "ecflow/base/Stats.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
+#include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
@@ -37,42 +42,111 @@ const std::string API_KEY_pbkdf2  = TokenFile::generate_token();
 const std::string API_KEY_expired = TokenFile::generate_token();
 const std::string API_KEY_revoked = TokenFile::generate_token();
 
-int get_random_port(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> distrib(min, max);
-    return distrib(gen);
-}
+// The range of TCP ports considered when selecting the port used by the REST API server under test.
+//
+// Both ranges lie below the ephemeral port range allocated by the operating system (Linux allocates from
+// 32768 upwards, macOS from 49152 upwards), since a port taken from the ephemeral range may be assigned,
+// at any moment, as the source port of an unrelated outgoing connection, making it unavailable to bind.
+// The ranges are disjoint, as the test binaries for the two backends are allowed to run concurrently.
 
 #if defined(ECF_TEST_HTTP_BACKEND)
-static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(8000, 8999);
-static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
+static const int ECF_TEST_HTTP_PORT_MIN            = 20000;
+static const int ECF_TEST_HTTP_PORT_MAX            = 24999;
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
 #else
-static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(49152, 65535);
-static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
+static const int ECF_TEST_HTTP_PORT_MIN            = 25000;
+static const int ECF_TEST_HTTP_PORT_MAX            = 29999;
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
 #endif
 
+///
+/// @brief Selects a TCP port, available on the local host, from the range [@p min, @p max].
+///
+/// Candidate ports are drawn at random, and each candidate is confirmed to be available by binding to it;
+/// the first available candidate is selected. Notice that, since the candidate port is released before
+/// being handed over to the server under test, availability is not guaranteed to persist.
+///
+/// @param[in] min The lowest port number considered
+/// @param[in] max The highest port number considered
+/// @param[in] attempts The maximum number of candidate ports considered
+/// @return The selected port number
+/// @throws std::runtime_error if no available port is found within the given number of attempts
+///
+int select_available_port(int min, int max, int attempts = 100) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(min, max);
+
+    for (int i = 0; i < attempts; ++i) {
+        int candidate = distrib(gen);
+        if (ecf::EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(candidate))) {
+            return candidate;
+        }
+    }
+
+    throw std::runtime_error("Unable to find an available port in the range [" + std::to_string(min) + ", " +
+                             std::to_string(max) + "], after " + std::to_string(attempts) + " attempts");
+}
+
+///
+/// @brief Provides the TCP port used by the REST API server under test.
+///
+/// The port is selected on first use, and remains unchanged for the remainder of the test run.
+///
+/// @return The selected port number
+/// @throws std::runtime_error if no available port is found
+///
+int api_port() {
+    static const int port = select_available_port(ECF_TEST_HTTP_PORT_MIN, ECF_TEST_HTTP_PORT_MAX);
+    return port;
+}
+
+///
+/// @brief Provides the TCP port used by the REST API server under test, in textual form.
+///
+/// @return The selected port number, as a string
+/// @throws std::runtime_error if no available port is found
+///
+const std::string& api_port_str() {
+    static const std::string port = std::to_string(api_port());
+    return port;
+}
+
+///
+/// @brief Provisions the certificate used by the REST API server under test.
+///
+/// The certificate is provisioned in the directory given by ECF_RESTAPI_CERT_DIRECTORY, as defined by the
+/// build system, and is removed once the test completes. The same variable directs the server under test
+/// to the certificate.
+///
+/// The ECF_RESTAPI_CERT_DIRECTORY must be provided, and be specific for the test. The sharing of this
+/// directory between multiple tests causes a race condition, where certificates can potentially be overwritten.
+/// Two concurrent provisions write server.key and server.crt in turn, and an interleaving of those writes
+/// leaves behind a certificate and a private key that do not belong together. The server is then unable to
+/// create an SSL context, and reports that as an inability to acquire the port, since bind_to_port() declines
+/// to bind a server that is not in a usable state.
+///
+/// @return The provisioned Certificate, which removes the certificate files once destroyed
+/// @throws std::runtime_error if ECF_RESTAPI_CERT_DIRECTORY is undefined or empty
+///
 std::unique_ptr<Certificate> create_certificate() {
-    auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
+    auto configured = ecf::environment::fetch("ECF_RESTAPI_CERT_DIRECTORY");
 
-    const std::string path_to_cert = (cert_dir) ? cert_dir.value() : ecf::environment::get("HOME") + "/.ecflowrc/ssl/";
+    if (!configured || configured.value().empty()) {
+        throw std::runtime_error("No valid ECF_RESTAPI_CERT_DIRECTORY provided. A certificate directory is required "
+                                 "for this test, typically provided by the build system; falling back to a "
+                                 "default/shared directory would cause a race condition with tests overwriting each "
+                                 "other's certificate.");
+    }
 
-    std::unique_ptr<Certificate> cert;
+    const std::string path_to_cert = configured.value();
+
+    fs::create_directories(path_to_cert);
+
+    auto cert = std::make_unique<Certificate>(path_to_cert);
 
     BOOST_TEST_MESSAGE("Certificates at " << path_to_cert);
 
-    if (fs::exists(path_to_cert + "/server.crt") == false || fs::exists(path_to_cert + "/server.key") == false) {
-        if (fs::exists(path_to_cert) == false) {
-            fs::create_directories(path_to_cert);
-        }
-
-        cert = std::make_unique<Certificate>(path_to_cert);
-
-        setenv("ECF_API_CERT_DIRECTORY", path_to_cert.c_str(), 1);
-        return cert;
-    }
     return cert;
 }
 
@@ -96,19 +170,35 @@ std::unique_ptr<TokenFile> create_token_file() {
 static std::unique_ptr<std::thread> api_server;
 
 ///
-/// @brief Flag to indicate readiness by the server thread once it successfully binds to the port
+/// @brief The state of the REST API server under test, as observed by the test.
 ///
-static std::atomic<bool> api_server_started{false};
+enum class ApiServerStatus {
+    starting, ///< The server thread has been launched, but the server is not yet accepting connections
+    ready,    ///< The server is accepting connections
+    failed,   ///< The server thread terminated with an error (for example, the port could not be bound)
+    stopped   ///< The server terminated normally
+};
+
+static std::atomic<ApiServerStatus> api_server_status{ApiServerStatus::starting};
+
+///
+/// @brief The error reported by the server thread; only meaningful once the status is @c failed.
+///
+/// The value is published by the store to @c api_server_status that accompanies it, and must not be read
+/// before that store has been observed.
+///
+static std::string api_server_error;
 
 void start_api_server() {
     if (ecf::environment::has("NO_API_SERVER")) {
         return; // terminate early, for debugging purposes
     }
 
-    api_server_started = false;
+    api_server_status = ApiServerStatus::starting;
+    api_server_error.clear();
 
     api_server = std::make_unique<std::thread>([] {
-        std::string port = ECF_TEST_HTTP_PORT;
+        std::string port = api_port_str();
         fs::path cwd(fs::current_path());
         std::string tokens_file = cwd.string() + ECF_TEST_HTTP_TOKENS_FILE;
 
@@ -125,27 +215,37 @@ void start_api_server() {
         };
         // clang-format on
 
-        HttpServer server(argv.size(), const_cast<char**>(argv.data()));
-
-        api_server_started = true; // Signal that server is starting (or has started)
-        server.run();
-        api_server_started = false; // Server is done (either normal shutdown or bind failure)
+        try {
+            HttpServer server(argv.size(), const_cast<char**>(argv.data()));
+            // The server reports the acquisition of the port itself, which is the only reliable indication
+            // that it is ready: a probe performed by the test cannot distinguish the server under test from
+            // an unrelated process holding the same port.
+            auto on_bound = [&] { api_server_status = ApiServerStatus::ready; };
+            server.run(on_bound);
+            api_server_status = ApiServerStatus::stopped;
+        }
+        catch (const std::exception& e) {
+            // Report the failure, rather than letting the exception escape the thread and terminate the process.
+            api_server_error  = e.what();
+            api_server_status = ApiServerStatus::failed;
+        }
     });
 
-    // Wait up to 10 seconds (100 * 100ms for the server thread to start/bind to port.
-    for (int i = 0; i < 100 && !api_server_started; ++i) {
+    // Wait up to 10 seconds (100 * 100ms) for the server to acquire the port, giving up as soon as the
+    // server thread reports a failure.
+    for (int i = 0; i < 100 && api_server_status == ApiServerStatus::starting; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    // After waiting, if the server thread has not indicated that it started, fail the test immediately.
-    if (!api_server_started) {
-        BOOST_FAIL("REST API server thread failed to start within 10 seconds, when attenting to bind to port " +
-                   ECF_TEST_HTTP_PORT);
+    if (api_server_status == ApiServerStatus::failed) {
+        BOOST_FAIL("REST API server failed to start on port " + api_port_str() + ": " + api_server_error);
         return;
     }
 
-    // Give the server a moment to complete the bind and become ready.
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    if (api_server_status != ApiServerStatus::ready) {
+        BOOST_FAIL("REST API server did not acquire port " + api_port_str() + " within 10 seconds");
+        return;
+    }
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
@@ -172,7 +272,7 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
-    httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
+    httplib::SSLClient c(API_HOST, api_port());
 
     c.enable_server_certificate_verification(false);
     // Set connection timeout
@@ -242,7 +342,7 @@ struct SetupTest
     }
     void setup() {
         // This needs to be initialized in setup() instead
-        // of constructor... really don't know why
+        // of constructor... really do not know why
         srv = start_ecflow_server();
         start_api_server();
         printf("======= TESTS STARTING ========\n");
@@ -250,7 +350,7 @@ struct SetupTest
 
     void teardown() {
         if (api_server && api_server->joinable()) {
-            if (api_server_started) {
+            if (api_server_status == ApiServerStatus::ready) {
                 // Request server to shut down gracefully.
                 printf("Shutting down REST API\n");
                 auto s = request("get", "/v1/shutdown");
@@ -402,7 +502,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
     handle_response(request("delete", "/v1/server/attributes", R"({"type":"variable","name":"foo"})", API_KEY),
                     HttpStatusCode::success_no_content);
     wait_until(
-        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "bar"); });
+        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "baz"); });
 }
 
 BOOST_AUTO_TEST_CASE(test_suite) {
@@ -1027,7 +1127,7 @@ BOOST_AUTO_TEST_CASE(test_node_info) {
     //       HEAD is declared as an allowed method in the OPTIONS handler; cpp-httplib automatically
     //       serves HEAD by running the GET handler and stripping the response body.
     {
-        httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
+        httplib::SSLClient c(API_HOST, api_port());
         c.enable_server_certificate_verification(false);
         c.set_connection_timeout(3);
         c.set_read_timeout(5);
@@ -1335,13 +1435,13 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
                             R"({"type":"variable","name":"xfoo","value":"xbaz"})",
                             "",
                             {{"X-API-Key", API_KEY}}));
-    wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
+    wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbaz"); });
 
     handle_response(
         request("delete", "/v1/server/attributes?key=" + API_KEY, R"({"type":"variable","name":"xfoo"})", ""),
         HttpStatusCode::success_no_content);
     wait_until(
-        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
+        [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbaz"); });
 
     handle_response(
         request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY_pbkdf2),
@@ -1728,15 +1828,24 @@ BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_Ap
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "+01:00");
     });
 
+    //
+    // The following update of the autocancel must never actually trigger the node cancellation (i.e. node removal).
+    //
+    // At this point of the test, /test/dynamic is COMPLETE and the server will remove the node as soon as the
+    // auto-cancel attribute is "free". The value set on creation is 1 hour. The following update makes the
+    // cancellation happen in 1 day (in terms of testing timeframe, this will never actually happen), and this is
+    // important as it ensures the explicit delete test to succeed. Otherwise, the node would be automatically removed,
+    // and the following tests would consequently fail.
+    //
     handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"0"})", API_KEY));
+        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"1"})", API_KEY));
     wait_until(
-        [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0"); });
+        [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "1"); });
 
     handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel"})", API_KEY),
                     HttpStatusCode::success_no_content);
     wait_until([] {
-        return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0");
+        return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "1");
     });
 }
 
@@ -1818,6 +1927,30 @@ BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_
 
     handle_response(request("delete", "/v1/suites/test/definition", "", API_KEY), HttpStatusCode::success_no_content);
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_server_status_reports_an_absent_protocol_as_null) {
+    ECF_NAME_THIS_TEST();
+
+    // A server predating the reporting of the protocol leaves the field empty, and the JSON must not
+    // present that as a protocol whose designation is the empty string.
+
+    {
+        // SSL is chosen because its encoding (SSL) differs from its designation (TCP/IP with SSL): the API
+        // reports the encoding, which is stable, rather than the phrasing chosen for readability.
+        Stats reported;
+        reported.protocol_ = "SSL";
+
+        ojson j = reported;
+        BOOST_REQUIRE(j["protocol"].is_string());
+        BOOST_REQUIRE_EQUAL(j["protocol"].get<std::string>(), "SSL");
+    }
+    {
+        Stats absent; // as restored from an archive written before `protocol_` existed
+
+        ojson j = absent;
+        BOOST_REQUIRE_MESSAGE(j["protocol"].is_null(), "expected a null protocol but found " << j["protocol"].dump());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_statistics, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_server")) {

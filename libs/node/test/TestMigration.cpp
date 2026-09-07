@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
     Family family;
     Task task;
 
-    // Can't persist server variable are dependent on HOST.i.e ECF_LISTS,ECF_CHECK,etc
+    // Cannot persist server variable are dependent on HOST.i.e ECF_LISTS,ECF_CHECK,etc
     // Hence is not cross-platform
     doSave(file_name + "Defs.def", defs);
 

@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(can_construct) {
         CHECK_EQUAL(rng.end(), 1);
         CHECK_EQUAL(rng.size(), 1);
     }
-    { // ranges of sequencial values, with step 1
+    { // ranges of sequential values, with step 1
         RepeatDate repeat("R", 20241129, 20241203, 1);
 
         Range rng(repeat);

@@ -1,7 +1,7 @@
 .. _user_manual:
 
-Using ecFlow
-//////////////////
+User Manual
+///////////
 
 .. toctree::
    :maxdepth: 1
@@ -14,7 +14,8 @@ Using ecFlow
    user_manual/text_based_suite_definition/index.rst
    user_manual/python_based_suite_definition/index.rst
    user_manual/node_attribute_overview
-   user_manual/definition_file_grammar
+   user_manual/definition_file_format
+   user_manual/expression_spec
    ecflow_ui/index.rst
    cookbook/index.rst
    elearning

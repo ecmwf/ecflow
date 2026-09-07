@@ -11,6 +11,8 @@
 #ifndef ecflow_base_ServerProtocol_HPP
 #define ecflow_base_ServerProtocol_HPP
 
+#include <ostream>
+
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Enumerate.hpp"
 
@@ -91,6 +93,18 @@ static inline std::string scheme_for(Protocol protocol) {
 
 static inline bool is_any_variation_of_http(Protocol protocol) {
     return protocol == Protocol::Http || protocol == Protocol::Https;
+}
+
+///
+/// @brief Writes the user-facing designation of the given protocol.
+///
+/// @param[in,out] o        The stream to write to
+/// @param[in] protocol     The protocol to write
+/// @return The stream given as @p o
+///
+inline std::ostream& operator<<(std::ostream& o, Protocol protocol) {
+    o << to_ui_designation(protocol);
+    return o;
 }
 
 } // namespace ecf

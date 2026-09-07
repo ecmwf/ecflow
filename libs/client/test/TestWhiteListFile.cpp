@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
 //
 // Note: To test HPUX->Linux, invoke serve on (Linux/HPUX) and the client cmds on other system
 //       On the client side set ECF_HOST to machine name. To allow further testing if ECF_HOST
-//       is specified then *don't* shutdown the server
+//       is specified then *do not* shutdown the server
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_loading_of_white_list_file) {

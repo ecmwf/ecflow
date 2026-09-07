@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -186,26 +187,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 const char* RequeueNodeCmd::arg() {
     return CtsApi::requeueArg();
 }
-const char* RequeueNodeCmd::desc() {
-    return "Re queues the specified node(s)\n"
-           "  If any child of the specified node(s) is in a suspended state, this state is cleared\n"
-           "Repeats are reset to their starting values, relative time attributes are reset.\n"
-           "  arg1 = (optional) [ abort | force ]\n"
-           "         abort  = re-queue only aborted tasks below node\n"
-           "         force  = Force the re-queueing even if there are nodes that are active or submitted\n"
-           "         <null> = Checks if any tasks are in submitted or active states below the node\n"
-           "                  if so does nothing. Otherwise re-queues the node.\n"
-           "  arg2 = list of node paths. The node paths must begin with a leading '/' character\n\n"
-           "Usage:\n"
-           "  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1\n"
-           "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.\n"
-           "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'";
-}
 
 void RequeueNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(RequeueNodeCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       RequeueNodeCmd::desc());
+    desc.add_options()(RequeueNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[RequeueNodeCmd::arg()].as<std::vector<std::string>>();
@@ -228,7 +212,7 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
         throw std::runtime_error(MESSAGE(
             "RequeueNodeCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
             "character\n"
-            << RequeueNodeCmd::desc() << "\n"));
+            << HelpCatalog::description_for("requeue").value_or(HelpCatalog::not_provided) << "\n"));
     }
 
     RequeueNodeCmd::Option option = RequeueNodeCmd::NO_OPTION;
@@ -247,13 +231,15 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
             }
         }
         else {
-            throw std::runtime_error(MESSAGE("RequeueNodeCmd: RequeueNodeCmd: Expected : [force | abort ] paths.\n"
-                                             << RequeueNodeCmd::desc() << "\n"));
+            throw std::runtime_error(
+                MESSAGE("RequeueNodeCmd: RequeueNodeCmd: Expected : [force | abort ] paths.\n"
+                        << HelpCatalog::description_for("requeue").value_or(HelpCatalog::not_provided) << "\n"));
         }
     }
     if (options.size() > 1) {
         throw std::runtime_error(MESSAGE("RequeueNodeCmd: Expected only a single option i.e [ force | abort ]\n"
-                                         << RequeueNodeCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("requeue").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     cmd = std::make_shared<RequeueNodeCmd>(paths, option);

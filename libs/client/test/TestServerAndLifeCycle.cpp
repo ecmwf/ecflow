@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(T_ServerAndLifeCycle)
 //
 // Note: To test HPUX->Linux, invoke serve on (Linux/HPUX) and the client cmds on other system
 //       On the client side set ECF_HOST to machine name. To allow further testing if ECF_HOST
-//       is specified then *don't* shutdown the server
+//       is specified then *do not* shutdown the server
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     // *******************************************************************************************
     std::string host = ClientEnvironment::hostSpecified();
     if (!host.empty()) {
-        // Server allready started, since we cant disable job generation ignore this test
+        // Server already started, since we cannot disable job generation ignore this test
         std::cout << "Ignoring test when ECF_HOST specified..." << std::endl;
         return;
     }

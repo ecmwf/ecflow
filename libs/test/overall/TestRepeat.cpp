@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
     // USER EDIT, on task with a time. The force complete will expire the time.
     // Forcing a task with the time attribute, to complete state, should invalidate/expire the time,
     // Hence it should hold indefinitely, or until it is re-queued manually, or automatically via a Repeat/cron.
-    // This Test ensures the the *REQUEUE* via the repeat, resets the time based attribute
+    // This Test ensures that the *REQUEUE* via the repeat, resets the time based attribute
     TestFixture::client().force(task->absNodePath(), "complete", true);
     TestFixture::client().force(task->absNodePath(), "complete", true);
 

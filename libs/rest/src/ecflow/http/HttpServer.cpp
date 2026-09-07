@@ -91,7 +91,7 @@ void HttpServer::parse_args(int argc, char** argv) const {
         // This assumes that the backend runs on the same machine as the REST API and thus the
         // communication is always done via HTTP (and never over HTTPS)
         //
-        // In case the backend become accessbile HTTPS, we would need another option --https to specify the protocol
+        // In case the backend become accessible HTTPS, we would need another option --https to specify the protocol
         //
         const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
         opts.host_protocol = selected;
@@ -184,7 +184,7 @@ void apply_listeners(httplib::Server& http_server) {
         // Usually no need to modify response fields -- they should be configured now, as
         // error handler is called *after* httplib finds out that status is >= 400
         //
-        // Exception is when errorhandler is called so that it doesn't go through the
+        // Exception is when errorhandler is called so that it does not go through the
         // registered endpoints
 
         if (res.body.empty()) {
@@ -204,7 +204,7 @@ void apply_listeners(httplib::Server& http_server) {
     });
 }
 
-void start_server(httplib::Server& http_server) {
+void start_server(httplib::Server& http_server, const HttpServer::BoundCallback& on_bound) {
     if (opts.verbose) {
         printf("ecFlow server location is %s:%d\n", opts.ecflow_host.c_str(), opts.ecflow_port);
     }
@@ -213,26 +213,52 @@ void start_server(httplib::Server& http_server) {
 
     const std::string proto = (opts.no_ssl ? "http" : "https");
 
-    if (opts.verbose) {
-        printf("%s server listening on port %d\n", proto.c_str(), opts.port);
-    }
-
     try {
-        bool ret = http_server.listen("0.0.0.0", opts.port);
-        if (ret == false) {
+        // An unusable server declines to bind, without ever attempting to acquire the port. This is checked
+        // separately, since otherwise the failure is indistinguishable from a port already in use -- and, in
+        // the SSL case, the cause (a certificate that cannot be loaded) is unrelated to the port.
+        if (http_server.is_valid() == false) {
+            std::string reason = "Server is not in a usable state, and is unable to accept connections";
+            if (opts.no_ssl == false) {
+                reason += " (unable to load the certificate and private key found in " + opts.cert_directory + ")";
+            }
+            throw std::runtime_error(reason);
+        }
+
+        // The port is acquired separately from the accept loop, so that a failure to bind is detected before
+        // the server announces itself as listening, and is reported to the caller instead of being ignored.
+        if (http_server.bind_to_port("0.0.0.0", opts.port) == false) {
             throw std::runtime_error("Failed to bind to port " + ecf::convert_to<std::string>(opts.port));
+        }
+
+        if (opts.verbose) {
+            printf("%s server listening on port %d\n", proto.c_str(), opts.port);
+        }
+
+        // Notify the caller only once the port is known to be acquired, so that a failure to bind is never
+        // mistaken for a running server. An empty/null callback is simply ignored.
+        if (on_bound) {
+            on_bound();
+        }
+
+        if (http_server.listen_after_bind() == false) {
+            throw std::runtime_error("Failed to accept connections on port " + ecf::convert_to<std::string>(opts.port));
         }
     }
     catch (const std::exception& e) {
         if (opts.verbose) {
             printf("Server execution stopped: %s\n", e.what());
         }
+
+        // Gracefully teardown, before forwarding the exception.
+        teardown();
+        throw;
     }
 
     teardown();
 }
 
-void HttpServer::run() const {
+void HttpServer::run(const BoundCallback& on_bound) const {
 #ifdef ECF_OPENSSL
     if (opts.no_ssl == false) {
         if (fs::exists(opts.cert_directory + "/server.crt") == false ||
@@ -246,7 +272,7 @@ void HttpServer::run() const {
 
         httplib::SSLServer http_server(cert.c_str(), key.c_str());
         apply_listeners(http_server);
-        start_server(http_server);
+        start_server(http_server, on_bound);
     }
     else
 #endif
@@ -254,7 +280,7 @@ void HttpServer::run() const {
         httplib::Server http_server;
 
         apply_listeners(http_server);
-        start_server(http_server);
+        start_server(http_server, on_bound);
     }
 }
 

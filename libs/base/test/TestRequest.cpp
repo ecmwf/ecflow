@@ -65,7 +65,7 @@ BOOST_FIXTURE_TEST_SUITE(U_Base, MyDefsFixture)
 
 BOOST_AUTO_TEST_SUITE(T_Request)
 
-// Can't delete the fixture defs, hence use a NULL deleter to avoid freeing memory twice.
+// Cannot delete the fixture defs, hence use a NULL deleter to avoid freeing memory twice.
 // Required since DefsCmd and LoadDefsCmd requires a shared_ptr.
 struct null_deleter
 {
@@ -205,7 +205,7 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
                                            "",
                                            "/suiteName")));
 
-    std::vector<Variable> to_add{Variable("name", "value"), Variable("name2", "value")};
+    std::vector<Variable> to_add{Variable::new_variable("name", "value"), Variable::new_variable("name2", "value")};
     std::vector<std::string> to_del{"name", "name2"};
     cmd_vec.push_back(Cmd_ptr(new InitCmd("suiteName/familyName/taskName",
                                           Submittable::DUMMY_JOBS_PASSWORD(),
@@ -374,12 +374,12 @@ static void test_persistence(const Defs& theFixtureDefs) {
         {
             if (theCmd.get()->handleRequestIsTestable()) {
                 // test handleRequest while were at it.
-                // Avoid TERMINATE_SERVER cmd as this will prematurely cause an exit, wont appear as an error
+                // Avoid TERMINATE_SERVER cmd as this will prematurely cause an exit, will not appear as an error
                 // cerr << "cmd_request = " << cmd_request << "\n";
                 try {
                     STC_Cmd_ptr ok_or_error_cmd = cmd_request.handleRequest(&mockServer);
                     if (ok_or_error_cmd) {
-                        // Commands like ErrorCmd, OkCmd don't return a cmd_ptr from handleRequest
+                        // Commands like ErrorCmd, OkCmd do not return a cmd_ptr from handleRequest
                         // those that do, check OkCmd returned, else if ErrorCmd show the error
                         BOOST_CHECK_MESSAGE(ok_or_error_cmd->ok(),
                                             "Request '" << cmd_request << "' returned " << ok_or_error_cmd->error());

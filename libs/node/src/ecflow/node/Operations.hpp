@@ -22,7 +22,7 @@
 namespace ecf {
 
 /**
- * BootstrapDefs, traverses the Node tree when the the server (re)starts or when a new suite is loaded,
+ * BootstrapDefs, traverses the Node tree when the server (re)starts or when a new suite is loaded,
  * and is used to bootstrap all required nodes and attributes.
  */
 struct BootstrapDefs
@@ -39,7 +39,7 @@ struct BootstrapDefs
 };
 
 /**
- * ShutdownDefs, traverses the Node tree when the the server shutsdown/halts,,
+ * ShutdownDefs, traverses the Node tree when the server shuts down/halts,
  * and is used to shutdown all required nodes and attributes.
  */
 struct ShutdownDefs

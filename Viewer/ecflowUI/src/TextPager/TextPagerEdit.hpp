@@ -153,7 +153,8 @@ public:
     void setShowLineNumbers(bool b);
     void setLineNumberArea(TextPagerLineNumberArea* a);
 
-    enum ActionType { CopyAction, SelectAllAction };
+    /// ActionCount must remain the last enumerator: it defines the size of TextEditPrivate::actions.
+    enum ActionType { CopyAction, SelectAllAction, ActionCount };
     QAction* action(ActionType type) const;
 
 public Q_SLOTS:

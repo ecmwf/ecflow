@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
     // Delete all Families
     {
         // DONT use getAllFamilies as this will return hierarchical families
-        // we don't want to delete families twice
+        // we do not want to delete families twice
         //		std::vector<Family*> vec;
         //		fixtureDef.defsfile_.getAllFamilies(vec);
     }
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_edit_history_ECFLOW_1684) {
     ECF_NAME_THIS_TEST();
 
     // This test will ensure that if a suite/family node is deleted, we *remove* any *OLD* edit history associated
-    // with the node, AND and of its children
+    // with the node, AND all of its children
 
     // Create log file for the commands to work. auto destroy at end of scope
     TestLog test_log("test_delete_node_edit_history.log");

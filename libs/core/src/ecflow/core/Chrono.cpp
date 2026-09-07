@@ -15,9 +15,8 @@
 #include <iomanip>
 #include <sstream>
 
-#include <boost/lexical_cast.hpp>
-
-#include "Message.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 namespace ecf {
@@ -56,7 +55,8 @@ Instant Instant::parse(const std::string& value) {
     if (ss.fail()) {
         throw std::runtime_error("Unable to parse invalid instant value: " + value);
     }
-    // Extra validation of the parsed values (n.b. parsing doesn't ensure number of days is in agreement with the month)
+    // Extra validation of the parsed values (n.b. parsing does not ensure number of days is in agreement with the
+    // month)
     if (!is_valid_days_of_month(tm.tm_mday, tm.tm_mon, tm.tm_year + 1900)) {
         throw std::runtime_error("Detected invalid number of days for instant value: " + value);
     }
@@ -171,7 +171,7 @@ DurationOut parse_duration(const std::string& d) {
     // Convert head (if any) to duration
     auto value = FirstDuration(0);
     if (!head.empty()) {
-        value = FirstDuration(boost::lexical_cast<int>(head.c_str()));
+        value = FirstDuration(ecf::convert_to<int>(head.c_str()));
     }
     DurationOut out = std::chrono::duration_cast<DurationOut>(value);
 

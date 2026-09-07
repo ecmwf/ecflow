@@ -25,7 +25,7 @@ std::string CtsApi::to_string(const std::vector<std::string>& vec) {
         }
         ret += vec[i];
         if (i != vec_size - 1) {
-            ret += " "; // don't add space at the end
+            ret += " "; // do not add space at the end
         }
     }
     return ret;
@@ -426,7 +426,7 @@ std::vector<std::string> CtsApi::delete_node(const std::vector<std::string>& pat
         retVec.emplace_back("force");
     }
     if (auto_confirm) {             // By default delete prompts
-        retVec.emplace_back("yes"); // yes means we don't prompt, and have automatically confirmed the delete
+        retVec.emplace_back("yes"); // yes means we do not prompt, and have automatically confirmed the delete
     }
     std::copy(paths.begin(), paths.end(), std::back_inserter(retVec));
     return retVec;

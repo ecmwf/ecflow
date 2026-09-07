@@ -16,7 +16,9 @@
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/HttpServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
-#include "ecflow/server/SslTcpServer.hpp"
+#ifdef ECF_OPENSSL
+    #include "ecflow/server/SslTcpServer.hpp"
+#endif
 #include "ecflow/server/TcpServer.hpp"
 
 template <typename U>
@@ -29,20 +31,21 @@ public:
     ~DefaultServer() override = default;
 
     std::string ssl() const override {
-        if constexpr (ECF_OPENSSL == 1) {
-            return serverEnv_.openssl().ssl();
-        }
-        else {
-            return "";
-        }
+#ifdef ECF_OPENSSL
+        return serverEnv_.openssl().ssl();
+#else
+        return "";
+#endif
     }
 
 private:
     U server_;
 };
 
-using BasicServer     = DefaultServer<TcpServer>;
-using BasicSslServer  = DefaultServer<SslTcpServer>;
+using BasicServer = DefaultServer<TcpServer>;
+#ifdef ECF_OPENSSL
+using BasicSslServer = DefaultServer<SslTcpServer>;
+#endif
 using BasicHttpServer = DefaultServer<HttpServer>;
 
 #endif /* ecflow_server_Server_HPP */

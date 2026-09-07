@@ -36,7 +36,7 @@
 
 // Define upper and lower bounds for timeouts
 //
-// The timeout is determines how long the client continues to attemp to contact the server(s).
+// The timeout determines how long the client continues to attempt to contact the server(s).
 //
 #ifdef DEBUG
 static constexpr long MAX_TIMEOUT            = 120; // = 2 minutes * 60 seconds
@@ -64,16 +64,14 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 ClientEnvironment::ClientEnvironment(bool gui)
     : AbstractClientEnv(),
       timeout_(DEFAULT_TIMEOUT),
-      zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),
-      gui_(gui) {
+      zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT) {
     init();
 }
 
 ClientEnvironment::ClientEnvironment(bool gui, const std::string& host, const std::string& port)
     : AbstractClientEnv(),
       timeout_(DEFAULT_TIMEOUT),
-      zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),
-      gui_(gui) {
+      zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT) {
     init();
     set_host_port(host, port); // assumes we are NOT going to read host file
 }
@@ -188,7 +186,7 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
 
     // Caution:
     //
-    //   We don't (re)enable SSL immediately after setting host/port, as this might happen multiple times
+    //   We do not (re)enable SSL immediately after setting host/port, as this might happen multiple times
     //   during the execution (e.g. when loading environment variables, and later processing command line options).
     //
     //   It is up to the user of this class to enable SSL if needed.

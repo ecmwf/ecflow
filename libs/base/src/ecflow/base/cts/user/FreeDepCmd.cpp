@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Node.hpp"
@@ -116,27 +117,9 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const {
 const char* FreeDepCmd::arg() {
     return CtsApi::freeDepArg();
 }
-const char* FreeDepCmd::desc() {
-    return "Free dependencies for a node. Defaults to triggers\n"
-           "After freeing the time related dependencies (i.e time,today,cron)\n"
-           "the next time slot will be missed.\n"
-           "  arg1 = (optional) trigger\n"
-           "  arg2 = (optional) all\n"
-           "         Free trigger, date and all time dependencies\n"
-           "  arg3 = (optional) date\n"
-           "         Free date dependencies\n"
-           "  arg4 = (optional) time\n"
-           "         Free all time dependencies i.e time, day, today, cron\n"
-           "  arg5 = List of paths. At least one required. Must start with a leading '/'\n"
-           "Usage:\n"
-           "  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2\n"
-           "  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1\n"
-           "  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1";
-}
 
 void FreeDepCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        FreeDepCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), FreeDepCmd::desc());
+    desc.add_options()(FreeDepCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
@@ -148,7 +131,8 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     if (args.size() < 1) {
         throw std::runtime_error(MESSAGE("FreeDepCmd: At least one arguments expected for Free dependencies. Found "
                                          << args.size() << "\n"
-                                         << FreeDepCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("free-dep").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     std::vector<std::string> options, paths;
@@ -156,7 +140,7 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     if (paths.empty()) {
         throw std::runtime_error(
             MESSAGE("FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                    << FreeDepCmd::desc() << "\n"));
+                    << HelpCatalog::description_for("free-dep").value_or(HelpCatalog::not_provided) << "\n"));
     }
 
     bool trigger    = options.empty(); // If no options default to freeing trigger dependencies
@@ -178,8 +162,10 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             time = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("FreeDepCmd: Invalid argument(" << options[i] << ")\n"
-                                                                             << FreeDepCmd::desc() << "\n"));
+            throw std::runtime_error(
+                MESSAGE("FreeDepCmd: Invalid argument("
+                        << options[i] << ")\n"
+                        << HelpCatalog::description_for("free-dep").value_or(HelpCatalog::not_provided) << "\n"));
         }
     }
     assert(trigger || all || date || time); // at least one must be true

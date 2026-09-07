@@ -263,10 +263,10 @@ void export_SuiteAndFamily(py::module& m) {
         .def("__len__", &Suite_len)
         .def("__contains__", &Suite_contains)
         .def("add_clock", &Suite_add_clock)
-        .def("get_clock", &Suite::clockAttr, "Returns the `suite`_ `clock`_")
+        .def("get_clock", &Suite::clockAttr, "Returns the :term:`suite` :term:`clock`")
         .def("add_end_clock", &Suite_add_end_clock, "End clock, used to mark end of simulation")
         .def("get_end_clock", &Suite::clock_end_attr, "Return the suite's end clock. Can be NULL")
-        .def("begun", &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise");
+        .def("begun", &Suite::begun, "Returns true if the :term:`suite` has begun, false otherwise");
 
     py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", py::dynamic_attr(), DefsDoc::family_doc())
 

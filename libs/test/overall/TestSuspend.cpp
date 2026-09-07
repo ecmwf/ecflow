@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_shutdown.def"),
                           1,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     // Shutdown the server. The time dependencies *should* still be handled
     // *** If this test fails, in that we fail to restart() server it will mess up
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_suspend_node.def"),
                           1,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     // SUSPEND the family. The time dependencies *should* still be handled
     TestFixture::client().set_throw_on_error(false);

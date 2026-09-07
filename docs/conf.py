@@ -43,7 +43,8 @@ copyright = "%s, European Centre for Medium-Range Weather Forecasts (ECMWF)" % (
 extensions = [
     "sphinx_rtd_theme",
     "sphinx_tabs.tabs",
-    "sphinx_copybutton"
+    "sphinx_copybutton",
+    "implementation"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -82,6 +83,8 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 html_css_files = ["css/custom_style.css"]
+
+html_js_files = ["js/grammar_terminals.js"]
 
 html_logo = ""
 

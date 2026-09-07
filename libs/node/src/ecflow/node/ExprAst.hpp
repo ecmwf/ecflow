@@ -489,7 +489,7 @@ private:
 };
 
 /// This class will need to determine the corresponding node pointer
-/// This is required so that during evaluation we don't need to search for the Node.
+/// This is required so that during evaluation we do not need to search for the Node.
 /// represent nodeName(a), dotPath(./a), dot dot path(../a/b)
 ///
 /// A Node without a corresponding Node* will return the integer value of

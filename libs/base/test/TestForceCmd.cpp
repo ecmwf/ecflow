@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot) {
     BOOST_CHECK_MESSAGE(t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),
                         "Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
 
-    // call again should, should be do difference, EXPECT no change, if its complete, seting complete, avoids another
+    // call again should, should be do difference, EXPECT no change, if its complete, setting complete, avoids another
     // state change
     TestHelper::invokeRequest(
         &the_defs,
@@ -585,7 +585,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_1) {
     BOOST_CHECK_MESSAGE(ts_13.is_valid(), "Expected time 13 to be valid");
 
     // Repeat *last* time, since all times have expired, we expect task to stay complete.
-    // Addtionally since we have *not* re-queued the flag NO_REQUE_IF_SINGLE_TIME_DEP should have remained set
+    // Additionally since we have *not* re-queued the flag NO_REQUE_IF_SINGLE_TIME_DEP should have remained set
     TestHelper::invokeRequest(
         &the_defs,
         Cmd_ptr(
@@ -795,7 +795,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_3) {
     BOOST_CHECK_MESSAGE(ts_13.is_valid(), "Expected time 13 to be valid");
 
     // Repeat *last* time, since all times have expired, we expect task to complete.
-    // Addtionally since we have *not* re-queued the flag NO_REQUE_IF_SINGLE_TIME_DEP should have remained set
+    // Additionally since we have *not* re-queued the flag NO_REQUE_IF_SINGLE_TIME_DEP should have remained set
     TestHelper::invokeRequest(
         &the_defs,
         Cmd_ptr(

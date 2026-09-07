@@ -35,7 +35,7 @@ const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV
 
 bool Str_valid_name(const std::string& name, std::string& msg) {
     // valid names are alphabetic (alphanumeric | underscore | .)
-    // however we can't have a leading '.' as that can interfere with trigger expressions
+    // however we cannot have a leading '.' as that can interfere with trigger expressions
 
     // verify that the string is not empty
     if (name.empty()) {
@@ -73,7 +73,7 @@ bool Str_valid_name(const std::string& name, std::string& msg) {
 
 bool Str_valid_name(const std::string& name) {
     // valid names are alphabetic (alphanumeric | underscore | .)
-    // however we can't have a leading '.' as that can interfere with trigger expressions
+    // however we cannot have a leading '.' as that can interfere with trigger expressions
 
     // verify that the string is not empty
     if (name.empty()) {

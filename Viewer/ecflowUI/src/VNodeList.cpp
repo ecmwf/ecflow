@@ -11,6 +11,7 @@
 #include "VNodeList.hpp"
 
 #include <QDateTime>
+#include <QSignalBlocker>
 
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -77,6 +78,10 @@ VNodeList::VNodeList(QObject* parent)
 }
 
 VNodeList::~VNodeList() {
+    // Blocking the signals prevents clear() from notifying anyone while this object is being destroyed.
+    // A slot invoked at that point (such as ChangeNotifyButton::updateIcon) performs GUI work, which is
+    // unsafe once the application is shutting down and the Qt runtime is partially torn down.
+    QSignalBlocker blocker(this);
     clear();
 }
 

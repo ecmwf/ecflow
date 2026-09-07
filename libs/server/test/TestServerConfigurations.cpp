@@ -19,6 +19,10 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
+// The configurations covered by this file are all concerned with the location and selection of SSL
+// certificates, and are therefore only meaningful when ecFlow is built with SSL support.
+#ifdef ECF_OPENSSL
+
 class MockServerInvoker {
 public:
     explicit MockServerInvoker(const std::string& commandline)
@@ -201,3 +205,5 @@ BOOST_AUTO_TEST_CASE(
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif

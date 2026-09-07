@@ -10,121 +10,108 @@
 
 # This test ensures that the simulator performs as expected.
 
-import os, fnmatch
+import os
+import pathlib
+
 import ecflow
 import ecflow_test_util as Test
 
 
-def simulate_defs_with_time():
-    # suite test_time_series
-    #  family family
-    #      task t1
-    #         time 00:00 23:00 04:00  # should run 6 times 00:00 04:00 08:00 12:00 16:00 20:00
-    #  endfamily
-    # endsuite
+def _remove_logs(prefix):
+    for log in pathlib.Path(".").glob(prefix + "*.log"):
+        log.unlink()
 
-    print("simulate_defs_with_time()")
+
+def test_simulate_defs_with_time():
     defs = ecflow.Defs()
     suite = defs.add_suite("test_time_series")
-    clock = ecflow.Clock(1, 1, 2011, False)  # day,month, year, hybrid make test start at midnight, otherwise current time used
+    clock = ecflow.Clock(
+        1, 1, 2011, False
+    )  # day, month, year, hybrid - makes test start at midnight
     suite.add_clock(clock)
     family = suite.add_family("family")
     task = family.add_task("t1")
-    ts = ecflow.TimeSeries(ecflow.TimeSlot(0, 0), ecflow.TimeSlot(23, 0), ecflow.TimeSlot(4, 0), True)
+    ts = ecflow.TimeSeries(
+        ecflow.TimeSlot(0, 0), ecflow.TimeSlot(23, 0), ecflow.TimeSlot(4, 0), True
+    )
     task.add_time(ecflow.Time(ts))
-    task.add_verify(ecflow.Verify(ecflow.State.complete, 6))  # expect task to complete 6 times
+    task.add_verify(
+        ecflow.Verify(ecflow.State.complete, 6)
+    )  # expect task to complete 6 times
 
-    theResult = defs.simulate()
-    assert len(theResult) == 0, "Expected simulation to return without any errors, but found:\n" + theResult
+    result = defs.simulate()
+    assert len(result) == 0, (
+        "Expected simulation to return without any errors, but found:\n" + result
+    )
 
-    print("  simple check for state change time")
-    print("   iso_extended:", task.get_state_change_time())
-    print("   iso_extended:", task.get_state_change_time("is0_extended"))
-    print("   iso         :", task.get_state_change_time("iso"))
-    print("   simple      :", task.get_state_change_time("simple"))
-    print("   rubbish     :", task.get_state_change_time("rubbish"))
-
-    os.remove("test_time_series.def.log")
+    _remove_logs("test_time_series")
 
 
-def simulate_deadlock():
-    # This simulation is expected to fail, since we have a deadlock/ race condition
-
-    print("simulate_deadlock")
-    # suite dead_lock
-    #  family family
-    #    task t1
-    #          trigger t2 == complete
-    #    task t2
-    #          trigger t1 == complete
-    #   endfamily
-    # endsuite
-
+def test_simulate_deadlock():
     defs = ecflow.Defs()
     suite = defs.add_suite("dead_lock")
     fam = suite.add_family("family")
     fam.add_task("t1").add_trigger("t2 == complete")
     fam.add_task("t2").add_trigger("t1 == complete")
 
-    theResult = defs.simulate()
-    assert len(theResult) != 0, "Expected simulation to return errors, but found none"
-    print(theResult)
+    result = defs.simulate()
+    assert len(result) != 0, "Expected simulation to return errors, but found none"
 
-    os.remove("dead_lock.def.log")
-    os.remove("defs.depth")
-    os.remove("defs.flat")
+    _remove_logs("dead_lock")
+    for name in ("defs.depth", "defs.flat"):
+        try:
+            os.remove(name)
+        except OSError:
+            pass
 
 
-def test_time_series():
-    # suite suite
-    #  clock real <sunday>
-    #    family family
-    #       task t1
-    #       time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
-    #      endfamily
-    # endsuite
-
-    print("Simulator:: ...test_time_series")
-
+def test_simulate_time_series():
     # Initialise real clock on a Monday, such that task should _only_ run
     # on Monday since we are using a hybrid clock
-    clock = ecflow.Clock(12, 10, 2009, False)  # day,month, year, hybrid 12 October 2009 was a Monday
+    clock = ecflow.Clock(12, 10, 2009, False)  # 12 October 2009 was a Monday
 
-    theDefs = ecflow.Defs()
-    suite = theDefs.add_suite("test_time_series")
+    defs = ecflow.Defs()
+    suite = defs.add_suite("test_time_series")
     suite.add_clock(clock)
 
     fam = suite.add_family("family")
     task = fam.add_task("t")
 
-    task.add_time("00:30 23:59 04:00");
-    task.add_verify(ecflow.Verify(ecflow.State.complete, 6))  # expect task to complete 6 times
+    task.add_time("00:30 23:59 04:00")
+    task.add_verify(
+        ecflow.Verify(ecflow.State.complete, 6)
+    )  # expect task to complete 6 times
 
-    theResult = theDefs.simulate()
-    assert len(theResult) == 0, "Expected simulation to return without any errors, but found:\n" + theResult
+    result = defs.simulate()
+    assert len(result) == 0, (
+        "Expected simulation to return without any errors, but found:\n" + result
+    )
 
-    os.remove("test_time_series.def.log")
+    _remove_logs("test_time_series")
 
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    simulate_defs_with_time()
-    simulate_deadlock()
-    test_time_series()
-
-    # traverse the CSim test data, make sure python simulation matches c++
+def test_simulate_all_good_defs():
+    """Iterate over all good .def files from the simulator test data directory."""
     workspace_dir = ecflow.File.source_dir()
-    csim_test_data = workspace_dir + "/CSim/test/data/good_defs"
-    print(csim_test_data)
-    for path in Test.all_files(csim_test_data, '*.def'):
-        print(path)
-        theDefs = ecflow.Defs(path)
-        theResult = theDefs.simulate()
-        assert len(theResult) == 0, "Expected simulation to return without any errors, but found:\n" + theResult
+    csim_test_data = (
+        pathlib.Path(workspace_dir)
+        / "libs"
+        / "test"
+        / "simulator"
+        / "test"
+        / "data"
+        / "good_defs"
+    )
+    assert (
+        csim_test_data.exists()
+    ), f"Simulator test data directory not found: {csim_test_data}"
 
-    # remove generated .log files
-    for path in Test.all_files(".", '*.log'):
-        os.remove(path)
+    for path in Test.all_files(str(csim_test_data), "*.def"):
+        defs = ecflow.Defs(path)
+        result = defs.simulate()
+        assert (
+            len(result) == 0
+        ), f"Expected simulation of {path} to return without errors, but found:\n{result}"
 
-    print("All Tests pass")
+    for path in pathlib.Path(".").glob("*.log"):
+        path.unlink()

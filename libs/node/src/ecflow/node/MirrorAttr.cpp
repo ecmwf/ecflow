@@ -12,6 +12,7 @@
 
 #include <sstream>
 
+#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
@@ -99,7 +100,7 @@ void MirrorAttr::mirror() {
 
     start_controller();
     if (!controller_) {
-        return; // Can't continue without a running controller...
+        return; // Cannot continue without a running controller...
     }
 
     // Task associated with Attribute is free when any notification is found
@@ -247,9 +248,9 @@ void MirrorAttr::start_controller() {
 
         std::uint32_t polling_value;
         try {
-            polling_value = boost::lexical_cast<std::uint32_t>(polling);
+            polling_value = ecf::convert_to<std::uint32_t>(polling);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (ecf::bad_conversion&) {
             // Update the 'local' state change number
             state_change_no_ = Ecf::incr_state_change_no();
 

@@ -41,7 +41,7 @@ using namespace ecf;
 ///
 /// Zombie Finding:
 /// For a given Task, we could have multiple zombie process, i.e. with different password/process id
-/// We can't assume that there is only one zombie process. Hence, search zombie matching
+/// We cannot assume that there is only one zombie process. Hence, search zombie matching
 /// should involve matching with password/process id first and then resort to path matching
 ///
 /// Note: Only the init child command is required pass the process id. The other child command may
@@ -294,7 +294,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
 
         /// On the child COMPLETE/ABORT cmd, remove the zombie:
         /// *****************************************************************************************
-        /// Since we are returning false, The Task Cmd complete/abort **wont** be able to remove the zombie
+        /// Since we are returning false, The Task Cmd complete/abort **will not** be able to remove the zombie
         /// i.e since we want job to continue, *WITHOUT* invoking the dohandeRequest
         /// *****************************************************************************************
         if (task_cmd->child_type() == Child::COMPLETE || task_cmd->child_type() == Child::ABORT) {

@@ -319,7 +319,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     //  2/ Logical *AND* of day of week, day of month, or month returned false
     theReasonWhy += "is cron dependent";
 
-    // Let's start by assuming that the time series was NOT free.
+    // Let us start by assuming that the time series was NOT free.
     // First check if week day, day of month, month, matches
     if (is_day_of_week_day_of_month_and_month_free(c)) {
 

@@ -76,7 +76,7 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
     }
 
     /// Note a complete expression that does not evaluate, does *NOT* hold the node
-    /// It merly sets node to complete.
+    /// It merely sets node to complete.
     if (node->completeAst() && !node->evaluateComplete()) {
         // Follow nodes referenced in the complete expressions
         analyseExpressions(node, dependentNodes, false, dependent);

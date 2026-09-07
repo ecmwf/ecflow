@@ -37,6 +37,8 @@
 #include "VTriggerAttr.hpp"
 #include "VUserVarAttr.hpp"
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Expression.hpp"
@@ -509,7 +511,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
 
     const Variable& var = node_->findVariable(key);
     if (!var.empty()) {
-        val = var.theValue();
+        val = var.value();
         if (substitute) {
             node_->variableSubstitution(val);
         }
@@ -517,7 +519,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     }
     const Variable& gvar = node_->findGenVariable(key);
     if (!gvar.empty()) {
-        val = gvar.theValue();
+        val = gvar.value();
         if (substitute) {
             node_->variableSubstitution(val);
         }
@@ -1271,7 +1273,7 @@ std::string VServer::genVariable(const std::string& key) const {
 
     for (const auto& genVar : cache_.genVars_) {
         if (genVar.name() == key) {
-            val = genVar.theValue();
+            val = genVar.value();
         }
     }
 
@@ -1311,7 +1313,7 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     // Search user variables first
     for (const auto& var : cache_.vars_) {
         if (var.name() == key) {
-            val = var.theValue();
+            val = var.value();
             if (substitute) {
                 substituteVariableValue(val);
             }
@@ -1323,7 +1325,7 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     // Then search server variables
     for (const auto& genVar : cache_.genVars_) {
         if (genVar.name() == key) {
-            val = genVar.theValue();
+            val = genVar.value();
             if (substitute) {
                 substituteVariableValue(val);
             }
@@ -1674,9 +1676,9 @@ QString VServer::toolTip() {
     txt += "<b>Host</b>: " + QString::fromStdString(server_->host());
     txt += " <b>Port</b>: " + QString::fromStdString(server_->port()) + "<br>";
 
-    if (server_->isSsl()) {
-        txt += "<b>SSL</b>: enabled<br>";
-    }
+    // Every protocol is worth naming, not only SSL: an HTTP or HTTPS server previously showed no
+    // protocol at all in its tooltip.
+    txt += "<b>Protocol</b>: " + QString::fromStdString(ecf::to_ui_designation(server_->protocol())) + "<br>";
 
     if (!server_->user().empty()) {
         txt += "<b>Custom user</b>: " + QString::fromStdString(server_->user()) + "<br>";
@@ -1713,15 +1715,20 @@ QString VServer::toolTip() {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage());
             }
         }
-        else if (st->state() == ConnectState::SslIncompatible) {
-            txt +=
-                "<b><font color=" + colErr.name() + ">Possible SSL incompatibility between server and client!</b><br>";
+        else if (st->state() == ConnectState::SslCertificateError) {
+            txt += "<b><font color=" + colErr.name() + ">SSL certificate error!</b><br>";
             if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n", "<br>");
             }
         }
-        else if (st->state() == ConnectState::SslCertificateError) {
-            txt += "<b><font color=" + colErr.name() + ">SSL certificate error!</b><br>";
+        else if (st->state() == ConnectState::ProtocolMismatch) {
+            txt += "<b><font color=" + colErr.name() + ">Client and server use different protocols!</b><br>";
+            const ecf::ConnectionDiagnosis& diagnosis = st->diagnosis();
+            if (diagnosis.peer_protocol) {
+                txt += "<b>Server protocol</b>: " +
+                       QString::fromStdString(ecf::to_ui_designation(diagnosis.peer_protocol.value())) + "<br>";
+            }
+            txt += "<b>Last failed attempt</b>: " + VFileInfo::formatDateAgo(st->lastLostTime()) + "<br>";
             if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n", "<br>");
             }

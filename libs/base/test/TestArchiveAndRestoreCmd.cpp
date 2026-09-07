@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
         f4->add_task("t1");
         f4->add_task("t2");
         TestHelper::invokeRequest(&theDefs,
-                                  Cmd_ptr(new BeginCmd(suite->absNodePath(), false))); // al nodes wil be active
+                                  Cmd_ptr(new BeginCmd(suite->absNodePath(), false))); // all nodes will be active
     }
     // cout << theDefs << "\n";
 

@@ -38,7 +38,7 @@ public:
     // If any user in read/write lists, then it has read access.
     // However, when paths are specified the returns may not be the same. i.e,
     //    verify_read_access("userX") != verify_read_access("userX","/f")
-    // This is is because different commands, call different functions:
+    // This is because different commands, call different functions:
     // Hence if we have:
     //              verify_read_access(userX) verify_read_access(userX,'/f') verify_read_access(userX,'/s1')
     //  userX  /s1               TRUE                  FALSE                        TRUE

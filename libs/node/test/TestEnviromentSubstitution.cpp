@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_environment_substitution) {
     {
         suite_ptr suite = defs.add_suite("suite");
         s               = suite.get();
-        suite->addVariable(Variable("AVI", "avi"));
+        suite->addVariable(Variable::new_variable("AVI", "avi"));
 
         std::vector<std::pair<std::string, std::string>> env;
         env.emplace_back(ecf::environment::ECF_HOME, std::string("/home/smshome"));

@@ -90,8 +90,8 @@ bool SNodeCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
         if (suite) {
             if (!PrintStyle::is_persist_style(style)) {
                 /// Auto generate externs, before writing to standard out. This can be expensive since
-                /// All the trigger references need to to be resolved. & AST need to be created first
-                /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
+                /// All the trigger references need to be resolved. & AST need to be created first
+                /// The old spirit based parsing, horrendously, slow. Cannot use Spirit QI, till IBM pull support it
                 ///
                 /// We need a fabricate a defs to show the externs, used by the suite
                 Defs defs;

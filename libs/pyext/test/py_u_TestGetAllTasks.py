@@ -8,12 +8,13 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Defs, Client, debug_build
-import ecflow_test_util as Test
-import os
+import pytest
+
+from ecflow import Defs
 
 
-def create_defs():
+@pytest.fixture
+def defs():
     defs = Defs()
     suite = defs.add_suite("test_get_all")
     suite.add_task("t0")
@@ -29,38 +30,65 @@ def test_get_all_tasks(defs):
     task_vec2 = defs.get_all_tasks()
     assert len(task_vec2) == 4, "Expected four tasks, but found " + str(len(task_vec2))
 
-    assert task_vec2[0].name() == "t0", "Expected task of name t0 but found " + task_vec2[0].name()
-    assert task_vec2[1].name() == "t1", "Expected task of name t1 but found " + task_vec2[1].name()
-    assert task_vec2[2].name() == "t2", "Expected task of name t2 but found " + task_vec2[2].name()
-    assert task_vec2[3].name() == "t3", "Expected task of name t3 but found " + task_vec2[3].name()
-
-    print("test_get_all_tasks PASSED")
+    assert task_vec2[0].name() == "t0", (
+        "Expected task of name t0 but found " + task_vec2[0].name()
+    )
+    assert task_vec2[1].name() == "t1", (
+        "Expected task of name t1 but found " + task_vec2[1].name()
+    )
+    assert task_vec2[2].name() == "t2", (
+        "Expected task of name t2 but found " + task_vec2[2].name()
+    )
+    assert task_vec2[3].name() == "t3", (
+        "Expected task of name t3 but found " + task_vec2[3].name()
+    )
 
 
 def test_get_all_nodes(defs):
     # Get all the nodes make sure they are in order
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 7, "Expected seven nodes, but found " + str(len(node_vec))
-    assert node_vec[0].name() == "test_get_all", "Nodes should be returned in order, expected test_get_all but found" + node_vec[0].name()
-    assert node_vec[1].name() == "t0", "Nodes should be returned in order, expected 't0' but found" + node_vec[1].name()
-    assert node_vec[2].name() == "f1", "Nodes should be returned in order, expected 'f1' but found" + node_vec[2].name()
-    assert node_vec[3].name() == "t1", "Nodes should be returned in order, expected 't1' but found" + node_vec[3].name()
-    assert node_vec[4].name() == "t2", "Nodes should be returned in order, expected 't2' but found" + node_vec[4].name()
-    assert node_vec[5].name() == "f2", "Nodes should be returned in order, expected 'f2' but found" + node_vec[5].name()
-    assert node_vec[6].name() == "t3", "Nodes should be returned in order, expected 't3' but found" + node_vec[6].name()
+    assert node_vec[0].name() == "test_get_all", (
+        "Nodes should be returned in order, expected test_get_all but found"
+        + node_vec[0].name()
+    )
+    assert node_vec[1].name() == "t0", (
+        "Nodes should be returned in order, expected 't0' but found"
+        + node_vec[1].name()
+    )
+    assert node_vec[2].name() == "f1", (
+        "Nodes should be returned in order, expected 'f1' but found"
+        + node_vec[2].name()
+    )
+    assert node_vec[3].name() == "t1", (
+        "Nodes should be returned in order, expected 't1' but found"
+        + node_vec[3].name()
+    )
+    assert node_vec[4].name() == "t2", (
+        "Nodes should be returned in order, expected 't2' but found"
+        + node_vec[4].name()
+    )
+    assert node_vec[5].name() == "f2", (
+        "Nodes should be returned in order, expected 'f2' but found"
+        + node_vec[5].name()
+    )
+    assert node_vec[6].name() == "t3", (
+        "Nodes should be returned in order, expected 't3' but found"
+        + node_vec[6].name()
+    )
 
     # test empty defs
     empty_defs = Defs()
     node_vec = empty_defs.get_all_nodes()
-    assert len(node_vec) == 0, "Expected zero nodes, for an empty defs but found " + str(len(node_vec))
+    assert (
+        len(node_vec) == 0
+    ), "Expected zero nodes, for an empty defs but found " + str(len(node_vec))
 
     # test one suite defs
     one_suite_defs = Defs()
     one_suite_defs.add_suite("s1")
     node_vec = one_suite_defs.get_all_nodes()
     assert len(node_vec) == 1, "Expected one node, but found " + str(len(node_vec))
-
-    print("test_get_all_nodes PASSED")
 
 
 def test_get_all_nodes_from_nodes():
@@ -88,14 +116,3 @@ def test_get_all_nodes_from_nodes():
 
     node_vec = suite.get_all_nodes()
     assert len(node_vec) == 6, "Expected 6 nodes but found " + str(len(node_vec))
-
-    print("test_get_all_nodes_from_nodes PASSED")
-
-
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    test_get_all_tasks(create_defs())
-    test_get_all_nodes(create_defs())
-    test_get_all_nodes_from_nodes()
-    print("All Tests pass")

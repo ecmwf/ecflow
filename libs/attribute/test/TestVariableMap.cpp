@@ -29,7 +29,8 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_empty_variable_map) {
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_variable_map) {
     ECF_NAME_THIS_TEST();
 
-    VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
+    VariableMap variables{
+        Variable::new_variable("n1", "v1"), Variable::new_variable("n2", "v2"), Variable::new_variable("n3", "v3")};
 
     BOOST_CHECK(!variables.empty());
     BOOST_CHECK(variables.size() == 3);
@@ -38,32 +39,35 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_variable_map) {
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_set_value_to_all_variables_in_variable_map) {
     ECF_NAME_THIS_TEST();
 
-    VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
+    VariableMap variables{
+        Variable::new_variable("n1", "v1"), Variable::new_variable("n2", "v2"), Variable::new_variable("n3", "v3")};
 
     std::string value = "some large value just for precaution!";
     // set value of all variables
     variables.set_value(value);
 
     for (const auto& variable : variables) {
-        BOOST_CHECK(variable.theValue() == value);
+        BOOST_CHECK(variable.value() == value);
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_access_variable_in_variable_map) {
     ECF_NAME_THIS_TEST();
 
-    VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
+    VariableMap variables{
+        Variable::new_variable("n1", "v1"), Variable::new_variable("n2", "v2"), Variable::new_variable("n3", "v3")};
 
     const Variable& variable = variables["n1"];
 
     BOOST_CHECK(variable.name() == "n1");
-    BOOST_CHECK(variable.theValue() == "v1");
+    BOOST_CHECK(variable.value() == "v1");
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_throws_when_accessing_inexistent_variable_in_variable_map) {
     ECF_NAME_THIS_TEST();
 
-    VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
+    VariableMap variables{
+        Variable::new_variable("n1", "v1"), Variable::new_variable("n2", "v2"), Variable::new_variable("n3", "v3")};
 
     Variable found;
     BOOST_CHECK_EXCEPTION(

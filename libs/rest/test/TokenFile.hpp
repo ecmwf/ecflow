@@ -77,7 +77,7 @@ private:
     static std::string generate_salt();
 
     ///
-    /// @briref Computes HMAC-SHA256 of the provided token using the provided salt, returning the hex-encoded digest.
+    /// @brief Computes HMAC-SHA256 of the provided token using the provided salt, returning the hex-encoded digest.
     ///
     /// @return The generated HMAC-SHA256
     ///

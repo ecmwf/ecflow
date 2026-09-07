@@ -65,9 +65,9 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     {
         suite_ptr suite = Suite::create("suite");
         family_ptr fam  = Family::create("family");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
-        suite->addVariable(Variable("SLEEPTIME", "1"));
-        suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         fam->addTask(Task::create("t1"));
         fam->addTask(Task::create("t2"));
         fam->addTask(Task::create("t3"));

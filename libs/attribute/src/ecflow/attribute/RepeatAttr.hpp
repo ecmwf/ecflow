@@ -327,18 +327,18 @@ private:
     mutable VariableMap generated_{
         // clang-format off
         // Date
-        Variable(name_ + "_DATE", "<invalid>"),
+        Variable::new_variable(name_ + "_DATE", "<invalid>"),
         // Date Components
-        Variable(name_ + "_YYYY", "<invalid>"),
-        Variable(name_ + "_MM", "<invalid>"),
-        Variable(name_ + "_DD", "<invalid>"),
-        Variable(name_ + "_JULIAN", "<invalid>"),
+        Variable::new_variable(name_ + "_YYYY", "<invalid>"),
+        Variable::new_variable(name_ + "_MM", "<invalid>"),
+        Variable::new_variable(name_ + "_DD", "<invalid>"),
+        Variable::new_variable(name_ + "_JULIAN", "<invalid>"),
         // Time
-        Variable(name_ + "_TIME", "<invalid>"),
+        Variable::new_variable(name_ + "_TIME", "<invalid>"),
         // Time Components4
-        Variable(name_ + "_HOURS", "<invalid>"),
-        Variable(name_ + "_MINUTES", "<invalid>"),
-        Variable(name_ + "_SECONDS", "<invalid>")
+        Variable::new_variable(name_ + "_HOURS", "<invalid>"),
+        Variable::new_variable(name_ + "_MINUTES", "<invalid>"),
+        Variable::new_variable(name_ + "_SECONDS", "<invalid>")
         // clang-format on
     };
 
@@ -467,7 +467,7 @@ public:
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value fomratted as a yyyymmddTHHMMSS string, or "" if out of bounds.
+    /// @return the current value formatted as a yyyymmddTHHMMSS string, or "" if out of bounds.
     ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
@@ -513,15 +513,15 @@ private:
     // *not* persisted
     mutable VariableMap generated_{
         // clang-format off
-        Variable(name_ + "_DATE", "<invalid>"),
-        Variable(name_ + "_YYYY", "<invalid>"),
-        Variable(name_ + "_MM", "<invalid>"),
-        Variable(name_ + "_DD", "<invalid>"),
-        Variable(name_ + "_JULIAN", "<invalid>"),
-        Variable(name_ + "_TIME", "<invalid>"),
-        Variable(name_ + "_HOURS", "<invalid>"),
-        Variable(name_ + "_MINUTES", "<invalid>"),
-        Variable(name_ + "_SECONDS", "<invalid>")
+        Variable::new_variable(name_ + "_DATE", "<invalid>"),
+        Variable::new_variable(name_ + "_YYYY", "<invalid>"),
+        Variable::new_variable(name_ + "_MM", "<invalid>"),
+        Variable::new_variable(name_ + "_DD", "<invalid>"),
+        Variable::new_variable(name_ + "_JULIAN", "<invalid>"),
+        Variable::new_variable(name_ + "_TIME", "<invalid>"),
+        Variable::new_variable(name_ + "_HOURS", "<invalid>"),
+        Variable::new_variable(name_ + "_MINUTES", "<invalid>"),
+        Variable::new_variable(name_ + "_SECONDS", "<invalid>")
         // clang-format on
     };
 
@@ -748,7 +748,7 @@ private:
 ///     then number of repeats is deterministic
 ///     However if the end-date is less than suite clock this should be reported as error
 ///   o Currently under the hybrid clock the date is not updated, this raises
-///     a whole-lot of issues. (We don't want a separate calendar, just for this).
+///     a whole-lot of issues. (We do not want a separate calendar, just for this).
 ///   o If there is _no_ suite clock, then we must use the current day
 ///     now the number of repeats  varies, and if end-date is less than the current
 ///     day we need to report an error

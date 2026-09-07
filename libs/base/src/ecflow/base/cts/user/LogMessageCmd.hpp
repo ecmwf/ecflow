@@ -35,8 +35,7 @@ public:
 
 private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the argument as provided to user
+    static const char* arg(); // used for argument parsing
 
     std::string msg_;
 

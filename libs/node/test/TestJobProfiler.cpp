@@ -46,11 +46,11 @@ BOOST_AUTO_TEST_CASE(test_job_profiler) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(
-            Variable(ecf::environment::ECF_INCLUDE, File::test_data("libs/node/test/data/includes", "libs/node")));
-        suite->addVariable(
-            Variable(ecf::environment::ECF_HOME, File::test_data("libs/node/test/data/SMSHOME", "libs/node")));
-        suite->addVariable(Variable("SLEEPTIME", "10"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE,
+                                                  File::test_data("libs/node/test/data/includes", "libs/node")));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_HOME,
+                                                  File::test_data("libs/node/test/data/SMSHOME", "libs/node")));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");
     }

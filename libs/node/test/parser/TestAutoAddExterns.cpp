@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
                               << defs.externs().size() << "\n"
                               << ecf::as_string(defs, PrintStyle::MIGRATE) << "\n");
 
-    // Test auto extern generation. Don't remove existing extern's
+    // Test auto extern generation. Do not remove existing extern's
     defs.auto_add_externs(false /* remove_existing_externs_first*/);
     BOOST_REQUIRE_MESSAGE(defs.externs().size() == 11,
                           "Expected 11, auto_add_extern(false) gave: " << defs.externs().size() << "\n"

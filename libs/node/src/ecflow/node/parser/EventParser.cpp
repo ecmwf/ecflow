@@ -31,8 +31,8 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
     }
 
     // ===============================================================
-    // Don't use -1, to represent that no number was specified, as on
-    // AIX portable binary archive can't cope with this
+    // Do not use -1, to represent that no number was specified, as on
+    // AIX portable binary archive cannot cope with this
     // use std::numeric_limits<int>::max()
     // THIS HAS TO BE THE SAME AS THE Event() constructor
     // ================================================================

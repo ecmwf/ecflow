@@ -43,6 +43,17 @@ struct Stats
 
     void show(std::ostream& os = std::cout) const;
 
+    ///
+    /// @brief Provides the protocol in a form suitable for display.
+    ///
+    /// The protocol is stored in its encoded form, since it is also reported over the REST API, where a
+    /// stable identifier is more useful than a phrase chosen for readability.
+    ///
+    /// @return The human-readable designation of the protocol; empty when no protocol is recorded, as is
+    /// the case for a server predating the reporting of the protocol
+    ///
+    std::string protocol_designation() const;
+
     void update() { request_count_++; }
     void update_stats(int poll_interval);
     void update_for_serialisation();
@@ -51,6 +62,7 @@ struct Stats
     std::string locked_by_user_;
     std::string host_;
     std::string port_;
+    std::string protocol_;
     std::string up_since_;
     std::string version_;
     std::string request_stats_;
@@ -247,9 +259,12 @@ private:
         if (version > 0) {
             ar & process_meter_;
         }
+        if (version > 1) {
+            ar & protocol_;
+        }
     }
 };
 
-CEREAL_CLASS_VERSION(Stats, 1)
+CEREAL_CLASS_VERSION(Stats, 2)
 
 #endif /* ecflow_base_Stats_HPP */

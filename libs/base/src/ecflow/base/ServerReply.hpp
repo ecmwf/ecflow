@@ -12,6 +12,7 @@
 #define ecflow_base_ServerReply_HPP
 
 #include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
@@ -52,6 +53,24 @@ public:
 
     bool eof() const { return eof_; }
     void set_eof() { eof_ = true; }
+
+    ///
+    /// @brief Provides the structured diagnosis of the most recent exchange.
+    ///
+    /// The diagnosis is populated by the transport that performed the exchange. It records "no
+    /// failure" whenever the exchange succeeded, and whenever the transport predates this
+    /// mechanism.
+    ///
+    /// @return The diagnosis of the most recent exchange
+    ///
+    const ecf::ConnectionDiagnosis& diagnosis() const { return diagnosis_; }
+
+    ///
+    /// @brief Records the structured diagnosis of the most recent exchange.
+    ///
+    /// @param[in] diagnosis The diagnosis observed by the transport
+    ///
+    void set_diagnosis(const ecf::ConnectionDiagnosis& diagnosis) { diagnosis_ = diagnosis; }
 
     void set_host_port(const std::string& host, const std::string& port) {
         host_ = host;
@@ -155,6 +174,8 @@ private:
     bool delete_all_{false};                   // clear at the start of invoke
     bool invalid_argument_{false};             // clear at the start of invoke
     bool eof_{false};                          // clear at the start of invoke
+
+    ecf::ConnectionDiagnosis diagnosis_; // clear at the start of invoke
 };
 
 #endif /* ecflow_base_ServerReply_HPP */

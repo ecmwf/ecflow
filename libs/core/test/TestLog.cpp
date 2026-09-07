@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
     }
 
     {
-        // Request more than is available, should only get back whats there
+        // Request more than is available, should only get back what is there
         std::string lines = Log::instance()->contents(NO_OF_LINES_IN_LOG_FILE * 2);
         int newlineCount  = std::count(lines.begin(), lines.end(), '\n');
         BOOST_CHECK_MESSAGE(NO_OF_LINES_IN_LOG_FILE == newlineCount,
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
     }
 
     {
-        // Request more than is available, should only get back whats there
+        // Request more than is available, should only get back what is there
         std::string lines = Log::instance()->contents(-NO_OF_LINES_IN_LOG_FILE * 2);
         int newlineCount  = std::count(lines.begin(), lines.end(), '\n');
         BOOST_CHECK_MESSAGE(NO_OF_LINES_IN_LOG_FILE == newlineCount,

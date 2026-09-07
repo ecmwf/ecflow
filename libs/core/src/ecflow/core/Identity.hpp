@@ -16,14 +16,88 @@
 
 namespace ecf {
 
+///
+/// @brief Strongly-typed wrapper for a user login name.
+///
+/// Distinguishes a username from a password (and from a bare std::string) at
+/// compile time, preventing the two from being accidentally interchanged when
+/// passed across the authentication/authorisation trust boundary.
+///
+class Username {
+public:
+    ///
+    /// @brief Construct a username from its textual value.
+    ///
+    /// @param username the login name; may be empty (e.g. for an anonymous identity)
+    ///
+    explicit Username(std::string username)
+        : v_{std::move(username)} {}
+
+    ///
+    /// @brief Return the underlying login name.
+    ///
+    /// @return a reference to the wrapped value, valid for the lifetime of this object
+    ///
+    [[nodiscard]] const std::string& value() const { return v_; }
+
+    ///
+    /// @brief Compare two usernames for equality of their textual value.
+    ///
+    friend bool operator==(const Username& lhs, const Username& rhs) { return lhs.v_ == rhs.v_; }
+    ///
+    /// @brief Compare two usernames for inequality of their textual value.
+    ///
+    friend bool operator!=(const Username& lhs, const Username& rhs) { return !(lhs == rhs); }
+
+private:
+    std::string v_;
+};
+
+///
+/// @brief Strongly-typed wrapper for a user password.
+///
+/// Distinguishes a password from a username (and from a bare std::string) at
+/// compile time, preventing the two from being accidentally interchanged when
+/// passed across the authentication trust boundary.
+///
+class Password {
+public:
+    ///
+    /// @brief Construct a password from its textual value.
+    ///
+    /// @param pass the password; may be empty (e.g. for a secure/omitted identity)
+    ///
+    explicit Password(std::string pass)
+        : v_{std::move(pass)} {}
+
+    ///
+    /// @brief Return the underlying password.
+    ///
+    /// @return a reference to the wrapped value, valid for the lifetime of this object
+    ///
+    [[nodiscard]] const std::string& value() const { return v_; }
+
+    ///
+    /// @brief Compare two passwords for equality of their textual value.
+    ///
+    friend bool operator==(const Password& lhs, const Password& rhs) { return lhs.v_ == rhs.v_; }
+    ///
+    /// @brief Compare two passwords for inequality of their textual value.
+    ///
+    friend bool operator!=(const Password& lhs, const Password& rhs) { return !(lhs == rhs); }
+
+private:
+    std::string v_;
+};
+
 class AbstractIdentity {
 public:
     virtual ~AbstractIdentity() = default;
 
     virtual std::unique_ptr<AbstractIdentity> clone() const = 0;
 
-    virtual std::string username() const = 0;
-    virtual std::string password() const = 0;
+    virtual const Username& username() const = 0;
+    virtual const Password& password() const = 0;
 
     virtual std::string as_string() const = 0;
 };
@@ -39,8 +113,8 @@ public:
         return std::make_unique<WrappingIdentity>(std::move(clone));
     }
 
-    [[nodiscard]] std::string username() const override { return id_.username(); }
-    [[nodiscard]] std::string password() const override { return id_.password(); }
+    [[nodiscard]] const Username& username() const override { return id_.username(); }
+    [[nodiscard]] const Password& password() const override { return id_.password(); }
 
     [[nodiscard]] std::string as_string() const override { return id_.as_string(); }
 
@@ -50,10 +124,14 @@ private:
 
 class None {
 public:
-    [[nodiscard]] std::string username() const { return ""; }
-    [[nodiscard]] std::string password() const { return ""; }
+    [[nodiscard]] const Username& username() const { return empty_username; }
+    [[nodiscard]] const Password& password() const { return empty_password; }
 
     [[nodiscard]] std::string as_string() const { return "None"; }
+
+private:
+    inline static Username empty_username{""};
+    inline static Password empty_password{""};
 };
 
 class UserX {
@@ -62,14 +140,14 @@ public:
         : username_(std::move(username)),
           password_(std::move(password)) {}
 
-    [[nodiscard]] std::string username() const { return username_; }
-    [[nodiscard]] std::string password() const { return password_; }
+    [[nodiscard]] const Username& username() const { return username_; }
+    [[nodiscard]] const Password& password() const { return password_; }
 
-    [[nodiscard]] std::string as_string() const { return "{UserX: " + username_ + "}"; }
+    [[nodiscard]] std::string as_string() const { return "{UserX: " + username_.value() + "}"; }
 
 private:
-    std::string username_;
-    std::string password_;
+    Username username_;
+    Password password_;
 };
 
 class CustomUserX {
@@ -78,30 +156,29 @@ public:
         : username_(std::move(username)),
           password_(std::move(password)) {}
 
-    [[nodiscard]] std::string username() const { return username_; }
-    [[nodiscard]] std::string password() const { return password_; }
+    [[nodiscard]] const Username& username() const { return username_; }
+    [[nodiscard]] const Password& password() const { return password_; }
 
-    [[nodiscard]] std::string as_string() const { return "{UserX: " + username_ + ":<omitted>}"; }
+    [[nodiscard]] std::string as_string() const { return "{CustomUserX: " + username_.value() + "}"; }
 
 private:
-    std::string username_;
-    std::string password_;
+    Username username_;
+    Password password_;
 };
 
 class SecureUserX {
 public:
     explicit SecureUserX(std::string username)
-        : username_(std::move(username)),
-          password_{} {}
+        : username_(std::move(username)) {}
 
-    [[nodiscard]] std::string username() const { return username_; }
-    [[nodiscard]] std::string password() const { return password_; }
+    [[nodiscard]] const Username& username() const { return username_; }
+    [[nodiscard]] const Password& password() const { return empty; }
 
-    [[nodiscard]] std::string as_string() const { return "{SecuredUserX: " + username_ + ":<omitted>}"; }
+    [[nodiscard]] std::string as_string() const { return "{SecuredUserX: " + username_.value() + "}"; }
 
 private:
-    std::string username_;
-    std::string password_;
+    Username username_;
+    inline static Password empty{""};
 };
 
 class TaskX {
@@ -111,14 +188,16 @@ public:
           pass_(std::move(pass)),
           tryno_(std::move(tryno)) {}
 
-    [[nodiscard]] std::string username() const { return pid_; }
-    [[nodiscard]] std::string password() const { return pass_; }
+    [[nodiscard]] const Username& username() const { return pid_; }
+    [[nodiscard]] const Password& password() const { return pass_; }
 
-    [[nodiscard]] std::string as_string() const { return "{TaskX: " + pid_ + ":" + pass_ + ":" + tryno_ + "}"; }
+    [[nodiscard]] std::string as_string() const {
+        return "{TaskX: " + pid_.value() + ":" + pass_.value() + ":" + tryno_ + "}";
+    }
 
 private:
-    std::string pid_;
-    std::string pass_;
+    Username pid_;
+    Password pass_;
     std::string tryno_;
 };
 
@@ -182,15 +261,16 @@ public:
     }
 
     [[nodiscard]] bool is_user() const {
-        return is_a<UserX>(*handle_) || is_a<CustomUserX>(*handle_) || is_a<SecureUserX>(*handle_);
+        return is_a<WrappingIdentity<UserX>>(*handle_) || is_a<WrappingIdentity<CustomUserX>>(*handle_) ||
+               is_a<WrappingIdentity<SecureUserX>>(*handle_);
     }
-    [[nodiscard]] bool is_task() const { return is_a<TaskX>(*handle_); }
+    [[nodiscard]] bool is_task() const { return is_a<WrappingIdentity<TaskX>>(*handle_); }
 
     [[nodiscard]] bool is_custom() const { return is_a<WrappingIdentity<CustomUserX>>(*handle_); }
     [[nodiscard]] bool is_secure() const { return is_a<WrappingIdentity<SecureUserX>>(*handle_); }
 
-    [[nodiscard]] std::string username() const { return handle_->username(); }
-    [[nodiscard]] std::string password() const { return handle_->password(); }
+    [[nodiscard]] const Username& username() const { return handle_->username(); }
+    [[nodiscard]] const Password& password() const { return handle_->password(); }
 
     [[nodiscard]] std::string as_string() const { return handle_->as_string(); }
 

@@ -46,6 +46,7 @@ set(test_srcs
   test/TestCerealWithHierarchy.cpp
   test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp
+  test/TestCollections.cpp
   test/TestCommandLine.cpp
   test/TestConverter.cpp
   test/TestCore_main.cpp # contains main() function for test driver
@@ -53,6 +54,7 @@ set(test_srcs
   test/TestFile.cpp
   test/TestFilesystem.cpp
   test/TestGetUserDetails.cpp
+  test/TestIdentity.cpp
   test/TestLog.cpp
   test/TestMessage.cpp
   test/TestMigration.cpp

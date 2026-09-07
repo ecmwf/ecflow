@@ -991,9 +991,9 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
     suite_ptr server_suite;
     {
         server_suite = serverDefs.add_suite("suite");
-        server_suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
-        server_suite->addVariable(Variable("SLEEPTIME", "1"));
-        server_suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        server_suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
+        server_suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        server_suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         family_ptr fam = server_suite->add_family("family");
         fam->add_task("t1")->add_trigger("/suite1/family/suite1_task1 == complete");
         fam->add_task("t2")->add_trigger("/suite1/family/suite1_task2 == complete");

@@ -84,14 +84,14 @@ public:
     void run(Defs&, const std::string& defs_file, int timeout = 40, bool waitForTestCompletion = true);
 #endif
 
-    /// Returns the location of the defs file, such thats it in the test data area
+    /// Returns the location of the defs file, such that it is in the test data area
     static std::string testDataDefsLocation(const std::string& defsFile);
 
     /// The test data location
     static std::string testDataLocation(const std::string& defsFile);
 
     /// This function is used for waiting for test to finish
-    /// returns the defs from the server at test completeion
+    /// returns the defs from the server at test completion
     defs_ptr testWaiter(const Defs& theClientDefs, // The defs on the client side
                         int timeout,               // How long should we wait for test to finish
                         bool verifyAttr);          // Test verification use verify attributes on defs

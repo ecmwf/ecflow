@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_change_order) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_change_order.def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     test_ordering();
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(test_handle_change_order) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_change_order.def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     TestFixture::client().set_throw_on_error(true);
     TestFixture::client().sync_local(); // First sync_local will do a full sync
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_handle_change_order) {
     }
 
     // Do same test, this time sync_local will only return suite a,b,c (i.e suite d,e not registered and hence left out)
-    // Ording should still be applied to the whole suite.
+    // Ordering should still be applied to the whole suite.
     test_ordering();
 
     std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()

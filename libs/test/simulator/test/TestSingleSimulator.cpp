@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_analysys, *boost::unit_test::disabled()) {
     // endsuite
 
     // This simulation is expected to fail, since we have a deadlock/ race condition
-    // It will prodice a defs.depth and defs.flat files. Make sure to remove them
+    // It will produce a defs.depth and defs.flat files. Make sure to remove them
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_analysys");

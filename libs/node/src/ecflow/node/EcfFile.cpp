@@ -132,7 +132,7 @@ void EcfFile::manual(std::string& theManual) {
     PreProcessor data(this, "EcfFile::manual:");
     data.preProcess(lines);
 
-    // perform variable sub's but don't error if failure
+    // perform variable sub's but do not error if failure
     try {
         JobsParam dummy; // create jobs = false, spawn jobs =  false
         variableSubstitution(dummy);
@@ -148,7 +148,7 @@ void EcfFile::manual(std::string& theManual) {
 
     if (theManualLines.empty()) {
         // There is no %manual -> %end in the file. However this may be .man file for Suites/Family
-        // For this case just include the pre-processed contents as is, ie since the whole file
+        // For this case just include the pre-processed contents as is, i.e., since the whole file
         // is the manual
         if (node_->isNodeContainer()) {
             vector_to_string(jobLines_, theManual);
@@ -366,7 +366,7 @@ const std::string& EcfFile::create_job(JobsParam& jobsParam) {
 
     /// Will use *USER* supplied edit variables in preference to node tree variable *IF* supplied
     /// expand %VAR% or %VAR:sub% & replace %% with %
-    // Allow variable substitution in comment and manual blocks. But if it fails, don't report as an error
+    // Allow variable substitution in comment and manual blocks. But if it fails, do not report as an error
     variableSubstitution(jobsParam);
 
 #ifdef DEBUG_VAR_SUB_OUTPUT
@@ -471,7 +471,7 @@ std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
             paths = {ecf_include};
         }
 
-        // Don't rely on hard coded paths. Added for testing, but could be generally useful
+        // Do not rely on hard coded paths. Added for testing, but could be generally useful
         // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
         for (std::string& path : paths) {
             node.variable_dollar_substitution(path);
@@ -769,7 +769,7 @@ bool EcfFile::extract_ecfmicro(const std::string& line, std::string& ecfmicro, s
 
 void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
     // Allow variable substitution in comment and manual blocks.
-    // But if it fails, don't report as an error
+    // But if it fails, do not report as an error
 
     // get the cached ECF_MICRO variable, typically its one char.
     std::string ecfMicro = ecfMicroCache_;
@@ -841,7 +841,7 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
             if (!node_->variable_substitution(jobLines_[i], jobsParam.user_edit_variables(), microChar)) {
 
                 // Allow variable substitution in comment and manual blocks.
-                // But if it fails, don't report as an error
+                // But if it fails, do not report as an error
                 int last_directive = -1;
                 if (!pp_stack.empty()) {
                     last_directive = pp_stack.back();
@@ -1179,7 +1179,7 @@ void EcfFile::doCreateUsrFile() const {
 bool EcfFile::extractManual(const std::vector<std::string>& lines,
                             std::vector<std::string>& theManualLines,
                             std::string& errormsg) const {
-    // Note: we have already done pre-processing, ie since the manual is obtained after
+    // Note: we have already done pre-processing, i.e., since the manual is obtained after
     // all the includes have been pre-procssed, hence most errors should have been caught
     // get the cached ECF_MICRO variable, typically its one char.
     std::string ecfMicro = ecfMicroCache_;
@@ -1231,7 +1231,7 @@ void EcfFile::remove_comment_manual_and_nopp_tokens() {
     // %comment    // preserve
     // -- comment  // preserve
     // %end        // preserve , this is paired with comment
-    // blah %blah% // preserve, i.e. don't preprocess
+    // blah %blah% // preserve, i.e. do not preprocess
     // %end        // delete this line, This is paired with nopp
     //
     // For the following
@@ -1578,7 +1578,7 @@ void PreProcessor::preProcess_line() {
         }
     }
 
-    // If there's no second token, when what kind of directive is it ?
+    // If there is no second token, when what kind of directive is it ?
     // allow   : %FRED:val%
     // disallow: %FRED
     std::string the_include_token;
@@ -1640,7 +1640,7 @@ void PreProcessor::preProcess_includes() {
         // remove %include from the job lines, since were going to expand or ignore it.
         // **** input script_line life_time is tied, jobLines_.back(), hence jobLines_.pop_back() will invalidate
         // script_lines
-        // **** Hence don't use script_line after this point.
+        // **** Hence do not use script_line after this point.
         jobLines_.pop_back();
 
         // handle %includeonce

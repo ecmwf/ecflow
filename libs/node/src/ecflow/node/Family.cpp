@@ -166,10 +166,10 @@ std::string Family::find_node_path(const std::string& type, const std::string& n
 
 FamGenVariables::FamGenVariables(const Family* f)
     : family_(f),
-      genvar_family_("FAMILY", "", false),
-      genvar_family1_("FAMILY1", "", false),
-      genvar_dirname_("ECF_DIRNAME", "", false),
-      genvar_basename_("ECF_BASENAME", "", false) {
+      genvar_family_(Variable("FAMILY", "")),
+      genvar_family1_(Variable("FAMILY1", "")),
+      genvar_dirname_(Variable("ECF_DIRNAME", "")),
+      genvar_basename_(Variable("ECF_BASENAME", "")) {
 }
 
 void FamGenVariables::update_generated_variables() const {

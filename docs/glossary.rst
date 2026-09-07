@@ -12,14 +12,14 @@ Glossary
    aborted
       Is a :term:`node` :term:`status`. 
       
-      When the :term:`ECF_JOB_CMD` fails or the :term:`job file` sends a :term:`ecflow_client` --abort :term:`child command`, then
+      When the :term:`ECF_JOB_CMD` fails or the :term:`job file` sends a :term:`ecflow_client` --abort :term:`task command`, then
       the task is placed into a aborted state.
       
    active
       Is a :term:`node` :term:`status`. 
       
       If :term:`job creation` was successful, and :term:`job file` has started, then the :term:`ecflow_client` --init
-      :term:`child command` is received by the :term:`ecflow_server` and the :term:`task` is placed into a active state
+      :term:`task command` is received by the :term:`ecflow_server` and the :term:`task` is placed into a active state
       
    autocancel
       autocancel is a way to automatically delete a :term:`node` which has completed.
@@ -135,44 +135,10 @@ Glossary
       .. code-block:: shell
 
          ecflow_client --load=<check_point_file> print check_only
-      
+
    child command
-      Child (or Task) commands are called from within the :term:`ecf script` files. The table also includes the default action (from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+      See :term:`task command`.
 
-      .. list-table:: 
-         :header-rows: 1
-         
-         * - Child (or Task) Command
-           - Description
-           - Zombie (default action)
-         * - :ref:`ecflow_client --init <init_cli>`
-           - Sets the :term:`task` to the :term:`active` :term:`status`
-           - block
-         * - :ref:`ecflow_client --wait <wait_cli>`
-           - Wait for a expression to evaluate
-           - block
-         * - :ref:`ecflow_client --queue <queue_cli>`
-           - Update :term:`queue` step in server
-           - block
-         * - :ref:`ecflow_client --abort <abort_cli>`
-           - Sets the :term:`task` to the :term:`aborted` :term:`status`
-           - block
-         * - :ref:`ecflow_client --complete <complete_cli>`
-           - Sets the :term:`task` to the :term:`complete` :term:`status`
-           - block 
-         * - :ref:`ecflow_client --event <event_cli>`
-           - Set an :term:`event`
-           - fob
-         * - :ref:`ecflow_client --meter <meter_cli>`
-           - Change a :term:`meter`
-           - fob
-         * - :ref:`ecflow_client --label <label_cli>`
-           - Change a :term:`label`
-           - fob
-
-      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
-       
-      
    clock
       A clock is an attribute of a :term:`suite`. 
       
@@ -231,7 +197,7 @@ Glossary
       The node can be set to complete:
 
       - By the :term:`complete expression`
-      - At job end when the :term:`task` receives the :ref:`ecflow_client –complete <complete_cli>` :term:`child command`
+      - At job end when the :term:`task` receives the :ref:`ecflow_client –complete <complete_cli>` :term:`task command`
       - Manually via the command line or GUI. When this happens any time attributes are expired in order.
 
   
@@ -313,9 +279,37 @@ Glossary
            - :token:`day`
        
    defstatus
-      Defines the default :term:`status` for a task/family to be assigned to the :term:`node` when the begin command is issued.
-      
-      By default :term:`node` gets queued when you use begin on a :term:`suite`. 
+      A defstatus is a :term:`node` attribute, that determines the default state assigned to the node
+      when it *begins* or is *requeued*.
+
+      Unless explicitly defined by the user, the default state of a node is :term:`queued`.
+
+      The values for defstatus are:
+
+      - :term:`unknown`
+      - :term:`complete`
+      - :term:`queued`
+      - :term:`aborted`
+      - :term:`submitted`
+      - :term:`active`
+      - :term:`suspended`
+
+      The defstatus value 'suspended' is particular, in the sense that, at begin/re-queue time, it sets the
+      node to state 'queued' but requires an explicit resume instruction by the user to eventually allow the
+      node to move to the 'submitted' state (the node is effectively *suspended* in the meantime).
+
+      .. important::
+
+         Although valid, the use of the values 'unknown', 'submitted' and 'active' is not recommended!
+
+         For a :term:`task`, these values very likely mean the node adopts an inconsistent state (e.g. a task
+         with 'active' state, but never actually submitted).
+
+         For a :term:`suite` or a :term:`family`, the only meaningful values are 'queued', 'complete' and
+         'suspended'. The remaining values have no lasting effect: the state is assigned to the node alone,
+         is not propagated to the children, and is superseded as soon as any of the children changes state.
+
+
       defstatus is useful in preventing suites from running automatically once begun or in setting
       tasks complete so they can be run selectively. 
 
@@ -336,7 +330,7 @@ Glossary
       A :term:`task` that is dependent cannot be started as long as some dependency is holding it or any of its **parent** :term:`node` s.
       
       The :term:`ecflow_server` will check the dependencies every minute, during normal :term:`scheduling` **and** when any
-      :term:`child command` causes a state change in the :term:`suite definition`.
+      :term:`task command` causes a state change in the :term:`suite definition`.
       
    directives
       Directives appear in a ecf script. (i.e. typically .ecf file, but could be .py file).Directives start with a % character. This is referred to as :term:`ECF_MICRO` character.
@@ -479,7 +473,7 @@ Glossary
       The ecFlow script is similar to a UNIX shell script.  
       
       The differences, however, includes the addition of “C” like pre-processing :term:`directives` and ecFlow :term:`variable`\ s.
-      Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
+      Also the script *must* include calls to the **init** and **complete** :term:`task command`\ s so that
       the :term:`ecflow_server` is aware when the job starts (i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
        
    ECF_BASENAME
@@ -539,7 +533,7 @@ Glossary
 
       .. important::
 
-         This configuration is, by default, only applicable to :term:`child commands <child command>`.
+         This configuration is, by default, only applicable to :term:`task commands <task command>`.
          But the behaviour can be customised by setting the environment variable ECF_HOSTFILE_POLICY.
 
    ECF_INCLUDE
@@ -699,7 +693,7 @@ Glossary
       The user must ensure that all the directories exists, including :term:`suite`/:term:`family`. If this is not done, you may well find task remains stuck in a submitted state. At ECMWF our submission scripts will ensure that directories exists.
 
    ECF_PASS
-      This is a generated :term:`variable`. During job generation process in the server, a unique password is generated and stored in the task. It then replaces %ECF_PASS% in the scripts(.ecf), with the actual value. When the job runs, ecflow_client reads this, as an environment variable, and passes it to the server. The server then compares this password with the one held on the task. This is used as a part of the authentication for child commands, and is used to detect zombies.
+      This is a generated :term:`variable`. During job generation process in the server, a unique password is generated and stored in the task. It then replaces %ECF_PASS% in the scripts(.ecf), with the actual value. When the job runs, ecflow_client reads this, as an environment variable, and passes it to the server. The server then compares this password with the one held on the task. This is used as a part of the authentication for task commands, and is used to detect zombies.
 
       The authentication process can be  bypassed, and allow the job to proceed (i.e.. when the user is sure that there is only a single process, trying to communicate with the server), by adding it as a user variable. i.e.:
 
@@ -776,11 +770,11 @@ Glossary
 
    ECF_TIMEOUT
       ECF_TIMEOUT is an environment variable, used by the :term:`ecflow_client`, and specifies how much time
-      (measured in seconds) a *child command* will continue to try contacting the server(s) before giving up.
+      (measured in seconds) a *task command* will continue to try contacting the server(s) before giving up.
 
       .. important::
 
-         This timeout is only applicable to :term:`child commands <child command>`.
+         This timeout is only applicable to :term:`task commands <task command>`.
 
       When ECF_TIMEOUT is not set, the client uses the default value of 24 hours (24 * 60 * 60 seconds).
       The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
@@ -825,13 +819,13 @@ Glossary
 
    ECF_ZOMBIE_TIMEOUT
       ECF_ZOMBIE_TIMEOUT is an environment variable used by the :term:`ecflow_client`, and that specifies how much time
-      (measured in seconds) a *zombie* child command will continue to try contacting the server(s) before giving up.
+      (measured in seconds) a *zombie* task command will continue to try contacting the server(s) before giving up.
 
       .. important::
 
-         This timeout is only applicable to :term:`child commands <child command>`.
+         This timeout is only applicable to :term:`task commands <task command>`.
 
-      A child command knows that the related :term:`task` has been deemed a :term:`zombie`, because the reply from
+      A task command knows that the related :term:`task` has been deemed a :term:`zombie`, because the reply from
       the server includes a *zombie* flag. When the client receives this flag, it will used ECF_ZOMBIE_TIMEOUT (instead of ECF_TIMEOUT).
 
       The ECF_ZOMBIE_TIMEOUT, in combination with the attempt to contact all hosts in ECF_HOSTFILE, allows a :term:`zombie`
@@ -864,7 +858,7 @@ Glossary
       
       The following variables affect the execution of ecflow_client. 
       
-      Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
+      Since the :term:`ecf script` can call ``ecflow_client`` (i.e :term:`task command`) then typically
       some are set in an include header.
       
       .. list-table:: Environment variables used by *ecflow_client*
@@ -876,7 +870,7 @@ Glossary
 
          * - ECF_HOST
 
-             (User + Child)
+             (User + Task)
            - The name of the :term:`ecflow_server` host
 
              |
@@ -892,7 +886,7 @@ Glossary
 
          * - ECF_PORT
 
-             (User + Child)
+             (User + Task)
            - The port on the :term:`ecflow_server` host
 
              |
@@ -908,7 +902,7 @@ Glossary
 
          * - NO_ECF
 
-             (User + Child)
+             (User + Task)
            - Speficies if client terminates immediately with success
              (to allow the scripts to be tested independently from the server)
 
@@ -922,7 +916,7 @@ Glossary
 
          * - ECF_DENIED
 
-             (User + Child)
+             (User + Task)
            - Specifies if client terminates with error when the server denies contacts,
              in order to avoid waiting for ECF_TIMEOUT.
 
@@ -937,7 +931,7 @@ Glossary
 
          * - ECF_SSL
 
-             (User + Child)
+             (User + Task)
            - Enables secure communication between server and client.
 
              |
@@ -968,12 +962,12 @@ Glossary
 
          * - :term:`ECF_NAME`
 
-             (Child only)
+             (Task only)
            - The path to the task
 
              |
 
-             **This variable is mandatory for child commands**
+             **This variable is mandatory for task commands**
 
              |
 
@@ -985,12 +979,12 @@ Glossary
 
          * - :term:`ECF_PASS`
 
-             (Child only)
+             (Task only)
            - The password of the task.
 
              |
 
-             **This variable is mandatory for child commands**
+             **This variable is mandatory for task commands**
 
              |
 
@@ -998,12 +992,12 @@ Glossary
 
          * - ECF_RID
 
-             (Child only)
+             (Task only)
            - The remote id of the task.
 
              |
 
-             **This variable is mandatory for child commands**
+             **This variable is mandatory for task commands**
 
              |
 
@@ -1011,7 +1005,7 @@ Glossary
 
          * - :term:`ECF_TRYNO`
 
-             (Child only)
+             (Task only)
            - The number of times the task has run.
 
              |
@@ -1020,7 +1014,7 @@ Glossary
 
          * - ECF_HOSTFILE
 
-             (User + Child)
+             (User + Task)
            - The path to the file that lists alternate hosts to try, if connection to main host fails
 
              |
@@ -1031,9 +1025,9 @@ Glossary
 
          * - ECF_HOSTFILE_POLICY
 
-             (User + Child)
+             (User + Task)
            - The policy, either "task" or "all", indicates when to perform retry based on the ECF_HOSTFILE.
-             The default policy is "task", meaning that the retry will only be performed for task (i.e. child) commands.
+             The default policy is "task", meaning that the retry will only be performed for task commands.
              If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
 
              |
@@ -1048,12 +1042,12 @@ Glossary
 
          * - ECF_TIMEOUT
 
-             (Child only)
+             (Task only)
            - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) with the server before giving up.
 
              |
 
-             This limit applies to all child commands, and user commands that have ECF_HOSTFILE_POLICY set to "all". When the client is unable to contact the server within the timeout period, it will exit with an error code.
+             This limit applies to all task commands, and user commands that have ECF_HOSTFILE_POLICY set to "all". When the client is unable to contact the server within the timeout period, it will exit with an error code.
 
              |
 
@@ -1068,7 +1062,7 @@ Glossary
 
          * - ECF_CONNECT_TIMEOUT
 
-             (Child only)
+             (Task only)
            - Maximum time (in seconds) for the client to establish connection with the server before giving up.
 
              |
@@ -1077,12 +1071,12 @@ Glossary
 
          * - ECF_ZOMBIE_TIMEOUT
 
-             (Child only)
+             (Task only)
            - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) to get a reply from the server.
 
              |
 
-             This limit applies to child commands that have been marked as zombies by the server. When the client is unable to contact the server within the timeout period, it will exit with an error code.
+             This limit applies to task commands that have been marked as zombies by the server. When the client is unable to contact the server within the timeout period, it will exit with an error code.
 
              |
 
@@ -1291,7 +1285,7 @@ Glossary
       
       There can be many events and they are displayed as nodes. 
       
-      The event is updated by placing the ``--event`` :term:`child command` in a :term:`ecf script`.
+      The event is updated by placing the ``--event`` :term:`task command` in a :term:`ecf script`.
       
       An event has a number and possibly a name. If it is only defined as a number, 
       its name is the text representation of the number without leading zeroes.
@@ -1451,7 +1445,7 @@ Glossary
       The steps above transforms an :term:`ecf script` to a :term:`job file` that can be submitted by
       performing :term:`variable substitution` on the :term:`ECF_JOB_CMD` :term:`variable` and invoking the command.
          
-      The running jobs will communicate back to the :term:`ecflow_server` by calling :term:`child command`\ s.
+      The running jobs will communicate back to the :term:`ecflow_server` by calling :term:`task command`\ s.
         
       This causes :term:`status` changes on the :term:`node`\ s in the :term:`ecflow_server` and flags can be set 
       to indicate various events.  
@@ -1479,7 +1473,7 @@ Glossary
    label
       A label has a name and a value and is a way of **displaying** information in :term:`ecflow_ui`
       
-      By placing a label :term:`child command`\ s in the :term:`ecf script` the user can be informed about progress
+      By placing a label :term:`task command`\ s in the :term:`ecf script` the user can be informed about progress
       in :term:`ecflow_ui`.
 
       Labels can be added to family nodes. To change the labels, scripts should use:
@@ -1488,7 +1482,7 @@ Glossary
          
          ecflow_client --alter change label <label_name> <new_value> /path/to/family_node/with/label
 
-      If the label :term:`child command`\ s results in a :term:`zombie` then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally. (i.e. without any errors). This default can be overridden by using a :term:`zombie` attribute.
+      If the label :term:`task command`\ s results in a :term:`zombie` then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally. (i.e. without any errors). This default can be overridden by using a :term:`zombie` attribute.
 
       .. list-table::
  
@@ -1535,7 +1529,7 @@ Glossary
          suite late
             late -s +00:15    # report late for all task taking longer than 15 minutes in submitted state
             family familyName
-               late -c +02:00 # all child task that take longer than 2 hours to complete should raise a late flag
+               late -c +02:00 # all tasks that take longer than 2 hours to complete should raise a late flag
                task t1
                      # effective late -s +00:05 -c +02:00
                      late -s +00:05  
@@ -1602,7 +1596,27 @@ Glossary
             ci.alter("/suite","change","limit_max","limit", "2")   
          except RuntimeError, e:
             print("Failed: " + str(e))
-      
+
+      The limit value, i.e. the number of tokens currently consumed, can be changed in the same way:
+
+      .. code-block:: shell
+
+         ecflow_client --alter change limit_value <limit-name> <new-value> <path-to-limit>
+         ecflow_client --alter change limit_value limit 2 /suite
+
+      A limit value that no longer reflects the nodes being limited, for example after a node has
+      been forced into a state, can be recovered by using the special value ``reset``. This
+      re-synchronises the limit with the nodes that are currently consuming it, i.e. the value and
+      the consumed paths of the limit are recomputed from the nodes that are currently
+      :term:`submitted` or :term:`active`.
+
+      .. code-block:: shell
+
+         ecflow_client --alter change limit_value limit reset /suite
+
+      Note that the recomputed value is allowed to exceed the limit max value, in which case the
+      excess is reported by :term:`ecflow_ui` as additional consumed tokens.
+
       See also:
 
       .. list-table::
@@ -1648,13 +1662,13 @@ Glossary
       The purpose of a meter is to signal proportional completion of a task and to 
       be able to trigger another job which is waiting on this proportional completion.
       
-      The meter is updated by placing the --meter :term:`child command` in a :term:`ecf script`. Meters can be added to family nodes. To change the meters, in the scripts should use:
+      The meter is updated by placing the --meter :term:`task command` in a :term:`ecf script`. Meters can be added to family nodes. To change the meters, in the scripts should use:
       
       .. code-block:: shell
          
           ecflow_client --alter change meter <meter_name> <new_value> /path/to/family_node/with/meter 
           
-      If the meter :term:`child command` results in a zombie, then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally (i.e. without any errors). This default can be overridden by using a zombie attribute.
+      If the meter :term:`task command` results in a zombie, then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally (i.e. without any errors). This default can be overridden by using a zombie attribute.
 
       See also:
 
@@ -1803,11 +1817,11 @@ Glossary
          endfamily
          endsuite        
 
-      The  :ref:`queue_cli` :term:`child command` will signal when a step is active, complete, or has aborted:
+      The  :ref:`queue_cli` :term:`task command` will signal when a step is active, complete, or has aborted:
                
       .. code-block:: shell
 
-         # Note: because --queue is treated like a child command(init,complete,event,label,meter,abort,wait), the task path ECF_NAME is read from the environment
+         # Note: because --queue is treated like a task command(init,complete,event,label,meter,abort,wait), the task path ECF_NAME is read from the environment
          
          # The --queue command will search up the node hierarchy for the queue name. If not found it fails.
          
@@ -1841,7 +1855,7 @@ Glossary
 
 
    queued
-      Is a :term:`node` :term:`status`. 
+      Is a :term:`node` :term:`state`.
       
       After the begin command, the task **without** a :term:`defstatus` are placed into the queued state
       
@@ -1900,20 +1914,34 @@ Glossary
        
    shutdown
       Is a :term:`ecflow_server` state. See :term:`server states`
-      
+
+   state
+      Each :term:`node` in :term:`suite definition`, and the :term:`ecflow_server` itself, has a state (also referred to as :term:`status`).
+
+      The :term:`node` states are:
+
+      - :term:`unknown`
+      - :term:`queued`
+      - :term:`submitted`
+      - :term:`active`
+      - :term:`complete`
+      - :term:`aborted`.
+
+      The :term:`ecflow_ui` reflects the node state as the background color of the box representing the node.
+
+      The :term:`ecflow_server` states are:
+
+      - :term:`shutdown`
+      - :term:`halted`
+      - :term:`running`
+
+      The server state is reflected as the background color of the root node in :term:`ecflow_ui`
+
    status
-      Each :term:`node` in :term:`suite definition` has a status. 
-      
-      Status reflects the state of the :term:`node`. 
-      In :term:`ecflow_ui` the background colour of the text reflects the status.  
-      
-      :term:`task` status are: :term:`unknown`, :term:`queued`, :term:`submitted`, :term:`active`, :term:`complete`, :term:`aborted` and :term:`suspended`
-      
-      :term:`ecflow_server` status are: :term:`shutdown`, :term:`halted`, :term:`running` 
-      this is shown on the root node in :term:`ecflow_ui`
+      See :term:`state`
       
    submitted
-      Is a :term:`node` :term:`status`. 
+      Is a :term:`node` :term:`state`.
       
       When the :term:`task` :term:`dependencies` are resolved/free the :term:`ecflow_server` places the task into a submitted state.
       However if the :term:`ECF_JOB_CMD` fails, the task is placed into the :term:`aborted` state
@@ -1980,10 +2008,19 @@ Glossary
       It can be monitored by :term:`ecflow_ui`
    
    suspended
-      Is a :term:`node` state. A :term:`node` can be placed into the suspended state via a :term:`defstatus` or via :term:`ecflow_ui`
-      
-      A suspended :term:`node` including any of its children cannot take part in :term:`scheduling` until
-      the node is resumed.
+      This value is used to configure the default state (i.e. :term:`defstatus`) of a :term:`node`.
+
+      A :term:`node` with :term:`defstatus` set to *suspended* will, at begin/re-queue time, adopt the state
+      :code:`queued` and then require an explicit resume command by the user to eventually move to
+      the :code:`submitted` state (the node is effectively *suspended* in the meantime).
+
+      A *suspended* :term:`node`, including its children, does not take part in the :term:`scheduling` until the
+      node is resumed. Also, the job generation will not happen for *suspended* nodes.
+
+      A :term:`node` can also be *suspended* using the CLI `--suspend` command or via the context menu of the :term:`ecflow_ui`.
+
+      While a node is *suspended*, the :term:`ecflow_ui` tree view shows the *suspended* colour next to a
+      narrow strip with the colour of the underlying :term:`node` state.
 
    task
       A task represents a job that needs to be carried out. 
@@ -2003,7 +2040,45 @@ Glossary
            - :py:class:`ecflow.Task`
          * - :ref:`grammar`
            - :token:`task`
-            
+
+   task command
+      Task commands (sometimes called Child commands) are executed within the :term:`ecf script` files.
+      The table also includes the default action (from version 4.0.4) if the task command is part of a zombie.
+      'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+
+      .. list-table::
+         :header-rows: 1
+
+         * - Task Command
+           - Description
+           - Zombie (default action)
+         * - :ref:`ecflow_client --init <init_cli>`
+           - Sets the :term:`task` to the :term:`active` :term:`status`
+           - block
+         * - :ref:`ecflow_client --wait <wait_cli>`
+           - Wait for a expression to evaluate
+           - block
+         * - :ref:`ecflow_client --queue <queue_cli>`
+           - Update :term:`queue` step in server
+           - block
+         * - :ref:`ecflow_client --abort <abort_cli>`
+           - Sets the :term:`task` to the :term:`aborted` :term:`status`
+           - block
+         * - :ref:`ecflow_client --complete <complete_cli>`
+           - Sets the :term:`task` to the :term:`complete` :term:`status`
+           - block
+         * - :ref:`ecflow_client --event <event_cli>`
+           - Set an :term:`event`
+           - fob
+         * - :ref:`ecflow_client --meter <meter_cli>`
+           - Change a :term:`meter`
+           - fob
+         * - :ref:`ecflow_client --label <label_cli>`
+           - Change a :term:`label`
+           - fob
+
+      The following environment variables must be set for the task commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
+
    time
       This defines a time dependency for a node. 
       
@@ -2113,7 +2188,7 @@ Glossary
       A node with a trigger can only be activated when its trigger has expired. 
       A trigger holds the node as long as the trigger expression evaluation returns false. 
       
-      Trigger evaluation occurs when ever the :term:`child command` communicates with the server. i.e whenever
+      Trigger evaluation occurs when ever the :term:`task command` communicates with the server. i.e whenever
       there is a state change in the suite definition.
       
       The keywords in trigger expressions are: :term:`unknown`, :term:`suspended`, :term:`complete`, :term:`queued`, :term:`submitted`, :term:`active`, :term:`aborted`
@@ -2213,7 +2288,7 @@ Glossary
       This is the default :term:`node` :term:`status` when a :term:`suite definition` is loaded into the :term:`ecflow_server`
       
    user command
-      User commands are any client to server requests that are **not** :term:`child command`\ s.
+      User commands are any client to server requests that are **not** :term:`task command`\ s.
       
    variable
       ecFlow makes heavy use of different kinds of variables.There are several kinds of variables:
@@ -2288,22 +2363,22 @@ Glossary
    zombie
       Zombies are running jobs that fail authentication when communicating with the :term:`ecflow_server`
       
-      :term:`child command`\ s like (init, event,meter, label, abort,complete) are placed in the :term:`ecf script`
+      :term:`task command`\ s like (init, event,meter, label, abort,complete) are placed in the :term:`ecf script`
       file and are used to communicate with the :term:`ecflow_server`. 
       
-      The :term:`ecflow_server` authenticates each connection attempt made by the :term:`child command`. 
+      The :term:`ecflow_server` authenticates each connection attempt made by the :term:`task command`. 
       Authentication can fail for a number of reasons:
       
-         - password(ECF_PASS) supplied with the :term:`child command`, does not match the one in the :term:`ecflow_server`
-         - path name(ECF_NAME) supplied with the :term:`child command`, does not locate a :term:`task` in the :term:`ecflow_server`
-         - process id(ECF_RID) supplied with :term:`child command`, does not correspond with the one stored in the :term:`ecflow_server`
-         - :term:`task` is already :term:`active`, but receives another init :term:`child command`
-         - :term:`task` is already :term:`complete`, but receives another :term:`child command`
-         - :term:`task` is already :term:`aborted`, but receives another :term:`child command`
+         - password(ECF_PASS) supplied with the :term:`task command`, does not match the one in the :term:`ecflow_server`
+         - path name(ECF_NAME) supplied with the :term:`task command`, does not locate a :term:`task` in the :term:`ecflow_server`
+         - process id(ECF_RID) supplied with :term:`task command`, does not correspond with the one stored in the :term:`ecflow_server`
+         - :term:`task` is already :term:`active`, but receives another init :term:`task command`
+         - :term:`task` is already :term:`complete`, but receives another :term:`task command`
+         - :term:`task` is already :term:`aborted`, but receives another :term:`task command`
          
       When authentication fails the job is considered to be a zombie.
       The :term:`ecflow_server` will keep a note of the zombie for a period of time, before it is automatically removed.
-      However the removed zombie, may well re-appear. (this is because each :term:`child command` will continue
+      However the removed zombie, may well re-appear. (this is because each :term:`task command` will continue
       attempting to contact the :term:`ecflow_server` for 24 hours. This is configurable 
       see ECF_TIMEOUT on :term:`ecflow_client`)
       
@@ -2322,7 +2397,7 @@ Glossary
       The zombie attribute defines how a :term:`zombie` should be handled in an automated fashion.
       Very careful consideration should be taken before this attribute is added as it may hide a genuine problem.
       It can be added to any :term:`node`. But is best defined at the :term:`suite` or :term:`family` level. 
-      If there is no zombie attribute the default behaviour is to block the :term:`child command`. 
+      If there is no zombie attribute the default behaviour is to block the :term:`task command`. 
       
       To add a zombie attribute in python, please see: :py:class:`ecflow.ZombieAttr`
       
@@ -2349,7 +2424,7 @@ Glossary
          
       * **ecf**: Jobs are created as part of the normal :term:`scheduling`
          
-         - Two init commands or task complete or aborted but receives another :term:`child command`
+         - Two init commands or task complete or aborted but receives another :term:`task command`
          - Server crashed (or terminated and restarted) and the recovered :term:`check point` file is out of date.
          - A :term:`task` is repeatedly re-run, earlier copies will not be remembered.
          - Job sent by another :term:`ecflow_server`, but which cannot talk to the original :term:`ecflow_server`

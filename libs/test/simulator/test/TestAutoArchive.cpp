@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_family.def"), errorMsg),
                         errorMsg);
 
-    // make sure all familes has been archived
+    // make sure all families has been archived
     auto families = ecf::get_all_families(theDefs);
     for (auto family : families) {
         BOOST_CHECK_MESSAGE(family->get_flag().is_set(ecf::Flag::ARCHIVED),

@@ -170,7 +170,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const {
     // *** are registered.                                                         ***
     //
     // add_suite() below will incremented the modify_change_no.
-    // We don't want to do this, as change for suites *not in* the our handle will get skewed
+    // We do not want to do this, as change for suites *not in* the our handle will get skewed
     // This class ensure that any changes made are reset to their original values
     EcfPreserveChangeNo preserveChangeNo;
 

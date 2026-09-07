@@ -545,13 +545,13 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             TestHelper::invokeRequest(&defs,
                                       Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::VARIABLE, "FRED1", "BILL1")));
             const Variable& v = s->findVariable("FRED1");
-            BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "BILL1",
+            BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "BILL1",
                                 "expected to find variable FRED1, with value BILL1");
         }
         {
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::VARIABLE, "FRED1")));
             const Variable& v = s->findVariable("FRED1");
-            BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "", "expected to find variable FRED1, with empty value");
+            BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "", "expected to find variable FRED1, with empty value");
         }
     }
 
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(paths, AlterCmd::VARIABLE, "FRED1", "BILL1")));
             for (size_t i = 0; i < nodes.size(); i++) {
                 const Variable& v = s->findVariable("FRED1");
-                BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "BILL1",
+                BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "BILL1",
                                     "expected to find variable FRED1, with value BILL1");
             }
         }
@@ -1321,6 +1321,39 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_errors) {
         TestHelper::invokeFailureRequest(
             &defs,
             Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_LABEL, "label", "value"))); // duplicate label name
+    }
+
+    /// Destroy singleton's to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_alter_cmd_defstatus_validation) {
+    ECF_NAME_THIS_TEST();
+
+    // Note: this exercises the string based constructor, which is the one that validates the given state.
+    // The enumeration based constructor used elsewhere in this file bypasses the validation.
+
+    const std::vector<std::string> paths{"/suite/t1"};
+
+    // Every state considered valid by DState must be accepted.
+    for (const auto& state : DState::allStates()) {
+        BOOST_REQUIRE_NO_THROW(AlterCmd(paths, "change", "defstatus", state, ""));
+    }
+
+    // An invalid state must be rejected, and the diagnostic must advertise the whole accepted set.
+    // A diagnostic that lists fewer states than the validation accepts leads users to believe that
+    // the missing ones are rejected.
+    try {
+        AlterCmd(paths, "change", "defstatus", "not-a-state", "");
+        BOOST_FAIL("Expected 'alter change defstatus not-a-state' to be rejected");
+    }
+    catch (const std::exception& e) {
+        const std::string diagnostic = e.what();
+        for (const auto& state : DState::allStates()) {
+            BOOST_CHECK_MESSAGE(diagnostic.find(state) != std::string::npos,
+                                "Expected the diagnostic to mention the accepted state '"
+                                    << state << "', but found: " << diagnostic);
+        }
     }
 
     /// Destroy singleton's to avoid valgrind from complaining

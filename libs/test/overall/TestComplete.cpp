@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(T_Complete)
 // complete. See page 65 of user manual
 //
 // As protection against user, a family should not complete
-// if any of its children are still in ACTIVE or SUBMIITED state.
+// if any of its children are still in ACTIVE or SUBMITTED state.
 //
 // **************************************************************************
 // Note: When we use a complete expression. Node resolution will set complete

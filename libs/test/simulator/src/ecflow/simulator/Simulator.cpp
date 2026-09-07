@@ -47,7 +47,7 @@ bool Simulator::run(const std::string& theDefsFile, std::string& errorMsg) const
         return false;
     }
     // cout << theDefs << "\n";
-    return run(theDefs, theDefsFile, errorMsg, false /* don't do check, allready done */);
+    return run(theDefs, theDefsFile, errorMsg, false /* do not do check, already done */);
 }
 
 bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string& errorMsg, bool do_checks) const {
@@ -262,7 +262,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
                      << " HAS parent Repeating node " << nodeWithRepeat->debugNodePath() << " "
                      << nodeWithRepeat->repeat().dump() << endl;
             }
-            else { // cound be a cron
+            else { // could be a cron
                 cout << " level " << level_ << " submitted task " << t->debugNodePath() << " count = " << (*i).second
                      << endl;
             }

@@ -52,16 +52,8 @@ STC_Cmd_ptr ServerVersionCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::string_cmd(Version::full());
 }
 
-static const char* arg_desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Returns the version number of the server\n"
-           "Usage:\n"
-           "  --server_version\n"
-           "    Writes the version to standard output\n";
-}
-
 void ServerVersionCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::server_version_arg(), arg_desc());
+    desc.add_options()(CtsApi::server_version_arg(), "");
 }
 
 void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {

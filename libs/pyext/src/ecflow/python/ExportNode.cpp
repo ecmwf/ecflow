@@ -1599,7 +1599,7 @@ void export_Node(py::module& m) {
              &Node_generated_variables_using_variable_list,
              "Retrieves the list of generated variables. Pass in ecflow.VariableList as argument to hold variables.")
 
-        .def("is_suspended", &Node::isSuspended, "Returns true if the `node`_ is in a `suspended`_ state")
+        .def("is_suspended", &Node::isSuspended, "Returns true if the :term:`node` is in a :term:`suspended` state")
 
         .def("find_variable",
              &Node::findVariable,
@@ -1623,17 +1623,17 @@ void export_Node(py::module& m) {
         .def("find_meter",
              &Node::findMeter,
              py::return_value_policy::reference,
-             "Find the `meter`_ on the node only. Returns an object")
+             "Find the :term:`meter` on the node only. Returns an object")
 
         .def("find_event",
              &Node::findEventByNameOrNumber,
              py::return_value_policy::reference,
-             "Find the `event`_ on the node only. Returns a object")
+             "Find the :term:`event` on the node only. Returns a object")
 
         .def("find_label",
              &Node::find_label,
              py::return_value_policy::reference,
-             "Find the `label`_ on the node only. Returns a object")
+             "Find the :term:`label` on the node only. Returns a object")
 
         .def("find_queue",
              &Node::find_queue,
@@ -1643,9 +1643,9 @@ void export_Node(py::module& m) {
         .def("find_generic",
              &Node::find_generic,
              py::return_value_policy::reference,
-             "Find the `generic`_ on the node only. Returns a Generic object")
+             "Find the :term:`generic` on the node only. Returns a Generic object")
 
-        .def("find_limit", &Node::find_limit, "Find the `limit`_ on the node only. returns a limit ptr")
+        .def("find_limit", &Node::find_limit, "Find the :term:`limit` on the node only. returns a limit ptr")
 
         .def("find_node_up_the_tree", &Node::find_node_up_the_tree, "Search immediate node, then up the node hierarchy")
 
@@ -1711,43 +1711,43 @@ void export_Node(py::module& m) {
              py::arg("force")              = true,
              "replace node on the server.")
 
-        .def_property_readonly("meters", &Node::meters, "Returns a list of `meter`_\\ s")
+        .def_property_readonly("meters", &Node::meters, "Returns a list of :term:`meter`\\ s")
 
-        .def_property_readonly("events", &Node::events, "Returns a list of `event`_\\ s")
+        .def_property_readonly("events", &Node::events, "Returns a list of :term:`event`\\ s")
 
-        .def_property_readonly("variables", &Node::variables, "Returns a list of user defined `variable`_\\ s")
+        .def_property_readonly("variables", &Node::variables, "Returns a list of user defined :term:`variable`\\ s")
 
-        .def_property_readonly("labels", &Node::labels, "Returns a list of `label`_\\ s")
+        .def_property_readonly("labels", &Node::labels, "Returns a list of :term:`label`\\ s")
 
         .def_property_readonly("avisos",
                                static_cast<const std::vector<ecf::AvisoAttr>& (Node::*)() const>(&Node::avisos),
                                py::return_value_policy::reference_internal,
-                               "Returns a list of `aviso`_\\ s")
+                               "Returns a list of :term:`aviso`\\ s")
 
         .def_property_readonly("mirrors",
                                static_cast<const std::vector<ecf::MirrorAttr>& (Node::*)() const>(&Node::mirrors),
                                py::return_value_policy::reference_internal,
-                               "Returns a list of `mirror`_\\ s")
+                               "Returns a list of :term:`mirror`\\ s")
 
-        .def_property_readonly("limits", &Node::limits, "Returns a list of `limit`_\\ s")
+        .def_property_readonly("limits", &Node::limits, "Returns a list of :term:`limit`\\ s")
 
-        .def_property_readonly("inlimits", &Node::inlimits, "Returns a list of `inlimit`_\\ s")
+        .def_property_readonly("inlimits", &Node::inlimits, "Returns a list of :term:`inlimit`\\ s")
 
         .def_property_readonly("verifies", &Node::verifys, "Returns a list of Verify's")
 
-        .def_property_readonly("times", &Node::timeVec, "Returns a list of `time`_\\ s")
+        .def_property_readonly("times", &Node::timeVec, "Returns a list of :term:`time`\\ s")
 
-        .def_property_readonly("todays", &Node::todayVec, "Returns a list of `today`_\\ s")
+        .def_property_readonly("todays", &Node::todayVec, "Returns a list of :term:`today`\\ s")
 
-        .def_property_readonly("dates", &Node::dates, "Returns a list of `date`_\\ s")
+        .def_property_readonly("dates", &Node::dates, "Returns a list of :term:`date`\\ s")
 
-        .def_property_readonly("days", &Node::days, "Returns a list of `day`_\\ s")
+        .def_property_readonly("days", &Node::days, "Returns a list of :term:`day`\\ s")
 
-        .def_property_readonly("crons", &Node::crons, "Returns a list of `cron`_\\ s")
+        .def_property_readonly("crons", &Node::crons, "Returns a list of :term:`cron`\\ s")
 
-        .def_property_readonly("zombies", &Node::zombies, "Returns a list of `zombie`_\\ s")
+        .def_property_readonly("zombies", &Node::zombies, "Returns a list of :term:`zombie`\\ s")
 
-        .def_property_readonly("queues", &Node::queues, "Returns a list of `queue`_\\ s")
+        .def_property_readonly("queues", &Node::queues, "Returns a list of :term:`queue`\\ s")
 
-        .def_property_readonly("generics", &Node::generics, "Returns a list of `generic`_\\ s");
+        .def_property_readonly("generics", &Node::generics, "Returns a list of :term:`generic`\\ s");
 }

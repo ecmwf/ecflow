@@ -66,7 +66,7 @@ public:
 
     /// Will ask the child command to terminate, *without* the child command raising any errors
     /// Since we can have many child commands(init,event,meter, label,complete) in a job
-    /// This fob must stay around, since we don't know how long the job will last for.
+    /// This fob must stay around, since we do not know how long the job will last for.
     /// Will override, fail,recover,remove
     /// For Command Line Interface only the task_path is provided. Just have to make do.
     void fob(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);
@@ -77,7 +77,7 @@ public:
     /// However the abort will also be a zombie, and will also be auto-terminated
     /// Hence the job file must be careful to use 'set -e' to avoid infinite recursion
     /// Since we can have many child commands(init,event,meter, label,complete) in a job
-    /// This fob must stay around, since we don't know how long the job will last for.
+    /// This fob must stay around, since we do not know how long the job will last for.
     /// Will override, fob,recover,remove
     /// For Command Line Interface only the task_path is provided. Just have to make do.
     void fail(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);

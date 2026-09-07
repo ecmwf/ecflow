@@ -13,7 +13,7 @@
 
 #include <string>
 
-/// Returns the location of the defs file, such thats it in the test data area
+/// Returns the location of the defs file, such that it is in the test data area
 std::string findTestDataLocation(const std::string& defsFile);
 
 #endif /* ecflow_simulator_test_TestUtil_HPP */

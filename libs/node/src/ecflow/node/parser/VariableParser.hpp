@@ -30,7 +30,7 @@
 /// *************************************************************
 ///
 /// Hence we will do the following:
-///   a/ On parsing always remove quotes ie single or double
+///   a/ On parsing always remove quotes i.e., single or double
 ///   b/ On serialising always add single quotes
 ///
 

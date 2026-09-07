@@ -78,12 +78,12 @@ void defs_update(int interval) {
     };
 
     // These will throw is ecflow server is not present; we will not
-    // try to reconnect if there wasn't a connection to begin with
+    // try to reconnect if there was not a connection to begin with
     client.news_local();
     client.sync_local();
 
     // Implement a drift to update cycle. The basic idea is that if we
-    // don't get requests to the interface, we slowly start to increase
+    // do not get requests to the interface, we slowly start to increase
     // the interval which we use to poll ecFlow server. This is done to
     // reduce ecFlow server load when there is no activity on the REST
     // API.

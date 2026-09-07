@@ -88,11 +88,11 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
 #endif
     /// ***************************************************************************
     /// Task based cmd have their own authentication mechanism, hence we
-    /// Don't need to call the base class authenticate
+    /// Do not need to call the base class authenticate
     /// **************************************************************************
 
     if (!server->allowTaskCommunication()) {
-        // This is not an Error, hence we don't throw exception
+        // This is not an Error, hence we do not throw exception
         reply = PreAllocatedReply::block_client_server_halted_cmd();
         return false;
     }
@@ -226,7 +226,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
                 // For all three it should be safe to just fob:
                 //   1/ Two calls to --complete # Be forgiving
                 //   2/ Overloaded server       # The correct course of action
-                //   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
+                //   3/ zombie                  # The zombie has completed anyway, do not bother blocking it
 
                 submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
                 server->zombie_ctrl().remove_by_path(path_to_submittable_);

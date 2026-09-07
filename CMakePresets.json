@@ -36,6 +36,7 @@
         "ENABLE_UI"                    : "ON",
         "ENABLE_STATIC_BOOST_LIBS"     : "OFF",
         "ENABLE_DEBIAN_PACKAGE"        : "ON",
+        "ENABLE_ASIO_SELECT_REACTOR"   : "ON",
         "Boost_INCLUDE_DIR"            : "/usr/include"
       },
       "environment"   : {}
@@ -70,6 +71,7 @@
         "ENABLE_UI"                    : "ON",
         "ENABLE_STATIC_BOOST_LIBS"     : "OFF",
         "ENABLE_DEBIAN_PACKAGE"        : "ON",
+        "ENABLE_ASIO_SELECT_REACTOR"   : "ON",
         "Boost_INCLUDE_DIR"            : "/usr/include"
       },
       "environment"   : {}
@@ -104,6 +106,7 @@
         "ENABLE_UI"                    : "ON",
         "ENABLE_STATIC_BOOST_LIBS"     : "OFF",
         "ENABLE_DEBIAN_PACKAGE"        : "ON",
+        "ENABLE_ASIO_SELECT_REACTOR"   : "ON",
         "Boost_INCLUDE_DIR"            : "/usr/include"
       },
       "environment"   : {}
@@ -138,6 +141,7 @@
         "ENABLE_UI"                    : "ON",
         "ENABLE_STATIC_BOOST_LIBS"     : "OFF",
         "ENABLE_DEBIAN_PACKAGE"        : "ON",
+        "ENABLE_ASIO_SELECT_REACTOR"   : "ON",
         "Boost_INCLUDE_DIR"            : "/usr/include"
       },
       "environment"   : {}

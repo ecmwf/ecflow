@@ -17,6 +17,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -213,7 +214,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 }
 
                 const Variable& ecf_jobout_gen_var = submittable->findGenVariable(ecf::environment::ECF_JOBOUT);
-                if (!File::open(ecf_jobout_gen_var.theValue(), fileContents)) {
+                if (!File::open(ecf_jobout_gen_var.value(), fileContents)) {
 
                     // If that fails as a backup, look under ECF_HOME/ECF_NAME.ECF_TRYNO,   ECFLOW-177 preserve old SMS
                     // behaviour
@@ -223,11 +224,11 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                     ecfhome_jobout += ".";
                     ecfhome_jobout += submittable->tryNo();
 
-                    if (ecfhome_jobout != ecf_jobout_gen_var.theValue()) {
+                    if (ecfhome_jobout != ecf_jobout_gen_var.value()) {
                         // Implies ECF_OUT was specified, hence *ALSO* look in ECF_HOME/ECF_NAME.ECF_TRYNO
                         if (!File::open(ecfhome_jobout, fileContents)) {
                             ss << "Failed to open the job-out (ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO='"
-                               << ecf_jobout_gen_var.theValue() << "') ";
+                               << ecf_jobout_gen_var.value() << "') ";
                             ss << "*AND* (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='" << ecfhome_jobout << "')";
                             ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
                             throw std::runtime_error(ss.str());
@@ -236,7 +237,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                     else {
                         // ECF_OUT *not* specified implies ECF_JOBOUT = ECF_HOME/ECF_NAME.ECF_TRYNO
                         ss << "Failed to open the job-out(ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='"
-                           << ecf_jobout_gen_var.theValue() << "') ";
+                           << ecf_jobout_gen_var.value() << "') ";
                         ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
                         throw std::runtime_error(ss.str());
                     }
@@ -333,20 +334,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 const char* CFileCmd::arg() {
     return CtsApi::fileArg();
 }
-const char* CFileCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "By default will return the script.\n"
-           "  arg1 = path to node\n"
-           "  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill\n"
-           "         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat\n"
-           "  arg3 = (optional) max_lines = 10000 <default>";
-}
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), CFileCmd::desc());
+    desc.add_options()(CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();
@@ -358,7 +348,8 @@ void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     if (args.size() < 1) {
         throw std::runtime_error(MESSAGE("CFileCmd: At least one arguments expected for File. Found "
                                          << args.size() << "\n"
-                                         << CFileCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("file").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     std::string pathToNode = args[0];

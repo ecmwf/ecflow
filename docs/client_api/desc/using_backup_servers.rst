@@ -1,6 +1,6 @@
 .. _using_backup_servers:
 
-Using backup servers
+Using Backup Servers
 ********************
 
 

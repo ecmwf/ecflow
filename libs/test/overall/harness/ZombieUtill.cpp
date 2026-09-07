@@ -31,7 +31,7 @@ void ZombieUtil::test_clean_up(int timeout) {
         std::cout << Zombie::pretty_print(zombies, 9) << "\n, attempting to *fob* then *remove* ...\n";
 
         int no_fobed = do_zombie_user_action(
-            ZombieCtrlAction::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
+            ZombieCtrlAction::FOB, zombies.size(), timeout, false /* do not fail if it takes to long */);
 
         // In order to FOB, we must wait, till a child command, talks to the server.
         if (no_fobed) {
@@ -44,7 +44,7 @@ void ZombieUtil::test_clean_up(int timeout) {
             sleep(wait);
         }
         (void)do_zombie_user_action(
-            ZombieCtrlAction::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
+            ZombieCtrlAction::REMOVE, no_fobed, timeout, false /* do not fail if it takes to long */);
     }
 }
 

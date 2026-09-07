@@ -40,7 +40,7 @@ std::string encode_base64(std::string_view value);
 /// @brief Simple validation of base64 encoded string.
 ///
 /// Checks the following conditions:
-/// - length has to be multiple of 4 (n.b. 0 if a valid lenght)
+/// - length has to be multiple of 4 (n.b. 0 if a valid length)
 /// - valid characters are A-Za-z0-9+/
 /// - '=' can be used for padding (0, 1, or 2 characters) at the end of string
 ///

@@ -653,7 +653,7 @@ endsuite;
         BOOST_CHECK(client.reason().find("[bob]") != std::string::npos);
     }
 
-    { // #authentication, perform operation with unknow user (i.e. not present in password file)
+    { // #authentication, perform operation with unknown user (i.e. not present in password file)
         auto client = RunClient{}
                           .with(host)
                           .with(port)

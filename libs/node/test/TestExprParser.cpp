@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
     // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
     // Note: we can use NOT,eq,ne,le,ge or brackets
-    //       we can't use a:event_name  ==> a:event_name == set
+    //       we cannot use a:event_name  ==> a:event_name == set
     std::vector expressions = {
         "a == complete"s,
         "a != complete"s,
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
     // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
     // Note: we can use NOT,eq,ne,le,ge,
-    //       we can't use a:event_name  ==> a:event_name == set
+    //       we cannot use a:event_name  ==> a:event_name == set
     std::vector expressions = {
         "((a == complete) and (b == complete))"s,
         "(((a == complete) or (b == complete)) and (c == complete))"s,
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
     //
-    // Notice: in the following trigger expressions, when a variable is refered (e.g. :VAR), it is evaluated to 0.
+    // Notice: in the following trigger expressions, when a variable is referred (e.g. :VAR), it is evaluated to 0.
     // In this case, because of the DateTime instant nature of the comparison, value 0 represents 19700101T000000.
     //
 
@@ -926,7 +926,7 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
                                "(a = complete and b = complete or c = complete)"s,
                                "(a erro complete and b == complete) or nodepath:eventname"s,
                                "(a == complete and b == complete or (a == complete and b == complete)"s,
-                               // triggers that don't make sense in the operational suites
+                               // triggers that do not make sense in the operational suites
                                "../../../legA/fc/pf/01 eq complete eq complete"s,
                                "/mofc/mon/hind/14/back == complete or %s:DOW ne 5"s, // ECFLOW-888
                                ":VAR eq 20001332T257890"s};
@@ -937,6 +937,57 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
         std::string error;
         auto actual = theExprParser.doParse(error);
         BOOST_CHECK_MESSAGE(!actual, expression << " expected to fail ");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_with_attached_tokens) {
+    ECF_NAME_THIS_TEST();
+
+    // ECFLOW-2112:
+    // A word operator (and/or/eq/ne/ge/gt/le/lt) must be a token in its own right, i.e. surrounded by
+    // whitespace/brackets. When it is "attached"/glued to an adjacent operand it forms a single identifier
+    // (e.g. 'completeand', '515and', 'andb') which silently changes the meaning of the expression.
+    // These expressions must be rejected by the parser.
+
+    using namespace std::string_literals;
+    std::vector expressions = {
+        // ---- The exact malformed expressions observed in operational checkpoints (ECFLOW-2112) ----
+        ":TIME ge 515and :ECF_DATE gt :YMD"s,
+        ":TIME ge 1115and :ECF_DATE gt :YMD"s,
+        "input eq completeand ( ( ../lag:YMD + 5) ge ../prep:YMD)"s,
+
+        // ---- 'and' attached to the preceding operand ----
+        "a == completeand b == complete"s, // node state glued to 'and'
+        "a eq completeand b eq complete"s, // word operators + state glued to 'and'
+        "1 == 1and 2 == 2"s,               // integer glued to 'and'
+        "a:value == 10and b:value == 20"s, // integer glued to 'and'
+
+        // ---- 'and' attached to the following operand ----
+        "a == complete andb == complete"s, // 'and' glued to node
+        "a == complete and2 == 2"s,        // 'and' glued to integer
+
+        // ---- 'or' attached to an operand ----
+        "a == completeor b == complete"s, // node state glued to 'or'
+        "a == complete orb == complete"s, // 'or' glued to node
+        "1 == 1or 2 == 2"s,               // integer glued to 'or'
+
+        // ---- word comparison operators glued to an operand ----
+        "aeq complete"s,                      // 'eq' glued to left operand
+        "a eqcomplete"s,                      // 'eq' glued to right operand
+        ":TIME ge515 and :ECF_DATE gt :YMD"s, // 'ge' glued to integer
+        "a ne completeand b == complete"s,    // 'ne'/state glued to 'and'
+
+        // ---- symbolic '==' interacting with a glued word operator ----
+        "a == completeand"s,                  // trailing glued 'and' after equality
+        "a == b == completeor c == complete"s // 'or' glued to state after chained '=='
+    };
+
+    for (const auto& expression : expressions) {
+
+        ExprParser theExprParser(expression);
+        std::string error;
+        auto actual = theExprParser.doParse(error);
+        BOOST_CHECK_MESSAGE(!actual, expression << " expected to fail (ECFLOW-2112 attached tokens)");
     }
 }
 

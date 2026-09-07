@@ -23,6 +23,7 @@
 #include "VReply.hpp"
 #include "VServerSettings.hpp"
 #include "VTask.hpp"
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -206,8 +207,29 @@ private:
     void failedClientServer(const std::string& msg);
     void compatibleServer();
     void incompatibleServer(const std::string& version);
-    void sslIncompatibleServer(const std::string& msg);
     void sslCertificateError(const std::string& msg);
+
+    ///
+    /// @brief Marks the server unreachable because the two ends speak different protocols.
+    ///
+    /// The queue and the refresh timer are stopped: no retry can help, because the server is
+    /// answering correctly to somebody, just not to a client configured this way.
+    ///
+    /// @param[in] diagnosis The diagnosis observed by the client
+    ///
+    void protocolMismatch(const ecf::ConnectionDiagnosis& diagnosis);
+
+    ///
+    /// @brief Decides what a failed first contact with a server means, from the diagnosis.
+    ///
+    /// This is the first request issued to a server, so a failure here has to distinguish a
+    /// misconfiguration from a server that is simply not running, without any prior knowledge of
+    /// the peer.
+    ///
+    /// @param[in] errMsg      The message reported by the client
+    /// @param[in] serverReply The reply, carrying the structured diagnosis
+    ///
+    void classifyFirstContactFailure(const std::string& errMsg, const ServerReply& serverReply);
 
     void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
     void updateSuiteFilter(bool needNewSuiteList);

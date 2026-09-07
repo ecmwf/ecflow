@@ -28,7 +28,7 @@ struct Gizmo
 };
 
 template <>
-struct ecf::converter_traits<Widget, Gizmo>
+struct ecf::detail::converter_traits<Widget, Gizmo>
 {
     inline static Gizmo convert(const Widget&) { return Gizmo{}; }
 };

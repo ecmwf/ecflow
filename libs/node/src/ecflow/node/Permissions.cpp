@@ -25,7 +25,7 @@ Permissions Permissions::find_in(const std::vector<Variable>& variables) {
     if (auto found = std::find_if(
             std::begin(variables), std::end(variables), [](auto&& var) { return var.name() == "PERMISSIONS"; });
         found != std::end(variables)) {
-        auto var_value = found->theValue();
+        auto var_value = found->value();
         return ecf::Permissions::make_from_variable(var_value);
     }
     else {

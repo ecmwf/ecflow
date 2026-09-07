@@ -143,7 +143,7 @@ SState::State Defs_get_server_state(defs_ptr self) {
 /// @return The added suite.
 ///
 suite_ptr Defs_add_suite(defs_ptr self, suite_ptr s) {
-    // Since we don't pass in a child pos, the nodes are added to the end
+    // Since we do not pass in a child pos, the nodes are added to the end
     self->addSuite(s);
     return s;
 }
@@ -241,7 +241,7 @@ defs_ptr Defs_add_variable_int(defs_ptr self, const std::string& name, int value
 /// @return The definitions (for method chaining).
 ///
 defs_ptr Defs_add_variable_variable(defs_ptr self, const Variable& var) {
-    self->server_state().add_or_update_user_variables(var.name(), var.theValue());
+    self->server_state().add_or_update_user_variables(var.name(), var.value());
     return self;
 }
 
@@ -354,7 +354,7 @@ py::object Defs_add(defs_ptr self, const py::handle& arg) {
 
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec) {
-            self->server_state().add_or_update_user_variables(i.name(), i.theValue());
+            self->server_state().add_or_update_user_variables(i.name(), i.value());
         }
     }
     else if (auto found = py_extract<py::list>(arg); found) {
@@ -367,7 +367,7 @@ py::object Defs_add(defs_ptr self, const py::handle& arg) {
     }
     else if (auto found = py_extract<Variable>(arg); found) {
         Variable var = found.value();
-        self->server_state().add_or_update_user_variables(var.name(), var.theValue());
+        self->server_state().add_or_update_user_variables(var.name(), var.value());
     }
     else {
         throw std::runtime_error("ExportDefs::add : Unknown type");
@@ -535,9 +535,9 @@ void export_Defs(py::module& m) {
 
         .def("delete_variable", &Defs_delete_variable, "An empty string will delete all user variables")
 
-        .def("find_suite", &Defs::findSuite, "Given a name, find the corresponding `suite`_")
+        .def("find_suite", &Defs::findSuite, "Given a name, find the corresponding :term:`suite`")
 
-        .def("find_abs_node", &Defs::findAbsNode, "Given a path, find the the `node`_")
+        .def("find_abs_node", &Defs::findAbsNode, "Given a path, find the the :term:`node`")
 
         .def("find_node_path",
              &Defs::find_node_path,
@@ -546,29 +546,29 @@ void export_Defs(py::module& m) {
 
         .def("find_node", &Defs::find_node, "Given a type(suite,family,task) and a path to a node, return the node.")
 
-        .def("get_all_nodes", &Defs_get_all_nodes, "Returns all the `node`_\\ s in the definition")
+        .def("get_all_nodes", &Defs_get_all_nodes, "Returns all the :term:`node`\\ s in the definition")
 
-        .def("get_all_tasks", &Defs_get_all_tasks, "Returns all the `task`_ nodes")
+        .def("get_all_tasks", &Defs_get_all_tasks, "Returns all the :term:`task` nodes")
 
         .def("has_time_dependencies",
              &Defs::hasTimeDependencies,
-             "returns True if the `suite definition`_ has any time `dependencies`_")
+             "returns True if the :term:`suite definition` has any time :term:`dependencies`")
 
         .def("save_as_checkpt",
              &Defs::write_to_checkpt_file,
-             "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
+             "Save the in memory :term:`suite definition` as a :term:`check point` file. This includes all node state.")
 
         .def("restore_from_checkpt",
              &Defs_restore,
-             "Restore the `suite definition`_ from a `check point`_ file stored on disk")
+             "Restore the :term:`suite definition` from a :term:`check point` file stored on disk")
 
         .def("save_as_defs",
              &Defs_save_as_defs_with_given_style,
-             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+             "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
 
         .def("save_as_defs",
              &Defs_save_as_defs_with_default_style,
-             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+             "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
 
         .def("check", &Defs_check, DefsDoc::check())
 
@@ -592,12 +592,13 @@ void export_Defs(py::module& m) {
             "suites",
             py::cpp_function([](const Defs& s) { return py::make_iterator(s.suites().begin(), s.suites().end()); },
                              py::keep_alive<0, 1>()),
-            "Returns a list of `suite`_\\ s")
+            "Returns a list of :term:`suite`\\ s")
 
-        .def_property_readonly("externs", &Defs::externs, "Returns a list of `extern`_\\ s")
+        .def_property_readonly("externs", &Defs::externs, "Returns a list of :term:`extern`\\ s")
 
         .def_property_readonly(
-            "user_variables", &Defs::user_variables, "Returns a list of user defined `variable`_\\ s")
+            "user_variables", &Defs::user_variables, "Returns a list of user defined :term:`variable`\\ s")
 
-        .def_property_readonly("server_variables", &Defs::server_variables, "Returns a list of server `variable`_\\ s");
+        .def_property_readonly(
+            "server_variables", &Defs::server_variables, "Returns a list of server :term:`variable`\\ s");
 }

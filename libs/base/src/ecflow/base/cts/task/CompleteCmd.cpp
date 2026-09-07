@@ -82,25 +82,10 @@ STC_Cmd_ptr CompleteCmd::doHandleRequest(AbstractServer* as) const {
 const char* CompleteCmd::arg() {
     return TaskApi::completeArg();
 }
-const char* CompleteCmd::desc() {
-    return "Mark task as complete. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n\n"
-           "If this child command is a zombie, then the default action will be to *block*.\n"
-           "The default can be overridden by using zombie attributes.\n"
-           "Otherwise the blocking period is defined by ECF_TIMEOUT.\n"
-           "The init command allows variables to be added, and complete command\n"
-           "allows for them to be removed.\n"
-           "  arg1(--remove)(optional) = a list of variables to removed from this task\n\n"
-           "Usage:\n"
-           "  ecflow_client --complete\n"
-           "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task";
-}
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CompleteCmd::arg(),
-                       CompleteCmd::desc())("remove",
-                                            boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                                            "remove variables i.e name name2");
+    desc.add_options()(CompleteCmd::arg(), "")("remove",
+                                               boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {

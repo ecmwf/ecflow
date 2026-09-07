@@ -117,7 +117,7 @@ void Log::flush() {
     std::scoped_lock lock(mx_);
 
     // will close ofstream and force data to be written to disk.
-    // Forcing writing to physical medium can't be guaranteed though!
+    // Forcing writing to physical medium cannot be guaranteed though!
     logImpl_.reset();
 }
 
@@ -170,7 +170,7 @@ void Log::check_new_path(const std::string& new_path) {
         }
     }
 
-    // Now check that path does not correspond to a directory, can't use that as the new log file location
+    // Now check that path does not correspond to a directory, cannot use that as the new log file location
     if (fs::is_directory(the_new_path)) {
         throw std::runtime_error(
             MESSAGE("LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory "

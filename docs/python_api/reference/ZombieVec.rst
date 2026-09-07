@@ -67,7 +67,3 @@ Remove and return the item at index ``i``
 
 Remove the first item from the list whose value is x. It is an error if there is no such item.
 
-
-.. py:function:: debug_build() -> bool
-   :module: ecflow
-

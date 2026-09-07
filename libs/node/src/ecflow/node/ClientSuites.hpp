@@ -15,7 +15,7 @@
 /// \brief The definition file could hold hundreds of suites, however the client
 /// may only be interested in a small subset. By allowing the client to register
 /// the suites they are interested in, we can reduce the network traffic
-/// when they ask for updates.(ie via sync or news)
+/// when they ask for updates.(i.e., via sync or news)
 /// When the Client registers an interest in suites it is returned a handle,
 /// this handle must is passed back to the server as a reference, with the sync'ing commands
 ///

@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
@@ -70,14 +71,14 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
     std::vector<Submittable*> tasks;
 
-    // If no suite name begin all suites, else begin the the specific suite
+    // If no suite name begin all suites, else begin the specific suite
     if (suiteName_.empty()) {
 
         const auto& suites = defs->suites();
         if (!force_) {
             size_t size = suites.size();
             for (size_t s = 0; s < size; s++) {
-                /// check_suite_can_begin will throw if suite can't begin
+                /// check_suite_can_begin will throw if suite cannot begin
                 defs->check_suite_can_begin(suites[s]);
             }
         }
@@ -98,7 +99,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
                 MESSAGE("BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n"));
         }
 
-        /// check_suite_can_begin will throw if suite can't begin
+        /// check_suite_can_begin will throw if suite cannot begin
         if (!force_) {
             defs->check_suite_can_begin(suite);
         }
@@ -126,29 +127,12 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 const char* BeginCmd::arg() {
     return CtsApi::beginArg();
 }
-const char* BeginCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Begin playing the definition in the server.\n"
-           "Expects zero or a single quoted string.\n"
-           "  arg1 = suite-name | Nothing | force\n"
-           "         play the chosen suite, if no arg specified, play all suites, in the definition\n"
-           "         force means reset the begin status on the suites and bypass checks.\n"
-           "         This is only required if suite-name is provide as the first argument\n"
-           "         Using force can cause the creation of zombies\n"
-           "Usage:\n"
-           "--begin                     # will begin all suites\n"
-           "--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be "
-           "quoted\n"
-           "--begin=\"mySuite\"         # begin playing suite of name 'mySuite'\n"
-           "--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check";
-}
 
 void BeginCmd::addOption(boost::program_options::options_description& desc) const {
     // allow options like
     // client --begin=suitename       // begin <suitename>
     // client --begin                 // means begin all suites
-    desc.add_options()(
-        BeginCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}), BeginCmd::desc());
+    desc.add_options()(BeginCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}));
 }
 void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     std::string beginArg = vm[arg()].as<std::string>();
@@ -182,9 +166,10 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             force = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
-                                             << lineTokens.size() << " arguments\n"
-                                             << BeginCmd::desc() << "\n"));
+            throw std::runtime_error(
+                MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
+                        << lineTokens.size() << " arguments\n"
+                        << HelpCatalog::description_for("begin").value_or(HelpCatalog::not_provided) << "\n"));
         }
     }
 

@@ -14,19 +14,27 @@
 #include <ctime>
 #include <string>
 
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+
 class ConnectState {
 public:
     ConnectState();
 
+    ///
+    /// @brief The state of the connection to a server, as far as the viewer can tell.
+    ///
+    /// ProtocolMismatch covers every pair of protocols the two ends can disagree on, and is
+    /// deliberately distinct from the states that mean the server cannot be reached at all.
+    ///
     enum State {
         Undef,
         Normal,
         Disconnected,
         Lost,
         VersionIncompatible,
-        SslIncompatible,
         SslCertificateError,
-        FailedClient
+        FailedClient,
+        ProtocolMismatch
     };
 
     void state(State state);
@@ -38,6 +46,23 @@ public:
     std::time_t lastDisconnectTime() const { return lastDisconnect_; }
     const std::string& errorMessage() const { return errMsg_; }
     const std::string& shortErrorMessage() const { return shortErrMsg_; }
+
+    ///
+    /// @brief Provides the structured diagnosis behind the current state.
+    ///
+    /// Carrying the diagnosis, rather than only its rendered message, is what allows each part of
+    /// the interface to phrase the failure in its own terms without parsing prose.
+    ///
+    /// @return The diagnosis; records no failure whenever the state is not a failure
+    ///
+    const ecf::ConnectionDiagnosis& diagnosis() const { return diagnosis_; }
+
+    ///
+    /// @brief Records the structured diagnosis behind the current state.
+    ///
+    /// @param[in] diagnosis The diagnosis observed by the client
+    ///
+    void diagnosis(const ecf::ConnectionDiagnosis& diagnosis) { diagnosis_ = diagnosis; }
 
 protected:
     static void init();
@@ -51,6 +76,7 @@ protected:
     std::time_t lastDisconnect_{0};
     std::string errMsg_;
     std::string shortErrMsg_;
+    ecf::ConnectionDiagnosis diagnosis_;
 };
 
 #endif /* ecflow_viewer_ConnectState_HPP */

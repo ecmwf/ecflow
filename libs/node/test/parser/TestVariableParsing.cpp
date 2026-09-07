@@ -54,20 +54,23 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
 
     const Variable& int1 = editSuite->findVariable("INT1");
     BOOST_REQUIRE_MESSAGE(!int1.empty(), "Could not find variable INT1");
-    BOOST_REQUIRE_MESSAGE(int1.value() == 10, "Expected INT1 to have a value of 10, but found " << int1.value());
+    BOOST_REQUIRE_MESSAGE(int1.value<int>() == 10,
+                          "Expected INT1 to have a value of 10, but found " << int1.value<int>());
 
     const Variable& int2 = editSuite->findVariable("INT2");
     BOOST_REQUIRE_MESSAGE(!int2.empty(), "Could not find variable INT2");
-    BOOST_REQUIRE_MESSAGE(int2.value() == 11, "Expected INT2 to have a value of 11, but found " << int2.value());
+    BOOST_REQUIRE_MESSAGE(int2.value<int>() == 11,
+                          "Expected INT2 to have a value of 11, but found " << int2.value<int>());
 
     const Variable& ymd = editSuite->findVariable("YMD");
     BOOST_REQUIRE_MESSAGE(!ymd.empty(), "Could not find variable YMD");
-    BOOST_REQUIRE_MESSAGE(ymd.value() == 20091012,
-                          "Expected YMD to have a value of 20091012, but found " << ymd.value());
+    BOOST_REQUIRE_MESSAGE(ymd.value<int>() == 20091012,
+                          "Expected YMD to have a value of 20091012, but found " << ymd.value<int>());
 
     const Variable& user = editSuite->findVariable("USER");
     BOOST_REQUIRE_MESSAGE(!user.empty(), "Could not find variable USER");
-    BOOST_REQUIRE_MESSAGE(user.value() == 0, "Expected user to have a value of 0, but found " << user.value());
+    BOOST_REQUIRE_MESSAGE(user.value<int>() == 0,
+                          "Expected user to have a value of 0, but found " << user.value<int>());
 }
 
 struct Expected
@@ -101,7 +104,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -144,7 +147,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -183,7 +186,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -255,7 +258,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -286,7 +289,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -321,7 +324,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -354,7 +357,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -385,7 +388,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -439,7 +442,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_variable_with_alias_format) {
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -488,7 +491,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -513,7 +516,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 }
 
@@ -583,7 +586,7 @@ edit k valuek # not a server variable
         try {
             const auto& variable = find_variable_by_type(state, e.expected_name, e.variable_type);
             BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-            BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+            BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
         }
         catch (std::runtime_error& error) {
             BOOST_CHECK_MESSAGE(false,
@@ -642,7 +645,7 @@ endsuite
     for (const auto& e : expectations) {
         auto variable = suite->findVariable(e.expected_name);
         BOOST_CHECK_EQUAL(variable.name(), e.expected_name);
-        BOOST_CHECK_EQUAL(variable.theValue(), e.expected_value);
+        BOOST_CHECK_EQUAL(variable.value(), e.expected_value);
     }
 #endif
 }
@@ -743,7 +746,7 @@ endsuite
     }
     catch (std::exception& e) {
         std::string_view msg = e.what();
-        BOOST_CHECK_MESSAGE(msg.find("Invalid Variable name") != std::string::npos,
+        BOOST_CHECK_MESSAGE(msg.find("Invalid name 'a:out'") != std::string::npos,
                             "Parsing failed as expected with error: " << msg);
     }
 }

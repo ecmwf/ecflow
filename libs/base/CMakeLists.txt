@@ -18,9 +18,12 @@ set(test_srcs
   test/TestClientHandleCmd.cpp
   test/TestClientOptionsParser.cpp
   test/TestCmd.cpp
+  test/TestConnectionDiagnosis.cpp
+  test/TestConnectionDiagnosisAgainstPeers.cpp
   test/TestDeleteNodeCmd.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
+  test/TestHelpCatalog.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp
@@ -60,30 +63,6 @@ ecbuild_add_test(
 target_clangformat(u_base
   CONDITION ENABLE_TESTS
 )
-
-set(test_srcs
-  # Sources
-  test/TestAlgorithms.cpp
-)
-
-ecbuild_add_test(
-  TARGET
-    u_base_algorithms
-  LABELS
-    unit nightly fast
-  SOURCES
-    ${test_srcs}
-  LIBS
-    ecflow_all
-    test_scaffold
-    test_harness.base
-    Threads::Threads
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-)
-target_clangformat(u_base_algorithms
-  CONDITION ENABLE_TESTS
-)
-
 
 # The following is not technically a test (as it makes no checks),
 # but a tool to measure the time it takes to generate a job file

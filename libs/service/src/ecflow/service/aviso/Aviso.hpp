@@ -130,7 +130,7 @@ private:
 
 /**
  *
- * An AvisoNoMatch represents a notification of successfull polling without any match found.
+ * An AvisoNoMatch represents a notification of successful polling without any match found.
  *
  */
 class AvisoNoMatch {

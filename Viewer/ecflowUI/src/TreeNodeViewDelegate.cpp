@@ -189,6 +189,11 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent
     nodeBox_ = new TreeNodeDelegateBox;
     attrBox_ = new TreeAttrDelegateBox;
 
+    plainPixId_ = IconProvider::add(":/viewer/protocol_plain.svg", "protocol_plain");
+    sslPixId_   = IconProvider::add(":/viewer/protocol_ssl.svg", "protocol_ssl");
+    httpPixId_  = IconProvider::add(":/viewer/protocol_http.svg", "protocol_http");
+    httpsPixId_ = IconProvider::add(":/viewer/protocol_https.svg", "protocol_https");
+
     drawAttrSelectionRect_ = true;
 
     attrFont_ = font_;
@@ -206,6 +211,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent
         propVec.emplace_back("view.tree.nodeFont");
         propVec.emplace_back("view.tree.attributeFont");
         propVec.emplace_back("view.tree.display_child_count");
+        propVec.emplace_back("view.tree.displayConnectionBadge");
         propVec.emplace_back("view.tree.displayNodeType");
         propVec.emplace_back("view.tree.background");
         propVec.emplace_back("view.common.node_style");
@@ -284,12 +290,31 @@ void TreeNodeViewDelegate::updateSettingsInternal() {
         }
     }
 
+    // Each of the three settings below adds or removes something drawn on the row, and so changes
+    // the width the row needs. The view caches its size hints, and recomputes them only when told
+    // to, so each of these has to announce the change; a repaint alone leaves the rows at their
+    // previous width, with the content clipped or trailed by a gap until something else forces a
+    // re-layout.
+
     if (VProperty* p = prop_->find("view.tree.display_child_count")) {
-        drawChildCount_ = p->value().toBool();
+        if (const bool show = p->value().toBool(); show != drawChildCount_) {
+            drawChildCount_ = show;
+            Q_EMIT sizeHintChangedGlobal();
+        }
+    }
+
+    if (VProperty* p = prop_->find("view.tree.displayConnectionBadge")) {
+        if (const bool show = p->value().toBool(); show != drawConnectionBadge_) {
+            drawConnectionBadge_ = show;
+            Q_EMIT sizeHintChangedGlobal();
+        }
     }
 
     if (VProperty* p = prop_->find("view.tree.displayNodeType")) {
-        drawNodeType_ = p->value().toBool();
+        if (const bool show = p->value().toBool(); show != drawNodeType_) {
+            drawNodeType_ = show;
+            Q_EMIT sizeHintChangedGlobal();
+        }
     }
 
     if (VProperty* p = prop_->find("view.tree.background")) {
@@ -400,6 +425,13 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
         QRect bandRect = QRect(0, vopt.rect.y(), 5, vopt.rect.height());
         painter->fillRect(bandRect, noConnectBandBrush_);
     }
+    // protocol mismatch
+    if (connectId == 4) {
+        QRect fullRect = QRect(0, vopt.rect.y(), painter->device()->width(), vopt.rect.height());
+        painter->fillRect(fullRect, mismatchConnectBgBrush_);
+        QRect bandRect = QRect(0, vopt.rect.y(), 5, vopt.rect.height());
+        painter->fillRect(bandRect, mismatchConnectBandBrush_);
+    }
 
     QVariant tVar = index.data(Qt::DisplayRole);
     painter->setFont(font_);
@@ -441,6 +473,20 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
 
     // else
     //	QStyledItemDelegate::paint(painter,option,index);
+}
+
+int TreeNodeViewDelegate::protocolPixId(ecf::Protocol protocol) const {
+    switch (protocol) {
+        case ecf::Protocol::Ssl:
+            return sslPixId_;
+        case ecf::Protocol::Http:
+            return httpPixId_;
+        case ecf::Protocol::Https:
+            return httpsPixId_;
+        case ecf::Protocol::Plain:
+            return plainPixId_;
+    }
+    return -1;
 }
 
 int TreeNodeViewDelegate::renderServer(QPainter* painter,
@@ -500,6 +546,24 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
         QRect shBr        = stateShape.shape_.boundingRect();
         currentRight      = shBr.x() + shBr.width();
         ;
+    }
+
+    // The protocol tag
+    //
+    // The protocol a server is configured for is a property of the server, not of its node tree,
+    // so the tag is drawn here rather than through the node icon list, which the user can filter.
+    // Every protocol is tagged, including plain TCP/IP: an absent tag would be indistinguishable
+    // from an icon that failed to load.
+    QRect protoRect;
+    const int protoPixId = protocolPixId(server->protocol());
+    const bool hasProto  = drawConnectionBadge_ && (protoPixId != -1);
+
+    if (hasProto) {
+        protoRect    = QRect(currentRight + nodeBox_->iconPreGap,
+                          itemRect.center().y() + 1 - nodeBox_->iconSize / 2,
+                          nodeBox_->iconSize,
+                          nodeBox_->iconSize);
+        currentRight = protoRect.x() + protoRect.width();
     }
 
     // Refresh timer
@@ -636,6 +700,11 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
     /*int remaining=6*60*1000; //   server->remainingTimeToRefresh();
     int total=10*60*1000; //server->refreshPeriod() ;
     renderTimer(painter,timeRect,remaining,total);*/
+
+    // Draw the protocol tag
+    if (hasProto) {
+        painter->drawPixmap(protoRect, IconProvider::pixmap(protoPixId, nodeBox_->iconSize));
+    }
 
     // Draw icons
     for (int i = 0; i < pixLst.count(); i++) {

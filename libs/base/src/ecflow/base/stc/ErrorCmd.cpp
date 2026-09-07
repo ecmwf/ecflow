@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ServerReply.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Log.hpp"
 
@@ -55,11 +57,19 @@ bool ErrorCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
         std::cout << "  ErrorCmd::handle_server_response " << error_msg_ << "\n";
     }
 
-    std::string ss;
-    ss += "Error: request( ";
-    ss += cts_cmd->print_short();
-    ss += " ) failed!  Server reply: ";
-    ss += error_msg_;
+    std::string ss = failed_request_prefix(*cts_cmd);
+
+    // A recorded transport failure means this reply was manufactured on the client side, after the
+    // exchange failed -- the server never replied at all. Reporting it as a server reply, with the
+    // raw transport message, is what made a protocol mismatch over SSL read differently from the
+    // same mismatch over any other transport.
+    if (auto explanation = ecf::explain(server_reply.diagnosis()); !explanation.empty()) {
+        ss += explanation;
+    }
+    else {
+        ss += "Server reply: ";
+        ss += error_msg_;
+    }
     ss += "\n";
     server_reply.set_error_msg(server_reply.get_error_msg() + ss); // append in-case multiple errors from group cmd
     return false;

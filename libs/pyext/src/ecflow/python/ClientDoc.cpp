@@ -11,7 +11,7 @@
 #include "ecflow/python/ClientDoc.hpp"
 
 const char* ClientDoc::class_client() {
-    return "Class client provides an interface to communicate with the `ecflow_server`_.:\n\n"
+    return "Class client provides an interface to communicate with the :term:`ecflow_server`.:\n\n"
            ".. code-block:: shell\n\n"
            "   Client(\n"
            "      string host, # The server name. Cannot be empty.\n"
@@ -119,7 +119,7 @@ const char* ClientDoc::set_retry_connection_period() {
 }
 
 const char* ClientDoc::set_connection_attempts() {
-    return "Set the number of times to connect to `ecflow_server`_, in case of connection failures\n\n"
+    return "Set the number of times to connect to :term:`ecflow_server`, in case of connection failures\n\n"
            "The period between connection attempts is handled by Client.set_retry_connection_period().\n"
            "If the network is unreliable the connection attempts can be be increased, likewise\n"
            "when the network is stable this number could be reduced to one.\n"
@@ -139,7 +139,7 @@ const char* ClientDoc::set_connection_attempts() {
 }
 
 const char* ClientDoc::get_defs() {
-    return "Returns the `suite definition`_ stored on the Client.\n\n"
+    return "Returns the :term:`suite definition` stored on the Client.\n\n"
            "Use :py:class:`ecflow.Client.sync_local()` to retrieve the definition from the server first.\n"
            "The definition is *retained* in memory until the next call to sync_local().\n"
            "\nUsage:\n\n"
@@ -175,7 +175,7 @@ const char* ClientDoc::edit_script_submit() {
 }
 
 const char* ClientDoc::get_log() {
-    return "Request the `ecflow_server`_ to return the log file contents as a string\n\n"
+    return "Request the :term:`ecflow_server` to return the log file contents as a string\n\n"
            "Use with caution as the returned string could be several megabytes.\n"
            "Only enabled in the debug build of ECF.\n"
            "\nUsage:\n\n"
@@ -188,7 +188,7 @@ const char* ClientDoc::get_log() {
 }
 
 const char* ClientDoc::new_log() {
-    return "Request the `ecflow_server`_ to use the path provided, as the new log file\n\n"
+    return "Request the :term:`ecflow_server` to use the path provided, as the new log file\n\n"
            "The old log file is released.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -203,7 +203,7 @@ const char* ClientDoc::new_log() {
 }
 
 const char* ClientDoc::clear_log() {
-    return "Request the `ecflow_server`_ to clear log file.\n\n"
+    return "Request the :term:`ecflow_server` to clear log file.\n\n"
            "Log file will be empty after this call.\n\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -215,8 +215,8 @@ const char* ClientDoc::clear_log() {
 }
 
 const char* ClientDoc::flush_log() {
-    return "Request the `ecflow_server`_ to flush and then close log file\n\n"
-           "It is best that the server is `shutdown`_ first, as log file will be reopened\n"
+    return "Request the :term:`ecflow_server` to flush and then close log file\n\n"
+           "It is best that the server is :term:`shutdown` first, as log file will be reopened\n"
            "whenever a command wishes to log any changes.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -232,9 +232,9 @@ const char* ClientDoc::log_msg() {
 }
 
 const char* ClientDoc::restart_server() {
-    return "Restart the `ecflow_server`_\n\n"
+    return "Restart the :term:`ecflow_server`\n\n"
            "Start job scheduling, communication with jobs, and respond to all requests.\n"
-           "See `server states`_\n"
+           "See :term:`server states`\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -244,9 +244,9 @@ const char* ClientDoc::restart_server() {
            "       print(str(e))\n";
 }
 const char* ClientDoc::halt_server() {
-    return "Halt the `ecflow_server`_\n\n"
+    return "Halt the :term:`ecflow_server`\n\n"
            "Stop server communication with jobs, and new job scheduling, and stops check pointing.\n"
-           "See `server states`_\n"
+           "See :term:`server states`\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -256,9 +256,9 @@ const char* ClientDoc::halt_server() {
            "       print(str(e))\n";
 }
 const char* ClientDoc::shutdown_server() {
-    return "Shut down the `ecflow_server`_\n\n"
+    return "Shut down the :term:`ecflow_server`\n\n"
            "Stop server from scheduling new jobs.\n"
-           "See `server states`_\n"
+           "See :term:`server states`\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -269,7 +269,7 @@ const char* ClientDoc::shutdown_server() {
 }
 
 const char* ClientDoc::terminate_server() {
-    return "Terminate the `ecflow_server`_\n\n"
+    return "Terminate the :term:`ecflow_server`\n\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -280,7 +280,7 @@ const char* ClientDoc::terminate_server() {
 }
 
 const char* ClientDoc::wait_for_server_reply() {
-    return "Wait for a response from the `ecflow_server`_::\n\n"
+    return "Wait for a response from the :term:`ecflow_server`::\n\n"
            "   void wait_for_server_reply(\n"
            "      int time_out     : (default = 60) \n"
            "   )\n\n"
@@ -296,15 +296,15 @@ const char* ClientDoc::wait_for_server_reply() {
 }
 
 const char* ClientDoc::load_defs() {
-    return "Load a `suite definition`_ or checkpoint file given by the file_path argument into the "
-           "`ecflow_server`_\n::\n\n"
+    return "Load a :term:`suite definition` or checkpoint file given by the file_path argument into the "
+           ":term:`ecflow_server`\n::\n\n"
            "   void load(\n"
            "      string file_path     : path name to the definition file\n"
            "      [(bool)force=False]  : If true overwrite suite of same name\n"
            "      [(bool)print=False]  : print parsed defs to standard out\n"
            "   )\n\n"
            "By default throws a RuntimeError exception for errors.\n"
-           "If force is not used and `suite`_ of the same name already exists in the server,\n"
+           "If force is not used and :term:`suite` of the same name already exists in the server,\n"
            "then a error is thrown\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -324,12 +324,12 @@ const char* ClientDoc::load_defs() {
 }
 
 const char* ClientDoc::load() {
-    return "Load a in memory `suite definition`_ into the `ecflow_server`_\n::\n\n"
+    return "Load a in memory :term:`suite definition` into the :term:`ecflow_server`\n::\n\n"
            "   void load(\n"
            "      Defs defs           : A in memory definition\n"
            "      [(bool)force=False] : for true overwrite suite of same name\n"
            "   )\n\n"
-           "If force is not used and `suite`_ already exists in the server, then a error is thrown.\n"
+           "If force is not used and :term:`suite` already exists in the server, then a error is thrown.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   defs = Defs()\n"
@@ -346,7 +346,7 @@ const char* ClientDoc::load() {
 }
 
 const char* ClientDoc::get_server_defs() {
-    return "Get all suite Node tree's from the `ecflow_server`_.\n\n"
+    return "Get all suite Node tree's from the :term:`ecflow_server`.\n\n"
            "The definition is *retained* in memory until the next call to get_server_defs().\n"
            "This is important since get_server_defs() could return several megabytes of data.\n"
            "Hence we only want to call it once, and then access it locally with get_defs().\n"
@@ -365,12 +365,14 @@ const char* ClientDoc::get_server_defs() {
 }
 
 const char* ClientDoc::sync() {
-    return "Requests that `ecflow_server`_ returns the full definition or incremental change made and applies them to "
+    return "Requests that :term:`ecflow_server` returns the full definition or incremental change made and applies "
+           "them to "
            "the client Defs\n\n"
            "When there is a very large definition, calling :py:class:`ecflow.Client.get_server_defs` each time can be "
            "*very* expensive\n"
            "both in terms of memory, speed, and network bandwidth. The alternative is to call\n"
-           "this function, which will get the incremental changes, and apply them local client `suite definition`_\n"
+           "this function, which will get the incremental changes, and apply them local client :term:`suite "
+           "definition`\n"
            "effectively synchronising the client and server Defs.\n"
            "If the period of time between two sync() calls is too long, then the full server definition\n"
            "is returned and assigned to the client Defs.\n"
@@ -399,7 +401,7 @@ const char* ClientDoc::sync() {
 }
 
 const char* ClientDoc::in_sync() {
-    return "Returns true if the definition on the client is in sync with the `ecflow_server`_\n\n"
+    return "Returns true if the definition on the client is in sync with the :term:`ecflow_server`\n\n"
            ".. Warning:: Calling in_sync() is **only** valid after a call to sync_local().\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -418,7 +420,7 @@ const char* ClientDoc::in_sync() {
 }
 
 const char* ClientDoc::news() {
-    return "Query the `ecflow_server`_ to detect any changes.\n\n"
+    return "Query the :term:`ecflow_server` to detect any changes.\n\n"
            "This returns a simple bool, if there has been changes, the user should call "
            ":py:class:`ecflow.Client.sync_local`.\n"
            "This will bring the client in sync with changes in the server. If sync_local() is not called\n"
@@ -471,13 +473,14 @@ const char* ClientDoc::changed_node_paths() {
 }
 
 const char* ClientDoc::checkpt() {
-    return "Request the `ecflow_server`_ `check point`_\\ s the definition held in the server immediately\n\n"
+    return "Request the :term:`ecflow_server` :term:`check point`\\ s the definition held in the server immediately\n\n"
            "This effectively saves the definition held in the server to disk,\n"
            "in a platform independent manner. This is the default when no arguments are specified.\n"
            "The saved file will include node state, passwords, etc.\n"
            "The default file name is <host>.<port>.ecf.check and is saved in ECF_HOME directory.\n"
-           "The `check point`_ file name can be overridden via ECF_CHECK server environment variable.\n"
-           "The back up `check point`_ file name can be overridden via ECF_CHECKOLD server environment variable::\n\n"
+           "The :term:`check point` file name can be overridden via ECF_CHECK server environment variable.\n"
+           "The back up :term:`check point` file name can be overridden via ECF_CHECKOLD server environment "
+           "variable::\n\n"
            "   void checkpt(\n"
            "     [(CheckPt::Mode)mode=CheckPt.UNDEFINED]\n"
            "                         : Must be one of [ NEVER, ON_TIME, ALWAYS, UNDEFINED ]\n"
@@ -519,10 +522,10 @@ const char* ClientDoc::checkpt() {
 }
 
 const char* ClientDoc::restore_from_checkpt() {
-    return "Request the `ecflow_server`_ loads the `check point`_ file from disk\n\n"
+    return "Request the :term:`ecflow_server` loads the :term:`check point` file from disk\n\n"
            "The server will first try to open file at ECF_HOME/ECF_CHECK if that fails it will\n"
            "then try path ECF_HOME/ECF_CHECKOLD.\n"
-           "An error is returned if the server has not been `halted`_ or contains a `suite definition`_\n"
+           "An error is returned if the server has not been :term:`halted` or contains a :term:`suite definition`\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -534,9 +537,9 @@ const char* ClientDoc::restore_from_checkpt() {
 }
 
 const char* ClientDoc::reload_wl_file() {
-    return "Request that the `ecflow_server`_ reload the white list file.\n\n"
+    return "Request that the :term:`ecflow_server` reload the white list file.\n\n"
            "The white list file if present, can be used to control who has read/write\n"
-           "access to the `ecflow_server`_::\n\n"
+           "access to the :term:`ecflow_server`::\n\n"
            "   void reload_wl_file()\n\n"
            "Usage:\n\n"
            ".. code-block:: python\n\n"
@@ -548,17 +551,19 @@ const char* ClientDoc::reload_wl_file() {
 }
 
 const char* ClientDoc::run() {
-    return "Immediately run the jobs associated with the input `node`_.\n\n"
-           "Ignore `trigger`_\\ s, `limit`_\\ s, `suspended`_, `time`_ or `date`_ dependencies,\n"
-           "just run the `task`_.\n"
-           "When a job completes, it may be automatically re-queued if it has\n"
-           "multiple time `dependencies`_. In the specific case where a `task`_ has a SINGLE\n"
-           "time dependency and we want to avoid re running the `task`_ then\n"
-           "a flag is set so that it is not automatically re-queued when set to `complete`_.\n"
-           "The flag is applied up the `node`_ hierarchy until we reach a node with a `repeat`_\n"
-           "or `cron`_ attribute. This behaviour allow `repeat`_ values to be incremented interactively.\n"
-           "A `repeat`_ attribute is incremented when all the child nodes are `complete`_\n"
-           "in this case the child nodes are automatically re-queued\n::\n\n"
+    return "Immediately run the jobs associated with the input :term:`node`.\n\n"
+           "Run the task, ignoring :term:`triggers <trigger>`, :term:`limits <limit>`, :term:`suspended`, :term:`time` "
+           "or :term:`date` dependencies.\n"
+           "When a job completes, it may be automatically re-queued if it has a :term:`cron`, or multiple\n"
+           "time :term:`dependencies`. Each run expires one time based attribute, and when the last one\n"
+           "expires, the task stays in a :term:`complete` state.\n"
+           "In the specific case where a :term:`task` has a single time dependency, and the task is run\n"
+           "before its time slot, a flag is set, so that the task is not automatically re-queued when set\n"
+           "to :term:`complete`.\n"
+           "The flag is applied up the :term:`node` hierarchy, until a node with a :term:`repeat` or\n"
+           ":term:`cron` attribute is reached. This behaviour allows repeat values to be incremented\n"
+           "interactively. A :term:`repeat` attribute is incremented when all the child nodes are\n"
+           ":term:`complete`, in which case the child nodes are automatically re-queued\n::\n\n"
            "   void run(\n"
            "      string absolute_node_path : Path name to node. If the path is suite/family will recursively\n"
            "                                  run all child tasks\n"
@@ -585,16 +590,52 @@ const char* ClientDoc::run() {
            "      task t1; time 10:00             # will complete straight away\n"
            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth run\n\n"
            "In the last case (task t2) after each run the next time slot is incremented.\n"
-           "This can be seen by calling the Why command.";
+           "This can be seen by calling the Why command.\n"
+           "\nEffect on the job output:\n\n"
+           "The job is submitted immediately, without passing through the :term:`queued` state, and the job\n"
+           "output counter (i.e. :term:`ECF_TRYNO`) is incremented. The output of the previous runs is\n"
+           "therefore preserved, in ``<task>.1``, ``<task>.2``, ``<task>.3``, and so on.\n\n"
+           "No attribute of the node is reset, with the exception of the :term:`labels <label>` and of a subset of\n"
+           "the node flags, which are always reset when a job is submitted. In particular, the\n"
+           ":term:`events <event>`, the :term:`meters <meter>`, the :term:`repeat` attributes, and the queue "
+           "attributes\n"
+           "retain their current value.\n\n"
+           "Use force_state(path,State.queued) to place a task back into the queued state, so that it\n"
+           "honours its dependencies on the next run, while still preserving the output of the previous\n"
+           "runs. Use requeue() to reset the output counter, in which case the next run **overwrites**\n"
+           "``<task>.1``.";
 }
 
 const char* ClientDoc::requeue() {
 
-    return "Re queues the specified `node`_ (s)\n::\n\n"
+    return "Re queues the specified :term:`node` (s)\n\n"
+           "Re-queueing restores the specified :term:`node` (s), and all their children, to the state held\n"
+           "before the last run. This is a comprehensive reset, and the following are reset:\n\n"
+           "- the state, which is taken from the default status (i.e. :term:`defstatus`), when defined\n"
+           "- the :term:`suspended` status of the children of the specified node(s). Notice that the\n"
+           "  suspended status of the specified node(s) themselves is **not** cleared\n"
+           "- the job output counter (i.e. :term:`ECF_TRYNO`), so that the next run writes to ``<task>.1``\n"
+           "  and thus **overwrites** the output of the previous runs\n"
+           "- the aborted reason, the job password, and the process identifier\n"
+           "- the node flags, with the exception of the message and archived flags\n"
+           "- :term:`repeat` attributes, which are reset to their starting value\n"
+           "- time based attributes, whose next time slot is re-evaluated, and relative durations are reset\n"
+           "- the late flag, the :term:`events <event>`, and the :term:`meters <meter>`\n"
+           "- :term:`labels <label>`, but **only** those defined on suites and families, and **not** those on tasks\n"
+           "- queue attributes\n"
+           "- :term:`limits <limit>`, together with any limit token held by the node(s) or their children\n\n"
+           "Note that the enclosing :term:`suite` must have been begun before any of its nodes can be\n"
+           "re-queued. When the 'force' option is used, user :term:`zombies <zombie>` are created for any task that\n"
+           "is :term:`active` or :term:`submitted` at the time the command is issued.\n\n"
+           "To place a task back into the :term:`queued` state while preserving the output of the previous\n"
+           "runs, and without resetting repeats, time based attributes, and flags, use\n"
+           "force_state(path,State.queued) instead.\n::\n\n"
            "   void requeue(\n"
            "      list paths     : A list of paths. Node paths must begin with a leading '/' character\n"
            "      [(str)option=''] : option = ('' | 'abort' | 'force')\n"
-           "          ''   : empty string, the default, re-queue the node\n"
+           "          ''   : empty string, the default. Checks whether any task below the node is in\n"
+           "                 the submitted or active state, and if so does nothing. Otherwise,\n"
+           "                 re-queues the node\n"
            "          abort: means re-queue only aborted tasks below node\n"
            "          force: means re-queueing even if there are nodes that are active or submitted\n"
            "   )\n"
@@ -615,7 +656,7 @@ const char* ClientDoc::requeue() {
 }
 
 const char* ClientDoc::free_trigger_dep() {
-    return "Free `trigger`_ `dependencies`_ for a `node`_\n::\n\n"
+    return "Free :term:`trigger` :term:`dependencies` for a :term:`node`\n::\n\n"
            "   void free_trigger_dep(\n"
            "      string absolute_node_path : Path name to node\n"
            "   )\n"
@@ -629,7 +670,7 @@ const char* ClientDoc::free_trigger_dep() {
 }
 
 const char* ClientDoc::free_date_dep() {
-    return "Free `date`_ `dependencies`_ for a `node`_\n::\n\n"
+    return "Free :term:`date` :term:`dependencies` for a :term:`node`\n::\n\n"
            "   void free_date_dep(\n"
            "      string absolute_node_path : Path name to node\n"
            "   )\n"
@@ -643,7 +684,7 @@ const char* ClientDoc::free_date_dep() {
 }
 
 const char* ClientDoc::free_time_dep() {
-    return "Free all time `dependencies`_. i.e `time`_, `day`_, `today`_, `cron`_\n::\n\n"
+    return "Free all time :term:`dependencies`. i.e :term:`time`, :term:`day`, :term:`today`, :term:`cron`\n::\n\n"
            "   void free_time_dep(\n"
            "      string absolute_node_path : Path name to node\n"
            "   )\n\n"
@@ -659,7 +700,8 @@ const char* ClientDoc::free_time_dep() {
 }
 
 const char* ClientDoc::free_all_dep() {
-    return "Free all `trigger`_, `date`_ and all time(`day`_, `today`_, `cron`_,etc) `dependencies`_\n::\n\n"
+    return "Free all :term:`trigger`, :term:`date` and all time(:term:`day`, :term:`today`, :term:`cron`,etc) "
+           ":term:`dependencies`\n::\n\n"
            "   void free_all_dep(\n"
            "      string absolute_node_path : Path name to node\n"
            "   )\n\n"
@@ -675,7 +717,7 @@ const char* ClientDoc::free_all_dep() {
 }
 
 const char* ClientDoc::ping() {
-    return "Checks if the `ecflow_server`_ is running\n::\n\n"
+    return "Checks if the :term:`ecflow_server` is running\n::\n\n"
            "   void ping()\n\n"
            "The default behaviour is to check on host 'localhost' and port 3141\n"
            "It should be noted that any Client function will fail if the server is\n"
@@ -693,7 +735,7 @@ const char* ClientDoc::ping() {
 }
 
 const char* ClientDoc::stats() {
-    return "Returns the `ecflow_server`_ statistics as a string\n\n"
+    return "Returns the :term:`ecflow_server` statistics as a string\n\n"
            ".. warning::\n\n"
            "    When called without arguments, this function will print the statistics to :code:`stdout`,"
            " before returning the information as a string.\n"
@@ -723,7 +765,7 @@ const char* ClientDoc::stats_reset() {
 }
 
 const char* ClientDoc::suites() {
-    return "Returns a list strings representing the `suite`_ names\n::\n\n"
+    return "Returns a list strings representing the :term:`suite` names\n::\n\n"
            "   list(string) suites()\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -736,7 +778,7 @@ const char* ClientDoc::suites() {
 }
 
 const char* ClientDoc::ch_register() {
-    return "Register interest in a set of `suite`_\\ s.\n\n"
+    return "Register interest in a set of :term:`suite`\\ s.\n\n"
            "If a definition has lots of suites, but the client is only interested in a small subset.\n"
            "Then using this command can reduce network bandwidth and synchronisation will be quicker.\n"
            "This command will create a client handle. This handle is held locally on the :py:class:`ecflow.Client`, "
@@ -792,7 +834,8 @@ const char* ClientDoc::ch_drop() {
            "When dealing with large definitions, where a user is only interested in a small subset\n"
            "of suites, registering them, improves download performance from the server.\n"
            "Registered suites have an associated handle.\n"
-           "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
+           "Client must ensure un-used handle are dropped otherwise they will stay, in the "
+           ":term:`ecflow_server`\n::\n\n"
            "   void ch_drop(\n"
            "      int client_handle : The handle must be an integer that is > 0\n"
            "   )\n"
@@ -829,7 +872,8 @@ const char* ClientDoc::ch_drop_user() {
            "When dealing with large definitions, where a user is only interested in a small subset\n"
            "of suites, registering them, improves download performance from the server.\n"
            "Registered suites have an associated handle.\n"
-           "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
+           "Client must ensure un-used handle are dropped otherwise they will stay, in the "
+           ":term:`ecflow_server`\n::\n\n"
            "   void ch_drop_user(\n"
            "        string user   # If empty string will drop current user\n"
            "   )\n\n"
@@ -917,7 +961,7 @@ const char* ClientDoc::ch_auto_add() {
 }
 
 const char* ClientDoc::get_file() {
-    return "The File command is used to request the various file types associated with a `node`_.\n\n"
+    return "The File command is used to request the various file types associated with a :term:`node`.\n\n"
            "By default, the output is composed of the last 10000 lines of the file. The number of lines can be "
            "customised via the :code:`max_lines` parameter.\n\n"
            "The content can be retrieved as a sequence of 'bytes'. This allows to download a file that contains "
@@ -942,8 +986,8 @@ const char* ClientDoc::get_file() {
 }
 
 const char* ClientDoc::plug() {
-    return "Plug command is used to move `node`_\\ s\n\n"
-           "The destination node can be on another `ecflow_server`_.\n"
+    return "Plug command is used to move :term:`node`\\ s\n\n"
+           "The destination node can be on another :term:`ecflow_server`.\n"
            "In which case the destination path should be of the form '//<host>:<port>/suite/family/task\n::\n\n"
            "   void plug(\n"
            "      string source_absolute_node_path       : Path name to source node\n"
@@ -952,11 +996,11 @@ const char* ClientDoc::plug() {
            "   )\n\n"
            "By default throws a RuntimeError exception for errors.\n\n"
            "Exceptions can be raised because:\n\n"
-           "- Source `node`_ is in a `active`_ or `submitted`_ state.\n"
+           "- Source :term:`node` is in a :term:`active` or :term:`submitted` state.\n"
            "- Another user already has an lock.\n"
            "- source/destination paths do not exist on the corresponding servers\n"
            "- If the destination node path is empty, i.e. only host:port is specified,\n"
-           "  then the source `node`_ must correspond to a `suite`_.\n"
+           "  then the source :term:`node` must correspond to a :term:`suite`.\n"
            "- If the source node is added as a child, then its name must be unique\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
@@ -1212,7 +1256,9 @@ const char* ClientDoc::alter() {
            "   # Sets the max value of the limit. The value must be convertible to an integer\n"
            "\n"
            " change limit_value name value\n"
-           "   # Sets the consumed tokens to value. The value must be convertible to an integer\n"
+           "   # Sets the consumed tokens to value. The value must be convertible to an integer,\n"
+           "   # or be the special value 'reset'. The special value 'reset' re-synchronises the\n"
+           "   # limit with the nodes that are currently consuming it.\n"
            "\n"
            " change repeat value\n"
            "   # For date repeats, the value must be an yyyymmdd formtted integer, defined in\n"
@@ -1236,14 +1282,15 @@ const char* ClientDoc::alter() {
 const char* ClientDoc::force_state() {
 
     return "Force a node(s) to a given state\n\n"
-           "When a `task`_ is set to `complete`_, it may be automatically re-queued if it has\n"
-           "multiple time `dependencies`_. In the specific case where a task has a single\n"
-           "time dependency and we want to interactively set it to `complete`_\n"
-           "a flag is set so that it is not automatically re-queued when set to complete.\n"
-           "The flag is applied up the node hierarchy until reach a node with a `repeat`_\n"
-           "or `cron`_ attribute. This behaviour allow `repeat`_ values to be incremented interactively.\n"
-           "A `repeat`_ attribute is incremented when all the child nodes are `complete`_\n"
-           "in this case the child nodes are automatically re-queued\n::\n\n"
+           "When a :term:`task` is set to :term:`complete`, it may be automatically re-queued if it has\n"
+           "multiple future time :term:`dependencies`. Each force complete expires one time based\n"
+           "attribute on that node, and when the last one expires, the node stays in a complete state.\n"
+           "In the specific case where a task has a single time dependency, and it is set to complete\n"
+           "interactively, a flag is set, so that the task is not automatically re-queued.\n"
+           "The flag is applied up the :term:`node` hierarchy, until a node with a :term:`repeat` or\n"
+           ":term:`cron` attribute is reached. This behaviour allows repeat values to be incremented\n"
+           "interactively. A :term:`repeat` attribute is incremented when all the child nodes are\n"
+           ":term:`complete`, in which case the child nodes are automatically re-queued\n::\n\n"
            "   void force_state(\n"
            "      string absolute_node_path: Path name to node. The path must begin with a leading '/'\n"
            "      State::State state       : [ unknown | complete | queued | submitted | active | aborted ]\n"
@@ -1271,7 +1318,28 @@ const char* ClientDoc::force_state() {
            "      task t1; time 10:00             # will complete straight away\n"
            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth \n\n"
            "In the last case (task t2) after each force complete, the next time slot is incremented.\n"
-           "This can be seen by calling the Why command.";
+           "This can be seen by calling the Why command.\n"
+           "\nEffect of forcing the state to queued:\n\n"
+           "Forcing a node to :term:`queued` is a deliberately minimal operation, intended to allow a task\n"
+           "to run again while preserving the output of the previous runs. It is **not** equivalent to\n"
+           "requeue(). The following are reset:\n\n"
+           "- the late flag, the :term:`events <event>`, and the :term:`meters <meter>` of the node (and, when\n"
+           "  force_state_recursive() is used, of all its children)\n"
+           "- any :term:`limit` token held by the node, which is released when the state actually changes\n\n"
+           "Everything else is preserved. In particular, the following are **not** reset:\n\n"
+           "- the job output counter (i.e. :term:`ECF_TRYNO`), so that the next run does not overwrite the\n"
+           "  output of the previous runs\n"
+           "- the aborted reason, the job password, and the process identifier\n"
+           "- the node flags, such as late, aborted, killed, and jobcmd_failed\n"
+           "- :term:`repeat` attributes, which retain their current value\n"
+           "- time based attributes, whose next time slot is neither reset nor re-evaluated\n"
+           "- queue attributes, which retain their current index\n"
+           "- :term:`labels <label>`\n"
+           "- the :term:`suspended` status, which is neither set nor cleared\n"
+           "- the default status (i.e. :term:`defstatus`), which is not re-applied\n\n"
+           "Note that user :term:`zombies <zombie>` are created for any task that is :term:`active` or\n"
+           ":term:`submitted` at the time the command is issued.\n\n"
+           "Use requeue() instead, when all the attributes of a node are expected to be reset.";
 }
 
 const char* ClientDoc::force_state_recursive() {
@@ -1300,7 +1368,7 @@ const char* ClientDoc::force_state_recursive() {
 
 const char* ClientDoc::force_event() {
 
-    return "Set or clear a `event`_\n::\n\n"
+    return "Set or clear a :term:`event`\n::\n\n"
            "   void force_event(\n"
            "      string absolute_node_path:event: Path name to node: < event name | number>\n"
            "                                       The paths must begin with a leading '/'\n"
@@ -1325,8 +1393,8 @@ const char* ClientDoc::force_event() {
 }
 
 const char* ClientDoc::replace() {
-    return "Replaces a `node`_ in a `suite definition`_ with the given path. The definition is in the "
-           "`ecflow_server`_\n::\n\n"
+    return "Replaces a :term:`node` in a :term:`suite definition` with the given path. The definition is in the "
+           ":term:`ecflow_server`\n::\n\n"
            "   void replace(\n"
            "      string absolute_node_path: Path name to node in the client defs.\n"
            "                                 This is also the node we want to replace in the server.\n"
@@ -1349,7 +1417,7 @@ const char* ClientDoc::replace() {
            "- The absolute_node_path does not exist in the provided definition\n"
            "- The provided client definition must be free of errors\n"
            "- If the third argument is not provided, then the absolute_node_path must exist in the server defs\n"
-           "- replace will fail, if child task nodes are in `active`_ / `submitted`_ state\n\n"
+           "- replace will fail, if child task nodes are in :term:`active` / :term:`submitted` state\n\n"
            "After replace is done, we check trigger expressions. These are reported to standard output.\n"
            "It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\n"
            "Please note, you can use check() to check trigger expression and limits in the server.\n\n"
@@ -1368,7 +1436,7 @@ const char* ClientDoc::replace() {
 }
 
 const char* ClientDoc::kill() {
-    return "Kills the job associated with the `node`_\n::\n\n"
+    return "Kills the job associated with the :term:`node`\n::\n\n"
            "   void kill(\n"
            "      list paths: List of paths. Paths must begin with a leading '/' character\n"
            "   )\n"
@@ -1376,8 +1444,8 @@ const char* ClientDoc::kill() {
            "      string absolute_node_path: Path name to node to kill.\n"
            "   )\n"
            "\n"
-           "If a `family`_ or `suite`_ is selected, will kill hierarchically.\n"
-           "Kill uses the ECF_KILL_CMD variable. After `variable substitution`_ it is invoked as a command.\n"
+           "If a :term:`family` or :term:`suite` is selected, will kill hierarchically.\n"
+           "Kill uses the ECF_KILL_CMD variable. After :term:`variable substitution` it is invoked as a command.\n"
            "The ECF_KILL_CMD variable should be written in such a way that the output is written to %ECF_JOB%.kill, "
            "i.e:\n\n"
            ".. code-block:: shell\n\n"
@@ -1387,7 +1455,7 @@ const char* ClientDoc::kill() {
            "Exceptions can be raised because:\n\n"
            "- The absolute_node_path does not exist in the server\n"
            "- ECF_KILL_CMD variable is not defined\n"
-           "- `variable substitution`_ fails\n"
+           "- :term:`variable substitution` fails\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1400,22 +1468,22 @@ const char* ClientDoc::kill() {
 }
 
 const char* ClientDoc::status() {
-    return "Shows the status of a job associated with a `task`_\n::\n\n"
+    return "Shows the status of a job associated with a :term:`task`\n::\n\n"
            "   void status(\n"
            "      list paths: List of paths. Paths must begin with a leading '/' character\n"
            "   )\n"
            "   void status(\n"
            "      string absolute_node_path\n"
            "   )\n\n"
-           "If a `family`_ or `suite`_ is selected, will invoke status command hierarchically.\n"
-           "Status uses the ECF_STATUS_CMD variable. After `variable substitution`_ it is invoked as a command.\n"
+           "If a :term:`family` or :term:`suite` is selected, will invoke status command hierarchically.\n"
+           "Status uses the ECF_STATUS_CMD variable. After :term:`variable substitution` it is invoked as a command.\n"
            "The command should be written in such a way that the output is written to %ECF_JOB%.stat, i.e:\n\n"
            ".. code-block:: shell\n\n"
            "   /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1\n\n"
            "Exceptions can be raised because:\n\n"
            "- The absolute_node_path does not exist in the server\n"
            "- ECF_STATUS_CMD variable is not defined\n"
-           "- `variable substitution`_ fails\n"
+           "- :term:`variable substitution` fails\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1428,9 +1496,9 @@ const char* ClientDoc::status() {
 }
 
 const char* ClientDoc::order() {
-    return "Re-orders the `node`_\\ s in the `suite definition`_ held by the `ecflow_server`_\n\n"
-           "It should be noted that in the absence of `dependencies`_,\n"
-           "the order in which `task`_\\ s are `submitted`_, depends on the order in the definition.\n"
+    return "Re-orders the :term:`node`\\ s in the :term:`suite definition` held by the :term:`ecflow_server`\n\n"
+           "It should be noted that in the absence of :term:`dependencies`,\n"
+           "the order in which :term:`task`\\ s are :term:`submitted`, depends on the order in the definition.\n"
            "This changes the order and hence affects the submission order\n::\n\n"
            "   void order(\n"
            "      string absolute_node_path: Path name to node.\n"
@@ -1455,7 +1523,7 @@ const char* ClientDoc::order() {
 }
 
 const char* ClientDoc::group() {
-    return "Allows a series of commands to be executed in the `ecflow_server`_\n::\n\n"
+    return "Allows a series of commands to be executed in the :term:`ecflow_server`\n::\n\n"
            "   void group(\n"
            "       string cmds : a list of ';' separated commands \n"
            "   )\n"
@@ -1470,8 +1538,8 @@ const char* ClientDoc::group() {
 }
 
 const char* ClientDoc::begin_suite() {
-    return "Begin playing the chosen `suite`_\\ s in the `ecflow_server`_\n\n"
-           ".. Note:: using the force option may cause `zombie`_\\ s if suite has running jobs\n\n"
+    return "Begin playing the chosen :term:`suite`\\ s in the :term:`ecflow_server`\n\n"
+           ".. Note:: using the force option may cause :term:`zombie`\\ s if suite has running jobs\n\n"
            "::\n\n"
            "   void begin_suite\n"
            "      string suite_name     : begin playing the given suite\n"
@@ -1488,8 +1556,8 @@ const char* ClientDoc::begin_suite() {
 }
 
 const char* ClientDoc::begin_all() {
-    return "Begin playing all the `suite`_\\ s in the `ecflow_server`_\n\n"
-           ".. Note:: using the force option may cause `zombie`_\\ s if suite has running jobs\n\n"
+    return "Begin playing all the :term:`suite`\\ s in the :term:`ecflow_server`\n\n"
+           ".. Note:: using the force option may cause :term:`zombie`\\ s if suite has running jobs\n\n"
            "::\n\n"
            "   void begin_all_suites(\n"
            "      [(bool)force=False] : bypass the checks for submitted and active jobs\n"
@@ -1505,7 +1573,7 @@ const char* ClientDoc::begin_all() {
 }
 
 const char* ClientDoc::suspend() {
-    return "Suspend `job creation` / generation for the given `node`_\n::\n\n"
+    return "Suspend `job creation` / generation for the given :term:`node`\n::\n\n"
            "   void suspend(\n"
            "      list paths: List of paths. Paths must begin with a leading '/' character\n"
            "   )\n"
@@ -1524,7 +1592,7 @@ const char* ClientDoc::suspend() {
 }
 
 const char* ClientDoc::resume() {
-    return "Resume `job creation` / generation for the given `node`_\n::\n\n"
+    return "Resume `job creation` / generation for the given :term:`node`\n::\n\n"
            "   void resume(\n"
            "      list paths: List of paths. Paths must begin with a leading '/' character\n"
            "   )\n"
@@ -1543,8 +1611,9 @@ const char* ClientDoc::resume() {
 }
 
 const char* ClientDoc::job_gen() {
-    return "Job submission for chosen Node *based* on `dependencies`_\n\n"
-           "The `ecflow_server`_ traverses the `node`_ tree every 60 seconds, and if the dependencies are free\n"
+    return "Job submission for chosen Node *based* on :term:`dependencies`\n\n"
+           "The :term:`ecflow_server` traverses the :term:`node` tree every 60 seconds, and if the dependencies are "
+           "free\n"
            "does `job creation` and submission. Sometimes the user may free time/date dependencies\n"
            "to avoid waiting for the server poll, this commands allows early job generation\n::\n\n"
            "   void job_generation(\n"
@@ -1561,9 +1630,9 @@ const char* ClientDoc::job_gen() {
 }
 
 const char* ClientDoc::delete_node() {
-    return "Delete the `node`_ (s) specified.\n\n"
-           "If a node is `submitted`_ or `active`_, then a Exception will be raised.\n"
-           "To force the deletion at the expense of `zombie`_ creation, then set\n"
+    return "Delete the :term:`node` (s) specified.\n\n"
+           "If a node is :term:`submitted` or :term:`active`, then a Exception will be raised.\n"
+           "To force the deletion at the expense of :term:`zombie` creation, then set\n"
            "the force parameter to true\n::\n\n"
            "   void delete(\n"
            "      list paths          : List of paths.\n"
@@ -1587,10 +1656,10 @@ const char* ClientDoc::delete_node() {
 }
 
 const char* ClientDoc::delete_all() {
-    return "Delete all the `node`_\\ s held in the `ecflow_server`_.\n\n"
-           "The `suite definition`_ in the server will be empty, after this call. **Use with care**\n"
-           "If a node is `submitted`_ or `active`_, then a Exception will be raised.\n"
-           "To force the deletion at the expense of `zombie`_ creation, then set\n"
+    return "Delete all the :term:`node`\\ s held in the :term:`ecflow_server`.\n\n"
+           "The :term:`suite definition` in the server will be empty, after this call. **Use with care**\n"
+           "If a node is :term:`submitted` or :term:`active`, then a Exception will be raised.\n"
+           "To force the deletion at the expense of :term:`zombie` creation, then set\n"
            "the force parameter to true\n::\n\n"
            "   void delete_all(\n"
            "      [(bool)force=False] : If true delete even if in 'active' or 'submitted' states\n"
@@ -1608,7 +1677,7 @@ const char* ClientDoc::delete_all() {
 
 const char* ClientDoc::enable_ssl() {
     return "Enable secure communication between client and server.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1620,7 +1689,7 @@ const char* ClientDoc::enable_ssl() {
 
 const char* ClientDoc::disable_ssl() {
     return "Disable secure communication between client and server.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1632,7 +1701,7 @@ const char* ClientDoc::disable_ssl() {
 
 const char* ClientDoc::get_certificate() {
     return "Retrieves the full path to the secure communication certificate currently used by the client.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1643,8 +1712,8 @@ const char* ClientDoc::get_certificate() {
 }
 
 const char* ClientDoc::check() {
-    return "Check `trigger`_ and `complete expression`_\\ s and `limit`_\\ s\n\n"
-           "The `ecflow_server`_ does not store `extern`_\\ s. Hence all unresolved references\n"
+    return "Check :term:`trigger` and :term:`complete expression`\\ s and :term:`limit`\\ s\n\n"
+           "The :term:`ecflow_server` does not store :term:`extern`\\ s. Hence all unresolved references\n"
            "are reported as errors.\n"
            "Returns a non empty string for any errors or warning\n::\n\n"
            "   string check(\n"

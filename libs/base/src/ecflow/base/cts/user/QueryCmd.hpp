@@ -44,11 +44,28 @@ public:
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the argument as provided to user
+    static const char* arg(); // used for argument parsing
 
     bool handleRequestIsTestable() const override { return false; }
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+
+    // Handling of each query type is delegated to one of the functions below, keeping
+    // doHandleRequest() as a simple dispatch on query_type_.
+    //
+    // Note: 'state' and 'variable' are the only query types that can be addressed at the server
+    // itself (i.e. when path_to_attribute_ is '/'), so their handlers deal with that case directly.
+    // All other handlers only ever operate on a node, found via find_node_for_query().
+    node_ptr find_node_for_query(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForState(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForDState(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForRepeat(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForEvent(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForMeter(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForLimit(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForLimitMax(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForLabel(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForVariable(Defs*) const;
+    STC_Cmd_ptr doHandleQueryForTrigger(Defs*) const;
 
 private:
     std::string query_type_; // [ state | dstate | event | meter | label | trigger ]

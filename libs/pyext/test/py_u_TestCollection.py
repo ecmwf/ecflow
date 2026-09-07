@@ -8,101 +8,148 @@
 # nor does it submit to any jurisdiction.
 #
 
+import pytest
+
 import ecflow
-import unittest
 
 
-def setup_test(self):
-    self.defs0 = ecflow.Defs()
-    self.suite0 = ecflow.Suite("s")
-    self.family0 = ecflow.Family("s")
-    self.task0 = ecflow.Task("s")
-
-    self.defs1 = ecflow.Defs();
-    self.defs1.add_suite("s1")
-    self.suite1 = ecflow.Suite("s");
-    self.suite1.add_task("t")
-    self.family1 = ecflow.Family("s");
-    self.family1.add_task("t")
-
-    self.defs3 = ecflow.Defs()
-    self.suite3 = ecflow.Suite("s")
-    self.family3 = ecflow.Family("s")
-    [self.defs3.add_suite("s" + str(i)) for i in [1, 2, 3]]
-    [self.suite3.add_family("f" + str(i)) for i in [1, 2, 3]]
-    [self.family3.add_task("t" + str(i)) for i in [1, 2, 3]]
+@pytest.fixture
+def empty_containers():
+    return {
+        "defs": ecflow.Defs(),
+        "suite": ecflow.Suite("s"),
+        "family": ecflow.Family("s"),
+        "task": ecflow.Task("s"),
+    }
 
 
-class TestSizedProtocol(unittest.TestCase):
-    def setUp(self):
-        setup_test(self)
-
-    def test_empty(self):
-        self.assertEqual(len(self.defs0), 0, "Expected empty defs to be of size zero")
-        self.assertEqual(len(self.suite0), 0, "Expected empty suite to be of size zero")
-        self.assertEqual(len(self.family0), 0, "Expected empty family to be of size zero")
-        self.assertEqual(len(self.task0), 0, "Expected empty task to be of size zero")
-
-    def test_size1(self):
-        self.assertEqual(len(self.defs1), 1, "Expected defs with one suite")
-        self.assertEqual(len(self.suite1), 1, "Expected suite with one child")
-        self.assertEqual(len(self.family1), 1, "Expected family with one child")
-
-    def test_size3(self):
-        self.assertEqual(len(self.defs3), 3, "Expected defs with 3 suite but found " + str(len(self.defs3)))
-        self.assertEqual(len(self.suite3), 3, "Expected suite with 3 child but found " + str(len(self.suite3)))
-        self.assertEqual(len(self.family3), 3, "Expected family with 3 child but found " + str(len(self.family3)))
+@pytest.fixture
+def single_item_containers():
+    defs = ecflow.Defs()
+    defs.add_suite("s1")
+    suite = ecflow.Suite("s")
+    suite.add_task("t")
+    family = ecflow.Family("s")
+    family.add_task("t")
+    return {"defs": defs, "suite": suite, "family": family}
 
 
-class TestContainerProtocol(unittest.TestCase):
-    def setUp(self):
-        setup_test(self)
-
-    def test_contains(self):
-        self.assertEqual(("s" not in self.defs0), True, "Err in defs container")
-        self.assertEqual(("z" not in self.defs3), True, "Err in defs container")
-        self.assertEqual(("s1" in self.defs3), True, "Err in defs container")
-        self.assertEqual(("s2" in self.defs3), True, "Err in defs container")
-        self.assertEqual(("s3" in self.defs3), True, "Err in defs container")
-
-        self.assertEqual(("f" not in self.suite0), True, "Err in suites container")
-        self.assertEqual(("z" not in self.suite3), True, "Err in suites container")
-        self.assertEqual(("f1" in self.suite3), True, "Err in suites container")
-        self.assertEqual(("f2" in self.suite3), True, "Err in suites container")
-        self.assertEqual(("f3" in self.suite3), True, "Err in suites container")
-
-        self.assertEqual(("z" not in self.family0), True, "Err in family container")
-        self.assertEqual(("t" not in self.family0), True, "Err in family container")
-        self.assertEqual(("t1" in self.family3), True, "Err in family container")
-        self.assertEqual(("t2" in self.family3), True, "Err in family container")
-        self.assertEqual(("t3" in self.family3), True, "Err in family container")
+@pytest.fixture
+def three_item_containers():
+    defs = ecflow.Defs()
+    suite = ecflow.Suite("s")
+    family = ecflow.Family("s")
+    [defs.add_suite("s" + str(i)) for i in [1, 2, 3]]
+    [suite.add_family("f" + str(i)) for i in [1, 2, 3]]
+    [family.add_task("t" + str(i)) for i in [1, 2, 3]]
+    return {"defs": defs, "suite": suite, "family": family}
 
 
-class TestIterableProtocol(unittest.TestCase):
-    def setUp(self):
-        setup_test(self)
-
-    def test_iterator(self):
-        self.assertTrue(hasattr(self.defs3, '__iter__'), "defs has no __iter__")
-        self.assertTrue(hasattr(self.suite3, '__iter__'), "suite has no __iter__")
-        self.assertTrue(hasattr(self.family3, '__iter__'), "family has no __iter__")
-        self.assertTrue(hasattr(self.task0, '__iter__'), "task has no __iter__ for aliases")
-        self.assertEqual([suite.name() for suite in self.defs3], ["s1", "s2", "s3"], "Defs iterator protocol not working")
-        self.assertEqual([child.name() for child in self.suite3], ["f1", "f2", "f3"], "Suites iterator protocol not working")
-        self.assertEqual([child.name() for child in self.family3], ["t1", "t2", "t3"], "Family iterator protocol not working")
+def test_empty_containers_have_length_zero(empty_containers):
+    assert len(empty_containers["defs"]) == 0, "Expected empty defs to be of size zero"
+    assert (
+        len(empty_containers["suite"]) == 0
+    ), "Expected empty suite to be of size zero"
+    assert (
+        len(empty_containers["family"]) == 0
+    ), "Expected empty family to be of size zero"
+    assert len(empty_containers["task"]) == 0, "Expected empty task to be of size zero"
 
 
-class TestNodesIteration(unittest.TestCase):
-    def setUp(self):
-        setup_test(self)
-
-    def test_node_iterator(self):
-        self.assertEqual([suite.name() for suite in self.defs3.suites], ["s1", "s2", "s3"], "Defs.suites not working")
-        self.assertEqual([child.name() for child in self.suite3.nodes], ["f1", "f2", "f3"], "Suite.nodes working")
-        self.assertEqual([child.name() for child in self.family3.nodes], ["t1", "t2", "t3"], "Family.nodes not working")
-        self.assertEqual([alias.name() for child in self.task0.nodes], [], "Task.nodes not working")
+def test_single_item_containers_have_length_one(single_item_containers):
+    assert len(single_item_containers["defs"]) == 1, "Expected defs with one suite"
+    assert len(single_item_containers["suite"]) == 1, "Expected suite with one child"
+    assert len(single_item_containers["family"]) == 1, "Expected family with one child"
 
 
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")
+def test_three_item_containers_have_length_three(three_item_containers):
+    assert (
+        len(three_item_containers["defs"]) == 3
+    ), "Expected defs with 3 suite but found " + str(len(three_item_containers["defs"]))
+    assert (
+        len(three_item_containers["suite"]) == 3
+    ), "Expected suite with 3 child but found " + str(
+        len(three_item_containers["suite"])
+    )
+    assert (
+        len(three_item_containers["family"]) == 3
+    ), "Expected family with 3 child but found " + str(
+        len(three_item_containers["family"])
+    )
+
+
+def test_container_protocol_membership(three_item_containers, empty_containers):
+    defs0 = empty_containers["defs"]
+    defs3 = three_item_containers["defs"]
+    assert "s" not in defs0, "Err in defs container"
+    assert "z" not in defs3, "Err in defs container"
+    assert "s1" in defs3, "Err in defs container"
+    assert "s2" in defs3, "Err in defs container"
+    assert "s3" in defs3, "Err in defs container"
+
+    suite0 = empty_containers["suite"]
+    suite3 = three_item_containers["suite"]
+    assert "f" not in suite0, "Err in suites container"
+    assert "z" not in suite3, "Err in suites container"
+    assert "f1" in suite3, "Err in suites container"
+    assert "f2" in suite3, "Err in suites container"
+    assert "f3" in suite3, "Err in suites container"
+
+    family0 = empty_containers["family"]
+    family3 = three_item_containers["family"]
+    assert "z" not in family0, "Err in family container"
+    assert "t" not in family0, "Err in family container"
+    assert "t1" in family3, "Err in family container"
+    assert "t2" in family3, "Err in family container"
+    assert "t3" in family3, "Err in family container"
+
+
+def test_iterable_protocol_iteration(three_item_containers, empty_containers):
+    defs3 = three_item_containers["defs"]
+    suite3 = three_item_containers["suite"]
+    family3 = three_item_containers["family"]
+    task0 = empty_containers["task"]
+
+    assert hasattr(defs3, "__iter__"), "defs has no __iter__"
+    assert hasattr(suite3, "__iter__"), "suite has no __iter__"
+    assert hasattr(family3, "__iter__"), "family has no __iter__"
+    assert hasattr(task0, "__iter__"), "task has no __iter__ for aliases"
+    assert [suite.name() for suite in defs3] == [
+        "s1",
+        "s2",
+        "s3",
+    ], "Defs iterator protocol not working"
+    assert [child.name() for child in suite3] == [
+        "f1",
+        "f2",
+        "f3",
+    ], "Suites iterator protocol not working"
+    assert [child.name() for child in family3] == [
+        "t1",
+        "t2",
+        "t3",
+    ], "Family iterator protocol not working"
+
+
+def test_named_node_iteration(three_item_containers, empty_containers):
+    defs3 = three_item_containers["defs"]
+    suite3 = three_item_containers["suite"]
+    family3 = three_item_containers["family"]
+    task0 = empty_containers["task"]
+
+    assert [suite.name() for suite in defs3.suites] == [
+        "s1",
+        "s2",
+        "s3",
+    ], "Defs.suites not working"
+    assert [child.name() for child in suite3.nodes] == [
+        "f1",
+        "f2",
+        "f3",
+    ], "Suite.nodes working"
+    assert [child.name() for child in family3.nodes] == [
+        "t1",
+        "t2",
+        "t3",
+    ], "Family.nodes not working"
+    assert [alias.name() for alias in task0.nodes] == [], "Task.nodes not working"

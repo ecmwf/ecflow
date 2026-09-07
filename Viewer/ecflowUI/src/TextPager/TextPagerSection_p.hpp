@@ -17,7 +17,7 @@
 
 #include <QCoreApplication>
 #include <QObject>
-class TextPagerSection;
+struct TextPagerSection;
 class TextSectionManager : public QObject {
     Q_OBJECT
 public:
@@ -32,7 +32,7 @@ Q_SIGNALS:
 private:
     TextSectionManager()
         : QObject(QCoreApplication::instance()) {}
-    friend class TextPagerSection;
+    friend struct TextPagerSection;
 };
 
 #endif

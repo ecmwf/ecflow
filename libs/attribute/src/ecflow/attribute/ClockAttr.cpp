@@ -190,7 +190,7 @@ void ClockAttr::begin_calendar(ecf::Calendar& calendar) const {
 
 boost::posix_time::ptime ClockAttr::ptime() const {
     if (day_ != 0) {
-        // Use the date given. ie we start from midnight on the given day + gain.
+        // Use the date given. i.e., we start from midnight on the given day + gain.
         auto theDate = boost::gregorian::date(year_, month_, day_);
         return {theDate, boost::posix_time::seconds(gain_)};
     }

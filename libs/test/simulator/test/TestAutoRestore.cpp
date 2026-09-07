@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     // PrintStyle::setStyle(PrintStyle::MIGRATE);
     // cout << theDefs;
 
-    // make sure all familes has been archived
+    // make sure all families has been archived
     auto families = ecf::get_all_families(theDefs);
     for (auto family : families) {
         if (family->name() == "do_autorestore") {

@@ -1,7 +1,7 @@
 .. _udp_api:
 
-ecFlow UDP
-**********
+UDP API
+*******
 
 .. caution:: 
   ecFlow's UDP server is experimental, actively under implementation, and its details are subject to change.

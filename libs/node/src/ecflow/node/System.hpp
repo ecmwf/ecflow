@@ -72,7 +72,7 @@ public:
     void setDefs(const defs_ptr& defs) { defs_ = defs; }
 
     // return true, if command can be spawned, else false.
-    // For jobs, We can't store reference to Task*, as future functionality like
+    // For jobs, We cannot store reference to Task*, as future functionality like
     // auto-migrate, etc, means we may end up pointing to garbage.
     // so instead we will store absNodePath. For other commands this can be empty
     enum CmdType { ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD };

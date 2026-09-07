@@ -19,6 +19,24 @@ cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 #
 
 #
+# Ensure CMake de-duplicates the link line where the linker allows it.
+#
+# This is necessary because test target name the library that its test harness already export,
+# so the same archive is listed more than once.
+#
+#  - CMP0156 lets CMake collapse the repeats when the linker can cope without them.
+#  - CMP0179 is needed alongside it: CMP0156 alone  leaves static libraries repeated,
+#    and every archive involved here is static.
+#
+if (POLICY CMP0156) # available from CMake 3.29
+  cmake_policy( SET CMP0156 NEW )
+endif()
+if (POLICY CMP0179) # available from CMake 3.31
+  cmake_policy( SET CMP0179 NEW )
+endif()
+
+
+#
 # Important: Force default build type to `Release` if no CMAKE_BUILD_TYPE is specified
 #
 if (NOT DEFINED CMAKE_BUILD_TYPE)
@@ -31,7 +49,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 # Project
 # =========================================================================================
 
-project( ecflow LANGUAGES CXX VERSION 5.18.0 )
+project( ecflow LANGUAGES CXX VERSION 5.19.0 )
 #
 # Important:
 #   The CMake project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
@@ -78,6 +96,21 @@ option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server"  
 option( ENABLE_UDP                 "Enable UDP server"                                   ON )
 option( ENABLE_DOCS                "Enable Documentation"                                OFF )
 option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                               OFF )
+
+#
+# On macOS, Boost.ASIO, by default, uses kqueue -- which is correctly intercepted by proxychains.
+#
+# On Linux, Boost.ASIO, by default, uses the epoll reactor.
+# This means that the TCP/IP client, driven by Boost's async_* calls, uses the epoll_* API.
+# Since proxychains only intercepts the select/connect API, the epoll_* calls are simply ignored.
+#
+# The option below allows to force the use of the Boost.Asio 'select' fallback reactor,
+# and thus allows the use with proxychains.
+#
+# This is useful to enable running ecflow_client/ecFlowUI in a Linux container, while using
+# proxychains to reach a SOCKS proxy and contact a remote host via an 'ssh -N -D' tunnel.
+#
+option( ENABLE_ASIO_SELECT_REACTOR "Use the Boost.Asio 'select' fallback reactor"        OFF )
 
 # =========================================================================================
 # Sanity check options
@@ -134,6 +167,11 @@ if(ENABLE_UDP AND NOT ENABLE_SERVER)
   set(ENABLE_UDP OFF)
 endif()
 
+# Only in Linux do we support the Boost.Asio 'select' fallback reactor
+if( ENABLE_ASIO_SELECT_REACTOR AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" )
+  ecbuild_critical( "ENABLE_ASIO_SELECT_REACTOR is only supported on Linux" )
+endif()
+
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
@@ -145,6 +183,7 @@ ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
+ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
 
 
 if (ENABLE_UI)

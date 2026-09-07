@@ -31,7 +31,7 @@ void parse_option(ClientOptionsParser::option_t& option,
         // In case form 1) is used, we discard the '--<option>'
         args.erase(args.begin());
         if (args.empty()) {
-            // This means that the option doesn't actually have a value (i.e. acts as a flag) and we simply return
+            // This means that the option does not actually have a value (i.e. acts as a flag) and we simply return
             return;
         }
         // store the 'arg1'

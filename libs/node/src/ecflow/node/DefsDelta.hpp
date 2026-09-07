@@ -19,7 +19,7 @@
 ///                  for asking for the full defs.
 ///
 /// When the client request the incremental changes, it also passes its client_state_change_no.
-/// The client_state_change number is used in the server side to determine what's changed.
+/// The client_state_change number is used in the server side to determine what is changed.
 /// These changes are collated with add()  and transferred to the client.
 /// The client then calls  incremental_sync() which will apply the changes to the client defs
 /// so bringing it in sync with the server defs.
@@ -56,7 +56,7 @@ public:
     // ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
     bool sync_suite_clock() const { return sync_suite_clock_; }
 
-    /// Add the compound memento, ie. store all memento's for a *given* node.
+    /// Add the compound memento, i.e., store all memento's for a *given* node.
     void add(compound_memento_ptr);
 
     void set_server_state_change_no(unsigned int s) { server_state_change_no_ = s; }
@@ -72,7 +72,7 @@ public:
     bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
 
     /// =========================================================================
-    // The client state change number. Used to determine what's changed
+    // The client state change number. Used to determine what is changed
     unsigned int client_state_change_no() const { return client_state_change_no_; }
 
     /// return the number of compound mementos

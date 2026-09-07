@@ -279,9 +279,10 @@ public:
     /// must not be too far in the future because leap seconds affect the count (which are only determined about 6
     /// months in advance). With local times a future duration calculation could be off by an entire hour, since
     /// legislatures can and do change DST rules at will. If you want to handle wall-clock times in the future, you
-    /// won't be able (in the general case) to calculate exact durations, for the same reasons described above. If you
-    /// want accurate calculations with future times, you will have to use TAI or an equivalent, but the mapping from
-    /// TAI to UTC or local time depends on leap seconds, so you will not have exact agreement with wall-clock time.
+    /// will not be able (in the general case) to calculate exact durations, for the same reasons described above. If
+    /// you want accurate calculations with future times, you will have to use TAI or an equivalent, but the mapping
+    /// from TAI to UTC or local time depends on leap seconds, so you will not have exact agreement with wall-clock
+    /// time.
     static boost::posix_time::ptime second_clock_time();
 
     bool is_special() const { return initTime_.is_special(); }

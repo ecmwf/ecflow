@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_Label_serialisation) {
 BOOST_AUTO_TEST_CASE(test_Variable_serialisation) {
     ECF_NAME_THIS_TEST();
 
-    Variable saved("varname", "var value 123 12 =");
+    auto saved = Variable::new_variable("varname", "var value 123 12 =");
     doSaveAndRestore(fileName, saved);
 }
 

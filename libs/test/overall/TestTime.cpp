@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_single_real_time) {
         // Avoid adding directly to TimeSlot
         // i.e if local time is 9:59 and we create a TimeSlot like
         //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
-        // The the minute will be 62, which is illegal and will not parse
+        // The minute will be 62, which is illegal and will not parse
         auto theLocalTime =
             boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
         auto time1 = theLocalTime + boost::posix_time::minutes(1);
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
         // Avoid adding directly to TimeSlot
         // i.e if local time is 9:59 and we create a TimeSlot like
         //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
-        // The the minute will be 62, which is illegal and will not parse
+        // The minute will be 62, which is illegal and will not parse
         auto theLocalTime =
             boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
 

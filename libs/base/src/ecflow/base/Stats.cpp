@@ -15,8 +15,8 @@
 #include <sstream>
 #include <string>
 
-#include <boost/range/adaptors.hpp>
-
+#include "ecflow/base/ServerProtocol.hpp"
+#include "ecflow/core/Collections.hpp"
 #include "ecflow/core/SState.hpp"
 
 Stats::Stats() = default;
@@ -25,6 +25,7 @@ Stats::Stats(const Stats& rhs)
     : locked_by_user_(rhs.locked_by_user_),
       host_(rhs.host_),
       port_(rhs.port_),
+      protocol_(rhs.protocol_),
       up_since_(rhs.up_since_),
       version_(rhs.version_),
       request_stats_(rhs.request_stats_),
@@ -123,6 +124,7 @@ Stats& Stats::operator=(const Stats& rhs) {
     swap(locked_by_user_, tmp.locked_by_user_);
     swap(host_, tmp.host_);
     swap(port_, tmp.port_);
+    swap(protocol_, tmp.protocol_);
     swap(up_since_, tmp.up_since_);
     swap(version_, tmp.version_);
     swap(request_stats_, tmp.request_stats_);
@@ -218,7 +220,7 @@ void Stats::update_stats(int poll_interval) {
 
     // To avoid excessive memory usage, we store only a limited number of:
     //  - requests per poll period
-    // Since we're polling every 60 seconds, sample cover the last hour
+    // Since we are polling every 60 seconds, sample cover the last hour
     if (request_vec_.size() > 60) {
         request_vec_.pop_front();
     }
@@ -256,10 +258,10 @@ void Stats::update_for_serialisation() {
     int count      = 0;
     double request = 0.0;
     double seconds = 0.0;
-    for (const auto& entry : boost::adaptors::reverse(request_vec_)) {
+    for (auto [r /* Request */, d /* Duration */] : ecf::collections::reversed(request_vec_)) {
         count++;
-        request += entry.first;
-        seconds += entry.second;
+        request += r;
+        seconds += d;
         double request_per_second = request / seconds;
 
         switch (count) {
@@ -494,6 +496,13 @@ bool Stats::has_user_commands_file() const {
     return found_any(file_ecf_, file_job_, file_jobout_, file_manual_, file_cmdout_);
 }
 
+std::string Stats::protocol_designation() const {
+    if (auto protocol = ecf::Enumerate<ecf::Protocol>::to_enum(protocol_); protocol) {
+        return ecf::to_ui_designation(protocol.value());
+    }
+    return protocol_; // unrecognised, including the empty value reported by an older server
+}
+
 void Stats::show(std::ostream& os) const {
     auto display = display_stats_helper(os, Stats::width);
 
@@ -502,6 +511,7 @@ void Stats::show(std::ostream& os) const {
     display("Status", SState::to_string(status_));
     display("Host", host_);
     display("Port", port_);
+    display("Protocol", protocol_designation());
     display("Up since", up_since_);
     display("Job sub' interval", job_sub_interval_, "s");
     display("ECF_HOME", ECF_HOME_);
