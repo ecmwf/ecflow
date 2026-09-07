@@ -30,7 +30,7 @@ target_clangformat(ecflow_server)
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
 # had no effect
-#          
+#
 SET_TARGET_PROPERTIES(ecflow_server
   PROPERTIES
     INSTALL_RPATH ""
@@ -41,7 +41,7 @@ SET_TARGET_PROPERTIES(ecflow_server
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+#SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 # the RPATH to be used when installing
 #SET(CMAKE_INSTALL_RPATH "")
@@ -51,7 +51,7 @@ SET_TARGET_PROPERTIES(ecflow_server
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 
-# ================================================================================                         
+# ================================================================================
 # TEST
 ecbuild_add_test(
   TARGET

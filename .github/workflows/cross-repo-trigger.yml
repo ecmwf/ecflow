@@ -115,7 +115,7 @@ jobs:
     needs:
     - resolve
     if: contains(fromJSON(inputs.from-jobs), 'ecbuild/build') || contains(fromJSON(inputs.from-jobs), 'stack-deps/build') || inputs.rebuild-request
-    name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+    name: ecflow/build (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container || '' }}
@@ -136,9 +136,11 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+        name: ecflow/build (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: start
+    - name: Announce image
+      uses: ecmwf/ci-infrastructure/actions/announce-image@main
     - uses: actions/checkout@v6
       with:
         repository: ecmwf/ecflow
@@ -147,6 +149,8 @@ jobs:
     - name: Decode matrix-leg
       id: m
       shell: bash
+      env:
+        MATRIX_LEG: ${{ toJSON(matrix) }}
       run: |
         set -euo pipefail
         shopt -s inherit_errexit 2>/dev/null || true
@@ -154,7 +158,7 @@ jobs:
           echo "::error::jq is required but not installed in this runner/image." >&2
           exit 1
         }
-        leg='${{ toJSON(matrix) }}'
+        leg="$MATRIX_LEG"
         require() {
           local val
           val=$(jq -r "$1" <<<"$leg")
@@ -176,9 +180,8 @@ jobs:
         } >> "$GITHUB_OUTPUT"
     - name: Fetch resolved deps
       id: deps
-      uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
+      uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
       with:
-        mode: download-only
         deps-json: ${{ steps.m.outputs.deps-json }}
         token: ${{ steps.mint.outputs.token }}
     - name: Build
@@ -188,10 +191,11 @@ jobs:
         cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
         cxx-compiler: ${{ steps.m.outputs.cxx-compiler }}
         build-type: ${{ steps.m.outputs.build-type }}
+    - name: Test
+      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8
     - name: Publish
-      uses: ecmwf/ci-infrastructure/actions/fetch-and-publish@main
+      uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
       with:
-        mode: publish
         install-path: ${{ steps.build.outputs.install-path }}
         artifact-name: ${{ steps.m.outputs.own-artifact-name }}
     - name: Report check-run conclusion
@@ -201,7 +205,7 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build (${{ matrix['build-type'] }}, ${{ matrix.platform }})
+        name: ecflow/build (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: finish
         conclusion: ${{ job.status }}

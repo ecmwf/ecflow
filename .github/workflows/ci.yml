@@ -1,59 +1,183 @@
-name: ci
+name: CI
 
 on:
-  # Trigger the workflow on push to main or develop, except tag creation
   push:
-    branches:
-      - 'main'
-      - 'develop'
-    tags-ignore:
-      - '**'
+    branches: [develop, main]
     paths-ignore:
       - ".cd/**"
       - ".github/cd-config.yml"
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+    paths-ignore:
+      - ".cd/**"
+      - ".github/cd-config.yml"
+  workflow_dispatch:
 
-  # Trigger the workflow on pull request
-  pull_request: ~
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
-  # Trigger the workflow manually
-  workflow_dispatch: ~
+env:
+  ARTIFACT_POLL_INTERVAL: ${{ vars.ARTIFACT_POLL_INTERVAL || '60' }}
+  ARTIFACT_S3_ENDPOINT: ${{ secrets.ARTIFACT_S3_ENDPOINT }}
+  ARTIFACT_S3_BUCKET: ${{ secrets.ARTIFACT_S3_BUCKET }}
+  SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-  # Trigger after public PR approved for CI
-  pull_request_target:
-    types: [labeled]
+permissions:
+  contents: read
 
 jobs:
-  # Run CI including downstream packages on self-hosted runners
-  downstream-ci:
-    name: downstream-ci
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
-    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
-    with:
-      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: |
-        clang@macos-13-arm
-      codecov_upload: true
-      clang_format: true
-      clang_format_ignore: |
-        3rdparty
-        docs
-        tools
-        releng
-        libs/client/test/data
-        libs/node/test/data
-        libs/pyext/test/data
-        libs/test/overall/data
-    secrets: inherit
+  ci-approval:
+    runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: ecmwf/ci-infrastructure/actions/require-ci-approval@main
 
-  # Build downstream packages on HPC
-  downstream-ci-hpc:
-    name: downstream-ci-hpc
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
-    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci-hpc.yml@main
-    with:
-      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: |
-        intel-2021.4.0
-        nvidia-22.11
-        aocc-4.0.0
-    secrets: inherit
+  pre-commit:
+    needs: ci-approval
+    runs-on: ubuntu-slim
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ecmwf/ci-infrastructure/actions/pre-commit@main
+
+  resolve:
+    needs: [ci-approval, pre-commit]
+    runs-on: arc-runner-normal
+    container:
+      image: eccr.ecmwf.int/public-ci-images/ubuntu24.04-base:latest
+    outputs:
+      build-matrix: ${{ steps.r.outputs.matrix-build }}
+      build-hpc-matrix: ${{ steps.r.outputs.matrix-build-hpc }}
+    steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
+      - id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
+      - id: r
+        uses: ecmwf/ci-infrastructure/actions/resolve-deps@main
+        with:
+          current-branch: ${{ github.head_ref || github.ref_name }}
+          matrix: build,build-hpc
+          token: ${{ steps.mint.outputs.token }}
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          app-private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+
+  build:
+    needs: [ci-approval, resolve]
+    name: build+test (${{ matrix.platform }}, ${{ matrix.cxx-compiler }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container || '' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.build-matrix) }}
+    steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
+      - id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
+
+      - name: Fetch resolved deps
+        id: deps
+        uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
+        with:
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          token: ${{ steps.mint.outputs.token }}
+
+      - name: Build ecflow
+        id: build
+        uses: ./.github/actions/build-ecflow
+        with:
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+          cxx-compiler: ${{ matrix.cxx-compiler }}
+          build-type: ${{ matrix.build-type }}
+
+      - name: Print dependency table
+        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
+        with:
+          resolved-json: ${{ toJSON(matrix._resolved) }}
+
+      # Run from the build tree: ecflow's tests link against it (and against
+      # static libraries that never reach the install prefix), so they cannot be
+      # run against the installed artifact.
+      #
+      # The filters come from .ci/manifest.toml's [matrix.build], which is also
+      # what the generated cross-repo-trigger.yml renders its Test step from —
+      # see the comment there for why this particular set. Spelling them out
+      # again here is how the two invocations drift apart.
+      - name: Test
+        if: ${{ matrix._resolved.ctest }}
+        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure ${{ matrix._resolved['ctest-args'] }}
+
+      - name: Publish ecflow
+        uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
+        with:
+          install-path: ${{ steps.build.outputs.install-path }}
+          artifact-name: ${{ matrix._resolved.own-artifact-name }}
+
+  build-hpc:
+    needs: [ci-approval, resolve]
+    name: build-hpc (${{ matrix.platform }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container }}
+      credentials:
+        username: ${{ secrets.ECCR_PULL_ROBOT_NAME }}
+        password: ${{ secrets.ECCR_PULL_ROBOT_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.build-hpc-matrix) }}
+    steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
+      - id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
+
+      - name: Fetch resolved deps
+        id: deps
+        uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
+        with:
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          token: ${{ steps.mint.outputs.token }}
+          # Stage the dep prefixes for shipment without installing anything
+          # here: they are consumed on the compute node, not in this container.
+          install-python-deps: 'false'
+
+      - name: Build ecflow on HPC
+        uses: ecmwf/ci-infrastructure/actions/build-on-hpc@main
+        with:
+          site: ${{ matrix.site }}
+          job-script: ${{ matrix.job-script || './.ci/hpc/build.sh.j2' }}
+          # The render context for the .j2 recipe: the toolchain this leg declares.
+          matrix-leg: ${{ toJSON(matrix) }}
+          artifact-name: ${{ matrix._resolved.own-artifact-name }}
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+          work-dir: ${{ vars.HPC_CI_WORK_DIR }}
+          remote-work-dir: ${{ vars.HPC_CI_REMOTE_WORK_DIR }}
+          troika-user: ${{ secrets.HPC_CI_SSH_USER }}

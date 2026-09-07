@@ -1,0 +1,59 @@
+name: old CI
+
+on:
+  # Trigger the workflow on push to main or develop, except tag creation
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - ".cd/**"
+      - ".github/cd-config.yml"
+
+  # Trigger the workflow on pull request
+  pull_request: ~
+
+  # Trigger the workflow manually
+  workflow_dispatch: ~
+
+  # Trigger after public PR approved for CI
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  # Run CI including downstream packages on self-hosted runners
+  downstream-ci:
+    name: downstream-ci
+    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
+    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
+    with:
+      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
+      skip_matrix_jobs: |
+        clang@macos-13-arm
+      codecov_upload: true
+      clang_format: true
+      clang_format_ignore: |
+        3rdparty
+        docs
+        tools
+        releng
+        libs/client/test/data
+        libs/node/test/data
+        libs/pyext/test/data
+        libs/test/overall/data
+    secrets: inherit
+
+  # Build downstream packages on HPC
+  downstream-ci-hpc:
+    name: downstream-ci-hpc
+    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-ci' }}
+    uses: ecmwf/downstream-ci/.github/workflows/downstream-ci-hpc.yml@main
+    with:
+      ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
+      skip_matrix_jobs: |
+        intel-2021.4.0
+        nvidia-22.11
+        aocc-4.0.0
+    secrets: inherit
