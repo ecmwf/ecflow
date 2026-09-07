@@ -16,11 +16,16 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeContainer.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/AvisoParser.hpp"
 #include "ecflow/node/parser/MirrorParser.hpp"
 
@@ -283,12 +288,20 @@ void Node::changeLimitMax(const std::string& name, int maxValue) {
 }
 
 void Node::changeLimitValue(const std::string& name, const std::string& value) {
+    // The special value 'reset' requests the reset of the limit with the nodes
+    // that are currently consuming it, and is therefore not expected to be an integer.
+    if (value == Limit::reset_keyword) {
+        reset_limit_value(name);
+        return;
+    }
+
     int theValue = 0;
     try {
         theValue = ecf::convert_to<int>(value);
     }
     catch (const ecf::bad_conversion&) {
-        throw std::runtime_error("Node::changeLimitValue expected integer value but found " + value);
+        throw std::runtime_error("Node::changeLimitValue expected an integer value, or '" +
+                                 std::string(Limit::reset_keyword) + "', but found " + value);
     }
     changeLimitValue(name, theValue);
 }
@@ -299,6 +312,84 @@ void Node::changeLimitValue(const std::string& name, int value) {
         throw std::runtime_error("Node::changeLimitValue: Could not find limit " + name);
     }
     limit->setValue(value);
+}
+
+namespace {
+
+///
+/// @brief Visits, in pre-order, the given Node and all its descendants, including the aliases of a Task.
+///
+/// @param[in] node The root of the traversal
+/// @param[in] visitor The function called on each visited Node
+///
+template <typename Visitor>
+void visit_node_and_descendants(Node& node, Visitor& visitor) {
+    visitor(node);
+
+    if (auto* container = dynamic_cast<NodeContainer*>(&node); container) {
+        for (const auto& child : container->children()) {
+            visit_node_and_descendants(*child, visitor);
+        }
+    }
+    else if (auto* task = dynamic_cast<Task*>(&node); task) {
+        for (const auto& alias : task->aliases()) {
+            visit_node_and_descendants(*alias, visitor);
+        }
+    }
+}
+
+} // namespace
+
+void Node::reset_limit_value(const std::string& name) {
+    limit_ptr limit = find_limit(name);
+    if (!limit.get()) {
+        throw std::runtime_error("Node::reset_limit_value: Could not find limit " + name);
+    }
+
+    Defs* the_defs = defs();
+    if (!the_defs) {
+        throw std::runtime_error("Node::reset_limit_value: Could not access the definition holding limit " + name);
+    }
+
+    // Discard the consumption currently recorded by the Limit.
+    limit->reset();
+
+    // Rebuild the consumption, by replaying the rules applied by Submittable::update_limits() for every node
+    // that is currently consuming, i.e. that is in the submitted or active state. The whole definition is
+    // traversed, since an inlimit is allowed to reference a Limit held in another suite.
+    //
+    // The 'incremented' flag of the referencing inlimits must be cleared as well, otherwise the inlimits that
+    // limit a single node (i.e. -n) refuse to consume a token during the replay. The flag is cleared as part
+    // of the same traversal: an inlimit is only ever consumed by the Node holding it or by a descendant (see
+    // Node::incrementInLimit(), which walks up the parent hierarchy), and the traversal is pre-order, and
+    // hence the flag of a Node is always cleared before any of its descendants replays.
+    auto visitor = [&limit](Node& node) {
+        node.inLimitMgr_.reset_for(limit.get());
+
+        auto* submittable = dynamic_cast<Submittable*>(&node);
+        if (!submittable) {
+            return;
+        }
+
+        NState::State state = submittable->state();
+        if (state != NState::SUBMITTED && state != NState::ACTIVE) {
+            return;
+        }
+
+        {
+            std::set<Limit*> limitSet; // ensure local inlimit have preference over parent
+            submittable->incrementInLimit(limitSet, limit.get());
+        }
+        if (state == NState::ACTIVE) {
+            // An active node has given up the tokens held on the inlimits that limit submission only (i.e. -s)
+            std::set<Limit*> limitSet;
+            submittable->decrementInLimitForSubmission(limitSet, limit.get());
+        }
+    };
+
+    for (const auto& suite : the_defs->suites()) {
+        visit_node_and_descendants(*suite, visitor);
+    }
 }
 
 void Node::changeDefstatus(const std::string& theState) {

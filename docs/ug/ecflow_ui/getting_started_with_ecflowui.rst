@@ -173,6 +173,12 @@ It is possible to select multiple nodes with the mouse and select a
 command which will be sent to them all. Also, using the **Custom...**
 menu entry, any command may be typed in.
 
+Three of the node commands place a task back into execution, and are easily confused, since they
+differ in how much of the state of the node is reset: *Execute* submits the job immediately and
+resets nothing, *Rerun* returns the task to the queued state while preserving the output of the
+previous runs, and *Requeue* resets the node, and all its children, to a pristine state. The
+attributes affected by each are compared in :ref:`tutorial-execute_rerun_and_requeue`.
+
 Configuration and setup
 =======================
 

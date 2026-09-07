@@ -23,6 +23,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 
 namespace cereal {
 class access;
@@ -32,6 +33,14 @@ class Node;
 // Class Limit: The limit is zero based, hence if limit is 10, increment must use < 10
 class Limit {
 public:
+    ///
+    /// @brief The special value accepted in place of an integer by 'alter change limit_value'
+    ///
+    /// When this value is given, the Limit is re-synchronised with the nodes that are currently
+    /// consuming it, rather than being set to an explicit value.
+    ///
+    static constexpr std::string_view reset_keyword = "reset";
+
     Limit(const std::string& name, int limit);
     Limit(const std::string& name, int limit, int value, const std::set<std::string>& paths, bool check = true);
     Limit() = default;

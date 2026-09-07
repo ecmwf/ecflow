@@ -368,8 +368,8 @@
             "menu"           : "Node",
             "name"           : "Reset",
             "visible_for"    : "limit",
-            "command"        : "ecflow_client --alter=change limit_value <node_name> 0 <parent_name>",
-            "question"       : "Confirm resetting limit <node_name>",
+            "command"        : "ecflow_client --alter=change limit_value <node_name> reset <parent_name>",
+            "question"       : "Confirm resetting limit <node_name> to the nodes currently consuming it",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },

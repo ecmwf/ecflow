@@ -149,16 +149,23 @@ inline X509* Certificate::generate_x509(EVP_PKEY* pkey) {
     /* Set the public key for our certificate. */
     X509_set_pubkey(x509, pkey);
 
-    /* We want to copy the subject name to the issuer name. */
-    X509_NAME* name = X509_get_subject_name(x509);
+    /* Since OpenSSL 4.0 we need to create a new name that is copied to both the subject and issuer. */
+    X509_NAME* name = X509_NAME_new();
+    if (!name) {
+        X509_free(x509);
+        EVP_PKEY_free(pkey);
+        throw std::runtime_error("Unable to create X509_NAME structure");
+    }
 
     /* Set the country code and common name. */
     X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC, (unsigned char*)"CA", -1, -1, 0);
     X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (unsigned char*)"ecflow-test", -1, -1, 0);
     X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"localhost", -1, -1, 0);
 
-    /* Now set the issuer name. */
+    /* Now set the subject and issuer name. */
+    X509_set_subject_name(x509, name);
     X509_set_issuer_name(x509, name);
+    X509_NAME_free(name);
 
     /* Actually sign the certificate with our key. */
     if (!X509_sign(x509, pkey, EVP_sha256())) {

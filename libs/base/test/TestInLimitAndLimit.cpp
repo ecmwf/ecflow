@@ -14,11 +14,17 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "MockServer.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
@@ -1283,6 +1289,669 @@ BOOST_AUTO_TEST_CASE(test_inlimit_submission_only) {
 
     // PrintStyle::setStyle(PrintStyle::MIGRATE);
     // cout << defs;
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_restores_consumed_tokens) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit A
+    //     task t1
+    //     task t2
+    //   family f2
+    //     inlimit A
+    //     task t1
+    //     task t2
+
+    // Once all the tasks are active, the limit A has consumed 4 tokens. Setting the limit value to 0
+    // desynchronises the limit from the tasks that are actually consuming it. Setting the limit value
+    // to 'reset' is expected to restore both the value and the consumed paths.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1"));
+    task_ptr f1_t1 = f1->add_task("t1");
+    task_ptr f1_t2 = f1->add_task("t2");
+    family_ptr f2  = s1->add_family("f2");
+    f2->addInLimit(InLimit("A", "/s1"));
+    task_ptr f2_t1 = f2->add_task("t1");
+    task_ptr f2_t2 = f2->add_task("t2");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2", "/s1/f2/t1", "/s1/f2/t2"};
+
+    {
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+
+        BOOST_CHECK_MESSAGE(the_limit->value() == 4, "Expected limit value to be 4 but found " << the_limit->value());
+        BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the 4 active tasks to be consuming");
+    }
+
+    {
+        // Desynchronise the limit, as the ecflow_ui 'Reset' menu entry used to do
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+
+        BOOST_CHECK_MESSAGE(the_limit->value() == 0, "Expected limit value to be 0 but found " << the_limit->value());
+        BOOST_CHECK_MESSAGE(the_limit->paths().empty(), "Expected no consumed paths");
+    }
+
+    {
+        // Re-synchronise the limit with the tasks that are actually consuming it
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+        BOOST_CHECK_MESSAGE(the_limit->value() == 4, "Expected limit value to be 4 but found " << the_limit->value());
+        BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the 4 active tasks to be consuming");
+    }
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_ignores_nodes_that_are_not_consuming) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit A
+    //     task t1
+    //     task t2
+    //   family f2
+    //     inlimit A
+    //     task t1
+    //     task t2
+
+    // Family f2 is forced complete, and hence releases its tokens. The re-synchronisation is expected
+    // to account for the tasks of family f1 only.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1"));
+    f1->add_task("t1");
+    f1->add_task("t2");
+    family_ptr f2 = s1->add_family("f2");
+    f2->addInLimit(InLimit("A", "/s1"));
+    f2->add_task("t1");
+    f2->add_task("t2");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    TestHelper::invokeRequest(
+        &defs,
+        Cmd_ptr(
+            new ForceCmd(f2->absNodePath(), "complete", true /* recursive */, false /* set Repeat to last value */)));
+
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+
+    // Set an arbitrary (and wrong) value, and then re-synchronise
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "7")));
+    BOOST_CHECK_MESSAGE(the_limit->value() == 7, "Expected limit value to be 7 but found " << the_limit->value());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected only the tasks of f1 to be consuming");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_honours_inlimit_tokens_and_precedence) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 100
+    //   family f1
+    //     inlimit A 10
+    //     task t1
+    //     task t2
+    //       inlimit A 3    # the inlimit of the task takes precedence over the one of the family
+
+    // The tokens consumed by t1 are the ones of the family inlimit, whereas the tokens consumed by t2
+    // are the ones of its own inlimit, i.e. 10 + 3.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 100));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1", 10));
+    f1->add_task("t1");
+    task_ptr f1_t2 = f1->add_task("t2");
+    f1_t2->addInLimit(InLimit("A", "/s1", 3));
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    BOOST_CHECK_MESSAGE(the_limit->value() == 13, "Expected limit value to be 13 but found " << the_limit->value());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 13, "Expected limit value to be 13 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected both tasks to be consuming");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_with_inlimit_limiting_this_node_only) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit -n A
+    //     task t1
+    //     task t2
+    //   family f2
+    //     inlimit -n A
+    //     task t1
+    //     task t2
+
+    // With '-n', each family consumes a single token, regardless of the number of active tasks, and the
+    // consumed path is the path of the family. The re-synchronisation must clear the 'incremented' flag
+    // held by the inlimits, otherwise the families refuse to consume a token again.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1", 1, true /* limit_this_node_only */));
+    f1->add_task("t1");
+    f1->add_task("t2");
+    family_ptr f2 = s1->add_family("f2");
+    f2->addInLimit(InLimit("A", "/s1", 1, true /* limit_this_node_only */));
+    f2->add_task("t1");
+    f2->add_task("t2");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    std::set<std::string> expected_paths{"/s1/f1", "/s1/f2"};
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected both families to be consuming");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected both families to be consuming");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_with_inlimit_limiting_submission_only) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs, with the limit and the inlimits held by different suites
+    // suite s0
+    //   limit T 10
+    // suite s1
+    //   family f1
+    //     inlimit -s T
+    //     task t1
+    //     task t2
+
+    // With '-s', a token is consumed on submission and released as soon as the task becomes active.
+    // Under this test scenario there is no delay between submitted and active, and hence the
+    // re-synchronisation is expected to leave the limit without any consumed token.
+    Defs defs;
+    suite_ptr s0 = defs.add_suite("s0");
+    s0->addLimit(Limit("T", 10));
+
+    suite_ptr s1  = defs.add_suite("s1");
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("T", "/s0", 1, false /* limit_this_node_only */, true /* limit_submission */));
+    f1->add_task("t1");
+    f1->add_task("t2");
+
+    limit_ptr the_limit = s0->find_limit("T");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    BOOST_CHECK_MESSAGE(the_limit->value() == 0, "Expected limit value to be 0 but found " << the_limit->value());
+
+    // Set an arbitrary (and wrong) value, and then re-synchronise
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "T", "5")));
+    BOOST_CHECK_MESSAGE(the_limit->value() == 5, "Expected limit value to be 5 but found " << the_limit->value());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "T", "reset")));
+
+    BOOST_CHECK_MESSAGE(the_limit->value() == 0, "Expected limit value to be 0 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths().empty(), "Expected no consumed paths");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_leaves_the_other_limits_untouched) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   limit B 10
+    //   family f1
+    //     inlimit A
+    //     inlimit B
+    //     task t1
+
+    // Re-synchronising limit A must not alter limit B, not even when limit B is itself desynchronised.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    s1->addLimit(Limit("B", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1"));
+    f1->addInLimit(InLimit("B", "/s1"));
+    f1->add_task("t1");
+
+    limit_ptr the_A_limit = s1->find_limit("A");
+    limit_ptr the_B_limit = s1->find_limit("B");
+    BOOST_CHECK_MESSAGE(the_A_limit && the_B_limit, "Could not find limits");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    BOOST_CHECK_MESSAGE(the_A_limit->value() == 1, "Expected limit A value to be 1 but found " << the_A_limit->value());
+    BOOST_CHECK_MESSAGE(the_B_limit->value() == 1, "Expected limit B value to be 1 but found " << the_B_limit->value());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "B", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    BOOST_CHECK_MESSAGE(the_A_limit->value() == 1, "Expected limit A value to be 1 but found " << the_A_limit->value());
+    BOOST_CHECK_MESSAGE(the_B_limit->value() == 0, "Expected limit B value to be 0 but found " << the_B_limit->value());
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_can_exceed_the_limit_maximum) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit A
+    //     task t1
+    //     task t2
+
+    // Reducing the maximum value of a limit does not stop the active tasks. The re-synchronisation
+    // reports the tokens actually consumed, even when these exceed the maximum value of the limit.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1"));
+    f1->add_task("t1");
+    f1->add_task("t2");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_MAX, "A", "1")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    BOOST_CHECK_MESSAGE(the_limit->theLimit() == 1,
+                        "Expected limit maximum to be 1 but found " << the_limit->theLimit());
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_is_repeatable) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit -n A
+    //     task t1
+
+    // Repeating the re-synchronisation is expected to be idempotent, i.e. tokens must neither
+    // accumulate nor be lost.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1", 1, true /* limit_this_node_only */));
+    f1->add_task("t1");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+
+    for (int i = 0; i < 3; ++i) {
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+        BOOST_CHECK_MESSAGE(the_limit->value() == 1,
+                            "Expected limit value to be 1 at iteration " << i << " but found " << the_limit->value());
+    }
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_rejects_other_non_numeric_values) {
+    ECF_NAME_THIS_TEST();
+
+    // Only the special value 'reset' is accepted in place of an integer.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+
+    BOOST_CHECK_THROW(s1->changeLimitValue("A", "current"), std::runtime_error);
+    BOOST_CHECK_THROW(s1->changeLimitValue("A", "RESET"), std::runtime_error);
+    BOOST_CHECK_NO_THROW(s1->changeLimitValue("A", "reset"));
+    BOOST_CHECK_NO_THROW(s1->changeLimitValue("A", "3"));
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_accounts_for_aliases) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs
+    // suite s1
+    //   limit A 10
+    //   family f1
+    //     inlimit A
+    //     task t1
+
+    // An alias is a Submittable, and consumes the inlimit held by an ancestor under its own path.
+    // The re-synchronisation traverses the aliases of a task, and hence is expected to account for
+    // the alias separately from the task it belongs to.
+    Defs defs;
+    suite_ptr s1 = defs.add_suite("s1");
+    s1->addLimit(Limit("A", 10));
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s1"));
+    task_ptr t1 = f1->add_task("t1");
+
+    limit_ptr the_limit = s1->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+
+    // Add an alias to the (now active) task, and take it through the states of a real submission
+    alias_ptr alias0 = t1->add_alias_only();
+    TestHelper::invokeRequest(
+        &defs,
+        Cmd_ptr(new ForceCmd(alias0->absNodePath(), "submitted", false /* recursive */, false /* set Repeat */)));
+    TestHelper::invokeRequest(
+        &defs, Cmd_ptr(new ForceCmd(alias0->absNodePath(), "active", false /* recursive */, false /* set Repeat */)));
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t1/alias0"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the task and its alias to be consuming");
+
+    // Desynchronise the limit, and then re-synchronise
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s1->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the task and its alias to be consuming");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_accounts_for_submitted_nodes) {
+    ECF_NAME_THIS_TEST();
+
+    // Create the following defs, with the limit and the inlimits held by different suites
+    // suite s0
+    //   limit A 10
+    // suite s1
+    //   family f1
+    //     inlimit A
+    //     inlimit -s S
+    //     task t1
+    //     task t2
+
+    // A submitted node consumes a token on both kinds of inlimit: the token taken on submission is
+    // only released once the node becomes active. Beginning a suite takes the tasks from submitted
+    // to active without pause, and hence a task is held in the submitted state explicitly here, so
+    // that the re-synchronisation of a submitted node is exercised on its own.
+    Defs defs;
+    suite_ptr s0 = defs.add_suite("s0");
+    s0->addLimit(Limit("A", 10));
+    s0->addLimit(Limit("S", 10));
+
+    suite_ptr s1  = defs.add_suite("s1");
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s0"));
+    f1->addInLimit(InLimit("S", "/s0", 1, false /* limit_this_node_only */, true /* limit_submission */));
+    task_ptr t1 = f1->add_task("t1");
+    f1->add_task("t2");
+
+    limit_ptr the_limit            = s0->find_limit("A");
+    limit_ptr the_submission_limit = s0->find_limit("S");
+    BOOST_CHECK_MESSAGE(the_limit && the_submission_limit, "Could not find limits");
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new BeginCmd("/s1")));
+
+    // Both tasks are active, and hence the tokens taken on submission have been released
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_submission_limit->value() == 0,
+                        "Expected submission limit value to be 0 but found " << the_submission_limit->value());
+
+    // Return a single task to the submitted state, so that it holds a token on both inlimits
+    TestHelper::invokeRequest(
+        &defs, Cmd_ptr(new ForceCmd(t1->absNodePath(), "submitted", false /* recursive */, false /* set Repeat */)));
+    TestHelper::test_state(t1, NState::SUBMITTED);
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2"};
+    std::set<std::string> expected_submission_paths{"/s1/f1/t1"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_submission_limit->value() == 1,
+                        "Expected submission limit value to be 1 but found " << the_submission_limit->value());
+
+    // Desynchronise both limits, and then re-synchronise them
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "S", "0")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "A", "reset")));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s0->absNodePath(), AlterCmd::LIMIT_VAL, "S", "reset")));
+
+    // The submitted task is accounted for on both inlimits, and the active task only on the first
+    BOOST_CHECK_MESSAGE(the_limit->value() == 2, "Expected limit value to be 2 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected both tasks to be consuming");
+    BOOST_CHECK_MESSAGE(the_submission_limit->value() == 1,
+                        "Expected submission limit value to be 1 but found " << the_submission_limit->value());
+    BOOST_CHECK_MESSAGE(the_submission_limit->paths() == expected_submission_paths,
+                        "Expected only the submitted task to be consuming the submission limit");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+namespace {
+
+///
+/// @brief Creates a definition whose single limit is consumed, from another suite, by each kind of inlimit.
+///
+/// The limit is held by suite s0, and referenced by suite s1 through an ordinary inlimit, an inlimit
+/// that limits a single node (i.e. -n), and an inlimit that limits submission only (i.e. -s). This
+/// covers, in one definition, every accounting path replayed by a reset.
+///
+defs_ptr make_cross_suite_limit_defs() {
+    defs_ptr defs = Defs::create();
+
+    suite_ptr s0 = defs->add_suite("s0");
+    s0->addLimit(Limit("A", 10));
+    s0->addLimit(Limit("S", 10));
+
+    suite_ptr s1  = defs->add_suite("s1");
+    family_ptr f1 = s1->add_family("f1");
+    f1->addInLimit(InLimit("A", "/s0"));
+    f1->addInLimit(InLimit("S", "/s0", 1, false /* limit_this_node_only */, true /* limit_submission */));
+    f1->add_task("t1");
+    f1->add_task("t2");
+    family_ptr f2 = s1->add_family("f2");
+    f2->addInLimit(InLimit("A", "/s0", 1, true /* limit_this_node_only */));
+    f2->add_task("t1");
+    f2->add_task("t2");
+
+    return defs;
+}
+
+///
+/// @brief Produces an exact copy of the given definition, by way of a checkpoint file.
+///
+/// A copy taken this way carries the state that a client holds after a full synchronisation,
+/// including the values that are generated per node (such as the task passwords), which a
+/// separately built definition would not reproduce.
+///
+/// @param[in] defs The definition to copy
+/// @param[in] file The path of the checkpoint file used as intermediate storage
+/// @return The restored copy
+///
+defs_ptr copy_through_checkpoint(const Defs& defs, const std::string& file) {
+    defs.cereal_save_as_checkpt(file);
+    defs_ptr copy = Defs::create();
+    copy->cereal_restore_from_checkpt(file);
+    fs::remove(file);
+    return copy;
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_is_delivered_by_incremental_synchronisation) {
+    ECF_NAME_THIS_TEST();
+
+    // A reset changes a limit held by one suite, based on the nodes consuming it in another suite,
+    // and clears the 'incremented' flag of the referencing inlimits. This test checks that a client
+    // that only synchronises incrementally is told about all of it.
+    defs_ptr server_defs = make_cross_suite_limit_defs();
+    TestHelper::invokeRequest(server_defs.get(), Cmd_ptr(new BeginCmd("")));
+    server_defs->server_state().set_state(SState::HALTED); // the default state of a server
+
+    limit_ptr the_limit = server_defs->findSuite("s0")->find_limit("A");
+    BOOST_CHECK_MESSAGE(the_limit, "Could not find limit");
+    BOOST_CHECK_MESSAGE(the_limit->value() == 3, "Expected limit value to be 3 but found " << the_limit->value());
+
+    ServerReply server_reply;
+    server_reply.set_client_defs(copy_through_checkpoint(*server_defs, "test_limit_value_reset_sync.check"));
+    BOOST_REQUIRE_MESSAGE(*server_defs == *server_reply.client_defs(),
+                          "Expected the client and the server to start out the same");
+
+    // The change numbers held by the client, before the server is changed
+    unsigned int client_state_change_no  = Ecf::state_change_no();
+    unsigned int client_modify_change_no = Ecf::modify_change_no();
+
+    {
+        // Desynchronise the limit, and then re-synchronise it
+        MockServer mock_server(server_defs);
+        TestHelper::invokeRequest(&mock_server, Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "A", "0")));
+        TestHelper::invokeRequest(&mock_server, Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "A", "reset")));
+    }
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2", "/s1/f2"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 3, "Expected limit value to be 3 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the reset to restore the consumed paths");
+
+    MockServer mock_server(server_defs);
+    unsigned int client_handle = 0;
+    SNewsCmd news_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+    SSyncCmd sync_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+
+    BOOST_CHECK_MESSAGE(news_cmd.get_news(), "Expected the server to report a change");
+    BOOST_CHECK_MESSAGE(sync_cmd.do_sync(server_reply), "Expected the server to report a change");
+    BOOST_CHECK_MESSAGE(server_reply.in_sync(), "Expected the client to be brought in sync");
+    BOOST_CHECK_MESSAGE(!server_reply.full_sync(), "Expected an incremental sync, rather than a full one");
+
+    limit_ptr client_limit = server_reply.client_defs()->findSuite("s0")->find_limit("A");
+    BOOST_REQUIRE_MESSAGE(client_limit, "Could not find limit in the client definition");
+    BOOST_CHECK_MESSAGE(client_limit->value() == 3,
+                        "Expected the client limit value to be 3 but found " << client_limit->value());
+    BOOST_CHECK_MESSAGE(client_limit->paths() == expected_paths, "Expected the client to receive the restored paths");
+
+    DebugEquality debug_equality; // only has effect in DEBUG build
+    BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(),
+                        "Expected the client and the server to be the same after synchronisation");
+
+    /// Destroy System singleton to avoid valgrind from complaining
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_value_reset_survives_a_checkpoint) {
+    ECF_NAME_THIS_TEST();
+
+    // A reset changes a limit and the 'incremented' flag of the inlimits referencing it. The two are
+    // stored separately, and a restart must restore them as a matching pair; otherwise the restored
+    // accounting does not release the tokens when the consumers complete.
+    defs_ptr defs = make_cross_suite_limit_defs();
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new BeginCmd("")));
+
+    limit_ptr the_limit            = defs->findSuite("s0")->find_limit("A");
+    limit_ptr the_submission_limit = defs->findSuite("s0")->find_limit("S");
+    BOOST_CHECK_MESSAGE(the_limit && the_submission_limit, "Could not find limits");
+
+    // Hold a task in the submitted state, so that the submission limit is consumed as well
+    TestHelper::invokeRequest(
+        defs.get(), Cmd_ptr(new ForceCmd("/s1/f1/t1", "submitted", false /* recursive */, false /* set Repeat */)));
+
+    // Desynchronise both limits, and then re-synchronise them
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "A", "0")));
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "S", "0")));
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "A", "reset")));
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new AlterCmd("/s0", AlterCmd::LIMIT_VAL, "S", "reset")));
+
+    std::set<std::string> expected_paths{"/s1/f1/t1", "/s1/f1/t2", "/s1/f2"};
+    BOOST_CHECK_MESSAGE(the_limit->value() == 3, "Expected limit value to be 3 but found " << the_limit->value());
+    BOOST_CHECK_MESSAGE(the_limit->paths() == expected_paths, "Expected the reset to restore the consumed paths");
+    BOOST_CHECK_MESSAGE(the_submission_limit->value() == 1,
+                        "Expected submission limit value to be 1 but found " << the_submission_limit->value());
+
+    defs_ptr restored = copy_through_checkpoint(*defs, "test_limit_value_reset_checkpoint.check");
+
+    std::string error_msg;
+    BOOST_CHECK_MESSAGE(restored->checkInvariants(error_msg), "Invariants failed after restore: " << error_msg);
+    BOOST_CHECK_MESSAGE(*restored == *defs, "Expected the restored definition to match the saved one");
+
+    limit_ptr restored_limit            = restored->findSuite("s0")->find_limit("A");
+    limit_ptr restored_submission_limit = restored->findSuite("s0")->find_limit("S");
+    BOOST_REQUIRE_MESSAGE(restored_limit && restored_submission_limit, "Could not find limits after restore");
+    BOOST_CHECK_MESSAGE(restored_limit->value() == 3,
+                        "Expected the restored limit value to be 3 but found " << restored_limit->value());
+    BOOST_CHECK_MESSAGE(restored_limit->paths() == expected_paths, "Expected the restored paths to match");
+    BOOST_CHECK_MESSAGE(restored_submission_limit->value() == 1,
+                        "Expected the restored submission limit value to be 1 but found "
+                            << restored_submission_limit->value());
+
+    // Completing every consumer must release every token. This only holds if the 'incremented' flag
+    // of the inlimit that limits a single node (i.e. -n) was restored together with the limit: a
+    // flag restored as unset leaves the family holding a token that is never given back.
+    TestHelper::invokeRequest(
+        restored.get(),
+        Cmd_ptr(new ForceCmd("/s1", "complete", true /* recursive */, false /* set Repeat to last value */)));
+
+    BOOST_CHECK_MESSAGE(restored_limit->value() == 0,
+                        "Expected the restored limit to be released but found " << restored_limit->value());
+    BOOST_CHECK_MESSAGE(restored_limit->paths().empty(), "Expected no consumed paths once every task is complete");
+    BOOST_CHECK_MESSAGE(restored_submission_limit->value() == 0,
+                        "Expected the restored submission limit to be released but found "
+                            << restored_submission_limit->value());
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();

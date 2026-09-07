@@ -99,12 +99,29 @@ std::string SCPort::next_only(bool debug) {
     return SCPort::find_available_port(std::to_string(thePort_));
 }
 
+namespace {
+
+/// @brief Determines whether a failed ping indicates that nothing is listening on the port.
+///
+/// A port is considered free only when the connection attempt was refused (or the host could not be
+/// resolved). Any other failure (authentication failure, protocol mismatch, a connection that was
+/// accepted and then closed, a timeout, a TLS handshake failure, ...) means that some process is
+/// already listening on the port, even if it is not an ecFlow server speaking the expected protocol.
+///
+/// @param[in] error_msg The message of the exception raised by the failed ping
+/// @return true if the port is free; false otherwise
+bool indicates_nothing_listening(const std::string& error_msg) {
+    return error_msg.find("connection was refused") != std::string::npos ||
+           error_msg.find("Connection refused") != std::string::npos ||
+           error_msg.find("could not be resolved") != std::string::npos;
+}
+
+} // namespace
+
 bool SCPort::is_free_port(int port, bool debug) {
-    // Ping failed, We need to distinguish between:
-    //    a/ Server does not exist : <FREE> port
-    //    b/ Address in use        : <BUSY> port on existing server
-    // Using server_version() but then get error messages
-    // ******** Until this is done we cannot implement port hopping **********
+    // A failed ping must distinguish between:
+    //    a/ Nothing is listening  : <FREE> port
+    //    b/ Something is listening: <BUSY> port (an ecFlow server, or any other process)
 
     if (debug) {
         std::cout << "  ClientInvoker::is_free_port: checking port " << port << "\n";
@@ -132,34 +149,24 @@ bool SCPort::is_free_port(int port, bool debug) {
         if (debug) {
             std::cout << "   " << msg;
         }
-        if (msg.find("authentication failed") != std::string::npos) {
+        if (indicates_nothing_listening(msg)) {
             if (debug) {
-                std::cout << "   Could not connect, due to authentication failure, hence port " << the_port
-                          << " is used. Returning FALSE\n";
+                std::cout << "   Nothing is listening on port " << the_port << ". Returning TRUE\n";
             }
-            return false;
+            return true;
         }
-        if (msg.find("invalid_argument") != std::string::npos) {
-            if (debug) {
-                std::cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used. Returning FALSE\n";
-            }
-            return false;
+        if (debug) {
+            std::cout << "   Something is listening on port " << the_port << " (but did not answer the ping),"
+                      << " hence port is used. Returning FALSE\n";
         }
-        else {
-            if (debug) {
-                std::cout << "   Found free port " << the_port << "\n";
-            }
-        }
+        return false;
     }
-    return true;
 }
 
 std::string SCPort::find_free_port(int seed_port_number, bool debug) {
-    // Ping failed, We need to distinguish between:
-    //    a/ Server does not exist : <FREE> port
-    //    b/ Address in use        : <BUSY> port on existing server
-    // Using server_version() but then get error messages
-    // ******** Until this is done we cannot implement port hopping **********
+    // A failed ping must distinguish between:
+    //    a/ Nothing is listening  : <FREE> port
+    //    b/ Something is listening: <BUSY> port (an ecFlow server, or any other process)
 
     if (debug) {
         std::cout << "  ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
@@ -188,28 +195,17 @@ std::string SCPort::find_free_port(int seed_port_number, bool debug) {
             if (debug) {
                 std::cout << "   " << error_msg;
             }
-            if (error_msg.find("authentication failed") != std::string::npos) {
-                if (debug) {
-                    std::cout << "   Could not connect, due to authentication failure, hence port " << the_port
-                              << " is used, trying next port\n";
-                }
-                the_port++;
-                continue;
-            }
-            if (error_msg.find("invalid_argument") != std::string::npos) {
-                if (debug) {
-                    std::cout << "   Mixing 4 and 5 series ?, hence port " << the_port
-                              << " is used, trying next port\n";
-                }
-                the_port++;
-                continue;
-            }
-            else {
+            if (indicates_nothing_listening(error_msg)) {
                 if (debug) {
                     std::cout << "   Found free port " << free_port << "\n";
                 }
                 break;
             }
+            if (debug) {
+                std::cout << "   Something is listening on port " << the_port
+                          << " (but did not answer the ping), hence port is used, trying next port\n";
+            }
+            the_port++;
         }
     }
     return free_port;

@@ -116,6 +116,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type, bool userAdde
         connect(w, SIGNAL(selectionChanged(VInfo_ptr)), this, SLOT(slotSelectionChanged(VInfo_ptr)));
 
         connect(w, SIGNAL(maximisedChanged(DashboardWidget*)), this, SLOT(slotMaximisedChanged(DashboardWidget*)));
+
+        connect(w, SIGNAL(settingsChanged()), this, SLOT(slotLayoutChanged()));
     }
 
     return w;
@@ -200,7 +202,18 @@ DashboardWidget* Dashboard::addWidget(const std::string& type, const std::string
 
     connect(dw, SIGNAL(closeRequested()), this, SLOT(slotDockClose()));
 
+    // Docking, floating, tabification and sizing are all part of the persisted
+    // dock state
+    connect(dw, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(slotLayoutChanged()));
+    connect(dw, SIGNAL(topLevelChanged(bool)), this, SLOT(slotLayoutChanged()));
+    connect(dw, SIGNAL(visibilityChanged(bool)), this, SLOT(slotLayoutChanged()));
+    connect(dw, SIGNAL(layoutChanged()), this, SLOT(slotLayoutChanged()));
+
     checkMaximisedState();
+
+    if (!settingsAreRead_) {
+        Q_EMIT contentsChanged();
+    }
 
     return w;
 }
@@ -288,6 +301,17 @@ void Dashboard::slotDockClose() {
             dw->deleteLater();
         }
         dock->deleteLater();
+
+        Q_EMIT contentsChanged();
+    }
+}
+
+// Any change to the dock layout or to a persisted pane property is reported
+// upstream so that the session can be saved. Changes made while the settings
+// are being restored are ignored.
+void Dashboard::slotLayoutChanged() {
+    if (!settingsAreRead_) {
+        Q_EMIT contentsChanged();
     }
 }
 

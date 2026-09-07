@@ -1443,7 +1443,8 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
         case AlterCmd::LIMIT_VAL: {
             if (options.size() != 4) {
                 throw std::runtime_error(MESSAGE("AlterCmd: change: limit-value: expected five arguments : change "
-                                                 "limit_value <limit_name> <int> <path_to_node>"
+                                                 "limit_value <limit_name> [ <int> | "
+                                                 << Limit::reset_keyword << " ] <path_to_node>"
                                                  << " but found  " << (options.size() + paths.size()) << " arguments.\n"
                                                  << dump_args(options, paths) << "\n"));
             }
@@ -1623,12 +1624,17 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
         }
 
         case AlterCmd::LIMIT_VAL: {
-            try {
-                ecf::convert_to<int>(value);
-            }
-            catch (const ecf::bad_conversion&) {
-                throw std::runtime_error(MESSAGE("AlterCmd: change: limit_value: expected "
-                                                 << value << " to be convertible to an integer\n"));
+            // The special value 'reset' requests the re-synchronisation of the limit with the nodes
+            // that are currently consuming it, and is therefore not expected to be an integer.
+            if (value != Limit::reset_keyword) {
+                try {
+                    ecf::convert_to<int>(value);
+                }
+                catch (const ecf::bad_conversion&) {
+                    throw std::runtime_error(MESSAGE("AlterCmd: change: limit_value: expected "
+                                                     << value << " to be convertible to an integer, or to be '"
+                                                     << Limit::reset_keyword << "'\n"));
+                }
             }
             Limit check(name, 10); // Check name, by creating
             break;

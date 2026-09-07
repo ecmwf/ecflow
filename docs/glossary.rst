@@ -1596,7 +1596,27 @@ Glossary
             ci.alter("/suite","change","limit_max","limit", "2")   
          except RuntimeError, e:
             print("Failed: " + str(e))
-      
+
+      The limit value, i.e. the number of tokens currently consumed, can be changed in the same way:
+
+      .. code-block:: shell
+
+         ecflow_client --alter change limit_value <limit-name> <new-value> <path-to-limit>
+         ecflow_client --alter change limit_value limit 2 /suite
+
+      A limit value that no longer reflects the nodes being limited, for example after a node has
+      been forced into a state, can be recovered by using the special value ``reset``. This
+      re-synchronises the limit with the nodes that are currently consuming it, i.e. the value and
+      the consumed paths of the limit are recomputed from the nodes that are currently
+      :term:`submitted` or :term:`active`.
+
+      .. code-block:: shell
+
+         ecflow_client --alter change limit_value limit reset /suite
+
+      Note that the recomputed value is allowed to exceed the limit max value, in which case the
+      excess is reported by :term:`ecflow_ui` as additional consumed tokens.
+
       See also:
 
       .. list-table::

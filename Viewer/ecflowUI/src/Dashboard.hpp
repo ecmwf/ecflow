@@ -71,6 +71,7 @@ protected Q_SLOTS:
     void slotPopInfoPanel(QString);
     void slotSelectionChanged(VInfo_ptr info);
     void slotMaximisedChanged(DashboardWidget* w);
+    void slotLayoutChanged();
 
 protected:
     void contextMenuEvent(QContextMenuEvent* e) override;
