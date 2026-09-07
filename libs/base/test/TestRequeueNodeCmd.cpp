@@ -187,7 +187,12 @@ BOOST_AUTO_TEST_CASE(test_ecflow_359) {
 
     defs_ptr the_defs = Defs::create();
     suite_ptr suite   = the_defs->add_suite("s1");
-    family_ptr f1     = suite->add_family("f1");
+    // A fixed clock, so that the time dependency below always holds, whatever the real time of day
+    ClockAttr clockAttr(15, 12, 2010, false);
+    clockAttr.set_gain(9 /*hour*/, 30 /*minutes*/); // start at 09:30
+    suite->addClock(clockAttr);
+
+    family_ptr f1 = suite->add_family("f1");
     f1->addRepeat(RepeatDate("YMD", 20090916, 20090928, 1));
 
     family_ptr parent = f1->add_family("parent");
