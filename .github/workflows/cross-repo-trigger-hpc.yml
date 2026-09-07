@@ -115,7 +115,7 @@ jobs:
     needs:
     - resolve
     if: contains(fromJSON(inputs.from-jobs), 'ecbuild/build-hpc') || contains(fromJSON(inputs.from-jobs), 'stack-deps/build-hpc') || inputs.rebuild-request
-    name: ecflow/build-hpc (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
+    name: ecflow/build-hpc (${{ matrix._resolved['job-name'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container || '' }}
@@ -139,7 +139,7 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build-hpc (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
+        name: ecflow/build-hpc (${{ matrix._resolved['job-name'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: start
     - name: Announce image
@@ -203,7 +203,7 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
         head-repo: ${{ inputs.from-repo }}
         head-sha: ${{ inputs.from-sha }}
-        name: ecflow/build-hpc (${{ matrix.platform }}, ${{ matrix['cxx-compiler'] }})
+        name: ecflow/build-hpc (${{ matrix._resolved['job-name'] }})
         details-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         phase: finish
         conclusion: ${{ job.status }}
