@@ -8,7 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     test_harness.base
   NOINSTALL
@@ -23,7 +23,7 @@ ecbuild_add_library(
     ./
   PUBLIC_LIBS
     ecflow_all
-)
-target_clangformat(test_harness.base
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )

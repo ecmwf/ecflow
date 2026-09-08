@@ -22,7 +22,7 @@ set(srcs
   ZombieUtill.cpp
 )
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     test_harness.test
   NOINSTALL
@@ -36,7 +36,7 @@ ecbuild_add_library(
     test_scaffold
     test_harness.base
     test_harness.client
-)
-target_clangformat(test_harness.test
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )

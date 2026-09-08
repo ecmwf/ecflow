@@ -49,7 +49,7 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.cpp>
 )
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET libhttp
   NOINSTALL
   TYPE STATIC
@@ -64,8 +64,8 @@ ecbuild_add_library(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   PUBLIC_DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  FORMAT
 )
-target_clangformat(libhttp)
 
 # ========================================================================
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty

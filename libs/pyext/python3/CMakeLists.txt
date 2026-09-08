@@ -19,7 +19,7 @@
 # and the Python development libraries are not linked directly into the ecflow Python module.
 #
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     ecflow3
   NOINSTALL
@@ -36,9 +36,8 @@ ecbuild_add_library(
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   CXXFLAGS
     $<$<CXX_COMPILER_ID:Clang>:-Wno-macro-redefined>
+  FORMAT
 )
-
-target_clangformat(ecflow3)
 
 set(ECFLOW_PYTHONPATH ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "Path to find ecflow python module for testing" FORCE)
 

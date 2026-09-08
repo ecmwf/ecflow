@@ -24,7 +24,7 @@ set(srcs
   src/ecflow/simulator/Simulator.cpp
   src/ecflow/simulator/SimulatorVisitor.cpp
 )
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     libsimulator
   NOINSTALL
@@ -35,8 +35,8 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     ecflow_all
+  FORMAT
 )
-target_clangformat(libsimulator)
 
 set(test_srcs
   # Headers
