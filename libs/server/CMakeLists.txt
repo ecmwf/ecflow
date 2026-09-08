@@ -11,7 +11,7 @@
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET
     ecflow_server
   SOURCES
@@ -23,8 +23,8 @@ ecbuild_add_executable(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  FORMAT
 )
-target_clangformat(ecflow_server)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""

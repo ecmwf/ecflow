@@ -36,6 +36,64 @@ function(_ecflow_format_target target)
 endfunction()
 
 #
+# ecflow_add_executable
+#
+# Declare an executable target, as a thin wrapper around
+# ecbuild_add_executable().
+#
+#   ecflow_add_executable(
+#     TARGET <target>
+#     [CONDITION <condition>...]
+#     [FORMAT]
+#     <ecbuild_add_executable arguments>...
+#   )
+#
+# All other arguments are forwarded verbatim to ecbuild_add_executable();
+# refer to the documentation of that function for the full set of supported
+# options.
+#
+# TARGET : required
+#   The name of the executable target to create.
+#
+# CONDITION : optional
+#   A list of tokens forming a boolean expression, evaluated as a CMake if()
+#   condition. When the expression evaluates to FALSE, neither the executable
+#   target nor the associated formatting target is created. The expression is
+#   forwarded both to ecbuild_add_executable() and, when FORMAT is given, to
+#   target_clangformat(), so that both remain governed by the same condition.
+#
+# FORMAT : optional
+#   Register the sources of the executable target with target_clangformat(),
+#   thereby creating the clangformat_<target> target and attaching it to the
+#   aggregate clangformat target. The formatting target is only created when
+#   the executable target itself has been created.
+#
+function(ecflow_add_executable)
+  set(options FORMAT)
+  set(single_value_args TARGET)
+  set(multi_value_args CONDITION)
+  cmake_parse_arguments(ARGS "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN})
+
+  set(executable_args ${ARGS_UNPARSED_ARGUMENTS})
+  if (DEFINED ARGS_TARGET)
+    list(PREPEND executable_args TARGET ${ARGS_TARGET})
+  endif()
+  if (DEFINED ARGS_CONDITION)
+    list(APPEND executable_args CONDITION ${ARGS_CONDITION})
+  endif()
+
+  ecbuild_add_executable(${executable_args})
+
+  if (ARGS_FORMAT)
+    set(format_args "")
+    if (DEFINED ARGS_CONDITION)
+      set(format_args CONDITION ${ARGS_CONDITION})
+    endif()
+    _ecflow_format_target("${ARGS_TARGET}" ${format_args})
+  endif()
+endfunction()
+
+#
 # ecflow_add_library
 #
 # Declare a library target, as a thin wrapper around ecbuild_add_library().

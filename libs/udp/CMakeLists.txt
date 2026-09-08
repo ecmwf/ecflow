@@ -18,7 +18,7 @@ set(${SERVER_TARGET}_srcs
   src/ecflow/udp/UDPServerMain.cpp
 )
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET ${SERVER_TARGET}
   SOURCES ${${SERVER_TARGET}_srcs}
   INCLUDES
@@ -28,11 +28,11 @@ ecbuild_add_executable(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  FORMAT
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""
 )
-target_clangformat(${SERVER_TARGET})
 
 
 # ==============================================================================
@@ -47,7 +47,7 @@ set(${CLIENT_TARGET}_srcs
   src/ecflow/udp/UDPClientMain.cpp
 )
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET ${CLIENT_TARGET}
   SOURCES ${${CLIENT_TARGET}_srcs}
   INCLUDES
@@ -56,12 +56,11 @@ ecbuild_add_executable(
     pthread
     Boost::boost
     $<$<VERSION_LESS:${SELECTED_BOOST_VERSION},1.69.0>:Boost::system>
+  FORMAT
 )
 set_target_properties(${CLIENT_TARGET} PROPERTIES
   INSTALL_RPATH ""
 )
-
-target_clangformat(${CLIENT_TARGET})
 
 # ==============================================================================
 # ECFLOW UDP Test(s)

@@ -70,7 +70,7 @@ ecflow_add_library(
 # ========================================================================
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET ecflow_http
   SOURCES
     src/ecflow/http/HttpMain.cpp
@@ -78,8 +78,8 @@ ecbuild_add_executable(
     libhttp
     ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  FORMAT
 )
-target_clangformat(ecflow_http)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
