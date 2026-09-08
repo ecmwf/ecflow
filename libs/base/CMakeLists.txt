@@ -77,6 +77,7 @@ if (ENABLE_ALL_TESTS)
       p_job_gen
     LABELS
       performance
+      manual # requires command line argument: p_job_gen <path-to-definition-file>
     SOURCES
       ${test_srcs}
     LIBS
