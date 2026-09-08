@@ -112,7 +112,7 @@ if (ENABLE_PYTHON)
   ecbuild_info( " * Python3_VERSION_PATCH     : ${Python3_VERSION_PATCH}" )
 
   # Set (deprecated) FindPython variables
-  # These are used by `ecbuild_add_test(... TYPE PYTHON ...)`.
+  # These are used by `ecflow_add_test(... TYPE PYTHON ...)`.
   set(PYTHONINTERP_FOUND "${Python3_Interpreter_FOUND}")
   set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
   set(Python_Interpreter_FOUND "${Python3_Interpreter_FOUND}")

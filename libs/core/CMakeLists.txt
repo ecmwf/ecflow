@@ -81,7 +81,7 @@ set(test_srcs
   test/TestWhiteListIncludes.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_core
   LABELS
@@ -92,7 +92,5 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-)
-target_clangformat(u_core
-  CONDITION ENABLE_TESTS
+  FORMAT
 )

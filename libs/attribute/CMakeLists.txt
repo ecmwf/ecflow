@@ -29,7 +29,7 @@ set(test_srcs
   test/TestZombieAttr.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_attributes
   LABELS
@@ -41,7 +41,7 @@ ecbuild_add_test(
     test_scaffold
   TEST_DEPENDS
     u_core
-)
-target_clangformat(u_attributes
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )

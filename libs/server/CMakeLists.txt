@@ -53,7 +53,7 @@ SET_TARGET_PROPERTIES(ecflow_server
 
 # ================================================================================
 # TEST
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_server
   LABELS
@@ -74,11 +74,12 @@ ecbuild_add_test(
     Threads::Threads
   TEST_DEPENDS
     u_base
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
-target_clangformat(u_server CONDITION ENABLE_TESTS)
-
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_server_authentication
   LABELS
@@ -92,12 +93,14 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_base
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-target_clangformat(u_server_authentication CONDITION ENABLE_TESTS)
 
 # ================================================================================
 # TEST
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     s_periodic_scheduler
   LABELS
@@ -115,9 +118,10 @@ ecbuild_add_test(
     Threads::Threads
   TEST_DEPENDS
     u_base
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-
-target_clangformat(s_periodic_scheduler CONDITION ENABLE_TESTS)
 
 # ===================================================================
 # install

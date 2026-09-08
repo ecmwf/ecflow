@@ -77,7 +77,7 @@ list(APPEND ${TEST_TARGET}_srcs
   test/TestUDPServerLaunch.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     ${TEST_TARGET}
   LABELS
@@ -102,8 +102,9 @@ ecbuild_add_test(
     ${CMAKE_CURRENT_BINARY_DIR}/test_sandbox
   ENVIRONMENT
     "PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}"
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-
-target_clangformat(${TEST_TARGET} CONDITION ENABLE_TESTS)
 
 file(COPY test/data/reference.def DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_sandbox/data)

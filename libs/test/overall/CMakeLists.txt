@@ -46,7 +46,7 @@ if (ENABLE_ALL_TESTS)
     TestWhyCmd.cpp
   )
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       s_test
     LABELS
@@ -61,10 +61,12 @@ if (ENABLE_ALL_TESTS)
       ecflow_server
     TEST_DEPENDS
       s_client
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
-  target_clangformat(s_test CONDITION ENABLE_TESTS)
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       s_test_using_http_backend
     LABELS
@@ -82,10 +84,12 @@ if (ENABLE_ALL_TESTS)
       ecflow_server
     TEST_DEPENDS
       s_client
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
-  target_clangformat(s_test_using_http_backend CONDITION ENABLE_TESTS)
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       s_zombies
     LABELS
@@ -101,11 +105,13 @@ if (ENABLE_ALL_TESTS)
       ecflow_server
     TEST_DEPENDS
       s_test
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
-  target_clangformat(s_zombies CONDITION ENABLE_TESTS)
 
   # This test runs forever, hence not suitable as unit test.
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       s_single
     LABELS
@@ -121,7 +127,9 @@ if (ENABLE_ALL_TESTS)
       ecflow_server
     TEST_DEPENDS
       s_client
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
-  target_clangformat(s_single CONDITION ENABLE_TESTS)
 
 endif()

@@ -85,7 +85,7 @@ if( NOT _ECFLOW_HAVE_PYTEST EQUAL 0 )
   # ENABLE_ALL_TESTS is what CI and the .ci/hpc recipes gate the full suite on, so
   # there a missing pytest is a broken environment, not a note: fail now rather
   # than at ctest time, where it reads as 79 unrelated test failures.
-  # HAVE_TESTS because ecbuild_add_test() registers nothing without it, leaving
+  # HAVE_TESTS because ecflow_add_test() registers nothing without it, leaving
   # nothing that could fail.
   if( HAVE_TESTS AND ENABLE_ALL_TESTS )
     ecbuild_critical( "${_ECFLOW_PYTEST_HINT}\nAlternatively, consider using -DENABLE_ALL_TESTS=OFF" )
@@ -126,7 +126,7 @@ if( ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH )
 endif()
 
 foreach( test ${u_tests} )
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       py3_${test}
     LABELS
@@ -150,7 +150,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
   list( APPEND _ECFLOW_PYEXT_ENVIRONMENT "ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/" )
 
   foreach( test ${s_tests} )
-    ecbuild_add_test(
+    ecflow_add_test(
       TARGET
         py3_${test}
       LABELS

@@ -14,7 +14,7 @@
 # u_service_executor
 # --------------------------------------------------
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_service_executor
   LABELS
@@ -27,15 +27,15 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-)
-target_clangformat(u_service_executor
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 # u_service_auth
 # --------------------------------------------------
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_service_auth
   LABELS
@@ -54,15 +54,15 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-)
-target_clangformat(u_service_auth
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 # u_service_aviso
 # --------------------------------------------------
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_service_aviso
   LABELS
@@ -85,15 +85,15 @@ ecbuild_add_test(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
-)
-target_clangformat(u_service_aviso
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 # u_service_mirror
 # --------------------------------------------------
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_service_mirror
   LABELS
@@ -111,8 +111,7 @@ ecbuild_add_test(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
-
-)
-target_clangformat(u_service_mirror
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )

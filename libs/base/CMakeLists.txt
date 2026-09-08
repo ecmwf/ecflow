@@ -42,7 +42,7 @@ set(test_srcs
   test/TestStatsCmd.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_base
   LABELS
@@ -59,9 +59,9 @@ ecbuild_add_test(
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   TEST_DEPENDS
     u_parser
-)
-target_clangformat(u_base
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 # The following is not technically a test (as it makes no checks),
@@ -72,7 +72,7 @@ if (ENABLE_ALL_TESTS)
     test/TestJobGenPerf.cpp
   )
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       p_job_gen
     LABELS
@@ -84,8 +84,8 @@ if (ENABLE_ALL_TESTS)
       test_scaffold
       test_harness.base
       Threads::Threads
-  )
-  target_clangformat(p_job_gen
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 endif()

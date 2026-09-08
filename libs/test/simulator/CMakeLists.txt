@@ -55,7 +55,7 @@ set(test_srcs
   test/TestToday.cpp
   test/TestUtil.cpp
 )
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     s_simulator
   LABELS
@@ -67,12 +67,14 @@ ecbuild_add_test(
     Threads::Threads
   TEST_DEPENDS
     u_base
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-target_clangformat(s_simulator CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS)
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       s_simulator_single
     LABELS
@@ -86,7 +88,9 @@ if (ENABLE_ALL_TESTS)
       Threads::Threads
     TEST_DEPENDS
       u_base
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
-  target_clangformat(s_simulator_single CONDITION ENABLE_TESTS)
 
 endif()
