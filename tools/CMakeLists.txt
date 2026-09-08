@@ -14,6 +14,7 @@ ecflow_add_executable(
     ecflow_standalone
   SOURCES
     ecflow_standalone.c
+  FORMAT
 )
 
 #

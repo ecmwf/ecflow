@@ -1,3 +1,4 @@
+/* clang-format off */
 /*
 ## Copyright 2009- ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0
@@ -60,28 +61,34 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
 *  + xxx='hello worlds from /home/ma/ma0'
 *  + fred=ma0
 ************************************o*************************************/
+/* clang-format on */
 
+#include <limits.h> /* for PATH_MAX  */
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <string.h>
-#include <limits.h> /* for PATH_MAX  */
+#include <unistd.h>
+
+#include <sys/types.h>
 
 #ifndef TRUE
-#  define TRUE  1
-#  define FALSE 0
+    #define TRUE 1
+    #define FALSE 0
 #endif
 
 const int32_t MAXLEN = 1024; /* Maximum line length */
 
-char *nameof(char *name) {
-  char *s;
-  int len = strlen(name);
-  for( s=name+len-1 ; len && *s != '/' ; len-- )  s--;
-  if(*s == '/') s++;
-  return s;
+char* nameof(char* name) {
+    char* s;
+    int len = strlen(name);
+    for (s = name + len - 1; len && *s != '/'; len--) {
+        s--;
+    }
+    if (*s == '/') {
+        s++;
+    }
+    return s;
 }
 
 pid_t do_setsid(void) {
@@ -93,113 +100,117 @@ pid_t do_setsid(void) {
 #endif
 }
 
-int main(int argc, char** argv)
-{
-  char *infile = NULL;             /* Temporary input file        */
-  char *outfile= "/dev/null";      /* Output file (def /dev/null) */
-  char *shell= "/bin/sh";          /* default shell */
-  /* int   keep_file=FALSE;*/      /* Flag to keep the input file */
+int main(int argc, char** argv) {
+    char* infile  = NULL;        /* Temporary input file        */
+    char* outfile = "/dev/null"; /* Output file (def /dev/null) */
+    char* shell   = "/bin/sh";   /* default shell */
+    /* int   keep_file=FALSE;*/  /* Flag to keep the input file */
 
-  FILE *input_fp;                  /* Temp to write the input file */
-  char buff[MAXLEN];               /* Temp buffer to read in lines */
-  char fname[PATH_MAX];
+    FILE* input_fp;    /* Temp to write the input file */
+    char buff[MAXLEN]; /* Temp buffer to read in lines */
+    char fname[PATH_MAX];
 
-  int   option;
-  extern char *optarg;             /* Needed for the getopt */
-  extern int   optind;
-      
-  signal(SIGCHLD,SIG_IGN);
+    int option;
+    extern char* optarg; /* Needed for the getopt */
+    extern int optind;
 
-  while( (option=getopt(argc,argv,"i:o:s:")) != -1 )
-    switch( option ) {
-      case 'i':
-        infile = optarg;
-        /* keep_file = TRUE; */
-        break;
+    signal(SIGCHLD, SIG_IGN);
 
-      case 'o':
-        outfile = optarg;
-        break;
+    while ((option = getopt(argc, argv, "i:o:s:")) != -1) {
+        switch (option) {
+            case 'i':
+                infile = optarg;
+                /* keep_file = TRUE; */
+                break;
 
-      case 's':
-        shell = optarg;
-        if (shell == NULL) {
-           fprintf(stderr,"usage: %s [-i inputfile] -o [outputfile] -s shell # empty shell argument passed for -s\n",*argv);
-           exit(0);
+            case 'o':
+                outfile = optarg;
+                break;
+
+            case 's':
+                shell = optarg;
+                if (shell == NULL) {
+                    fprintf(stderr,
+                            "usage: %s [-i inputfile] -o [outputfile] -s shell # empty shell argument passed for -s\n",
+                            *argv);
+                    exit(0);
+                }
+                break;
+
+            default:
+                fprintf(stderr, "usage: %s [-i inputfile] -o [outputfile]\n", *argv);
+                exit(0);
         }
-        break;
-
-      default:
-        fprintf(stderr,"usage: %s [-i inputfile] -o [outputfile]\n",*argv);
-        exit(0);
     }
 
-  /* Copy standard input to infile */
-  if( !infile ) {
-    /* printf("!infile\n"); */
-    static char template[] = "/tmp/tmp_ecflowXXXXXX";
-    strcpy(fname, template); /* Copy template */
+    /* Copy standard input to infile */
+    if (!infile) {
+        /* printf("!infile\n"); */
+        static char template[] = "/tmp/tmp_ecflowXXXXXX";
+        strcpy(fname, template); /* Copy template */
 
-    int fd = mkstemp(fname);
-    /* printf("input Filename is %s\n", fname);   Print it for information */
-    infile = fname;
-    close(fd);
+        int fd = mkstemp(fname);
+        /* printf("input Filename is %s\n", fname);   Print it for information */
+        infile = fname;
+        close(fd);
 
-    if (!(input_fp = fopen(infile, "w"))) { // NOLINT(bugprone-assignment-in-if-condition)
-      perror("ecflow_standalone.c, temp file creation error");
-      exit(1);
-    } 
-    while( fgets(buff, MAXLEN-1, stdin)) {
-      /* fprintf(stderr, "%s", buff); */
-      fputs(buff,input_fp);
+        if (!(input_fp = fopen(infile, "w"))) { // NOLINT(bugprone-assignment-in-if-condition)
+            perror("ecflow_standalone.c, temp file creation error");
+            exit(1);
+        }
+        while (fgets(buff, MAXLEN - 1, stdin)) {
+            /* fprintf(stderr, "%s", buff); */
+            fputs(buff, input_fp);
+        }
     }
-  }
-  else {
-     if( !(input_fp=fopen(infile,"r")) ) { // NOLINT(bugprone-assignment-in-if-condition)
-        perror("STANDALONE-INPUT-FILE cannot open");
+    else {
+        if (!(input_fp = fopen(infile, "r"))) { // NOLINT(bugprone-assignment-in-if-condition)
+            perror("STANDALONE-INPUT-FILE cannot open");
+            exit(1);
+        }
+    }
+    fclose(input_fp);
+
+    /* fork child process, closing the parent */
+    switch (fork()) {
+        case -1:
+            perror(*argv);
+            exit(1);
+        case 0:
+            break; /* child */
+        default:
+            exit(0); /* The parent exits */
+    }
+
+    /* close standard out,and make standard out a copy of standard error
+     * This is done so that very next fopen(), will be used as stdout/srderr for execl
+     *
+     * int dup2(int oldfd, int newfd);
+     * makes newfd be the copy of oldfd, closing newfd first if necessary
+     * */
+    close(2);                         /* close standard error in child */
+    FILE* fout = fopen(outfile, "w"); /* Open file for output and error, when running execl(..) */
+    dup2(2, 1);
+    close(0); /* close standard in , in child */
+
+    /* make sure infile exists and is readable */
+    if (!(input_fp = fopen(infile, "r"))) { // NOLINT(bugprone-assignment-in-if-condition)
+        perror("STANDALONE-INPUT-FILE-FOR-SHELL");
         exit(1);
-     }
-  }
-  fclose(input_fp);
+    }
+    /* fclose(input_fp); */
 
-  /* fork child process, closing the parent */
-  switch(fork()) {
-    case -1: perror(*argv); exit(1);
-    case  0: break;                       /* child */
-    default: exit(0);                     /* The parent exits */
-  }
+    /* if( !keep_file ) unlink(infile);
+       for (n=3; n<65535 ;n++) fclose(n); */
 
+    /* create a new session from the child process */
+    if (do_setsid() == -1) {
+        perror("STANDALONE-SETSID");
+        exit(1);
+    }
 
-  /* close standard out,and make standard out a copy of standard error
-   * This is done so that very next fopen(), will be used as stdout/srderr for execl
-   *
-   * int dup2(int oldfd, int newfd);
-   * makes newfd be the copy of oldfd, closing newfd first if necessary
-   * */
-  close(2);                         /* close standard error in child */
-  FILE* fout = fopen(outfile,"w");  /* Open file for output and error, when running execl(..) */
-  dup2(2,1);
-  close(0);                         /* close standard in , in child */
-
-  /* make sure infile exists and is readable */
-  if( !(input_fp=fopen(infile,"r")) ) { // NOLINT(bugprone-assignment-in-if-condition)
-    perror("STANDALONE-INPUT-FILE-FOR-SHELL");
+    execl(shell, nameof(shell), "-x", infile, (char*)0);
+    /* if( !keep_file ) unlink(infile); */
+    fclose(fout);
     exit(1);
-  }
-  /* fclose(input_fp); */
-
-  /* if( !keep_file ) unlink(infile); 
-     for (n=3; n<65535 ;n++) fclose(n); */
-
-  /* create a new session from the child process */
-  if( do_setsid() == -1 )
-  {
-    perror("STANDALONE-SETSID");
-    exit(1);
-  }
-
-  execl(shell,nameof(shell),"-x",infile,(char *)0);
-  /* if( !keep_file ) unlink(infile); */
-  fclose(fout);
-  exit(1);
 }
