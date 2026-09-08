@@ -38,7 +38,7 @@ function(target_clangformat TARGET)
 
   # Skip setup if condition supplied and FALSE
   if (DEFINED ARGS_CONDITION)
-    if (${${ARGS_CONDITION}})
+    if (${ARGS_CONDITION})
       # Do nothing, just continue
     else()
       return()
