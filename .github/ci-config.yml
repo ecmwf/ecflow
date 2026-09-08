@@ -11,8 +11,7 @@ cmake_options: >-
   -DCMAKE_PREFIX_PATH=/opt/ecmwf/stack-deps/share/cmake/pybind11
 
 ctest_options: >-
-  -L nightly 
-  -E s_test|s_zombies
+  -L nightly
 
 dependencies: |
   ecmwf/ecbuild

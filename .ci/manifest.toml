@@ -57,13 +57,7 @@ forwarded-inputs = ["cxx-compiler", "build-type"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
 ctest = true
-# s_test and s_zombies are the long-running system suites the legacy runner
-# config (.github/ci-config.yml) also skips.
-#
-# py3_s_TestClientApi is NOT a legacy-parity exclusion --
-# it is a timeout problem to be fixed and not part of the CI rollout.
-# I discussed it with Marcos
-ctest-args = "-L nightly -E 's_test|s_zombies|py3_s_TestClientApi' -j 8"
+ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "g++-8"
@@ -80,7 +74,7 @@ cxx = "g++"
 boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
 python-root = "/usr/local/apps/python3/3.11.8-01"
 tests = true
-ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
+ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "icpx"
@@ -95,7 +89,7 @@ cxx = "icpx"
 boost-root = "/usr/local/apps/boost/1.90.0/INTEL/2025.3"
 python-root = "/usr/local/apps/python3/3.13.13-01"
 tests = true
-ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
+ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
@@ -110,7 +104,7 @@ cxx = "clang++"
 boost-root = "/usr/local/apps/boost/1.81.0/AMD/4.0"
 python-root = "/usr/local/apps/python3/3.10.10-01"
 tests = false
-ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
+ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "nvc++"
@@ -125,7 +119,7 @@ cxx = "nvc++"
 boost-root = "/usr/local/apps/boost/1.87.0/NVIDIA/24.11"
 python-root = "/usr/local/apps/python3/3.12.9-01"
 tests = false
-ctest-args = "-L nightly -E 's_test|s_zombies|s_http' -j 8"
+ctest-args = "-L nightly -j 8"
 
 [matrix.build-hpc]
 execution = "hpc"
