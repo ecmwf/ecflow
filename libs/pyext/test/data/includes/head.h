@@ -17,11 +17,10 @@ if [[ "%ECF_SSL:%" != "" ]] ; then
    export ECF_SSL=%ECF_SSL:%   # if server is SSL make sure client is
 fi
 
-# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
-os_name=$(uname -s)
-if [[ $os_name = Linux ]] ; then
-    host %ECF_HOST%
-fi
+#
+# At this point, a sanity check could be performed,
+# to ensure that ${ECF_HOST} is resolvable to an IP address!
+#
 
 echo "About to run ecflow_client --version"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --version

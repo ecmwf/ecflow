@@ -261,12 +261,10 @@ void TaskScriptGenerator::generate_head_file() const {
     contents += "fi\n";
     contents += "#export ECF_DEBUG_CLIENT=1\n";
     contents += "\n";
-    contents +=
-        "# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address\n";
-    contents += "os_name=$(uname -s)\n";
-    contents += "if [[ $os_name = Linux ]] ; then\n";
-    contents += "   ping -c 1 %ECF_HOST%\n";
-    contents += "fi\n";
+    contents += "#\n";
+    contents += "# At this point, a sanity check could be performed,\n";
+    contents += "# to ensure that ${ECF_HOST} is resolvable to an IP address!\n";
+    contents += "#\n";
     contents += "\n";
     contents += "# Tell ecFlow we have started\n";
     contents += client_exe + "--init=$$\n";
