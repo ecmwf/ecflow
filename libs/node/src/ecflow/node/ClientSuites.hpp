@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include "ecflow/node/AuthorisationContext.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 namespace ecf {
@@ -98,7 +99,7 @@ public:
     void suite_deleted_in_defs(suite_ptr);
 
     /// Collate the incremental changes, made to my suites
-    void collateChanges(DefsDelta& changes) const;
+    void collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const;
 
     // Only return the defs state and suites that the client has registered in this suite
     // *HOWEVER* if the client has registered all the suites, just return the server defs
