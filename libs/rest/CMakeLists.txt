@@ -49,7 +49,7 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.cpp>
 )
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET libhttp
   NOINSTALL
   TYPE STATIC
@@ -64,13 +64,13 @@ ecbuild_add_library(
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   PUBLIC_DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  FORMAT
 )
-target_clangformat(libhttp)
 
 # ========================================================================
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET ecflow_http
   SOURCES
     src/ecflow/http/HttpMain.cpp
@@ -78,8 +78,8 @@ ecbuild_add_executable(
     libhttp
     ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  FORMAT
 )
-target_clangformat(ecflow_http)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
@@ -125,7 +125,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
     # Sharing a directory causes a race condition between the tests that overwrite each other's certificate.
     #
 
-    ecbuild_add_test(
+    ecflow_add_test(
       TARGET
         s_http
       LABELS
@@ -147,12 +147,12 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       TEST_DEPENDS
         u_base
         s_client
-    )
-    target_clangformat(s_http
-      CONDITION ENABLE_TESTS
+      CONDITION
+        ENABLE_TESTS
+      FORMAT
     )
 
-    ecbuild_add_test(
+    ecflow_add_test(
       TARGET
         s_http_using_http_backend
       LABELS
@@ -176,9 +176,9 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       TEST_DEPENDS
         u_base
         s_client
-    )
-    target_clangformat(s_http_using_http_backend
-      CONDITION ENABLE_TESTS
+      CONDITION
+        ENABLE_TESTS
+      FORMAT
     )
   else ()
     message(WARNING "SSL not enabled - will not run HTTP server tests")

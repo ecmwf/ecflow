@@ -62,7 +62,7 @@ set(test_srcs
   test/TestZombies.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_node
   LABELS
@@ -75,9 +75,10 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_attributes
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-target_clangformat(u_node
-  CONDITION ENABLE_TESTS)
 
 
 set(test_srcs
@@ -97,7 +98,7 @@ set(test_srcs
   test/parser/TestParser_main.cpp # test entry point
   test/parser/TestVariableParsing.cpp
 )
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_parser
   LABELS
@@ -113,9 +114,9 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_node
-)
-target_clangformat(u_parser
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 
@@ -124,7 +125,7 @@ set(test_srcs
   test/expressions/TestExpressionsGoldenCorpus.cpp
   test/expressions/TestExpressions_main.cpp # test entry point
 )
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_expressions
   LABELS
@@ -138,9 +139,9 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_node
-)
-target_clangformat(u_expressions
-  CONDITION ENABLE_TESTS
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
 
 
@@ -150,7 +151,7 @@ if (ENABLE_ALL_TESTS)
     test/TestSingleExprParse_main.cpp # test entry point
   )
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       u_node_single
     LABELS
@@ -163,9 +164,9 @@ if (ENABLE_ALL_TESTS)
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     TEST_DEPENDS
       u_anattr
-  )
-  target_clangformat(u_node_single
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
 
@@ -180,7 +181,7 @@ if (ENABLE_ALL_TESTS)
     test/parser/TestSingleDefsFile.cpp
   )
 
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       p_parser
     LABELS
@@ -191,9 +192,9 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-  )
-  target_clangformat(p_parser
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
 
@@ -209,7 +210,7 @@ if (ENABLE_ALL_TESTS)
 
   # The following is not technically a test (as it makes no checks),
   # but a tool to measure the time it takes to parse 'mega.def' file
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       p_parser_timer
     LABELS
@@ -222,9 +223,9 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       test_scaffold
       Boost::boost # Boost header-only libraries must be available
-  )
-  target_clangformat(p_parser_timer
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
   # The following is not technically a test (as it makes no checks),
@@ -232,7 +233,7 @@ if (ENABLE_ALL_TESTS)
   set(test_srcs
     test/parser/ParseOnly.cpp
   )
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       p_parser_only
     LABELS
@@ -245,9 +246,9 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-  )
-  target_clangformat(p_parser_only
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
 endif()

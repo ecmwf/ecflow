@@ -12,7 +12,7 @@ if (NOT ENABLE_SERVER)
   return() # Do not proceed if server is not enabled
 endif ()
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     s_foolproof
   LABELS
@@ -37,5 +37,7 @@ ecbuild_add_test(
     ecflow_client
   ARGS
     --random=1
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
 )
-target_clangformat(s_foolproof CONDITION ENABLE_TESTS)

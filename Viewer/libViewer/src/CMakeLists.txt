@@ -63,7 +63,7 @@ elseif(Qt5_FOUND)
   qt5_wrap_ui(LIBVIEWER_FORMS_HEADERS ${wrap_ui_files})
 endif()
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     viewer
   NOINSTALL
@@ -98,5 +98,5 @@ ecbuild_add_library(
     $<$<TARGET_EXISTS:Qt6::Network>:Qt6::Network>
     $<$<TARGET_EXISTS:Qt6::Charts>:Qt6::Charts>
     $<$<TARGET_EXISTS:Qt6::Core5Compat>:Qt6::Core5Compat>
+  FORMAT
 )
-target_clangformat( viewer )

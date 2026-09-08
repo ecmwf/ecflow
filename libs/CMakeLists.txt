@@ -601,7 +601,7 @@ set(srcs
 )
 
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     ecflow_all
   NOINSTALL
@@ -633,8 +633,8 @@ ecbuild_add_library(
     CMAKE
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
     $<$<VERSION_GREATER_EQUAL:${SELECTED_BOOST_VERSION},1.69.0>:BOOST_ASIO_NO_DEPRECATED>
+  FORMAT
 )
-target_clangformat(ecflow_all)
 
 
 add_subdirectory(core)

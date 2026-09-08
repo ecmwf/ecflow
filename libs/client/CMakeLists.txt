@@ -11,7 +11,7 @@
 # ========================================================================
 # EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET
     ecflow_client
   SOURCES
@@ -19,8 +19,8 @@ ecbuild_add_executable(
   LIBS
     ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  FORMAT
 )
-target_clangformat(ecflow_client)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
@@ -67,7 +67,7 @@ set(test_srcs
   test/TestUrlCmd.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_client
   LABELS
@@ -90,9 +90,7 @@ ecbuild_add_test(
     u_base
   CONDITION
     ENABLE_TESTS
-)
-target_clangformat(u_client
-  CONDITION ENABLE_TESTS
+  FORMAT
 )
 
 # ================================================================================                         
@@ -120,7 +118,7 @@ if (ENABLE_SERVER)
   )
 endif()
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     s_client
   LABELS
@@ -142,17 +140,15 @@ ecbuild_add_test(
   TEST_DEPENDS
     u_base
   CONDITION
-    ENABLE_SERVER # AND ENABLE_TESTS
-)
-target_clangformat(s_client
-  CONDITION ENABLE_SERVER # AND ENABLE_TESTS
+    ENABLE_SERVER AND ENABLE_TESTS
+  FORMAT
 )
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   # Simple stand alone test
   #
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       p_large_defs
     LABELS
@@ -175,15 +171,15 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
-  )
-  target_clangformat(p_large_defs
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
   #
   # test migration
   #
-  ecbuild_add_test(
+  ecflow_add_test(
     TARGET
       m_migration
     LABELS
@@ -206,9 +202,9 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
-  )
-  target_clangformat(m_migration
-    CONDITION ENABLE_TESTS
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
   )
 
 endif()

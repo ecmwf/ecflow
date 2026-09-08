@@ -802,7 +802,7 @@ endif()
 file(GLOB image_files "${CMAKE_CURRENT_SOURCE_DIR}/../images/*.*")
 add_custom_target(Qt_resource_cpp DEPENDS ${VIEWER_RES} ${image_files})
 
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET
     ecflow_ui.x
   SOURCES
@@ -836,9 +836,9 @@ ecbuild_add_executable(
     $<$<TARGET_EXISTS:Qt6::Network>:Qt6::Network>
     $<$<TARGET_EXISTS:Qt6::Charts>:Qt6::Charts>
     $<$<TARGET_EXISTS:Qt6::Core5Compat>:Qt6::Core5Compat>
+  FORMAT
 )
 set_target_properties(ecflow_ui.x PROPERTIES AUTOMOC ON)
-target_clangformat(ecflow_ui.x)
 
 set(ENABLE_ECFLOW_UI_LOG "OFF")
 # The following target, ecflow_ui_log, is inconsistent
@@ -872,7 +872,7 @@ if(${ENABLE_ECFLOW_UI_LOG})
 
   list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
 
-  ecbuild_add_executable(
+  ecflow_add_executable(
     TARGET
       ecflow_ui_log
     SOURCES
@@ -911,8 +911,8 @@ if(${ENABLE_ECFLOW_UI_LOG})
       $<$<TARGET_EXISTS:Qt6::Network>:Qt6::Network>
       $<$<TARGET_EXISTS:Qt6::Charts>:Qt6::Charts>
       $<$<TARGET_EXISTS:Qt6::Core5Compat>:Qt6::Core5Compat>
+    FORMAT
   )
   set_target_properties(ecflow_ui_log PROPERTIES AUTOMOC ON)
-  target_clangformat(ecflow_ui_log)
 
 endif()

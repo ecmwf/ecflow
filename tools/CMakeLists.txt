@@ -9,11 +9,12 @@
 #
 
 # This can be used by submission system. i.e trimurti
-ecbuild_add_executable(
+ecflow_add_executable(
   TARGET
     ecflow_standalone
   SOURCES
     ecflow_standalone.c
+  FORMAT
 )
 
 #

@@ -16,7 +16,7 @@ if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
   set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
 endif()
 
-ecbuild_add_library(
+ecflow_add_library(
   TARGET
     test_scaffold
   NOINSTALL
@@ -32,8 +32,8 @@ ecbuild_add_library(
   PUBLIC_LIBS
     Boost::boost
     ${ADDITIONAL_BOOST_COMPONENTS}
+  FORMAT
 )
-target_clangformat(test_scaffold)
 
 set(test_srcs
   # Headers
@@ -81,7 +81,7 @@ set(test_srcs
   test/TestWhiteListIncludes.cpp
 )
 
-ecbuild_add_test(
+ecflow_add_test(
   TARGET
     u_core
   LABELS
@@ -92,7 +92,5 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-)
-target_clangformat(u_core
-  CONDITION ENABLE_TESTS
+  FORMAT
 )
