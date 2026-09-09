@@ -25,6 +25,15 @@ repos:
     hooks:
       - id: check-ci-approval
 
+  # `reuse lint` checks the whole project, including 3rdparty/: the hook passes
+  # no filenames, so the exclude above does not narrow it. always_run keeps it
+  # honest for a commit that happens to touch only excluded paths.
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      - id: reuse
+        always_run: true
+
   # Off until the tree is cleaned up; the counts are what each would rewrite today.
   #
   # - repo: https://github.com/pre-commit/pre-commit-hooks
