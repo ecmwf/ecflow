@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _python_based_suite_definition:
 
 Python based suite definition

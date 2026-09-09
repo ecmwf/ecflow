@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _environment_variables_for_the_ecflow_client:
 
 Environment variables for the ecFlow client

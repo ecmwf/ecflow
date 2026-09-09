@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 import pathlib
 import sys
 
@@ -6,6 +10,16 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from validate_help_manifest import check_cross_references, check_schema, load_json  # noqa: E402
+
+# The tags below are emitted into the generated pages, not applied to this
+# file; the fence keeps the licence tooling from reading them as its own.
+# REUSE-IgnoreStart
+SPDX_HEADER = (
+    ".. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)\n"
+    ".. SPDX-License-Identifier: Apache-2.0\n"
+    "\n"
+)
+# REUSE-IgnoreEnd
 
 cmd_type_terms = {"task": "child command", "user": "user command"}
 
@@ -405,15 +419,15 @@ if __name__ == "__main__":
     # Render and store index.rst
     content = render_index_rst()
     with open("index.rst", "w") as f:
-        f.write(content)
+        f.write(SPDX_HEADER + content)
 
     command_entries = load_commands(manifest)
     with open("cli_commands.rst", "w") as f:
-        f.write(render_commands_rst(command_entries))
+        f.write(SPDX_HEADER + render_commands_rst(command_entries))
 
     option_entries = load_options(manifest)
     with open("cli_options.rst", "w") as f:
-        f.write(render_options_rst(option_entries))
+        f.write(SPDX_HEADER + render_options_rst(option_entries))
 
     # Ensure api sub-folders is present
     pathlib.Path("api").mkdir(parents=True, exist_ok=True)
@@ -422,9 +436,9 @@ if __name__ == "__main__":
     for entry in command_entries:
         content = render_single_page_rst(manifest, entry.name)
         with open(f"api/{entry.name}.rst", "w") as f:
-            f.write(content)
+            f.write(SPDX_HEADER + content)
 
     for entry in option_entries:
         content = render_single_page_rst(manifest, entry.name)
         with open(f"api/{entry.name}.rst", "w") as f:
-            f.write(content)
+            f.write(SPDX_HEADER + content)

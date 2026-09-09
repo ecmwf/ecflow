@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _adding_meters_events_and_labels:
 
 Adding Meters, Events and Labels

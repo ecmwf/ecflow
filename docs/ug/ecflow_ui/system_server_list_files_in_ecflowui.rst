@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _system_server_list_files_in_ecflowui:
 
 System server list files in ecFlowUI
