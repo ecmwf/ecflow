@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _how_to_mirror_a_remote_task:
 
 How to mirror a remote Task?

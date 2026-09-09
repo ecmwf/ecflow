@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 set -x            # Enable debug mode
 set -e            # Exit immediately if a command exits with a non-zero status
 set -u            # Treat unset variables as an error when substituting

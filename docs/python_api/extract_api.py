@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 """
 
   This script generates the Python API reference pages (reference/*.rst) by introspecting
@@ -19,6 +22,16 @@
 
 import re
 from pathlib import Path
+
+# The tags below are emitted into the generated pages, not applied to this
+# file; the fence keeps the licence tooling from reading them as its own.
+# REUSE-IgnoreStart
+SPDX_HEADER = (
+    ".. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)\n"
+    ".. SPDX-License-Identifier: Apache-2.0\n"
+    "\n"
+)
+# REUSE-IgnoreEnd
 
 try:
     import ecflow
@@ -146,7 +159,7 @@ def generate():
             raise SystemExit(f"extract_api.py: unexpected non-class module member: {name}")
         lines = class_lines(name, cls)
         content = "\n".join(lines) + ("\n" if not lines[-1] else "\n\n")
-        (OUTPUT_DIR / f"{name}.rst").write_text(content)
+        (OUTPUT_DIR / f"{name}.rst").write_text(SPDX_HEADER + content)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _how_a_job_file_is_created_from_an_ecflow_file:
 
 How a job file is created from an ecFlow file

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 # This software is provided under the ECMWF standard software license agreement.
 # file deepcode ignore PythonConstantBinaryExpression: legacy
 """ a layer over raw ecflow api

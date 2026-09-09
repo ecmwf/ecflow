@@ -1,3 +1,7 @@
+<!--
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # ecFlow
 
@@ -13,6 +17,8 @@
   <a href="https://ecflow.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/ecflow/badge/?version=latest" alt="Documentation Status"></a>
   &nbsp;
   <a href="https://codecov.io/gh/ecmwf/ecflow"><img src="https://codecov.io/gh/ecmwf/ecflow/branch/develop/graph/badge.svg" alt="Code Coverage"></a>
+  &nbsp;
+  <a href="https://api.reuse.software/info/github.com/ecmwf/ecflow"><img src="https://api.reuse.software/badge/github.com/ecmwf/ecflow" alt="REUSE status"></a>
 </div>
 
 
@@ -27,10 +33,16 @@ The documentation can be found at https://ecflow.readthedocs.io/.
 
 ## COPYRIGHT AND LICENCE
 
-Copyright 2005- European Centre for Medium-Range Weather Forecasts (ECMWF).
+Copyright 2009- European Centre for Medium-Range Weather Forecasts (ECMWF).
 
-This software is licensed under the terms of the Apache Licence Version 2.0
-which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+This software is licensed under the terms of the Apache Licence, Version 2.0, which can be
+obtained at http://www.apache.org/licenses/LICENSE-2.0. The complete text is distributed with
+the source as [`LICENSE`](LICENSE), and in the unmodified form expected by licence tooling as
+[`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt).
 
 In applying this licence, ECMWF does not waive the privileges and immunities granted to it by
 virtue of its status as an intergovernmental organisation nor does it submit to any jurisdiction.
+
+Each file declares its copyright and licence with SPDX tags; files unable to carry a comment are
+covered by [`REUSE.toml`](REUSE.toml). Third-party software included in the source tree retains
+the licensing of its origin, as recorded in [`NOTICE`](NOTICE).

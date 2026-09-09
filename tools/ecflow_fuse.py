@@ -1,4 +1,8 @@
 #!/usr/bin/env python2
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 # file deepcode ignore SSHHostKeyVerificationDisabled: <comment the reason here>
 from __future__ import print_function
 import os

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Every file Git detects as text is stored with LF in the repository.
+* text=auto
+
+# Vendored third-party code is stored exactly as it arrives from upstream, and is never renormalised.
+3rdparty/** -text
+
+# Binary assets, marked explicitly rather than left to content detection.
+*.gif binary
+*.gz  binary
+*.jpg binary
+*.ogg binary
+*.png binary
+
+# The following script carries literal NUL bytes inside Perl substitutions, which makes Git detect it as binary.
+# The attribute states that explicitly, so that the file is never renormalised.
+tools/ecflow_logsvr.pl -text

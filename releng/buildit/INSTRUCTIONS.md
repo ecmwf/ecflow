@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Building ecFlow from source
 
 This folder contains scripts that build and install ecFlow from source. Each script is self-contained, and performs the
