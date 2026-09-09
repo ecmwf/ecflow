@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Third-party actions are pinned to an immutable commit SHA rather than a tag,
+# per the Codex audit guidance. The tag beside each is a hint for locating the
+# release, not what is resolved.
+
+name: REUSE Compliance
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  reuse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
