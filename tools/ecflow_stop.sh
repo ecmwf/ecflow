@@ -1,23 +1,9 @@
 #!/bin/bash
-#==========================================================================
-##.TITLE   ECMWF utility for ecFlow
-##.NAME    ecflow_stop.sh
-##.SECTION ECFLOW
-##.AUTHOR  Avi
-## Revision    : $Revision: #10 $ 
-##
-## Copyright 2009- ECMWF.
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
-##
-##.FILE    ecflow_stop.sh
-##.INFO    this file is expected to be located in /usr/local/share
-##         it is to be used on ecgate by member states users  
-##         one ecf server occurrence will be generated on ecgate
-#==========================================================================
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# This script is expected to be located in /usr/local/share, and to be used on ecgate by member states users.
 
 #set -eux
 

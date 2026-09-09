@@ -1,23 +1,9 @@
 #!/bin/bash
-#set -x
-#set -u
-#==========================================================================
-##.TITLE   ECMWF utility for ECFLOW
-##.NAME    ecflow_start.sh
-##.SECTION ECF
-##.AUTHOR  Avi
-## Revision    : $Revision: #19 $ 
-##
-## Copyright 2009- ECMWF.
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
-##
-##.FILE    ecflow_start.sh
-###        Will start the ecflow_server in the background, using user id
-###        to make a unique port number.
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# This script starts the ecflow_server in the background, using user id to make a unique port number.
 
 if [[ $(hostname) = a[a-d]?-*.bullx && -z ${ECFLOW_ALLOW_LOCAL+x} ]]; then
     echo "To use an ecFlow server on the Atos HPC at ECMWF, please read instructions: https://confluence.ecmwf.int/display/UDOC/HPC2020%3A+Using+ecFlow"
