@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Building ecFlow Docker images
 
 This document describes the overall process to build ecFlow Docker images.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 # find all cpp file that have std::runtime_error.
 # if these file dont have #include <stdexcept> add it as the first include
 

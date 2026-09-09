@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 #
 # docker_ecflow_ui.sh - launch ecflow_ui in a Docker container (ecflow-all-dev:latest by default),
 # with its X11 display forwarded to the host and, optionally, its connections routed through
