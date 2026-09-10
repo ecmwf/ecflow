@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 {% if not tests %}
 # This recipe runs no tests!
 {% endif %}
@@ -48,8 +52,6 @@ cmake -S "$CI_SOURCE_DIR" -B "${TMPDIR:-/tmp}/build" \
   -DCMAKE_INSTALL_PREFIX="$CI_INSTALL_PREFIX"
 cmake --build "${TMPDIR:-/tmp}/build" --parallel "${SLURM_CPUS_PER_TASK:-64}"
 {% if tests %}
-# s_test also covers s_test_using_http_backend; s_http covers s_http* (which the
-# legacy ci-hpc-config.yml disables on HPC without recording why).
 ctest --test-dir "${TMPDIR:-/tmp}/build" --output-on-failure {{ ctest_args }}
 {% endif %}
 cmake --install "${TMPDIR:-/tmp}/build"

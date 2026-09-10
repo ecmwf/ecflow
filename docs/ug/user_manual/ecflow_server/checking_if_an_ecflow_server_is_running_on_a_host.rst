@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _checking_if_an_ecflow_server_is_running_on_a_host:
 
 Checking if an ecFlow server is running on a host

@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 import glob
 import os
 import pathlib
 import yaml
+
+# The tags below are emitted into the generated pages, not applied to this
+# file; the fence keeps the licence tooling from reading them as its own.
+# REUSE-IgnoreStart
+SPDX_HEADER = (
+    ".. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)\n"
+    ".. SPDX-License-Identifier: Apache-2.0\n"
+    "\n"
+)
+# REUSE-IgnoreEnd
 
 """
 
@@ -70,7 +83,7 @@ def build_toc():
 """
 
     with open("python_api.rst", "w") as f:
-        f.write(t)
+        f.write(SPDX_HEADER + t)
 
     check_usage(names)
 

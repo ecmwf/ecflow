@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 {% set name = "ecFlow" %}
 {% set git_tag = environ.get('GIT_DESCRIBE_TAG', '0.0.0').lstrip('v') %}
 {% set version = git_tag.replace('-', '') | lower %}

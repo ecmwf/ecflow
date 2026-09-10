@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _what_is_the_most_efficient_way_to_access_my_suites:
 
 What is the most efficient way to access my suites?

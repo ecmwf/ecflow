@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
 # GENERATED FILE - DO NOT EDIT.
 # Regenerate via the ci-infrastructure-generate CLI.
 # Source of truth: each repo's .ci/manifest.toml.

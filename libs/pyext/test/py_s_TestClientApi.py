@@ -1,12 +1,5 @@
-#
-# Copyright 2009- ECMWF.
-#
-# This software is licensed under the terms of the Apache Licence version 2.0
-# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-# In applying this licence, ECMWF does not waive the privileges and immunities
-# granted to it by virtue of its status as an intergovernmental organisation
-# nor does it submit to any jurisdiction.
-#
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
 
 # This test ensures the User API works as expected.
 
@@ -64,11 +57,35 @@ def disable_on(regex_platform):
 
 
 def ecf_includes():
-    return os.getcwd() + "/test/data/includes"
+    # Resolved from the source directory, rather than from the current working
+    # directory: the tests run from the build tree, where the include files are
+    # absent, and ecFlow would then generate a head.h of its own.
+    return File.source_dir() + "/libs/pyext/test/data/includes"
 
 
 def debugging():
     return False  # Use to enable auto flush and disable log file tests
+
+
+def job_output(ecf_home, suite_name):
+    """Collect the job output of every task of a suite, for diagnostics.
+
+    The job output files are the only record of what a job did before it
+    reported back, and are thus the first thing to inspect when a suite
+    fails to complete.
+    """
+    root = os.path.join(ecf_home, suite_name)
+    chunks = []
+    for dirpath, _, filenames in os.walk(root):
+        for filename in sorted(filenames):
+            if not re.match(r".*\.\d+$", filename):
+                continue  # not a job output file (e.g. the .ecf script, the .job1 file)
+            path = os.path.join(dirpath, filename)
+            with open(path) as stream:
+                chunks.append("--- " + path + "\n" + stream.read())
+    if not chunks:
+        return "no job output found under " + root
+    return "\n".join(chunks)
 
 
 def create_defs(name, port, protocol):
@@ -592,7 +609,9 @@ class TestClientApi:
                 break
             assert (
                 suite.get_state() != State.aborted
-            ), "Expected suite to complete, but found it was aborted"
+            ), "Expected suite to complete, but found it was aborted:\n" + str(
+                self.ci.get_defs()
+            ) + "\n" + job_output(Test.ecf_home(port), "test_client_run")
             time.sleep(3)
             if count > 20:
                 assert False, (
@@ -600,6 +619,8 @@ class TestClientApi:
                     + str(count)
                     + " loops:\n"
                     + str(self.ci.get_defs())
+                    + "\n"
+                    + job_output(Test.ecf_home(port), "test_client_run")
                 )
 
         self.ci.log_msg("Looped " + str(count) + " times")
@@ -646,6 +667,10 @@ class TestClientApi:
                     + str(count)
                     + " loops:\n"
                     + str(self.ci.get_defs())
+                    + "\n"
+                    + job_output(
+                        Test.ecf_home(port), "test_client_run_with_multiple_paths"
+                    )
                 )
 
         self.ci.log_msg("Looped " + str(count) + " times")
@@ -781,6 +806,29 @@ class TestClientApi:
         t4.add_trigger("1 == 0")
 
         defs.generate_scripts()
+
+        # The suite defined above is equivalent to the following definition file:
+        #
+        #   suite test_client_free_dep
+        #     clock real
+        #     edit ECF_HOME <ecf_home>
+        #     edit ECF_CLIENT_EXE_PATH <ecflow_client> [--http]
+        #     edit SLEEPTIME 1
+        #     edit ECF_INCLUDE <includes>
+        #     family f1
+        #       task t1
+        #         time 00:01
+        #       task t2
+        #         date <today, as dd.mm.yyyy>
+        #       task t3
+        #         trigger 1 == 0
+        #       task t4
+        #         time 00:01
+        #         date <today, as dd.mm.yyyy>
+        #         trigger 1 == 0
+        #     endfamily
+        #   endsuite
+
         msg = defs.check_job_creation(verbose=True)
         assert len(msg) == 0, msg
 
@@ -792,7 +840,9 @@ class TestClientApi:
         t2_path = "/test_client_free_dep/f1/t2"
         t3_path = "/test_client_free_dep/f1/t3"
         t4_path = "/test_client_free_dep/f1/t4"
+        count = 0
         while 1:
+            count += 1
             self.ci.sync_local()
             t1 = self.ci.get_defs().find_abs_node(t1_path)
             t2 = self.ci.get_defs().find_abs_node(t2_path)
@@ -811,7 +861,21 @@ class TestClientApi:
             suite = self.ci.get_defs().find_suite("test_client_free_dep")
             if suite.get_state() == State.complete:
                 break
+            assert (
+                suite.get_state() != State.aborted
+            ), "Expected suite to complete, but found it was aborted:\n" + str(
+                self.ci.get_defs()
+            ) + "\n" + job_output(ecfhome, "test_client_free_dep")
             time.sleep(3)
+            if count > 20:
+                assert False, (
+                    "test_client_free_dep aborted after "
+                    + str(count)
+                    + " loops:\n"
+                    + str(self.ci.get_defs())
+                    + "\n"
+                    + job_output(ecfhome, "test_client_free_dep")
+                )
 
         dir_to_remove = Test.ecf_home(self.ci.get_port()) + "/" + "test_client_free_dep"
         shutil.rmtree(dir_to_remove, ignore_errors=True)
@@ -1151,14 +1215,30 @@ class TestClientApi:
         self.ci.load(defs)
         self.ci.begin_all_suites()
 
+        count = 0
         while 1:
+            count += 1
             if self.ci.news_local():
                 self.ci.sync_local()  # get the changes, synced with local defs
                 suite = self.ci.get_defs().find_suite("test_client_get_file")
                 assert suite is not None, "Expected to find suite"
                 if suite.get_state() == State.complete:
                     break
+                assert (
+                    suite.get_state() != State.aborted
+                ), "Expected suite to complete, but found it was aborted:\n" + str(
+                    self.ci.get_defs()
+                ) + "\n" + job_output(Test.ecf_home(port), "test_client_get_file")
             time.sleep(1)
+            if count > 60:
+                assert False, (
+                    "test_client_get_file aborted after "
+                    + str(count)
+                    + " loops:\n"
+                    + str(self.ci.get_defs())
+                    + "\n"
+                    + job_output(Test.ecf_home(port), "test_client_get_file")
+                )
 
         try:
             for task in ["/test_client_get_file/f1/t1", "/test_client_get_file/f1/t2"]:
