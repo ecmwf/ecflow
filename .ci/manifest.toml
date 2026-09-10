@@ -1,6 +1,16 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
+# Emitted above the DO-NOT-EDIT banner of every workflow the generator writes.
+# reuse.yml wants an SPDX header in each of them, and a regeneration rewrites
+# those files wholesale — so the header has to be declared here, or the next run
+# deletes it.
+[generated]
+header = """
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+"""
+
 [package]
 name = "ecflow"
 prefix = "ecflow"
