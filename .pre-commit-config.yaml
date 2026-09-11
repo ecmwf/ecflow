@@ -21,7 +21,7 @@ repos:
         exclude: '^(docs|tools|releng)/|^libs/(client|node|pyext)/test/data/|^libs/test/overall/data/'
 
   - repo: https://github.com/ecmwf/ci-infrastructure
-    rev: 2b2f347b71942501be4b964217ec7aeeb79eb27c
+    rev: 83c6ffdefe118a75d76e6802bf0b8cf27185eaf7
     hooks:
       - id: check-ci-approval
 
