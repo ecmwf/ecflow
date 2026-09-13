@@ -10,6 +10,7 @@
 
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"

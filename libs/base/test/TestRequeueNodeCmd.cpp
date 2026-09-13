@@ -12,6 +12,7 @@
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"

@@ -51,6 +51,7 @@
 #include "ecflow/base/stc/SStringCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 

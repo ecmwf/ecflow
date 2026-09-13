@@ -7,6 +7,7 @@
 
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"

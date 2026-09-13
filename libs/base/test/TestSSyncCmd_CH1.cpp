@@ -13,6 +13,7 @@
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
