@@ -4,6 +4,7 @@
  */
 
 #include <chrono>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,6 +16,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 ///
 /// \brief Tests the connection diagnosis against a real ecFlow server
@@ -144,7 +146,9 @@ BOOST_AUTO_TEST_CASE(test_a_stopped_server_is_not_reported_as_a_mismatch) {
 
     // Nothing is listening on this port: the diagnosis must say so, rather than blame the
     // configuration. Telling the two apart is the reason the diagnosis exists.
-    const auto port = SCPort::next();
+    // The port is reserved (and released) by MakePort, so that no other test starts a server on it meanwhile.
+    const auto reserved = ecf::test::scaffold::MakePort{}.with(ecf::test::scaffold::AutomaticPortValue{}).create();
+    const auto port     = std::to_string(reserved.value());
 
     ClientInvoker theClient(ecf::string_constants::localhost, port);
     theClient.set_throw_on_error(false);
