@@ -30,18 +30,21 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
 
+///
+/// Provides the log for each test case in the suite, since the commands under test report their activity to it.
+///
+struct LogFixture
+{
+    ecf::test::scaffold::TestLog test_log{"test_inlimit_and_limit.log"};
+};
+
 BOOST_AUTO_TEST_SUITE(U_Base)
 
-BOOST_AUTO_TEST_SUITE(T_InLimitAndLimit)
-
-BOOST_AUTO_TEST_CASE(test_add_log) {
-    // create once for all test below, then remove at the end
-    Log::create("test_add_log.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
-}
+BOOST_FIXTURE_TEST_SUITE(T_InLimitAndLimit, LogFixture)
 
 BOOST_AUTO_TEST_CASE(test_add_limit) {
     ECF_NAME_THIS_TEST();
@@ -1950,12 +1953,6 @@ BOOST_AUTO_TEST_CASE(test_limit_value_reset_survives_a_checkpoint) {
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
-}
-
-BOOST_AUTO_TEST_CASE(test_destroy_log) {
-    Log::destroy();
-    fs::remove("test_add_log.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

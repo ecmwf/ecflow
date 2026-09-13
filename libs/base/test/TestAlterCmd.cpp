@@ -23,12 +23,21 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
 
+///
+/// Provides the log for each test case in the suite, since the commands under test report their activity to it.
+///
+struct LogFixture
+{
+    ecf::test::scaffold::TestLog test_log{"test_alter_cmd.log"};
+};
+
 BOOST_AUTO_TEST_SUITE(U_Base)
 
-BOOST_AUTO_TEST_SUITE(T_AlterCmd)
+BOOST_FIXTURE_TEST_SUITE(T_AlterCmd, LogFixture)
 
 class TestStateChanged {
 public:
@@ -72,14 +81,6 @@ private:
     Defs* defs_;
     unsigned int initial_state_change_no_;
 };
-
-BOOST_AUTO_TEST_CASE(test_add_log5) {
-    ECF_NAME_THIS_TEST();
-
-    // create once for all test below, then remove at the end
-    Log::create("test_add_log5.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
-}
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
     ECF_NAME_THIS_TEST();
@@ -1353,12 +1354,6 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_defstatus_validation) {
 
     /// Destroy singleton's to avoid valgrind from complaining
     System::destroy();
-}
-
-BOOST_AUTO_TEST_CASE(test_destroy_log5) {
-    Log::destroy();
-    fs::remove("test_add_log5.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
