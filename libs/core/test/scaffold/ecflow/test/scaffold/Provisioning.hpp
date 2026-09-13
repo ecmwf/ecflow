@@ -24,6 +24,7 @@
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/ecflow_source_build_dir.h"
 #include "ecflow/core/ecflow_version.h"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/LockFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Process.hpp"
@@ -735,6 +736,12 @@ struct SpecificPortValue
     static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port) {
         // attempt to create 'lock' file
         if (auto lock = LockFile::make_lock(LockFile::port_lock_path(std::to_string(port))); lock.has_value()) {
+            // The lock is taken before probing, so that no other test process can claim the port in between;
+            // a port that is bound by some unrelated process is rejected (releasing its lock file)
+            if (!EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(port))) {
+                ECF_TEST_DBG("Port " << port << " is locked, but already in use");
+                return std::nullopt;
+            }
             return std::make_pair(port, std::move(lock.value()));
         }
 
