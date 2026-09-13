@@ -20,7 +20,6 @@
 #include <sys/param.h>
 
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/ecflow_source_build_dir.h"

@@ -14,7 +14,6 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "ecflow/client/Rtt.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
@@ -22,6 +21,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 
 #ifdef DEBUG
 std::string rtt_filename = "rtt.dat";
@@ -35,6 +35,7 @@ std::string TestFixture::test_dir_;
 std::string TestFixture::project_test_dir_ = "libs/test/overall";
 
 using namespace ecf;
+using ecf::test::scaffold::EcfPortLock;
 
 namespace /* anonymous */ {
 

@@ -15,12 +15,12 @@
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
 #include "ecflow/base/Stats.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/TypeToJson.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
@@ -74,7 +74,7 @@ int select_available_port(int min, int max, int attempts = 100) {
 
     for (int i = 0; i < attempts; ++i) {
         int candidate = distrib(gen);
-        if (ecf::EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(candidate))) {
+        if (ecf::test::scaffold::EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(candidate))) {
             return candidate;
         }
     }

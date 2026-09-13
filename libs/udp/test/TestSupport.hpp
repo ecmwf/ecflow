@@ -13,13 +13,13 @@
 
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Process.hpp"
 #include "ecflow/udp/UDPClient.hpp"
@@ -282,7 +282,7 @@ private:
     static MockServer::port_t get_ecflow_server_port() {
         MockServer::port_t selected_port = 3199;
         ECF_TEST_DBG("   Attempting to use port: " << selected_port);
-        while (!EcfPortLock::is_free(selected_port)) {
+        while (!ecf::test::scaffold::EcfPortLock::is_free(selected_port)) {
             ECF_TEST_DBG("   Selected port: " << selected_port << " is not available.");
             ++selected_port;
             ECF_TEST_DBG("   Attempting to use port: " << selected_port);

@@ -10,15 +10,16 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/ServerProtocol.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::EcfPortLock;
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 

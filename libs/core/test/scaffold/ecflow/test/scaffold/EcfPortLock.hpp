@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef ecflow_core_EcfPortLock_HPP
-#define ecflow_core_EcfPortLock_HPP
+#ifndef ecflow_test_scaffold_EcfPortLock_HPP
+#define ecflow_test_scaffold_EcfPortLock_HPP
 
 ///
 /// \brief This class enables the creation of a lock file, so that different processes
@@ -25,8 +25,9 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Message.hpp"
 
-namespace ecf {
+namespace ecf::test::scaffold {
 
 class EcfPortLock {
 
@@ -187,7 +188,7 @@ private:
     static std::string port_file(const std::string& the_port) {
         // We need the *SAME* location so that different process find the same file.
         // When going across compiler the root_build_dir is not sufficient
-        std::string path = File::root_source_dir();
+        std::string path = ecf::File::root_source_dir();
         ecf::environment::get("ECF_PORT_LOCK_DIR", path);
 
         path += "/";
@@ -198,6 +199,6 @@ private:
     }
 };
 
-} // namespace ecf
+} // namespace ecf::test::scaffold
 
-#endif /* ecflow_core_EcfPortLock_HPP */
+#endif /* ecflow_test_scaffold_EcfPortLock_HPP */

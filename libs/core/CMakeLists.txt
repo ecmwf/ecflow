@@ -15,6 +15,7 @@ ecflow_add_library(
   NOINSTALL
   TYPE STATIC
   SOURCES
+    test/scaffold/ecflow/test/scaffold/EcfPortLock.hpp
     test/scaffold/ecflow/test/scaffold/Naming.hpp
     test/scaffold/ecflow/test/scaffold/Process.hpp
     test/scaffold/ecflow/test/scaffold/Provisioning.hpp
