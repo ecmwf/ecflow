@@ -13,6 +13,7 @@
 #include "SCPort.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
