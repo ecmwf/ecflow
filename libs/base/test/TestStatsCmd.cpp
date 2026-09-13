@@ -12,9 +12,11 @@
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
+
+using ecf::test::scaffold::TestLog;
 
 ///
 ///   Tests for `Stats` command
@@ -61,7 +63,7 @@ BOOST_AUTO_TEST_SUITE(T_StatsCmd)
 
 BOOST_AUTO_TEST_CASE(is_able_to_report_number_of_suites) {
 
-    ecf::TestLog test_log("test_stats_cmd__reports_number_of_suites.log");
+    TestLog test_log("test_stats_cmd__reports_number_of_suites.log");
 
     Defs defs;
     // Considering 3 suites, to be reported by `Stats`
@@ -95,7 +97,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_report_number_of_suites) {
 
 BOOST_AUTO_TEST_CASE(is_able_to_report_requests_per_second) {
 
-    ecf::TestLog test_log("test_stats_cmd__reports_requests_per_second.log");
+    TestLog test_log("test_stats_cmd__reports_requests_per_second.log");
 
     Defs defs;
 
@@ -136,7 +138,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_report_requests_per_second) {
 
 BOOST_AUTO_TEST_CASE(is_able_to_report_protocol) {
 
-    ecf::TestLog test_log("test_stats_cmd__reports_protocol.log");
+    TestLog test_log("test_stats_cmd__reports_protocol.log");
 
     Defs defs;
 

@@ -9,7 +9,6 @@
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -17,8 +16,10 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 // #define DEBUG 1
 

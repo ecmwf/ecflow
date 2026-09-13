@@ -13,7 +13,6 @@
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
@@ -21,8 +20,10 @@
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 /// This test, is used to check sync with the client handles.
 /// The client handles will register interest in a set of suites

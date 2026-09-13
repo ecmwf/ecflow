@@ -10,12 +10,13 @@
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 

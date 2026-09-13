@@ -10,7 +10,6 @@
 #include "MockServer.hpp"
 #include "ecflow/base/cts/user/FreeDepCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Family.hpp"
@@ -18,8 +17,10 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 

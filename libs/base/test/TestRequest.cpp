@@ -51,11 +51,12 @@
 #include "ecflow/base/stc/SStringCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 BOOST_FIXTURE_TEST_SUITE(U_Base, MyDefsFixture)
 

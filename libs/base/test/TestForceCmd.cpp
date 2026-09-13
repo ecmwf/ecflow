@@ -14,12 +14,13 @@
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 struct Fixture
 {

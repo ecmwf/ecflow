@@ -21,6 +21,7 @@ ecflow_add_library(
     test/scaffold/ecflow/test/scaffold/Process.hpp
     test/scaffold/ecflow/test/scaffold/Provisioning.hpp
     test/scaffold/ecflow/test/scaffold/Serialisation.hpp
+    test/scaffold/ecflow/test/scaffold/TestLog.hpp
     test/scaffold/ecflow/test/scaffold/Process.cpp
   PUBLIC_INCLUDES
     test/scaffold
