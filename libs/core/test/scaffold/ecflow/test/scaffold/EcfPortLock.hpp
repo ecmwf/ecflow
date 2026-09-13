@@ -6,76 +6,43 @@
 #ifndef ecflow_test_scaffold_EcfPortLock_HPP
 #define ecflow_test_scaffold_EcfPortLock_HPP
 
-///
-/// \brief This class enables the creation of a lock file, so that different processes
-///        avoid creating server with same port number.
-///
-///        IMPORTANT: This functionality is used in TESTS only.
-///
-
-#include <cerrno>
-#include <cstring>
-#include <fcntl.h>
 #include <iostream>
-#include <sstream>
-#include <unistd.h>
+#include <stdexcept>
+#include <string>
 
 #include <boost/asio.hpp>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Environment.hpp"
-#include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Message.hpp"
+#include "ecflow/test/scaffold/LockFile.hpp"
 
 namespace ecf::test::scaffold {
 
+///
+/// @brief Reserves server port numbers across test processes, by means of port lock files.
+///
+/// This is a stateless facade over LockFile, retained for test harnesses that track the reserved port as a plain
+/// value and release it explicitly with remove(); the lock file is not removed automatically. New code is expected
+/// to use MakePort, which releases the lock automatically.
+///
 class EcfPortLock {
-
-    /// @brief Attempts to create the given lock file atomically.
-    ///
-    /// The file is created with an exclusive-create open, so that when several processes race to
-    /// create the same lock file exactly one of them succeeds. A check-then-create sequence would
-    /// allow two processes to both observe the file as absent and both claim the lock.
-    ///
-    /// @param[in] path The lock file path
-    /// @return true if the lock file was created by this call; false if the lock file already
-    ///         exists, or could not be created (e.g. due to permissions)
-    static bool create_lock_file(const std::string& path) {
-        std::cout << " *** Attempting to create lock file: " << path << std::endl;
-        int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
-        if (fd < 0) {
-            if (errno == EEXIST) {
-                std::cout << " *** Found an existing lock file! Giving up..." << std::endl;
-            }
-            else {
-                std::cout << " *** Unable to create a lock file (" << std::strerror(errno) << ")! Giving up..."
-                          << std::endl;
-            }
-            return false;
-        }
-        ::close(fd);
-        std::cout << " *** Created lock file: " << path << std::endl;
-        return true;
-    }
-
 public:
-    // Disable default construction
     EcfPortLock() = delete;
 
-    /**
-     * Attempts to lock the given port
-     *
-     * Has the side-effect of creating a lock file on the filesystem related to the given port
-     *
-     * \returns true, if lock was achieved; false otherwise.
-     */
+    ///
+    /// @brief Attempts to lock the given port, by creating the related lock file.
+    ///
+    /// @param[in] port The port to lock
+    /// @param[in] debug Whether to trace the attempt on standard output
+    /// @return true if the lock was acquired; false otherwise
+    ///
     static bool try_port_lock(int port, bool debug = false) {
-        std::string the_port = ecf::convert_to<std::string>(port);
-        std::string the_file = port_file(the_port);
         if (debug) {
-            std::cout << "  EcfPortLock::try_port_lock(" << port << "), creating file: " << the_file;
+            std::cout << "  EcfPortLock::try_port_lock(" << port << "), creating file: " << port_file(port);
         }
-        if (create_lock_file(the_file)) {
+        if (auto lock = LockFile::make_lock(port_file(port)); lock.has_value()) {
+            lock->release();
             if (debug) {
                 std::cout << "  EcfPortLock::try_lock(" << port << "), got a lock! returning TRUE\n ";
             }
@@ -87,13 +54,13 @@ public:
         return false;
     }
 
-    /**
-     * Iteratively attempts to lock an available port, starting the search from the given port
-     *
-     * Has the side-effect of creating a lock file on the filesystem related to the given port
-     *
-     * \returns the available port
-     */
+    ///
+    /// @brief Locks the first available port, searching upwards from the given port.
+    ///
+    /// @param[in] port The port to start the search from
+    /// @param[in] debug Whether to trace the attempts on standard output
+    /// @return The locked port
+    ///
     static int try_next_port_lock(int port, bool debug = false) {
         while (!try_port_lock(port, debug)) {
             ++port;
@@ -101,22 +68,18 @@ public:
         return port;
     }
 
-    /**
-     * Performs the unlock the the given port
-     *
-     * Effectively removes the lock file related to the given port
-     */
-    static void try_port_unlock(int port, bool debug = false) {
-        std::string the_port = ecf::convert_to<std::string>(port);
-        std::string the_file = port_file(the_port);
-        fs::remove(the_file);
-    }
+    ///
+    /// @brief Unlocks the given port, by removing the related lock file.
+    ///
+    /// @param[in] port The port to unlock
+    ///
+    static void try_port_unlock(int port, bool /*debug*/ = false) { fs::remove(port_file(port)); }
 
     ///
     /// @brief Checks whether the given TCP port can be bound on the local machine.
     ///
-    /// @param port The TCP port number to check.
-    /// @return true if port is free, false if it is occupied or if any error occurs during the check.
+    /// @param[in] port The TCP port number to check
+    /// @return true if the port is free; false if it is occupied or if any error occurs during the check
     ///
     static bool is_tcp_port_free(unsigned short port) {
         using namespace boost::asio;
@@ -127,7 +90,7 @@ public:
         boost::system::error_code ec;
         a.open(ip::tcp::v4(), ec);
         if (ec) {
-            // If we cannot open a socket, assume the port is in use.
+            // If a socket cannot be opened, the port is assumed to be in use.
             std::cout << "  EcfPortLock::is_port_free(" << port << ") : FALSE (unable to open socket)\n ";
             return false;
         }
@@ -146,10 +109,16 @@ public:
         return true;
     }
 
+    ///
+    /// @brief Checks whether the given port is neither locked (by lock file) nor bound (by a running process).
+    ///
+    /// @param[in] port The port to check
+    /// @param[in] debug Whether to trace the checks on standard output
+    /// @return true if the port is free; false otherwise
+    ///
     static bool is_free(int port, bool debug = false) {
-        std::string the_port = ecf::convert_to<std::string>(port);
         // 1. File-lock check (fast path)
-        if (fs::exists(port_file(the_port))) {
+        if (fs::exists(port_file(port))) {
             if (debug) {
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE (lock file exists)\n ";
             }
@@ -157,7 +126,7 @@ public:
         }
 
         // 2. TCP socket check
-        // This ensures the port is free, by actually trying to binding to it (and immediately releasing it).
+        // This ensures the port is free, by actually trying to bind to it (and immediately releasing it).
         if (!is_tcp_port_free(port)) {
             if (debug) {
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE (TCP port occupied)\n ";
@@ -170,33 +139,36 @@ public:
         return true;
     }
 
+    ///
+    /// @brief Ensures the lock file for the given port exists.
+    ///
+    /// An already existing lock file is accepted, since callers commonly re-affirm a lock obtained earlier
+    /// (for example, by try_next_port_lock()).
+    ///
+    /// @param[in] the_port The port to lock, as text
+    /// @throws std::runtime_error if the lock file does not exist and cannot be created
+    ///
     static void create(const std::string& the_port) {
-        std::string the_file = port_file(the_port);
-        std::string errorMsg;
-        if (!ecf::File::create(the_file, "", errorMsg)) {
-            throw std::runtime_error(
-                MESSAGE("EcfPortLock::create_free_port_file : could not create file " << the_file));
+        auto the_file = LockFile::port_lock_path(the_port);
+        if (fs::exists(the_file)) {
+            return;
         }
+        if (auto lock = LockFile::make_lock(the_file); lock.has_value()) {
+            lock->release();
+            return;
+        }
+        throw std::runtime_error(MESSAGE("EcfPortLock::create : could not create file " << the_file));
     }
 
-    static void remove(const std::string& the_port) {
-        std::string the_file = port_file(the_port);
-        fs::remove(the_file);
-    }
+    ///
+    /// @brief Removes the lock file for the given port.
+    ///
+    /// @param[in] the_port The port to unlock, as text
+    ///
+    static void remove(const std::string& the_port) { fs::remove(LockFile::port_lock_path(the_port)); }
 
 private:
-    static std::string port_file(const std::string& the_port) {
-        // We need the *SAME* location so that different process find the same file.
-        // When going across compiler the root_build_dir is not sufficient
-        std::string path = ecf::File::root_source_dir();
-        ecf::environment::get("ECF_PORT_LOCK_DIR", path);
-
-        path += "/";
-        path += the_port;
-        path += ".lock";
-
-        return path;
-    }
+    static fs::path port_file(int port) { return LockFile::port_lock_path(ecf::convert_to<std::string>(port)); }
 };
 
 } // namespace ecf::test::scaffold
