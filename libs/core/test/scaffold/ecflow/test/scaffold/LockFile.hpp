@@ -18,6 +18,7 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/ecflow_source_build_dir.h"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 namespace ecf::test::scaffold {
 
@@ -67,7 +68,7 @@ public:
     ///         created (for example, due to permissions)
     ///
     static std::optional<LockFile> make_lock(const fs::path& lock_file) {
-        if (create_file(lock_file)) {
+        if (create_file(lock_file, describe_current_test())) {
             return LockFile{lock_file};
         }
         return std::nullopt;
@@ -126,12 +127,16 @@ private:
     }
 
     ///
-    /// @brief Creates the given lock file atomically.
+    /// @brief Creates the given lock file atomically, with the given content.
+    ///
+    /// The content identifies the creator of the lock file, so that a leftover lock file (for example, after a test
+    /// run is killed) can be traced back to the test that created it.
     ///
     /// @param[in] path The lock file path
+    /// @param[in] content The content written to the lock file
     /// @return true if the lock file was created by this call; false if it already exists, or could not be created
     ///
-    static bool create_file(const fs::path& path) {
+    static bool create_file(const fs::path& path, const std::string& content) {
         std::cout << " *** Attempting to create lock file: " << path << std::endl;
         int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
         if (fd < 0) {
@@ -143,6 +148,16 @@ private:
                           << std::endl;
             }
             return false;
+        }
+        // The content is informational only; the lock is held by the existence of the file, so a short write is
+        // reported but does not invalidate the lock
+        for (const char* p = content.data(); p != content.data() + content.size();) {
+            auto written = ::write(fd, p, static_cast<size_t>(content.data() + content.size() - p));
+            if (written < 0) {
+                std::cout << " *** Unable to write lock file content (" << std::strerror(errno) << ")" << std::endl;
+                break;
+            }
+            p += written;
         }
         ::close(fd);
         std::cout << " *** Created lock file: " << path << std::endl;
