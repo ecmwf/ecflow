@@ -69,13 +69,6 @@ public:
     }
 
     ///
-    /// @brief Unlocks the given port, by removing the related lock file.
-    ///
-    /// @param[in] port The port to unlock
-    ///
-    static void try_port_unlock(int port, bool /*debug*/ = false) { fs::remove(port_file(port)); }
-
-    ///
     /// @brief Checks whether the given TCP port can be bound on the local machine.
     ///
     /// @param[in] port The TCP port number to check
