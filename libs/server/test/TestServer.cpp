@@ -15,11 +15,10 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
-#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
-using ecf::test::scaffold::EcfPortLock;
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 
@@ -129,57 +128,23 @@ void test_the_server(const std::string& port) {
 BOOST_AUTO_TEST_CASE(test_server) {
     ECF_NAME_THIS_TEST();
 
-    // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
-    // Hence the lock file is not always sufficient.
-    // ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
-    std::string the_port1 = "3144";
-    if (auto port = ecf::environment::fetch("ECF_FREE_PORT"); port) { // from metabuilder, allow parallel tests
-        the_port1 = port.value();
+    // Reserve a port, so that debug and release, gnu, clang, intel, etc. builds can run at the same time.
+    // ECF_FREE_PORT (from metabuilder) seeds the search, and should be unique among those builds.
+    ecf::test::scaffold::Port::port_t seed_port = 3144;
+    if (auto port = ecf::environment::fetch("ECF_FREE_PORT"); port) {
+        seed_port = ecf::convert_to<ecf::test::scaffold::Port::port_t>(port.value());
     }
-    std::cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
+    std::cout << "  Find free port to start server, starting with port " << seed_port << "\n";
 
-    auto the_port = ecf::convert_to<int>(the_port1);
-    while (!EcfPortLock::is_free(the_port)) {
-        the_port++;
-    }
-    std::string port = ecf::convert_to<std::string>(the_port);
-    EcfPortLock::create(port);
-    std::cout << "  Found free port: " << port << " ";
+    auto port = ecf::test::scaffold::MakePort{}.with(ecf::test::scaffold::AutomaticPortValue{seed_port}).create();
+    std::string the_port = ecf::convert_to<std::string>(port.value());
+    std::cout << "  Found free port: " << the_port << "\n";
 
+    test_the_server(the_port);
+
+    // cleanup (the port lock is released when `port` goes out of scope)
     Host h;
-    int count = 0;
-    while (true) {
-        try {
-            test_the_server(port);
-            std::cout << "\n";
-            break;
-        }
-        catch (...) {
-            count++;
-
-            // cleanup
-            fs::remove(h.ecf_log_file(port));
-            EcfPortLock::remove(port);
-
-            std::cout << " : port " << port << " is used, trying next port\n";
-
-            the_port = ecf::convert_to<int>(port);
-            the_port++;
-
-            while (!EcfPortLock::is_free(the_port)) {
-                the_port++;
-            }
-            port = ecf::convert_to<std::string>(the_port);
-            EcfPortLock::create(port);
-            std::cout << "  Found free port: " << port << "\n";
-
-            BOOST_REQUIRE_MESSAGE(count < 20, "Could not find new port after 20 attempts");
-        }
-    }
-
-    // cleanup
-    fs::remove(h.ecf_log_file(port));
-    EcfPortLock::remove(port);
+    fs::remove(h.ecf_log_file(the_port));
 
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
