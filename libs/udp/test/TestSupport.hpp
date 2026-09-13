@@ -19,9 +19,9 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/test/scaffold/EcfPortLock.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Process.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 #include "ecflow/udp/UDPClient.hpp"
 
 namespace ecf::test {
@@ -268,35 +268,32 @@ public:
 
 /**
  * This fixture provisions the tests with both an ecFlow server and an ecFlow UDP server.
+ *
+ * The ports of both servers are reserved (with lock files) for the lifetime of the fixture, so that
+ * concurrent test runs do not collide.
  */
 struct EnableServersFixture
 {
     EnableServersFixture()
-        : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
+        : ecflow_server_port{scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199}).create()},
+          ecflow_udp_port{scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199}).create()},
+          ecflow_server(as_port(ecflow_server_port)),
+          ecflow_udp(as_port(ecflow_udp_port), as_port(ecflow_server_port)) {
+        // Load 'reference' suite for tests...
+        ecflow_server.load_definition(fs::absolute("data/reference.def").string());
+    }
     ~EnableServersFixture() = default;
+
+    // Ports are declared first, so that they are reserved before the servers start and released after they stop
+    scaffold::Port ecflow_server_port;
+    scaffold::Port ecflow_udp_port;
 
     ecf::test::MockServer ecflow_server;
     ecf::test::MockUDPServer ecflow_udp;
 
 private:
-    static MockServer::port_t get_ecflow_server_port() {
-        MockServer::port_t selected_port = 3199;
-        ECF_TEST_DBG("   Attempting to use port: " << selected_port);
-        while (!ecf::test::scaffold::EcfPortLock::is_free(selected_port)) {
-            ECF_TEST_DBG("   Selected port: " << selected_port << " is not available.");
-            ++selected_port;
-            ECF_TEST_DBG("   Attempting to use port: " << selected_port);
-        }
-        ECF_TEST_DBG("   Found free port: " << selected_port);
-        return selected_port;
-    }
-    static MockServer::port_t get_ecflow_udp_port() { return 3198; }
-
-    EnableServersFixture(MockServer::port_t ecflow_server_port, MockServer::port_t ecflow_udp_port)
-        : ecflow_server(ecflow_server_port),
-          ecflow_udp(ecflow_udp_port, ecflow_server_port) {
-        // Load 'reference' suite for tests...
-        ecflow_server.load_definition(fs::absolute("data/reference.def").string());
+    static MockServer::port_t as_port(const scaffold::Port& port) {
+        return static_cast<MockServer::port_t>(port.value());
     }
 };
 
