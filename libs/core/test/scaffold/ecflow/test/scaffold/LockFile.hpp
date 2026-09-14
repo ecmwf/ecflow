@@ -165,8 +165,14 @@ private:
         for (const char* p = content.data(); p != content.data() + content.size();) {
             auto written = ::write(fd, p, static_cast<size_t>(content.data() + content.size() - p));
             if (written < 0) {
+                if (errno == EINTR) {
+                    continue; // interrupted by a signal before writing anything; retry
+                }
                 std::cout << " *** Unable to write lock file content (" << std::strerror(errno) << ")" << std::endl;
                 break;
+            }
+            if (written == 0) {
+                break; // no progress possible; keep the lock, with whatever content was written
             }
             p += written;
         }
