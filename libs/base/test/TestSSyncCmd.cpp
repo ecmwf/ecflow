@@ -25,8 +25,10 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 

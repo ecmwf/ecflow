@@ -12,14 +12,17 @@
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 
@@ -357,20 +360,27 @@ BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
     log_file += ".log";
     log_file = File::test_data(log_file, "libs/base");
 
-    Log::create(log_file);
+    // The Log is kept alive only while the command runs; destroying it flushes the log file, which is
+    // inspected afterwards (hence TestLog, which would remove the file, is not used here)
+    struct ScopedLog
+    {
+        explicit ScopedLog(const std::string& path) { Log::create(path); }
+        ~ScopedLog() { Log::destroy(); }
+    };
 
-    // Re-queue the family. In past we queued all nodes, then set to complete
-    // We still do this, but we now longer LOG the setting the queued state
-    // Hence in the log file we only expected to see nodes in the complete state
-    // See: ECFLOW-1239. When dealing with thousands of nodes, this was causing performance problems
-    TestHelper::invokeRequest(the_defs.get(), Cmd_ptr(new RequeueNodeCmd(f1->absNodePath())));
-    TestHelper::test_state(t1, NState::COMPLETE);
-    TestHelper::test_state(t2, NState::COMPLETE);
-    TestHelper::test_state(f1, NState::COMPLETE);
-    TestHelper::test_state(suite, NState::COMPLETE);
+    {
+        ScopedLog scoped_log(log_file);
 
-    // This should also flush the log file.
-    Log::destroy();
+        // Re-queue the family. In past we queued all nodes, then set to complete
+        // We still do this, but we now longer LOG the setting the queued state
+        // Hence in the log file we only expected to see nodes in the complete state
+        // See: ECFLOW-1239. When dealing with thousands of nodes, this was causing performance problems
+        TestHelper::invokeRequest(the_defs.get(), Cmd_ptr(new RequeueNodeCmd(f1->absNodePath())));
+        TestHelper::test_state(t1, NState::COMPLETE);
+        TestHelper::test_state(t2, NState::COMPLETE);
+        TestHelper::test_state(f1, NState::COMPLETE);
+        TestHelper::test_state(suite, NState::COMPLETE);
+    }
 
     // Open the log file and look for 'queued:' if we find it then this is a regression.
     std::string error_msg;

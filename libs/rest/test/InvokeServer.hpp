@@ -13,8 +13,8 @@
 
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/server/Server.hpp"

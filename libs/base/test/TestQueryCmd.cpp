@@ -19,8 +19,10 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 // ---------------------------------------------------------------------------------------------------------
 // Test fixture and helpers

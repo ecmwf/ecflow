@@ -6,6 +6,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <memory>
 #include <random>
 #include <stdexcept>
 
@@ -15,13 +16,13 @@
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
 #include "ecflow/base/Stats.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
 
@@ -55,27 +56,33 @@ static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_bac
 #endif
 
 ///
-/// @brief Selects a TCP port, available on the local host, from the range [@p min, @p max].
+/// @brief Reserves a TCP port, available on the local host, from the range [@p min, @p max].
 ///
-/// Candidate ports are drawn at random, and each candidate is confirmed to be available by binding to it;
-/// the first available candidate is selected. Notice that, since the candidate port is released before
-/// being handed over to the server under test, availability is not guaranteed to persist.
+/// Candidate ports are drawn at random, and each candidate is reserved by locking it (which creates the
+/// related lock file, and confirms the port can be bound); the first candidate that can be reserved is
+/// selected. The reservation is held until the returned Port is destroyed, so that concurrent test runs
+/// do not select the same port.
 ///
 /// @param[in] min The lowest port number considered
 /// @param[in] max The highest port number considered
 /// @param[in] attempts The maximum number of candidate ports considered
-/// @return The selected port number
+/// @return The reserved port
 /// @throws std::runtime_error if no available port is found within the given number of attempts
 ///
-int select_available_port(int min, int max, int attempts = 100) {
+std::unique_ptr<ecf::test::scaffold::Port> reserve_available_port(int min, int max, int attempts = 100) {
+    using namespace ecf::test::scaffold;
+
     static std::random_device rd;
     static std::mt19937 gen(rd());
     std::uniform_int_distribution<> distrib(min, max);
 
     for (int i = 0; i < attempts; ++i) {
-        int candidate = distrib(gen);
-        if (ecf::EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(candidate))) {
-            return candidate;
+        auto candidate = static_cast<Port::port_t>(distrib(gen));
+        try {
+            return MakePort{}.with(SpecificPortValue{candidate}).create_owned();
+        }
+        catch (const MakePort::UnableToLockPort&) {
+            // candidate is locked by another test, or already bound; try another
         }
     }
 
@@ -86,14 +93,14 @@ int select_available_port(int min, int max, int attempts = 100) {
 ///
 /// @brief Provides the TCP port used by the REST API server under test.
 ///
-/// The port is selected on first use, and remains unchanged for the remainder of the test run.
+/// The port is reserved on first use, and remains unchanged (and reserved) for the remainder of the test run.
 ///
 /// @return The selected port number
 /// @throws std::runtime_error if no available port is found
 ///
 int api_port() {
-    static const int port = select_available_port(ECF_TEST_HTTP_PORT_MIN, ECF_TEST_HTTP_PORT_MAX);
-    return port;
+    static const auto port = reserve_available_port(ECF_TEST_HTTP_PORT_MIN, ECF_TEST_HTTP_PORT_MAX);
+    return static_cast<int>(port->value());
 }
 
 ///

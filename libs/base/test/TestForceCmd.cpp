@@ -17,8 +17,10 @@
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 struct Fixture
 {

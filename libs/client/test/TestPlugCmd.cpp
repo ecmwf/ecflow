@@ -17,8 +17,10 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 static void get_defs(Defs& defs) {
     // suite suite1

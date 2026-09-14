@@ -11,23 +11,24 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
+///
+/// Provides the log for each test case in the suite, since the commands under test report their activity to it.
+///
+struct LogFixture
+{
+    ecf::test::scaffold::TestLog test_log{"test_client_handle_cmd.log"};
+};
+
 BOOST_AUTO_TEST_SUITE(U_Base)
 
-BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
-
-BOOST_AUTO_TEST_CASE(is_able_to_create_log_file) {
-    ECF_NAME_THIS_TEST();
-
-    // create once for all test below, then remove at the end
-    Log::create("test_add_log3.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
-}
+BOOST_FIXTURE_TEST_SUITE(T_ClientHandleCmd, LogFixture)
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_empty_server) {
     ECF_NAME_THIS_TEST();
@@ -368,14 +369,6 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_suite_ordering) {
     // check ordering after adding new suites, notice we auto add new suites to all our handles
     defs.add_suite("sxx");
     BOOST_CHECK_MESSAGE(check_ordering(defs), "Ordering not preserved after adding a new suite");
-}
-
-BOOST_AUTO_TEST_CASE(is_able_to_destroy_log_file) {
-    ECF_NAME_THIS_TEST();
-
-    Log::destroy();
-    fs::remove("test_add_log3.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

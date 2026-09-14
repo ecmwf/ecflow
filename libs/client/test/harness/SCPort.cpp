@@ -9,9 +9,11 @@
 
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
+
+using ecf::test::scaffold::EcfPortLock;
 
 namespace ecf {
 

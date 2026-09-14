@@ -20,8 +20,10 @@
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::TestLog;
 
 /// This test, is used to check sync with the client handles.
 /// The client handles will register interest in a set of suites

@@ -288,7 +288,7 @@ void Log::get_log_types(std::vector<std::string>& vec) {
     vec.emplace_back("OTH");
 }
 
-//======================================================================================================
+// *** LogFlusher
 
 LogFlusher::~LogFlusher() {
     Log* the_log = Log::instance();
@@ -297,23 +297,7 @@ LogFlusher::~LogFlusher() {
     }
 }
 
-//======================================================================================================
-
-TestLog::TestLog(const std::string& log_path)
-    : log_path_(log_path) {
-    Log::create(log_path);
-}
-
-TestLog::~TestLog() {
-
-    // Remove the log file. Comment out for debugging
-    fs::remove(log_path_);
-
-    // Explicitly destroy log. To keep valgrind happy
-    Log::destroy();
-}
-
-//======================================================================================================
+// *** LogTimer
 
 LogTimer::~LogTimer() {
     Log* the_log = Log::instance();
@@ -322,7 +306,8 @@ LogTimer::~LogTimer() {
     }
 }
 
-//======================================================================================================
+// *** LogImpl
+
 LogImpl::LogImpl(const std::string& filename)
     : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {

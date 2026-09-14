@@ -9,6 +9,7 @@
 #include <array>
 #include <chrono>
 #include <fstream>
+#include <memory>
 #include <optional>
 #include <random>
 #include <regex>
@@ -20,11 +21,12 @@
 #include <sys/param.h>
 
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/ecflow_source_build_dir.h"
 #include "ecflow/core/ecflow_version.h"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
+#include "ecflow/test/scaffold/LockFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Process.hpp"
 
@@ -541,51 +543,6 @@ private:
     std::string content_;
 };
 
-class LockFile {
-public:
-    static std::optional<LockFile> make_lock(const fs::path& lock_file) {
-        if (create_file(lock_file)) {
-            return LockFile{lock_file};
-        }
-        return std::nullopt;
-    };
-
-private:
-    LockFile(const fs::path& lock_file)
-        : lock_file_(lock_file) {
-        assert(!lock_file_.empty());
-        assert(fs::exists(lock_file_));
-        assert(fs::is_regular_file(lock_file_));
-    }
-
-public:
-    LockFile(const LockFile&)                = delete;
-    LockFile& operator=(const LockFile&)     = delete;
-    LockFile(LockFile&&) noexcept            = default;
-    LockFile& operator=(LockFile&&) noexcept = default;
-
-    ~LockFile() {
-        if (!lock_file_.empty()) {
-            fs::remove(lock_file_);
-        }
-    }
-
-    [[nodiscard]] const fs::path& path() const { return lock_file_; }
-
-private:
-    static bool create_file(const fs::path& file) {
-        if (auto lock = fopen(file.c_str(), "wx")) {
-            auto content = std::string("This is a lock file!"); // This is dummy content!
-            fwrite(content.c_str(), 1, content.size(), lock);
-            fclose(lock);
-            return true;
-        }
-        return false;
-    }
-
-    fs::path lock_file_{};
-};
-
 struct User
 {
     std::string username;
@@ -777,13 +734,15 @@ struct SpecificPortValue
 
     port_t base_port;
 
-    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(const fs::path lock_dir, port_t port) {
-        // define name of 'lock' file
-        auto lock_name     = std::to_string(port) + ".lock";
-        fs::path lock_file = lock_dir / lock_name;
-
+    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port) {
         // attempt to create 'lock' file
-        if (auto lock = LockFile::make_lock(lock_file); lock.has_value()) {
+        if (auto lock = LockFile::make_lock(LockFile::port_lock_path(std::to_string(port))); lock.has_value()) {
+            // The lock is taken before probing, so that no other test process can claim the port in between;
+            // a port that is bound by some unrelated process is rejected (releasing its lock file)
+            if (!EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(port))) {
+                ECF_TEST_DBG("Port " << port << " is locked, but already in use");
+                return std::nullopt;
+            }
             return std::make_pair(port, std::move(lock.value()));
         }
 
@@ -800,10 +759,10 @@ struct AutomaticPortValue
 
     port_t base_port;
 
-    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(const fs::path lock_dir, port_t port) {
+    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port) {
 
         for (port_t current = port; current <= Port::maximum_port; ++current) {
-            if (auto found = SpecificPortValue::attempt_to_lock_port(lock_dir, current); found.has_value()) {
+            if (auto found = SpecificPortValue::attempt_to_lock_port(current); found.has_value()) {
                 return found;
             }
         }
@@ -845,19 +804,11 @@ public:
     }
 
     [[nodiscard]] Port create() const {
-        // define location to store 'lock' files
-        // 1) by default, use project build directory
-        // 2) overridden by ECF_PORT_LOCK_DIR environment variable
-        fs::path lock_dir = CMAKE_ECFLOW_SOURCE_DIR();
-        if (const char* env = std::getenv("ECF_PORT_LOCK_DIR")) {
-            lock_dir = env;
-        };
-
         return std::visit(
-            [&lock_dir](auto&& strategy) {
+            [](auto&& strategy) {
                 // attempt to lock port (i.e. create the lock file)
                 using Strategy = std::decay_t<decltype(strategy)>;
-                if (auto found = Strategy::attempt_to_lock_port(lock_dir, strategy.base_port); found.has_value()) {
+                if (auto found = Strategy::attempt_to_lock_port(strategy.base_port); found.has_value()) {
                     auto port_ = found.value().first;
                     auto lock_ = std::move(found.value().second);
                     ECF_TEST_DBG("Port " << port_ << " is locked, lock file created at " << lock_.path());
@@ -868,6 +819,21 @@ public:
                 };
             },
             strategy_);
+    }
+
+    ///
+    /// @brief Reserves a port, as create(), and returns it with heap ownership.
+    ///
+    /// Port is neither copyable nor movable, so a reservation that must outlive the scope that made it (for example,
+    /// one held by a static or by a fixture member created later) is obtained this way.
+    ///
+    /// @return The reserved Port, released when the pointer is destroyed
+    /// @throws UnableToLockPort if no port can be reserved
+    ///
+    [[nodiscard]] std::unique_ptr<Port> create_owned() const {
+        // std::make_unique would forward the Port prvalue to a (deleted) move constructor; direct initialisation
+        // from the prvalue elides it
+        return std::unique_ptr<Port>(new Port(create())); // NOLINT(modernize-make-unique)
     }
 
     std::variant<SpecificPortValue, AutomaticPortValue> strategy_;

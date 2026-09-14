@@ -12,10 +12,11 @@
 
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/test/scaffold/EcfPortLock.hpp"
 
 class InvokeServer {
 public:
@@ -128,7 +129,7 @@ private:
         theServerInvokePath += " -d";
 
         // Create a port file. To avoid creating multiple servers on the same port number
-        ecf::EcfPortLock::create(port);
+        ecf::test::scaffold::EcfPortLock::create(port);
 
         // Make sure server starts in the background to avoid hanging test
         theServerInvokePath += " --port=" + port;
@@ -164,7 +165,7 @@ private:
         }
 
         // remove port file. This prevented multiple different process from opening servers with same port number
-        ecf::EcfPortLock::remove(port);
+        ecf::test::scaffold::EcfPortLock::remove(port);
 
         // Remove generated file comment for debug
         ecf::Host h;

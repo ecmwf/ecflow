@@ -218,6 +218,8 @@ class EcfPortLock(object):
                 self.lock_time = self.at_time()
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.lock_file_fp = fp
+                fp.write(self._describe_current_test())
+                fp.flush()
                 print("   *LOCKED* file " + file + " : " + self.lock_time)
                 return True
             except IOError:
@@ -249,6 +251,24 @@ class EcfPortLock(object):
         )
         self.lock_file_fp.close()
         os.remove(file)
+
+    @staticmethod
+    def _describe_current_test():
+        """Describe the running test process, one "key: value" per line, so that a
+        leftover lock file (e.g. after a killed test run) can be traced back to the
+        test script that created it. Mirrors the description written by the C++ test scaffold."""
+        created = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        # Under pytest, PYTEST_CURRENT_TEST names the test being executed (as "file::test (phase)");
+        # otherwise the command line identifies the test script
+        test = os.environ.get("PYTEST_CURRENT_TEST") or " ".join(sys.argv)
+        return (
+            "created: " + created + "\n"
+            "host: " + gethostname() + "\n"
+            "pid: " + str(os.getpid()) + "\n"
+            "cwd: " + os.getcwd() + "\n"
+            "executable: " + sys.executable + "\n"
+            "test: " + test + "\n"
+        )
 
     def _lock_file(self, port):
         if "ECF_PORT_LOCK_DIR" in os.environ:

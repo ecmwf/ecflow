@@ -275,7 +275,6 @@ set(srcs
   core/src/ecflow/core/DState.hpp
   core/src/ecflow/core/DebugPerf.hpp
   core/src/ecflow/core/Ecf.hpp
-  core/src/ecflow/core/EcfPortLock.hpp
   core/src/ecflow/core/Enumerate.hpp
   core/src/ecflow/core/Environment.hpp
   core/src/ecflow/core/Extract.hpp

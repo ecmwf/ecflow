@@ -17,6 +17,7 @@ ecflow_add_library(
     .
   PUBLIC_LIBS
     ecflow_all
+    test_scaffold
     test_harness.base
   CONDITION
     ENABLE_TESTS
