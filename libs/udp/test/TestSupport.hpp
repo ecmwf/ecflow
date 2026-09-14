@@ -266,12 +266,12 @@ public:
     }
 };
 
-/**
- * This fixture provisions the tests with both an ecFlow server and an ecFlow UDP server.
- *
- * The ports of both servers are reserved (with lock files) for the lifetime of the fixture, so that
- * concurrent test runs do not collide.
- */
+///
+/// @brief Provisions the tests with both an ecFlow server and an ecFlow UDP server.
+///
+/// The ports of both servers are reserved (with lock files) for the lifetime of the fixture, so that
+/// concurrent test runs do not collide.
+///
 struct EnableServersFixture
 {
     EnableServersFixture()
@@ -292,6 +292,7 @@ struct EnableServersFixture
     ecf::test::MockUDPServer ecflow_udp;
 
 private:
+    /// @brief Narrows a reserved port to the port type used by the mock servers.
     static MockServer::port_t as_port(const scaffold::Port& port) {
         return static_cast<MockServer::port_t>(port.value());
     }

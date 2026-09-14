@@ -161,6 +161,7 @@ public:
     static void remove(const std::string& the_port) { fs::remove(LockFile::port_lock_path(the_port)); }
 
 private:
+    /// @brief Resolves the lock file path for the given port.
     static fs::path port_file(int port) { return LockFile::port_lock_path(ecf::convert_to<std::string>(port)); }
 };
 
