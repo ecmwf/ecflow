@@ -6,7 +6,9 @@
 #ifndef ecflow_test_scaffold_TestLog_HPP
 #define ecflow_test_scaffold_TestLog_HPP
 
+#include <iostream>
 #include <string>
+#include <system_error>
 
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
@@ -35,8 +37,12 @@ public:
     TestLog& operator=(const TestLog&) = delete;
 
     ~TestLog() {
-        // Remove the log file. Comment out for debugging
-        fs::remove(log_path_);
+        // Remove the log file (comment out for debugging); failures are reported, never thrown from a destructor
+        std::error_code ec;
+        fs::remove(log_path_, ec);
+        if (ec) {
+            std::cout << " *** Unable to remove log file " << log_path_ << " (" << ec.message() << ")" << std::endl;
+        }
 
         // Explicitly destroy log. To keep valgrind happy
         Log::destroy();

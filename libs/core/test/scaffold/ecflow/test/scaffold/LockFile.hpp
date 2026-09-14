@@ -13,6 +13,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <system_error>
 #include <unistd.h>
 
 #include "ecflow/core/Environment.hpp"
@@ -119,9 +120,19 @@ private:
         assert(fs::is_regular_file(lock_file_));
     }
 
+    ///
+    /// @brief Removes the owned lock file, if any, and relinquishes ownership.
+    ///
+    /// Failures are reported, never thrown, since this is called from the destructor and from move assignment.
+    ///
     void remove() {
         if (!lock_file_.empty()) {
-            fs::remove(lock_file_);
+            std::error_code ec;
+            fs::remove(lock_file_, ec);
+            if (ec) {
+                std::cout << " *** Unable to remove lock file " << lock_file_ << " (" << ec.message() << ")"
+                          << std::endl;
+            }
             lock_file_.clear();
         }
     }
