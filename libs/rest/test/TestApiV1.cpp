@@ -79,7 +79,7 @@ std::unique_ptr<ecf::test::scaffold::Port> reserve_available_port(int min, int m
     for (int i = 0; i < attempts; ++i) {
         auto candidate = static_cast<Port::port_t>(distrib(gen));
         try {
-            return std::unique_ptr<Port>(new Port(MakePort{}.with(SpecificPortValue{candidate}).create()));
+            return MakePort{}.with(SpecificPortValue{candidate}).create_owned();
         }
         catch (const MakePort::UnableToLockPort&) {
             // candidate is locked by another test, or already bound; try another

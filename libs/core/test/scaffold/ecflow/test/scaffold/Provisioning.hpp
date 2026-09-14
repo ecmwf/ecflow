@@ -9,6 +9,7 @@
 #include <array>
 #include <chrono>
 #include <fstream>
+#include <memory>
 #include <optional>
 #include <random>
 #include <regex>
@@ -818,6 +819,21 @@ public:
                 };
             },
             strategy_);
+    }
+
+    ///
+    /// @brief Reserves a port, as create(), and returns it with heap ownership.
+    ///
+    /// Port is neither copyable nor movable, so a reservation that must outlive the scope that made it (for example,
+    /// one held by a static or by a fixture member created later) is obtained this way.
+    ///
+    /// @return The reserved Port, released when the pointer is destroyed
+    /// @throws UnableToLockPort if no port can be reserved
+    ///
+    [[nodiscard]] std::unique_ptr<Port> create_owned() const {
+        // std::make_unique would forward the Port prvalue to a (deleted) move constructor; direct initialisation
+        // from the prvalue elides it
+        return std::unique_ptr<Port>(new Port(create())); // NOLINT(modernize-make-unique)
     }
 
     std::variant<SpecificPortValue, AutomaticPortValue> strategy_;
