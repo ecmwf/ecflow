@@ -71,6 +71,9 @@ public:
     ///
     /// @brief Checks whether the given TCP port can be bound on the local machine.
     ///
+    /// The probe binds with SO_REUSEADDR, exactly as the ecFlow server does, so that connections lingering
+    /// in TIME_WAIT (left behind by a server that has already shut down) do not make the port appear busy.
+    ///
     /// @param[in] port The TCP port number to check
     /// @return true if the port is free; false if it is occupied or if any error occurs during the check
     ///
@@ -85,6 +88,11 @@ public:
         if (ec) {
             // If a socket cannot be opened, the port is assumed to be in use.
             std::cout << "  EcfPortLock::is_port_free(" << port << ") : FALSE (unable to open socket)\n ";
+            return false;
+        }
+        a.set_option(ip::tcp::acceptor::reuse_address(true), ec);
+        if (ec) {
+            std::cout << "  EcfPortLock::is_port_free(" << port << ") : FALSE (unable to set SO_REUSEADDR)\n ";
             return false;
         }
         a.bind({ip::tcp::v4(), port}, ec);

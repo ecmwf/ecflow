@@ -44,17 +44,17 @@ BOOST_AUTO_TEST_CASE(test_locking_known_ports) {
     using namespace ecf;
     using namespace ecf::test::scaffold;
 
-    auto port_a = MakePort{}.with(SpecificPortValue{44444}).create();
-    auto port_b = MakePort{}.with(SpecificPortValue{44445}).create();
-    auto port_c = MakePort{}.with(SpecificPortValue{44446}).create();
+    auto port_a = MakePort{}.with(SpecificPortValue{24444}).create();
+    auto port_b = MakePort{}.with(SpecificPortValue{24445}).create();
+    auto port_c = MakePort{}.with(SpecificPortValue{24446}).create();
 
     BOOST_TEST_MESSAGE("Acquired port: " << port_a.value() << " at " << port_a.lock_location());
     BOOST_TEST_MESSAGE("Acquired port: " << port_b.value() << " at " << port_b.lock_location());
     BOOST_TEST_MESSAGE("Acquired port: " << port_c.value() << " at " << port_c.lock_location());
 
-    BOOST_CHECK(port_a.value() == 44444);
-    BOOST_CHECK(port_b.value() == 44445);
-    BOOST_CHECK(port_c.value() == 44446);
+    BOOST_CHECK(port_a.value() == 24444);
+    BOOST_CHECK(port_b.value() == 24445);
+    BOOST_CHECK(port_c.value() == 24446);
     BOOST_CHECK(fs::exists(port_a.lock_location()));
     BOOST_CHECK(fs::exists(port_b.lock_location()));
     BOOST_CHECK(fs::exists(port_c.lock_location()));
@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
     using namespace ecf::test::scaffold;
 
     auto port_a = MakePort{}.with(AutomaticPortValue{}).create();
-    auto port_b = MakePort{}.with(AutomaticPortValue{44444}).create();
-    auto port_c = MakePort{}.with(AutomaticPortValue{44444}).create();
+    auto port_b = MakePort{}.with(AutomaticPortValue{24444}).create();
+    auto port_c = MakePort{}.with(AutomaticPortValue{24444}).create();
 
     BOOST_TEST_MESSAGE("Acquired port: " << port_a.value() << " at " << port_a.lock_location());
     BOOST_TEST_MESSAGE("Acquired port: " << port_b.value() << " at " << port_b.lock_location());
