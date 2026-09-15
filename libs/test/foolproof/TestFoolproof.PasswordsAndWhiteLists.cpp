@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <fstream>
+#include <regex>
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -663,6 +666,136 @@ endsuite;
         // The originating user name is present in the rejection message
         BOOST_CHECK(client.reason().find("[charlie]") != std::string::npos);
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies that a refused --news request does not corrupt the server log.
+     *
+     * The --news command is logged without a trailing newline, so that the reply can append its outcome and
+     * terminate the line. Older servers logged the command before checking the credentials, and thus a refused
+     * --news left the log line open; the next record written by the server (the refusal itself) was then glued
+     * onto the end of the same line, and both records became unparseable.
+     *
+     * Requirements
+     *
+     * - Every line in the server log starts with a record marker (e.g. MSG:[hh:mm:ss d.m.yyyy]).
+     * - No line in the server log contains a record marker after the first column.
+     * - The refusal of a --news request, due to failed authentication or authorisation, is logged on its own line.
+     * - An accepted --news request is logged on its own, terminated line.
+     *
+     */
+
+    using namespace ecf::test::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto user_alice   = User{"alice", "somesecret", "rw"};
+    auto user_bob     = User{"bob", "anothersecret", "r"};  // Note: not included in whitelist file!
+    auto user_charlie = User{"charlie", "topsecret", "rw"}; // Note: not included in password file!
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto authentication = MakeTestFile{}
+                              .with(SpecificFileLocation{"custom.passwds", cwd})
+                              .with(PasswordsFile{host, port, user_alice, user_bob}.data())
+                              .create();
+
+    auto authorisation =
+        MakeTestFile{}.with(SpecificFileLocation{"custom.lists", cwd}).with(WhitelistFile{user_alice}.data()).create();
+
+    const auto log_path = cwd.path() / "custom.ecf.log";
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_LISTS", authorisation.filename()),
+                                        std::make_tuple("ECF_LOG", log_path.string())}
+                      .data())
+            .create();
+
+    const auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    { // #authorisation, request news with alice's "rw" access % [success]
+        auto client = RunClient{}.with(host).with(port).with(user_alice).with(cwd).execute(RunClient::CommandNews{});
+        BOOST_REQUIRE(client.ok());
+    }
+
+    { // #authorisation, request news with bob, who is not in the whitelist % [failure]
+        auto client = RunClient{}.with(host).with(port).with(user_bob).with(cwd).execute(RunClient::CommandNews{});
+        BOOST_REQUIRE(!client.ok());
+        BOOST_CHECK(client.reason().find("Command not accepted, due to: Authorisation (user) failed, due to: "
+                                         "Insufficient permissions") != std::string::npos);
+    }
+
+    { // ... the next record must land on its own line, not on the (refused) news line
+        auto client = RunClient{}.with(host).with(port).with(user_alice).with(cwd).execute(RunClient::CommandPing{});
+        BOOST_REQUIRE(client.ok());
+    }
+
+    { // #authentication, request news with charlie, who is not in the password file % [failure]
+        auto client = RunClient{}.with(host).with(port).with(user_charlie).with(cwd).execute(RunClient::CommandNews{});
+        BOOST_REQUIRE(!client.ok());
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
+    }
+
+    { // ... the next record must land on its own line, not on the (refused) news line
+        auto client = RunClient{}.with(host).with(port).with(user_alice).with(cwd).execute(RunClient::CommandPing{});
+        BOOST_REQUIRE(client.ok());
+    }
+
+    // Inspect the server log (flushed by the server after each request)
+
+    std::vector<std::string> lines;
+    {
+        BOOST_REQUIRE_MESSAGE(fs::exists(log_path), "The server log file exists at " << log_path);
+        std::ifstream ifs(log_path);
+        for (std::string line; std::getline(ifs, line);) {
+            if (!line.empty()) {
+                lines.push_back(line);
+            }
+        }
+        BOOST_REQUIRE(!lines.empty());
+    }
+
+    const std::regex record_marker{R"(^(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} \d{1,2}\.\d{1,2}\.\d{4}\])"};
+    const std::regex embedded_record_marker{R"(.+(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} )"};
+
+    size_t accepted_news = 0;
+    size_t refusals      = 0;
+    for (const auto& line : lines) {
+        ECF_TEST_DBG("Log line: " << line);
+        BOOST_CHECK_MESSAGE(std::regex_search(line, record_marker), "Line starts with a record marker: " << line);
+        BOOST_CHECK_MESSAGE(!std::regex_search(line, embedded_record_marker),
+                            "Line holds a single record (no embedded record marker): " << line);
+        if (line.find("--news=0 0 0") != std::string::npos) {
+            accepted_news++;
+        }
+        if (line.find("Command not accepted") != std::string::npos) {
+            refusals++;
+        }
+    }
+
+    // The accepted --news is logged on its own (terminated) line, the refused ones are never logged
+    BOOST_CHECK_EQUAL(accepted_news, 1);
+    // Both refusals are logged, each on its own line
+    BOOST_CHECK_EQUAL(refusals, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
