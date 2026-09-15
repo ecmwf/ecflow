@@ -69,6 +69,36 @@ BOOST_AUTO_TEST_CASE(test_variable_inheritance) {
     findParentVariableValue(z, "LOWER", "10");
 }
 
+BOOST_AUTO_TEST_CASE(test_variable_inheritance_from_server_state) {
+    ECF_NAME_THIS_TEST();
+
+    //
+    // Test: when a variable is not found on the node or any of its parents, the lookup falls back to the
+    // server variables. A server variable is found by presence, so that an empty value is still reported as
+    // found (with an empty value), while a variable that does not exist anywhere is reported as not found.
+    //
+
+    Defs defs;
+    task_ptr t = defs.add_suite("suite")->add_family("f")->add_task("t");
+    defs.server_state().add_or_update_user_variables("SERVER_VAR", "server_value");
+    defs.server_state().add_or_update_user_variables("EMPTY_SERVER_VAR", "");
+    defs.beginAll();
+
+    findParentVariableValue(t, "SERVER_VAR", "server_value");
+    findParentVariableValue(t, "EMPTY_SERVER_VAR", "");
+
+    std::string value = "<not set>";
+    BOOST_CHECK_MESSAGE(t->findParentUserVariableValue("EMPTY_SERVER_VAR", value),
+                        "expected findParentUserVariableValue to find the empty server variable");
+    BOOST_CHECK_MESSAGE(value.empty(), "expected an empty value but found: " << value);
+
+    value = "<not set>";
+    BOOST_CHECK_MESSAGE(!t->findParentVariableValue("UNDEFINED_VAR", value),
+                        "expected findParentVariableValue to not find an undefined variable");
+    BOOST_CHECK_MESSAGE(!t->findParentUserVariableValue("UNDEFINED_VAR", value),
+                        "expected findParentUserVariableValue to not find an undefined variable");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

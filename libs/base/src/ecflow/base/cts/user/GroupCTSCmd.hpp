@@ -21,6 +21,17 @@
 //
 class GroupCTSCmd final : public UserCmd {
 public:
+    ///
+    /// @brief Creates a group command from a ';'-separated series of commands.
+    ///
+    /// Each sub-command is parsed on its own, with the same options and rules as on the command line; the
+    /// leading '--' of a sub-command is optional, and an option of the sub-command (such as --evaluate) may
+    /// follow its arguments.
+    ///
+    /// @param[in] list_of_commands the sub-commands, separated by ';'
+    /// @param[in] clientEnv the client environment
+    /// @throws std::runtime_error when a sub-command is not recognised or rejects its arguments
+    ///
     GroupCTSCmd(const std::string& list_of_commands, AbstractClientEnv* clientEnv);
     explicit GroupCTSCmd(Cmd_ptr cmd)
         : cli_(false) {

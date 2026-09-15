@@ -1132,10 +1132,12 @@ const char* CtsApi::edit_script_arg() {
     return "edit_script";
 }
 
-std::vector<std::string>
-CtsApi::query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute) {
+std::vector<std::string> CtsApi::query(const std::string& query_type,
+                                       const std::string& path_to_attribute,
+                                       const std::string& attribute,
+                                       bool evaluate) {
     std::vector<std::string> retVec;
-    retVec.reserve(3);
+    retVec.reserve(4);
     std::string ret = "--query=";
     ret += query_type;
     retVec.push_back(ret);
@@ -1155,8 +1157,14 @@ CtsApi::query(const std::string& query_type, const std::string& path_to_attribut
     else if (query_type == "state" || query_type == "dstate") {
         retVec.push_back(path_to_attribute);
     }
+    if (evaluate) {
+        retVec.push_back(std::string("--") + query_evaluate_arg());
+    }
     return retVec;
 }
 const char* CtsApi::queryArg() {
     return "query";
+}
+const char* CtsApi::query_evaluate_arg() {
+    return "evaluate";
 }

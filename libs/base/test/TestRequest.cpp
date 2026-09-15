@@ -229,6 +229,8 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TODAY, "10:00 20:00 00:30")));
     cmd_vec.push_back(Cmd_ptr(new PlugCmd()));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("event", "/suiteName/t1", "event", "")));
+    cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));
+    cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", true)));
 
     std::shared_ptr<GroupCTSCmd> theGroupCmd = std::make_shared<GroupCTSCmd>();
     theGroupCmd->addChild(Cmd_ptr(new ServerVersionCmd()));
@@ -448,6 +450,42 @@ BOOST_AUTO_TEST_CASE(test_all_request_persistence_text) {
                                                                // at end of scope
 
     test_persistence(fixtureDefsFile());
+}
+
+BOOST_AUTO_TEST_CASE(test_query_evaluate_request_persistence) {
+    ECF_NAME_THIS_TEST();
+
+    TestLog test_log("test_query_evaluate_request_persistence.log");
+
+    //
+    // Test: the evaluate flag of a QueryCmd survives a round trip through the wire format, is only present in
+    // the serialised text when set, and distinguishes two otherwise identical requests.
+    //
+
+    ClientToServerRequest evaluated;
+    evaluated.set_cmd(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", true)));
+    ClientToServerRequest raw;
+    raw.set_cmd(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));
+
+    std::string evaluated_text;
+    ecf::save_as_string(evaluated_text, evaluated);
+    std::string raw_text;
+    ecf::save_as_string(raw_text, raw);
+
+    BOOST_CHECK_MESSAGE(evaluated_text.find("evaluate_") != std::string::npos,
+                        "expected the serialised request to carry the evaluate flag: " << evaluated_text);
+    BOOST_CHECK_MESSAGE(raw_text.find("evaluate_") == std::string::npos,
+                        "expected the serialised request to omit an unset evaluate flag: " << raw_text);
+
+    ClientToServerRequest restored_evaluated;
+    ecf::restore_from_string(evaluated_text, restored_evaluated);
+    ClientToServerRequest restored_raw;
+    ecf::restore_from_string(raw_text, restored_raw);
+
+    BOOST_CHECK_MESSAGE(restored_evaluated == evaluated, "expected the evaluated request to survive a round trip");
+    BOOST_CHECK_MESSAGE(restored_raw == raw, "expected the raw request to survive a round trip");
+    BOOST_CHECK_MESSAGE(!(restored_evaluated == raw), "expected requests differing only in evaluate to differ");
+    BOOST_CHECK_MESSAGE(!(restored_raw == evaluated), "expected requests differing only in evaluate to differ");
 }
 
 BOOST_AUTO_TEST_CASE(test_request_authenticate) {

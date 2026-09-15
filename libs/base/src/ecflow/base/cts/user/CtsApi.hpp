@@ -202,8 +202,22 @@ public:
                                                 const std::string& path_to_script = "",
                                                 bool create_alias                 = false,
                                                 bool run                          = true);
-    static std::vector<std::string>
-    query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute);
+    ///
+    /// @brief Builds the command line tokens of a --query request.
+    ///
+    /// @param[in] query_type the kind of query, one of [state | dstate | repeat | event | meter | limit |
+    ///                       limit_max | label | variable | trigger]
+    /// @param[in] path_to_attribute the path to the node holding the attribute ('/' for the server itself)
+    /// @param[in] attribute the attribute name, the trigger expression, or 'next' | 'prev' for a repeat; may be
+    ///                      empty
+    /// @param[in] evaluate when true, appends the --evaluate option as a separate trailing token; only meaningful
+    ///                     for query type 'variable'
+    /// @return the tokens, starting with "--query=<query_type>"
+    ///
+    static std::vector<std::string> query(const std::string& query_type,
+                                          const std::string& path_to_attribute,
+                                          const std::string& attribute,
+                                          bool evaluate = false);
 
     // Only to be used in Cmd
     static const char* server_version_arg();
@@ -275,6 +289,14 @@ public:
     static const char* alterArg();
     static const char* edit_script_arg();
     static const char* queryArg();
+
+    ///
+    /// @brief Returns the name of the --evaluate option, a modifier of --query that is only valid with query
+    ///        type 'variable'.
+    ///
+    /// @return the option name, without the leading dashes
+    ///
+    static const char* query_evaluate_arg();
 };
 
 #endif /* ecflow_base_cts_user_CtsApi_HPP */

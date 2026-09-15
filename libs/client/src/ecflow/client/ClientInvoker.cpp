@@ -1597,11 +1597,13 @@ int ClientInvoker::plug(const std::string& sourcePath, const std::string& destPa
 
 int ClientInvoker::query(const std::string& query_type,
                          const std::string& path_to_attribute,
-                         const std::string& attribute) {
+                         const std::string& attribute,
+                         bool evaluate) {
     if (testInterface_) {
-        return invoke(CtsApi::query(query_type, path_to_attribute, attribute));
+        return invoke(CtsApi::query(query_type, path_to_attribute, attribute, evaluate));
     }
-    return invoke(std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path()));
+    return invoke(
+        std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path(), evaluate));
 }
 
 // ======================================================================================================

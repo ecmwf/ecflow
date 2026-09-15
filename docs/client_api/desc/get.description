@@ -13,7 +13,7 @@ both of the examples, the output is fully parse-able
 
 .. code-block:: shell
 
-  ecflow_client --get=/s1  
+  ecflow_client --get=/s1
 
 To write the node tree **state** to standard output please use group
 option, i.e.

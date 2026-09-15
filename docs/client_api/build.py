@@ -243,7 +243,9 @@ def render_single_page_rst(manifest, name):
     description_header = "" if not description else f"\n.. rubric:: {description_title}\n\n"
 
     output = render_help_output(manifest, name)
-    output = '\n'.join(['   ' + line for line in output.split('\n')]) + '\n' # prefix each line of the output with the necessary indentation
+    # prefix each line of the output with the necessary indentation; blank lines stay empty, so that the
+    # generated page carries no trailing whitespace
+    output = '\n'.join([('   ' + line) if line else '' for line in output.split('\n')]) + '\n'
     output_title = f"Output of :code:`--help={name}`"
     output_header = f"\n.. rubric:: {output_title}\n\n"
 
@@ -286,7 +288,7 @@ def render_index_rst():
 .. _ecflow_cli:
 
 {title}
-{"/" * len(title)} 
+{"/" * len(title)}
 
 The :term:`ecFlow command line interface (CLI) <ecflow_client>` is provided by the :code:`ecflow_client` executable.
 A large number of commands/options enabled by the :ref:`ecflow_ui` are also available as CLI commands.
@@ -322,7 +324,7 @@ and ``--help=defs/<item>`` respectively.
 
 .. toctree::
     :maxdepth: 1
-    
+
     desc/cli_option_overriding
     desc/cli_scripting_in_batch
     desc/using_backup_servers

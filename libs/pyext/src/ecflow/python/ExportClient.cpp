@@ -93,13 +93,16 @@ std::string ClientInvoker_server_version(ClientInvoker* self) {
 /// @param query_type The type of query (e.g. `"state"`, `"dstate"`, `"repeat"`, `"trigger"`).
 /// @param path_to_attribute The absolute node path, possibly including the attribute name.
 /// @param attribute The attribute name, if not encoded in \p path_to_attribute.
+/// @param evaluate Only valid for query type `"variable"`: when true, the variable value is returned with all
+///                 variable references (e.g. `%VAR%`) resolved, instead of as stored.
 /// @return A reference to the server reply string.
 ///
 const std::string& ClientInvoker_query(ClientInvoker* self,
                                        const std::string& query_type,
                                        const std::string& path_to_attribute,
-                                       const std::string& attribute) {
-    self->query(query_type, path_to_attribute, attribute);
+                                       const std::string& attribute,
+                                       bool evaluate) {
+    self->query(query_type, path_to_attribute, attribute, evaluate);
     return self->get_string();
 }
 
@@ -1255,6 +1258,7 @@ void export_Client(py::module& m) {
              py::arg("query_type"),
              py::arg("path_to_attribute"),
              py::arg("attribute") = std::string{},
+             py::arg("evaluate")  = false,
              py::return_value_policy::reference,
              ClientDoc::query())
 
