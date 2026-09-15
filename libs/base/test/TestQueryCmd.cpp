@@ -1107,6 +1107,29 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unresolved_server_va
     BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/", "SERVER_REF"), std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_reference_to_empty_server_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a node variable referencing a server variable that exists with an empty value is resolved (the
+    // reference is replaced by the empty value), rather than reported as unresolved. The empty server variable
+    // can also be queried directly through a node path.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("EMPTY_SERVER_VAR", "");
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "prefix%EMPTY_SERVER_VAR%suffix");
+
+    std::string res = "<not set>";
+    BOOST_CHECK_NO_THROW(res = invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"));
+    BOOST_CHECK_MESSAGE(res == "prefixsuffix", "expected 'prefixsuffix' but found: " << res);
+
+    res = "<not set>";
+    BOOST_CHECK_NO_THROW(res = invoke_query(defs, "variable", "/suite/f/t1", "EMPTY_SERVER_VAR"));
+    BOOST_CHECK_MESSAGE(res.empty(), "expected an empty value but found: " << res);
+}
+
 BOOST_AUTO_TEST_CASE(test_query_evaluate_fails_for_non_variable_query_type) {
     ECF_NAME_THIS_TEST();
     TestLog test_log("test_query_cmd.log");
