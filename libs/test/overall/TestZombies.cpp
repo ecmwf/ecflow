@@ -63,8 +63,24 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_Zombies)
 
 enum WaitType { SINGLE, ALL };
-static int timeout      = 32;
-static int NUM_OF_TASKS = 5;
+
+// Time until a blocked zombie's next retry (see ClientInvoker::NEXT_HOST_POLL_PERIOD, in release builds)
+static const int ZOMBIE_RETRY_PERIOD = 30;
+static const int NUM_OF_TASKS        = 5;
+static const int SLEEPTIME           = 5; // longer than the default, to allow for the creation of zombies
+
+// Used when waiting for tasks to change state, or for zombies to be created or acted upon.
+// Must cover:
+//  - up to ZOMBIE_RETRY_PERIOD, plus
+//  - 1 or 2 seconds for the polling in the wait loop
+static const int zombie_action_timeout = ZOMBIE_RETRY_PERIOD + 2;
+
+// Used when waiting for zombies to complete and be removed after a user action (fob, adopt, ...).
+// Must cover:
+//  - up to ZOMBIE_RETRY_PERIOD, plus
+//  - SLEEPTIME, before the zombie sends --complete, plus
+//  - 1 or 2 seconds for the polling in the wait loop
+static const int zombie_termination_timeout = ZOMBIE_RETRY_PERIOD + SLEEPTIME + 2;
 
 static std::string dump_tasks(const std::vector<Task*>& tasks) {
     std::ostringstream ss;
@@ -483,8 +499,7 @@ static void wait_for_no_zombies(int max_time_to_wait) {
 
 static void populate_defs(Defs& theDefs, const std::string& suite_name) {
     suite_ptr suite = theDefs.add_suite(suite_name);
-    suite->addVariable(
-        Variable::new_variable("SLEEPTIME", "5")); // sleep for longer than normal to allow for creation of zombies
+    suite->addVariable(Variable::new_variable("SLEEPTIME", ecf::convert_to<std::string>(SLEEPTIME)));
     family_ptr family = suite->add_family("f");
     for (int i = 0; i < NUM_OF_TASKS; i++) {
         family->add_task("t" + ecf::convert_to<std::string>(i));
@@ -502,7 +517,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
     TestFixture::client().zombieGet();
     if (!TestFixture::client().server_reply().zombies().empty()) {
         (void)ZombieUtil::do_zombie_user_action(
-            ZombieCtrlAction::REMOVE, TestFixture::client().server_reply().zombies().size(), timeout);
+            ZombieCtrlAction::REMOVE, TestFixture::client().server_reply().zombies().size(), zombie_action_timeout);
     }
 
     if (ecf_debug_enabled) {
@@ -517,7 +532,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
                           false /* do not wait for test to finish */);
 
     // Wait for a single task to reach state submitted or active, before creating zombies
-    waitForTaskStates(SINGLE, NState::SUBMITTED, NState::ACTIVE, timeout);
+    waitForTaskStates(SINGLE, NState::SUBMITTED, NState::ACTIVE, zombie_action_timeout);
 
     // ******************************************************************************
     // IMPORTANT: If Job generation takes to long i.e >= next poll then it will TIMEOUT.
@@ -609,7 +624,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
     }
 
     /// When jobs try to communicate with server via child commands they will block the Child commands
-    if (waitForZombieCreation(number_submitted_or_active, timeout)) {
+    if (waitForZombieCreation(number_submitted_or_active, zombie_action_timeout)) {
 
         /// Check we have zombies and they are of type USER
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -701,18 +716,19 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation) {
     // *Note* in test environment the client invoker will try connecting to the server
     // ****** for 5 seconds, after that an error is returned. This will cause the
     // ****** job to abort.
-    wait_for_zombies_of_type(Child::PATH, NUM_OF_TASKS, timeout);
+    wait_for_zombies_of_type(Child::PATH, NUM_OF_TASKS, zombie_action_timeout);
 
     // Fob all the zombies. This will UNBLOCK the child commands allowing them to complete
     // Fobing does *NOT* alter node tree state, however COMPLETE should auto delete the zombie
     // Hence after this command, the number of fobed zombies may *NOT* be the same
     // as the number of tasks. Since the fobed zombies are auto deleted when a complete
     // child command is received.
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Wait for zombies to be deleted in the server
-    if (!wait_for_zombie_termination(timeout)) {
+    if (!wait_for_zombie_termination(zombie_termination_timeout)) {
         remove_stale_zombies();
     }
 
@@ -749,11 +765,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
     // Hence after this command, the number of fobed zombies may *NOT* be the same
     // as the number of tasks. Since the fobed zombies are auto deleted when a complete
     // child command is received.
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Wait for zombies to be deleted in the server
-    if (!wait_for_zombie_termination(timeout)) {
+    if (!wait_for_zombie_termination(zombie_termination_timeout)) {
         remove_stale_zombies(); // see notes above
     }
 
@@ -784,13 +801,14 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fail) {
     check_at_least_one_zombie();
 
     // Fail all the zombies. This will UNBLOCK and terminate the child commands allowing them to finish
-    int no_of_failed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FAIL, NUM_OF_TASKS, timeout);
+    int no_of_failed_zombies =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FAIL, NUM_OF_TASKS, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(no_of_failed_zombies > 0, "*error* Expected > 0 Failed zombies but found none");
 
     check_at_least_one_zombie();
 
     // Wait for zombies to abort, then remove all the zombies
-    wait_for_zombies_child_cmd(ALL, ecf::Child::ABORT, timeout, true /* delete */);
+    wait_for_zombies_child_cmd(ALL, ecf::Child::ABORT, zombie_action_timeout, true /* delete */);
 
     check_expected_no_of_zombies(0);
     std::cout << timer.duration() << "s\n";
@@ -819,7 +837,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
     /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
     /// Previously we had tried again, but fix for ECFLOW-1216, means we now do not try again,hence allow abort
-    BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL, NState::COMPLETE, NState::ABORTED, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL, NState::COMPLETE, NState::ABORTED, zombie_action_timeout),
                           "*error* Expected non-zombie tasks to complete or abort");
 
     // Note: if when we started to create zombies and some tasks are still queued *NOT* all will be zombies.
@@ -831,11 +849,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
     // child command is received.
     //
     /// When we have two sets of completes, we just fob, automatically. See TaskCmd::authenticate
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, no_of_zombies, timeout);
+    int no_of_fobed_zombies =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, no_of_zombies, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
-    if (!wait_for_zombie_termination(timeout)) {
+    if (!wait_for_zombie_termination(zombie_termination_timeout)) {
         remove_stale_zombies(); // see notes above
     }
 
@@ -867,7 +886,7 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr) {
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
     /// Creating zombies by queuing submitted/active tasks, increments try number of the second set.
     /// This avoid text file busy,(i.e by using begin/requeue creating a job file, whilst its already running)
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected non-zombie tasks to complete");
 
     check_at_least_one_zombie();
@@ -879,7 +898,7 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr) {
     TestFixture::client().alter("/" + suite_name, "add", "zombie", "user:fob::");
 
     // Fobbing causes auto deletion of zombies, when the Child complete is reached
-    if (!wait_for_zombie_termination(timeout)) {
+    if (!wait_for_zombie_termination(zombie_termination_timeout)) {
         remove_stale_zombies(); // see notes above
     }
 
@@ -910,23 +929,24 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_adopt) {
     create_and_start_test(suite_name, "queued", true /* add delay before init */);
 
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected non-zombie tasks to complete");
 
     check_at_least_one_zombie();
 
     /// Adopt all the zombies. This will UNBLOCK the child commands allowing them to finish
     /// This test below fail on AIX, its too fast , task's may already be adopted and hence do not fail
-    int no_of_adopted_zombied = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::ADOPT, NUM_OF_TASKS, timeout);
+    int no_of_adopted_zombied =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::ADOPT, NUM_OF_TASKS, zombie_action_timeout);
     if (ecf_debug_enabled) {
         std::cout << "   found " << no_of_adopted_zombied << " zombies for adoption\n";
     }
 
     /// The blocked zombies are free, start with blocked init command
-    (void)waitForTaskState(SINGLE, NState::ACTIVE, timeout);
+    (void)waitForTaskState(SINGLE, NState::ACTIVE, zombie_action_timeout);
 
     /// Now wait for all tasks to complete
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected zombie tasks to complete");
 
     remove_stale_zombies(); // see notes above
@@ -953,7 +973,7 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr_for_adopt) {
     create_and_start_test(suite_name, "queued", true /* add a delay before init */);
 
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected non-zombie tasks to complete");
 
     // expected 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
@@ -971,10 +991,10 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr_for_adopt) {
 
     /// The blocked zombies are free, start with blocked init command
     /// This may fail on AIX, its too fast , task's may already be complete, dont fail
-    (void)waitForTaskState(SINGLE, NState::ACTIVE, timeout);
+    (void)waitForTaskState(SINGLE, NState::ACTIVE, zombie_action_timeout);
 
     /// Now wait for all tasks to complete. ** They may be complete from last process set **
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected all zombie task to complete after adopt");
 
     remove_stale_zombies(); // see notes above
@@ -1004,10 +1024,10 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_complete) {
     check_at_least_one_zombie();
 
     // Fob all the zombies child commands allowing them to finish
-    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, zombie_action_timeout);
 
     // Wait for zombies to complete, they should get removed automatically
-    wait_for_no_zombies(timeout);
+    wait_for_no_zombies(zombie_termination_timeout);
 
     std::cout << timer.duration() << "s\n";
 }
@@ -1031,10 +1051,10 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_abort) {
     check_at_least_one_zombie();
 
     // Fob all the zombies child commands allowing them to finish
-    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, zombie_action_timeout);
 
     // Wait for zombies to complete, they should get removed automatically
-    wait_for_no_zombies(timeout);
+    wait_for_no_zombies(zombie_termination_timeout);
 
     std::cout << timer.duration() << "s\n";
 }
@@ -1081,7 +1101,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_inheritance) {
     }
 
     // Wait for zombies to complete, they should get removed automatically
-    wait_for_no_zombies(timeout);
+    wait_for_no_zombies(zombie_termination_timeout);
 
     std::cout << timer.duration() << "s\n";
 }
@@ -1138,17 +1158,17 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
 
     // kill all the zombies, i.e kill -15 on the script
     // This will be trapped by the signal and hence will call abort
-    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::KILL, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::KILL, NUM_OF_TASKS, zombie_action_timeout);
 
     // wait for kill zombies. This should eventually lead to process terminating
-    int killed = wait_for_killed_zombies(NUM_OF_TASKS, timeout);
+    int killed = wait_for_killed_zombies(NUM_OF_TASKS, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(killed > 0, "*error* Expected " << NUM_OF_TASKS << " killed ");
 
     {
         // wait for process to be killed: killing is a separate process, we could well
         // have got to the complete, before the process is killed.
         // Once the complete is fobed it terminate the process.
-        AssertTimer assertTimer(timeout, false); // Bomb out after n seconds, fall back if test fail
+        AssertTimer assertTimer(zombie_action_timeout, false); // Bomb out after n seconds, fall back if test fail
         while (true) {
             int completed = 0;
             int aborted   = 0;
@@ -1179,7 +1199,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
     {
         bool task_became_blocked = false;
         // wait for process to be die
-        AssertTimer assertTimer(timeout, false); // Bomb out after n seconds, fall back if test fail
+        AssertTimer assertTimer(zombie_action_timeout, false); // Bomb out after n seconds, fall back if test fail
         while (true) {
             TestFixture::client().zombieGet();
             std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -1204,9 +1224,9 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
     }
 
     // remove the killed zombies
-    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::REMOVE, NUM_OF_TASKS, timeout, false);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::REMOVE, NUM_OF_TASKS, zombie_action_timeout, false);
 
-    wait_for_no_zombies(timeout);
+    wait_for_no_zombies(zombie_termination_timeout);
 
     std::cout << timer.duration() << "s\n";
 }
@@ -1221,7 +1241,7 @@ static void remove_all_user_zombies() {
     }
 
     int removed_count = 0;
-    AssertTimer assertTimer(timeout, false); // Bomb out after n seconds, fall back if test fail
+    AssertTimer assertTimer(zombie_action_timeout, false); // Bomb out after n seconds, fall back if test fail
     while (removed_count < NUM_OF_TASKS) {
         TestFixture::client().zombieGet();
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -1261,20 +1281,21 @@ BOOST_AUTO_TEST_CASE(test_ecf_zombie_type_creation) {
     create_and_start_test(suite_name, "queued", true /* add a delay before init */);
 
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, timeout),
+    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL, NState::COMPLETE, zombie_action_timeout),
                           "*error* Expected non-zombie tasks to complete");
 
     // wait and remove all *USER* zombies.
     remove_all_user_zombies();
 
     // wait of at least *ONE* zombie of type *ECF*
-    wait_for_zombies_of_type(Child::ECF, NUM_OF_TASKS, timeout);
+    wait_for_zombies_of_type(Child::ECF, NUM_OF_TASKS, zombie_action_timeout);
 
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies =
+        ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, zombie_action_timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
-    if (!wait_for_zombie_termination(timeout)) {
+    if (!wait_for_zombie_termination(zombie_termination_timeout)) {
         remove_stale_zombies(); // see notes above
     }
 
