@@ -13,6 +13,7 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -118,16 +119,7 @@ ClientToServerCmd::time_duration_t CSyncCmd::timeout() const {
 
 void CSyncCmd::do_log(AbstractServer* as) const {
     if (api_ == CSyncCmd::NEWS) {
-
-        /// Log without adding a new line, to the log file
-        /// The SNewsCmd will append additional debug and then add new line
-        std::string ss;
-        print(ss);                           // Populate the stream with command details:
-        if (!log_no_newline(Log::MSG, ss)) { // log command without adding newline
-            // problems with opening or writing to log file, warn users, ECFLOW-536
-            as->defs()->flag().set(ecf::Flag::LOG_ERROR);
-            as->defs()->server_state().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
-        }
+        // Logged by doHandleRequest(), once the outcome is known
         return;
     }
 
@@ -142,7 +134,19 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
     switch (api_) {
         case CSyncCmd::NEWS: {
             as->update_stats().news_++;
-            return PreAllocatedReply::news_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            auto reply =
+                PreAllocatedReply::news_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+
+            // Log the command together with the outcome, as a single record
+            std::string ss;
+            print(ss);
+            ss += dynamic_cast<const SNewsCmd&>(*reply).annotation();
+            if (!log(Log::MSG, ss)) {
+                // problems with opening or writing to log file, warn users, ECFLOW-536
+                as->defs()->flag().set(ecf::Flag::LOG_ERROR);
+                as->defs()->server_state().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
+            }
+            return reply;
         }
         case CSyncCmd::SYNC: {
             as->update_stats().sync_++;

@@ -59,7 +59,7 @@ public:
 
     /// returns true if the handle was created, or suites added or removed from it
     /// The handle change flag is reset when create_defs is called
-    bool handle_changed(unsigned int client_handle);
+    bool handle_changed(unsigned int client_handle) const;
 
     /// Collect all the state changes, so that only small subset is returned to client
     /// When nodes are added/deleted we use the modify_change_no_, in this case
@@ -80,8 +80,9 @@ public:
     defs_ptr create_defs(unsigned int client_handle, defs_ptr server_defs) const;
 
     /// Used to determine the change, will throw if handle not found
-    void
-    max_change_no(unsigned int client_handle, unsigned int& max_state_change_no, unsigned int& max_modify_change_no);
+    void max_change_no(unsigned int client_handle,
+                       unsigned int& max_state_change_no,
+                       unsigned int& max_modify_change_no) const;
 
     /// Accessor
     const std::vector<ecf::ClientSuites>& clientSuites() const { return clientSuites_; }

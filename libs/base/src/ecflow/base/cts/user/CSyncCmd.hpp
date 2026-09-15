@@ -49,8 +49,14 @@ public:
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
-    /// Custom handling of command logging to add additional debug on same line
-    /// makes it easier to debug errors in syncing.
+    ///
+    /// @brief Logs the command, except for NEWS, which is logged by doHandleRequest() together with its outcome.
+    ///
+    /// The NEWS record reads `--news=<handle> <state> <modify> :<user>@<host> [<annotation>]`, where the annotation
+    /// is the justification produced by SNewsCmd::init(). It can only be written once the reply has been built, so
+    /// for NEWS the record is written after the request is handled rather than before, as for every other command.
+    /// The request is read-only, so nothing is lost if the server dies while handling it.
+    ///
     void do_log(AbstractServer*) const override;
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
