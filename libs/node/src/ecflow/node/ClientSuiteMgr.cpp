@@ -160,7 +160,7 @@ bool ClientSuiteMgr::valid_handle(unsigned int client_handle) const {
 }
 
 /// returns true if the handle was created, or suites added or removed from it
-bool ClientSuiteMgr::handle_changed(unsigned int client_handle) {
+bool ClientSuiteMgr::handle_changed(unsigned int client_handle) const {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         if (clientSuites_[i].handle() == client_handle) {
@@ -203,7 +203,7 @@ defs_ptr ClientSuiteMgr::create_defs(unsigned int client_handle, defs_ptr server
 
 void ClientSuiteMgr::max_change_no(unsigned int client_handle,
                                    unsigned int& max_state_change_no,
-                                   unsigned int& max_modify_change_no) {
+                                   unsigned int& max_modify_change_no) const {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         if (clientSuites_[i].handle() == client_handle) {

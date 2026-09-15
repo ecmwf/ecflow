@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_log) {
     BOOST_CHECK_MESSAGE(fs::exists(path), "log file " << path << " not created \n");
 }
 
-BOOST_AUTO_TEST_CASE(test_log_append) {
+BOOST_AUTO_TEST_CASE(test_log_flusher) {
     ECF_NAME_THIS_TEST();
 
     std::string path = getLogPath();
