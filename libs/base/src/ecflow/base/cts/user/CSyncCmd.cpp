@@ -127,8 +127,6 @@ void CSyncCmd::do_log(AbstractServer* as) const {
 }
 
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
-    // LogTimer timer(" CSyncCmd::doHandleRequest");
-
     // If no defs not loaded, SSyncCmd and SNewsCmd do nothing. This is a valid state, hence do not error for this
     // request
     switch (api_) {

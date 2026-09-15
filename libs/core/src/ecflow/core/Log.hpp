@@ -27,12 +27,8 @@
 ///   enough because of file caching. This matters for tests, which clear and copy the log file between runs, and
 ///   for the log server, which reads the file while the server writes it.
 ///
-/// Three writers exist:
-/// - Log::log writes a complete record
-/// - Log::log_no_newline writes a record but leaves the line open
-/// - Log::append closes it with additional text
-/// The last two together allow a command to be logged before its outcome is known, and the outcome to be added once
-/// it is (see CSyncCmd and SNewsCmd). The obligation to close the line rests entirely with the caller.
+/// There is a single writer, Log::log, which always writes complete, terminated records. Nothing can leave a line
+/// open, so a record can never be glued onto a previous one.
 ///
 
 #include <fstream>
@@ -40,8 +36,6 @@
 #include <mutex>
 #include <string>
 #include <vector>
-
-#include "ecflow/core/Timer.hpp"
 
 namespace ecf {
 
@@ -88,9 +82,8 @@ public:
     ///
     /// @brief Flushes, closes and destroys the singleton.
     ///
-    /// Safe to call when no instance exists. After this call Log::instance() returns null, and the free functions
-    /// ecf::log, ecf::log_no_newline and ecf::log_append fall back to standard output (when LogToCout is active) or
-    /// discard their message.
+    /// Safe to call when no instance exists. After this call Log::instance() returns null, and the free function
+    /// ecf::log falls back to standard output (when LogToCout is active) or discards its message.
     ///
     static void destroy();
 
@@ -118,7 +111,7 @@ public:
     ///
     /// When @p message contains newlines it is split into one record per line, each with the same marker and time
     /// stamp; empty lines are dropped, so a message consisting only of newlines writes nothing (see
-    /// LogImpl::do_log).
+    /// LogImpl::log).
     ///
     /// The time stamp is not the time of the write. MSG, LOG and OTH records carry the cached *request time*, the
     /// stamp last set by cache_time_stamp(), so that every record of one request carries the same stamp; ERR, WAR
@@ -140,37 +133,6 @@ public:
     ///         written, and the original record has been written again.
     ///
     bool log(LogType, const std::string& message);
-
-    ///
-    /// @brief Writes a record but leaves the line open, i.e. without a terminating newline.
-    ///
-    /// Intended for a record whose outcome is not yet known: the caller writes the command with this function and
-    /// completes the line later with append(). Nothing else must be written to the log in between, or the next
-    /// record is glued onto the open line and both become unparseable; the caller is responsible for reaching
-    /// append() on every path, including error paths.
-    ///
-    /// The line is left open only when @p message contains no newline. When it does, the multi-line behaviour of
-    /// log() applies unchanged: every record, the last one included, is terminated, and no line is left open (see
-    /// LogImpl::do_log).
-    ///
-    /// The time stamp rules are those of log().
-    ///
-    /// @param[in] lt      The record marker.
-    /// @param[in] message The record body.
-    /// @return true when the write succeeded; false on failure, with the same recovery as log().
-    ///
-    bool log_no_newline(LogType, const std::string& message);
-
-    ///
-    /// @brief Appends raw text to the current line and terminates it with a newline.
-    ///
-    /// No marker and no time stamp are written, so this function is only meaningful directly after a
-    /// log_no_newline() on the same request. Called on a closed line, it produces a line with no record marker.
-    ///
-    /// @param[in] message The text appended to the open line; may be empty, in which case only the newline is written.
-    /// @return true when the write succeeded; false on failure, with the same recovery as log().
-    ///
-    bool append(const std::string& message);
 
     ///
     /// @brief Sets the time stamp reused by subsequent MSG, LOG and OTH records to the current time.
@@ -315,32 +277,6 @@ public:
 };
 
 ///
-/// @brief Logs the time elapsed in a scope, on destruction.
-///
-/// The record is written with the DBG marker, as ` <msg> <seconds>`. Does nothing when no Log instance exists.
-///
-class LogTimer {
-public:
-    ///
-    /// @brief Starts the timer.
-    ///
-    /// @param[in] msg Label written before the elapsed time; must outlive this object.
-    ///
-    explicit LogTimer(const char* msg)
-        : msg_(msg) {}
-
-    // Disable copy (and move) semantics
-    LogTimer(const LogTimer&)                  = delete;
-    const LogTimer& operator=(const LogTimer&) = delete;
-
-    ~LogTimer();
-
-private:
-    const char* msg_;
-    DurationTimer timer_;
-};
-
-///
 /// @brief Owns the open log file and performs the actual writes.
 ///
 /// A LogImpl is created by Log when the file must be open and destroyed when the file must be closed, so that
@@ -348,7 +284,7 @@ private:
 /// always possible. The class performs no locking and no failure recovery; both are the responsibility of Log.
 ///
 /// The file is opened in append mode, so a LogImpl created after another one was destroyed continues at the end
-/// of the file, including on a line that was left open by log_no_newline().
+/// of the file.
 ///
 /// @invariant Between create_time_stamp() calls, every record written with MSG, LOG or OTH carries the same time
 ///            stamp; writing an ERR, WAR or DBG record counts as a create_time_stamp() call.
@@ -373,32 +309,26 @@ public:
     ~LogImpl();
 
     ///
-    /// @brief Writes a complete record, terminated by a newline.
+    /// @brief Writes the marker, the time stamp and the message, as one or more terminated records.
+    ///
+    /// The time stamp is refreshed to the current time for ERR, WAR and DBG, and when none has been cached yet;
+    /// otherwise the cached one is reused, whatever its age. A refresh replaces the cache, so it also affects the
+    /// MSG, LOG and OTH records written afterwards.
+    ///
+    /// A message without newlines is written as a single record, `XXX:[stamp] <message>`. A message with newlines
+    /// is split at every newline, using ecf::algorithm::split_at, and each piece is written as a separate record
+    /// with the same marker and time stamp. The split drops empty pieces and ignores leading and trailing newlines,
+    /// so
+    ///   - `"a\n"` yields one record,
+    ///   - `"a\n\nb"` yields two records with no blank line between them,
+    ///   - and, a message consisting only of newlines yields no output at all
+    ///     (the write counter is still incremented, so the next flush() flushes the stream).
     ///
     /// @param[in] lt      The record marker.
-    /// @param[in] message The record body; when it contains newlines, every non-empty line is written as a
-    ///                    separate record (see do_log()).
+    /// @param[in] message The record body, possibly spanning several lines.
     /// @return true when the stream is still good after the write.
     ///
-    bool log(Log::LogType lt, const std::string& message) { return do_log(lt, message, true); }
-
-    ///
-    /// @brief Writes a record without a terminating newline.
-    ///
-    /// @param[in] lt      The record marker.
-    /// @param[in] message The record body. Only a message without newlines leaves the line open; one with newlines
-    ///                    is written as terminated records, exactly as by log() (see do_log()).
-    /// @return true when the stream is still good after the write.
-    ///
-    bool log_no_newline(Log::LogType lt, const std::string& message) { return do_log(lt, message, false); }
-
-    ///
-    /// @brief Writes raw text followed by a newline, with no marker and no time stamp.
-    ///
-    /// @param[in] message The text to write; may be empty.
-    /// @return true when the stream is still good after the write.
-    ///
-    bool append(const std::string& message);
+    bool log(Log::LogType lt, const std::string& message);
 
     ///
     /// @brief Sets the cached time stamp to the current time.
@@ -433,36 +363,6 @@ public:
     const std::string& log_open_error() const { return log_open_error_; }
 
 private:
-    ///
-    /// @brief Writes the marker, the time stamp and the message, as one or more records.
-    ///
-    /// The time stamp is refreshed to the current time for ERR, WAR and DBG, and when none has been cached yet;
-    /// otherwise the cached one is reused, whatever its age. A refresh replaces the cache, so it also affects the
-    /// MSG, LOG and OTH records written afterwards. The message is then written in one of two ways, and the two are
-    /// not symmetric:
-    ///
-    /// - A message without newlines is written as a single record, `XXX:[stamp] <message>`, followed by a newline
-    ///   only when @p newline is true. This is the only path that can leave a line open.
-    ///
-    /// - A message with newlines is split at every newline, using ecf::algorithm::split_at, and each piece is
-    ///   written as a separate record with the same marker and time stamp. Every piece, the last one included, is
-    ///   terminated by a newline; @p newline is ignored on this path.
-    ///   The split drops empty pieces and ignores leading and trailing newlines, so
-    ///     - `"a\n"` yields one record,
-    ///     - `"a\n\nb"` yields two records with no blank line between them,
-    ///     - and, a message consisting only of newlines yields no output at all
-    ///       (the write counter is still incremented, so the next flush() flushes the stream).
-    ///
-    /// In practice the only caller passing @p newline as false, CSyncCmd, always passes a single-line message, so
-    /// the asymmetry is not exercised; it is documented here because it is invisible from the public API.
-    ///
-    /// @param[in] lt      The record marker.
-    /// @param[in] message The record body, possibly spanning several lines.
-    /// @param[in] newline Whether to terminate the record; honoured only for a message without newlines.
-    /// @return true when the stream is still good after the write.
-    ///
-    bool do_log(Log::LogType, const std::string& message, bool newline);
-
     std::string time_stamp_;
     std::string log_type_and_time_stamp_; // re-use memory
     std::string log_open_error_;
@@ -473,10 +373,9 @@ private:
 ///
 /// @brief Mirrors log messages to standard output while an instance is alive.
 ///
-/// A debugging aid: while any LogToCout object exists, the free functions ecf::log, ecf::log_no_newline and
-/// ecf::log_append also print their message to standard output when no Log instance exists, and write-failure
-/// diagnostics are printed as well. The flag is global and not reference counted, so the destruction of one
-/// instance disables the mirroring for all.
+/// A debugging aid: while any LogToCout object exists, the free function ecf::log also prints its message to
+/// standard output when no Log instance exists, and write-failure diagnostics are printed as well. The flag is
+/// global and not reference counted, so the destruction of one instance disables the mirroring for all.
 ///
 class LogToCout {
 public:
@@ -510,28 +409,6 @@ private:
 /// @return The result of Log::log, or true when no Log instance exists.
 ///
 bool log(Log::LogType, const std::string& message);
-
-///
-/// @brief Writes a record without a terminating newline to the log, if one exists.
-///
-/// Convenience wrapper over Log::log_no_newline, with the same fallback as ecf::log. The caller must complete the
-/// line with ecf::log_append before anything else is written.
-///
-/// @param[in] lt      The record marker.
-/// @param[in] message The record body.
-/// @return The result of Log::log_no_newline, or true when no Log instance exists.
-///
-bool log_no_newline(Log::LogType, const std::string& message);
-
-///
-/// @brief Appends text to the open line of the log, and terminates it, if a log exists.
-///
-/// Convenience wrapper over Log::append, with the same fallback as ecf::log.
-///
-/// @param[in] message The text appended to the open line; may be empty.
-/// @return The result of Log::append, or true when no Log instance exists.
-///
-bool log_append(const std::string& message);
 
 ///
 /// @brief Reports a failed assertion and terminates the process when a log exists.

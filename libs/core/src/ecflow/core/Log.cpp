@@ -63,38 +63,6 @@ bool Log::log(Log::LogType lt, const std::string& message) {
     return true;
 }
 
-bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
-    std::scoped_lock lock(mx_);
-
-    create_logimpl();
-
-    if (!logImpl_->log_no_newline(lt, message)) {
-        // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
-        log_error_ = handle_write_failure();
-
-        (void)logImpl_->log(Log::ERR, log_error_);
-        (void)logImpl_->log_no_newline(lt, message);
-        return false;
-    }
-    return true;
-}
-
-bool Log::append(const std::string& message) {
-    std::scoped_lock lock(mx_);
-
-    create_logimpl();
-
-    if (!logImpl_->append(message)) {
-        // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
-        log_error_ = handle_write_failure();
-
-        (void)logImpl_->log(Log::ERR, log_error_);
-        (void)logImpl_->append(message);
-        return false;
-    }
-    return true;
-}
-
 void Log::cache_time_stamp() {
     std::scoped_lock lock(mx_);
 
@@ -244,30 +212,6 @@ bool log(Log::LogType lt, const std::string& message) {
     return true;
 }
 
-bool log_no_newline(Log::LogType lt, const std::string& message) {
-    if (Log::instance()) {
-        return Log::instance()->log_no_newline(lt, message);
-    }
-    else {
-        if (LogToCout::ok()) {
-            std::cout << message << '\n';
-        }
-    }
-    return true;
-}
-
-bool log_append(const std::string& message) {
-    if (Log::instance()) {
-        return Log::instance()->append(message);
-    }
-    else {
-        if (LogToCout::ok()) {
-            std::cout << message << '\n';
-        }
-    }
-    return true;
-}
-
 void log_assert(char const* expr, char const* file, long line, const std::string& message) {
     auto assert_msg = MESSAGE("ASSERT failure: " << expr << " at " << file << ":" << line << " " << message);
     std::cerr << assert_msg << "\n";
@@ -294,15 +238,6 @@ LogFlusher::~LogFlusher() {
     Log* the_log = Log::instance();
     if (the_log) {
         the_log->flush_only(); // flush without closing log file.
-    }
-}
-
-// *** LogTimer
-
-LogTimer::~LogTimer() {
-    Log* the_log = Log::instance();
-    if (the_log) {
-        the_log->log(Log::DBG, MESSAGE(" " << msg_ << " " << timer_.elapsed_seconds()));
     }
 }
 
@@ -349,7 +284,7 @@ static void append_log_type(std::string& str, Log::LogType lt) {
     }
 }
 
-bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) {
+bool LogImpl::log(Log::LogType lt, const std::string& message) {
     count_++;
 
     // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
@@ -365,13 +300,10 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
 
     if (message.find("\n") == std::string::npos) {
         // If message has no \n then write in one go
-        file_ << log_type_and_time_stamp_ << message;
-        if (newline) {
-            file_ << '\n';
-        }
+        file_ << log_type_and_time_stamp_ << message << '\n';
     }
     else {
-        // If message has \n then split into multiple lines
+        // If message has \n then split into multiple records, one per non-empty line
         std::vector<std::string> lines;
         ecf::algorithm::split_at(lines, message, "\n");
         size_t theSize = lines.size();
@@ -388,12 +320,6 @@ void LogImpl::flush() {
         file_.flush();
         count_ = 0;
     }
-}
-
-bool LogImpl::append(const std::string& message) {
-    count_++;
-    file_ << message << '\n';
-    return file_.good();
 }
 
 void LogImpl::create_time_stamp() {
