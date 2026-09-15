@@ -157,7 +157,7 @@ void ClientToServerCmd::add_node_for_edit_history(Defs* defs, const std::string&
     add_node_for_edit_history(defs->findAbsNode(absNodepath));
 }
 
-void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const {
+void ClientToServerCmd::add_node_for_edit_history(const node_ptr& the_node) const {
     if (the_node.get()) {
         edit_history_nodes_.push_back(the_node);
     }

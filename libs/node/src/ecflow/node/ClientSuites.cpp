@@ -44,7 +44,7 @@ void ClientSuites::add_suite(const std::string& s) {
     }
 }
 
-void ClientSuites::add_suite(suite_ptr suite) {
+void ClientSuites::add_suite(const suite_ptr& suite) {
     if (suite.get()) {
 
         // *IMPORTANT* update weak_suite_ptr_
@@ -75,7 +75,7 @@ void ClientSuites::remove_suite(const std::string& s) {
     }
 }
 
-bool ClientSuites::remove_suite(suite_ptr suite) {
+bool ClientSuites::remove_suite(const suite_ptr& suite) {
     if (suite.get()) {
         auto i = find_suite(suite->name());
         if (i != suites_.end()) {
@@ -87,7 +87,7 @@ bool ClientSuites::remove_suite(suite_ptr suite) {
     return false;
 }
 
-void ClientSuites::suite_added_in_defs(suite_ptr suite) {
+void ClientSuites::suite_added_in_defs(const suite_ptr& suite) {
     if (auto_add_new_suites_) {
         add_suite(suite);
     }
@@ -101,7 +101,7 @@ void ClientSuites::suite_added_in_defs(suite_ptr suite) {
     }
 }
 
-void ClientSuites::suite_replaced_in_defs(suite_ptr suite) {
+void ClientSuites::suite_replaced_in_defs(const suite_ptr& suite) {
     // *IF* and *ONLY IF* the suite was previously registered added, *UPDATE* its suite_ptr
     auto i = find_suite(suite->name());
     if (i != suites_.end()) {
@@ -110,7 +110,7 @@ void ClientSuites::suite_replaced_in_defs(suite_ptr suite) {
     }
 }
 
-void ClientSuites::suite_deleted_in_defs(suite_ptr suite) {
+void ClientSuites::suite_deleted_in_defs(const suite_ptr& suite) {
     // Deleted suites are *NOT* automatically removed
     // They have to be moved explicitly by the user. Reset to weak ptr
     if (suite.get()) {

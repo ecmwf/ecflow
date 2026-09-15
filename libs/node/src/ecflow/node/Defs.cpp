@@ -602,7 +602,7 @@ void Defs::beginAll() {
 }
 
 void Defs::reset_begin() {
-    std::for_each(suiteVec_.begin(), suiteVec_.end(), [](suite_ptr s) { s->reset_begin(); });
+    std::for_each(suiteVec_.begin(), suiteVec_.end(), [](const suite_ptr& s) { s->reset_begin(); });
 }
 
 void Defs::requeue() {

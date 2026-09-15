@@ -50,7 +50,7 @@ public:
     // clear local attributes so that, when the suite is requeued, the computer clock is synced
     void sync();
 
-    void init_calendar(ecf::Calendar&);
+    void init_calendar(ecf::Calendar&) const;
     void begin_calendar(ecf::Calendar&) const;
 
     // The state_change_no is never reset. Must be incremented if it can affect equality

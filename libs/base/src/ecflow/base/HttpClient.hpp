@@ -133,7 +133,7 @@ public:
     /// @throws std::runtime_error if @p cmd_ptr is null, or if HTTPS is requested by an ecFlow
     ///         built without SSL support
     ///
-    HttpClient(Cmd_ptr cmd_ptr,
+    HttpClient(const Cmd_ptr& cmd_ptr,
                const std::string& scheme,
                const std::string& host,
                const std::string& port,

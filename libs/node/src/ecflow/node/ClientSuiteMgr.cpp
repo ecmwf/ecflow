@@ -191,7 +191,7 @@ void ClientSuiteMgr::suites(unsigned int client_handle, std::vector<std::string>
     }
 }
 
-defs_ptr ClientSuiteMgr::create_defs(unsigned int client_handle, defs_ptr server_defs) const {
+defs_ptr ClientSuiteMgr::create_defs(unsigned int client_handle, const defs_ptr& server_defs) const {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         if (clientSuites_[i].handle() == client_handle) {
@@ -217,7 +217,7 @@ void ClientSuiteMgr::max_change_no(unsigned int client_handle,
                                         "refresh GUI/re-register suites"));
 }
 
-void ClientSuiteMgr::suite_added_in_defs(suite_ptr suite) {
+void ClientSuiteMgr::suite_added_in_defs(const suite_ptr& suite) {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         clientSuites_[i].suite_added_in_defs(suite);
@@ -225,7 +225,7 @@ void ClientSuiteMgr::suite_added_in_defs(suite_ptr suite) {
     }
 }
 
-void ClientSuiteMgr::suite_replaced_in_defs(suite_ptr suite) {
+void ClientSuiteMgr::suite_replaced_in_defs(const suite_ptr& suite) {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         clientSuites_[i].suite_replaced_in_defs(suite);
@@ -233,7 +233,7 @@ void ClientSuiteMgr::suite_replaced_in_defs(suite_ptr suite) {
     }
 }
 
-void ClientSuiteMgr::suite_deleted_in_defs(suite_ptr suite) {
+void ClientSuiteMgr::suite_deleted_in_defs(const suite_ptr& suite) {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {
         clientSuites_[i].suite_deleted_in_defs(suite);

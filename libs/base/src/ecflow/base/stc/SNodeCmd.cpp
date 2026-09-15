@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -19,10 +20,10 @@
 // Note: In the case where defs has not been loaded, it can be NULL
 
 SNodeCmd::SNodeCmd(AbstractServer* as, node_ptr node) {
-    init(as, node);
+    init(as, std::move(node));
 }
 
-void SNodeCmd::init(AbstractServer* as, node_ptr node) {
+void SNodeCmd::init(AbstractServer* as, const node_ptr& node) {
     the_node_str_.clear();
     if (node.get()) {
         the_node_str_ = ecf::as_string(node, PrintStyle::NET);

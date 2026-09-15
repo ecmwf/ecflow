@@ -52,7 +52,7 @@ public:
     bool sync_suite_clock() const { return sync_suite_clock_; }
 
     /// Add the compound memento, i.e., store all memento's for a *given* node.
-    void add(compound_memento_ptr);
+    void add(const compound_memento_ptr&);
 
     void set_server_state_change_no(unsigned int s) { server_state_change_no_ = s; }
     void set_server_modify_change_no(unsigned int s) { server_modify_change_no_ = s; }
@@ -64,7 +64,7 @@ public:
     /// Applies the mementos to the client defs and record all changed nodes.
     /// Can raise std::runtime_error.
     /// Note:: updating state_change_no() on the *client side*  has *no effect*
-    bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
+    bool incremental_sync(const defs_ptr& client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
 
     /// =========================================================================
     // The client state change number. Used to determine what is changed

@@ -128,7 +128,7 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
     return ret_flag;
 }
 
-void GroupSTCCmd::addChild(STC_Cmd_ptr childCmd) {
+void GroupSTCCmd::addChild(const STC_Cmd_ptr& childCmd) {
     LOG_ASSERT(childCmd.get(), ""); // Dont add NULL children
     cmdVec_.push_back(childCmd);
 }

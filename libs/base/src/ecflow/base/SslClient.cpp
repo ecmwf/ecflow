@@ -6,6 +6,7 @@
 #include "ecflow/base/SslClient.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
@@ -24,7 +25,7 @@
 /// Constructor starts the asynchronous connect operation.
 SslClient::SslClient(boost::asio::io_context& io,
                      boost::asio::ssl::context& context,
-                     Cmd_ptr cmd_ptr,
+                     const Cmd_ptr& cmd_ptr,
                      const std::string& host,
                      const std::string& port,
                      time_duration_t timeout,
@@ -116,7 +117,7 @@ void SslClient::record_failure(ecf::ConnectionFailure failure, const std::string
 // response to graceful termination or an unrecoverable error.
 void SslClient::start(endpoints_iterator_t endpoints_iterator) {
     // Start the connect actor.
-    start_connect(endpoints_iterator);
+    start_connect(std::move(endpoints_iterator));
 
     // Start the deadline actor. You will note that we are not setting any
     // particular deadline here. Instead, the connect and input actors will
@@ -124,7 +125,7 @@ void SslClient::start(endpoints_iterator_t endpoints_iterator) {
     deadline_.async_wait([this](const boost::system::error_code&) { check_deadline(); });
 }
 
-bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
+bool SslClient::start_connect(const endpoints_iterator_t& endpoints_iterator) {
     if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
         std::cout << "   SslClient::start_connect: Trying " << endpoints_iterator->endpoint() << "..." << std::endl;

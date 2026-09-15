@@ -179,41 +179,41 @@ private:
 
     void my_print(std::string& os, const std::vector<std::string>& paths) const;
 
-    Add_attr_type get_add_attr_type(const std::string&) const;
+    static Add_attr_type get_add_attr_type(const std::string&);
     void createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const;
-    void extract_name_and_value_for_add(Add_attr_type,
-                                        std::string& name,
-                                        std::string& value,
-                                        std::vector<std::string>& options,
-                                        std::vector<std::string>& paths) const;
-    void check_for_add(Add_attr_type, const std::string& name, const std::string& value) const;
+    static void extract_name_and_value_for_add(Add_attr_type,
+                                               std::string& name,
+                                               std::string& value,
+                                               std::vector<std::string>& options,
+                                               std::vector<std::string>& paths);
+    static void check_for_add(Add_attr_type, const std::string& name, const std::string& value);
 
-    Delete_attr_type get_delete_attr_type(const std::string&) const;
+    static Delete_attr_type get_delete_attr_type(const std::string&);
     void
     createDelete(Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
-    void extract_name_and_value_for_delete(Delete_attr_type,
-                                           std::string& name,
-                                           std::string& value,
-                                           const std::vector<std::string>& options,
-                                           const std::vector<std::string>& paths) const;
+    static void extract_name_and_value_for_delete(Delete_attr_type,
+                                                  std::string& name,
+                                                  std::string& value,
+                                                  const std::vector<std::string>& options,
+                                                  const std::vector<std::string>& paths);
     void check_for_delete(Delete_attr_type, const std::string& name, const std::string& value) const;
 
-    Change_attr_type get_change_attr_type(const std::string&) const;
+    static Change_attr_type get_change_attr_type(const std::string&);
     void createChange(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const;
-    void extract_name_and_value_for_change(Change_attr_type,
-                                           std::string& name,
-                                           std::string& value,
-                                           std::vector<std::string>& options,
-                                           std::vector<std::string>& paths) const;
-    void check_for_change(Change_attr_type, const std::string& name, const std::string& value) const;
+    static void extract_name_and_value_for_change(Change_attr_type,
+                                                  std::string& name,
+                                                  std::string& value,
+                                                  std::vector<std::string>& options,
+                                                  std::vector<std::string>& paths);
+    static void check_for_change(Change_attr_type, const std::string& name, const std::string& value);
 
-    ecf::Flag::Type get_flag_type(const std::string&) const;
+    static ecf::Flag::Type get_flag_type(const std::string&);
     void create_flag(Cmd_ptr& cmd,
                      const std::vector<std::string>& options,
                      const std::vector<std::string>& paths,
                      bool flag) const;
 
-    void check_sort_attr_type(const std::string&) const;
+    static void check_sort_attr_type(const std::string&);
     void create_sort_attributes(Cmd_ptr& cmd,
                                 const std::vector<std::string>& options,
                                 const std::vector<std::string>& paths) const;

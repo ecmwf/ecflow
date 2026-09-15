@@ -231,7 +231,7 @@ protected:
 
     /// finds the associated node and adds to edit history nodes
     void add_node_for_edit_history(Defs* as, const std::string& absNodepath) const;
-    void add_node_for_edit_history(node_ptr) const;
+    void add_node_for_edit_history(const node_ptr&) const;
     void add_node_path_for_edit_history(const std::string& absNodepath) const;
 
     void add_edit_history(Defs*, const std::string& path) const;

@@ -174,7 +174,7 @@ void ClockAttr::sync() {
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void ClockAttr::init_calendar(ecf::Calendar& calendar) {
+void ClockAttr::init_calendar(ecf::Calendar& calendar) const {
     Calendar::Clock_t clockType = (hybrid_) ? Calendar::HYBRID : Calendar::REAL;
     calendar.init(clockType);
 }

@@ -695,7 +695,7 @@ void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         << dump_args(options, paths) << "\n"));
 }
 
-AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type) const {
+AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type) {
     AlterCmd::Add_attr_type theAttrType = addAttrType(attr_type);
     if (theAttrType == AlterCmd::ADD_ATTR_ND) {
         std::ostringstream ss;
@@ -750,7 +750,7 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                                               std::string& name,
                                               std::string& value,
                                               std::vector<std::string>& options,
-                                              std::vector<std::string>& paths) const {
+                                              std::vector<std::string>& paths) {
     // **** parse and check format, expect this argument to be single or double tick quoted ****
     // **** for time,date,day or zombie
     name = options[2];
@@ -871,9 +871,7 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
     }
 }
 
-void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
-                             const std::string& name,
-                             const std::string& value) const {
+void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType, const std::string& name, const std::string& value) {
     // **** parse and check format, expect this argument to be single or double tick quoted ****
     // **** for time,date,day or zombie
     if (name.empty()) {
@@ -949,7 +947,7 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
     }
 }
 
-AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& attr_type) const {
+AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& attr_type) {
     AlterCmd::Delete_attr_type theAttrType = deleteAttrType(attr_type);
     if (theAttrType == AlterCmd::DELETE_ATTR_ND) {
         std::ostringstream ss;
@@ -999,7 +997,7 @@ void AlterCmd::extract_name_and_value_for_delete(AlterCmd::Delete_attr_type theA
                                                  std::string& name,
                                                  std::string& value,
                                                  const std::vector<std::string>& options,
-                                                 const std::vector<std::string>& paths) const {
+                                                 const std::vector<std::string>& paths) {
     // Generally an empty third argument means delete all attributes, otherwise delete the specific one.
     if (options.size() >= 3) {
         name = options[2];
@@ -1181,7 +1179,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
 
 // =====================================================================================
 
-AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& attr_type) const {
+AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& attr_type) {
     AlterCmd::Change_attr_type theAttrType = changeAttrType(attr_type);
     if (theAttrType == AlterCmd::CHANGE_ATTR_ND) {
         std::ostringstream ss;
@@ -1218,7 +1216,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                                                  std::string& name,
                                                  std::string& value,
                                                  std::vector<std::string>& options,
-                                                 std::vector<std::string>& paths) const {
+                                                 std::vector<std::string>& paths) {
     std::ostringstream ss;
     switch (theAttrType) {
         case AlterCmd::VARIABLE: {
@@ -1492,7 +1490,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
 void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                                 const std::string& name,
-                                const std::string& value) const {
+                                const std::string& value) {
     switch (theAttrType) {
         case AlterCmd::VARIABLE:
             break;
@@ -1651,7 +1649,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
     }
 }
 
-ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const {
+ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) {
     Flag::Type theFlagType = Flag::string_to_flag_type(flag_type);
     if (theFlagType == Flag::NOT_SET) {
         std::ostringstream ss;
@@ -1682,7 +1680,7 @@ void AlterCmd::create_flag(Cmd_ptr& cmd,
     cmd                    = std::make_shared<AlterCmd>(paths, theFlagType, flag);
 }
 
-void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
+void AlterCmd::check_sort_attr_type(const std::string& attr_type) {
     ecf::Attr::Type theAttrType = Attr::to_attr(attr_type);
     if (theAttrType == Attr::UNKNOWN) {
         std::ostringstream ss;

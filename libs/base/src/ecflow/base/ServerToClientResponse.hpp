@@ -37,7 +37,7 @@ public:
 
     /// Handle the response from the server. On the client side
     /// return true IF and ONLY IF client response was ok, if further client action required return false
-    bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const;
+    bool handle_server_response(ServerReply&, const Cmd_ptr& cts_cmd, bool debug) const;
 
     /// Used by boost test, to verify persistence
     bool operator==(const ServerToClientResponse& rhs) const;

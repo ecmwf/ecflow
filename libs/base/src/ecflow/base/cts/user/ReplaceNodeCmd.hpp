@@ -10,7 +10,7 @@
 
 class ReplaceNodeCmd final : public UserCmd {
 public:
-    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force);
+    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const defs_ptr& client_defs, bool force);
     ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force);
     ReplaceNodeCmd() = default;
 

@@ -51,7 +51,7 @@ static std::string make_scheme_host_port(const std::string& scheme, const std::s
     return scheme + "://" + host + ":" + port;
 }
 
-HttpClient::HttpClient(Cmd_ptr cmd_ptr,
+HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
                        const std::string& scheme,
                        const std::string& host,
                        const std::string& port,

@@ -818,7 +818,7 @@ public:
 
     /// check trigger expression have nodes and events,meter,repeat that resolve, will throw for error
     std::unique_ptr<AstTop>
-    parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
+    parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context) const;
 
     virtual boost::posix_time::time_duration sum_runtime() { return sc_rt_; }
 

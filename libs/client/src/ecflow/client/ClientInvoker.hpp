@@ -382,7 +382,7 @@ public:
                 bool create_parents_as_required = true,
                 bool force                      = false) const;
     int replace_1(const std::string& absNodePath,
-                  defs_ptr client_defs,
+                  const defs_ptr& client_defs,
                   bool create_parents_as_required = true,
                   bool force                      = false) const;
 
@@ -499,7 +499,7 @@ private:
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
+    int invoke(const Cmd_ptr&) const; // assumes clients of Cmd_ptr constructor has caught exceptions
 
     int do_invoke_cmd(Cmd_ptr) const;
 

@@ -45,7 +45,7 @@ public:
     ///
     SslClient(boost::asio::io_context& io,
               boost::asio::ssl::context& context,
-              Cmd_ptr cmd_ptr,
+              const Cmd_ptr& cmd_ptr,
               const std::string& host,
               const std::string& port,
               time_duration_t timeout             = std::chrono::seconds{0},
@@ -75,7 +75,7 @@ private:
     void stop();
     void check_deadline();
 
-    bool start_connect(endpoints_iterator_t endpoints_iterator);
+    bool start_connect(const endpoints_iterator_t& endpoints_iterator);
 
     void start_handshake();
     void handle_handshake(const boost::system::error_code& e);
