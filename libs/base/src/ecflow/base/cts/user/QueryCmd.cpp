@@ -28,15 +28,22 @@ using namespace ecf;
 
 QueryCmd::~QueryCmd() = default;
 
-void QueryCmd::print(std::string& os) const {
+std::string QueryCmd::print_as_string() const {
     // path_to_task_ is only used in logging, so we know which task initiated the query, can be empty when invoked via
     // cmd line
-    user_cmd(os,
-             CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_, evaluate_)) + path_to_task_);
+    std::string ret = CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_, evaluate_));
+    if (!path_to_task_.empty()) {
+        ret += ' ';
+        ret += path_to_task_;
+    }
+    return ret;
+}
+
+void QueryCmd::print(std::string& os) const {
+    user_cmd(os, print_as_string());
 }
 void QueryCmd::print_only(std::string& os) const {
-    os += CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_, evaluate_));
-    os += path_to_task_;
+    os += print_as_string();
 }
 
 bool QueryCmd::equals(ClientToServerCmd* rhs) const {

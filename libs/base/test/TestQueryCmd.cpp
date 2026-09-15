@@ -1165,17 +1165,15 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_print_includes_evaluate_option
 
     {
         std::string printed;
-        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t1", true);
+        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t2", true);
         cmd.print_only(printed);
-        BOOST_CHECK_MESSAGE(printed.find("--evaluate") != std::string::npos,
-                            "expected printed command to include --evaluate but found: " << printed);
+        BOOST_CHECK_EQUAL(printed, "--query=variable /suite/f/t1:var1 --evaluate /suite/f/t2");
     }
     {
         std::string printed;
-        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t1", false);
+        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t2", false);
         cmd.print_only(printed);
-        BOOST_CHECK_MESSAGE(printed.find("--evaluate") == std::string::npos,
-                            "expected printed command to not include --evaluate but found: " << printed);
+        BOOST_CHECK_EQUAL(printed, "--query=variable /suite/f/t1:var1 /suite/f/t2");
     }
 }
 
@@ -1195,6 +1193,17 @@ BOOST_AUTO_TEST_CASE(test_query_print_includes_calling_task_path) {
     cmd.print(out);
     BOOST_CHECK_MESSAGE(out.find("/suite/f/t2") != std::string::npos,
                         "expected print() output to include the calling task path but found: " << out);
+
+    // The task path is a separate token, so that the logged command remains unambiguous
+    std::string only;
+    cmd.print_only(only);
+    BOOST_CHECK_EQUAL(only, "--query=state /suite/f/t1 /suite/f/t2");
+
+    // ... and is omitted, without a trailing separator, when the command is invoked from the command line
+    QueryCmd from_cli("state", "/suite/f/t1", "", "");
+    only.clear();
+    from_cli.print_only(only);
+    BOOST_CHECK_EQUAL(only, "--query=state /suite/f/t1");
 }
 
 BOOST_AUTO_TEST_CASE(test_query_increments_server_query_stats_counter) {

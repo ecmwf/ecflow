@@ -56,6 +56,13 @@ public:
 private:
     static const char* arg(); // used for argument parsing
 
+    ///
+    /// @brief Renders the command as logged: the query, followed by the calling task path when present.
+    ///
+    /// @return the command text, without user and host
+    ///
+    std::string print_as_string() const;
+
     bool handleRequestIsTestable() const override { return false; }
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
