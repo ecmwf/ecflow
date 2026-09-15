@@ -935,6 +935,13 @@ public:
         std::vector<std::string> options() const { return {"--get"}; }
     };
 
+    struct CommandNews
+    {
+        static constexpr bool contacts_server = true;
+
+        std::vector<std::string> options() const { return {"--news", "0", "0", "0"}; }
+    };
+
     struct CommandGetState
     {
         static constexpr bool contacts_server = true;
