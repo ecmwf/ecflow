@@ -5239,10 +5239,14 @@ QueryCmd
          ``variable``, ``trigger``, ``repeat``, ``limit`` or ``limit_max`` (``query_type_``).
        - ``arg2`` (path): the node, or ``<path>:<attribute>``, being queried (``path_to_attribute_``
          and ``attribute_``).
-       - ``arg3`` (optional task path): the task the query is made on behalf of (``path_to_task_``),
-         used for logging.
+       - ``--evaluate`` (optional, ``variable`` only): resolve the variable references in the value
+         before returning it (``evaluate_``, a Boolean serialised only when ``true``; a request without
+         it deserialises with the flag unset, so older clients and servers keep interoperating).
+       - ``path_to_task_`` (context, not a CLI argument): the task on whose behalf the query is made,
+         taken from ``ECF_NAME`` when the client runs inside a job; used for logging only.
    * - Environment variables
      - - ``ECF_USER`` (optional): overrides the authenticated user name.
+       - ``ECF_NAME`` (optional): the calling task path recorded in ``path_to_task_``.
 
 Reads a single piece of state from the server without changing anything — for example the state of a
 node, or the value of an event, meter or variable. The reply is always a string. It is often used
@@ -5369,6 +5373,39 @@ inside scripts to branch on a node's state.
                       "path_to_attribute_": "/suite/family/task",
                       "attribute_": "",
                       "path_to_task_": "/suite/family/task"
+                    }
+                  }
+                }
+              }
+            }
+
+        ``--query variable /suite/family/task:YMD --evaluate`` (the ``evaluate_`` field is present only
+        when the option is given):
+
+        .. code-block:: json
+
+            {
+              "21ClientToServerRequest": {
+                "cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "QueryCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": {
+                        "cereal_class_version": 0,
+                        "value0": {
+                          "cereal_class_version": 0,
+                          "cl_host_": "host.example.com"
+                        },
+                        "user_": "operator"
+                      },
+                      "query_type_": "variable",
+                      "path_to_attribute_": "/suite/family/task",
+                      "attribute_": "YMD",
+                      "path_to_task_": "/suite/family/task",
+                      "evaluate_": true
                     }
                   }
                 }

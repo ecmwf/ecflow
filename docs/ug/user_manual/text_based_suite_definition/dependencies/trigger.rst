@@ -15,8 +15,9 @@ A node with a trigger can only be activated when its trigger has
 expired. A trigger holds the node as long as the trigger's expression
 evaluation returns false. There are a few additional keywords and some
 names may point to other nodes with their value acting as the status of
-those nodes. Trigger mathematics are computed, using double arithmetic
-(with no string comparisons). There should not be any need to use
+those nodes. Trigger mathematics are computed using integer arithmetic:
+every operand is an integer, and there are no string comparisons (see
+:ref:`expression_spec`). There should not be any need to use
 numerical expressions, instead logical functions (and, or, not, eq, ne)
 with node names should be used.
 

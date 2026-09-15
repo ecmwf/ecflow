@@ -1852,20 +1852,26 @@ Usage:
 .. py:method:: Client.query(self: ecflow.Client, query_type: str, path_to_attribute: str, attribute: str = '', evaluate: bool = False) -> str
    :module: ecflow
 
-Query the status of event, meter, state, variable, limit, limit_max or trigger expression without blocking
+Query the status of a node attribute, or evaluate a trigger expression, without blocking. The result is
+returned as a string.
 
-- state,     return :code:`unknown` | :code:`complete` | :code:`queued` | :code:`aborted` | :code:`submitted` | :code:`active` to standard out
-- dstate,    return :code:`unknown` | :code:`complete` | :code:`queued` | :code:`suspended` | :code:`aborted` | :code:`submitted` | :code:`active` to standard out
-- event,     return :code:`set` | :code:`clear` to standard out
-- meter,     return value of the meter to standard out
-- limit,     return value of the limit to standard out
-- limit_max, return maximum value of the limit to standard out
+- state,     returns :code:`unknown` | :code:`complete` | :code:`queued` | :code:`aborted` | :code:`submitted` | :code:`active`
+- dstate,    returns :code:`unknown` | :code:`complete` | :code:`queued` | :code:`suspended` | :code:`aborted` | :code:`submitted` | :code:`active`
+- repeat,    returns the current value of the repeat; with attribute :code:`next` or :code:`prev`, the
+             next or previous value instead (the repeat itself is not changed, and the value stays
+             within the repeat bounds)
+- event,     returns :code:`set` | :code:`clear`
+- meter,     returns the value of the meter
+- limit,     returns the value of the limit
+- limit_max, returns the maximum value of the limit
+- label,     returns the new value of the label, or the initial value when no new value has been set
+- variable,  returns the value of the variable, repeat or generated variable, searching up the node
+             tree. By default, the value is returned as stored; when :code:`evaluate` is true, all
+             variable references (e.g. :code:`%VAR%`) in the value are resolved before it is returned,
+             following the same rules as job generation (see :code:`ecflow_client --help=query`); a
+             trailing micro character without a partner does not form a reference and is returned
+             untouched
 - trigger,   returns :code:`true` if the expression is true, otherwise :code:`false`
-- variable,  return the variable value to standard out. By default, the value is returned as stored;
-             when :code:`evaluate` is true, all variable references (e.g. :code:`%VAR%`) in the value
-             are resolved before it is returned, following the same rules as job generation (see
-             :code:`ecflow_client --help=query`); a trailing micro character without a partner does
-             not form a reference and is returned untouched
 
 
 .. important:: 
@@ -1876,21 +1882,25 @@ Query the status of event, meter, state, variable, limit, limit_max or trigger e
 .. code-block:: shell
 
   string query(
-     string query_type        # [ event | meter | variable | trigger | limit | limit_max ]
-     string path_to_attribute # path to the attribute.
+     string query_type        # [ state | dstate | repeat | event | meter | limit | limit_max | label |
+                              #   variable | trigger ]
+     string path_to_attribute # path to the node holding the attribute.
                               # the path '/', the server itself, can only be used with 'state' or 'variable'
-     string attribute         # name of the attribute or trigger expression
+     string attribute         # name of the attribute, trigger expression, or 'next' | 'prev' for a
+                              # repeat; empty for 'state', 'dstate' and the current repeat value
      bool evaluate            # (optional, default False) only valid with 'variable': resolve all
                               # variable references in the value
   )
 
-By default throws a exception for errors.
+By default throws an exception for errors.
 
 Exceptions can be raised if the path to the attribute does not exist and because:
 
+- No repeat exists on the specified node
 - No event of the given name exists on the specified node
 - No meter of the given name exists on the specified node
 - No limit of the given name exists on the specified node
+- No label of the given name exists on the specified node
 - trigger expression does not parse, or if references to node/attributes are not defined
 - No variable of the given name (repeat or generated variable) exists on the
   specified node or any of its parent, or (when path_to_attribute is '/') no user or
@@ -1904,18 +1914,21 @@ Usage:
 
    try:
        ci = Client()                                                  # use default host(ECF_HOST) & port(ECF_PORT)
-       res = ci.query('event','/path/to/node','event_name')           # returns 'SET' | 'CLEAR'
+       res = ci.query('state','/path/to/node')                        # returns node state as a string
+       res = ci.query('dstate','/path/to/node')                       # returns node state, can include suspended
+       res = ci.query('repeat','/path/to/node')                       # returns current repeat value as a string
+       res = ci.query('repeat','/path/to/node','next')                # returns next repeat value as a string
+       res = ci.query('event','/path/to/node','event_name')           # returns 'set' | 'clear'
        res = ci.query('meter','/path/to/node','meter_name')           # returns meter value as a string
        res = ci.query('limit','/path/to/node','limit_name')           # returns limit value as a string
        res = ci.query('limit_max','/path/to/node','limit_name')       # returns max limit value as a string
+       res = ci.query('label','/path/to/node','label_name')           # returns label value as a string
        res = ci.query('variable','/path/to/node','var')               # returns variable value as a string
        res = ci.query('variable','/path/to/node','var',evaluate=True) # returns variable value, references resolved
        res = ci.query('variable','/','SCHOST')                        # returns value of server variable as a string
-       res = ci.query('trigger','/path/to/node','/joe90 == complete') # return 'true' | 'false' as a string
-       res = ci.query('state','/path/to/node')                        # return node state as a string
-       res = ci.query('dstate','/path/to/node')                       # return node state as a string, can include suspended
-   except RuntimeError, e:
-       print str(e)
+       res = ci.query('trigger','/path/to/node','/joe90 == complete') # returns 'true' | 'false' as a string
+   except RuntimeError as e:
+       print(str(e))
 
 
 .. py:method:: Client.reload_custom_passwd_file(self: ecflow.Client) -> int
