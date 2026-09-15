@@ -6,12 +6,13 @@
 #include "ecflow/base/WhyCmd.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 
 WhyCmd::WhyCmd(defs_ptr defs, const std::string& absNodePath)
-    : defs_(defs) {
+    : defs_(std::move(defs)) {
     if (!defs_.get()) {
         throw std::runtime_error("WhyCmd: The definition parameter is empty");
     }

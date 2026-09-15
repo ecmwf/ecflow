@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
@@ -25,7 +26,7 @@
 
 /// Constructor starts the asynchronous connect operation.
 Client::Client(boost::asio::io_context& io,
-               Cmd_ptr cmd_ptr,
+               const Cmd_ptr& cmd_ptr,
                const std::string& host,
                const std::string& port,
                time_duration_t timeout,
@@ -121,7 +122,7 @@ void Client::record_failure(ecf::ConnectionFailure failure, const std::string& d
 // response to graceful termination or an unrecoverable error.
 void Client::start(endpoints_iterator_t endpoints_iterator) {
     // Start the connect actor.
-    start_connect(endpoints_iterator);
+    start_connect(std::move(endpoints_iterator));
 
     // Start the deadline actor. You will note that we are not setting any
     // particular deadline here. Instead, the connect and input actors will
@@ -129,7 +130,7 @@ void Client::start(endpoints_iterator_t endpoints_iterator) {
     deadline_.async_wait([this](const boost::system::error_code&) { check_deadline(); });
 }
 
-bool Client::start_connect(endpoints_iterator_t endpoints_iterator) {
+bool Client::start_connect(const endpoints_iterator_t& endpoints_iterator) {
     if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
         std::cout << "   Client::start_connect: Trying " << endpoints_iterator->endpoint() << "..." << std::endl;

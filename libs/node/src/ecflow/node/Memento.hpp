@@ -91,7 +91,7 @@ public:
 
     CompoundMemento() = default; // for serialization
 
-    void incremental_sync(defs_ptr client_def) const;
+    void incremental_sync(const defs_ptr& client_def) const;
     void add(memento_ptr m) { vec_.push_back(m); }
     void clear_attributes() { clear_attributes_ = true; }
 

@@ -6,6 +6,7 @@
 #include "ecflow/server/SslTcpServer.hpp"
 
 #include <iostream>
+#include <utility>
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/server/BaseServer.hpp"
@@ -34,7 +35,7 @@ void SslTcpServer::start_accept() {
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });
 }
 
-void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connection_ptr conn) {
+void SslTcpServer::handle_accept(const boost::system::error_code& e, const ssl_connection_ptr& conn) {
     if (serverEnv_.debug()) {
         std::cout << "   SslTcpServer::handle_accept" << std::endl;
     }
@@ -75,7 +76,7 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
     start_accept();
 }
 
-void SslTcpServer::handle_handshake(const boost::system::error_code& e, ssl_connection_ptr new_conn) {
+void SslTcpServer::handle_handshake(const boost::system::error_code& e, const ssl_connection_ptr& new_conn) {
     if (serverEnv_.debug()) {
         std::cout << "   SslTcpServer::handle_handshake" << std::endl;
     }
@@ -95,7 +96,7 @@ void SslTcpServer::handle_handshake(const boost::system::error_code& e, ssl_conn
     }
 }
 
-void SslTcpServer::handle_read(const boost::system::error_code& e, ssl_connection_ptr conn) {
+void SslTcpServer::handle_read(const boost::system::error_code& e, const ssl_connection_ptr& conn) {
     /// Handle completion of a write operation.
     // **********************************************************************************
     // This function *must* finish with write, otherwise it ends up being called recursively
@@ -134,7 +135,7 @@ void SslTcpServer::handle_write(const boost::system::error_code& e, ssl_connecti
     // Do any necessary clean up after outbound_response_  has run. i.e like re-claiming memory
     outbound_response_.cleanup();
 
-    (void)shutdown_socket(conn, "SslTcpServer::handle_write:");
+    (void)shutdown_socket(std::move(conn), "SslTcpServer::handle_write:");
 
     // If asked to terminate we do it here rather than in handle_read.
     // So that we have responded to the client.

@@ -74,23 +74,23 @@ public:
 
     /// Add an interest to this suite
     void add_suite(const std::string&);
-    void add_suite(suite_ptr);
+    void add_suite(const suite_ptr&);
 
     /// no longer interested in this suite. Explicit remove
     void remove_suite(const std::string&);
-    bool remove_suite(suite_ptr);
+    bool remove_suite(const suite_ptr&);
 
     /// A new suite has been added to the definition.
     /// If it was already registered update the suite ptr
     /// If auto add new suite enabled,register it
-    void suite_added_in_defs(suite_ptr);
+    void suite_added_in_defs(const suite_ptr&);
 
     /// A suite has been updated in the definition.
-    void suite_replaced_in_defs(suite_ptr);
+    void suite_replaced_in_defs(const suite_ptr&);
 
     /// The suite has been deleted, update modify_change_no. So we do a full sync
     /// RESETs suite ptr. Deleted suites are *NOT* automatically removed
-    void suite_deleted_in_defs(suite_ptr);
+    void suite_deleted_in_defs(const suite_ptr&);
 
     /// Collate the incremental changes, made to my suites
     void collateChanges(DefsDelta& changes) const;

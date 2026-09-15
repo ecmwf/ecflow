@@ -356,7 +356,7 @@ int ClientInvoker::invoke(const std::vector<std::string>& args) const {
     return invoke(CommandLine(args));
 }
 
-int ClientInvoker::invoke(Cmd_ptr cts_cmd) const {
+int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
     // assumes clients of Cmd_ptr constructor has caught exceptions
 
     // Allow request to be logged & allow logging of round trip time, Hence must be placed *before* RoundTripRecorder
@@ -1409,7 +1409,7 @@ int ClientInvoker::replace(const std::string& absNodePath,
 }
 
 int ClientInvoker::replace_1(const std::string& absNodePath,
-                             defs_ptr client_defs,
+                             const defs_ptr& client_defs,
                              bool create_parents_as_required,
                              bool force) const {
     /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle

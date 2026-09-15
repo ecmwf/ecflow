@@ -50,7 +50,7 @@ ojson make_json_response(std::string_view path, std::string_view message) {
 
 } // namespace
 
-ojson make_node_json(node_ptr node) {
+ojson make_node_json(const node_ptr& node) {
     return ojson::object(
         {{"type", ecf::algorithm::tolower(node->debugType())}, {"name", node->name()}, {"children", ojson::array()}});
 }

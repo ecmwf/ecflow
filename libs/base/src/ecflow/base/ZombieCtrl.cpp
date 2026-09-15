@@ -182,12 +182,12 @@ bool ZombieCtrl::handle_zombie(Submittable* task,       // This NULL for path zo
     return handle_user_actions(new_zombie, task, task_cmd, action_taken, theReply);
 }
 
-bool ZombieCtrl::handle_existing_zombie(Zombie& theExistingZombie,      // The server already knows about the zombie
-                                        Submittable* task,              // This NULL for path zombies
-                                        node_ptr closest_matching_node, // only defined for path zombies
-                                        const TaskCmd* task_cmd,        // The child command
-                                        std::string& action_taken,      // User action taken
-                                        STC_Cmd_ptr& theReply           // Reply varies according to User Action
+bool ZombieCtrl::handle_existing_zombie(Zombie& theExistingZombie, // The server already knows about the zombie
+                                        Submittable* task,         // This NULL for path zombies
+                                        const node_ptr& closest_matching_node, // only defined for path zombies
+                                        const TaskCmd* task_cmd,               // The child command
+                                        std::string& action_taken,             // User action taken
+                                        STC_Cmd_ptr& theReply                  // Reply varies according to User Action
 ) {
 #ifdef DEBUG_ZOMBIE
     std::cout << " handle_existing_zombie: ";
@@ -444,7 +444,7 @@ void ZombieCtrl::add_user_zombies(Node* node, const std::string& user_cmd) {
     add_user_zombies(submittables, user_cmd);
 }
 
-void ZombieCtrl::add_user_zombies(defs_ptr defs, const std::string& user_cmd) {
+void ZombieCtrl::add_user_zombies(const defs_ptr& defs, const std::string& user_cmd) {
     if (!defs.get()) {
         return;
     }

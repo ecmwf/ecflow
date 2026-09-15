@@ -19,7 +19,7 @@ namespace ecf {
 
 namespace implementation {
 
-std::string ensure_single_quotes(const AvisoAttr::listener_t listener) {
+std::string ensure_single_quotes(const AvisoAttr::listener_t& listener) {
     using namespace std::string_literals;
     if (!listener.empty() && listener.front() == '\'' && listener.back() == '\'') {
         return listener;

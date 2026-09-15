@@ -48,7 +48,7 @@ public:
     /// Then add as 'USER' zombies. This should be called when commands like, delete, requeue,
     /// run, are using the force option, and will create zombies.
     void add_user_zombies(Node*, const std::string& user_cmd);
-    void add_user_zombies(defs_ptr, const std::string& user_cmd);
+    void add_user_zombies(const defs_ptr&, const std::string& user_cmd);
     void add_user_zombies(const std::vector<Submittable*>& tasks, const std::string& user_cmd);
 
     /// Returns the list of zombies, **updated** with seconds since creation
@@ -105,12 +105,12 @@ public:
     const Zombie& find_by_path_only(const std::string& path_to_task) const;
 
 private:
-    bool handle_existing_zombie(Zombie&,                        // The server already knows about the zombie
-                                Submittable*,                   // This NULL for path zombies
-                                node_ptr closest_matching_node, // only set for path zombies
-                                const TaskCmd* task_cmd,        // The child command
-                                std::string& action_taken,      // User action taken
-                                STC_Cmd_ptr& theReply           // Reply varies according to User Action
+    bool handle_existing_zombie(Zombie&,                               // The server already knows about the zombie
+                                Submittable*,                          // This NULL for path zombies
+                                const node_ptr& closest_matching_node, // only set for path zombies
+                                const TaskCmd* task_cmd,               // The child command
+                                std::string& action_taken,             // User action taken
+                                STC_Cmd_ptr& theReply                  // Reply varies according to User Action
     );
 
     bool handle_user_actions(Zombie&,                   // The server already knows about the zombie

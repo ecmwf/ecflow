@@ -45,7 +45,7 @@ public:
     /// @throws std::runtime_error if @p cmd_ptr is null, or if the endpoint cannot be resolved
     ///
     Client(boost::asio::io_context& io,
-           Cmd_ptr cmd_ptr,
+           const Cmd_ptr& cmd_ptr,
            const std::string& host,
            const std::string& port,
            time_duration_t timeout             = std::chrono::seconds{0},
@@ -77,7 +77,7 @@ private:
     void stop();
     void check_deadline();
 
-    bool start_connect(endpoints_iterator_t endpoint_iter);
+    bool start_connect(const endpoints_iterator_t& endpoint_iter);
     void start_write();
     void start_read();
 

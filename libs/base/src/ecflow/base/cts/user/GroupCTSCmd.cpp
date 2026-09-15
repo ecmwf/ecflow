@@ -266,7 +266,7 @@ ecf::authorisation_t GroupCTSCmd::authorise(AbstractServer& server) const {
     return implementation::do_authorise(*this, server);
 }
 
-void GroupCTSCmd::addChild(Cmd_ptr childCmd) {
+void GroupCTSCmd::addChild(const Cmd_ptr& childCmd) {
     assert(childCmd.get()); // Dont add NULL children
     cmdVec_.push_back(childCmd);
 }

@@ -19,7 +19,7 @@ using namespace ecf;
 Memento::~Memento() = default;
 
 // ===============================================================
-void CompoundMemento::incremental_sync(defs_ptr client_def) const {
+void CompoundMemento::incremental_sync(const defs_ptr& client_def) const {
     /// Clear out aspects, for this Memento.
     ///   Aspects are added via do_incremental_* / set_mememto functions
     ///   AND in *this* function when node attributes have been added or deleted.
