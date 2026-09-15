@@ -78,6 +78,12 @@ By default :code:`--query variable` returns such a value exactly as stored; the 
 option resolves the references first, following the same rules as job generation
 (see :ref:`query_cli_evaluate`). A reference that cannot be resolved is an error.
 
+.. warning::
+
+   :code:`--evaluate` requires an ecFlow server of version 5.20 or later. An older server ignores the option
+   silently and returns the value as stored, without any error; check the server version
+   (:code:`ecflow_client --server_version`) before relying on the resolved value.
+
 .. danger::
 
    Variables referenced in :term:`trigger` and :term:`complete expressions <complete expression>` are

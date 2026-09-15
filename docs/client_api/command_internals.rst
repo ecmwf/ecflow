@@ -5241,7 +5241,9 @@ QueryCmd
          and ``attribute_``).
        - ``--evaluate`` (optional, ``variable`` only): resolve the variable references in the value
          before returning it (``evaluate_``, a Boolean serialised only when ``true``; a request without
-         it deserialises with the flag unset, so older clients and servers keep interoperating).
+         it deserialises with the flag unset, so older clients keep working with a 5.20 server).
+         **A server older than 5.20 ignores the field silently** and answers with the value as
+         stored, so a new client gets no indication that evaluation did not take place.
        - ``path_to_task_`` (context, not a CLI argument): the task on whose behalf the query is made,
          taken from ``ECF_NAME`` when the client runs inside a job; used for logging only.
    * - Environment variables
@@ -5327,6 +5329,10 @@ inside scripts to branch on a node's state.
 
                 --evaluate
                     # Only valid when the attribute is a variable: resolve all variable references in the value.
+                    # WARNING: requires an ecFlow server of version 5.20 or later. An older server does not know
+                    # the option, ignores it silently, and returns the value as stored (e.g. '%YYYY%%MM%%DD%')
+                    # without any error; a script relying on the resolved value must therefore check the
+                    # server version (ecflow_client --server_version) or the returned value.
 
             Usage:
 

@@ -135,6 +135,21 @@ no partially resolved value is returned. ``--evaluate`` is only accepted
 together with the ``variable`` attribute; combining it with any other
 attribute is an error.
 
+.. warning::
+
+   **``--evaluate`` requires an ecFlow server of version 5.20 or later.**
+
+   The option travels to the server as an additional field of the query
+   request. A server older than 5.20 does not know that field, ignores it
+   silently, and answers the query as if ``--evaluate`` had not been
+   given: the command **succeeds** and returns the value **as stored**
+   (for example ``%YYYY%%MM%%DD%`` instead of ``20240101``), with no
+   error or warning on either side. A new client cannot detect this
+   from the reply alone. A script that relies on the resolved value must
+   therefore check the server version first
+   (``ecflow_client --server_version``), or validate the returned value
+   (for example, that it contains no micro character).
+
 .. code-block:: shell
 
    # given: suite s / family f (repeat YYYY) / family m (repeat MM) / family d (repeat DD)
