@@ -6,6 +6,8 @@
 #ifndef ecflow_base_cts_CtsCmdRegistry_HPP
 #define ecflow_base_cts_CtsCmdRegistry_HPP
 
+#include <map>
+#include <string>
 #include <vector>
 
 #include <boost/program_options.hpp>
@@ -50,7 +52,26 @@ public:
 private:
     std::vector<Cmd_ptr> vec_;
 
+    /// Modifier options, i.e. options registered by a command in addition to its own argument (for example
+    /// --evaluate, registered by --query), mapped to the argument of the command that owns them. A modifier
+    /// is only meaningful together with its owning command, and is rejected when given with any other command.
+    std::map<std::string, std::string> modifiers_;
+
     void addHelpOption(boost::program_options::options_description& desc) const;
+
+    ///
+    /// @brief Collects the modifier options registered by every command into modifiers_.
+    ///
+    void collectModifiers();
+
+    ///
+    /// @brief Rejects any modifier option present in `vm` that is not owned by the command being created.
+    ///
+    /// @param[in] matched_arg the argument of the command selected for creation
+    /// @param[in] vm the parsed command line options
+    /// @throws std::runtime_error when a modifier owned by another command is present
+    ///
+    void rejectForeignModifiers(const std::string& matched_arg, const boost::program_options::variables_map& vm) const;
 };
 
 #endif /* ecflow_base_cts_CtsCmdRegistry_HPP */

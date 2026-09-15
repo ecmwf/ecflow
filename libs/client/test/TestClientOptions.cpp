@@ -15,6 +15,7 @@
 #include "ecflow/base/cts/task/QueueCmd.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
@@ -1662,6 +1663,73 @@ BOOST_AUTO_TEST_CASE(test_query_rejects_invalid_arguments) {
     // does not start with '/') is not covered here, since path_to_task is derived from the ECF_NAME
     // environment variable read internally by ClientEnvironment, which this harness has no way to
     // override per-test.
+}
+
+/// Goal: --evaluate is a modifier owned by --query. Given with any other command it must be rejected
+/// (by CtsCmdRegistry, before the selected command is created) rather than silently discarded.
+BOOST_AUTO_TEST_CASE(test_evaluate_rejected_with_other_commands) {
+    ECF_NAME_THIS_TEST();
+
+    ClientEnvironment environment(false);
+
+    for (const auto& cl : {CommandLine::make_command_line("ecflow_client", "--ping", "--evaluate"),
+                           CommandLine::make_command_line("ecflow_client", "--evaluate", "--ping"),
+                           CommandLine::make_command_line("ecflow_client", "--suspend", "/path/to/node", "--evaluate"),
+                           CommandLine::make_command_line("ecflow_client", "--get_state", "/path", "--evaluate"),
+                           CommandLine::make_command_line("ecflow_client", "--evaluate", "--stats")}) {
+        std::cout << "Testing command line: " << cl.original() << std::endl;
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // ... whereas with --query it is accepted (see test_is_able_to_handle_query for the resulting command)
+    {
+        auto cl =
+            CommandLine::make_command_line("ecflow_client", "--query", "variable", "/path/to/node:VAR", "--evaluate");
+        ClientOptions options;
+        BOOST_CHECK_NO_THROW(options.parse(cl, &environment));
+    }
+}
+
+/// Goal: --evaluate is also usable within a --group, where each sub-command is parsed separately and
+/// the leading '--' of the sub-command is optional. The same rules apply as on the command line.
+BOOST_AUTO_TEST_CASE(test_evaluate_within_group) {
+    ECF_NAME_THIS_TEST();
+
+    using Command = GroupCTSCmd;
+
+    // --evaluate with --query variable, with and without the optional leading '--'
+    for (const auto& group : {"query variable /path/to/node:VAR --evaluate",
+                              "--query variable /path/to/node:VAR --evaluate",
+                              "ping; query variable /path/to/node:VAR --evaluate"}) {
+        auto cl = CommandLine::make_command_line("ecflow_client", std::string("--group=") + group);
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE(!command.cmdVec().empty());
+            auto query = dynamic_cast<QueryCmd*>(command.cmdVec().back().get());
+            BOOST_REQUIRE_MESSAGE(query, "expected the last sub-command to be a QueryCmd");
+            BOOST_CHECK_EQUAL(query->query_type(), "variable");
+            BOOST_CHECK_EQUAL(query->path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(query->attribute(), "VAR");
+            BOOST_CHECK_EQUAL(query->evaluate(), true);
+        });
+    }
+
+    ClientEnvironment environment(false);
+
+    // --evaluate with another sub-command is rejected
+    for (const auto& group : {"ping --evaluate", "ping; suspend /path/to/node --evaluate"}) {
+        auto cl = CommandLine::make_command_line("ecflow_client", std::string("--group=") + group);
+        std::cout << "Testing command line: " << cl.original() << std::endl;
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // an unrecognised sub-command is an error (raised by boost::program_options), not a crash
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--group=ping; nonsense");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::exception);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
