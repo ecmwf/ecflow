@@ -51,6 +51,15 @@ numeric (otherwise its numeric value would be used in the expression.)
     task another
       trigger ./00z == complete # the previous task 
 
+.. danger::
+
+   Trigger operands are **integers**. A variable referenced in a trigger is converted to an integer exactly as
+   stored: references to other variables in its value (such as ``%YYYY%%MM%%DD%``) are **never** substituted, and
+   any value that is not an integer literal silently converts to ``0``. A trigger such as
+   ``trigger /s/f/t:YMD == 0`` is therefore *true* when ``YMD`` holds ``%YYYY%%MM%%DD%``. A string repeat
+   contributes the index of its current item, and an enumerated repeat its index unless the item is an integer
+   literal. Only integer-valued variables are meaningful in triggers; see :ref:`the expression specification <expr-integer-operands>` for details.
+
 For events it is convenient to use a plain name, since an event can only have values **clear** or **set**, numerically 0 or 1.
 Notice that the following triggers will hold as long as the event is not set, with the second line considered a clearer alternative.
 

@@ -5280,9 +5280,17 @@ inside scripts to branch on a node's state.
              - variable  return value of the variable, repeat or generated variable to standard out,
                          will search up the node tree. When path is '/', the variable is looked up on the
                          server itself, i.e. 'ecflow_client --query variable /:name'
+                         By default the value is returned as stored, i.e. references to other variables
+                         (such as %OTHER%) are not resolved. With the --evaluate option, all references in
+                         the value are resolved before it is returned, using the same substitution as job
+                         generation: the micro character is taken from ECF_MICRO (default '%'), references
+                         are resolved recursively, %VAR:default% uses 'default' when VAR is not defined,
+                         and a double micro character is collapsed into a single one. References are looked
+                         up in the same way as the queried variable itself (user variable, repeat, generated
+                         variable, searching up the node tree; or the server variables when path is '/').
              - trigger   returns 'true' if the expression is true, otherwise 'false'
 
-            If this command is called within a '.ecf' script we will additionally log the task calling this command
+            If this command is called within a '.ecf' script, the task calling this command is additionally logged.
             This is required to aid debugging for excessive use of this command
             The command will fail if the node path to the attribute does not exist in the definition and if:
              - repeat   The repeat is not found
@@ -5291,8 +5299,11 @@ inside scripts to branch on a node's state.
              - limit/limit_max The limit is not found
              - label    The label is not found
              - variable No user or generated variable or repeat of that name found on node or its parents,
-                        or (when path is '/') no user or server variable of that name found on the server
+                        or (when path is '/') no user or server variable of that name found on the server;
+                        or, with --evaluate, a reference in the value cannot be resolved (a partially
+                        resolved value is never returned)
              - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid
+             - --evaluate is used with an attribute other than variable
 
             Argument(s):
 
@@ -5304,6 +5315,11 @@ inside scripts to branch on a node's state.
 
                 value: trigger expression | prev | next
                     # The values `prev` and `next` are only used when the attribute is a repeat
+
+            Option(s):
+
+                --evaluate
+                    # Only valid when the attribute is a variable: resolve all variable references in the value.
 
             Usage:
 
@@ -5319,6 +5335,7 @@ inside scripts to branch on a node's state.
                 --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out
                 --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out
                 --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out
+                --query variable /path/to/task/with/var:var_name --evaluate # returns the variable value with references resolved
                 --query variable /:var_name                         # returns the server variable value to standard out
                 --query trigger /path/to/node/with/trigger "/suite/task == complete" # return true if expression evaluates false otherwise
 

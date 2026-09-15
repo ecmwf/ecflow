@@ -1849,7 +1849,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.query(self: ecflow.Client, query_type: str, path_to_attribute: str, attribute: str = '') -> str
+.. py:method:: Client.query(self: ecflow.Client, query_type: str, path_to_attribute: str, attribute: str = '', evaluate: bool = False) -> str
    :module: ecflow
 
 Query the status of event, meter, state, variable, limit, limit_max or trigger expression without blocking
@@ -1861,7 +1861,9 @@ Query the status of event, meter, state, variable, limit, limit_max or trigger e
 - limit,     return value of the limit to standard out
 - limit_max, return maximum value of the limit to standard out
 - trigger,   returns :code:`true` if the expression is true, otherwise :code:`false`
-- variable,  return the variable value to standard out.
+- variable,  return the variable value to standard out. By default, the value is returned as stored;
+             when :code:`evaluate` is true, all variable references (e.g. :code:`%VAR%`) in the value
+             are resolved before it is returned
 
 
 .. important:: 
@@ -1876,6 +1878,8 @@ Query the status of event, meter, state, variable, limit, limit_max or trigger e
      string path_to_attribute # path to the attribute.
                               # the path '/', the server itself, can only be used with 'state' or 'variable'
      string attribute         # name of the attribute or trigger expression
+     bool evaluate            # (optional, default False) only valid with 'variable': resolve all
+                              # variable references in the value
   )
 
 By default throws a exception for errors.
@@ -1889,22 +1893,25 @@ Exceptions can be raised if the path to the attribute does not exist and because
 - No variable of the given name (repeat or generated variable) exists on the
   specified node or any of its parent, or (when path_to_attribute is '/') no user or
   server variable of that name exists on the server
+- evaluate is true and the query type is not 'variable'
+- evaluate is true and a variable reference in the value cannot be resolved
 
 Usage:
 
 .. code-block:: python
 
    try:
-       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-       res = ci.query('event','/path/to/node','event_name') # returns 'SET' | 'CLEAR'
-       res = ci.query('meter','/path/to/node','meter_name') # returns meter value as a string
-       res = ci.query('limit','/path/to/node','limit_name') # returns limit value as a string
-       res = ci.query('limit_max','/path/to/node','limit_name') # returns max limit value as a string
-       res = ci.query('variable','/path/to/node,'var')      # returns variable value as a string
-       res = ci.query('variable','/','SCHOST')              # returns value of server variable as a string
+       ci = Client()                                                  # use default host(ECF_HOST) & port(ECF_PORT)
+       res = ci.query('event','/path/to/node','event_name')           # returns 'SET' | 'CLEAR'
+       res = ci.query('meter','/path/to/node','meter_name')           # returns meter value as a string
+       res = ci.query('limit','/path/to/node','limit_name')           # returns limit value as a string
+       res = ci.query('limit_max','/path/to/node','limit_name')       # returns max limit value as a string
+       res = ci.query('variable','/path/to/node','var')               # returns variable value as a string
+       res = ci.query('variable','/path/to/node','var',evaluate=True) # returns variable value, references resolved
+       res = ci.query('variable','/','SCHOST')                        # returns value of server variable as a string
        res = ci.query('trigger','/path/to/node','/joe90 == complete') # return 'true' | 'false' as a string
-       res = ci.query('state','/path/to/node') # return node state as a string
-       res = ci.query('dstate','/path/to/node') # return node state as a string,can include suspended
+       res = ci.query('state','/path/to/node')                        # return node state as a string
+       res = ci.query('dstate','/path/to/node')                       # return node state as a string, can include suspended
    except RuntimeError, e:
        print str(e)
 

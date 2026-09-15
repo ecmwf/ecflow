@@ -25,6 +25,7 @@ Where:
 * arg2 = <path> | <path>:name     where name is name of a event, meter,limit or variable.
   Path :code:`/` represents the server itself, and can only be used with :code:`state` or :code:`variable`
 * arg3 = trigger expression (optional)  | prev | next    # prev,next only used when arg1 is repeat
+* :code:`--evaluate` (optional)  # only with :code:`variable`: resolve variable references in the value
 
 Some examples using the query command:
 
@@ -51,8 +52,11 @@ Some examples using the query command:
     # returns the current value of the meter 
     meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name) 
     
-    # returns the variable value
+    # returns the variable value, as stored (e.g. '%YYYY%%MM%%DD%')
     value=$(ecflow_client --query variable /path/to/task/with/var:var_name)
+
+    # returns the variable value with variable references resolved (e.g. '20240101')
+    value=$(ecflow_client --query variable /path/to/task/with/var:var_name --evaluate)
 
     # returns the value of a variable attached to the server itself
     value=$(ecflow_client --query variable /:ECF_PORT)
@@ -68,6 +72,18 @@ Some examples using the query command:
     
     # return true if expression evaluates false otherwise
     value=$(ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\") 
+
+A variable value may itself refer to other variables, for example :code:`edit YMD '%YYYY%%MM%%DD%'`.
+By default :code:`--query variable` returns such a value exactly as stored; the :code:`--evaluate`
+option resolves the references first, following the same rules as job generation
+(see :ref:`query_cli_evaluate`). A reference that cannot be resolved is an error.
+
+.. danger::
+
+   Variables referenced in :term:`trigger` and :term:`complete expressions <complete expression>` are
+   **never** evaluated in this way. Expression operands are integers, and a variable whose value is not
+   an integer literal (such as :code:`%YYYY%%MM%%DD%`) converts to :code:`0` without any warning.
+   See :ref:`expression_spec`.
 
 Update Task Script
 ------------------

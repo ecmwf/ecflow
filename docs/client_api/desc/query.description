@@ -36,12 +36,16 @@ variable, limit , limit_max or trigger expression without blocking
 -  variable      return value of the variable, repeat or generated
    variable to standard out, will search up the node tree. When
    path is ``/``, the variable is looked up on the server itself,
-   i.e. ``ecflow_client --query variable /:name``
+   i.e. ``ecflow_client --query variable /:name``.
+   By default the value is returned as stored, i.e. references to other
+   variables (such as ``%OTHER%``) are not resolved. With the
+   ``--evaluate`` option, all references in the value are resolved before
+   it is returned; see :ref:`query_cli_evaluate` below.
 
 -  trigger        returns 'true' if the expression is true, otherwise
    'false'
 
-If this command is called within a '.ecf' script we will additionally log the task calling this command
+If this command is called within a '.ecf' script, the task calling this command is additionally logged.
 
 This is required to aid debugging for excessive use of this command
 
@@ -60,10 +64,14 @@ in the definition and if:
 
 -  variable No user or generated variable or repeat of that name found
    on node, or any of its parents. When path is ``/``, no user or
-   server variable of that name found on the server
+   server variable of that name found on the server. With
+   ``--evaluate``, a reference in the value cannot be resolved (a
+   partially resolved value is never returned)
 
 -  trigger  Trigger does not parse, or reference to nodes/attributes in
    the expression are not valid
+
+-  ``--evaluate`` is used with an attribute other than ``variable``
 
 Arguments:
 
@@ -77,6 +85,62 @@ Arguments:
 -  arg3 = trigger expression (optional)  \| prev \| next    # prev,next
    only used when arg1 is repeat
 
+Options:
+
+-  ``--evaluate`` (optional) only valid when arg1 is ``variable``: resolve
+   all variable references in the value
+
+.. _query_cli_evaluate:
+
+Evaluating variable references
+------------------------------
+
+A variable value may itself refer to other variables, for example
+``edit YMD '%YYYY%%MM%%DD%'``. Such references are only resolved when a
+job is generated; ``--query variable`` returns the value exactly as
+stored. The ``--evaluate`` option requests that the references be
+resolved, using the same substitution rules as job generation:
+
+-  the micro character is taken from the ``ECF_MICRO`` variable, found by
+   searching up the node tree from the queried node (default ``%``);
+
+-  each reference is looked up in the same way as the queried variable
+   itself: user variable, repeat, then generated variable, searching up
+   the node tree from the queried node (or among the server variables,
+   when path is ``/``); the generated variables ``ECF_HOST``,
+   ``ECF_PORT``, ``ECF_TRYNO``, ``ECF_NAME`` and ``ECF_PASS`` take
+   precedence over user variables of the same name;
+
+-  references are resolved recursively, so that ``%A%`` where ``A`` is
+   ``%B%`` and ``B`` is ``value`` yields ``value``; a self-referencing
+   chain is reported as an error rather than looping forever;
+
+-  ``%VAR:default%`` yields the value of ``VAR`` when it is defined, and
+   ``default`` otherwise;
+
+-  a double micro character (``%%``) is collapsed into a single one.
+
+A reference that cannot be resolved is an error: the command fails and
+no partially resolved value is returned. ``--evaluate`` is only accepted
+together with the ``variable`` attribute; combining it with any other
+attribute is an error.
+
+.. code-block:: shell
+
+   # given: suite s / family f (repeat YYYY) / family m (repeat MM) / family d (repeat DD)
+   #        and, on task t: edit YMD '%YYYY%%MM%%DD%'
+   ecflow_client --query variable /s/f/m/d/t:YMD             # %YYYY%%MM%%DD%
+   ecflow_client --query variable /s/f/m/d/t:YMD --evaluate  # 20240101
+
+.. danger::
+
+   The value of a variable used in a :term:`trigger` or :term:`complete
+   expression` is **never** evaluated in this way. Expression operands
+   are integers: a variable whose value is not an integer literal (such
+   as ``%YYYY%%MM%%DD%``) converts to ``0`` without any warning, so a
+   trigger such as ``/s/f/m/d/t:YMD == 0`` is *true*. See
+   :ref:`expression_spec` for details.
+
 Usage:
 
 .. code-block:: shell
@@ -89,6 +153,7 @@ Usage:
    event=$(ecflow_client --query event /path/to/task/with/event:event_name)                        # return set | clear to standard out
    meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name)                        # returns the current value of the meter to standard out
    value=$(ecflow_client --query variable /path/to/task/with/var:var_name )                        # returns the variable value to standard out
+   value=$(ecflow_client --query variable /path/to/task/with/var:var_name --evaluate)              # returns the variable value with references resolved
    value=$(ecflow_client --query variable /:var_name )                                              # returns the server variable value to standard out
    limit_value=$(ecflow_client --query limit  /path/to/task/with/limit:limit_name)                 # returns the current value of the limit to standard out
    limit_max=$(ecflow_client --query limit_max /path/to/task/with/limit:limit_name)                # returns the max value of the limit to standard out
