@@ -40,17 +40,58 @@ public:
     const std::string& path_to_attribute() const { return path_to_attribute_; }
     const std::string& attribute() const { return attribute_; }
     const std::string& path_to_task() const { return path_to_task_; }
+
+    ///
+    /// @brief Indicates whether the variable references in the queried value are to be resolved.
+    ///
+    /// @return true when --evaluate was requested; only meaningful for query type 'variable'
+    ///
     bool evaluate() const { return evaluate_; }
 
-    void print(std::string&) const override;
-    void print_only(std::string&) const override;
-    bool equals(ClientToServerCmd*) const override;
+    ///
+    /// @brief Appends the command, as logged by the server, followed by the user and client host.
+    ///
+    /// @param[out] os the string the command is appended to
+    ///
+    void print(std::string& os) const override;
+
+    ///
+    /// @brief Appends the command as logged by the server, without user and client host.
+    ///
+    /// @param[out] os the string the command is appended to
+    ///
+    void print_only(std::string& os) const override;
+
+    ///
+    /// @brief Compares this command with another one.
+    ///
+    /// @param[in] rhs the command to compare with
+    /// @return true when @p rhs is a QueryCmd with the same query type, path, attribute, calling task path and
+    ///         evaluate flag, and the base class considers the commands equal
+    ///
+    bool equals(ClientToServerCmd* rhs) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
     [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
 
     const char* theArg() const override { return arg(); }
+
+    ///
+    /// @brief Registers the --query option (multi-token) and its --evaluate modifier (value-less).
+    ///
+    /// @param[in,out] desc the description the options are added to
+    ///
     void addOption(boost::program_options::options_description& desc) const override;
+
+    ///
+    /// @brief Creates the command from the parsed command line options.
+    ///
+    /// @param[out] cmd the created command
+    /// @param[in] vm the parsed options; the --query tokens are validated per query type, and --evaluate is
+    ///               accepted only with query type 'variable'
+    /// @param[in] clientEnv the client environment, providing the calling task path (ECF_NAME) for logging
+    /// @throws std::runtime_error when the query type, its arguments or the --evaluate combination are invalid
+    ///
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
@@ -64,7 +105,16 @@ private:
     std::string print_as_string() const;
 
     bool handleRequestIsTestable() const override { return false; }
-    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+
+    ///
+    /// @brief Dispatches the query to the handler of its query type.
+    ///
+    /// @param[in] as the server holding the definition
+    /// @return the reply carrying the queried value as a string
+    /// @throws std::runtime_error when --evaluate is combined with a query type other than 'variable', or when
+    ///         the query type is unknown
+    ///
+    STC_Cmd_ptr doHandleRequest(AbstractServer* as) const override;
 
     // Handling of each query type is delegated to one of the functions below, keeping
     // doHandleRequest() as a simple dispatch on query_type_.
@@ -81,7 +131,18 @@ private:
     STC_Cmd_ptr doHandleQueryForLimit(Defs*) const;
     STC_Cmd_ptr doHandleQueryForLimitMax(Defs*) const;
     STC_Cmd_ptr doHandleQueryForLabel(Defs*) const;
-    STC_Cmd_ptr doHandleQueryForVariable(Defs*) const;
+
+    ///
+    /// @brief Returns the value of a user, repeat or generated variable, searching up the node tree, or of a
+    ///        server variable when the path is '/'.
+    ///
+    /// @param[in] defs the definition being queried
+    /// @return the reply carrying the value as stored or, when evaluate() is true, with all variable references
+    ///         resolved
+    /// @throws std::runtime_error when the variable is not found, or when evaluate() is true and a reference in
+    ///         the value cannot be resolved (a partially resolved value is never returned)
+    ///
+    STC_Cmd_ptr doHandleQueryForVariable(Defs* defs) const;
     STC_Cmd_ptr doHandleQueryForTrigger(Defs*) const;
 
 private:

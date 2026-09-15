@@ -688,21 +688,41 @@ public:
     // This is used to find relative nodes.
     virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode) = 0;
 
-    /// Look for user,generated and repeat variables
-    /// Find variable corresponding to the given name, by search up the parent hierarchy
-    /// ** We need to distinguish between a variable the exists, but has an empty value
-    /// ** hence we return true if variable is found, and false otherwise
+    ///
+    /// @brief Finds the value of a user, repeat or generated variable, searching this node, then its ancestors,
+    ///        and finally the server variables.
+    ///
+    /// A variable is found by presence, so that a variable that exists with an empty value is distinguished from
+    /// a variable that does not exist.
+    ///
+    /// @param[in] name the variable name
+    /// @param[out] theValue the value of the variable, when found (possibly empty)
+    /// @return true when the variable is found, false otherwise
+    ///
     bool findParentVariableValue(const std::string& name, std::string& theValue) const;
 
-    /// Look for the parent generated variable only
+    ///
+    /// @brief Finds the value of a generated variable, searching this node, then its ancestors, and finally the
+    ///        server variables.
+    ///
+    /// @param[in] name the variable name
+    /// @param[out] theValue the value of the variable, when found (possibly empty)
+    /// @return true when the variable is found, false otherwise
+    ///
     bool find_parent_gen_variable_value(const std::string& name, std::string& theValue) const;
 
-    /// Only looks at user variables
-    /// Find variable corresponding to the given name, by search up the parent hierarchy
-    /// Use when we know that variable is user defined. This is more efficient than
-    /// calling findParentVariableValue.
-    /// *** We need to distinguish between a variable the exists, but has an empty value
-    /// *** hence we return true if variable is found, and false otherwise
+    ///
+    /// @brief Finds the value of a user variable, searching this node, then its ancestors, and finally the server
+    ///        variables.
+    ///
+    /// This is more efficient than findParentVariableValue() when the variable is known to be user defined. A
+    /// variable is found by presence, so that a variable that exists with an empty value is distinguished from a
+    /// variable that does not exist.
+    ///
+    /// @param[in] name the variable name
+    /// @param[out] theValue the value of the variable, when found (possibly empty)
+    /// @return true when the variable is found, false otherwise
+    ///
     bool findParentUserVariableValue(const std::string& name, std::string& theValue) const;
 
     /// This function should be used, when we do not care about the distinctions between
