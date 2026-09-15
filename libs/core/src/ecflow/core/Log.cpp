@@ -364,6 +364,7 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
     log_type_and_time_stamp_ += time_stamp_;
 
     if (message.find("\n") == std::string::npos) {
+        // If message has no \n then write in one go
         file_ << log_type_and_time_stamp_ << message;
         if (newline) {
             file_ << '\n';
