@@ -9,6 +9,7 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
@@ -1108,6 +1109,31 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_self_reference) {
     BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "LOOP"), std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_returns_empty_value) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a node variable that exists with an empty value evaluates to an empty string, with and without
+    // --evaluate; and a reference to such a variable is replaced by nothing.
+    //
+
+    Defs defs   = make_test_defs();
+    node_ptr t1 = defs.findAbsNode("/suite/f/t1");
+    t1->add_variable("EMPTY", "");
+    t1->add_variable("REF", "[%EMPTY%]");
+
+    std::string res = "<not set>";
+    BOOST_CHECK_NO_THROW(res = invoke_query(defs, "variable", "/suite/f/t1", "EMPTY"));
+    BOOST_CHECK_MESSAGE(res.empty(), "expected an empty value but found: " << res);
+
+    res = "<not set>";
+    BOOST_CHECK_NO_THROW(res = invoke_evaluated_variable_query(defs, "/suite/f/t1", "EMPTY"));
+    BOOST_CHECK_MESSAGE(res.empty(), "expected an empty evaluated value but found: " << res);
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "[]");
+}
+
 BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unknown_variable) {
     ECF_NAME_THIS_TEST();
     TestLog test_log("test_query_cmd.log");
@@ -1191,6 +1217,132 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_reference_to_empty_se
     BOOST_CHECK_MESSAGE(res.empty(), "expected an empty value but found: " << res);
 }
 
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_returns_empty_server_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', a server variable that exists with an empty value evaluates to an empty string,
+    // and a reference to it is replaced by nothing. An unknown server variable, by contrast, fails.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("EMPTY", "");
+    defs.server_state().add_or_update_user_variables("REF", "[%EMPTY%]");
+
+    std::string res = "<not set>";
+    BOOST_CHECK_NO_THROW(res = invoke_evaluated_variable_query(defs, "/", "EMPTY"));
+    BOOST_CHECK_MESSAGE(res.empty(), "expected an empty evaluated value but found: " << res);
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "REF"), "[]");
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/", "XXXX_SERVER_VAR"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_nested_server_variable_references) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', references are resolved recursively (A -> %B% -> %C% -> value) through the server
+    // variables, across user and generated server variables.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().set_server_variables({Variable("ECF_PORT", "3141")});
+    defs.server_state().add_or_update_user_variables("A", "%B%");
+    defs.server_state().add_or_update_user_variables("B", "%C%:%ECF_PORT%");
+    defs.server_state().add_or_update_user_variables("C", "value");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "A"), "value:3141");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_uses_default_for_missing_server_variable_reference) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', the %VAR:default% form uses the default value when VAR is not defined, and the
+    // variable value when it is.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("DEFINED", "defined");
+    defs.server_state().add_or_update_user_variables("WITH_DEFAULT", "%UNDEFINED:fallback%");
+    defs.server_state().add_or_update_user_variables("DEFINED_WINS", "%DEFINED:fallback%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "WITH_DEFAULT"), "fallback");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "DEFINED_WINS"), "defined");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_collapses_double_micro_in_server_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', a double micro character is collapsed into a single one.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("PERCENT", "100%%");
+    defs.server_state().add_or_update_user_variables("FORMAT", "date +%%Y%%m%%d");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "PERCENT"), "100%");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "FORMAT"), "date +%Y%m%d");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_honours_ecf_micro_in_server_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', the micro character is taken from the ECF_MICRO server variable; references using
+    // the default '%' are then left as-is.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("ECF_MICRO", "#");
+    defs.server_state().add_or_update_user_variables("TARGET", "target");
+    defs.server_state().add_or_update_user_variables("REF", "#TARGET#-%TARGET%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "REF"), "target-%TARGET%");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_server_variable_cycle) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', a self-referencing variable and a mutually referencing pair are errors, and do not
+    // hang.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("LOOP", "%LOOP%");
+    defs.server_state().add_or_update_user_variables("PING", "%PONG%");
+    defs.server_state().add_or_update_user_variables("PONG", "%PING%");
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/", "LOOP"), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/", "PING"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_node_variable_cycle) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a mutually referencing pair of node variables is an error, and does not hang (the self-reference
+    // case is covered by test_query_variable_evaluate_fails_for_self_reference).
+    //
+
+    Defs defs   = make_test_defs();
+    node_ptr t1 = defs.findAbsNode("/suite/f/t1");
+    t1->add_variable("PING", "%PONG%");
+    t1->add_variable("PONG", "%PING%");
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "PING"), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE(test_query_evaluate_fails_for_non_variable_query_type) {
     ECF_NAME_THIS_TEST();
     TestLog test_log("test_query_cmd.log");
@@ -1235,6 +1387,58 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_print_includes_evaluate_option
         QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t2", false);
         cmd.print_only(printed);
         BOOST_CHECK_EQUAL(printed, "--query=variable /suite/f/t1:var1 /suite/f/t2");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_query_evaluate_equality) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: two query commands are equal only when the evaluate flag matches, in addition to every other
+    // field; the comparison is symmetric.
+    //
+
+    QueryCmd raw("variable", "/suite/f/t1", "var1", "/suite/f/t2", false);
+    QueryCmd raw_again("variable", "/suite/f/t1", "var1", "/suite/f/t2", false);
+    QueryCmd evaluated("variable", "/suite/f/t1", "var1", "/suite/f/t2", true);
+    QueryCmd evaluated_again("variable", "/suite/f/t1", "var1", "/suite/f/t2", true);
+
+    BOOST_CHECK(raw.equals(&raw_again));
+    BOOST_CHECK(evaluated.equals(&evaluated_again));
+    BOOST_CHECK(!raw.equals(&evaluated));
+    BOOST_CHECK(!evaluated.equals(&raw));
+
+    // the default for the flag is false
+    QueryCmd defaulted("variable", "/suite/f/t1", "var1", "/suite/f/t2");
+    BOOST_CHECK(defaulted.equals(&raw));
+    BOOST_CHECK(!defaulted.equals(&evaluated));
+}
+
+BOOST_AUTO_TEST_CASE(test_query_evaluate_cts_api_argument_vector) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: the argument vector generated by CtsApi::query() carries --evaluate as a standalone trailing token
+    // when requested, and nothing extra otherwise; this is the form used by the test interface and logging.
+    //
+
+    {
+        std::vector<std::string> expected = {"--query=variable", "/suite/f/t1:var1", "--evaluate"};
+        std::vector<std::string> actual   = CtsApi::query("variable", "/suite/f/t1", "var1", true);
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+    {
+        std::vector<std::string> expected = {"--query=variable", "/suite/f/t1:var1"};
+        std::vector<std::string> actual   = CtsApi::query("variable", "/suite/f/t1", "var1", false);
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+    {
+        // the default for the flag is false
+        std::vector<std::string> expected = {"--query=variable", "/:SERVER_VAR"};
+        std::vector<std::string> actual   = CtsApi::query("variable", "/", "SERVER_VAR");
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
     }
 }
 
