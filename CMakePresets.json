@@ -179,6 +179,12 @@
         "Boost_INCLUDE_DIR": "/usr/include"
       },
       "environment": {}
+    },
+    {
+      "name": "ci",
+      "cacheVariables": {
+        "ENABLE_ALL_TESTS": "ON"
+      }
     }
   ],
   "buildPresets": [
