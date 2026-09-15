@@ -229,6 +229,8 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TODAY, "10:00 20:00 00:30")));
     cmd_vec.push_back(Cmd_ptr(new PlugCmd()));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("event", "/suiteName/t1", "event", "")));
+    cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));
+    cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", true)));
 
     std::shared_ptr<GroupCTSCmd> theGroupCmd = std::make_shared<GroupCTSCmd>();
     theGroupCmd->addChild(Cmd_ptr(new ServerVersionCmd()));

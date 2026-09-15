@@ -31,10 +31,11 @@ QueryCmd::~QueryCmd() = default;
 void QueryCmd::print(std::string& os) const {
     // path_to_task_ is only used in logging, so we know which task initiated the query, can be empty when invoked via
     // cmd line
-    user_cmd(os, CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_)) + path_to_task_);
+    user_cmd(os,
+             CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_, evaluate_)) + path_to_task_);
 }
 void QueryCmd::print_only(std::string& os) const {
-    os += CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_));
+    os += CtsApi::to_string(CtsApi::query(query_type_, path_to_attribute_, attribute_, evaluate_));
     os += path_to_task_;
 }
 
@@ -55,6 +56,9 @@ bool QueryCmd::equals(ClientToServerCmd* rhs) const {
     if (path_to_task_ != the_rhs->path_to_task()) {
         return false;
     }
+    if (evaluate_ != the_rhs->evaluate()) {
+        return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -68,14 +72,18 @@ ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
+    // --evaluate is a value-less modifier, only meaningful for '--query variable'
+    desc.add_options()(CtsApi::query_evaluate_arg(), "");
 }
 
 void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    auto args = vm[arg()].as<std::vector<std::string>>();
+    auto args     = vm[arg()].as<std::vector<std::string>>();
+    bool evaluate = vm.count(CtsApi::query_evaluate_arg()) > 0;
 
     if (clientEnv->debug()) {
         dumpVecArgs(QueryCmd::arg(), args);
-        std::cout << "  QueryCmd::create " << QueryCmd::arg() << " task_path(" << clientEnv->task_path() << ")\n";
+        std::cout << "  QueryCmd::create " << QueryCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") evaluate(" << evaluate << ")\n";
     }
 
     std::string query_type;
@@ -158,6 +166,13 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
                     << query_type));
     }
 
+    // Only checked once the query type is known to be valid, so that a missing/invalid query type is reported as such
+    if (evaluate && query_type != "variable") {
+        throw std::runtime_error(MESSAGE("QueryCmd: --"
+                                         << CtsApi::query_evaluate_arg()
+                                         << " is only valid with query type 'variable', but found: " << query_type));
+    }
+
     if (path_to_attribute.empty() || (!path_to_attribute.empty() && path_to_attribute[0] != '/')) {
         throw std::runtime_error(MESSAGE("QueryCmd: invalid path to attribute: " << path_to_attribute));
     }
@@ -169,7 +184,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         throw std::runtime_error(MESSAGE("QueryCmd: invalid path to task: " << path_to_task));
     }
 
-    cmd = std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, path_to_task);
+    cmd = std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, path_to_task, evaluate);
 }
 
 const char* QueryCmd::arg() {
@@ -180,6 +195,14 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().query_++;
 
     Defs* defs = as->defs().get();
+
+    // The CLI already rejects this combination, but the command can also be built directly (e.g. via the C++/Python
+    // client API), hence the check is repeated here.
+    if (evaluate_ && query_type_ != "variable") {
+        throw std::runtime_error(MESSAGE("QueryCmd: --"
+                                         << CtsApi::query_evaluate_arg()
+                                         << " is only valid with query type 'variable', but found: " << query_type_));
+    }
 
     if (query_type_ == "state") {
         return doHandleQueryForState(defs);
@@ -327,16 +350,37 @@ STC_Cmd_ptr QueryCmd::doHandleQueryForVariable(Defs* defs) const {
         if (!defs->server_state().variable_exists(attribute_)) {
             throw std::runtime_error(MESSAGE("QueryCmd: Cannot find server variable of name " << attribute_));
         }
-        return PreAllocatedReply::string_cmd(defs->server_state().find_variable(attribute_));
+        std::string the_value = defs->server_state().find_variable(attribute_);
+        if (evaluate_) {
+            std::string evaluated = the_value;
+            if (!defs->server_state().variableSubstitution(evaluated)) {
+                // Never return a partially substituted value: an unresolved reference is an error
+                throw std::runtime_error(MESSAGE("QueryCmd: Cannot evaluate server variable of name "
+                                                 << attribute_ << ", found unresolved variable reference in '"
+                                                 << the_value << "'"));
+            }
+            return PreAllocatedReply::string_cmd(evaluated);
+        }
+        return PreAllocatedReply::string_cmd(the_value);
     }
 
     node_ptr node = find_node(defs, path_to_attribute_);
     std::string the_value;
-    if (node->findParentVariableValue(attribute_, the_value)) {
-        return PreAllocatedReply::string_cmd(the_value);
+    if (!node->findParentVariableValue(attribute_, the_value)) {
+        throw std::runtime_error(MESSAGE("QueryCmd: Cannot find variable, repeat or generated var' of name "
+                                         << attribute_ << " on node " << path_to_attribute_ << " or its parents"));
     }
-    throw std::runtime_error(MESSAGE("QueryCmd: Cannot find variable, repeat or generated var' of name "
-                                     << attribute_ << " on node " << path_to_attribute_ << " or its parents"));
+    if (evaluate_) {
+        std::string evaluated = the_value;
+        if (!node->variableSubstitution(evaluated)) {
+            // Never return a partially substituted value: an unresolved reference is an error
+            throw std::runtime_error(MESSAGE("QueryCmd: Cannot evaluate variable of name "
+                                             << attribute_ << " on node " << path_to_attribute_
+                                             << ", found unresolved variable reference in '" << the_value << "'"));
+        }
+        return PreAllocatedReply::string_cmd(evaluated);
+    }
+    return PreAllocatedReply::string_cmd(the_value);
 }
 
 STC_Cmd_ptr QueryCmd::doHandleQueryForTrigger(Defs* defs) const {

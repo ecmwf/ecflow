@@ -2433,6 +2433,63 @@ class TestClientApi:
             "Expected to find suite state queued but found: " + res
         )
 
+    def test_client_query_variable_evaluate(self):
+        print_test(self.ci, "test_client_query_variable_evaluate")
+        self.ci.delete_all()
+        defs = create_defs(
+            "test_client_query_variable_evaluate", self.ci.get_port(), self.protocol
+        )
+        suite = defs.find_suite("test_client_query_variable_evaluate")
+        suite.add_variable("YYYY", "2000")
+        family = suite.find_family("f1")
+        family.add_variable("MM", "01")
+        task = family.find_task("t1")
+        task.add_variable("DD", "02")
+        task.add_variable("YMD", "%YYYY%%MM%%DD%")
+        task.add_variable("BAD", "%UNDEFINED%")
+        path = task.get_abs_node_path()
+
+        self.ci.load(defs)
+
+        # By default, the value is returned as stored
+        res = self.ci.query("variable", path, "YMD")
+        assert res == "%YYYY%%MM%%DD%", (
+            "Expected raw variable value '%YYYY%%MM%%DD%' but found: " + res
+        )
+
+        # With evaluate, variable references are resolved
+        res = self.ci.query("variable", path, "YMD", evaluate=True)
+        assert res == "20000102", (
+            "Expected evaluated variable value '20000102' but found: " + res
+        )
+        res = self.ci.query("variable", path, "YMD", True)
+        assert res == "20000102", (
+            "Expected evaluated variable value '20000102' but found: " + res
+        )
+
+        # Server variables (path '/') are evaluated against the server variables
+        res = self.ci.query("variable", "/", "ECF_PORT", evaluate=True)
+        assert res == str(self.ci.get_port()), (
+            "Expected evaluated server variable value "
+            + str(self.ci.get_port())
+            + " but found: "
+            + res
+        )
+
+        # An unresolved reference is an error, a partially substituted value is never returned
+        try:
+            self.ci.query("variable", path, "BAD", evaluate=True)
+            assert False, "Expected evaluate to fail for an unresolved reference"
+        except RuntimeError:
+            pass
+
+        # evaluate is only valid with query type 'variable'
+        try:
+            self.ci.query("state", path, "", evaluate=True)
+            assert False, "Expected evaluate to fail for a non-variable query type"
+        except RuntimeError:
+            pass
+
     def test_client_suspend_multiple_paths(self):
         print_test(self.ci, "test_client_suspend_multiple_paths")
         self.ci.delete_all()

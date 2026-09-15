@@ -1488,6 +1488,39 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_query) {
             BOOST_CHECK_EQUAL(command.query_type(), "variable");
             BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
             BOOST_CHECK_EQUAL(command.attribute(), "MY_VAR");
+            BOOST_CHECK_EQUAL(command.evaluate(), false);
+        });
+    }
+    {
+        // --evaluate after the query arguments
+        auto cl = CommandLine::make_command_line(
+            "ecflow_client", "--query", "variable", "/path/to/node:MY_VAR", "--evaluate");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "variable");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "MY_VAR");
+            BOOST_CHECK_EQUAL(command.evaluate(), true);
+        });
+    }
+    {
+        // --evaluate before the query arguments
+        auto cl = CommandLine::make_command_line(
+            "ecflow_client", "--evaluate", "--query", "variable", "/path/to/node:MY_VAR");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "variable");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "MY_VAR");
+            BOOST_CHECK_EQUAL(command.evaluate(), true);
+        });
+    }
+    {
+        // --evaluate with a server variable (path '/')
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "variable", "/:SERVER_VAR", "--evaluate");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "variable");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/");
+            BOOST_CHECK_EQUAL(command.attribute(), "SERVER_VAR");
+            BOOST_CHECK_EQUAL(command.evaluate(), true);
         });
     }
     {
@@ -1561,6 +1594,20 @@ BOOST_AUTO_TEST_CASE(test_query_rejects_invalid_arguments) {
     // ... and the expression must parse (validated eagerly, client-side, in create()).
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--query", "trigger", "/path/to/node", "1 == ");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // --evaluate is only valid with query type 'variable'.
+    for (const auto& query_type : {"state", "dstate", "repeat", "event", "meter", "label", "limit", "limit_max"}) {
+        auto cl =
+            CommandLine::make_command_line("ecflow_client", "--query", query_type, "/path/to/node:name", "--evaluate");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    {
+        auto cl = CommandLine::make_command_line(
+            "ecflow_client", "--query", "trigger", "/path/to/node", "1 == 1", "--evaluate");
         ClientOptions options;
         BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
     }

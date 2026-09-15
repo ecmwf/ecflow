@@ -202,8 +202,10 @@ public:
                                                 const std::string& path_to_script = "",
                                                 bool create_alias                 = false,
                                                 bool run                          = true);
-    static std::vector<std::string>
-    query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute);
+    static std::vector<std::string> query(const std::string& query_type,
+                                          const std::string& path_to_attribute,
+                                          const std::string& attribute,
+                                          bool evaluate = false);
 
     // Only to be used in Cmd
     static const char* server_version_arg();
@@ -275,6 +277,7 @@ public:
     static const char* alterArg();
     static const char* edit_script_arg();
     static const char* queryArg();
+    static const char* query_evaluate_arg();
 };
 
 #endif /* ecflow_base_cts_user_CtsApi_HPP */

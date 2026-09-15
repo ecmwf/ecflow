@@ -120,6 +120,7 @@ static std::string invoke(Defs& defs, const Cmd_ptr& cmd) {
 /// @param path_to_attribute the path to the node whose attribute is being queried
 /// @param attribute the name of the attribute being queried (empty for state and dstate)
 /// @param path_to_task the path to the task that is invoking the query (for logging only)
+/// @param evaluate only valid with query type 'variable': resolve variable references in the value
 /// @return the text-based reply, when command handling is successful; otherwise, empty string.
 /// @throws std::runtime_error or whatever the command handling throws when the command fails
 ///
@@ -127,8 +128,25 @@ static std::string invoke_query(Defs& defs,
                                 const std::string& query_type,
                                 const std::string& path_to_attribute,
                                 const std::string& attribute    = "",
-                                const std::string& path_to_task = "/suite/f/t1") {
-    return invoke(defs, Cmd_ptr(new QueryCmd(query_type, path_to_attribute, attribute, path_to_task)));
+                                const std::string& path_to_task = "/suite/f/t1",
+                                bool evaluate                   = false) {
+    return invoke(defs, Cmd_ptr(new QueryCmd(query_type, path_to_attribute, attribute, path_to_task, evaluate)));
+}
+
+///
+/// @brief Invokes a `--query variable <path>:<name> --evaluate` on the given `defs`
+///
+/// This is a convenience wrapper over `invoke_query()`, for the evaluated variable queries.
+///
+/// @param defs the suite definition being used
+/// @param path_to_attribute the path to the node whose variable is being queried ('/' for the server)
+/// @param attribute the name of the variable being queried
+/// @return the text-based reply, when command handling is successful; otherwise, empty string.
+/// @throws std::runtime_error or whatever the command handling throws when the command fails
+///
+static std::string
+invoke_evaluated_variable_query(Defs& defs, const std::string& path_to_attribute, const std::string& attribute) {
+    return invoke_query(defs, "variable", path_to_attribute, attribute, "/suite/f/t1", true);
 }
 
 } // namespace
@@ -891,6 +909,254 @@ BOOST_AUTO_TEST_CASE(test_query_fails_for_unsupported_query_type_against_server)
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_ServerVariable
+
+BOOST_AUTO_TEST_SUITE(T_EvaluatedVariable)
+
+//
+// Scope: --query variable <path>:name --evaluate
+//
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_returns_value_without_references_unchanged) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a variable whose value holds no variable reference is returned as stored, with or without --evaluate.
+    //
+
+    Defs defs = make_test_defs();
+    BOOST_CHECK_EQUAL(invoke_query(defs, "variable", "/suite/f/t1", "var1"), "var1");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "var1"), "var1");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_references_to_parent_variables) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: the scenario from ECFLOW-1975, i.e. a task variable composed of the values of parent variables.
+    // Without --evaluate the raw value is returned; with --evaluate the references are resolved.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite")->add_variable("YYYY", "2000");
+    defs.findAbsNode("/suite/f")->add_variable("MM", "01");
+    defs.findAbsNode("/suite/f/t1")->add_variable("DD", "02");
+    defs.findAbsNode("/suite/f/t1")->add_variable("YMD", "%YYYY%%MM%%DD%");
+
+    BOOST_CHECK_EQUAL(invoke_query(defs, "variable", "/suite/f/t1", "YMD"), "%YYYY%%MM%%DD%");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "YMD"), "20000102");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_references_to_repeat) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a reference to the repeat defined on the suite (see make_test_defs()) is resolved to the current
+    // repeat value.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "date=%YMD%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "date=20090916");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_nested_references) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: references are resolved recursively, i.e. A -> %B% -> %C% -> value.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("A", "%B%");
+    defs.findAbsNode("/suite/f/t1")->add_variable("B", "%C%");
+    defs.findAbsNode("/suite/f/t1")->add_variable("C", "value");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "A"), "value");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_generated_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: references to generated variables (e.g. ECF_NAME) are resolved.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("ME", "%ECF_NAME%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "ME"), "/suite/f/t1");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_honours_ecf_micro) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: the micro character is taken from ECF_MICRO; references using the default '%' are then left as-is.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite")->add_variable("ECF_MICRO", "#");
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "#var2#-%var2%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "var2-%var2%");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_uses_default_for_missing_reference) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: the %VAR:default% form uses the default value when VAR is not defined.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "%UNDEFINED:fallback%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "fallback");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_collapses_double_micro) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a double micro character (%%) is collapsed to a single one.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "100%%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "100%");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unresolved_reference) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a reference that cannot be resolved is an error; a partially substituted value is never returned.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("REF", "%var1%-%UNDEFINED%");
+
+    BOOST_CHECK_EQUAL(invoke_query(defs, "variable", "/suite/f/t1", "REF"), "%var1%-%UNDEFINED%");
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_self_reference) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a self-referencing variable (infinite recursion) is an error, and does not hang.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->add_variable("LOOP", "%LOOP%");
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "LOOP"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unknown_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: querying an unknown variable name fails, regardless of --evaluate.
+    //
+
+    Defs defs = make_test_defs();
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "XXXX"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_server_variable_references) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', references in a server variable are resolved against the server variables.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().set_server_variables({Variable("ECF_PORT", "3141")});
+    defs.server_state().add_or_update_user_variables("SERVER_REF", "port=%ECF_PORT%");
+
+    BOOST_CHECK_EQUAL(invoke_query(defs, "variable", "/", "SERVER_REF"), "port=%ECF_PORT%");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "SERVER_REF"), "port=3141");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unresolved_server_variable_reference) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', a reference that cannot be resolved is an error.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().add_or_update_user_variables("SERVER_REF", "%UNDEFINED_SERVER_VAR%");
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/", "SERVER_REF"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_evaluate_fails_for_non_variable_query_type) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: --evaluate is only valid with query type 'variable'; any other query type must fail, even when the
+    // query would otherwise succeed.
+    //
+
+    Defs defs = make_test_defs();
+    BOOST_CHECK_THROW(invoke_query(defs, "state", "/suite/f/t1", "", "/suite/f/t1", true), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "dstate", "/suite/f/t1", "", "/suite/f/t1", true), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "repeat", "/suite", "", "/suite/f/t1", true), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "event", "/suite/f/t1", k_event_name, "/suite/f/t1", true),
+                      std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "meter", "/suite/f/t1", k_meter_name, "/suite/f/t1", true),
+                      std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "limit", "/suite", k_limit_name, "/suite/f/t1", true), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "limit_max", "/suite", k_limit_name, "/suite/f/t1", true), std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "label", "/suite/f/t2", k_label_name, "/suite/f/t1", true),
+                      std::runtime_error);
+    BOOST_CHECK_THROW(invoke_query(defs, "trigger", "/suite/f/t1", "/suite/f/t2 == complete", "/suite/f/t1", true),
+                      std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_print_includes_evaluate_option) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: the logged form of the command records that --evaluate was requested, and only then.
+    //
+
+    {
+        std::string printed;
+        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t1", true);
+        cmd.print_only(printed);
+        BOOST_CHECK_MESSAGE(printed.find("--evaluate") != std::string::npos,
+                            "expected printed command to include --evaluate but found: " << printed);
+    }
+    {
+        std::string printed;
+        QueryCmd cmd("variable", "/suite/f/t1", "var1", "/suite/f/t1", false);
+        cmd.print_only(printed);
+        BOOST_CHECK_MESSAGE(printed.find("--evaluate") == std::string::npos,
+                            "expected printed command to not include --evaluate but found: " << printed);
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END() // T_EvaluatedVariable
 
 BOOST_AUTO_TEST_CASE(test_query_print_includes_calling_task_path) {
     ECF_NAME_THIS_TEST();
