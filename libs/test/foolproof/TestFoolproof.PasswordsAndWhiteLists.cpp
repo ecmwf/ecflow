@@ -574,12 +574,15 @@ BOOST_AUTO_TEST_CASE(test_e2e_rejection_message_includes_username) {
      * Description
      *
      * This test case verifies that, when a command is rejected, the rejection message returned to the client
-     * includes the originating user name (within square brackets). See ECFLOW-2097.
+     * includes the rejected command, the originating user name and the client host (within square brackets).
+     * See ECFLOW-2097.
      *
      * Requirements
      *
-     * - An authorisation failure message ends with the offending user name, as: [<username>].
-     * - An authentication failure message includes the offending user name, as: [<username>].
+     * - An authorisation failure message ends with the rejected command, user and host, as:
+     *   [--<command> :<username>@<host>].
+     * - An authentication failure message ends with the rejected command, user and host, as:
+     *   [--<command> :<username>@<host>].
      *
      */
 
@@ -647,8 +650,9 @@ endsuite;
 
         BOOST_CHECK(client.reason().find("Command not accepted, due to: Authorisation (user) failed, due to: "
                                          "Insufficient permissions") != std::string::npos);
-        // The originating user name is present in the rejection message
-        BOOST_CHECK(client.reason().find("[bob]") != std::string::npos);
+        // The rejected command, originating user name and client host are present in the rejection message
+        BOOST_CHECK(client.reason().find("[--alter change label l attempted_value /s/f/task :bob@" + host.value() +
+                                         "]") != std::string::npos);
     }
 
     { // #authentication, perform operation with unknown user (i.e. not present in password file)
@@ -663,8 +667,9 @@ endsuite;
         BOOST_CHECK(client.reason().find(
                         "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
                     std::string::npos);
-        // The originating user name is present in the rejection message
-        BOOST_CHECK(client.reason().find("[charlie]") != std::string::npos);
+        // The rejected command, originating user name and client host are present in the rejection message
+        BOOST_CHECK(client.reason().find("[--alter change label l attempted_value /s/f/task :charlie@" + host.value() +
+                                         "]") != std::string::npos);
     }
 }
 
@@ -685,7 +690,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
      *
      * - Every line in the server log starts with a record marker (e.g. MSG:[hh:mm:ss d.m.yyyy]).
      * - No line in the server log contains a record marker after the first column.
-     * - The refusal of a --news request, due to failed authentication or authorisation, is logged on its own line.
+     * - The refusal of a --news request, due to failed authentication or authorisation, is logged on its own line,
+     *   and identifies the rejected command, the user and the client host.
      * - An accepted --news request is logged on its own, terminated line.
      *
      */
@@ -777,25 +783,38 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
     const std::regex record_marker{R"(^(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} \d{1,2}\.\d{1,2}\.\d{4}\])"};
     const std::regex embedded_record_marker{R"(.+(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} )"};
 
-    size_t accepted_news = 0;
-    size_t refusals      = 0;
+    const std::string accepted_news_record = "--news=0 0 0 :alice@" + host.value();
+    const std::string refused_news_bob     = "Command not accepted, due to: Authorisation (user) failed, due to: "
+                                             "Insufficient permissions [--news=0 0 0 :bob@" +
+                                         host.value() + "]";
+    const std::string refused_news_charlie = "Command not accepted, due to: Authentication (user) failed, due to: "
+                                             "Incorrect credentials detected [--news=0 0 0 :charlie@" +
+                                             host.value() + "]";
+
+    size_t accepted_news    = 0;
+    size_t refusals_bob     = 0;
+    size_t refusals_charlie = 0;
     for (const auto& line : lines) {
         ECF_TEST_DBG("Log line: " << line);
         BOOST_CHECK_MESSAGE(std::regex_search(line, record_marker), "Line starts with a record marker: " << line);
         BOOST_CHECK_MESSAGE(!std::regex_search(line, embedded_record_marker),
                             "Line holds a single record (no embedded record marker): " << line);
-        if (line.find("--news=0 0 0") != std::string::npos) {
+        if (line.find(accepted_news_record) != std::string::npos) {
             accepted_news++;
         }
-        if (line.find("Command not accepted") != std::string::npos) {
-            refusals++;
+        if (line.find(refused_news_bob) != std::string::npos) {
+            refusals_bob++;
+        }
+        if (line.find(refused_news_charlie) != std::string::npos) {
+            refusals_charlie++;
         }
     }
 
-    // The accepted --news is logged on its own (terminated) line, the refused ones are never logged
+    // The accepted --news is logged on its own (terminated) line
     BOOST_CHECK_EQUAL(accepted_news, 1);
-    // Both refusals are logged, each on its own line
-    BOOST_CHECK_EQUAL(refusals, 2);
+    // Each refusal is logged on its own line, identifying the rejected command, the user and the client host
+    BOOST_CHECK_EQUAL(refusals_bob, 1);
+    BOOST_CHECK_EQUAL(refusals_charlie, 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
