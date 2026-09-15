@@ -1036,6 +1036,49 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_collapses_double_micro) {
     BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "REF"), "100%");
 }
 
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_leaves_trailing_unpaired_micro_untouched) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: micro characters are paired from left to right. A trailing micro character without a partner
+    // does not form a reference: it, and the text after it, are returned untouched, while every reference
+    // before it is resolved. This is the same behaviour as job generation, and is not an error.
+    //
+
+    Defs defs   = make_test_defs();
+    node_ptr t1 = defs.findAbsNode("/suite/f/t1");
+    t1->add_variable("ONLY_UNPAIRED", "%MALFORMED");
+    t1->add_variable("AFTER_REFERENCE", "some %var1% then %MALFORMED");
+    t1->add_variable("AFTER_NESTED", "%var2%/%var1%/%MALFORMED");
+    t1->add_variable("UNPAIRED_AT_END", "value%");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "ONLY_UNPAIRED"), "%MALFORMED");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "AFTER_REFERENCE"),
+                      "some var1 then %MALFORMED");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "AFTER_NESTED"), "var2/var1/%MALFORMED");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "UNPAIRED_AT_END"), "value%");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_pairs_micro_characters_left_to_right) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: an unpaired micro character in the middle of the value is not skipped; it pairs with the next
+    // one, so the text in between is taken as the reference name. Such a name is not defined, hence the
+    // evaluation fails. A literal micro character must be doubled instead.
+    //
+
+    Defs defs   = make_test_defs();
+    node_ptr t1 = defs.findAbsNode("/suite/f/t1");
+    t1->add_variable("MID_UNPAIRED", "a %B c %var1% e"); // read as reference 'B c ' followed by literal 'var1'
+    t1->add_variable("MID_DOUBLED", "a %% c %var1% e");  // literal '%' followed by reference 'var1'
+
+    BOOST_CHECK_THROW(invoke_evaluated_variable_query(defs, "/suite/f/t1", "MID_UNPAIRED"), std::runtime_error);
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/suite/f/t1", "MID_DOUBLED"), "a % c var1 e");
+}
+
 BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unresolved_reference) {
     ECF_NAME_THIS_TEST();
     TestLog test_log("test_query_cmd.log");
@@ -1091,6 +1134,24 @@ BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_resolves_server_variable_refer
 
     BOOST_CHECK_EQUAL(invoke_query(defs, "variable", "/", "SERVER_REF"), "port=%ECF_PORT%");
     BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "SERVER_REF"), "port=3141");
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_leaves_trailing_unpaired_micro_untouched_in_server_variable) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: for path '/', a trailing unpaired micro character is likewise returned untouched, after the
+    // references before it are resolved.
+    //
+
+    Defs defs = make_test_defs();
+    defs.server_state().set_server_variables({Variable("ECF_PORT", "3141")});
+    defs.server_state().add_or_update_user_variables("ONLY_UNPAIRED", "%MALFORMED");
+    defs.server_state().add_or_update_user_variables("AFTER_REFERENCE", "port %ECF_PORT% then %MALFORMED");
+
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "ONLY_UNPAIRED"), "%MALFORMED");
+    BOOST_CHECK_EQUAL(invoke_evaluated_variable_query(defs, "/", "AFTER_REFERENCE"), "port 3141 then %MALFORMED");
 }
 
 BOOST_AUTO_TEST_CASE(test_query_variable_evaluate_fails_for_unresolved_server_variable_reference) {

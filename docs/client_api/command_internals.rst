@@ -5288,6 +5288,9 @@ inside scripts to branch on a node's state.
                          and a double micro character is collapsed into a single one. References are looked
                          up in the same way as the queried variable itself (user variable, repeat, generated
                          variable, searching up the node tree; or the server variables when path is '/').
+                         Micro characters are paired from left to right; a trailing micro character without a
+                         partner does not form a reference and is returned untouched, together with the text
+                         after it, e.g. 'some %VAR% then %MALFORMED' yields 'some value then %MALFORMED'.
              - trigger   returns 'true' if the expression is true, otherwise 'false'
 
             If this command is called within a '.ecf' script, the task calling this command is additionally logged.

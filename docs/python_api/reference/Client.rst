@@ -1863,7 +1863,9 @@ Query the status of event, meter, state, variable, limit, limit_max or trigger e
 - trigger,   returns :code:`true` if the expression is true, otherwise :code:`false`
 - variable,  return the variable value to standard out. By default, the value is returned as stored;
              when :code:`evaluate` is true, all variable references (e.g. :code:`%VAR%`) in the value
-             are resolved before it is returned
+             are resolved before it is returned, following the same rules as job generation (see
+             :code:`ecflow_client --help=query`); a trailing micro character without a partner does
+             not form a reference and is returned untouched
 
 
 .. important:: 
