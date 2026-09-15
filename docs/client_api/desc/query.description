@@ -154,7 +154,7 @@ attribute is an error.
 Usage:
 
 .. code-block:: shell
-  
+
    state=$(ecflow_client --query state /path/to/node)                                              # return node state to standard out
    dstate=$(ecflow_client --query dstate /path/to/node)                                            # state that can includes suspended
    value=$(ecflow_client --query repeat /path/to/node )                                            # return the current value as a string

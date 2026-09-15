@@ -3369,7 +3369,7 @@ target by ``absNodePath_``:
             ---
 
             Show the reason why a node is not running.
-            Can only be used with the group command. The group command must include a 
+            Can only be used with the group command. The group command must include a
             &#x27;get&#x27; command(i.e returns the server defs)
             The why command take a optional string argument representing a node path
             Will return reason why the node is holding and for all its children.
@@ -3708,7 +3708,7 @@ underlies the "edit script" workflow in ``ecflow_ui``.
                     # between the %comment/%end and use these them to generate the
                     # job using the ecf file accessible from the server
                     #
-                    # pre_process_file: Pre-process the user supplied file, 
+                    # pre_process_file: Pre-process the user supplied file,
                     # expanding includes, performing variable substitution,
                     # removing manual & comment sections.
                     #
@@ -5509,7 +5509,7 @@ Verbatim ``ecflow_client --replace`` output (the common environment-variable foo
      arg3 = (optional) [ parent | false ] (default = parent)
             create parent families or suite as needed, when arg1 does not
             exist in the server
-     arg4 = (optional) force (default = false) 
+     arg4 = (optional) force (default = false)
             Force the replacement even if it causes zombies to be created
    Replace can fail if:
    - The node path(arg1) does not exist in the provided client definition(arg2)

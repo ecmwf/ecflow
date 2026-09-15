@@ -634,7 +634,7 @@
         "        # between the %comment/%end and use these them to generate the",
         "        # job using the ecf file accessible from the server",
         "        #",
-        "        # pre_process_file: Pre-process the user supplied file, ",
+        "        # pre_process_file: Pre-process the user supplied file,",
         "        # expanding includes, performing variable substitution,",
         "        # removing manual & comment sections.",
         "        #",
@@ -2251,7 +2251,7 @@
       "summary": "Show the reason why a node is not running.",
       "description": [
         "Show the reason why a node is not running.",
-        "Can only be used with the group command. The group command must include a ",
+        "Can only be used with the group command. The group command must include a",
         "'get' command(i.e returns the server defs)",
         "The why command take a optional string argument representing a node path",
         "Will return reason why the node is holding and for all its children.",
