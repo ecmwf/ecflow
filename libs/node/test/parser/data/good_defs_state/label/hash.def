@@ -1,0 +1,25 @@
+defs_state MIGRATE
+suite label_hash_state
+   family f
+      task t
+         label Traj "" # "#0 96/96"
+         label Min "" # "#1 28/50 or 0.043 ~> 0.050"
+         label info "" # "### min for /mc/main/1/fc10d/fc/pf/3/modeleps_nemo: 12\n### max for /mc/main/1/fc10d/fc/pf/3/modeleps_nemo:15"
+         label hash_both "a#b" # "x#y"
+         label blank_hash_both "a # b" # "x # y"
+         label leading "abc" # "#leading"
+         label trailing "abc" # "trailing#"
+         label only_hash "abc" # "#"
+         label quoted_hash "abc" # "x "#" y"
+         label separator_like "abc" # "x" # "y"
+         label quotes_both "ONLY CAMS "NON-CRITICAL" SUITES" # "ONLY CAMS "NON-CRITICAL" SUITES TOO"
+         label quoted_word ""note"" # "It is now possible to archive as eccams"
+         label trailing_quote "abc" # "say "hi""
+         label lone_quote "abc" # """
+         label tab "" # "20K	/ec/ws1/tc/emos/test/fdb:/ec/ws1/tc/emos/test/fdb"
+         label blanks "  a  " # "  b  "
+         label trailing_blank "spinup 2016 v2" # "2016 "
+         label multiline "CI fc" # "CI fc\nPURPOSE: replicate\nSTATUS: open"
+         label ends_newline "steps" # "9e5 steps\n"
+   endfamily
+endsuite

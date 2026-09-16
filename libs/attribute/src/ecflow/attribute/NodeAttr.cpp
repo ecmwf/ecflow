@@ -374,6 +374,89 @@ void Label::parse(const std::string& line, std::vector<std::string>& lineTokens,
     parse(line, lineTokens, parse_state, n_, v_, new_v_);
 }
 
+namespace {
+
+bool is_blank(char c) {
+    return c == ' ' || c == '\t';
+}
+
+// Skips blanks, then one token, starting at 'pos'; returns the position after the token.
+size_t skip_token(const std::string& line, size_t pos) {
+    while (pos < line.size() && is_blank(line[pos])) {
+        ++pos;
+    }
+    while (pos < line.size() && !is_blank(line[pos])) {
+        ++pos;
+    }
+    return pos;
+}
+
+// Returns true when 'line', from 'pos' to its end, holds only blanks optionally followed by a comment.
+// A comment needs at least one blank before '#', so that a quote immediately followed by '#' stays
+// part of the value (the documented limitation is a quote followed by one or more blanks and '#').
+bool only_blanks_or_comment(const std::string& line, size_t pos) {
+    const size_t start = pos;
+    while (pos < line.size() && is_blank(line[pos])) {
+        ++pos;
+    }
+    return pos == line.size() || (pos > start && line[pos] == '#');
+}
+
+// Searches, from 'from', for the state separator: the quote 'q', one or more blanks, '#',
+// one or more blanks, and a double quote. On success, 'closing' receives the position of the
+// quote that closes the default value and 'opening' the position of the quote that opens the
+// current value.
+bool find_state_separator(const std::string& line, size_t from, char q, size_t& closing, size_t& opening) {
+    for (size_t pos = line.find(q, from); pos != std::string::npos; pos = line.find(q, pos + 1)) {
+        size_t i = pos + 1;
+        if (i >= line.size() || !is_blank(line[i])) {
+            continue;
+        }
+        while (i < line.size() && is_blank(line[i])) {
+            ++i;
+        }
+        if (i >= line.size() || line[i] != '#') {
+            continue;
+        }
+        ++i;
+        if (i >= line.size() || !is_blank(line[i])) {
+            continue;
+        }
+        while (i < line.size() && is_blank(line[i])) {
+            ++i;
+        }
+        if (i < line.size() && line[i] == '"') {
+            closing = pos;
+            opening = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+void unescape_newlines(std::string& value) {
+    if (value.find("\\n") != std::string::npos) {
+        ecf::algorithm::replace_all(value, "\\n", "\n");
+    }
+}
+
+// Reads the current value that opens at the double quote found at 'opening'; the value extends to the
+// last double quote of the line, or to the end of the line when no other double quote follows.
+std::string read_current_value(const std::string& line, size_t opening) {
+    size_t end = line.size();
+    if (line.back() == '"' && line.size() - 1 > opening) {
+        end = line.size() - 1;
+    }
+    else if (size_t last = line.rfind('"'); last != std::string::npos && last > opening) {
+        end = last; // line does not end with the closing quote; ignore what follows the last quote
+    }
+    std::string value = line.substr(opening + 1, end - opening - 1);
+    unescape_newlines(value);
+    return value;
+}
+
+} // namespace
+
 void Label::parse(const std::string& line,
                   std::vector<std::string>& lineTokens,
                   bool parse_state,
@@ -386,24 +469,27 @@ void Label::parse(const std::string& line,
     }
 
     the_name = lineTokens[1];
+    the_new_value.clear();
 
-    // parsing will always STRIP single or double quotes, print will add double quotes
-    // label simple_label 'ecgems'
-    if (line_token_size == 3) {
-        ecf::algorithm::remove_double_quotes(lineTokens[2]);
-        ecf::algorithm::remove_single_quotes(lineTokens[2]);
-        the_value = lineTokens[2];
-        if (the_value.find("\\n") != std::string::npos) {
-            ecf::algorithm::replace_all(the_value, "\\n", "\n");
-        }
+    // Locate the first character of the default value: after 'label', the name, and the blanks that follow
+    size_t value_begin = skip_token(line, skip_token(line, 0));
+    while (value_begin < line.size() && is_blank(line[value_begin])) {
+        ++value_begin;
     }
-    else {
 
-        // label complex_label "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # fred
-        // label simple_label "fred" #  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"
+    if (value_begin >= line.size() || (line[value_begin] != '"' && line[value_begin] != '\'')) {
+        // A single unquoted token is the whole value, even when it starts with '#', e.g. 'label rev #40fd83'
+        if (line_token_size == 3) {
+            the_value = lineTokens[2];
+            unescape_newlines(the_value);
+            return;
+        }
+
+        // Unquoted value, e.g. 'label OBS 0'; tokens are joined until a comment starts
         std::string value;
         value.reserve(line.size());
-        for (size_t i = 2; i < line_token_size; ++i) {
+        size_t i = 2;
+        for (; i < line_token_size; ++i) {
             if (lineTokens[i].at(0) == '#') {
                 break;
             }
@@ -412,44 +498,53 @@ void Label::parse(const std::string& line,
             }
             value += lineTokens[i];
         }
-
-        ecf::algorithm::remove_double_quotes(value);
-        ecf::algorithm::remove_single_quotes(value);
         the_value = value;
-        if (the_value.find("\\n") != std::string::npos) {
-            ecf::algorithm::replace_all(the_value, "\\n", "\n");
-        }
+        unescape_newlines(the_value);
 
-        // state
-        if (parse_state) {
-            // label name "value" # "new  value"
-            bool comment_fnd                 = false;
-            size_t first_quote_after_comment = 0;
-            size_t last_quote_after_comment  = 0;
-            for (size_t i = line.size() - 1; i > 0; i--) {
-                if (line[i] == '#') {
-                    comment_fnd = true;
-                    break;
-                }
-                if (line[i] == '"') {
-                    if (last_quote_after_comment == 0) {
-                        last_quote_after_comment = i;
-                    }
-                    first_quote_after_comment = i;
-                }
+        // With state, a '#' token followed by a double quote introduces the current value: label OBS 0 # "current"
+        if (parse_state && i + 1 < line_token_size && lineTokens[i] == "#" && lineTokens[i + 1].at(0) == '"') {
+            size_t pos = value_begin;
+            for (size_t k = 2; k <= i; ++k) {
+                pos = skip_token(line, pos); // position right after token k
             }
-            if (comment_fnd && first_quote_after_comment != last_quote_after_comment) {
-                std::string new_value = line.substr(first_quote_after_comment + 1,
-                                                    last_quote_after_comment - first_quote_after_comment - 1);
-                // std::cout << "new label = '" << new_value << "'\n";
-                the_new_value = new_value;
+            size_t opening = line.find('"', pos);
+            the_new_value  = read_current_value(line, opening);
+        }
+        return;
+    }
 
-                if (the_new_value.find("\\n") != std::string::npos) {
-                    ecf::algorithm::replace_all(the_new_value, "\\n", "\n");
-                }
+    // Quoted value; the quote character that opens the value is the one that closes it.
+    // The content between the quotes is taken verbatim, hence blanks are preserved.
+    const char q       = line[value_begin];
+    const size_t begin = value_begin + 1;
+
+    size_t closing = std::string::npos;
+    if (parse_state) {
+        // label name "default value" # "current value"
+        size_t opening = std::string::npos;
+        if (find_state_separator(line, begin, q, closing, opening)) {
+            the_new_value = read_current_value(line, opening);
+        }
+    }
+    else {
+        // label name "default value" # comment
+        for (size_t pos = line.find(q, begin); pos != std::string::npos; pos = line.find(q, pos + 1)) {
+            if (only_blanks_or_comment(line, pos + 1)) {
+                closing = pos;
+                break;
             }
         }
     }
+
+    if (closing == std::string::npos) {
+        closing = line.rfind(q);
+        if (closing < begin) {
+            closing = line.size(); // no closing quote; take the remainder of the line
+        }
+    }
+
+    the_value = line.substr(begin, closing - begin);
+    unescape_newlines(the_value);
 }
 
 template <class Archive>
