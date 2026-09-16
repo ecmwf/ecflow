@@ -10,6 +10,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
@@ -519,11 +520,17 @@ void Label::parse(const std::string& line,
     const size_t begin = value_begin + 1;
 
     size_t closing = std::string::npos;
+    bool ambiguous = false;
     if (parse_state) {
         // label name "default value" # "current value"
         size_t opening = std::string::npos;
         if (find_state_separator(line, begin, q, closing, opening)) {
             the_new_value = read_current_value(line, opening);
+
+            // A second separator means that a value contains the separator sequence; the split above may then be wrong
+            size_t other_closing = std::string::npos;
+            size_t other_opening = std::string::npos;
+            ambiguous            = find_state_separator(line, opening, '"', other_closing, other_opening);
         }
     }
     else {
@@ -531,6 +538,8 @@ void Label::parse(const std::string& line,
         for (size_t pos = line.find(q, begin); pos != std::string::npos; pos = line.find(q, pos + 1)) {
             if (only_blanks_or_comment(line, pos + 1)) {
                 closing = pos;
+                // A further quote inside the comment suggests that the value continued past the chosen quote
+                ambiguous = line.find(q, pos + 1) != std::string::npos;
                 break;
             }
         }
@@ -545,6 +554,13 @@ void Label::parse(const std::string& line,
 
     the_value = line.substr(begin, closing - begin);
     unescape_newlines(the_value);
+
+    if (ambiguous) {
+        log(Log::WAR,
+            MESSAGE("Label::parse: ambiguous label line, the value may be truncated; label '"
+                    << the_name << "' read with default value '" << the_value << "' and current value '"
+                    << the_new_value << "' from: " << line));
+    }
 }
 
 template <class Archive>

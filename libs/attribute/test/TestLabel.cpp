@@ -11,8 +11,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
 
@@ -148,6 +150,8 @@ BOOST_AUTO_TEST_CASE(test_label_round_trip_hash_in_values) {
     const ValuePair cases[] = {
         {"abc", "some value"},
         {"abc", "some#value"},
+        {"x", "current"},
+        {"x", "cur#rent"},
         {"", "#0 30/50 or 0.048 ~> 0.050"},
         {"", "#0 96/96"},
         {"", "#1 28/50 or 0.043 ~> 0.050"},
@@ -236,11 +240,72 @@ BOOST_AUTO_TEST_CASE(test_label_round_trip_blanks_in_values) {
         {"5cfa2a40fa214167847fb1d9b5161812 - febr 2024 - 10 members - o96->o320",
          "5cfa2a40fa214167847fb1d9b5161812 - febr 2024 - 10 members - o96->o320 - 9e5 steps\n"},
         {"value\n that\n is\n multiple\n token\n and\n new\n \nlines", ""},
-        {"CY50R1.0 Tco319L137 SP eORCA025_Z75 - S2S control - like j4db but ifs-nemo scalars \xe2\x86\x92 fields", ""},
+        {"CY50R1.0 Tco319L137 SP eORCA025_Z75 - S2S control - like j4db but ifs-nemo scalars \xe2\x86\x92 fields, test "
+         "reproducible",
+         ""},
     };
     for (const auto& c : cases) {
         check_round_trip(c.value, c.new_value);
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_label_round_trip_exhaustive_short_values) {
+    ECF_NAME_THIS_TEST();
+
+    // Every default value of up to four characters and every current value of up to three characters, drawn
+    // from an alphabet made of the significant characters, must survive a state round trip, unless the default
+    // value contains a double quote followed by blanks and '#', which is the documented limitation.
+    // Each eligible default value must also survive a definition-only round trip.
+    const std::string alphabet = "a\"# \t";
+
+    std::vector<std::string> values{""};
+    for (size_t length = 1; length <= 4; ++length) {
+        std::vector<std::string> longer;
+        for (const auto& value : values) {
+            if (value.size() == length - 1) {
+                for (char c : alphabet) {
+                    longer.push_back(value + c);
+                }
+            }
+        }
+        values.insert(values.end(), longer.begin(), longer.end());
+    }
+
+    size_t definitions_checked = 0;
+    size_t state_checked       = 0;
+    size_t ambiguous           = 0;
+    for (const auto& value : values) {
+        const bool value_is_ambiguous = contains_quote_blanks_hash(value);
+        if (!value_is_ambiguous) {
+            check_parse(write_line(value, ""), false, value, "");
+            ++definitions_checked;
+        }
+        for (const auto& new_value : values) {
+            if (new_value.size() > 3) {
+                continue;
+            }
+            if (value_is_ambiguous) {
+                ++ambiguous;
+                continue;
+            }
+            ++state_checked;
+
+            std::string line = write_line(value, new_value);
+            std::vector<std::string> tokens;
+            ecf::algorithm::split_at(tokens, line);
+            Label label;
+            label.parse(line, tokens, true);
+            if (label.value() != value || label.new_value() != new_value) {
+                BOOST_ERROR("Round trip failed for default '" << value << "' and current '" << new_value << "': line '"
+                                                              << line << "' read as default '" << label.value()
+                                                              << "' and current '" << label.new_value() << "'");
+            }
+        }
+    }
+    BOOST_CHECK_EQUAL(definitions_checked, 755);
+    BOOST_CHECK_MESSAGE(state_checked > 100000,
+                        "Expected more than 100000 state pairs to be checked, found " << state_checked);
+    BOOST_CHECK_MESSAGE(ambiguous > 0, "Expected some pairs to be excluded as ambiguous");
 }
 
 BOOST_AUTO_TEST_CASE(test_label_parsing_definition_forms) {
@@ -338,11 +403,50 @@ BOOST_AUTO_TEST_CASE(test_label_parsing_tolerates_unterminated_lines) {
 BOOST_AUTO_TEST_CASE(test_label_parsing_ambiguous_default_value) {
     ECF_NAME_THIS_TEST();
 
+    ecf::test::scaffold::TestLog test_log("test_label_parsing_ambiguous_default_value.log");
+
     // A default value containing its quote followed by blanks and '#' cannot be told apart from the state
     // separator; the first separator wins. These lines document the limitation.
     check_parse("label L \"a\" # \"b\" # \"x\"", true, "a", "b\" # \"x");
     check_parse("label L \"\" # \" # \"a\"", true, "", " # \"a");
     check_parse("label L \"say \"hi\" # ok\" # comment", false, "say \"hi", "");
+
+    // Each ambiguous line, in state or definition form, is reported in the log with the values that were read
+    std::string log_contents = Log::instance()->contents(100);
+    BOOST_CHECK_MESSAGE(log_contents.find("WAR:") != std::string::npos, "Expected a warning in log:\n" << log_contents);
+    BOOST_CHECK_MESSAGE(log_contents.find("the value may be truncated; label 'L' read with default value 'a' "
+                                          "and current value 'b\" # \"x' from: label L \"a\" # \"b\" # \"x\"") !=
+                            std::string::npos,
+                        "Expected the first ambiguous line to be reported in log:\n"
+                            << log_contents);
+    BOOST_CHECK_MESSAGE(
+        log_contents.find("label 'L' read with default value '' and current value ' # \"a' from: label L "
+                          "\"\" # \" # \"a\"") != std::string::npos,
+        "Expected the second ambiguous line to be reported in log:\n"
+            << log_contents);
+    BOOST_CHECK_MESSAGE(log_contents.find("label 'L' read with default value 'say \"hi' and current value '' from: "
+                                          "label L \"say \"hi\" # ok\" # comment") != std::string::npos,
+                        "Expected the definition line to be reported in log:\n"
+                            << log_contents);
+}
+
+BOOST_AUTO_TEST_CASE(test_label_parsing_unambiguous_lines_do_not_warn) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::test::scaffold::TestLog test_log("test_label_parsing_unambiguous_lines_do_not_warn.log");
+
+    // A single separator, hash and quote characters in either value, or a comment, never trigger the warning
+    check_parse("label L \"a#b\" # \"x#y\"", true, "a#b", "x#y");
+    check_parse("label L \"a # b\" # \"x # y\"", true, "a # b", "x # y");
+    check_parse("label L \"say \"hi\"\" # \"say \"hi\"\"", true, "say \"hi\"", "say \"hi\"");
+    check_parse("label L \"abc\" # \"x \"#\" y\"", true, "abc", "x \"#\" y");
+    check_parse("label L \"x\" # \"y\" # note", true, "x", "y");
+    check_parse("label L \"x\" # comment", false, "x", "");
+
+    std::string log_contents = Log::instance()->contents(100);
+    BOOST_CHECK_MESSAGE(log_contents.find("WAR:") == std::string::npos,
+                        "Expected no warning in log:\n"
+                            << log_contents);
 }
 
 BOOST_AUTO_TEST_CASE(test_label_parsing_rejects_short_lines) {

@@ -76,6 +76,9 @@ public:
     /// Since values are stored without escaping, one shape remains ambiguous: a default value that
     /// contains its own quote character followed by blanks and '#'. In state form such a value is split at
     /// the wrong place; in a definition file with a trailing comment, it is truncated at that point.
+    /// When a state line holds more than one separator, or when a definition line holds a further quote
+    /// after the closing quote, a warning naming the label, the values read and the line is logged, so
+    /// that the possible truncation does not pass unnoticed.
     ///
     /// @param[in] line the complete line
     /// @param[in] lineTokens the line split at blanks; the second token is the label name

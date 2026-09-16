@@ -80,6 +80,7 @@ BOOST_AUTO_TEST_CASE(test_label_values_survive_write_and_restore) {
         {"abc", "#"},
         {"abc", "x # y"},
         {"a#b", "x#y"},
+        {"a\"#b", "x"},
         {"a #b", "x"},
         {"a # b", "x"},
         {"#40fd83", ""},
