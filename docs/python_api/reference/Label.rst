@@ -23,6 +23,11 @@ There are two ways of updating the label
 - A :term:`child command` can be used to automatically update the label on a :term:`task`
 - Using the alter command, the labels on :term:`suite` :term:`family` and :term:`task` can be changed manually
 
+The default value must not contain a double quote followed by blanks and a hash character,
+that is, the sequence '" #'; see the limitations of the :term:`label` attribute in the user manual.
+The current value, set from a job or with the alter command, has no such restriction;
+a current value that itself contains '" # "' is read correctly but logged as a warning.
+
 Constructor::
 
    Label(name,value)

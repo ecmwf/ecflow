@@ -1487,6 +1487,8 @@ Glossary
 
       If the label :term:`task command`\ s results in a :term:`zombie` then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally. (i.e. without any errors). This default can be overridden by using a :term:`zombie` attribute.
 
+      The default value of a label must not contain a double quote followed by blanks and a hash character (the sequence ``" #``); the current value has no such restriction, although one that itself contains ``" # "`` is read correctly but logged as a warning. See the limitations described for the :ref:`label <label>` attribute.
+
       .. list-table::
  
          * - :ref:`ecflow_cli`
