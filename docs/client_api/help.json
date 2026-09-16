@@ -2562,7 +2562,7 @@
       "required": "optional",
       "applies_to": "task",
       "description": "Maximum time for a task command to deliver a message to the server, retrying the main and alternate hosts until the limit is reached",
-      "default": 86400,
+      "default": 3600,
       "minimum": 60,
       "maximum": 86400,
       "unit": "seconds"
@@ -2573,7 +2573,7 @@
       "required": "optional",
       "applies_to": "task",
       "description": "Maximum time for a task command flagged as a zombie by the server to keep retrying; the ECF_TIMEOUT limit still applies, so the effective limit is the smaller of the two",
-      "default": 43200,
+      "default": 1800,
       "minimum": 60,
       "maximum": 86400,
       "unit": "seconds"

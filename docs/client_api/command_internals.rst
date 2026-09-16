@@ -104,12 +104,12 @@ into the job at submission time:
    * - ``ECF_TRYNO``
      - The run number of the job, used in job and output file-name generation.
    * - ``ECF_TIMEOUT``
-     - Maximum time, in seconds, for the client to deliver a message to the server; default is 24
-       hours.
+     - Maximum time, in seconds, for the client to deliver a message to the server; default is 1
+       hour (3600 seconds).
    * - ``ECF_ZOMBIE_TIMEOUT``
      - Maximum time, in seconds, for a task command flagged as a zombie to keep retrying; default is
-       12 hours. The ``ECF_TIMEOUT`` limit still applies, so the effective limit is the smaller of
-       the two.
+       30 minutes (1800 seconds). The ``ECF_TIMEOUT`` limit still applies, so the effective limit is
+       the smaller of the two.
    * - ``ECF_CONNECT_TIMEOUT``
      - Maximum time, in seconds, to establish a connection with the server; default is 0, meaning
        that the timeout is taken from the command being executed.

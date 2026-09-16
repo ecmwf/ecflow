@@ -937,6 +937,8 @@ When updating the node status from a task (i.e. from a script with child command
     "ECF_PASS": "...",
     "ECF_RID": "...",
     "ECF_TRYNO": "...",
+    "ECF_TIMEOUT": 3600,
+    "ECF_ZOMBIE_TIMEOUT": 1800,
     "action": "abort|complete|init|wait"
   }
 
@@ -944,6 +946,9 @@ where
 
 -  :code:`action` is the name of the action to be taken taken
 -  :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
+-  :code:`ECF_TIMEOUT` and :code:`ECF_ZOMBIE_TIMEOUT` are optional integers, in seconds, with the same meaning,
+   defaults and accepted range as the :term:`ECF_TIMEOUT` and :term:`ECF_ZOMBIE_TIMEOUT` environment variables
+   of :term:`ecflow_client`; a value outside the accepted range is adjusted to the nearest limit
 
 When :code:`action=abort`, the followign additional parameters are necessary:
 
@@ -1170,6 +1175,8 @@ When updating a node attribute from a task (i.e. from a script with child comman
     "ECF_PASS": "...",
     "ECF_RID": "...",
     "ECF_TRYNO": "...",
+    "ECF_TIMEOUT": 3600,
+    "ECF_ZOMBIE_TIMEOUT": 1800,
     "name": "...",
     "type": "event|label|limit|meter|queue",
     "value": "...",
@@ -1182,6 +1189,9 @@ where
 
 - :code:`name` is the name of the attribute
 - :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
+- :code:`ECF_TIMEOUT` and :code:`ECF_ZOMBIE_TIMEOUT` are optional integers, in seconds, with the same meaning,
+  defaults and accepted range as the :term:`ECF_TIMEOUT` and :term:`ECF_ZOMBIE_TIMEOUT` environment variables
+  of :term:`ecflow_client`; a value outside the accepted range is adjusted to the nearest limit
 
 When updating :code:`queue` attributes, the parameter :code:`value` is **not** used, and the following additional parameters are required:
 

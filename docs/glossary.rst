@@ -779,9 +779,13 @@ Glossary
 
          This timeout is only applicable to :term:`task commands <task command>`.
 
-      When ECF_TIMEOUT is not set, the client uses the default value of 24 hours (24 * 60 * 60 seconds).
-      The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
+      When ECF_TIMEOUT is not set, the client uses the default value of 1 hour (3600 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds).
       If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+      .. warning::
+         *Changed in version 5.20.0*:
+         The default value was reduced from 24 hours (86400 seconds).
 
       When the client is unable to contact the server within the timeout period, it will exit with an error code.
 
@@ -835,9 +839,13 @@ Glossary
       task from being adopted by another server. This can be particularly useful in cases where the server has been restarted,
       and the client is trying to contact an old server.
 
-      When ECF_ZOMBIE_TIMEOUT is not set, the client uses the default value of 12 hours (12 * 60 * 60 seconds).
-      The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
+      When ECF_ZOMBIE_TIMEOUT is not set, the client uses the default value of 30 minutes (1800 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds).
       If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+      .. warning::
+         *Changed in version 5.20.0*:
+         The default value was reduced from 12 hours (43200 seconds).
 
       The ECF_TIMEOUT limit applies to every task command, including those flagged as zombies; a zombie task
       command therefore gives up after the smaller of ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT.
@@ -1057,7 +1065,7 @@ Glossary
 
              |
 
-             The default value is 24 hours (24 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+             The default value is 1 hour (3600 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds). If a value outside this range is specified, it will be adjusted to the nearest limit.
 
              |
 
@@ -1086,7 +1094,7 @@ Glossary
 
              |
 
-             The default value is 12 hours (12 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours. If a value outside this range is specified, it will be adjusted to the nearest limit. Since the ECF_TIMEOUT limit also applies to zombie task commands, the effective limit is the smaller of the two.
+             The default value is 30 minutes (1800 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds). If a value outside this range is specified, it will be adjusted to the nearest limit. Since the ECF_TIMEOUT limit also applies to zombie task commands, the effective limit is the smaller of the two.
 
              |
 
@@ -2387,8 +2395,8 @@ Glossary
       When authentication fails the job is considered to be a zombie.
       The :term:`ecflow_server` will keep a note of the zombie for a period of time, before it is automatically removed.
       However the removed zombie, may well re-appear. (this is because each :term:`task command` will continue
-      attempting to contact the :term:`ecflow_server` for 24 hours. This is configurable 
-      see ECF_TIMEOUT on :term:`ecflow_client`)
+      attempting to contact the :term:`ecflow_server` for up to :term:`ECF_TIMEOUT`, 1 hour by default.
+      See :term:`ecflow_client`)
       
       See also:
 

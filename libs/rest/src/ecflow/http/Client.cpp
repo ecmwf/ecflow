@@ -113,9 +113,10 @@ std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& requ
     ci->set_child_password(payload.at(ecf::environment::ECF_PASS).get<std::string>());
     ci->set_child_pid(json_type_to_string(payload.at(ecf::environment::ECF_RID)));
     ci->set_child_try_no(std::stoi(json_type_to_string(payload.at(ecf::environment::ECF_TRYNO))));
-    ci->set_child_timeout(payload.value(ecf::environment::ECF_TIMEOUT, ClientEnvironment::DEFAULT_TIMEOUT));
-    ci->set_zombie_child_timeout(
-        payload.value(ecf::environment::ECF_ZOMBIE_TIMEOUT, ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT));
+    ci->set_child_timeout(ClientEnvironment::clamp_timeout(
+        payload.value(ecf::environment::ECF_TIMEOUT, ClientEnvironment::DEFAULT_TIMEOUT)));
+    ci->set_zombie_child_timeout(ClientEnvironment::clamp_timeout(
+        payload.value(ecf::environment::ECF_ZOMBIE_TIMEOUT, ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT)));
 
     return ci;
 }

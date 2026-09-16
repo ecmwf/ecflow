@@ -102,9 +102,9 @@ public:
     /// @brief The maximum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
     static constexpr long MAX_TIMEOUT = 86400; // = 24 hours * 60 minutes * 60 seconds
     /// @brief The default value (in seconds) of ECF_TIMEOUT
-    static constexpr long DEFAULT_TIMEOUT = MAX_TIMEOUT;
+    static constexpr long DEFAULT_TIMEOUT = 3600; // = 1 hour * 60 minutes * 60 seconds
     /// @brief The default value (in seconds) of ECF_ZOMBIE_TIMEOUT
-    static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 43200; // = 12 hours * 60 minutes * 60 seconds
+    static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 1800; // = 30 minutes * 60 seconds
     /// @brief The minimum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
     static constexpr long MIN_TIMEOUT = 60; // = 60 seconds
 #endif

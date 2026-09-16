@@ -38,11 +38,15 @@ When blocking the :term:`child command` command continues attempting to contact 
 
 There are two environment variables that control how :term:`ecflow_client` handles wait times when trying to connect to the server.
 
-- ECF_TIMEOUT   This defines the maximum time client will wait for **any** :term:`child command`. Hence this includes zombies. Typically applicable when the server is down. It is specified in seconds. The default value is 24 hours.  See :term:`ecflow_client`. 
-- ECF_ZOMBIE_TIMEOUT  This is applied to zombies only. It is specified in seconds. The default value is 12 hours. This would apply for **each zombie** init, abort, and complete in the script.
+- :term:`ECF_TIMEOUT` defines the maximum time the client waits for **any** :term:`child command`, hence including zombies. It is typically applicable when the server is down. It is specified in seconds, and the default value is 1 hour (3600 seconds). See :term:`ecflow_client`.
+- :term:`ECF_ZOMBIE_TIMEOUT` is applied to zombies only. It is specified in seconds, and the default value is 30 minutes (1800 seconds). It applies to **each zombie** init, abort, and complete in the script. Since ECF_TIMEOUT also applies, a zombie gives up after the smaller of the two.
 
-When any of the above timeout is exceeded, :term:`ecflow_client` exits with a failure. Depending on your script, this can be caught by a trap, which will typically call abort child command, this again can wait for 12/24 hours before exiting the process.
-Hence it is worth considering if this is appropriate behaviour for your system.
+.. warning::
+   *Changed in version 5.20.0*:
+   The default values were reduced from 24 hours (ECF_TIMEOUT) and 12 hours (ECF_ZOMBIE_TIMEOUT).
+
+When any of the above timeouts is exceeded, :term:`ecflow_client` exits with a failure. Depending on the script, this can be caught by a trap, which typically calls the abort child command; this again can wait for up to the timeout before the process exits.
+Hence it is worth considering whether this is the appropriate behaviour for the system.
 
 The jobs can also configured, so that if the server denies the communication, then the :term:`child command` can be set to fail immediately. (This can be done setting the environment variable ECF_DENIED in your scripts. See :term:`ecflow_client`). This can be useful to detect network issues early.
 
@@ -75,7 +79,7 @@ The actions include:
 #. Inspect the log file, it will show you how the zombie has arisen.
 #. Inspect the zombie tag in :term:`ecflow_ui` (select the host node, then select the zombie's tab)
 #. Experiment with the different actions on the zombie
-#. Since the default ECF_ZOMBIE_TIMEOUT is 12hr, change this to 1 minute, by editing your head.h. 
+#. Since the default ECF_ZOMBIE_TIMEOUT is 30 minutes, change this to 1 minute, by editing head.h. 
 
    .. code-block:: shell
 
