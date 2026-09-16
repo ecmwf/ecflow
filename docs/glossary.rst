@@ -898,6 +898,10 @@ Glossary
                 # Or, use the command line option
                 ecflow_client --host machine1 <cmd>
 
+             |
+
+             :Default: ``localhost``
+
          * - ECF_PORT
 
              (User + Task)
@@ -914,6 +918,10 @@ Glossary
                 # Or, use the command line option
                 ecflow_client --port 3141 <cmd>
 
+             |
+
+             :Default: ``3141``
+
          * - NO_ECF
 
              (User + Task)
@@ -927,6 +935,10 @@ Glossary
                # To terminate immediately
                # with a success code
                export NO_ECF=1
+
+             |
+
+             :Default: not set (the client contacts the server)
 
          * - ECF_DENIED
 
@@ -942,6 +954,10 @@ Glossary
                # with an error code
                # when server denies contact
                export ECF_DENIED=1
+
+             |
+
+             :Default: not set (the client keeps retrying until ECF_TIMEOUT is reached)
 
          * - ECF_SSL
 
@@ -974,6 +990,11 @@ Glossary
                # To use a specific certificate
                export ECF_SSL=<value>
 
+             |
+
+             :Default: not set (communication is not secured)
+             :Values: ``1`` or empty, for the shared certificate; any other value, for a custom certificate path
+
          * - :term:`ECF_NAME`
 
              (Task only)
@@ -991,6 +1012,10 @@ Glossary
 
                 /suite/family/task
 
+             |
+
+             :Default: none (mandatory for task commands)
+
          * - :term:`ECF_PASS`
 
              (Task only)
@@ -1003,6 +1028,10 @@ Glossary
              |
 
              The value is used by the server to identify the task, and is provided by the server (%ECF_PASS%) to be used in variable substitution in the script.
+
+             |
+
+             :Default: none (mandatory for task commands)
 
          * - ECF_RID
 
@@ -1017,6 +1046,10 @@ Glossary
 
              The value is used by the server to identify the task, and is provided by the server (%ECF_RID%) to be used in variable substitution in the script.
 
+             |
+
+             :Default: none (mandatory for task commands)
+
          * - :term:`ECF_TRYNO`
 
              (Task only)
@@ -1025,6 +1058,10 @@ Glossary
              |
 
              This value is provided by the server (%ECF_TRYNO%) and used in job/output file name generation.
+
+             |
+
+             :Default: none (mandatory for task commands)
 
          * - ECF_HOSTFILE
 
@@ -1037,12 +1074,16 @@ Glossary
 
                 $HOME/.echostfile
 
+             |
+
+             :Default: not set (no alternate hosts are tried)
+
          * - ECF_HOSTFILE_POLICY
 
              (User + Task)
-           - The policy, either "task" or "all", indicates when to perform retry based on the ECF_HOSTFILE.
-             The default policy is "task", meaning that the retry will only be performed for task commands.
-             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
+           - The policy indicates when to perform retry based on the ECF_HOSTFILE.
+             With the policy "task", the retry is only performed for task commands.
+             With the policy "all", the retry is performed for both task and user commands (including :code:`ping`).
 
              |
 
@@ -1053,6 +1094,11 @@ Glossary
 
                # To apply retry policy to all commands
                export ECF_HOSTFILE_POLICY=all
+
+             |
+
+             :Default: ``task``
+             :Values: ``task``, ``all``
 
          * - ECF_TIMEOUT
 
@@ -1065,14 +1111,15 @@ Glossary
 
              |
 
-             The default value is 1 hour (3600 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds). If a value outside this range is specified, it will be adjusted to the nearest limit.
+             .. code-block:: shell
+
+               # To wait a maximum of 2 hours
+               export ECF_TIMEOUT=7200
 
              |
 
-             .. code-block:: shell
-
-               # To wait a maximum of 1 hour
-               export ECF_TIMEOUT=3600
+             :Default: ``3600`` seconds (1 hour); before version 5.20.0, 86400 seconds (24 hours)
+             :Range: ``60`` to ``86400`` seconds (24 hours); a value outside the range is adjusted to the nearest limit
 
          * - ECF_CONNECT_TIMEOUT
 
@@ -1081,7 +1128,7 @@ Glossary
 
              |
 
-             The default value is 0 seconds, meaning that there is no timeout for establishing connection.
+             :Default: ``0`` seconds (no dedicated connection timeout; the timeout of the command in use applies)
 
          * - ECF_ZOMBIE_TIMEOUT
 
@@ -1091,17 +1138,19 @@ Glossary
              |
 
              This limit applies to task commands that have been marked as zombies by the server. When the client is unable to contact the server within the timeout period, it will exit with an error code.
-
-             |
-
-             The default value is 30 minutes (1800 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds). If a value outside this range is specified, it will be adjusted to the nearest limit. Since the ECF_TIMEOUT limit also applies to zombie task commands, the effective limit is the smaller of the two.
+             Since the ECF_TIMEOUT limit also applies to zombie task commands, the effective limit is the smaller of the two.
 
              |
 
              .. code-block:: shell
 
-               # To wait a maximum of 1 hour
-               export ECF_ZOMBIE_TIMEOUT=3600
+               # To wait a maximum of 10 minutes
+               export ECF_ZOMBIE_TIMEOUT=600
+
+             |
+
+             :Default: ``1800`` seconds (30 minutes); before version 5.20.0, 43200 seconds (12 hours)
+             :Range: ``60`` to ``86400`` seconds (24 hours); a value outside the range is adjusted to the nearest limit
 
          * - :term:`ECF_PASSWD`
 
@@ -1118,6 +1167,10 @@ Glossary
 
                # Or, use the command line option
                ecflow_client --password <password> <comand>
+
+             |
+
+             :Default: not set (no password file is read)
 
          * - ECF_USER
 
@@ -1138,6 +1191,10 @@ Glossary
 
                 # Or, use the command line option
                 ecflow_client --user user_name <comand>
+
+             |
+
+             :Default: not set (the login name of the current user is used)
 
    ecflow_server
       This executable is the server. 
@@ -1165,67 +1222,68 @@ Glossary
 
              |
 
-             By default, the server will use the current working directory.
+             :Default: ``.`` (the current working directory)
 
          * - ECF_PORT
            - The server port number.
 
              |
 
-             By default, the server will use port 3141.
+             :Default: ``3141``
 
          * - ECF_LOG
            - The path to the log (or history) file
 
              |
 
-             By default, the server will use the file name ``<host>.<port>.ecf.log``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.log``, in the directory where the server is running
 
          * - ECF_CHECK
            - The path to the checkpoint file
 
              |
 
-             By default, the server will use the file name ``<host>.<port>.ecf.check``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.check``, under ECF_HOME
 
          * - ECF_CHECKOLD
            - The path to the backup checkpoint file
 
              |
 
-             By default, the server will use the file name ``<host>.<port>.ecf.check.b``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.check.b``, under ECF_HOME
 
          * - ECF_CHECKINTERVAL
-           - The interval (in second) to save :term:`check point` file
+           - The interval (in seconds) to save :term:`check point` file
 
              |
 
-             By default, the server will save the checkpoint file every 120 seconds.
+             :Default: ``120`` seconds
+             :Range: any positive integer
 
          * - ECF_LISTS
            - The white list file, used for authorization purposes (i.e. control read/write access).
 
              |
 
-             By default, the server will look for a file named ``<host>.<port>.ecf.lists``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.lists``, in the directory where the server is running
 
          * - ECF_TASK_THRESHOLD
            - The threshold (in milliseconds) to report all task that take longer than given threshold.
 
              |
 
-             By default, the server will report all tasks that take longer than 4000 milliseconds.
+             *Used to debug/instrument, those scripts that are very large*.
 
              |
 
-             *Used to debug/instrument, those scripts that are very large*.
+             :Default: ``4000`` milliseconds
 
          * - :term:`ECF_PASSWD`
            - The path to server password file, used to authenticate :term:`user commands <user command>`.
 
              |
 
-             By default, the server will look for a file named ``<host>.<port>.ecf.passwd``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.passwd``, in the directory where the server is running
 
 
          * - ECF_CUSTOM_PASSWD
@@ -1233,14 +1291,14 @@ Glossary
 
              |
 
-             By default, the server will look for a file named ``<host>.<port>.ecf.custom_passwd``, in the directory where the server is running.
+             :Default: ``<host>.<port>.ecf.custom_passwd``, in the directory where the server is running
 
          * - ECF_PRUNE_NODE_LOG
-           - When the checkpoint point file is loaded, by default the node log history older than 30 days is automatically pruned.
+           - The age (in days) beyond which the node log history is pruned when the checkpoint file is loaded.
 
              |
 
-             The variable allows this value to be customized. Setting the variable to 0, means all history is preserved at the cost increasing server memory and time taken to write checkpoint file.
+             Setting the variable to 0 means that all history is preserved, at the cost of increasing server memory and the time taken to write the checkpoint file.
 
              |
 
@@ -1251,6 +1309,11 @@ Glossary
 
                 # Preserve all history
                 export ECF_PRUNE_NODE_LOG=0
+
+             |
+
+             :Default: ``30`` days
+             :Values: ``0`` to preserve all history
 
          * - ECF_SSL
            - Enable secure communication between server and client.
@@ -1273,6 +1336,11 @@ Glossary
              |
 
              Consider using `ecflow_start.sh -s` to start the server with SSL support.
+
+             |
+
+             :Default: not set (communication is not secured)
+             :Values: ``1`` or empty, for the shared certificate; any other value, for a custom certificate path
 
              |
 
