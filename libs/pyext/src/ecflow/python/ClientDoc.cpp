@@ -29,11 +29,14 @@ const char* ClientDoc::class_client() {
            "* ECF_TRYNO <int>   : The number of times the job has run. Used in file name generation. Set to 1 by "
            "begin() and re-queue commands.\n"
            "* ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server\n"
+           "* ECF_ZOMBIE_TIMEOUT <int> : Max time in seconds for a zombie child command to deliver message to main "
+           "server\n"
            "* ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails\n"
            "* ECF_HOSTFILE_POLICY <string> : The policy (\"task\" or \"all\") to define which commands consider using "
            "alternate hosts.\n"
            "* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids "
-           "24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual "
+           "waiting for ECF_TIMEOUT. Note: when you have hundreds of tasks, using this approach requires a lot of "
+           "manual "
            "intervention to determine job status\n"
            "* NO_ECF <any> : If set exit's immediately with success. Used to test jobs without communicating with "
            "server\n\n"
@@ -1824,10 +1827,9 @@ const char* ClientDoc::set_child_try_no() {
 }
 
 const char* ClientDoc::set_child_timeout() {
-    return "Set timeout if child cannot connect to server, default is 24 hours. The input is required to be in "
-           "seconds\n\n"
-           "By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt "
-           "to connect to the server\n"
+    return "Set timeout if child cannot connect to server. The input is required to be in seconds\n\n"
+           "By default the environment variable ECF_TIMEOUT is read to control how long child command should attempt "
+           "to connect to the server; see the ecflow_client documentation for the default value.\n"
            "This can be overridden for the python child api";
 }
 

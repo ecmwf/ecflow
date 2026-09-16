@@ -1066,8 +1066,12 @@ void export_Client(py::module& m) {
     static const char* ClientInvoker_enable_https_doc = "Enable HTTPS communication";
 
     static const char* ClientInvoker_set_zombie_child_timeout_doc =
-        "Set timeout for zombie child commands,that cannot connect to server, default is 24 hours. "
-        "The input is required to be in seconds";
+        "Set timeout for zombie child commands, that cannot connect to server. The input is required to be in "
+        "seconds\n\n"
+        "By default the environment variable ECF_ZOMBIE_TIMEOUT is read to control how long a zombie child command "
+        "should "
+        "attempt to connect to the server; see the ecflow_client documentation for the default value.\n"
+        "This can be overridden for the python child api";
 
     static const char* ClientInvoker_debug_server_on_doc =
         "Enable server debug, Will dump to standard out on server host.";

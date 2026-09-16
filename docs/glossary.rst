@@ -836,8 +836,11 @@ Glossary
       and the client is trying to contact an old server.
 
       When ECF_ZOMBIE_TIMEOUT is not set, the client uses the default value of 12 hours (12 * 60 * 60 seconds).
-      The minimum value allowed is 60 seconds, while the maximum value is 12 hours.
+      The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
       If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+      The ECF_TIMEOUT limit applies to every task command, including those flagged as zombies; a zombie task
+      command therefore gives up after the smaller of ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT.
 
    ecFlow
       Is the ECMWF work flow manager.
@@ -1083,7 +1086,7 @@ Glossary
 
              |
 
-             The default value is 12 hours (12 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 12 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+             The default value is 12 hours (12 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours. If a value outside this range is specified, it will be adjusted to the nearest limit. Since the ECF_TIMEOUT limit also applies to zombie task commands, the effective limit is the smaller of the two.
 
              |
 

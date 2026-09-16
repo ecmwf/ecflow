@@ -132,7 +132,7 @@ public:
     virtual void setup_user_authentification()                   = 0; // if user empty setup.
 
     /// Allow control over connection to different servers/hosts if the main server is down
-    /// i.e for a getCmd, we do not want to wait 24 hours, trying all the servers
+    /// i.e for a getCmd, we do not want to wait for ECF_TIMEOUT, trying all the servers
     /// However for Task based commands like , init,abort,event, meter,complete we
     /// want this behaviour as it can alter Node tree state and thus affect dependent nodes
     virtual bool connect_to_different_servers() const { return false; }

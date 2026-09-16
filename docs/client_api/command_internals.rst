@@ -106,6 +106,13 @@ into the job at submission time:
    * - ``ECF_TIMEOUT``
      - Maximum time, in seconds, for the client to deliver a message to the server; default is 24
        hours.
+   * - ``ECF_ZOMBIE_TIMEOUT``
+     - Maximum time, in seconds, for a task command flagged as a zombie to keep retrying; default is
+       12 hours. The ``ECF_TIMEOUT`` limit still applies, so the effective limit is the smaller of
+       the two.
+   * - ``ECF_CONNECT_TIMEOUT``
+     - Maximum time, in seconds, to establish a connection with the server; default is 0, meaning
+       that the timeout is taken from the command being executed.
    * - ``ECF_DENIED``
      - Lets the task exit with an error on connection failure, instead of waiting for ``ECF_TIMEOUT``.
    * - ``NO_ECF``
@@ -6196,7 +6203,7 @@ carried by ``user_action_``:
             Locates the task in the servers list of zombies, and sets flags to block it.
             This is default behaviour of the child commands(init,abort,complete,wait,queue)
             when the server cannot match the passwords. Each child commands will continue
-            attempting to connect to the server for 24 hours, and will then return an error.
+            attempting to connect to the server for up to ECF_TIMEOUT, and will then return an error.
             The connection timeout can be configured with environment ECF_TIMEOUT
               args = list of task paths, at least one expected
 

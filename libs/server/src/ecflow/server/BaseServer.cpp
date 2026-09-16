@@ -374,7 +374,7 @@ void BaseServer::halted() {
 
     // Stop the task communication with server. Hence nodes can be stuck
     // in submitted/active states. Task based command will continue attempting,
-    // communication with the server for up to 24hrs.
+    // communication with the server for up to ECF_TIMEOUT.
     // Will update defs as well to stop job scheduling
     set_server_state(SState::HALTED);
 }

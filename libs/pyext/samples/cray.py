@@ -89,7 +89,7 @@ class Client(object):
       self.ci.set_child_password("$ECF_PASS$")
       self.ci.set_child_try_no($ECF_TRYNO$)
     
-      print "Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing"
+      print "Only wait 20 seconds, if the server cannot be contacted, before failing"
       self.ci.set_child_timeout(20)
       self.ci.set_zombie_child_timeout(10)
      

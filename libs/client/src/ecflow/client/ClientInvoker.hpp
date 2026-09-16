@@ -259,7 +259,7 @@ public:
     void set_child_try_no(unsigned int try_no) { clientEnv_.set_child_try_no(try_no); }
     void set_child_timeout(unsigned int seconds) {
         clientEnv_.set_child_cmd_timeout(seconds);
-    } // ECF_TIMEOUT default is 24 hours allow python jobs to override
+    } // ECF_TIMEOUT defaults to ClientEnvironment::DEFAULT_TIMEOUT; allow python jobs to override
     void set_child_host_file(const std::string& host_file) { clientEnv_.set_child_host_file(host_file); }
     void set_child_denied(bool denied) { clientEnv_.set_child_denied(denied); }
     void set_child_no_ecf(bool no_ecf) { clientEnv_.set_child_no_ecf(no_ecf); }
@@ -268,7 +268,7 @@ public:
     void set_child_complete_del_vars(std::vector<std::string>& vars) { clientEnv_.set_child_complete_del_vars(vars); }
     void set_zombie_child_timeout(unsigned int seconds) {
         clientEnv_.set_zombie_child_cmd_timeout(seconds);
-    } // ECF_ZOMBIE_TIMEOUT default is 24 hours allow python jobs to override
+    } // ECF_ZOMBIE_TIMEOUT defaults to ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT; allow python jobs to override
 
     void child_init();
     void child_abort(const std::string& reason = "");

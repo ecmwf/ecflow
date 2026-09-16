@@ -6,6 +6,8 @@
 #ifndef ecflow_client_ClientEnvironment_HPP
 #define ecflow_client_ClientEnvironment_HPP
 
+#include <algorithm>
+
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #ifdef ECF_OPENSSL
@@ -74,6 +76,48 @@ public:
      */
     using time_duration_t = std::chrono::milliseconds;
 
+    /// @name Task command timeout bounds and defaults
+    ///
+    /// The timeouts determine how long a task command continues to attempt to contact the server(s),
+    /// iterating over the hosts listed in ECF_HOSTFILE, before giving up. The values are expressed in seconds.
+    ///
+    /// The values read from ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT are clamped to [MIN_TIMEOUT, MAX_TIMEOUT].
+    /// A blocked zombie effectively waits for the smaller of the two timeouts, since the ECF_TIMEOUT limit
+    /// applies to every task command, including those flagged as zombies by the server.
+    ///
+    /// These constants are the single point of definition for the release defaults; the documented values
+    /// (help manifest, glossary, Python API) are expected to match them.
+    ///
+    /// @{
+#ifdef DEBUG
+    /// @brief The maximum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
+    static constexpr long MAX_TIMEOUT = 120; // = 2 minutes * 60 seconds
+    /// @brief The default value (in seconds) of ECF_TIMEOUT
+    static constexpr long DEFAULT_TIMEOUT = MAX_TIMEOUT;
+    /// @brief The default value (in seconds) of ECF_ZOMBIE_TIMEOUT
+    static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 120; // = 2 minutes * 60 seconds
+    /// @brief The minimum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
+    static constexpr long MIN_TIMEOUT = 5; // = 5 seconds
+#else
+    /// @brief The maximum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
+    static constexpr long MAX_TIMEOUT = 86400; // = 24 hours * 60 minutes * 60 seconds
+    /// @brief The default value (in seconds) of ECF_TIMEOUT
+    static constexpr long DEFAULT_TIMEOUT = MAX_TIMEOUT;
+    /// @brief The default value (in seconds) of ECF_ZOMBIE_TIMEOUT
+    static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 43200; // = 12 hours * 60 minutes * 60 seconds
+    /// @brief The minimum accepted value (in seconds) for ECF_TIMEOUT and ECF_ZOMBIE_TIMEOUT
+    static constexpr long MIN_TIMEOUT = 60; // = 60 seconds
+#endif
+    /// @}
+
+    /**
+     * @brief Clamp a timeout value to the accepted range.
+     *
+     * @param[in] seconds The timeout value, in seconds
+     * @return The value adjusted to the nearest limit of [MIN_TIMEOUT, MAX_TIMEOUT]
+     */
+    static constexpr long clamp_timeout(long seconds) { return std::max(std::min(seconds, MAX_TIMEOUT), MIN_TIMEOUT); }
+
     /**
      * @brief Create a new ClientEnvironment, effectively loading all environment configurations
      *
@@ -107,7 +151,7 @@ public:
      * The `Task command timeout` is the maximum time in seconds for the client to deliver the message.
      * The client will continue to attempt to contact the server until this timeout is reached.
      *
-     * The `Task command timeout` default is 24 hours
+     * The `Task command timeout` defaults to DEFAULT_TIMEOUT,
      * but can be customised by exporting environment variable ECF_TIMEOUT.
      *
      * @remark  This timeout is currently used for the Task commands *ONLY*
@@ -128,8 +172,11 @@ public:
      * The client, running on a Zombie task, will continue to attempt to contact the server until this timeout is
      * reached.
      *
-     * The `Zombie command timeout` default is 12 hours
+     * The `Zombie command timeout` defaults to DEFAULT_ZOMBIE_TIMEOUT,
      * but can be customised by exporting environment variable ECF_ZOMBIE_TIMEOUT.
+     *
+     * Since the `Task command timeout` applies to every task command, a zombie task command effectively
+     * waits for the smaller of the two timeouts.
      *
      * @remark  This timeout is currently used for the Zombie commands *ONLY*
      */
@@ -163,7 +210,7 @@ public:
     bool get_next_host(std::string& errorMsg);
 
     /// If server denies client communication and this flag is set, exit with an error
-    /// Avoids 24hr hour connection attempt to server. Aids zombie control.
+    /// Avoids waiting for ECF_TIMEOUT while attempting to connect to server. Aids zombie control.
     bool denied() const { return denied_; }
 
     /// if NO_ECF is set then abort client immediately.  Client should return success
@@ -277,8 +324,9 @@ private:
     std::string user_name_;
     mutable std::string passwd_;
 
-    long timeout_;        // ECF_TIMEOUT. Host file iteration time out
-    long zombie_timeout_; // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
+    long timeout_;        // ECF_TIMEOUT. Host file iteration time out, defaults to DEFAULT_TIMEOUT
+    long zombie_timeout_; // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, defaults to
+                          // DEFAULT_ZOMBIE_TIMEOUT
     std::vector<Variable> init_add_vars_;
     std::vector<std::string> complete_del_vars_;
 
