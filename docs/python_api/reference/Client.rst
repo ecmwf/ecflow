@@ -1878,6 +1878,12 @@ returned as a string.
 
   When path_to_attribute is '/', the variable is looked up on the server itself
 
+.. warning:: 
+
+  :code:`evaluate=True` requires an ecFlow server of version 5.20 or later. An older server ignores
+  the request for evaluation silently and returns the value as stored, without raising any error;
+  check the server version (:code:`Client.server_version()`) before relying on the resolved value.
+
 
 .. code-block:: shell
 

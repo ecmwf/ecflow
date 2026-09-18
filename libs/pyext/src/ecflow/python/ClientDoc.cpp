@@ -1034,7 +1034,7 @@ const char* ClientDoc::query() {
            "\n"
            "  When path_to_attribute is '/', the variable is looked up on the server itself\n"
            "\n"
-           ".. warning:: \n"
+           ".. warning::\n"
            "\n"
            "  :code:`evaluate=True` requires an ecFlow server of version 5.20 or later. An older server ignores\n"
            "  the request for evaluation silently and returns the value as stored, without raising any error;\n"
