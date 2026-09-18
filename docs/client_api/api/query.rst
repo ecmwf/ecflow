@@ -50,12 +50,16 @@ variable, limit , limit_max or trigger expression without blocking
 -  variable      return value of the variable, repeat or generated
    variable to standard out, will search up the node tree. When
    path is ``/``, the variable is looked up on the server itself,
-   i.e. ``ecflow_client --query variable /:name``
+   i.e. ``ecflow_client --query variable /:name``.
+   By default the value is returned as stored, i.e. references to other
+   variables (such as ``%OTHER%``) are not resolved. With the
+   ``--evaluate`` option, all references in the value are resolved before
+   it is returned; see :ref:`query_cli_evaluate` below.
 
 -  trigger        returns 'true' if the expression is true, otherwise
    'false'
 
-If this command is called within a '.ecf' script we will additionally log the task calling this command
+If this command is called within a '.ecf' script, the task calling this command is additionally logged.
 
 This is required to aid debugging for excessive use of this command
 
@@ -74,10 +78,14 @@ in the definition and if:
 
 -  variable No user or generated variable or repeat of that name found
    on node, or any of its parents. When path is ``/``, no user or
-   server variable of that name found on the server
+   server variable of that name found on the server. With
+   ``--evaluate``, a reference in the value cannot be resolved (a
+   partially resolved value is never returned)
 
 -  trigger  Trigger does not parse, or reference to nodes/attributes in
    the expression are not valid
+
+-  ``--evaluate`` is used with an attribute other than ``variable``
 
 Arguments:
 
@@ -91,10 +99,91 @@ Arguments:
 -  arg3 = trigger expression (optional)  \| prev \| next    # prev,next
    only used when arg1 is repeat
 
+Options:
+
+-  ``--evaluate`` (optional) only valid when arg1 is ``variable``: resolve
+   all variable references in the value
+
+.. _query_cli_evaluate:
+
+Evaluating variable references
+------------------------------
+
+A variable value may itself refer to other variables, for example
+``edit YMD '%YYYY%%MM%%DD%'``. Such references are only resolved when a
+job is generated; ``--query variable`` returns the value exactly as
+stored. The ``--evaluate`` option requests that the references be
+resolved, using the same substitution rules as job generation:
+
+-  the micro character is taken from the ``ECF_MICRO`` variable, found by
+   searching up the node tree from the queried node (default ``%``);
+
+-  each reference is looked up in the same way as the queried variable
+   itself: user variable, repeat, then generated variable, searching up
+   the node tree from the queried node (or among the server variables,
+   when path is ``/``); the generated variables ``ECF_HOST``,
+   ``ECF_PORT``, ``ECF_TRYNO``, ``ECF_NAME`` and ``ECF_PASS`` take
+   precedence over user variables of the same name;
+
+-  references are resolved recursively, so that ``%A%`` where ``A`` is
+   ``%B%`` and ``B`` is ``value`` yields ``value``; a self-referencing
+   chain is reported as an error rather than looping forever;
+
+-  ``%VAR:default%`` yields the value of ``VAR`` when it is defined, and
+   ``default`` otherwise;
+
+-  a double micro character (``%%``) is collapsed into a single one;
+
+-  micro characters are paired from left to right, so a micro character
+   without a partner at the end of the value does not form a reference:
+   it is returned untouched, together with the text after it, once every
+   reference before it has been resolved (``some %VAR% then %MALFORMED``
+   yields ``some value then %MALFORMED``). An unpaired micro character
+   in the *middle* of the value pairs with the next one instead, and the
+   text in between is taken as a reference name (``a %B c %D% e`` is read
+   as a reference named ``B c`` followed by a space, then the literal
+   ``D``); a literal micro character must therefore be doubled.
+
+A reference that cannot be resolved is an error: the command fails and
+no partially resolved value is returned. ``--evaluate`` is only accepted
+together with the ``variable`` attribute; combining it with any other
+attribute is an error.
+
+.. warning::
+
+   **``--evaluate`` requires an ecFlow server of version 5.20 or later.**
+
+   The option travels to the server as an additional field of the query
+   request. A server older than 5.20 does not know that field, ignores it
+   silently, and answers the query as if ``--evaluate`` had not been
+   given: the command **succeeds** and returns the value **as stored**
+   (for example ``%YYYY%%MM%%DD%`` instead of ``20240101``), with no
+   error or warning on either side. A new client cannot detect this
+   from the reply alone. A script that relies on the resolved value must
+   therefore check the server version first
+   (``ecflow_client --server_version``), or validate the returned value
+   (for example, that it contains no micro character).
+
+.. code-block:: shell
+
+   # given: suite s / family f (repeat YYYY) / family m (repeat MM) / family d (repeat DD)
+   #        and, on task t: edit YMD '%YYYY%%MM%%DD%'
+   ecflow_client --query variable /s/f/m/d/t:YMD             # %YYYY%%MM%%DD%
+   ecflow_client --query variable /s/f/m/d/t:YMD --evaluate  # 20240101
+
+.. danger::
+
+   The value of a variable used in a :term:`trigger` or :term:`complete
+   expression` is **never** evaluated in this way. Expression operands
+   are integers: a variable whose value is not an integer literal (such
+   as ``%YYYY%%MM%%DD%``) converts to ``0`` without any warning, so a
+   trigger such as ``/s/f/m/d/t:YMD == 0`` is *true*. See
+   :ref:`expression_spec` for details.
+
 Usage:
 
 .. code-block:: shell
-  
+
    state=$(ecflow_client --query state /path/to/node)                                              # return node state to standard out
    dstate=$(ecflow_client --query dstate /path/to/node)                                            # state that can includes suspended
    value=$(ecflow_client --query repeat /path/to/node )                                            # return the current value as a string
@@ -103,6 +192,7 @@ Usage:
    event=$(ecflow_client --query event /path/to/task/with/event:event_name)                        # return set | clear to standard out
    meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name)                        # returns the current value of the meter to standard out
    value=$(ecflow_client --query variable /path/to/task/with/var:var_name )                        # returns the variable value to standard out
+   value=$(ecflow_client --query variable /path/to/task/with/var:var_name --evaluate)              # returns the variable value with references resolved
    value=$(ecflow_client --query variable /:var_name )                                              # returns the server variable value to standard out
    limit_value=$(ecflow_client --query limit  /path/to/task/with/limit:limit_name)                 # returns the current value of the limit to standard out
    limit_max=$(ecflow_client --query limit_max /path/to/task/with/limit:limit_name)                # returns the max value of the limit to standard out
@@ -119,10 +209,10 @@ The following help text is generated by :code:`ecflow_client --help=query`
 
 ::
 
-   
+
    query
    -----
-   
+
    Query the status of attributes
     i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking
     - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out
@@ -136,9 +226,20 @@ The following help text is generated by :code:`ecflow_client --help=query`
     - variable  return value of the variable, repeat or generated variable to standard out,
                 will search up the node tree. When path is '/', the variable is looked up on the
                 server itself, i.e. 'ecflow_client --query variable /:name'
+                By default the value is returned as stored, i.e. references to other variables
+                (such as %OTHER%) are not resolved. With the --evaluate option, all references in
+                the value are resolved before it is returned, using the same substitution as job
+                generation: the micro character is taken from ECF_MICRO (default '%'), references
+                are resolved recursively, %VAR:default% uses 'default' when VAR is not defined,
+                and a double micro character is collapsed into a single one. References are looked
+                up in the same way as the queried variable itself (user variable, repeat, generated
+                variable, searching up the node tree; or the server variables when path is '/').
+                Micro characters are paired from left to right; a trailing micro character without a
+                partner does not form a reference and is returned untouched, together with the text
+                after it, e.g. 'some %VAR% then %MALFORMED' yields 'some value then %MALFORMED'.
     - trigger   returns 'true' if the expression is true, otherwise 'false'
-   
-   If this command is called within a '.ecf' script we will additionally log the task calling this command
+
+   If this command is called within a '.ecf' script, the task calling this command is additionally logged.
    This is required to aid debugging for excessive use of this command
    The command will fail if the node path to the attribute does not exist in the definition and if:
     - repeat   The repeat is not found
@@ -147,22 +248,34 @@ The following help text is generated by :code:`ecflow_client --help=query`
     - limit/limit_max The limit is not found
     - label    The label is not found
     - variable No user or generated variable or repeat of that name found on node or its parents,
-               or (when path is '/') no user or server variable of that name found on the server
+               or (when path is '/') no user or server variable of that name found on the server;
+               or, with --evaluate, a reference in the value cannot be resolved (a partially
+               resolved value is never returned)
     - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid
-   
+    - --evaluate is used with an attribute other than variable
+
    Argument(s):
-   
+
        attribute: [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]
            # The kind of the attribute to be queried.
-   
+
        target: <path> | <path>:name
            # The path to the node or the node and attribute name.
-   
+
        value: trigger expression | prev | next
            # The values `prev` and `next` are only used when the attribute is a repeat
-   
+
+   Option(s):
+
+       --evaluate
+           # Only valid when the attribute is a variable: resolve all variable references in the value.
+           # WARNING: requires an ecFlow server of version 5.20 or later. An older server does not know
+           # the option, ignores it silently, and returns the value as stored (e.g. '%YYYY%%MM%%DD%')
+           # without any error; a script relying on the resolved value must therefore check the
+           # server version (ecflow_client --server_version) or the returned value.
+
    Usage:
-   
+
        --query state /                                     # return top level state to standard out
        --query state /path/to/node                         # return node state to standard out
        --query dstate /path/to/node                        # state that can included suspended
@@ -175,11 +288,12 @@ The following help text is generated by :code:`ecflow_client --help=query`
        --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out
        --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out
        --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out
+       --query variable /path/to/task/with/var:var_name --evaluate # returns the variable value with references resolved
        --query variable /:var_name                         # returns the server variable value to standard out
        --query trigger /path/to/node/with/trigger "/suite/task == complete" # return true if expression evaluates false otherwise
-   
+
    The client considers, for both user and task commands, the following environment variables:
-   
+
      ECF_HOST <string> [mandatory*]
        The main server hostname; default value is 'localhost'
      ECF_PORT <int> [mandatory*]
@@ -190,11 +304,11 @@ The following help text is generated by :code:`ecflow_client --help=query`
        File that lists alternate hosts to try, if connection to main host fails
      ECF_HOSTFILE_POLICY <string> [optional]
        The policy ('task' or 'all') to define which commands consider using alternate hosts.
-   
+
    The options marked with (*) must be specified in order for the client to communicate
    with the server, either by setting the environment variables or by specifying the
    command line options.
-   
+
 
 
 .. seealso::

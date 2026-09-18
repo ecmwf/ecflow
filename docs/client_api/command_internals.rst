@@ -3369,7 +3369,7 @@ target by ``absNodePath_``:
             ---
 
             Show the reason why a node is not running.
-            Can only be used with the group command. The group command must include a 
+            Can only be used with the group command. The group command must include a
             &#x27;get&#x27; command(i.e returns the server defs)
             The why command take a optional string argument representing a node path
             Will return reason why the node is holding and for all its children.
@@ -3708,7 +3708,7 @@ underlies the "edit script" workflow in ``ecflow_ui``.
                     # between the %comment/%end and use these them to generate the
                     # job using the ecf file accessible from the server
                     #
-                    # pre_process_file: Pre-process the user supplied file, 
+                    # pre_process_file: Pre-process the user supplied file,
                     # expanding includes, performing variable substitution,
                     # removing manual & comment sections.
                     #
@@ -5239,10 +5239,16 @@ QueryCmd
          ``variable``, ``trigger``, ``repeat``, ``limit`` or ``limit_max`` (``query_type_``).
        - ``arg2`` (path): the node, or ``<path>:<attribute>``, being queried (``path_to_attribute_``
          and ``attribute_``).
-       - ``arg3`` (optional task path): the task the query is made on behalf of (``path_to_task_``),
-         used for logging.
+       - ``--evaluate`` (optional, ``variable`` only): resolve the variable references in the value
+         before returning it (``evaluate_``, a Boolean serialised only when ``true``; a request without
+         it deserialises with the flag unset, so older clients keep working with a 5.20 server).
+         **A server older than 5.20 ignores the field silently** and answers with the value as
+         stored, so a new client gets no indication that evaluation did not take place.
+       - ``path_to_task_`` (context, not a CLI argument): the task on whose behalf the query is made,
+         taken from ``ECF_NAME`` when the client runs inside a job; used for logging only.
    * - Environment variables
      - - ``ECF_USER`` (optional): overrides the authenticated user name.
+       - ``ECF_NAME`` (optional): the calling task path recorded in ``path_to_task_``.
 
 Reads a single piece of state from the server without changing anything — for example the state of a
 node, or the value of an event, meter or variable. The reply is always a string. It is often used
@@ -5280,9 +5286,20 @@ inside scripts to branch on a node's state.
              - variable  return value of the variable, repeat or generated variable to standard out,
                          will search up the node tree. When path is '/', the variable is looked up on the
                          server itself, i.e. 'ecflow_client --query variable /:name'
+                         By default the value is returned as stored, i.e. references to other variables
+                         (such as %OTHER%) are not resolved. With the --evaluate option, all references in
+                         the value are resolved before it is returned, using the same substitution as job
+                         generation: the micro character is taken from ECF_MICRO (default '%'), references
+                         are resolved recursively, %VAR:default% uses 'default' when VAR is not defined,
+                         and a double micro character is collapsed into a single one. References are looked
+                         up in the same way as the queried variable itself (user variable, repeat, generated
+                         variable, searching up the node tree; or the server variables when path is '/').
+                         Micro characters are paired from left to right; a trailing micro character without a
+                         partner does not form a reference and is returned untouched, together with the text
+                         after it, e.g. 'some %VAR% then %MALFORMED' yields 'some value then %MALFORMED'.
              - trigger   returns 'true' if the expression is true, otherwise 'false'
 
-            If this command is called within a '.ecf' script we will additionally log the task calling this command
+            If this command is called within a '.ecf' script, the task calling this command is additionally logged.
             This is required to aid debugging for excessive use of this command
             The command will fail if the node path to the attribute does not exist in the definition and if:
              - repeat   The repeat is not found
@@ -5291,8 +5308,11 @@ inside scripts to branch on a node's state.
              - limit/limit_max The limit is not found
              - label    The label is not found
              - variable No user or generated variable or repeat of that name found on node or its parents,
-                        or (when path is '/') no user or server variable of that name found on the server
+                        or (when path is '/') no user or server variable of that name found on the server;
+                        or, with --evaluate, a reference in the value cannot be resolved (a partially
+                        resolved value is never returned)
              - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid
+             - --evaluate is used with an attribute other than variable
 
             Argument(s):
 
@@ -5304,6 +5324,15 @@ inside scripts to branch on a node's state.
 
                 value: trigger expression | prev | next
                     # The values `prev` and `next` are only used when the attribute is a repeat
+
+            Option(s):
+
+                --evaluate
+                    # Only valid when the attribute is a variable: resolve all variable references in the value.
+                    # WARNING: requires an ecFlow server of version 5.20 or later. An older server does not know
+                    # the option, ignores it silently, and returns the value as stored (e.g. '%YYYY%%MM%%DD%')
+                    # without any error; a script relying on the resolved value must therefore check the
+                    # server version (ecflow_client --server_version) or the returned value.
 
             Usage:
 
@@ -5319,6 +5348,7 @@ inside scripts to branch on a node's state.
                 --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out
                 --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out
                 --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out
+                --query variable /path/to/task/with/var:var_name --evaluate # returns the variable value with references resolved
                 --query variable /:var_name                         # returns the server variable value to standard out
                 --query trigger /path/to/node/with/trigger "/suite/task == complete" # return true if expression evaluates false otherwise
 
@@ -5349,6 +5379,39 @@ inside scripts to branch on a node's state.
                       "path_to_attribute_": "/suite/family/task",
                       "attribute_": "",
                       "path_to_task_": "/suite/family/task"
+                    }
+                  }
+                }
+              }
+            }
+
+        ``--query variable /suite/family/task:YMD --evaluate`` (the ``evaluate_`` field is present only
+        when the option is given):
+
+        .. code-block:: json
+
+            {
+              "21ClientToServerRequest": {
+                "cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "QueryCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": {
+                        "cereal_class_version": 0,
+                        "value0": {
+                          "cereal_class_version": 0,
+                          "cl_host_": "host.example.com"
+                        },
+                        "user_": "operator"
+                      },
+                      "query_type_": "variable",
+                      "path_to_attribute_": "/suite/family/task",
+                      "attribute_": "YMD",
+                      "path_to_task_": "/suite/family/task",
+                      "evaluate_": true
                     }
                   }
                 }
@@ -5452,7 +5515,7 @@ Verbatim ``ecflow_client --replace`` output (the common environment-variable foo
      arg3 = (optional) [ parent | false ] (default = parent)
             create parent families or suite as needed, when arg1 does not
             exist in the server
-     arg4 = (optional) force (default = false) 
+     arg4 = (optional) force (default = false)
             Force the replacement even if it causes zombies to be created
    Replace can fail if:
    - The node path(arg1) does not exist in the provided client definition(arg2)

@@ -17,16 +17,16 @@ public:
 
 private:
     /// ssl and connection functions
-    void handle_handshake(const boost::system::error_code& error, ssl_connection_ptr conn);
+    void handle_handshake(const boost::system::error_code& error, const ssl_connection_ptr& conn);
 
     /// Handle completion of a accept operation.
-    void handle_accept(const boost::system::error_code& e, ssl_connection_ptr conn);
+    void handle_accept(const boost::system::error_code& e, const ssl_connection_ptr& conn);
 
     /// Handle completion of a write operation.
     void handle_write(const boost::system::error_code& e, ssl_connection_ptr conn);
 
     /// Handle completion of a read operation.
-    void handle_read(const boost::system::error_code& e, ssl_connection_ptr conn);
+    void handle_read(const boost::system::error_code& e, const ssl_connection_ptr& conn);
 
     void start_accept();
 };

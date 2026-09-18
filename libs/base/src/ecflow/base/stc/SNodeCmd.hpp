@@ -18,7 +18,7 @@ public:
     SNodeCmd(AbstractServer* as, node_ptr node);
     SNodeCmd() = default;
 
-    void init(AbstractServer* as, node_ptr node);
+    void init(AbstractServer* as, const node_ptr& node);
 
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;

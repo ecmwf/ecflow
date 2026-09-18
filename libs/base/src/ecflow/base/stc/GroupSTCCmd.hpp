@@ -19,7 +19,7 @@ public:
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
 
-    void addChild(STC_Cmd_ptr childCmd);
+    void addChild(const STC_Cmd_ptr& childCmd);
     const std::vector<STC_Cmd_ptr>& cmdVec() const { return cmdVec_; }
 
     // these two must be opposite of each other

@@ -5,7 +5,7 @@
 .. _ecflow_cli:
 
 Command line interface (CLI)
-//////////////////////////// 
+////////////////////////////
 
 The :term:`ecFlow command line interface (CLI) <ecflow_client>` is provided by the :code:`ecflow_client` executable.
 A large number of commands/options enabled by the :ref:`ecflow_ui` are also available as CLI commands.
@@ -41,7 +41,7 @@ and ``--help=defs/<item>`` respectively.
 
 .. toctree::
     :maxdepth: 1
-    
+
     desc/cli_option_overriding
     desc/cli_scripting_in_batch
     desc/using_backup_servers

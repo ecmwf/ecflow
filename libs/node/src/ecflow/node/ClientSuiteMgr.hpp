@@ -59,7 +59,7 @@ public:
 
     /// returns true if the handle was created, or suites added or removed from it
     /// The handle change flag is reset when create_defs is called
-    bool handle_changed(unsigned int client_handle);
+    bool handle_changed(unsigned int client_handle) const;
 
     /// Collect all the state changes, so that only small subset is returned to client
     /// When nodes are added/deleted we use the modify_change_no_, in this case
@@ -77,11 +77,12 @@ public:
     /// and then set it on the newly created defs.
     /// It also takes special precaution *NOT* to change Ecf::state_change_no() and Ecf::modify_change_no()
     /// This will clear the handle_changed flag
-    defs_ptr create_defs(unsigned int client_handle, defs_ptr server_defs) const;
+    defs_ptr create_defs(unsigned int client_handle, const defs_ptr& server_defs) const;
 
     /// Used to determine the change, will throw if handle not found
-    void
-    max_change_no(unsigned int client_handle, unsigned int& max_state_change_no, unsigned int& max_modify_change_no);
+    void max_change_no(unsigned int client_handle,
+                       unsigned int& max_state_change_no,
+                       unsigned int& max_modify_change_no) const;
 
     /// Accessor
     const std::vector<ecf::ClientSuites>& clientSuites() const { return clientSuites_; }
@@ -92,14 +93,14 @@ public:
     /// A suite has been added to the definition.
     /// If the suite was previously registered *UPDATE* its suite_ptr
     /// Otherwise if any ClientSuites registered for automatic inclusion of new suite, add them in
-    void suite_added_in_defs(suite_ptr);
+    void suite_added_in_defs(const suite_ptr&);
 
     /// A suite has been updated in the definition.
-    void suite_replaced_in_defs(suite_ptr);
+    void suite_replaced_in_defs(const suite_ptr&);
 
     /// The suite has been deleted from the definition, reset the suite_ptr
     /// Deleted suites STAY registered, until explicitly dropped.
-    void suite_deleted_in_defs(suite_ptr);
+    void suite_deleted_in_defs(const suite_ptr&);
 
     /// Update suites to be in same order as Defs.
     void update_suite_order();

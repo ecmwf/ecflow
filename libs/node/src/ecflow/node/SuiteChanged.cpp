@@ -13,7 +13,7 @@
 
 namespace ecf {
 
-SuiteChanged::SuiteChanged(suite_ptr s)
+SuiteChanged::SuiteChanged(const suite_ptr& s)
     : suite_(s),
       state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
@@ -32,7 +32,7 @@ SuiteChanged::~SuiteChanged() {
 }
 
 // ============================================================================
-SuiteChanged0::SuiteChanged0(node_ptr s)
+SuiteChanged0::SuiteChanged0(const node_ptr& s)
     : node_(s),
       suite_(s->suite()),
       state_change_no_(Ecf::state_change_no()),

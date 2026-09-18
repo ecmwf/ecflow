@@ -18,7 +18,10 @@
 
 using namespace ecf;
 
-ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
+ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
+                               bool createNodesAsNeeded,
+                               const defs_ptr& client_defs,
+                               bool force)
     : createNodesAsNeeded_(createNodesAsNeeded),
       force_(force),
       pathToNode_(node_path) {

@@ -29,6 +29,7 @@ set(test_srcs
   test/TestRequeueNodeCmd.cpp
   test/TestResolveDependencies.cpp
   test/TestSpecificIssues.cpp
+  test/TestSNewsCmd.cpp
   test/TestSSyncCmd.cpp
   test/TestSSyncCmdOrder.cpp
   test/TestSSyncCmd_CH1.cpp

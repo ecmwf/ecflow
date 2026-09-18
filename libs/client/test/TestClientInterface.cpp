@@ -124,6 +124,13 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
     BOOST_REQUIRE_MESSAGE(theClient.query("variable", "/suite", "var") == 0,
                           CtsApi::queryArg() << " should return 0\n"
                                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.query("variable", "/suite", "var", true) == 0,
+                          CtsApi::to_string(CtsApi::query("variable", "/suite", "var", true)) << " should return 0\n"
+                                                                                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.query("variable", "/", "SERVER_VAR", true) == 0,
+                          CtsApi::to_string(CtsApi::query("variable", "/", "SERVER_VAR", true))
+                              << " should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.query("trigger", "/suite", "1 == 1") == 0,
                           CtsApi::queryArg() << " should return 0\n"
                                              << theClient.errorMsg());
@@ -1429,6 +1436,17 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
     BOOST_REQUIRE_MESSAGE(theClient.query("variable", "/suite", "") == 1,
                           std::string(CtsApi::queryArg()) << " should return 0\n"
                                                           << theClient.errorMsg());
+    // --evaluate is only valid with query type 'variable'
+    for (const auto& query_type : {"state", "dstate", "repeat", "event", "meter", "label", "limit", "limit_max"}) {
+        BOOST_REQUIRE_MESSAGE(theClient.query(query_type, "/suite", "name", true) == 1,
+                              CtsApi::to_string(CtsApi::query(query_type, "/suite", "name", true))
+                                  << " should return 1\n"
+                                  << theClient.errorMsg());
+    }
+    BOOST_REQUIRE_MESSAGE(theClient.query("trigger", "/suite", "1 == 1", true) == 1,
+                          CtsApi::to_string(CtsApi::query("trigger", "/suite", "1 == 1", true))
+                              << " should return 1\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.query("trigger", "/suite", "") == 1,
                           std::string(CtsApi::queryArg()) << " should return 0\n"
                                                           << theClient.errorMsg());

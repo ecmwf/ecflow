@@ -12,7 +12,7 @@
 
 using namespace ecf;
 
-bool ServerToClientResponse::handle_server_response(ServerReply& r, Cmd_ptr cts_cmd, bool debug) const {
+bool ServerToClientResponse::handle_server_response(ServerReply& r, const Cmd_ptr& cts_cmd, bool debug) const {
     /// Called in client context: see ClientInvoker
     if (stc_cmd_.get()) {
         return stc_cmd_->handle_server_response(r, cts_cmd, debug);

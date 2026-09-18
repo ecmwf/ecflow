@@ -53,17 +53,16 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
         theParent = theParent->parent();
     }
 
-    // If all else fails search defs environment, returns empty string if match not found
+    // If all else fails search defs environment
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
     //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
     //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
-    if (the_defs) {
+    if (the_defs && the_defs->server_state().variable_exists(name)) {
+        // Presence is tested explicitly, so that a server variable with an empty value is found
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty()) {
-            return true;
-        }
+        return true;
     }
     return false; // the variable cannot be found
 }
@@ -81,17 +80,16 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
         theParent = theParent->parent();
     }
 
-    // If all else fails search defs environment, returns empty string if match not found
+    // If all else fails search defs environment
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
     //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
     //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
-    if (the_defs) {
+    if (the_defs && the_defs->server_state().variable_exists(name)) {
+        // Presence is tested explicitly, so that a server variable with an empty value is found
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty()) {
-            return true;
-        }
+        return true;
     }
     return false; // the variable cannot be found
 }
@@ -109,15 +107,14 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
         theParent = theParent->parent();
     }
 
-    // If all else fails search defs environment, returns empty string if match not found
+    // If all else fails search defs environment
+    // Note: when calling ecflow_client --get_state=/suite/task
+    // The node can be detached from the defs.
     Defs* the_defs = defs();
-    if (the_defs) {
-        // Note: when calling ecflow_client --get_state=/suite/task
-        // The node can be detached from the defs.
+    if (the_defs && the_defs->server_state().variable_exists(name)) {
+        // Presence is tested explicitly, so that a server variable with an empty value is found
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty()) {
-            return true;
-        }
+        return true;
     }
     return false; // the variable cannot be found
 }

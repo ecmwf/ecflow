@@ -1650,7 +1650,7 @@ bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, st
 }
 
 std::unique_ptr<AstTop>
-Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context) {
+Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context) const {
     std::unique_ptr<AstTop> ast = Expression::parse(expr, context); // will throw for errors
 
     std::string errorMsg;

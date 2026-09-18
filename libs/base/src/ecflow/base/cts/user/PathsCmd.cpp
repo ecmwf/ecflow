@@ -211,8 +211,6 @@ const char* PathsCmd::theArg() const {
 }
 
 STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
-    // LogTimer timer(" PathsCmd::doHandleRequest");
-
     Defs* defs = as->defs().get();
     std::ostringstream ss;
     switch (api_) {

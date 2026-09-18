@@ -6,6 +6,7 @@
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 
 #include <memory>
+#include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
@@ -42,6 +43,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/core/Message.hpp"
 
 CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     // If a new client to server command is added. Make sure to add it here.
@@ -138,6 +140,32 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     if (addGroupCmd) {
         vec_.push_back(std::make_shared<GroupCTSCmd>());
     }
+
+    collectModifiers();
+}
+
+void CtsCmdRegistry::collectModifiers() {
+    for (const auto& registered_cmd : vec_) {
+        boost::program_options::options_description desc;
+        registered_cmd->addOption(desc);
+        for (const auto& option : desc.options()) {
+            if (option->long_name() != registered_cmd->theArg()) {
+                modifiers_[option->long_name()] = registered_cmd->theArg();
+            }
+        }
+    }
+}
+
+void CtsCmdRegistry::rejectForeignModifiers(const std::string& matched_arg,
+                                            const boost::program_options::variables_map& vm) const {
+    for (const auto& entry : modifiers_) {
+        const std::string& modifier = entry.first;
+        const std::string& owner    = entry.second;
+        if (owner != matched_arg && vm.count(modifier)) {
+            throw std::runtime_error(MESSAGE("Option --" << modifier << " is only valid with --" << owner
+                                                         << ", but found with --" << matched_arg));
+        }
+    }
 }
 
 bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
@@ -152,6 +180,7 @@ bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
                           << "\n";
             }
 
+            rejectForeignModifiers(registered_cmd->theArg(), vm);
             registered_cmd->create(cmd, vm, clientEnv);
             return true;
         }

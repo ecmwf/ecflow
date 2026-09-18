@@ -6,6 +6,7 @@
 #include "ecflow/server/TcpServer.hpp"
 
 #include <iostream>
+#include <utility>
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/server/Server.hpp"
@@ -31,7 +32,7 @@ void TcpServer::start_accept() {
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });
 }
 
-void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr conn) {
+void TcpServer::handle_accept(const boost::system::error_code& e, const connection_ptr& conn) {
     if (serverEnv_.debug()) {
         std::cout << "   TcpServer::handle_accept" << std::endl;
     }
@@ -74,7 +75,7 @@ void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr
     start_accept();
 }
 
-void TcpServer::handle_read(const boost::system::error_code& e, connection_ptr conn) {
+void TcpServer::handle_read(const boost::system::error_code& e, const connection_ptr& conn) {
     // start read
     // timer_.start();
 
@@ -120,7 +121,7 @@ void TcpServer::handle_write(const boost::system::error_code& e, connection_ptr 
     // Do any necessary clean up after outbound_response_  has run. i.e like re-claiming memory
     outbound_response_.cleanup();
 
-    (void)shutdown_socket(conn, "TcpServer::handle_write:");
+    (void)shutdown_socket(std::move(conn), "TcpServer::handle_write:");
 
     // If asked to terminate we do it here rather than in handle_read.
     // So that we have responded to the client.

@@ -23,7 +23,7 @@ namespace ecf {
 
 class SuiteChanged {
 public:
-    explicit SuiteChanged(suite_ptr s);
+    explicit SuiteChanged(const suite_ptr& s);
 
     // Disable copy (and move) semantics
     SuiteChanged(const SuiteChanged&)            = delete;
@@ -41,7 +41,7 @@ private:
 
 class SuiteChanged0 {
 public:
-    explicit SuiteChanged0(node_ptr s);
+    explicit SuiteChanged0(const node_ptr& s);
 
     // Disable copy (and move) semantics
     SuiteChanged0(const SuiteChanged0&)            = delete;

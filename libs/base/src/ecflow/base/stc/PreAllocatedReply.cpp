@@ -5,6 +5,8 @@
 
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
+#include <utility>
+
 #include "ecflow/base/stc/BlockClientZombieCmd.hpp"
 #include "ecflow/base/stc/DefsCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
@@ -73,7 +75,7 @@ STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as, bool save_edit_histo
 
 STC_Cmd_ptr PreAllocatedReply::node_cmd(AbstractServer* as, node_ptr node) {
     auto* cmd = dynamic_cast<SNodeCmd*>(node_cmd_.get());
-    cmd->init(as, node);
+    cmd->init(as, std::move(node));
     return node_cmd_;
 }
 

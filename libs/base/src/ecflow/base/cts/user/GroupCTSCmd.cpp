@@ -52,8 +52,10 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         // This is required by the boost program options.
         ecf::algorithm::trim(aCmd);
 
+        // Only the leading '--' is optional; a '--' further along the command belongs to an option of the
+        // command itself (e.g. 'query variable /s/t:VAR --evaluate').
         subCmd.clear();
-        if (aCmd.find("--") == std::string::npos) {
+        if (!ecf::algorithm::starts_with(aCmd, "--")) {
             subCmd = "--";
         }
         subCmd += aCmd;
@@ -97,7 +99,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
         // The first will be the command, then the args. However from boost 1.59
         // we must use --cmd=value, instead of --cmd value
-        if (!subCmdArgs.empty() && subCmdArgs.size() > 1 && subCmdArgs[0].find("=") == std::string::npos) {
+        // (unless the second token is an option of its own, e.g. 'ping --evaluate', which must stay separate)
+        if (!subCmdArgs.empty() && subCmdArgs.size() > 1 && subCmdArgs[0].find("=") == std::string::npos &&
+            !ecf::algorithm::starts_with(subCmdArgs[1], "--")) {
             subCmdArgs[0] += "=";
             subCmdArgs[0] += subCmdArgs[1];
             subCmdArgs.erase(subCmdArgs.begin() + 1); // remove, since we have added to first
@@ -135,7 +139,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         po::notify(group_vm);
 
         Cmd_ptr childCmd;
-        cmdRegistry.parse(childCmd, group_vm, clientEnv);
+        if (!cmdRegistry.parse(childCmd, group_vm, clientEnv) || !childCmd) {
+            throw std::runtime_error(MESSAGE("GroupCTSCmd: unrecognised command '" << aCmd << "' in group"));
+        }
         addChild(childCmd);
     }
 }
@@ -266,7 +272,7 @@ ecf::authorisation_t GroupCTSCmd::authorise(AbstractServer& server) const {
     return implementation::do_authorise(*this, server);
 }
 
-void GroupCTSCmd::addChild(Cmd_ptr childCmd) {
+void GroupCTSCmd::addChild(const Cmd_ptr& childCmd) {
     assert(childCmd.get()); // Dont add NULL children
     cmdVec_.push_back(childCmd);
 }
@@ -321,7 +327,6 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
 #ifdef DEBUG_GROUP_CMD
     std::cout << "GroupCTSCmd::doHandleRequest cmdVec_.size() = " << cmdVec_.size() << "\n";
 #endif
-    // ecf::LogTimer timer(" GroupCTSCmd::doHandleRequest");
 
     as->update_stats().group_cmd_++;
 

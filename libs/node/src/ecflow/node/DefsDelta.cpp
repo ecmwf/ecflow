@@ -25,7 +25,7 @@ void DefsDelta::init(unsigned int client_state_change_no, bool sync_suite_clock)
     compound_mementos_.clear();
 }
 
-bool DefsDelta::incremental_sync(defs_ptr client_def,
+bool DefsDelta::incremental_sync(const defs_ptr& client_def,
                                  std::vector<std::string>& changed_nodes,
                                  int client_handle) const {
     // ****************************************************
@@ -68,7 +68,7 @@ bool DefsDelta::incremental_sync(defs_ptr client_def,
     return !compound_mementos_.empty();
 }
 
-void DefsDelta::add(compound_memento_ptr memento) {
+void DefsDelta::add(const compound_memento_ptr& memento) {
     compound_mementos_.push_back(memento);
 }
 

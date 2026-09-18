@@ -64,6 +64,28 @@ An expression yields an integer; a **non-zero** result is *true* and a **zero** 
 boolean operators yield ``1`` or ``0``, but a bare numeric operand is also a valid expression (for example ``trigger
 1`` is always true, and ``trigger /suite/limit:remaining`` is true while the value is non-zero).
 
+.. _expr-integer-operands:
+
+.. danger::
+
+   **Every operand is an integer, and a variable value that is not an integer literal silently evaluates to 0.**
+
+   When an expression references a *variable* (``/path/to/node:NAME`` or ``:NAME``), the value of that variable is
+   converted to a signed integer **exactly as stored**:
+
+   - references to other variables inside the value (for example ``%YYYY%%MM%%DD%``) are **never** substituted; the
+     value is not the composed date but the literal string ``%YYYY%%MM%%DD%``, which converts to ``0``;
+   - any value that is not an integer literal (``abc``, an empty string, ``2024-01-01``, ``1.5``) converts to ``0``;
+   - a ``string`` repeat contributes the **index** of its current item, never the item text; an ``enumerated``
+     repeat contributes the current item when it is an integer literal (``"01"`` gives ``1``) and its index
+     otherwise; a ``date`` repeat contributes the ``YYYYMMDD`` integer.
+
+   No warning is raised in any of these cases. Consequently ``trigger /s/f/t:YMD == 0`` is *true* when ``YMD`` holds
+   ``%YYYY%%MM%%DD%``, and ``trigger /s/f/t:YMD == 20240101`` is *never* true for such a value, however the referenced
+   variables are set. Only integer-valued variables are meaningful in expressions; the ecflow_ui *Why* tab shows the
+   integer each operand evaluated to. To obtain the substituted value of such a variable outside an expression, use
+   ``ecflow_client --query variable /s/f/t:YMD --evaluate`` (see :ref:`query_cli`).
+
 Abstract syntax tree
 --------------------
 
@@ -141,7 +163,9 @@ Operands
    * - Node attribute
      - ``/path/to/node:name``
      - The integer value of the named attribute of the node at ``/path/to/node``: an *event* (``set`` = 1,
-       ``clear`` = 0), a *meter*, a user or generated *variable*, a *limit*, a *repeat*, or a *queue*.
+       ``clear`` = 0), a *meter*, a user or generated *variable*, a *limit*, a *repeat*, or a *queue*. A variable
+       value is converted as stored, without substitution of ``%VAR%`` references, and yields ``0`` when it is not an
+       integer literal (see :ref:`the warning above <expr-integer-operands>`).
    * - Parent attribute
      - ``:name``
      - The value of the attribute ``name``, resolved exactly like a *node attribute* but located **by name up the

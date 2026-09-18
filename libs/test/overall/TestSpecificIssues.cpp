@@ -3,19 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
@@ -51,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
         // cout << theDefs;
     }
 
-    // Create a custom ecf file for test_task_abort_cmd/family0/abort to invoke the child abort command
+    // Create a custom ecf file for test_ECFLOW_1589/t1 that completes and then exits with a non-zero status
     std::string templateEcfFile;
     templateEcfFile += "%include <head.h>\n";
     templateEcfFile += "\n";
@@ -69,16 +74,37 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
 
     // Since the job will call exit 1, i.e from bad_tail.h, we expect ecf::Flag::JOBCMD_FAILED
     // and since task t1 has *ALREADY* completed we expect ecf::Flag::ZOMBIE
-    BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
-                          "sync_local failed should return 0\n"
-                              << TestFixture::client().errorMsg());
-    defs_ptr defs = TestFixture::client().defs();
-    // cout << defs;
-    node_ptr task = defs->findAbsNode("/test_ECFLOW_1589/t1");
-    BOOST_REQUIRE_MESSAGE(task, "Expected to find task\n");
-    BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::ZOMBIE), "expected zombie flag to be set\n");
+    //
+    // The flags are only set once the server 'reaps' (i.e. collects the exit status of) the
+    // terminated ECF_JOB_CMD child, which happens in System::processTerminatedChildren() at the
+    // end of the next job generation tick. The test harness returns as soon as the task is
+    // complete, so poll for the flags for a bounded time.
+    const int max_time_to_wait = std::max(10, 3 * TestFixture::job_submission_interval());
+    AssertTimer assertTimer(max_time_to_wait, false);
+    node_ptr task;
+    while (true) {
+        BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
+                              "sync_local failed should return 0\n"
+                                  << TestFixture::client().errorMsg());
+        defs_ptr defs = TestFixture::client().defs();
+        task          = defs->findAbsNode("/test_ECFLOW_1589/t1");
+        BOOST_REQUIRE_MESSAGE(task, "Expected to find task\n");
+        if (task->get_flag().is_set(ecf::Flag::ZOMBIE) && task->get_flag().is_set(ecf::Flag::JOBCMD_FAILED)) {
+            break;
+        }
+        if (assertTimer.duration() >= assertTimer.timeConstraint()) {
+            break;
+        }
+        sleep(1);
+    }
+    BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::ZOMBIE),
+                        "expected zombie flag to be set after waiting "
+                            << max_time_to_wait << "s\n"
+                            << ecf::as_string(*TestFixture::client().defs(), PrintStyle::STATE));
     BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::JOBCMD_FAILED),
-                        "expected JOBCMD_FAILED failed flag to be set\n");
+                        "expected JOBCMD_FAILED flag to be set after waiting "
+                            << max_time_to_wait << "s\n"
+                            << ecf::as_string(*TestFixture::client().defs(), PrintStyle::STATE));
 
     std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
               << ")\n";

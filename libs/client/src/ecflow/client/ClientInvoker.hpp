@@ -382,7 +382,7 @@ public:
                 bool create_parents_as_required = true,
                 bool force                      = false) const;
     int replace_1(const std::string& absNodePath,
-                  defs_ptr client_defs,
+                  const defs_ptr& client_defs,
                   bool create_parents_as_required = true,
                   bool force                      = false) const;
 
@@ -423,7 +423,20 @@ public:
 
     int plug(const std::string& sourcePath, const std::string& destPath) const;
 
-    int query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute);
+    ///
+    /// @brief Queries an attribute (state, event, meter, variable, trigger expression, ...) on the server.
+    ///
+    /// @param[in] query_type the kind of query, e.g. state, dstate, repeat, event, meter, label, variable, trigger
+    /// @param[in] path_to_attribute the path to the node holding the attribute ('/' for the server itself)
+    /// @param[in] attribute the attribute name, or the trigger expression; empty for state and dstate
+    /// @param[in] evaluate only valid for query type 'variable': when true, the variable value is returned with
+    ///                     all variable references (e.g. %VAR%) resolved, instead of as stored
+    /// @return 0 on success; the reply is available via get_string()
+    ///
+    int query(const std::string& query_type,
+              const std::string& path_to_attribute,
+              const std::string& attribute,
+              bool evaluate = false);
 
     int alter(const std::vector<std::string>& paths,
               const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
@@ -499,7 +512,7 @@ private:
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
+    int invoke(const Cmd_ptr&) const; // assumes clients of Cmd_ptr constructor has caught exceptions
 
     int do_invoke_cmd(Cmd_ptr) const;
 
