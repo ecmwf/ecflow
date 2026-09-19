@@ -41,17 +41,22 @@ const std::string API_KEY_revoked = TokenFile::generate_token();
 // The range of TCP ports considered when selecting the port used by the REST API server under test.
 //
 // Both ranges lie below the ephemeral port range allocated by the operating system (Linux allocates from
-// 32768 upwards, macOS from 49152 upwards), since a port taken from the ephemeral range may be assigned,
-// at any moment, as the source port of an unrelated outgoing connection, making it unavailable to bind.
+// 32768 upwards, macOS from 49152 upwards), since a port in the ephemeral range may be assigned by
+// the OS, making it unavailable to bind.
+//
 // The ranges are disjoint, as the test binaries for the two backends are allowed to run concurrently.
 
 #if defined(ECF_TEST_HTTP_BACKEND)
 static const int ECF_TEST_HTTP_PORT_MIN            = 20000;
 static const int ECF_TEST_HTTP_PORT_MAX            = 24999;
+static const int ECF_TEST_ECFLOW_PORT_MIN          = 30000;
+static const int ECF_TEST_ECFLOW_PORT_MAX          = 30999; // [30000, 30999], 1000 ports to be randomly selected from.
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
 #else
 static const int ECF_TEST_HTTP_PORT_MIN            = 25000;
 static const int ECF_TEST_HTTP_PORT_MAX            = 29999;
+static const int ECF_TEST_ECFLOW_PORT_MIN          = 31000;
+static const int ECF_TEST_ECFLOW_PORT_MAX          = 31999; // [31000, 31999], 1000 ports to be randomly selected from.
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
 #endif
 
@@ -112,6 +117,34 @@ int api_port() {
 const std::string& api_port_str() {
     static const std::string port = std::to_string(api_port());
     return port;
+}
+
+///
+/// @brief Provides the TCP port of the ecFlow server that backs the REST API server under test.
+///
+/// When ECF_PORT is already set in the environment, that exact port is reserved, so that a run can be
+/// pinned to a known server port; otherwise a port is drawn from the range assigned to this test, which
+/// lies below the ephemeral range of Linux (32768-60999) and macOS (49152-65535), so that an outgoing
+/// connection of a concurrent test is never assigned one of these ports as its source port. Either
+/// way the reservation confirms that nothing is bound to the port, so that concurrent test runs, including
+/// build jobs of other repositories sharing the host, never talk to each other's ecFlow server. The port
+/// is reserved on first use, and remains unchanged (and reserved) for the remainder of the test run.
+///
+/// @return The selected port number
+/// @throws ecf::test::scaffold::MakePort::UnableToLockPort if the port given by ECF_PORT is not available
+/// @throws std::runtime_error if no available port is found in the assigned range
+///
+int ecflow_port() {
+    using namespace ecf::test::scaffold;
+
+    static const auto port = []() -> std::unique_ptr<Port> {
+        if (ecf::environment::has("ECF_PORT")) {
+            auto requested = ecf::convert_to<Port::port_t>(ecf::environment::get("ECF_PORT"));
+            return MakePort{}.with(SpecificPortValue{requested}).create_owned();
+        }
+        return reserve_available_port(ECF_TEST_ECFLOW_PORT_MIN, ECF_TEST_ECFLOW_PORT_MAX);
+    }();
+    return static_cast<int>(port->value());
 }
 
 ///
@@ -330,11 +363,9 @@ struct SetupTest
             throw std::runtime_error("Failed to set signal mask");
         }
 
-#if defined(ECF_TEST_HTTP_BACKEND)
-        setenv("ECF_PORT", "3198", 0);
-#else
-        setenv("ECF_PORT", "3199", 0);
-#endif
+        // The ecFlow server port is reserved for the whole run, so that no other test (or build job on the
+        // same host) can bind it or be mistaken for the server under test
+        setenv("ECF_PORT", std::to_string(ecflow_port()).c_str(), 1);
         setenv("ECF_HOST", "localhost", 1);
 
         // Ensure each separate test uses its own ECF_HOME...

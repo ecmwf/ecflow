@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_creating_host) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_locking_known_ports) {
+BOOST_AUTO_TEST_CASE(test_locking_known_tcp_ports) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf;
@@ -80,6 +80,30 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
     BOOST_CHECK(fs::exists(port_a.lock_location()));
     BOOST_CHECK(fs::exists(port_b.lock_location()));
     BOOST_CHECK(fs::exists(port_c.lock_location()));
+}
+
+BOOST_AUTO_TEST_CASE(test_locking_known_udp_ports) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+    using namespace ecf::test::scaffold;
+
+    // Occupy UDP port 24447, as a running ecflow_udp would
+    boost::asio::io_context io;
+    boost::asio::ip::udp::socket occupied(io, {boost::asio::ip::udp::v4(), 24447});
+
+    // A UDP reservation skips the occupied port, while a TCP reservation of the same number is unaffected
+    auto port_a = MakePort{}.with(AutomaticPortValue{24447, Transport::UDP}).create();
+    BOOST_CHECK_THROW(MakePort{}.with(SpecificPortValue{24447, Transport::UDP}).create(), MakePort::UnableToLockPort);
+    auto port_b = MakePort{}.with(SpecificPortValue{24447, Transport::TCP}).create();
+
+    BOOST_TEST_MESSAGE("Acquired UDP port: " << port_a.value() << " at " << port_a.lock_location());
+    BOOST_TEST_MESSAGE("Acquired TCP port: " << port_b.value() << " at " << port_b.lock_location());
+
+    BOOST_CHECK(port_a.value() == 24448);
+    BOOST_CHECK(port_b.value() == 24447);
+    BOOST_CHECK(fs::exists(port_a.lock_location()));
+    BOOST_CHECK(fs::exists(port_b.lock_location()));
 }
 
 BOOST_AUTO_TEST_CASE(test_setting_environment_variables) {
