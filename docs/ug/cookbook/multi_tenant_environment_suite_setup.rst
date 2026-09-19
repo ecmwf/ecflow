@@ -238,18 +238,50 @@ read/write access:
    edit ECF_PERMISSIONS 'alice:rwx,bob:r,charlie:rw'
 
 The variable is evaluated hierarchically, starting from the server and descending to the node being
-accessed:
+accessed. Each level folds its own :code:`ECF_PERMISSIONS` value into an *active set* of
+``<user>:<rights>`` entries, and the command is accepted only if the active set at the target node
+grants the required right to the requesting user:
 
-- the server-level :code:`ECF_PERMISSIONS` establishes the initial set of permissions;
+- the server-level :code:`ECF_PERMISSIONS` establishes the initial active set;
 
-- at a suite (the root node), the permissions *supersede* the active set, so that suites can add
-  users that the server level did not mention;
+- at a suite (the root node), the suite's entries *supersede* the active set: every *sticky* entry
+  of the active set is kept, every entry listed on the suite is added (replacing any non-sticky
+  entry for the same user), and every remaining *non-sticky* entry is dropped. This allows a suite
+  to add users that the server level did not mention;
 
-- at a family or task, the permissions *restrict* the active set, so that a user can never gain, on a
-  lower node, a right that a higher node does not already grant;
+- at a family or task, the node's entries *restrict* the active set: every *sticky* entry is kept,
+  every non-sticky entry whose user is listed on the node is narrowed to the rights present in
+  *both* the active set and the node's entry, and every non-sticky entry whose user is *not* listed
+  on the node is dropped. Users listed on the node that were not already active are ignored, so
+  that a user can never gain, on a lower node, a right that a higher node does not already grant.
+  A family or task without :code:`ECF_PERMISSIONS` leaves the active set unchanged;
 
 - a right marked *sticky* (``s``) is preserved regardless of the entries defined on lower nodes,
   which is useful for server-level rights that must not be weakened by a suite.
+
+.. warning::
+
+   Two consequences of the rules above are easy to overlook, and both have been verified against
+   the implementation:
+
+   - **The suite level supersedes even when the suite defines no** :code:`ECF_PERMISSIONS`. The
+     suite's (empty) entry list replaces the active set, so *every non-sticky server-level entry is
+     dropped* on every suite that does not list the user again. A server-level entry such as
+     ``ops:rw`` therefore grants ``ops`` the server-level operations only (those evaluated at
+     ``/``, such as loading definitions or querying the server), and grants nothing on any suite
+     unless that suite lists ``ops`` explicitly. Server-level entries that are meant to apply
+     everywhere, typically the administrators, **must be marked sticky** (for example,
+     ``admin:rwxos``).
+
+   - **An active set that becomes empty is treated as "no rules", and no rules means everything is
+     allowed.** This is the same backward-compatible rule that applies when the server has no
+     :code:`ECF_PERMISSIONS` at all, but it also triggers when the restriction step drops the last
+     remaining entry. For example, with the server defining ``ops:rw``, a suite defining
+     ``alice:rw``, and a family below it defining ``bob:r`` (``bob`` not being active above), the
+     family's active set is empty, and *every* user, including users never mentioned anywhere, is
+     allowed every operation on that family and its descendants. Until this is addressed in the
+     implementation, keep at least one sticky entry at server level, so that the active set can
+     never become empty.
 
 When several users require different rights on the same node, list them as additional
 comma-separated entries.
@@ -260,7 +292,16 @@ comma-separated entries.
    branch (see ``libs/node/src/ecflow/node/permissions/``). The relevant details are:
 
    - the node variable name is ``ECF_PERMISSIONS`` (``ecf::environment::ECF_PERMISSIONS``); an
-     invalid value causes the corresponding permissions to be treated as empty;
+     invalid value on a node causes the corresponding permissions to be treated as empty (on a
+     suite, this drops every non-sticky entry, exactly as if the variable were absent; on a family
+     or task, it leaves the active set unchanged), whereas an invalid value at server level
+     prevents the server from starting;
+
+   - the supersede and restrict steps are implemented by ``Permissions::combine_supersede()`` and
+     ``Permissions::combine_override()`` (``libs/node/src/ecflow/node/permissions/Permissions.cpp``),
+     driven along the node path by ``permissions_at()`` in ``ActivePermissions.cpp``; the two
+     consequences highlighted above are covered by the ``t1_*`` and ``t2_*`` cases in
+     ``libs/node/test/TestPermissions.cpp``;
 
    - the server selects its authorisation source by precedence: a valid white list file
      (``ECF_LISTS``) takes priority; otherwise, if a server-level ``ECF_PERMISSIONS`` is defined and
