@@ -84,6 +84,7 @@ set(test_srcs
   test/parser/TestAutoAddExterns.cpp
   test/parser/TestAvisoAttr.cpp
   test/parser/TestDefsStructurePersistAndReload.cpp
+  test/parser/TestLabelParsing.cpp
   test/parser/TestMementoPersistAndReload.cpp
   test/parser/TestMigration.cpp
   test/parser/TestMirrorAttr.cpp

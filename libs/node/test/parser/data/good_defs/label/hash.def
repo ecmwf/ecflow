@@ -1,0 +1,23 @@
+# Label default values that contain hash and quote characters
+suite label_hash
+   family f
+      task t
+         label version "#40fd83"
+         label dirty "#af412e-dirty"
+         label with_hash "x#y"
+         label with_blank_hash "x #y"
+         label with_blank_hash_blank "x # y"
+         label with_trailing_hash "x#"
+         label only_hash "#"
+         label quoted_word ""note""
+         label quoted_inside "say "hi" to all"
+         label trailing_quote "say "hi""
+         label leading_quote ""quoted" start"
+         label single_quotes 'it's'
+         label yaml "{end: !!timestamp '2001-12-31 23:59:59', start: !!timestamp '1994-01-01 00:00:00'}"
+         label blanks "  padded  "
+         label commented "x # y" # a trailing comment
+         label empty_commented "" # for empty label
+         label unquoted 0
+   endfamily
+endsuite

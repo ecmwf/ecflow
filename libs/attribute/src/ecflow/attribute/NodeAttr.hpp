@@ -44,13 +44,56 @@ public:
     std::string toString() const;
     std::string dump() const;
 
+    ///
+    /// @brief Parses a label line into this label.
+    ///
+    /// @see Label::parse(const std::string&, std::vector<std::string>&, bool, std::string&, std::string&, std::string&)
+    ///
     void parse(const std::string& line, std::vector<std::string>& lineTokens, bool parse_state);
+
+    ///
+    /// @brief Parses a label line, as found in a definition file, a checkpoint file, or a synchronisation message.
+    ///
+    /// The accepted forms are:
+    ///
+    ///   label <name> <value>                                   (unquoted single token)
+    ///   label <name> "<default value>"                         (single or double quotes)
+    ///   label <name> "<default value>" # <comment>             (definition files only)
+    ///   label <name> "<default value>" # "<current value>"     (state, when parse_state is true)
+    ///
+    /// The value is delimited by the quote character that opens it, and its content is taken verbatim:
+    /// blanks, tabs, and embedded quote or hash characters are preserved. The sequence '\n' is
+    /// converted to a newline in both values.
+    ///
+    /// When parse_state is true, the current value is introduced by the state separator, that is, the
+    /// closing quote followed by one or more blanks, '#', one or more blanks, and a double quote; the
+    /// first separator found after the opening quote is taken. The current value extends to the last
+    /// double quote of the line. When parse_state is false, the default value ends at the first closing
+    /// quote that is followed only by blanks or by a comment. When parse_state is true and the line
+    /// carries no current value, a trailing comment is tolerated only when it holds no double quote;
+    /// otherwise the last double quote of the line is taken as the one closing the default value.
+    ///
+    /// Since values are stored without escaping, one shape remains ambiguous: a default value that
+    /// contains its own quote character followed by blanks and '#'. In state form such a value is split at
+    /// the wrong place; in a definition file with a trailing comment, it is truncated at that point.
+    /// When a state line holds more than one separator, or when a definition line holds a further quote
+    /// after the closing quote, a warning naming the label, the values read and the line is logged, so
+    /// that the possible truncation does not pass unnoticed.
+    ///
+    /// @param[in] line the complete line
+    /// @param[in] lineTokens the line split at blanks; the second token is the label name
+    /// @param[in] parse_state true when the line may carry the current value after the '#' separator
+    /// @param[out] the_name the label name
+    /// @param[out] the_value the default value
+    /// @param[out] the_new_value the current value, or empty when absent
+    /// @throws std::runtime_error when the line has fewer than three tokens
+    ///
     static void parse(const std::string& line,
                       std::vector<std::string>& lineTokens,
                       bool parse_state,
-                      std::string&,
-                      std::string&,
-                      std::string&);
+                      std::string& the_name,
+                      std::string& the_value,
+                      std::string& the_new_value);
     static const Label& EMPTY(); // Added to support return by reference
 
 public:
