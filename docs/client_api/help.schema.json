@@ -144,7 +144,24 @@
           "type": "string",
           "minLength": 1
         },
-        "description": { "type": "string", "minLength": 1 }
+        "description": { "type": "string", "minLength": 1 },
+        "default": {
+          "description": "Value used when the variable is not set. Mirrors the constant in the client sources (e.g. ClientEnvironment::DEFAULT_TIMEOUT); an integer for numeric variables, a string otherwise.",
+          "type": ["integer", "string"]
+        },
+        "minimum": {
+          "description": "Smallest accepted value; a value below it is adjusted to this limit. Only meaningful for numeric variables.",
+          "type": "integer"
+        },
+        "maximum": {
+          "description": "Largest accepted value; a value above it is adjusted to this limit. Only meaningful for numeric variables.",
+          "type": "integer"
+        },
+        "unit": {
+          "description": "Unit of the default, minimum and maximum values (e.g. seconds).",
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "topic": {

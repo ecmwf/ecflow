@@ -32,7 +32,7 @@ To enable the :code:`ecflow_client` to read the file and use the listed backup s
 
 .. important::
 
-    The maximum retry period is defined by :code:`ECF_TIMEOUT`, which by default is set to 24 hours.
+    The maximum retry period is defined by :code:`ECF_TIMEOUT`, which by default is set to 1 hour (see :term:`ECF_TIMEOUT`).
     This means that the :code:`ecflow_client` will continue to loop over the list and retry primary host followed by alternate hosts for up to :code:`ECF_TIMEOUT`, before giving up and reporting a failure.
 
 .. warning::

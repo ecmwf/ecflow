@@ -47,17 +47,60 @@ private:
 };
 
 ///
-/// @brief Formats a single environment-variable manifest entry as two indented help lines.
+/// @brief Renders a manifest scalar (string or integer) as help text.
+///
+/// @param[in] value Manifest value; a string is rendered verbatim, any other scalar via its JSON dump.
+/// @return The rendered text.
+///
+std::string scalar_to_string(const nlohmann::json& value) {
+    return value.is_string() ? value.get<std::string>() : value.dump();
+}
+
+///
+/// @brief Formats the default-value line of an environment-variable manifest entry.
+///
+/// @details Rendered only for entries carrying a "default" field. The line states the default,
+/// followed by the unit when one is declared, and by the accepted range when both "minimum" and
+/// "maximum" are declared. The layout matches the documentation renderer in
+/// docs/client_api/build.py, so that the CLI help and the generated documentation agree.
+///
+/// @param[in] var Manifest entry taken from the "environment_variables" array.
+/// @return The formatted line, terminated by a newline; empty when the entry has no default.
+///
+std::string format_env_var_default(const nlohmann::json& var) {
+    if (!var.contains("default")) {
+        return {};
+    }
+
+    std::string unit = var.contains("unit") ? " " + var.at("unit").get<std::string>() : "";
+
+    std::string line = "    Default: ";
+    line += scalar_to_string(var.at("default"));
+    line += unit;
+    if (var.contains("minimum") && var.contains("maximum")) {
+        line += "; accepted range: ";
+        line += scalar_to_string(var.at("minimum"));
+        line += " to ";
+        line += scalar_to_string(var.at("maximum"));
+        line += unit;
+    }
+    line += "\n";
+    return line;
+}
+
+///
+/// @brief Formats a single environment-variable manifest entry as indented help lines.
 ///
 /// @details The first line carries the variable name, its type, and its requirement level; a
 /// trailing asterisk marks a variable whose value can be overridden by a command-line option. The
-/// second line carries the description. The layout matches the documentation renderer in
-/// docs/client_api/build.py, so that the CLI help and the generated documentation agree.
+/// second line carries the description, and an optional third line the default value and accepted
+/// range. The layout matches the documentation renderer in docs/client_api/build.py, so that the
+/// CLI help and the generated documentation agree.
 ///
 /// @param[in] var Manifest entry taken from the "environment_variables" array; must contain the
 ///                "required", "name", "type", and "description" fields, and may contain
-///                "overridable_by".
-/// @return The formatted two-line block, terminated by a newline.
+///                "overridable_by", "default", "minimum", "maximum" and "unit".
+/// @return The formatted block, terminated by a newline.
 ///
 std::string format_env_var(const nlohmann::json& var) {
     std::string required = var.at("required").get<std::string>();
@@ -74,6 +117,7 @@ std::string format_env_var(const nlohmann::json& var) {
     line += "]\n    ";
     line += var.at("description").get<std::string>();
     line += "\n";
+    line += format_env_var_default(var);
     return line;
 }
 

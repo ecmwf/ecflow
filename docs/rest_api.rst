@@ -465,13 +465,13 @@ Payload to create a new Suite
 
   {
     "definition": "...",
-    "auto_add_extern": "true|false"
+    "auto_add_externs": "true|false"
   }
 
 where
 
 - :code:`definition` is the ecFlow node definition
-- :code:`auto_add_extern` indicates whether to automatically add external triggers
+- :code:`auto_add_externs` (optional) indicates whether to automatically add external triggers; default: :code:`false`
 
 List all Suites
 ~~~~~~~~~~~~~~~
@@ -818,13 +818,15 @@ Payload to update the definition of a Node
 
   {
     "definition": "...",
-    "auto_add_extern": "true|false"
+    "force": false
   }
 
 where
 
 - :code:`definition` is the ecFlow node definition
-- :code:`auto_add_extern` indicates whether to automatically add external triggers
+- :code:`force` (optional) indicates whether to replace the node even when it (or any of its children) is
+  active or submitted, which might create :term:`zombies <zombie>`; this is the :code:`force` option of
+  :code:`ecflow_client --replace`. Default: :code:`false`
 
 Delete a Node
 ~~~~~~~~~~~~~
@@ -904,16 +906,19 @@ When updating node status with a user command, with user authentication, the req
 .. code-block:: json
 
   {
-    "action": "abort|begin|complete|defstatus|execute|requeue|rerun|resume|submit|suspend",
-    "recursive": false
+    "action": "abort|archive|begin|complete|defstatus|execute|requeue|rerun|restore|resume|submit|suspend",
+    "recursive": false,
+    "force": false
   }
 
 where
 
--  :code:`name`: Name of the action that is taken against the given path
--  :code:`recursive`: Specify if same action is run recursive through the
+-  :code:`action`: Name of the action that is taken against the given path
+-  :code:`recursive` (optional): Specify if same action is run recursive through the
    children of the node. Note: not all actions support recursive
    operation. Default: false
+-  :code:`force` (optional): Only used by :code:`action=archive`, to archive the node even when it has
+   active tasks; this is the :code:`force` option of :code:`ecflow_client --archive`. Default: false
 
 When :code:`action=defstatus`, the following additional options are necessary:
 
@@ -937,6 +942,8 @@ When updating the node status from a task (i.e. from a script with child command
     "ECF_PASS": "...",
     "ECF_RID": "...",
     "ECF_TRYNO": "...",
+    "ECF_TIMEOUT": 3600,
+    "ECF_ZOMBIE_TIMEOUT": 1800,
     "action": "abort|complete|init|wait"
   }
 
@@ -944,6 +951,9 @@ where
 
 -  :code:`action` is the name of the action to be taken taken
 -  :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
+-  :code:`ECF_TIMEOUT` and :code:`ECF_ZOMBIE_TIMEOUT` are optional integers, in seconds, with the same meaning,
+   defaults and accepted range as the :term:`ECF_TIMEOUT` and :term:`ECF_ZOMBIE_TIMEOUT` environment variables
+   of :term:`ecflow_client`; a value outside the accepted range is adjusted to the nearest limit
 
 When :code:`action=abort`, the followign additional parameters are necessary:
 
@@ -1170,6 +1180,8 @@ When updating a node attribute from a task (i.e. from a script with child comman
     "ECF_PASS": "...",
     "ECF_RID": "...",
     "ECF_TRYNO": "...",
+    "ECF_TIMEOUT": 3600,
+    "ECF_ZOMBIE_TIMEOUT": 1800,
     "name": "...",
     "type": "event|label|limit|meter|queue",
     "value": "...",
@@ -1182,6 +1194,9 @@ where
 
 - :code:`name` is the name of the attribute
 - :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
+- :code:`ECF_TIMEOUT` and :code:`ECF_ZOMBIE_TIMEOUT` are optional integers, in seconds, with the same meaning,
+  defaults and accepted range as the :term:`ECF_TIMEOUT` and :term:`ECF_ZOMBIE_TIMEOUT` environment variables
+  of :term:`ecflow_client`; a value outside the accepted range is adjusted to the nearest limit
 
 When updating :code:`queue` attributes, the parameter :code:`value` is **not** used, and the following additional parameters are required:
 

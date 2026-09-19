@@ -249,8 +249,7 @@ void TaskScriptGenerator::generate_head_file() const {
     contents += "export ECF_PASS=%ECF_PASS%    # A unique password\n";
     contents += "export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task\n";
     contents += "export ECF_RID=$$\n";
-    contents += "export ECF_TIMEOUT=300 # Only wait 5 minutes, if the server cannot be contacted (note default is 24 "
-                "hours) before failing\n";
+    contents += "export ECF_TIMEOUT=300 # Only wait 5 minutes, if the server cannot be contacted, before failing\n";
     contents += "if [[ \"%ECF_SSL:%\" != \"\" ]] ; then\n";
     contents += "   export ECF_SSL=%ECF_SSL:%\n";
     contents += "fi\n";

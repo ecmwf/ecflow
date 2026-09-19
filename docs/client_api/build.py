@@ -187,11 +187,23 @@ def join_description(lines):
     return "\n".join(lines)
 
 
+def format_env_var_default(var):
+    # Reproduces Help.cpp's format_env_var_default(): one line stating the default, the unit when
+    # declared, and the accepted range when both bounds are declared.
+    if "default" not in var:
+        return ""
+    unit = f" {var['unit']}" if "unit" in var else ""
+    txt = f"    Default: {var['default']}{unit}"
+    if "minimum" in var and "maximum" in var:
+        txt += f"; accepted range: {var['minimum']} to {var['maximum']}{unit}"
+    return txt + "\n"
+
+
 def format_env_var(var):
     required = var["required"]
     if var.get("overridable_by"):
         required += "*"
-    return f"  {var['name']} <{var['type']}> [{required}]\n    {var['description']}\n"
+    return f"  {var['name']} <{var['type']}> [{required}]\n    {var['description']}\n" + format_env_var_default(var)
 
 
 def render_client_env_description(env_vars):

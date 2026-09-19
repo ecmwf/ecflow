@@ -81,7 +81,7 @@ public:
 
     /// Stop job scheduling *AND*  task communication with server. Failed task request are logged
     /// Hence nodes can be stuck in submitted/active states.
-    /// Task based command will continue attempting, communication with the server for up to 24hrs.
+    /// Task based command will continue attempting, communication with the server for up to ECF_TIMEOUT.
     ///
     /// When the server is halted, we do *NOT* do any further check pointing
     /// In a typical operational scenario where we have a home, and backup servers.

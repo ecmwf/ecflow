@@ -2307,7 +2307,7 @@
         "Locates the task in the servers list of zombies, and sets flags to block it.",
         "This is default behaviour of the child commands(init,abort,complete,wait,queue)",
         "when the server cannot match the passwords. Each child commands will continue",
-        "attempting to connect to the server for 24 hours, and will then return an error.",
+        "attempting to connect to the server for up to ECF_TIMEOUT, and will then return an error.",
         "The connection timeout can be configured with environment ECF_TIMEOUT",
         "  args = list of task paths, at least one expected",
         "",
@@ -2491,7 +2491,8 @@
       "required": "mandatory",
       "applies_to": "both",
       "overridable_by": "host",
-      "description": "The main server hostname; default value is 'localhost'"
+      "description": "The main server hostname",
+      "default": "localhost"
     },
     {
       "name": "ECF_PORT",
@@ -2499,7 +2500,8 @@
       "required": "mandatory",
       "applies_to": "both",
       "overridable_by": "port",
-      "description": "The main server port; default value is '3141'"
+      "description": "The main server port",
+      "default": 3141
     },
     {
       "name": "ECF_SSL",
@@ -2522,7 +2524,8 @@
       "type": "string",
       "required": "optional",
       "applies_to": "both",
-      "description": "The policy ('task' or 'all') to define which commands consider using alternate hosts."
+      "description": "The policy ('task' or 'all') to define which commands consider using alternate hosts.",
+      "default": "task"
     },
     {
       "name": "ECF_NAME",
@@ -2558,7 +2561,31 @@
       "type": "int",
       "required": "optional",
       "applies_to": "task",
-      "description": "Maximum time in *seconds* for client to deliver message to main server; default is 24 hours"
+      "description": "Maximum time for a task command to deliver a message to the server, retrying the main and alternate hosts until the limit is reached",
+      "default": 3600,
+      "minimum": 60,
+      "maximum": 86400,
+      "unit": "seconds"
+    },
+    {
+      "name": "ECF_ZOMBIE_TIMEOUT",
+      "type": "int",
+      "required": "optional",
+      "applies_to": "task",
+      "description": "Maximum time for a task command flagged as a zombie by the server to keep retrying; the ECF_TIMEOUT limit still applies, so the effective limit is the smaller of the two",
+      "default": 1800,
+      "minimum": 60,
+      "maximum": 86400,
+      "unit": "seconds"
+    },
+    {
+      "name": "ECF_CONNECT_TIMEOUT",
+      "type": "int",
+      "required": "optional",
+      "applies_to": "task",
+      "description": "Maximum time to establish a connection with the server; 0 means that the timeout is taken from the command being executed",
+      "default": 0,
+      "unit": "seconds"
     },
     {
       "name": "ECF_DENIED",

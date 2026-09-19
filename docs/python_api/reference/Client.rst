@@ -36,9 +36,10 @@ For the python interface these environment variable are not really applicable bu
 * ECF_PASS <string> : The jobs password, allocated by server, then used by server to authenticate client request
 * ECF_TRYNO <int>   : The number of times the job has run. Used in file name generation. Set to 1 by begin() and re-queue commands.
 * ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server
+* ECF_ZOMBIE_TIMEOUT <int> : Max time in seconds for a zombie child command to deliver message to main server
 * ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails
 * ECF_HOSTFILE_POLICY <string> : The policy ("task" or "all") to define which commands consider using alternate hosts.
-* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids 24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual intervention to determine job status
+* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids waiting for ECF_TIMEOUT. Note: when you have hundreds of tasks, using this approach requires a lot of manual intervention to determine job status
 * NO_ECF <any> : If set exit's immediately with success. Used to test jobs without communicating with server
 
 The following environment variables are used by the python interface and child commands
@@ -2361,9 +2362,9 @@ This can be overridden for the python child api
 .. py:method:: Client.set_child_timeout(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
-Set timeout if child cannot connect to server, default is 24 hours. The input is required to be in seconds
+Set timeout if child cannot connect to server. The input is required to be in seconds
 
-By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt to connect to the server
+By default the environment variable ECF_TIMEOUT is read to control how long child command should attempt to connect to the server; see the ecflow_client documentation for the default value.
 This can be overridden for the python child api
 
 
@@ -2493,7 +2494,10 @@ Set user name. A password must be provided in the file <host>.<port>.ecf.custom_
 .. py:method:: Client.set_zombie_child_timeout(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
-Set timeout for zombie child commands,that cannot connect to server, default is 24 hours. The input is required to be in seconds
+Set timeout for zombie child commands, that cannot connect to server. The input is required to be in seconds
+
+By default the environment variable ECF_ZOMBIE_TIMEOUT is read to control how long a zombie child command should attempt to connect to the server; see the ecflow_client documentation for the default value.
+This can be overridden for the python child api
 
 
 .. py:method:: Client.shutdown_server(self: ecflow.Client) -> int

@@ -29,22 +29,6 @@
     #include "ecflow/base/Openssl.hpp"
 #endif
 
-// Define upper and lower bounds for timeouts
-//
-// The timeout determines how long the client continues to attempt to contact the server(s).
-//
-#ifdef DEBUG
-static constexpr long MAX_TIMEOUT            = 120; // = 2 minutes * 60 seconds
-static constexpr long DEFAULT_TIMEOUT        = MAX_TIMEOUT;
-static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 120; // = 2 minutes * 60 seconds
-static constexpr long MIN_TIMEOUT            = 5;   // = 5 seconds
-#else
-static constexpr long MAX_TIMEOUT            = 86400; // = 24 hours * 60 minutes * 60 seconds
-static constexpr long DEFAULT_TIMEOUT        = MAX_TIMEOUT;
-static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 43200; // = 12 hours * 60 minutes * 60 seconds
-static constexpr long MIN_TIMEOUT            = 60;
-#endif
-
 // #define DEBUG_ENVIRONMENT 1
 
 static constexpr const char* ECF_HOSTFILE_POLICY_ALL  = "all";
@@ -280,10 +264,10 @@ void ClientEnvironment::read_environment_variables() {
     ecf::environment::get(ecf::environment::ECF_USER, user_name_);
 
     ecf::environment::get(ecf::environment::ECF_TIMEOUT, timeout_);
-    timeout_ = std::max(std::min(timeout_, MAX_TIMEOUT), MIN_TIMEOUT);
+    timeout_ = clamp_timeout(timeout_);
 
     ecf::environment::get(ecf::environment::ECF_ZOMBIE_TIMEOUT, zombie_timeout_);
-    zombie_timeout_ = std::max(std::min(zombie_timeout_, MAX_TIMEOUT), MIN_TIMEOUT);
+    zombie_timeout_ = clamp_timeout(zombie_timeout_);
 
     ecf::environment::get(ecf::environment::ECF_CONNECT_TIMEOUT, connect_timeout_);
 

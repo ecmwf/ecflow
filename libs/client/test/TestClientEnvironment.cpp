@@ -4,11 +4,13 @@
  */
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -183,6 +185,112 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_policy) {
         BOOST_CHECK(env.host_file_policy_is_task());
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_client_environment_timeout_bounds) {
+    ECF_NAME_THIS_TEST();
+
+    // The bounds must hold in every build configuration (i.e. both DEBUG and release constants)
+    BOOST_CHECK_LT(ClientEnvironment::MIN_TIMEOUT, ClientEnvironment::MAX_TIMEOUT);
+    BOOST_CHECK_LE(ClientEnvironment::MIN_TIMEOUT, ClientEnvironment::DEFAULT_TIMEOUT);
+    BOOST_CHECK_LE(ClientEnvironment::DEFAULT_TIMEOUT, ClientEnvironment::MAX_TIMEOUT);
+    BOOST_CHECK_LE(ClientEnvironment::MIN_TIMEOUT, ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT);
+    // A zombie timeout larger than the task command timeout would have no effect
+    BOOST_CHECK_LE(ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT, ClientEnvironment::DEFAULT_TIMEOUT);
+
+    BOOST_CHECK_EQUAL(ClientEnvironment::clamp_timeout(ClientEnvironment::MIN_TIMEOUT - 1),
+                      ClientEnvironment::MIN_TIMEOUT);
+    BOOST_CHECK_EQUAL(ClientEnvironment::clamp_timeout(ClientEnvironment::MIN_TIMEOUT), ClientEnvironment::MIN_TIMEOUT);
+    BOOST_CHECK_EQUAL(ClientEnvironment::clamp_timeout(ClientEnvironment::MAX_TIMEOUT), ClientEnvironment::MAX_TIMEOUT);
+    BOOST_CHECK_EQUAL(ClientEnvironment::clamp_timeout(ClientEnvironment::MAX_TIMEOUT + 1),
+                      ClientEnvironment::MAX_TIMEOUT);
+}
+
+BOOST_AUTO_TEST_CASE(test_client_environment_timeout_from_environment) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    {
+        // When no timeout is specified, the defaults are used...
+
+        WithoutTestEnvironmentVariable timeout("ECF_TIMEOUT");
+        WithoutTestEnvironmentVariable zombie_timeout("ECF_ZOMBIE_TIMEOUT");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK_EQUAL(env.max_child_cmd_timeout(), ClientEnvironment::DEFAULT_TIMEOUT);
+        BOOST_CHECK_EQUAL(env.max_zombie_child_cmd_timeout(), ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT);
+    }
+
+    {
+        // When a value within range is specified, it is used as is...
+
+        long within = (ClientEnvironment::MIN_TIMEOUT + ClientEnvironment::MAX_TIMEOUT) / 2;
+        WithTestEnvironmentVariable timeout("ECF_TIMEOUT", std::to_string(within));
+        WithTestEnvironmentVariable zombie_timeout("ECF_ZOMBIE_TIMEOUT", std::to_string(within));
+
+        ClientEnvironment env(false);
+        BOOST_CHECK_EQUAL(env.max_child_cmd_timeout(), within);
+        BOOST_CHECK_EQUAL(env.max_zombie_child_cmd_timeout(), within);
+    }
+
+    {
+        // When a value below the minimum is specified, it is adjusted to the minimum...
+
+        WithTestEnvironmentVariable timeout("ECF_TIMEOUT", "1");
+        WithTestEnvironmentVariable zombie_timeout("ECF_ZOMBIE_TIMEOUT", "1");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK_EQUAL(env.max_child_cmd_timeout(), ClientEnvironment::MIN_TIMEOUT);
+        BOOST_CHECK_EQUAL(env.max_zombie_child_cmd_timeout(), ClientEnvironment::MIN_TIMEOUT);
+    }
+
+    {
+        // When a value above the maximum is specified, it is adjusted to the (shared) maximum...
+
+        std::string above = std::to_string(ClientEnvironment::MAX_TIMEOUT + 1);
+        WithTestEnvironmentVariable timeout("ECF_TIMEOUT", above);
+        WithTestEnvironmentVariable zombie_timeout("ECF_ZOMBIE_TIMEOUT", above);
+
+        ClientEnvironment env(false);
+        BOOST_CHECK_EQUAL(env.max_child_cmd_timeout(), ClientEnvironment::MAX_TIMEOUT);
+        BOOST_CHECK_EQUAL(env.max_zombie_child_cmd_timeout(), ClientEnvironment::MAX_TIMEOUT);
+    }
+}
+
+#ifndef DEBUG
+BOOST_AUTO_TEST_CASE(test_client_environment_timeout_matches_help_manifest) {
+    ECF_NAME_THIS_TEST();
+
+    // The help manifest documents the release defaults; both must be updated together.
+    // (DEBUG builds use shorter, test-only values that are deliberately not documented.)
+
+    auto find_variable = [](const std::string& name) -> const nlohmann::json& {
+        for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
+            if (var.at("name").get<std::string>() == name) {
+                return var;
+            }
+        }
+        throw std::runtime_error("environment variable not found in help manifest: " + name);
+    };
+
+    {
+        const auto& var = find_variable("ECF_TIMEOUT");
+        BOOST_CHECK_EQUAL(var.at("default").get<long>(), ClientEnvironment::DEFAULT_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("minimum").get<long>(), ClientEnvironment::MIN_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("maximum").get<long>(), ClientEnvironment::MAX_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("unit").get<std::string>(), "seconds");
+    }
+
+    {
+        const auto& var = find_variable("ECF_ZOMBIE_TIMEOUT");
+        BOOST_CHECK_EQUAL(var.at("default").get<long>(), ClientEnvironment::DEFAULT_ZOMBIE_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("minimum").get<long>(), ClientEnvironment::MIN_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("maximum").get<long>(), ClientEnvironment::MAX_TIMEOUT);
+        BOOST_CHECK_EQUAL(var.at("unit").get<std::string>(), "seconds");
+    }
+}
+#endif
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
