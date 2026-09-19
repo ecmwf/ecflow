@@ -163,6 +163,75 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(t1_suite_without_permissions_drops_non_sticky_server_users) {
+    ECF_NAME_THIS_TEST();
+    using namespace ecf;
+    using namespace std::string_literals;
+
+    // Server grants 'admin' sticky rights and 'ops' non-sticky rights; the suite defines no ECF_PERMISSIONS
+    Defs d;
+    auto s = d.add_suite("s1");
+    auto f = s->add_family("f1");
+    f->add_task("t1");
+    d.server_state().add_or_update_server_variable(ecf::environment::ECF_PERMISSIONS, "admin:rwxos,ops:rw");
+
+    AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
+
+    auto admin = Identity::make_secure_user(Username{"admin"}.value());
+    auto ops   = Identity::make_secure_user(Username{"ops"}.value());
+
+    // At server level, both users are allowed
+    BOOST_CHECK(service.allows(admin, d, "/"s, Allowed::READ));
+    BOOST_CHECK(service.allows(ops, d, "/"s, Allowed::READ));
+    BOOST_CHECK(service.allows(ops, d, "/"s, Allowed::WRITE));
+
+    // Below the suite, only the sticky user survives (T1)
+    for (auto&& path : {"/s1"s, "/s1/f1"s, "/s1/f1/t1"s}) {
+        BOOST_CHECK(service.allows(admin, d, path, Allowed::READ));
+        BOOST_CHECK(service.allows(admin, d, path, Allowed::WRITE));
+        BOOST_CHECK(!service.allows(ops, d, path, Allowed::READ));
+        BOOST_CHECK(!service.allows(ops, d, path, Allowed::WRITE));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(t2_collapsed_active_permissions_allow_everyone) {
+    ECF_NAME_THIS_TEST();
+    using namespace ecf;
+    using namespace std::string_literals;
+
+    // Server grants 'ops' (non-sticky); suite lists only 'alice'; family lists only 'bob' (never active above)
+    Defs d;
+    auto s = d.add_suite("s1");
+    s->addVariable(Variable(ecf::environment::ECF_PERMISSIONS, "alice:rw"));
+    auto f = s->add_family("f1");
+    f->addVariable(Variable(ecf::environment::ECF_PERMISSIONS, "bob:r"));
+    f->add_task("t1");
+    d.server_state().add_or_update_server_variable(ecf::environment::ECF_PERMISSIONS, "ops:rw");
+
+    AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
+
+    auto ops      = Identity::make_secure_user(Username{"ops"}.value());
+    auto alice    = Identity::make_secure_user(Username{"alice"}.value());
+    auto bob      = Identity::make_secure_user(Username{"bob"}.value());
+    auto stranger = Identity::make_secure_user(Username{"stranger"}.value());
+
+    // At the suite, only alice is active
+    BOOST_CHECK(service.allows(alice, d, "/s1"s, Allowed::WRITE));
+    BOOST_CHECK(!service.allows(ops, d, "/s1"s, Allowed::READ));
+    BOOST_CHECK(!service.allows(bob, d, "/s1"s, Allowed::READ));
+    BOOST_CHECK(!service.allows(stranger, d, "/s1"s, Allowed::READ));
+
+    // At the family, the active set collapses to empty, which is treated as "no rules" (T2)
+    for (auto&& path : {"/s1/f1"s, "/s1/f1/t1"s}) {
+        for (auto&& who : {ops, alice, bob, stranger}) {
+            BOOST_CHECK(service.allows(who, d, path, Allowed::READ));
+            BOOST_CHECK(service.allows(who, d, path, Allowed::WRITE));
+            BOOST_CHECK(service.allows(who, d, path, Allowed::EXECUTE));
+            BOOST_CHECK(service.allows(who, d, path, Allowed::OWNER));
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(can_calculate_permission_superseeding_basic_rules) {
     ECF_NAME_THIS_TEST();
     using namespace ecf;
