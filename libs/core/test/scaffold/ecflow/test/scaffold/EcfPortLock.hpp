@@ -111,6 +111,43 @@ public:
     }
 
     ///
+    /// @brief Checks whether the given UDP port can be bound on the local machine.
+    ///
+    /// UDP and TCP port numbers are independent, so this probe says nothing about the TCP port of the same
+    /// number. The probe binds without SO_REUSEADDR, as ecflow_udp does, since with that option several UDP
+    /// sockets may share a port and the probe would never report it busy.
+    ///
+    /// @param[in] port The UDP port number to check
+    /// @return true if the port is free; false if it is occupied or if any error occurs during the check
+    ///
+    static bool is_udp_port_free(unsigned short port) {
+        using namespace boost::asio;
+
+        io_context io;
+        ip::udp::socket s(io);
+
+        boost::system::error_code ec;
+        s.open(ip::udp::v4(), ec);
+        if (ec) {
+            std::cout << "  EcfPortLock::is_udp_port_free(" << port << ") : FALSE (unable to open socket)\n ";
+            return false;
+        }
+        s.bind({ip::udp::v4(), port}, ec);
+        if (ec) {
+            if (ec == error::address_in_use) {
+                std::cout << "  EcfPortLock::is_udp_port_free(" << port
+                          << ") : FALSE (unable to bind, due to port already in use)\n ";
+            }
+            else {
+                std::cout << "  EcfPortLock::is_udp_port_free(" << port
+                          << ") : FALSE (unable to bind, due to unknown issue)\n ";
+            }
+            return false;
+        }
+        return true;
+    }
+
+    ///
     /// @brief Checks whether the given port is neither locked (by lock file) nor bound (by a running process).
     ///
     /// @param[in] port The port to check

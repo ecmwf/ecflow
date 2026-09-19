@@ -276,7 +276,8 @@ struct EnableServersFixture
 {
     EnableServersFixture()
         : ecflow_server_port{scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199}).create()},
-          ecflow_udp_port{scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199}).create()},
+          ecflow_udp_port{
+              scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199, scaffold::Transport::UDP}).create()},
           ecflow_server(as_port(ecflow_server_port)),
           ecflow_udp(as_port(ecflow_udp_port), as_port(ecflow_server_port)) {
         // Load 'reference' suite for tests...

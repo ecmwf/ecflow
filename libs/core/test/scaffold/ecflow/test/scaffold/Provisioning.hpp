@@ -725,21 +725,43 @@ private:
     Host::host_t host_{Host::default_host};
 };
 
+///
+/// @brief Identifies the transport protocol whose port number a reservation probes.
+///
+/// TCP and UDP port numbers are independent, so a reservation must probe the port of the transport the
+/// reserved server actually binds. The lock file, however, is shared by both transports: one port number
+/// is never handed out twice, whichever transports are involved.
+///
+enum class Transport { TCP, UDP };
+
+///
+/// @brief Reserves one given port number, probing the port of the given transport.
+///
 struct SpecificPortValue
 {
     using port_t = Port::port_t;
 
-    explicit SpecificPortValue(port_t port = Port::default_port)
-        : base_port{port} {}
+    explicit SpecificPortValue(port_t port = Port::default_port, Transport transport = Transport::TCP)
+        : base_port{port},
+          transport{transport} {}
 
     port_t base_port;
+    Transport transport;
 
-    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port) {
+    ///
+    /// @brief Locks the given port number and confirms that the port of the given transport can be bound.
+    ///
+    /// @param[in] port The port number to reserve
+    /// @param[in] transport The transport whose port is probed
+    /// @return The port and its lock, or std::nullopt when the port is locked by another test or already bound
+    ///
+    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port,
+                                                                           Transport transport = Transport::TCP) {
         // attempt to create 'lock' file
         if (auto lock = LockFile::make_lock(LockFile::port_lock_path(std::to_string(port))); lock.has_value()) {
             // The lock is taken before probing, so that no other test process can claim the port in between;
             // a port that is bound by some unrelated process is rejected (releasing its lock file)
-            if (!EcfPortLock::is_tcp_port_free(static_cast<unsigned short>(port))) {
+            if (!is_free(port, transport)) {
                 ECF_TEST_DBG("Port " << port << " is locked, but already in use");
                 return std::nullopt;
             }
@@ -748,21 +770,41 @@ struct SpecificPortValue
 
         return std::nullopt;
     }
+
+private:
+    static bool is_free(port_t port, Transport transport) {
+        auto number = static_cast<unsigned short>(port);
+        return transport == Transport::UDP ? EcfPortLock::is_udp_port_free(number)
+                                           : EcfPortLock::is_tcp_port_free(number);
+    }
 };
 
+///
+/// @brief Reserves the first available port number at or above a given one, probing the given transport.
+///
 struct AutomaticPortValue
 {
     using port_t = Port::port_t;
 
-    explicit AutomaticPortValue(port_t port = Port::default_port)
-        : base_port{port} {}
+    explicit AutomaticPortValue(port_t port = Port::default_port, Transport transport = Transport::TCP)
+        : base_port{port},
+          transport{transport} {}
 
     port_t base_port;
+    Transport transport;
 
-    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port) {
+    ///
+    /// @brief Locks the first port number, from the given one upwards, whose port of the given transport is free.
+    ///
+    /// @param[in] port The first port number considered
+    /// @param[in] transport The transport whose port is probed
+    /// @return The port and its lock, or std::nullopt when no port up to Port::maximum_port can be reserved
+    ///
+    static std::optional<std::pair<port_t, LockFile>> attempt_to_lock_port(port_t port,
+                                                                           Transport transport = Transport::TCP) {
 
         for (port_t current = port; current <= Port::maximum_port; ++current) {
-            if (auto found = SpecificPortValue::attempt_to_lock_port(current); found.has_value()) {
+            if (auto found = SpecificPortValue::attempt_to_lock_port(current, transport); found.has_value()) {
                 return found;
             }
         }
@@ -808,7 +850,8 @@ public:
             [](auto&& strategy) {
                 // attempt to lock port (i.e. create the lock file)
                 using Strategy = std::decay_t<decltype(strategy)>;
-                if (auto found = Strategy::attempt_to_lock_port(strategy.base_port); found.has_value()) {
+                if (auto found = Strategy::attempt_to_lock_port(strategy.base_port, strategy.transport);
+                    found.has_value()) {
                     auto port_ = found.value().first;
                     auto lock_ = std::move(found.value().second);
                     ECF_TEST_DBG("Port " << port_ << " is locked, lock file created at " << lock_.path());
