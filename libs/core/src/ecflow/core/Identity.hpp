@@ -115,6 +115,9 @@ private:
     T id_;
 };
 
+///
+/// @brief None represents...
+///
 class None {
 public:
     [[nodiscard]] const Username& username() const { return empty_username; }
@@ -127,6 +130,13 @@ private:
     inline static Password empty_password{""};
 };
 
+///
+/// @brief UserX represents a user with a username and password, extracted by the client from the environment
+/// (i.e. the user is extracted from the $USER, and the password is found on the client side $ECF_PASSWD file).
+///
+/// The user and password are provided by the client in the inbound request, and the authentication is performed by the
+/// ecFlow server itself. This is done by checking the user's credentials against the server side $ECF_PASSWD file.
+///
 class UserX {
 public:
     explicit UserX(std::string username, std::string password)
@@ -143,6 +153,15 @@ private:
     Password password_;
 };
 
+///
+/// @brief UserX represents a user with a username and password, provided explicitly to the client
+/// (i.e. the user is either defined by $ECF_USER or provided by the --user option, and the password is either found on
+/// the client side $ECF_CUSTOM_PASSWD file or provided by the --password option).
+///
+/// The user and password are provided by the client in the inbound request, and the authentication is performed by the
+/// ecFlow server itself. This is done by checking the user's credentials against the server side $ECF_CUSTOM_PASSWD
+/// file.
+///
 class CustomUserX {
 public:
     explicit CustomUserX(std::string username, std::string password)
@@ -159,6 +178,18 @@ private:
     Password password_;
 };
 
+///
+/// @brief SecureUserX represents a user for which the credentials where successfully verified.
+///
+/// This kind of user is used, when using HTTPS, to  encode the fact that external Authentication has been
+/// performed.
+///
+/// This kind of user has a name, but it does not have an associated password (i.e. any eventual authentication
+/// token was provided to and used by the external Authentication mechanism, but not passed on to the ecFlow server).
+///
+/// Since no password is available, the only Authentication mechanism that is applicable is external Authentication,
+/// meaning that ecFlow server will not apply any Authentication related to PasswordFile.
+///
 class SecureUserX {
 public:
     explicit SecureUserX(std::string username)
@@ -174,6 +205,13 @@ private:
     inline static Password empty{""};
 };
 
+///
+/// @brief TaskX represents a task with a pid, password, and try number, extracted by the client from the environment
+/// (respectively, $ECF_RID, $ECF_PASS, and $ECF_TRYNO).
+///
+/// In fact, this object contains "meta" information about the Task and does not identify any actual user.
+/// At the moment, the ecFlow server does not have information about the 'user' that issues the "Task Requests".
+///
 class TaskX {
 public:
     explicit TaskX(std::string pid, std::string pass, std::string tryno)
@@ -247,9 +285,13 @@ public:
         : handle_{std::move(other.handle_)} {}
     ~Identity() = default;
 
-    Identity& operator=(Identity other) {
-        using std::swap;
-        std::swap(handle_, other.handle_);
+    Identity& operator=(const Identity& other) {
+        handle_ = other.handle_->clone();
+        return *this;
+    }
+
+    Identity& operator=(Identity&& other) noexcept {
+        handle_ = std::move(other.handle_);
         return *this;
     }
 

@@ -25,6 +25,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AuthorisationContext.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -34,9 +35,11 @@
 namespace cereal {
 class access;
 }
+
 namespace ecf {
 class NodeTreeVisitor;
 class CalendarUpdateParams;
+struct FormatContext;
 } // namespace ecf
 
 class Defs {
@@ -177,6 +180,7 @@ public:
 
     /// Will requeue all suites. Current used in test only
     void requeue();
+    void requeue(const ecf::AuthorisationContext& authorisation);
 
     /// returns true if defs has cron,time,day,date or today time dependencies
     bool hasTimeDependencies() const;
@@ -302,6 +306,7 @@ public:
      * @param st the print style to use for writing the defs
      */
     void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+    void write_to_string(std::string& os, ecf::FormatContext ctx) const;
 
     /**
      * @brief Write the defs to a file at the given path.
@@ -347,7 +352,7 @@ public:
     constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
     /// Memento functions:
-    void collateChanges(unsigned int client_handle, DefsDelta&) const;
+    void collateChanges(unsigned int client_handle, DefsDelta& changes, const ecf::AuthorisationContext& ctx) const;
     void set_memento(const StateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerStateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerVariableMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);

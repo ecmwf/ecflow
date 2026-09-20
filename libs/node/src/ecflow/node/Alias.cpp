@@ -58,8 +58,8 @@ void Alias::begin() {
     Submittable::begin();
 }
 
-void Alias::requeue(Requeue_args& args) {
-    Submittable::requeue(args);
+void Alias::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
+    Submittable::requeue(args, authorisation);
 }
 
 const std::string& Alias::debugType() const {
@@ -99,7 +99,12 @@ const std::string& Alias::script_extension() const {
     return File::USR_EXTN();
 }
 
-void Alias::collateChanges(DefsDelta& changes) const {
+void Alias::collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const {
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
+
     /// All changes to Alias should be on ONE compound_memento_ptr
     compound_memento_ptr comp;
     Submittable::incremental_changes(changes, comp);
