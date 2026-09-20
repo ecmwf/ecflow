@@ -1,7 +1,5 @@
-/*
- * SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
 
 // Un-comment these for selective for debugging. At the moment because we have added
 //            ast generation BOOST_SPIRIT_DEBUG is to verbose, making debugging a pain.

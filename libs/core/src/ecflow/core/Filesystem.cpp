@@ -1,7 +1,5 @@
-/*
- * SPDX-FileCopyrightText: 2023- European Centre for Medium-Range Weather Forecasts (ECMWF)
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2023- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
 
 #include "Filesystem.hpp"
 

@@ -1,7 +1,5 @@
-/*
- * SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
 
 ///
 /// Based on https://gist.github.com/nathan-osman/5041136

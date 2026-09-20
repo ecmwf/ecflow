@@ -1,8 +1,8 @@
+// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
+
 /* clang-format off */
 /*
-## SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
-## SPDX-License-Identifier: Apache-2.0
-
 *
 *  Read stdin and create a session from it
 *

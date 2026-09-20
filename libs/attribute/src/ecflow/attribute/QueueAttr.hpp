@@ -1,7 +1,5 @@
-/*
- * SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef ecflow_attribute_QueueAttr_HPP
 #define ecflow_attribute_QueueAttr_HPP

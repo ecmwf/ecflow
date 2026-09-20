@@ -31,10 +31,8 @@ if(manifest_content MATCHES "\\)ecflow_help\"")
     "delimiter here and in generated_client_help.hpp's consumers.")
 endif()
 
-file(WRITE "${OUTPUT}" "/*
- * SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
- * SPDX-License-Identifier: Apache-2.0
- */
+file(WRITE "${OUTPUT}" "// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
 
 /*
  * Generated from docs/client_api/help.json -- see cmake/GenerateClientHelp.cmake.
