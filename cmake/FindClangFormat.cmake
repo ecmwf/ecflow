@@ -48,7 +48,13 @@ function(target_clangformat TARGET)
   if (NOT target_sources MATCHES "-NOTFOUND")
     foreach (clangformat_source ${target_sources})
       get_filename_component(clangformat_source ${clangformat_source} ABSOLUTE)
-      list(APPEND clangformat_sources ${clangformat_source})
+      # Generated sources are only checked, never formatted in place
+      get_source_file_property(clangformat_generated ${clangformat_source} GENERATED)
+      if (clangformat_generated)
+        list(APPEND clangformat_generated_sources ${clangformat_source})
+      else ()
+        list(APPEND clangformat_sources ${clangformat_source})
+      endif ()
     endforeach ()
   endif ()
 
@@ -60,9 +66,11 @@ function(target_clangformat TARGET)
   endif()
 
   # Remove auto-generated sources (e.g. Qt files)
-  list(FILTER clangformat_sources EXCLUDE REGEX ".*/moc_.*")
-  list(FILTER clangformat_sources EXCLUDE REGEX ".*/ui_.*")
-  list(FILTER clangformat_sources EXCLUDE REGEX ".*/qrc_.*")
+  foreach (clangformat_list clangformat_sources clangformat_generated_sources)
+    list(FILTER ${clangformat_list} EXCLUDE REGEX ".*/moc_.*")
+    list(FILTER ${clangformat_list} EXCLUDE REGEX ".*/ui_.*")
+    list(FILTER ${clangformat_list} EXCLUDE REGEX ".*/qrc_.*")
+  endforeach ()
 
   # Define name of specific format target
   get_target_property(target_name ${TARGET} NAME)
@@ -78,6 +86,24 @@ function(target_clangformat TARGET)
     COMMENT
     "Formatting '${TARGET}' with ${CLANGFORMAT_EXE} ..."
     )
+
+  # Generated sources live in the build tree, out of reach of the -style=file
+  # lookup, so they are verified against the project style rather than
+  # reformatted (the generator is the place to fix any violation)
+  if (clangformat_generated_sources)
+    add_custom_command(TARGET ${format_target} POST_BUILD
+      COMMAND
+      ${CLANGFORMAT_EXE}
+      -style=file:${PROJECT_SOURCE_DIR}/.clang-format
+      --dry-run
+      -Werror
+      ${clangformat_generated_sources}
+      COMMENT
+      "Checking generated sources of '${TARGET}' with ${CLANGFORMAT_EXE} ..."
+      )
+    add_custom_target(${format_target}_generated DEPENDS ${clangformat_generated_sources})
+    add_dependencies(${format_target} ${format_target}_generated)
+  endif ()
 
   # Wire up dependencies to main format target
   if (TARGET clangformat)
