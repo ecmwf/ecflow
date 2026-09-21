@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ClockWidget_HPP
-#define ecflow_viewer_ClockWidget_HPP
+#pragma once
 
 #include <QLabel>
 
@@ -31,5 +30,3 @@ protected:
     bool showSec_{false};
     const int timeoutInMs_{1000};
 };
-
-#endif // ecflow_viewer_ClockWidget_HPP

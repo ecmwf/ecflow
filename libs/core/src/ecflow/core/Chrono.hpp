@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Chrono_HPP
-#define ecflow_core_Chrono_HPP
+#pragma once
 
 #include <chrono>
 #include <string>
@@ -113,5 +112,3 @@ bool operator>(const Duration& rhs, const Duration& lhs);
 bool operator>=(const Duration& rhs, const Duration& lhs);
 
 } // namespace ecf
-
-#endif /* ecflow_core_Chrono_HPP */

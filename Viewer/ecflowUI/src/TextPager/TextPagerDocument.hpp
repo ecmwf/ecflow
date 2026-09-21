@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERDOCUMENT_HPP__
-#define TEXTPAGERDOCUMENT_HPP__
+#pragma once
 
 #include <QChar>
 #include <QEventLoop>
@@ -192,5 +191,3 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode)
 Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::Options)
-
-#endif

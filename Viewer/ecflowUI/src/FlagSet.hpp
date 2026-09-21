@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_FlagSet_HPP
-#define ecflow_viewer_FlagSet_HPP
+#pragma once
 
 template <class T>
 class FlagSet {
@@ -20,5 +19,3 @@ public:
 private:
     int flags_{0};
 };
-
-#endif /* ecflow_viewer_FlagSet_HPP */

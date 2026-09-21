@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERSECTION_P_HPP_
-#define TEXTPAGERSECTION_P_HPP_
+#pragma once
 
 #include <QCoreApplication>
 #include <QObject>
@@ -34,5 +33,3 @@ private:
         : QObject(QCoreApplication::instance()) {}
     friend struct TextPagerSection;
 };
-
-#endif

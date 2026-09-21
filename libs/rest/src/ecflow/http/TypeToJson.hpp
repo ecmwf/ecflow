@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_http_TypeToJson_HPP
-#define ecflow_http_TypeToJson_HPP
+#pragma once
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -81,5 +80,3 @@ void to_json(ecf::http::ojson&, const ecf::AutoRestoreAttr&);
 void to_json(ecf::http::ojson&, const ecf::AvisoAttr&);
 void to_json(ecf::http::ojson&, const ecf::MirrorAttr&);
 } // namespace ecf
-
-#endif /* ecflow_http_TypeToJson_HPP */

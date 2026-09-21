@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef NODEEXPRESSION_HPP_
-#define NODEEXPRESSION_HPP_
+#pragma once
 
 #include "StringMatchMode.hpp"
 #include "VAttribute.hpp"
@@ -552,5 +551,3 @@ public:
 private:
     QString attrState_;
 };
-
-#endif

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_Viewer_HPP
-#define ecflow_viewer_Viewer_HPP
+#pragma once
 
 namespace Viewer {
 enum ViewMode { TreeViewMode, TableViewMode, NoViewMode };
@@ -53,5 +52,3 @@ enum Param {
     LateIcon
 };
 } // namespace Viewer
-
-#endif /* ecflow_viewer_Viewer_HPP */

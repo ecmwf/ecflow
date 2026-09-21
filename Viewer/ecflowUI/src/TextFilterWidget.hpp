@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TextFilterWidget_HPP
-#define ecflow_viewer_TextFilterWidget_HPP
+#pragma once
 
 #include <QCompleter>
 #include <QToolButton>
@@ -76,5 +75,3 @@ private:
     QToolButton* optionTb_{nullptr};
     VProperty* showLineNumProp_{nullptr};
 };
-
-#endif /* ecflow_viewer_TextFilterWidget_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_task_EventCmd_HPP
-#define ecflow_base_cts_task_EventCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 #include "ecflow/core/cereal_optional_nvp.hpp"
@@ -55,5 +54,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const EventCmd&);
 
 CEREAL_FORCE_DYNAMIC_INIT(EventCmd)
-
-#endif /* ecflow_base_cts_task_EventCmd_HPP */

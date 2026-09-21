@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_PasswdFile_HPP
-#define ecflow_core_PasswdFile_HPP
+#pragma once
 
 ///
 /// \brief Parser for password file
@@ -90,5 +89,3 @@ private:
     std::string passwd_file_;
     std::vector<Pass_wd> vec_;
 };
-
-#endif /* ecflow_core_PasswdFile_HPP */

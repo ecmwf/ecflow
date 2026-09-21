@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Serialization_HPP
-#define ecflow_core_Serialization_HPP
+#pragma once
 
 ///
 /// \brief Simple class that defines the Archive types used for Serialisation
@@ -81,5 +80,3 @@ void restore_from_string(const std::string& archive_data, T& restored) {
     template void T::serialize<cereal::JSONOutputArchive>(cereal::JSONOutputArchive&,       \
                                                           std::uint32_t const /*version*/); \
     template void T::serialize<cereal::JSONInputArchive>(cereal::JSONInputArchive&, std::uint32_t const /*version*/)
-
-#endif /* ecflow_core_Serialization_HPP */

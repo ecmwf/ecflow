@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_AbstractObserver_HPP
-#define ecflow_core_AbstractObserver_HPP
+#pragma once
 
 #include <vector>
 
@@ -25,5 +24,3 @@ public:
     virtual void update_delete(const Node*) {}
     virtual void update_delete(const Defs*) {}
 };
-
-#endif /* ecflow_core_AbstractObserver_HPP */

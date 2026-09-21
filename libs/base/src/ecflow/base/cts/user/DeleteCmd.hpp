@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_user_DeleteCmd_HPP
-#define ecflow_base_cts_user_DeleteCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
@@ -57,5 +56,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const DeleteCmd&);
 
 CEREAL_FORCE_DYNAMIC_INIT(DeleteCmd)
-
-#endif /* ecflow_base_cts_user_DeleteCmd_HPP */

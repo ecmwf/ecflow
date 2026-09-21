@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_task_TaskCmd_HPP
-#define ecflow_base_cts_task_TaskCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Child.hpp"
@@ -80,5 +79,3 @@ private:
            CEREAL_NVP(try_no_));
     }
 };
-
-#endif /* ecflow_base_cts_task_TaskCmd_HPP */

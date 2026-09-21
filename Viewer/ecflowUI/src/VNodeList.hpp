@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VNodeList_HPP
-#define ecflow_viewer_VNodeList_HPP
+#pragma once
 
 #include <map>
 #include <vector>
@@ -87,5 +86,3 @@ protected:
     std::map<ServerHandler*, int> serverCnt_;
     int maxNum_{200};
 };
-
-#endif /* ecflow_viewer_VNodeList_HPP */

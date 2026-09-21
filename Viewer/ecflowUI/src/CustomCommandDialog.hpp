@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_CustomCommandDialog_HPP
-#define ecflow_viewer_CustomCommandDialog_HPP
+#pragma once
 
 #include <QDialog>
 
@@ -19,5 +18,3 @@ public:
     void setNodes(const std::vector<VInfo_ptr>& nodes) { commandDesigner_->setNodes(nodes); }
     const std::vector<VInfo_ptr>& selectedNodes() { return commandDesigner_->selectedNodes(); }
 };
-
-#endif /* ecflow_viewer_CustomCommandDialog_HPP */

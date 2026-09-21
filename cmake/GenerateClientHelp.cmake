@@ -40,8 +40,7 @@ file(WRITE "${OUTPUT}" "// SPDX-FileCopyrightText: 2009- European Centre for Med
  * DO NOT EDIT DIRECTLY.
  */
 
-#ifndef ecflow_base_generated_client_help_HPP
-#define ecflow_base_generated_client_help_HPP
+#pragma once
 
 #include <string_view>
 
@@ -58,5 +57,4 @@ file(WRITE "${OUTPUT}" "// SPDX-FileCopyrightText: 2009- European Centre for Med
 inline ECFLOW_HELP_CONSTEXPR std::string_view client_help_json = R\"ecflow_help(
 ${manifest_content})ecflow_help\";
 
-#endif /* ecflow_base_generated_client_help_HPP */
 ")

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_ExportCollections_HPP
-#define ecflow_python_ExportCollections_HPP
+#pragma once
 
 #include <vector>
 
@@ -29,5 +28,3 @@ PYBIND11_MAKE_OPAQUE(std::vector<task_ptr>)
 //
 //
 #include <pybind11/stl.h>
-
-#endif /* ecflow_python_ExportCollections_HPP */

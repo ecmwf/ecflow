@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_client_ClientOptions_HPP
-#define ecflow_client_ClientOptions_HPP
+#pragma once
 
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 class ClientEnvironment;
@@ -49,5 +48,3 @@ private:
     CtsCmdRegistry cmdRegistry_;
     boost::program_options::options_description* desc_;
 };
-
-#endif /* ecflow_client_ClientOptions_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_ExprAst_HPP
-#define ecflow_node_ExprAst_HPP
+#pragma once
 
 // The AST is now demand created, and hence we no longer need to persist it
 
@@ -688,5 +687,3 @@ private:
     const AstVariable* astVariable_;
     Node* theReferenceNode_;
 };
-
-#endif /* ecflow_node_ExprAst_HPP */

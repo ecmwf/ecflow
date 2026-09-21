@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_TodayAttr_HPP
-#define ecflow_attribute_TodayAttr_HPP
+#pragma once
 
 ///
 /// \brief The Today attribute is heavily tied to the `begin` command
@@ -182,5 +181,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_attribute_TodayAttr_HPP */

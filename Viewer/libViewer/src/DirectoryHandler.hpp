@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_DirectoryHandler_HPP
-#define ecflow_viewer_DirectoryHandler_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -56,5 +55,3 @@ private:
     static std::string uiEventLogFile_;
     static std::string socketDir_;
 };
-
-#endif /* ecflow_viewer_DirectoryHandler_HPP */

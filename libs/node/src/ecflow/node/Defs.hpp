@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_Defs_HPP
-#define ecflow_node_Defs_HPP
+#pragma once
 
 ///
 /// \brief class defs: The root of the node tree. Holds all the suites:
@@ -522,5 +521,3 @@ public:
 private:
     defs_ptr defs_ptr_;
 };
-
-#endif /* ecflow_node_Defs_HPP */

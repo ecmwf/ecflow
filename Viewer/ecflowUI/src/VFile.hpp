@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VFile_HPP
-#define ecflow_viewer_VFile_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -102,5 +101,3 @@ protected:
     bool cached_{false};
     std::vector<std::string> log_;
 };
-
-#endif /* ecflow_viewer_VFile_HPP */

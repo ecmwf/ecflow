@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_DateAttr_HPP
-#define ecflow_attribute_DateAttr_HPP
+#pragma once
 
 ///
 /// \note calendarChanged() once a Date is free, it stays free. It relies on parent cron/repeat to re-queue
@@ -92,5 +91,3 @@ private:
     template <class Archive>
     void serialize(Archive& ar);
 };
-
-#endif /* ecflow_attribute_DateAttr_HPP */

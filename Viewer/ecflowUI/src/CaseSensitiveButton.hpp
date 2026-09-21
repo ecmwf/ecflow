@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_CaseSensitiveButton_HPP
-#define ecflow_viewer_CaseSensitiveButton_HPP
+#pragma once
 
 #include <map>
 
@@ -23,5 +22,3 @@ Q_SIGNALS:
 private:
     std::map<bool, QString> tooltip_;
 };
-
-#endif /* ecflow_viewer_CaseSensitiveButton_HPP */

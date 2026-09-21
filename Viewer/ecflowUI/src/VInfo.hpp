@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VInfo_HPP
-#define ecflow_viewer_VInfo_HPP
+#pragma once
 
 #include <cstddef>
 #include <memory>
@@ -173,5 +172,3 @@ public:
     virtual void notifyDataLost(VInfo*) = 0;
     virtual void notifyDelete(VInfo*)   = 0;
 };
-
-#endif /* ecflow_viewer_VInfo_HPP */

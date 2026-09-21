@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_task_TaskApi_HPP
-#define ecflow_base_cts_task_TaskApi_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -39,5 +38,3 @@ public:
     static const char* completeArg();
     static const char* waitArg();
 };
-
-#endif /* ecflow_base_cts_task_TaskApi_HPP */

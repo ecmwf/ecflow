@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_SessionRenameDialog_HPP
-#define ecflow_viewer_SessionRenameDialog_HPP
+#pragma once
 
 #include <QDialog>
 
@@ -29,5 +28,3 @@ public Q_SLOTS:
 private:
     std::string newName_;
 };
-
-#endif /* ecflow_viewer_SessionRenameDialog_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_InfoPresenter_HPP
-#define ecflow_viewer_InfoPresenter_HPP
+#pragma once
 
 #include <vector>
 
@@ -34,5 +33,3 @@ protected:
     InfoProvider* infoProvider_{nullptr};      // the main info provider
     std::vector<InfoProvider*> infoProviders_; // the list of all the providers including the main one
 };
-
-#endif /* ecflow_viewer_InfoPresenter_HPP */

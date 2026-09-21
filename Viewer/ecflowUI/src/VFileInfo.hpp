@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VFileInfo_HPP
-#define ecflow_viewer_VFileInfo_HPP
+#pragma once
 
 #include <ctime>
 
@@ -21,5 +20,3 @@ public:
     static QString formatDate(const std::time_t& t);
     static QString formatDateAgo(const std::time_t& t);
 };
-
-#endif /* ecflow_viewer_VFileInfo_HPP */

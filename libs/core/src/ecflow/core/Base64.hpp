@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Base64_HPP
-#define ecflow_core_Base64_HPP
+#pragma once
 
 #include <string>
 #include <string_view>
@@ -43,5 +42,3 @@ std::string encode_base64(std::string_view value);
 bool validate_base64(std::string_view value);
 
 } // namespace ecf
-
-#endif // ecflow_core_Base64_HPP

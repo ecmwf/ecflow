@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_CmdContext_HPP
-#define ecflow_node_CmdContext_HPP
+#pragma once
 
 ///
 /// \brief This class allow client to determine whether they are in a middle of a command.
@@ -28,5 +27,3 @@ private:
     static bool in_command_;
 };
 } // namespace ecf
-
-#endif /* ecflow_node_CmdContext_HPP */

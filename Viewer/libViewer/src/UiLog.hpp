@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_UiLog_HPP
-#define ecflow_viewer_UiLog_HPP
+#pragma once
 
 #include <sstream>
 #include <string>
@@ -85,5 +84,3 @@ std::ostream& operator<<(std::ostream&, const QRegion&);
 std::ostream& operator<<(std::ostream&, const QRect&);
 std::ostream& operator<<(std::ostream&, const QPoint&);
 std::ostream& operator<<(std::ostream&, const QDateTime&);
-
-#endif /* ecflow_viewer_UiLog_HPP */

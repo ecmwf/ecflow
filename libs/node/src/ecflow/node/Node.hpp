@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_Node_HPP
-#define ecflow_node_Node_HPP
+#pragma once
 
 ///
 /// \note The node class does NOT serialise the triggers and complete.
@@ -1073,5 +1072,3 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
-
-#endif /* ecflow_node_Node_HPP */

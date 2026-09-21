@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_client_ClientEnvironment_HPP
-#define ecflow_client_ClientEnvironment_HPP
+#pragma once
 
 #include <algorithm>
 
@@ -388,5 +387,3 @@ private:
 
     const std::string& get_password(const char*, const std::string& user) const;
 };
-
-#endif /* ecflow_client_ClientEnvironment_HPP */

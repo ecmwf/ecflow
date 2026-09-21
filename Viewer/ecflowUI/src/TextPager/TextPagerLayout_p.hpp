@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERLAYOUT_P_HPP_
-#define TEXTPAGERLAYOUT_P_HPP_
+#pragma once
 
 #include <QKeyEvent>
 #include <QList>
@@ -113,5 +112,3 @@ public:
     enum Direction { Forward = 0, Backward = TextPagerDocument::FindBackward };
     void updateViewportPosition(int pos, Direction direction, bool applyIt = true);
 };
-
-#endif

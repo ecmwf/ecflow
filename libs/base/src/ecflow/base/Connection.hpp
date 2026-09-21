@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_Connection_HPP
-#define ecflow_base_Connection_HPP
+#pragma once
 
 ///
 /// \brief Serves as the connection between client server
@@ -202,5 +201,3 @@ private:
 };
 
 using connection_ptr = std::shared_ptr<connection>;
-
-#endif /* ecflow_base_Connection_HPP */

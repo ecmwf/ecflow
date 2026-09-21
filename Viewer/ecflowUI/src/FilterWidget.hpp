@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_FileWidget_HPP
-#define ecflow_viewer_FileWidget_HPP
+#pragma once
 
 #include <QMap>
 #include <QMenu>
@@ -86,5 +85,3 @@ protected:
     QFont font_;
     QFont loadFont_;
 };
-
-#endif /* ecflow_viewer_FileWidget_HPP */

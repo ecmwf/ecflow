@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VariableModelData_HPP
-#define ecflow_viewer_VariableModelData_HPP
+#pragma once
 
 #include <set>
 #include <vector>
@@ -121,5 +120,3 @@ protected:
     std::set<std::string> names_;
     std::vector<VariableModelDataObserver*> observers_;
 };
-
-#endif /* ecflow_viewer_VariableModelData_HPP */

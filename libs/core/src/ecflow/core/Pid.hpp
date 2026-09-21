@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Pid_HPP
-#define ecflow_core_Pid_HPP
+#pragma once
 
 #include <string>
 
@@ -18,5 +17,3 @@ public:
     /// otherwise, throws exception(std::runtime_error)
     static std::string unique_name(const std::string& prefix);
 };
-
-#endif /* ecflow_core_Pid_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_test_harness_MockServer_HPP
-#define ecflow_base_test_harness_MockServer_HPP
+#pragma once
 
 #include <cassert>
 
@@ -157,5 +156,3 @@ public:
 private:
     ecf::SuiteChanged suiteChanged_;
 };
-
-#endif /* ecflow_base_test_harness_MockServer_HPP */

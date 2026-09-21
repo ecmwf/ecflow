@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_stc_BlockClientZombieCmd_HPP
-#define ecflow_base_stc_BlockClientZombieCmd_HPP
+#pragma once
 
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Child.hpp"
@@ -39,5 +38,3 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const BlockClientZombieCmd&);
-
-#endif /* ecflow_base_stc_BlockClientZombieCmd_HPP */

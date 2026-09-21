@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SYNTAXHIGHLIGHTER_HPP__
-#define SYNTAXHIGHLIGHTER_HPP__
+#pragma once
 
 #include <QColor>
 #include <QFont>
@@ -73,5 +72,3 @@ private:
     friend class TextPagerEdit;
     friend class TextPagerLayout;
 };
-
-#endif

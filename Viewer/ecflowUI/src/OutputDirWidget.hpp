@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_OutputDirWidget_HPP
-#define ecflow_viewer_OutputDirWidget_HPP
+#pragma once
 
 #include <QWidget>
 
@@ -84,5 +83,3 @@ private:
     void adjustCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
     void setCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
 };
-
-#endif /* ecflow_viewer_OutputDirWidget_HPP */

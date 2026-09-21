@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TableNodeWidget_HPP
-#define ecflow_viewer_TableNodeWidget_HPP
+#pragma once
 
 #include "NodeWidget.hpp"
 #include "ui_TableNodeWidget.h"
@@ -51,5 +50,3 @@ private:
     VParamFilterMenu* stateFilterMenu_;
     QAction* acAutoScroll_;
 };
-
-#endif /* ecflow_viewer_TableNodeWidget_HPP */

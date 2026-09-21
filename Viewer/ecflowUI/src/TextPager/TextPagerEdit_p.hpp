@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGEREDIT_P_HPP__
-#define TEXTPAGEREDIT_P_HPP__
+#pragma once
 
 #include <QAction>
 #include <QBasicTimer>
@@ -162,5 +161,3 @@ private:
     TextEditPrivate *priv;
 };
 */
-
-#endif

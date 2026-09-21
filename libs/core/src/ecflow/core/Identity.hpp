@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Identity_HPP
-#define ecflow_core_Identity_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -282,5 +281,3 @@ inline std::ostream& operator<<(std::ostream& os, const Identity& id) {
 }
 
 } // namespace ecf
-
-#endif // ecflow_core_Identity_HPP

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_udp_Trace_HPP
-#define ecflow_udp_Trace_HPP
+#pragma once
 
 #include <sstream>
 #include <string>
@@ -48,5 +47,3 @@ Trace& getTrace();
 
 #define TRACE_FATAL(location, ...) \
     { ecf::log::getTrace().add("fatal", location, __VA_ARGS__); }
-
-#endif /* ecflow_udp_Trace_HPP */

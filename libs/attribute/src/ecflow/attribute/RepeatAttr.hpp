@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_RepeatAttr_HPP
-#define ecflow_attribute_RepeatAttr_HPP
+#pragma once
 
 ///
 /// \brief Repeat Attribute. Please note that for repeat string, enumeration
@@ -1079,5 +1078,3 @@ std::optional<T> current_value_as(const Repeat& repeat) {
 } // namespace repeat
 
 } // namespace ecf
-
-#endif /* ecflow_attribute_RepeatAttr_HPP */

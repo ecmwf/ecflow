@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_AvisoAttr_HPP
-#define ecflow_node_AvisoAttr_HPP
+#pragma once
 
 #include <cstdint>
 #include <iostream>
@@ -254,5 +253,3 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
 }
 
 } // namespace ecf
-
-#endif /* ecflow_node_AvisoAttr_HPP */

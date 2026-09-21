@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2023- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Filesystem_HPP
-#define ecflow_core_Filesystem_HPP
+#pragma once
 
 #include <filesystem>
 
@@ -32,5 +31,3 @@ std::chrono::system_clock::time_point last_write_time(const std::filesystem::pat
 
 } // namespace fsx
 } // namespace ecf
-
-#endif /* ecflow_core_Filesystem_HPP */

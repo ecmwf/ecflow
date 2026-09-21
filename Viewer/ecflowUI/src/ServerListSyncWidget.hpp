@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ServerListSyncWidget_HPP
-#define ecflow_viewer_ServerListSyncWidget_HPP
+#pragma once
 
 #include <vector>
 
@@ -32,5 +31,3 @@ private:
     QString buildUnsetSysChange(ServerListSyncChangeItem* t);
     QString buildTable(QString name, QString host, QString port) const;
 };
-
-#endif /* ecflow_viewer_ServerListSyncWidget_HPP */

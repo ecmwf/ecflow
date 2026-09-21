@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_TypeTraits_HPP
-#define ecflow_core_TypeTraits_HPP
+#pragma once
 
 #include <type_traits>
 
@@ -45,5 +44,3 @@ template <typename T, typename... Xs>
 inline constexpr bool is_one_of_v = is_one_of<T, Xs...>::value;
 
 } // namespace ecf
-
-#endif /* ecflow_core_TypeTraits_HPP */

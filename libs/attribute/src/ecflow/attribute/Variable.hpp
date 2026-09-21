@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_Variable_HPP
-#define ecflow_attribute_Variable_HPP
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -294,5 +293,3 @@ private:
     storage_t variables_;
     index_t index_;
 };
-
-#endif /* ecflow_attribute_Variable_HPP */

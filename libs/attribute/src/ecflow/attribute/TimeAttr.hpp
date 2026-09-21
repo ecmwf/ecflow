@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_TimeAttr_HPP
-#define ecflow_attribute_TimeAttr_HPP
+#pragma once
 
 ///
 /// \brief isFree is called when a node is queued. If it returns true, Task can be submitted
@@ -133,5 +132,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_attribute_TimeAttr_HPP */

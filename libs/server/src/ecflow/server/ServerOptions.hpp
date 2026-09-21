@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_ServerOptions_HPP
-#define ecflow_server_ServerOptions_HPP
+#pragma once
 
 ///
 /// \brief This class will parse the server arguments.
@@ -34,5 +33,3 @@ public:
 private:
     boost::program_options::variables_map vm_;
 };
-
-#endif /*ecflow_server_ServerOptions_HPP */

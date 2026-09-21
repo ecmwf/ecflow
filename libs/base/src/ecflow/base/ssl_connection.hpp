@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ssl_connection_HPP
-#define ecflow_base_ssl_connection_HPP
+#pragma once
 
 #if defined(HPUX)
     #include <sys/select.h> // hp-ux uses pselect
@@ -214,5 +213,3 @@ private:
 };
 
 using ssl_connection_ptr = std::shared_ptr<ssl_connection>;
-
-#endif /* ecflow_base_ssl_connection_HPP */

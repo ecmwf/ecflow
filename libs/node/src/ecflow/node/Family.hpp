@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_Family_HPP
-#define ecflow_node_Family_HPP
+#pragma once
 
 #include "ecflow/node/NodeContainer.hpp"
 
@@ -95,5 +94,3 @@ private:
     mutable Variable genvar_dirname_;
     mutable Variable genvar_basename_;
 };
-
-#endif /* ecflow_node_Family_HPP */

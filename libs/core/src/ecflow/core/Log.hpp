@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Log_HPP
-#define ecflow_core_Log_HPP
+#pragma once
 
 #include "ecflow/core/Message.hpp"
 
@@ -436,5 +435,3 @@ void log_assert(char const* expr, char const* file, long line, const std::string
     ((expr) ? (static_cast<void>(0)) : ecf::log_assert(#expr, __FILE__, __LINE__, MESSAGE(EXPRESSION)))
 
 } // namespace ecf
-
-#endif /* ecflow_core_Log_HPP */

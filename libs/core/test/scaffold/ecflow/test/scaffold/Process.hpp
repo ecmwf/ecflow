@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_test_foolproof_scaffold_Process_HPP
-#define ecflow_test_foolproof_scaffold_Process_HPP
+#pragma once
 
 #include <filesystem>
 #include <memory>
@@ -42,5 +41,3 @@ private:
 };
 
 } // namespace ecf::test::scaffold
-
-#endif /* ecflow_test_foolproof_scaffold_Process_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_test_harness_TestFixture_HPP
-#define ecflow_test_harness_TestFixture_HPP
+#pragma once
 
 ///
 /// \brief This Fixture facilitates the test of client/server on different platforms
@@ -88,5 +87,3 @@ private:
     static std::string test_dir_;         // used when we have an external server, different platform
     static std::string project_test_dir_; // "Test" or "view"
 };
-
-#endif /* ecflow_test_harness_TestFixture_HPP */

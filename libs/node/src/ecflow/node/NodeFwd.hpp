@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_NodeFwd_HPP
-#define ecflow_node_NodeFwd_HPP
+#pragma once
 
 #include <map>
 #include <memory>
@@ -111,5 +110,3 @@ class AliasNumberMemento;
 class NodeQueueMemento;
 class NodeGenericMemento;
 class NodeQueueIndexMemento;
-
-#endif /* ecflow_node_NodeFwd_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_service_mirror_Mirror_HPP
-#define ecflow_service_mirror_Mirror_HPP
+#pragma once
 
 #include <string>
 #include <string_view>
@@ -88,5 +87,3 @@ using MirrorResponse = std::variant<MirrorNotification, MirrorError>;
 std::ostream& operator<<(std::ostream&, const MirrorResponse&);
 
 } // namespace ecf::service::mirror
-
-#endif /* ecflow_service_mirror_Mirror_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_parser_RepeatParser_HPP
-#define ecflow_node_parser_RepeatParser_HPP
+#pragma once
 
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/parser/Parser.hpp"
@@ -20,5 +19,3 @@ private:
     bool get_value(const std::vector<std::string>& lineTokens, int& value) const;
     bool get_value(const std::vector<std::string>& lineTokens, ecf::Instant& value) const;
 };
-
-#endif /* ecflow_node_parser_RepeatParser_HPP */

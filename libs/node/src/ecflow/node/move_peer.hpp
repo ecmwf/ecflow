@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_move_peer_HPP
-#define ecflow_node_move_peer_HPP
+#pragma once
 
 #include "ecflow/node/Node.hpp"
 
@@ -42,5 +41,3 @@ void move_peer_node(std::vector<ct>& vec, Node* source, Node* dest, const std::s
     throw std::runtime_error(
         MESSAGE(error_str << "::move source node " << source->absNodePath() << " not found on parent"));
 }
-
-#endif /* ecflow_node_move_peer_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_Trigger_HPP
-#define ecflow_python_Trigger_HPP
+#pragma once
 
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/python/PythonUtil.hpp"
@@ -53,5 +52,3 @@ private:
     void add(const PartExpression& t) { vec_.push_back(t); }
     std::vector<PartExpression> vec_;
 };
-
-#endif /* ecflow_python_Trigger_HPP */

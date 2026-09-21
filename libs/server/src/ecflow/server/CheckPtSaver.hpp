@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_CheckPtSaver_HPP
-#define ecflow_server_CheckPtSaver_HPP
+#pragma once
 
 #include <boost/asio.hpp>
 
@@ -118,5 +117,3 @@ private:
     mutable unsigned int state_change_no_;  // detect state change in defs
     mutable unsigned int modify_change_no_; // detect state change in defs
 };
-
-#endif /* ecflow_server_CheckPtSaver_HPP */

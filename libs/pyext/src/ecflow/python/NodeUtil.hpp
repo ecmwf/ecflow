@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_NodeUtil_HPP
-#define ecflow_python_NodeUtil_HPP
+#pragma once
 
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/python/PythonBinding.hpp"
@@ -23,5 +22,3 @@ public:
     /// Since kwargs is a dictionary, each entry will be added as a Variable with name and value
     static void add(Node& self, const py::kwargs& kwargs);
 };
-
-#endif /* ecflow_python_NodeUtil_HPP */

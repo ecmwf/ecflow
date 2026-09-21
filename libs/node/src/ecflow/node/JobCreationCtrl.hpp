@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_JobCreationCtrl_HPP
-#define ecflow_node_JobCreationCtrl_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -55,5 +54,3 @@ private:
     std::vector<weak_submittable_ptr> fail_submittables_;
     JobsParam jobsParam_; // create jobs = false, spawn jobs = false used as a cache
 };
-
-#endif /* ecflow_node_JobCreationCtrl_HPP */

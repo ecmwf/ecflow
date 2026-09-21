@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_PythonUtil_HPP
-#define ecflow_python_PythonUtil_HPP
+#pragma once
 
 #include <vector>
 
@@ -102,5 +101,3 @@ ssize_t py_hash(const py::object& self);
 ///       available to Python threads.
 ///
 void py_finalize_enum(py::module& m, const char* class_name);
-
-#endif /* ecflow_python_PythonUtil_HPP */

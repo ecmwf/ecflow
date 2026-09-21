@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ServerProtocol_HPP
-#define ecflow_base_ServerProtocol_HPP
+#pragma once
 
 #include <ostream>
 
@@ -101,5 +100,3 @@ inline std::ostream& operator<<(std::ostream& o, Protocol protocol) {
 }
 
 } // namespace ecf
-
-#endif /* ecflow_base_ServerProtocol_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ChangeNotifyWidget_HPP
-#define ecflow_viewer_ChangeNotifyWidget_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -63,5 +62,3 @@ protected:
     std::map<std::string, ChangeNotifyButton*> buttons_;
     static std::vector<ChangeNotifyWidget*> widgets_;
 };
-
-#endif /* ecflow_viewer_ChangeNotifyWidget_HPP */

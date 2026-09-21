@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_Zombie_HPP
-#define ecflow_attribute_Zombie_HPP
+#pragma once
 
 ///
 /// \brief Holds the zombie structure
@@ -145,5 +144,3 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const Zombie&);
-
-#endif /* ecflow_attribute_Zombie_HPP */

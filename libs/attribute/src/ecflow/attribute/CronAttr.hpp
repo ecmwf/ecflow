@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_attribute_CronAttr_HPP
-#define ecflow_attribute_CronAttr_HPP
+#pragma once
 
 #include "ecflow/core/TimeSeries.hpp"
 
@@ -127,5 +126,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_attribute_CronAttr_HPP */

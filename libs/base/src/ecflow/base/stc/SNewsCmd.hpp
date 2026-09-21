@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_stc_SNewsCmd_HPP
-#define ecflow_base_stc_SNewsCmd_HPP
+#pragma once
 
 ///
 /// @brief The reply to a --news request: tells the client whether it must synchronise.
@@ -119,5 +118,3 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const SNewsCmd&);
-
-#endif /* ecflow_base_stc_SNewsCmd_HPP */

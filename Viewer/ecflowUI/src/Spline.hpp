@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_Spline_HPP
-#define ecflow_viewer_Spline_HPP
+#pragma once
 
 #include <vector>
 
@@ -25,5 +24,3 @@ private:
     std::vector<double> coeffA_, coeffB_, coeffC_;
     bool status_{false};
 };
-
-#endif /* ecflow_viewer_Spline_HPP */

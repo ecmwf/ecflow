@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_ServerEnvironment_HPP
-#define ecflow_server_ServerEnvironment_HPP
+#pragma once
 
 ///
 /// \brief The server environment is read from the configuration file. This defines
@@ -254,5 +253,3 @@ private:
     boost::asio::ip::tcp tcp_protocol_; // defaults to IPv4 TCP protocol
     friend class ServerOptions;
 };
-
-#endif /* ecflow_server_ServerEnvironment_HPP */

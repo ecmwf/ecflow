@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Passwd_HPP
-#define ecflow_core_Passwd_HPP
+#pragma once
 
 ///
 /// The tasks send by the ECF will have GENERATED PASSWORD that is not
@@ -29,5 +28,3 @@ public:
     /// generate a random password
     static std::string generate();
 };
-
-#endif /* ecflow_core_Passwd_HPP */

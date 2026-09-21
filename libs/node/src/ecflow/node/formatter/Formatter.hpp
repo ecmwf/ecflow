@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_formatter_Formatter_HPP
-#define ecflow_node_formatter_Formatter_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -41,5 +40,3 @@ static void format_vector_as_defs(const std::vector<std::shared_ptr<T>>& items, 
 
 } // namespace implementation
 } // namespace ecf
-
-#endif /* ecflow_node_formatter_Formatter_HPP */

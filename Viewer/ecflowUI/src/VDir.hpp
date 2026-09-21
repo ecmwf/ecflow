@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VDir_HPP
-#define ecflow_viewer_VDir_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -65,5 +64,3 @@ protected:
 
 class VDir;
 using VDir_ptr = std::shared_ptr<VDir>;
-
-#endif /* ecflow_viewer_VDir_HPP */

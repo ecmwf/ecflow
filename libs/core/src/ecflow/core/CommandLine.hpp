@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_CommandLine_HPP
-#define ecflow_core_CommandLine_HPP
+#pragma once
 
 #include <iterator>
 #include <ostream>
@@ -111,5 +110,3 @@ private:
             : L(std::move(lambda))... {}
     };
 };
-
-#endif /* ecflow_core_CommandLine_HPP */

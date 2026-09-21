@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_HttpLibrary_HPP
-#define ecflow_core_HttpLibrary_HPP
+#pragma once
 
 #include <sys/socket.h>
 #if defined(MSG_NOSIGNAL)
@@ -34,5 +33,3 @@
 #endif
 
 #include <httplib.h>
-
-#endif /* ecflow_core_HttpLibrary_HPP */

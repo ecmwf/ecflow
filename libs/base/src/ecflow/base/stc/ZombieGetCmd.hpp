@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_stc_ZombieGetCmd_HPP
-#define ecflow_base_stc_ZombieGetCmd_HPP
+#pragma once
 
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
@@ -37,5 +36,3 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const ZombieGetCmd&);
-
-#endif /* ecflow_base_stc_ZombieGetCmd_HPP */

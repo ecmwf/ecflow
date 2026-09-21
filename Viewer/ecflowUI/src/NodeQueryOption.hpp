@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_NodeQueryOption_HPP
-#define ecflow_viewer_NodeQueryOption_HPP
+#pragma once
 
 #include <QDateTime>
 #include <QStringList>
@@ -163,5 +162,3 @@ protected:
     int period_{-1};
     QString periodUnits_;
 };
-
-#endif /* ecflow_viewer_NodeQueryOption_HPP */

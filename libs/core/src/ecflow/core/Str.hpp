@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Str_HPP
-#define ecflow_core_Str_HPP
+#pragma once
 
 #include <algorithm>
 #include <cctype>
@@ -772,5 +771,3 @@ bool get_token(std::string_view input, size_t index, std::string& token, std::st
 } // namespace algorithm
 
 } // namespace ecf
-
-#endif /* ecflow_core_Str_HPP */

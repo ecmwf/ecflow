@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VIcon_HPP
-#define ecflow_viewer_VIcon_HPP
+#pragma once
 
 #include <map>
 #include <set>
@@ -49,5 +48,3 @@ protected:
     static std::vector<VIcon*> itemsVec_;
     static std::vector<std::string> lastNames_;
 };
-
-#endif /* ecflow_viewer_VIcon_HPP */

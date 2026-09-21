@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_AttributeEditorFactory_HPP
-#define ecflow_viewer_AttributeEditorFactory_HPP
+#pragma once
 
 #include <string>
 
@@ -32,5 +31,3 @@ public:
     explicit AttributeEditorMaker(const std::string& t)
         : AttributeEditorFactory(t) {}
 };
-
-#endif /* ecflow_viewer_AttributeEditorFactory_HPP */

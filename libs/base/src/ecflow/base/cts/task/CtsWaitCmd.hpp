@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_task_CtsWaitCmd_HPP
-#define ecflow_base_cts_task_CtsWaitCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 
@@ -48,5 +47,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const CtsWaitCmd&);
 
 CEREAL_FORCE_DYNAMIC_INIT(CtsWaitCmd)
-
-#endif /* ecflow_base_cts_task_CtsWaitCmd_HPP */

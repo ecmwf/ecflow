@@ -27,8 +27,7 @@
 /// OTHER DEALINGS IN THE SOFTWARE.
 ///
 
-#ifndef ecflow_http_test_Certificate_HPP
-#define ecflow_http_test_Certificate_HPP
+#pragma once
 
 #include <cstdio>
 #include <iostream>
@@ -206,5 +205,3 @@ inline void Certificate::write_to_disk(EVP_PKEY* pkey, X509* x509) {
         throw std::runtime_error("Unable to write private key to disk");
     }
 }
-
-#endif /* ecflow_http_test_Certificate_HPP */

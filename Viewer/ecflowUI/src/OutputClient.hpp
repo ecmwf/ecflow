@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_OutputClient_HPP
-#define ecflow_viewer_OutputClient_HPP
+#pragma once
 
 #include <QElapsedTimer>
 #include <QObject>
@@ -51,5 +50,3 @@ private:
     OutputClient(const OutputClient&);
     OutputClient& operator=(const OutputClient&);
 };
-
-#endif /* ecflow_viewer_OutputClient_HPP */

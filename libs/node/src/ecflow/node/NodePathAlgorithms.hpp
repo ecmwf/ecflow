@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_NodePathAlgorithms_hpp
-#define ecflow_node_NodePathAlgorithms_hpp
+#pragma once
 
 #include <string>
 #include <vector>
@@ -108,5 +107,3 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 }
 
 } // namespace ecf
-
-#endif // ecflow_node_NodePathAlgorithms_hpp

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_user_PathsCmd_HPP
-#define ecflow_base_cts_user_PathsCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
@@ -64,5 +63,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const PathsCmd&);
 
 CEREAL_FORCE_DYNAMIC_INIT(PathsCmd)
-
-#endif /* ecflow_base_cts_user_PathsCmd_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_DState_HPP
-#define ecflow_core_DState_HPP
+#pragma once
 
 ///
 /// \brief DState stores the state of a node.
@@ -71,5 +70,3 @@ public:
 private:
     DState::State st_;
 };
-
-#endif /* ecflow_core_DState_HPP */

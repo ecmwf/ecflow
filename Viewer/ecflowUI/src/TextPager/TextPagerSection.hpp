@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERSECTION_HPP__
-#define TEXTPAGERSECTION_HPP__
+#pragma once
 
 #include <QCursor>
 #include <QString>
@@ -75,5 +74,3 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions)
-
-#endif

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_JobsParam_HPP
-#define ecflow_node_JobsParam_HPP
+#pragma once
 
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/EcfFile.hpp"
@@ -96,5 +95,3 @@ private:
     boost::posix_time::ptime time_out_time_;  // When we actually timed out must >= next_poll_time_
     EcfFile ecf_file_;                        // keep for lifetime, to optimise memory and cache include file
 };
-
-#endif /* ecflow_node_JobsParam_HPP */

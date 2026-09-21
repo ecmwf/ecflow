@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_stc_ServerToClientCmd_HPP
-#define ecflow_base_stc_ServerToClientCmd_HPP
+#pragma once
 
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/base/ServerReply.hpp"
@@ -40,5 +39,3 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version) {}
 };
-
-#endif /* ecflow_base_stc_ServerToClientCmd_HPP */

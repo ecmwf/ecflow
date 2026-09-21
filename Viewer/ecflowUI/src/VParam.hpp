@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VParam_HPP
-#define ecflow_viewer_VParam_HPP
+#pragma once
 
 #include <QColor>
 
@@ -63,5 +62,3 @@ protected:
     QString typeColourPropName_;
     int id_;
 };
-
-#endif /* ecflow_viewer_VParam_HPP */

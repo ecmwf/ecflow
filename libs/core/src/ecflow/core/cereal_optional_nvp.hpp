@@ -21,8 +21,7 @@
  * SOFTWARE.
  */
 
-#ifndef ecflow_core_cereal_optional_nvp_HPP
-#define ecflow_core_cereal_optional_nvp_HPP
+#pragma once
 
 ///
 /// Example
@@ -99,5 +98,3 @@ make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
 
 #define CEREAL_OPTIONAL_NVP_2(ar, T) ::cereal::make_optional_nvp(ar, #T, T)
 #define CEREAL_OPTIONAL_NVP_3(ar, T, P) ::cereal::make_optional_nvp(ar, #T, T, P)
-
-#endif /* ecflow_core_cereal_optional_nvp_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ConnectionDiagnosis_HPP
-#define ecflow_base_ConnectionDiagnosis_HPP
+#pragma once
 
 #include <optional>
 #include <ostream>
@@ -144,5 +143,3 @@ inline std::ostream& operator<<(std::ostream& o, ConnectionFailure failure) {
 std::string explain(const ConnectionDiagnosis& diagnosis);
 
 } // namespace ecf
-
-#endif /* ecflow_base_ConnectionDiagnosis_HPP */

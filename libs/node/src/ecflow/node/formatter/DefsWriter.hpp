@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_formatter_DefsWriter_HPP
-#define ecflow_node_formatter_DefsWriter_HPP
+#pragma once
 
 #include <algorithm>
 #include <cstdint>
@@ -2441,5 +2440,3 @@ inline std::string as_string(const T& item, PrintStyle::Type_t style) {
 }
 
 } // namespace ecf
-
-#endif /* ecflow_node_formatter_DefsWriter_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_DefsDoc_HPP
-#define ecflow_python_DefsDoc_HPP
+#pragma once
 
 // ===========================================================================
 // IMPORTANT: These appear as python doc strings.
@@ -65,5 +64,3 @@ public:
     static const char* simulate();
     static const char* get_server_state();
 };
-
-#endif /* ecflow_python_DefsDoc_HPP */

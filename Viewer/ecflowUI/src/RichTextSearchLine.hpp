@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_RichTextSearchLine_HPP
-#define ecflow_viewer_RichTextSearchLine_HPP
+#pragma once
 
 #include <QTextBrowser>
 
@@ -20,5 +19,3 @@ private:
     // The interface is set internally
     void setSearchInterface(AbstractTextSearchInterface*) {}
 };
-
-#endif /* ecflow_viewer_RichTextSearchLine_HPP */

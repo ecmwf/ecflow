@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_TimeStamp_HPP
-#define ecflow_core_TimeStamp_HPP
+#pragma once
 
 #include <string>
 
@@ -46,5 +45,3 @@ void now_in_brief(std::string& buffer);
 
 } // namespace TimeStamp
 } // namespace ecf
-
-#endif /* ecflow_core_TimeStamp_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_NodeTreeTraverser_HPP
-#define ecflow_server_NodeTreeTraverser_HPP
+#pragma once
 
 ///
 /// \brief This class will traverse the node tree periodically, It is tied to a server.
@@ -83,5 +82,3 @@ private:
     bool firstTime_;
     bool running_;
 };
-
-#endif /* ecflow_server_NodeTreeTraverser_HPP */

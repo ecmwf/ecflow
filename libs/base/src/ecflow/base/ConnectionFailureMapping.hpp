@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ConnectionFailureMapping_HPP
-#define ecflow_base_ConnectionFailureMapping_HPP
+#pragma once
 
 #include <boost/system/error_code.hpp>
 
@@ -70,5 +69,3 @@ ConnectionFailure classify_handshake_error(const boost::system::error_code& erro
 #endif
 
 } // namespace ecf
-
-#endif /* ecflow_base_ConnectionFailureMapping_HPP */

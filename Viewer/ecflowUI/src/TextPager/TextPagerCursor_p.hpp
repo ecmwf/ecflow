@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERCURSOR_P_HPP__
-#define TEXTPAGERCURSOR_P_HPP__
+#pragma once
 
 #include <QAtomicInt>
 #include <QCoreApplication>
@@ -204,5 +203,3 @@ public:
 
     TextPagerDocument* document{nullptr};
 };
-
-#endif

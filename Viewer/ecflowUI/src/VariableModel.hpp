@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VariableModel_HPP
-#define ecflow_viewer_VariableModel_HPP
+#pragma once
 
 #include <vector>
 
@@ -135,5 +134,3 @@ protected:
     QMap<QString, int> nameCnt_;
     bool ignoreDuplicateNames_; // Ignore duplicate names across ancestors
 };
-
-#endif /* ecflow_viewer_VariableModel_HPP */

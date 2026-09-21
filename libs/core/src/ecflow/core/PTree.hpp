@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_PTree_HPP
-#define ecflow_core_PTree_HPP
+#pragma once
 
 #include <optional>
 #include <stdexcept>
@@ -565,5 +564,3 @@ T PTree::get(std::string_view path) const {
 }
 
 } // namespace ecf
-
-#endif /* ecflow_core_PTree_HPP */

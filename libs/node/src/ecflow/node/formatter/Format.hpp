@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_formatter_Format_HPP
-#define ecflow_node_formatter_Format_HPP
+#pragma once
 
 #include "ecflow/node/formatter/AvisoFormatter.hpp"
 #include "ecflow/node/formatter/MirrorFormatter.hpp"
@@ -37,5 +36,3 @@ void format_as_defs(const T& value, Stream& output) {
 }
 
 } // namespace ecf
-
-#endif /* ecflow_node_formatter_Format_HPP */

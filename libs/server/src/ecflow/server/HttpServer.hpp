@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_HttpServer_HPP
-#define ecflow_server_HttpServer_HPP
+#pragma once
 
 #include <memory>
 
@@ -37,5 +36,3 @@ private:
     void do_accept();
     void on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket, BaseServer* server);
 };
-
-#endif /* ecflow_server_HttpServer_HPP */

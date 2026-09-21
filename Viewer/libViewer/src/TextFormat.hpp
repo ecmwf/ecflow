@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TextFormat_HPP
-#define ecflow_viewer_TextFormat_HPP
+#pragma once
 
 #include <QColor>
 #include <QList>
@@ -27,5 +26,3 @@ QString formatTableRow(QString col1Text, QString col2Text, QColor bg, QColor fg,
 QString formatTableRow(QString col1Text, QString col2Text, bool boldCol1);
 
 } // namespace Viewer
-
-#endif /* ecflow_viewer_TextFormat_HPP  */

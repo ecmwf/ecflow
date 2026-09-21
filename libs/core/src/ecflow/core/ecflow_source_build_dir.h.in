@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_ecflow_source_build_dir_H
-#define ecflow_core_ecflow_source_build_dir_H
+#pragma once
 
 #include <string>
 
@@ -31,5 +30,3 @@ inline std::string CMAKE_ECFLOW_BUILD_DIR() {
 inline std::string CMAKE_ECFLOW_BUILD_TYPE() {
     return "@CMAKE_BUILD_TYPE@";
 }
-
-#endif /* ecflow_core_ecflow_source_build_dir_H */

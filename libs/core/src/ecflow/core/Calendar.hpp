@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Calendar_HPP
-#define ecflow_core_Calendar_HPP
+#pragma once
 
 ///
 /// \brief The calendar encapsulates date and time. The date is derived from the time.
@@ -312,5 +311,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_core_Calendar_HPP */

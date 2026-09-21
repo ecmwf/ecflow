@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_AbstractClientEnv_HPP
-#define ecflow_base_AbstractClientEnv_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -80,5 +79,3 @@ public:
     virtual void set_test()         = 0;
     virtual bool under_test() const = 0;
 };
-
-#endif /* ecflow_base_AbstractClientEnv_HPP */

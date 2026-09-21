@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_DefsCmd_HPP
-#define ecflow_base_cts_DefsCmd_HPP
+#pragma once
 
 #include "ecflow/base/stc/DefsCache.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
@@ -46,5 +45,3 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const DefsCmd&);
-
-#endif /* ecflow_base_cts_DefsCmd_HPP */

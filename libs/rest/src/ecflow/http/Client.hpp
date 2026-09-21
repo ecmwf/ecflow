@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_http_Client_HPP
-#define ecflow_http_Client_HPP
+#pragma once
 
 #include <memory>
 
@@ -17,5 +16,3 @@ std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
 std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ojson& payload);
 
 } // namespace ecf::http
-
-#endif /* ecflow_http_Client_HPP */

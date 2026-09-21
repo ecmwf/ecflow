@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_MenyConfigDialog_HPP
-#define ecflow_viewer_MenyConfigDialog_HPP
+#pragma once
 
 #include <QDialog>
 #include <QSplitter>
@@ -68,5 +67,3 @@ public:
 private:
     void addChildrenToMenuTree(Menu* menu, QTreeWidgetItem* parent);
 };
-
-#endif /* ecflow_viewer_MenyConfigDialog_HPP */

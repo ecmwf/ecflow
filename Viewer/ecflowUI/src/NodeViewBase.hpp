@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_NodeViewBase_HPP
-#define ecflow_viewer_NodeViewBase_HPP
+#pragma once
 
 #include "VInfo.hpp"
 #include "Viewer.hpp"
@@ -34,5 +33,3 @@ public:
 protected:
     NodeFilterDef* filterDef_;
 };
-
-#endif /* ecflow_viewer_NodeViewBase_HPP */

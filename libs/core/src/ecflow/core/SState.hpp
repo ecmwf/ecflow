@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_SState_HPP
-#define ecflow_core_SState_HPP
+#pragma once
 
 #include <string>
 
@@ -27,5 +26,3 @@ public:
     static SState::State toState(const std::string&);
     static bool isValid(const std::string&);
 };
-
-#endif /* ecflow_core_SState_HPP */

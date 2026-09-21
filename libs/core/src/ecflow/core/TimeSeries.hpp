@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_TimeSeries_HPP
-#define ecflow_core_TimeSeries_HPP
+#pragma once
 
 ///
 /// \brief Represents a set of time instants (possibly just one)
@@ -199,5 +198,3 @@ std::ostream& operator<<(std::ostream& os, const TimeSeries*);
 std::ostream& operator<<(std::ostream& os, const TimeSeries&);
 
 } // namespace ecf
-
-#endif /* ecflow_core_TimeSeries_HPP */

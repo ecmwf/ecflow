@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_EditHistoryMgr_HPP
-#define ecflow_base_cts_EditHistoryMgr_HPP
+#pragma once
 
 class ClientToServerCmd;
 class AbstractServer;
@@ -49,5 +48,3 @@ private:
     mutable unsigned int state_change_no_;
     mutable unsigned int modify_change_no_;
 };
-
-#endif /* ecflow_base_cts_EditHistoryMgr_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_JobItemWidget_HPP
-#define ecflow_viewer_JobItemWidget_HPP
+#pragma once
 
 #include "CodeItemWidget.hpp"
 #include "InfoPanelItem.hpp"
@@ -30,5 +29,3 @@ protected:
     void updateState(const ChangeFlags&) override;
     void reloadRequested() override;
 };
-
-#endif /* ecflow_viewer_JobItemWidget_HPP */

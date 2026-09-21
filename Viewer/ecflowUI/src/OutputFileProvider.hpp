@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_OutputFileProvider_HPP
-#define ecflow_viewer_OutputFileProvider_HPP
+#pragma once
 
 #include <map>
 
@@ -79,5 +78,3 @@ private:
     OutputFileFetchQueueManager* fetchManager_{nullptr};
     std::vector<VDir_ptr> dirs_;
 };
-
-#endif /* ecflow_viewer_OutputFileProvider_HPP */

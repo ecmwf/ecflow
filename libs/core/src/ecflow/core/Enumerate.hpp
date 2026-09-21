@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_Enumerate_HPP
-#define ecflow_core_Enumerate_HPP
+#pragma once
 
 #include <algorithm>
 #include <array>
@@ -147,5 +146,3 @@ public:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_core_Enumerate_HPP */

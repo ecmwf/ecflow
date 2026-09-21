@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ComboMulti_HPP
-#define ecflow_viewer_ComboMulti_HPP
+#pragma once
 
 #include <QComboBox>
 #include <QItemDelegate>
@@ -65,5 +64,3 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void itemChecked() const;
 };
-
-#endif /* ecflow_viewer_ComboMulti_HPP */

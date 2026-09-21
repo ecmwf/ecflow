@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_WhiteListFile_HPP
-#define ecflow_core_WhiteListFile_HPP
+#pragma once
 
 ///
 /// \brief Parser for whitelist file
@@ -88,5 +87,3 @@ private:
     mymap users_with_read_access_;  // user,paths
     mymap users_with_write_access_; // user,paths
 };
-
-#endif /* ecflow_core_WhiteListFile_HPP */

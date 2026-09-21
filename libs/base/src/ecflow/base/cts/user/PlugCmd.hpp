@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_user_PlugCmd_HPP
-#define ecflow_base_cts_user_PlugCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
@@ -50,5 +49,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const PlugCmd&);
 
 CEREAL_FORCE_DYNAMIC_INIT(PlugCmd)
-
-#endif /* ecflow_base_cts_user_PlugCmd_HPP */

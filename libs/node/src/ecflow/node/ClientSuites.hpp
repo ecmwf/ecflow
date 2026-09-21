@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_ClientSuites_HPP
-#define ecflow_node_ClientSuites_HPP
+#pragma once
 
 ///
 /// \brief The definition file could hold hundreds of suites, however the client
@@ -146,5 +145,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_node_ClientSuites_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TriggerGraphLayoutBuilder_HPP
-#define ecflow_viewer_TriggerGraphLayoutBuilder_HPP
+#pragma once
 
 #include <cstddef>
 #include <vector>
@@ -120,5 +119,3 @@ protected:
     std::vector<SimpleGraphLayoutNode*> nodes_;
     int focus_{0};
 };
-
-#endif /* ecflow_viewer_TriggerGraphLayoutBuilder_HPP */

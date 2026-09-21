@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ServerComQueue_HPP
-#define ecflow_viewer_ServerComQueue_HPP
+#pragma once
 
 #include <deque>
 #include <vector>
@@ -88,5 +87,3 @@ protected:
     int maxLogoutTryNo_{12};
     int logoutInterval_{10000};
 };
-
-#endif /* ecflow_viewer_ServerComQueue_HPP */

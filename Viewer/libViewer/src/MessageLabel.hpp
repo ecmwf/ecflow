@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_MessageLabel_HPP
-#define ecflow_viewer_MessageLabel_HPP
+#pragma once
 
 #include <QWidget>
 
@@ -129,5 +128,3 @@ private:
     MessageLabelProgWidget* progWidget_{nullptr};
     QString message_;
 };
-
-#endif /* ecflow_viewer_MessageLabel_HPP */

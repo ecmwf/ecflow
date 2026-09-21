@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_SslTcpServer_HPP
-#define ecflow_server_SslTcpServer_HPP
+#pragma once
 
 #include "ecflow/base/ssl_connection.hpp"
 #include "ecflow/server/TcpBaseServer.hpp"
@@ -28,5 +27,3 @@ private:
 
     void start_accept();
 };
-
-#endif /* ecflow_server_SslTcpServer_HPP */

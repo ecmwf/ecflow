@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef TEXTCODECWRAPPER_HPP
-#define TEXTCODECWRAPPER_HPP
+#pragma once
 
 #include <QString>
 
@@ -41,5 +40,3 @@ protected:
     QTextCodec* value_{nullptr};
 };
 #endif
-
-#endif // TEXTCODECWRAPPER_HPP

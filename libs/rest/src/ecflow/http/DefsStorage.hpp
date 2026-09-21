@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_http_DefsStorage_HPP
-#define ecflow_http_DefsStorage_HPP
+#pragma once
 
 #include <functional>
 
@@ -20,5 +19,3 @@ void trigger_defs_update();
 void trigger_defs_update(std::function<void()> function);
 
 } // namespace ecf::http
-
-#endif /* DefsStorage */

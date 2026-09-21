@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_Task_HPP
-#define ecflow_node_Task_HPP
+#pragma once
 
 #include "ecflow/node/Submittable.hpp"
 
@@ -127,5 +126,3 @@ private:
     unsigned int alias_no_{0};
     std::vector<alias_ptr> aliases_;
 };
-
-#endif /* ecflow_node_Task_HPP */

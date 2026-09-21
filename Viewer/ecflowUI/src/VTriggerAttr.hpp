@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VTriggerAttr_HPP
-#define ecflow_viewer_VTriggerAttr_HPP
+#pragma once
 
 #include <vector>
 
@@ -53,5 +52,3 @@ public:
     static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
     static void expressions(const VNode* vnode, std::string& trigger, std::string& complete);
 };
-
-#endif /* ecflow_viewer_VTriggerAttr_HPP */

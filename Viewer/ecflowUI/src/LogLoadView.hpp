@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_LogLoadView_HPP
-#define ecflow_viewer_LogLoadView_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -628,5 +627,3 @@ protected:
     enum ColumnOrder { NameOrder, ValueOrder };
     ColumnOrder columnOrder_;
 };
-
-#endif /* ecflow_viewer_LogLoadView_HPP */

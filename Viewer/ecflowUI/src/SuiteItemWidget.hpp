@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_SuiteItemWidget_HPP
-#define ecflow_viewer_SuiteItemWidget_HPP
+#pragma once
 
 #include <QWidget>
 
@@ -57,5 +56,3 @@ protected:
     bool columnsAdjusted_{false};
     bool edited_{false};
 };
-
-#endif /* ecflow_viewer_SuiteItemWidget_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_service_mirror_MirrorService_HPP
-#define ecflow_service_mirror_MirrorService_HPP
+#pragma once
 
 #include <optional>
 #include <string>
@@ -91,5 +90,3 @@ public:
 };
 
 } // namespace ecf::service::mirror
-
-#endif /* ecflow_service_mirror_MirrorService_HPP */

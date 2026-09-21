@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_TimeSlot_HPP
-#define ecflow_core_TimeSlot_HPP
+#pragma once
 
 #include <iosfwd>
 
@@ -68,5 +67,3 @@ private:
 std::ostream& operator<<(std::ostream& os, const TimeSlot*);
 std::ostream& operator<<(std::ostream& os, const TimeSlot&);
 } // namespace ecf
-
-#endif /* ecflow_core_TimeSlot_HPP */

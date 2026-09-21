@@ -1,5 +1,4 @@
-#ifndef WEAKPOINTER_H
-#define WEAKPOINTER_H
+#pragma once
 
 #include <qglobal.h>
 
@@ -11,6 +10,4 @@
 #else
     #include <QWeakPointer>
     #define WeakPointer QWeakPointer
-#endif
-
 #endif

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_test_harness_ZombieUtil_HPP
-#define ecflow_test_harness_ZombieUtil_HPP
+#pragma once
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/ZombieCtrlAction.hpp"
@@ -37,5 +36,3 @@ public:
 private:
     int timeout_;
 };
-
-#endif /* ecflow_test_harness_ZombieUtil_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_NodeState_HPP
-#define ecflow_node_NodeState_HPP
+#pragma once
 
 #include "ecflow/core/NState.hpp"
 
@@ -80,5 +79,3 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
 }
 
 } // namespace ecf
-
-#endif /* ecflow_node_NodeState_HPP */

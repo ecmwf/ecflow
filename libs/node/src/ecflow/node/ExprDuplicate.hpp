@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_ExprDuplicate_HPP
-#define ecflow_node_ExprDuplicate_HPP
+#pragma once
 
 ///
 /// \brief For large designs > 90% of triggers are identical.
@@ -40,5 +39,3 @@ public:
     // Add the expr to the map, the ast is cloned.
     static void add(const std::string& expr, AstTop*);
 };
-
-#endif /* ecflow_node_ExprDuplicate_HPP */

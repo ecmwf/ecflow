@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_PeriodicScheduler_HPP
-#define ecflow_server_PeriodicScheduler_HPP
+#pragma once
 
 #include <chrono>
 #include <iostream>
@@ -271,5 +270,3 @@ void PeriodicScheduler<TASK>::execute() {
 }
 
 } // namespace ecf
-
-#endif /* ecflow_server_PeriodicActivity_HPP */

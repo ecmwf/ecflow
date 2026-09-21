@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_http_test_InvokeServer_HPP
-#define ecflow_http_test_InvokeServer_HPP
+#pragma once
 
 #include <iostream>
 #include <thread>
@@ -91,5 +90,3 @@ public:
     bool server_started{false};
     bool use_http_backend_{false};
 };
-
-#endif /* ecflow_http_test_InvokeServer_HPP */

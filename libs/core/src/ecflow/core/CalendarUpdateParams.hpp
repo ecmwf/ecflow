@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_CalendarUpdateParams_HPP
-#define ecflow_core_CalendarUpdateParams_HPP
+#pragma once
 
 ///
 /// \brief Collate list of arguments used to update calendar
@@ -59,5 +58,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_core_CalendarUpdateParams_HPP */

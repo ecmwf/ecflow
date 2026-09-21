@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_test_TestVersioning_HPP
-#define ecflow_core_test_TestVersioning_HPP
+#pragma once
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
@@ -105,5 +104,3 @@ private:
 } // namespace version_change_dm_type
 
 CEREAL_CLASS_VERSION(version_change_dm_type::X, 1)
-
-#endif /* ecflow_core_test_TestVersioning_HPP */

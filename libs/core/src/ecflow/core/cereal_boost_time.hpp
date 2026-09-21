@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_cereal_boost_time_HPP
-#define ecflow_core_cereal_boost_time_HPP
+#pragma once
 
 #include <cereal/archives/json.hpp>
 #include <cereal/details/traits.hpp>
@@ -57,5 +56,3 @@ inline void load(Archive& ar, boost::gregorian::date& d) {
 }
 
 } // namespace cereal
-
-#endif /* ecflow_core_cereal_boost_time_HPP */

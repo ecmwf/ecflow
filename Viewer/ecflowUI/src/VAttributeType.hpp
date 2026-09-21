@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VAttributeType_HPP
-#define ecflow_viewer_VAttributeType_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -55,5 +54,3 @@ private:
     static std::map<std::string, VAttributeType*> typesMap_;
     static std::vector<VAttributeType*> types_;
 };
-
-#endif /* ecflow_viewer_VAttributeType_HPP */

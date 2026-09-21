@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_ecflow_version_config_H
-#define ecflow_core_ecflow_version_config_H
+#pragma once
 
 // clang-format off
 #define ECFLOW_VERSION        "@ecflow_VERSION@"
@@ -16,5 +15,3 @@
 // PROJECT_VERSION_MAJOR=@PROJECT_VERSION_MAJOR@
 // PROJECT_VERSION_MINOR=@PROJECT_VERSION_MINOR@
 // PROJECT_VERSION_PATCH=@PROJECT_VERSION_PATCH@
-
-#endif /* ecflow_core_ecflow_version_config_H */

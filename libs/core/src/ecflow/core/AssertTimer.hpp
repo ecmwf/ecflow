@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_AssertTimer_HPP
-#define ecflow_core_AssertTimer_HPP
+#pragma once
 
 ///
 /// \brief Simple class that asserts when a time constraint is not met
@@ -35,5 +34,3 @@ private:
 };
 
 } // namespace ecf
-
-#endif /* ecflow_core_AssertTimer_HPP */

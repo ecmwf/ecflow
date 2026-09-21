@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_VNState_HPP
-#define ecflow_viewer_VNState_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -54,5 +53,3 @@ private:
     static std::map<std::string, VNState*> items_;
     unsigned char ucId_{0};
 };
-
-#endif /* ecflow_viewer_VNState_HPP */

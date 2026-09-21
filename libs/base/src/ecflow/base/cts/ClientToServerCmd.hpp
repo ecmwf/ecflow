@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_ClientToServerCmd_HPP
-#define ecflow_base_cts_ClientToServerCmd_HPP
+#pragma once
 
 #include <boost/program_options.hpp>
 
@@ -265,5 +264,3 @@ private:
 /// @return The prefix, ending with a single trailing space
 ///
 std::string failed_request_prefix(const ClientToServerCmd& request);
-
-#endif /* ecflow_base_cts_ClientToServerCmd_HPP */

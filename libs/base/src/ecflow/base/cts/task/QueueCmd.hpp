@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_task_QueueCmd_HPP
-#define ecflow_base_cts_task_QueueCmd_HPP
+#pragma once
 
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 
@@ -67,5 +66,3 @@ private:
 };
 
 CEREAL_FORCE_DYNAMIC_INIT(QueueCmd)
-
-#endif /* ecflow_base_cts_task_QueueCmd_HPP */

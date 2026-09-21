@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_SslClient_HPP
-#define ecflow_base_SslClient_HPP
+#pragma once
 
 ///
 /// \brief This class acts as the client part. ( in client/server architecture)
@@ -108,5 +107,3 @@ private:
     ecf::ConnectionDiagnosis owned_diagnosis_; /// Used when the caller provides no storage
     ecf::ConnectionDiagnosis& diagnosis_;      /// The diagnosis of the exchange, populated on failure
 };
-
-#endif /* ecflow_base_SslClient_HPP */

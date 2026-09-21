@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_test_scaffold_Naming_HPP
-#define ecflow_test_scaffold_Naming_HPP
+#pragma once
 
 #include <algorithm>
 #include <chrono>
@@ -108,5 +107,3 @@ inline std::string describe_current_test() {
         std::cerr << " +++ " << ARGS << std::endl; \
     } while (0)
 // NOLINTEND(bugprone-macro-parentheses)
-
-#endif /* ecflow_test_scaffold_Naming_HPP */

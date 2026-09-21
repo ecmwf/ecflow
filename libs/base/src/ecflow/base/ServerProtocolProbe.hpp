@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ServerProtocolProbe_HPP
-#define ecflow_base_ServerProtocolProbe_HPP
+#pragma once
 
 #include <chrono>
 #include <optional>
@@ -79,5 +78,3 @@ bool probes_as_http(const std::string& scheme,
                     std::chrono::milliseconds timeout);
 
 } // namespace ecf
-
-#endif /* ecflow_base_ServerProtocolProbe_HPP */

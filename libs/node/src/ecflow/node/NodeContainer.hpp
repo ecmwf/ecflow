@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_node_NodeContainer_HPP
-#define ecflow_node_NodeContainer_HPP
+#pragma once
 
 ///
 /// \brief The NodeContainer class holds families and tasks
@@ -151,5 +150,3 @@ protected:
     unsigned int order_state_change_no_{0};      // no need to persist
     unsigned int add_remove_state_change_no_{0}; // no need to persist
 };
-
-#endif /* ecflow_node_NodeContainer_HPP */

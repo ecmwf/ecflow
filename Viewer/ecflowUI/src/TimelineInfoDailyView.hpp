@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TimelineInfoDailyView_HPP
-#define ecflow_viewer_TimelineInfoDailyView_HPP
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QDialog>
@@ -142,5 +141,3 @@ protected:
     QTime startTime_;
     QTime endTime_;
 };
-
-#endif /* ecflow_viewer_TimelineInfoDailyView_HPP */

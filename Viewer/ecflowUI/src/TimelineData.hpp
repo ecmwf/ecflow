@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_TimelineData_HPP
-#define ecflow_viewer_TimelineData_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -126,5 +125,3 @@ protected:
     QHash<QString, size_t> pathHash_;
     std::vector<size_t> sortIndex_;
 };
-
-#endif /* ecflow_viewer_TimelineData_HPP */

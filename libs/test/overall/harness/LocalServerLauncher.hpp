@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_test_harness_LocalServerLauncher_HPP
-#define ecflow_test_harness_LocalServerLauncher_HPP
+#pragma once
 
 #include <cassert>
 #include <string>
@@ -55,5 +54,3 @@ private:
     bool use_http_           = false;
     int submission_interval_ = job_submission_interval();
 };
-
-#endif /* ecflow_test_harness_LocalServerLauncher_HPP */

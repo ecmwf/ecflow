@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ServerReply_HPP
-#define ecflow_base_ServerReply_HPP
+#pragma once
 
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
@@ -170,5 +169,3 @@ private:
 
     ecf::ConnectionDiagnosis diagnosis_; // clear at the start of invoke
 };
-
-#endif /* ecflow_base_ServerReply_HPP */

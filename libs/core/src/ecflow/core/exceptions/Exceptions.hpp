@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_exceptions_Exceptions_HPP
-#define ecflow_core_exceptions_Exceptions_HPP
+#pragma once
 
 #include <stdexcept>
 
@@ -34,5 +33,3 @@ struct InvalidArgument : public Exception
     } while (0)
 
 #define THROW_RUNTIME(message) THROW_EXCEPTION(std::runtime_error, message)
-
-#endif /* ecflow_core_exceptions_Exceptions_HPP */

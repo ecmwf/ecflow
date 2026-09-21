@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_ZombieCtrl_HPP
-#define ecflow_base_ZombieCtrl_HPP
+#pragma once
 
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/Cmd.hpp"
@@ -127,5 +126,3 @@ private:
 private:
     std::vector<Zombie> zombies_;
 };
-
-#endif /* ecflow_base_ZombieCtrl_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_CtsCmdRegistry_HPP
-#define ecflow_base_cts_CtsCmdRegistry_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -84,5 +83,3 @@ private:
     ///
     void rejectForeignModifiers(const std::string& matched_arg, const boost::program_options::variables_map& vm) const;
 };
-
-#endif /* ecflow_base_cts_CtsCmdRegistry_HPP */

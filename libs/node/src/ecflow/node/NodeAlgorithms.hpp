@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#pragma once
+
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAstVisitor.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Task.hpp"
-
-#ifndef ecflow_node_NodeAlgorithms_HPP
-    #define ecflow_node_NodeAlgorithms_HPP
 
 namespace ecf {
 
@@ -180,5 +179,3 @@ void ensure_all_mirrors_are_valid(const Defs& defs, std::string_view host, std::
 void ensure_all_mirrors_are_valid(const Node& node, std::string_view host, std::string_view port);
 
 } // namespace ecf
-
-#endif /* ecflow_node_NodeAlgorithms_HPP */

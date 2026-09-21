@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_http_test_TokenFile_HPP
-#define ecflow_http_test_TokenFile_HPP
+#pragma once
 
 #include <array>
 #include <iomanip>
@@ -156,5 +155,3 @@ inline std::string TokenFile::hmac_sha256(const std::string& salt, const std::st
 
     return ss.str();
 }
-
-#endif /* #ifndef ecflow_http_test_TokenFile_HPP */

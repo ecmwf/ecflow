@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_service_aviso_Aviso_HPP
-#define ecflow_service_aviso_Aviso_HPP
+#pragma once
 
 #include <cstdint>
 #include <optional>
@@ -270,5 +269,3 @@ private:
 };
 
 } // namespace ecf::service::aviso
-
-#endif /* ecflow_service_aviso_Aviso_HPP */

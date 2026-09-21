@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_NOrder_HPP
-#define ecflow_core_NOrder_HPP
+#pragma once
 
 #include <string>
 
@@ -16,5 +15,3 @@ public:
     static NOrder::Order toOrder(const std::string&);
     static bool isValid(const std::string& order);
 };
-
-#endif /* ecflow_core_NOrder_HPP */

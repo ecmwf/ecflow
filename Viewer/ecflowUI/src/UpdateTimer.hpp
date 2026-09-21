@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_UpdateTimer_HPP
-#define ecflow_viewer_UpdateTimer_HPP
+#pragma once
 
 #include <QTimer>
 
@@ -12,5 +11,3 @@ public:
         : QTimer(parent) {}
     void drift(int, int);
 };
-
-#endif /* ecflow_viewer_UpdateTimer_HPP */

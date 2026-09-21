@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_NodeSearchWidget_HPP
-#define ecflow_viewer_NodeSearchWidget_HPP
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QDialog>
@@ -59,5 +58,3 @@ private:
     bool columnsAdjusted_{false};
     QElapsedTimer elapsed_;
 };
-
-#endif /* ecflow_viewer_NodeSearchWidget_HPP */

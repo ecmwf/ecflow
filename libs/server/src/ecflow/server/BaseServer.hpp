@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_server_BaseServer_HPP
-#define ecflow_server_BaseServer_HPP
+#pragma once
 
 #include <boost/asio.hpp>
 
@@ -99,5 +98,3 @@ protected:
     ServerEnvironment& serverEnv_;
     std::string userWhoHasLock_;
 };
-
-#endif /* ecflow_server_BaseServer_HPP */

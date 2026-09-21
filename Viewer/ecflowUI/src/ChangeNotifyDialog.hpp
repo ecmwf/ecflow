@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ChangeNotifyDialog_HPP
-#define ecflow_viewer_ChangeNotifyDialog_HPP
+#pragma once
 
 #include <QDialog>
 #include <QLinearGradient>
@@ -107,5 +106,3 @@ protected:
     QHBoxLayout* buttonHb_;
     VProperty* switchWsProp_{nullptr};
 };
-
-#endif /* ecflow_viewer_ChangeNotifyDialog_HPP */

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGEREDIT_HPP__
-#define TEXTPAGEREDIT_HPP__
+#pragma once
 
 #include <QAbstractScrollArea>
 #include <QtGui>
@@ -227,5 +226,3 @@ private:
     QColor separatorCol_;
     QColor currentCol_;
 };
-
-#endif

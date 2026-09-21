@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_python_Edit_HPP
-#define ecflow_python_Edit_HPP
+#pragma once
 
 #include <vector>
 
@@ -23,5 +22,3 @@ public:
 private:
     std::vector<Variable> vec_;
 };
-
-#endif /* ecflow_python_Edit_HPP */

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_core_PasswordEncryption_HPP
-#define ecflow_core_PasswordEncryption_HPP
+#pragma once
 
 ///
 /// \brief Provides a generic password encryption mechanism + specific POSIX implementation
@@ -40,5 +39,3 @@ struct BasePasswordEncryption
 };
 
 using PasswordEncryption = BasePasswordEncryption<PosixEncryption>;
-
-#endif /* ecflow_core_PasswordEncryption_HPP */

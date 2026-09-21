@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_ServerObserver_HPP
-#define ecflow_viewer_ServerObserver_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,5 +27,3 @@ public:
     virtual void notifyEndServerSync(ServerHandler*) {}
     virtual void notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/) {}
 };
-
-#endif /* ecflow_viewer_ServerObserver_HPP */

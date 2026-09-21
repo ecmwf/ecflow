@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_base_cts_DefsCache_HPP
-#define ecflow_base_cts_DefsCache_HPP
+#pragma once
 
 #include "ecflow/node/NodeFwd.hpp"
 
@@ -54,5 +53,3 @@ private:
     static unsigned int state_change_no_;  // detect state change in defs across clients
     static unsigned int modify_change_no_; // detect state change in defs across clients
 };
-
-#endif /* ecflow_base_cts_DefsCache_HPP */

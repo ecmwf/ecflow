@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ecflow_viewer_StringMatchCombo_HPP
-#define ecflow_viewer_StringMatchCombo_HPP
+#pragma once
 
 #include <QComboBox>
 #include <QToolButton>
@@ -24,5 +23,3 @@ public:
     StringMatchMode::Mode currentMatchMode() const;
     void setMatchMode(const StringMatchMode& mode);
 };
-
-#endif /* ecflow_viewer_StringMatchCombo_HPP */

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERDOCUMENT_P_HPP__
-#define TEXTPAGERDOCUMENT_P_HPP__
+#pragma once
 
 #include <QApplication>
 #include <QDebug>
@@ -110,9 +109,9 @@ struct Chunk
     mutable int firstLineIndex;
 #ifdef TEXTDOCUMENT_LINENUMBER_CACHE
     mutable QVector<int> lineNumbers;
-        // format is how many endlines in the area from (n *
-        // TEXTDOCUMENT_LINENUMBER_CACHE_INTERVAL) to
-        // ((n + 1) * TEXTDOCUMENT_LINENUMBER_CACHE_INTERVAL)
+    // format is how many endlines in the area from (n *
+    // TEXTDOCUMENT_LINENUMBER_CACHE_INTERVAL) to
+    // ((n + 1) * TEXTDOCUMENT_LINENUMBER_CACHE_INTERVAL)
 #else
     mutable int lines;
 #endif
@@ -362,7 +361,7 @@ public:
         ASSUME(doc->q->readCharacter(pos) == chunkData.at(offset));
     #endif
         return convert ? chunkData.at(offset).toLower() : chunkData.at(offset);
-            // return convert ? chunkData[offset].toLower() : chunkData[offset];
+        // return convert ? chunkData[offset].toLower() : chunkData[offset];
 #else
         return convert ? doc->q->readCharacter(pos).toLower() : doc->q->readCharacter(pos);
 #endif
@@ -433,7 +432,7 @@ public:
         Q_ASSERT(doc);
 
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                // qDebug() << "prevLine --->" << pos << offset;  //<< chunkData;
+            // qDebug() << "prevLine --->" << pos << offset;  //<< chunkData;
     #endif
 
         // If we are at the start
@@ -476,9 +475,9 @@ public:
 
         // We will go backwards until we find a newline
         while (*data != newline) {
-                // Q_ASSERT(*data  == chunkData.at(offset));
+            // Q_ASSERT(*data  == chunkData.at(offset));
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                    // qDebug() << pos << offset << chunkData.at(offset) << to;
+                // qDebug() << pos << offset << chunkData.at(offset) << to;
     #endif
             if (pos <= min) {
                 if (to != offset) {
@@ -515,7 +514,7 @@ public:
                 to = offset;
 
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                        // qDebug() << "change" << pos << offset << *data << chunkData.at(offset);
+                    // qDebug() << "change" << pos << offset << *data << chunkData.at(offset);
     #endif
             }
             else {
@@ -524,7 +523,7 @@ public:
         }
 
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                // qDebug() << pos << offset << to;
+            // qDebug() << pos << offset << to;
     #endif
 
         // offset is either a newline charter or 0 (the start of the document)
@@ -540,7 +539,7 @@ public:
 #endif
 
 #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-            // qDebug() << "line:" << str;
+        // qDebug() << "line:" << str;
 #endif
 
         return 1;
@@ -555,7 +554,7 @@ public:
         Q_ASSERT(doc);
 
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                // qDebug() << "nextLine --->" << pos << offset << chunkData.size() << chunkData.at(offset);
+            // qDebug() << "nextLine --->" << pos << offset << chunkData.size() << chunkData.at(offset);
     #endif
         int posEnd = end();
         if (pos >= posEnd) {
@@ -603,7 +602,7 @@ public:
         // We will go forward until we find a newline
         while (*data != newline) {
     #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-                    // qDebug() << pos << offset << chunkData.at(offset);
+                // qDebug() << pos << offset << chunkData.at(offset);
     #endif
             if (pos >= posEnd) {
                 if (str.size() == 0) {
@@ -658,7 +657,7 @@ public:
 #endif
 
 #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
-            // qDebug() << "line:" << str;
+        // qDebug() << "line:" << str;
 #endif
 
         return 1;
@@ -712,5 +711,3 @@ private:
     bool convert;
     const QChar newline;
 };
-
-#endif

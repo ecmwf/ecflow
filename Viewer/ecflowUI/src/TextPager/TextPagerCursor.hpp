@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TEXTPAGERCURSOR_HPP__
-#define TEXTPAGERCURSOR_HPP__
+#pragma once
 
 #include <QKeyEvent>
 #include <QSize>
@@ -129,5 +128,3 @@ private:
 };
 
 QDebug operator<<(QDebug dbg, const TextPagerCursor& cursor);
-
-#endif
