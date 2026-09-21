@@ -4,6 +4,7 @@
 #ifndef ecflow_core_CommandLine_HPP
 #define ecflow_core_CommandLine_HPP
 
+#include <iterator>
 #include <ostream>
 #include <string>
 #include <vector>

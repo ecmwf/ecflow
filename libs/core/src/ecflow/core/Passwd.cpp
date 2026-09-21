@@ -4,6 +4,7 @@
 #include "ecflow/core/Passwd.hpp"
 
 #include <array>
+#include <cstdlib>
 #include <ctime>
 #include <unistd.h>
 

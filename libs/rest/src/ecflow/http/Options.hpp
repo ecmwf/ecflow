@@ -4,6 +4,7 @@
 #ifndef ecflow_http_Options_HPP
 #define ecflow_http_Options_HPP
 
+#include <cstdlib>
 #include <string>
 
 namespace ecf::http {
