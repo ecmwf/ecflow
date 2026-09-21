@@ -3,15 +3,6 @@
 SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 SPDX-License-Identifier: Apache-2.0
 #}
-{% block sbatch %}
-#SBATCH --qos=nf
-#SBATCH --gres=ssdtmp:30G
-#SBATCH --mem=64GB
-#SBATCH --time=01:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
-{% endblock %}
 {% block preflight %}
 {{ super() }}
 # Boost and Python come from cluster modules (Boost.Python is linked against a
