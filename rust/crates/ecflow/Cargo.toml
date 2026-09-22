@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "ecflow"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+description = "Safe Rust client for ECMWF's ecFlow workflow manager"
+
+[features]
+default = ["ssl"]
+# Build ecFlow with OpenSSL support.
+ssl = ["ecflow-sys/ssl"]
+
+[dependencies]
+ecflow-sys.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[package.metadata.docs.rs]
