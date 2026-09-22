@@ -29,9 +29,11 @@ Building requires CMake, a C++17 compiler, Git and Boost 1.66 or newer with its
 development headers. OpenSSL is needed for the default `ssl` feature. ecbuild
 is cloned during the build unless `ECBUILD_DIR` points at a checkout.
 
-On macOS with Homebrew, `brew install boost openssl@3` is enough; the build
-script finds both under `/opt/homebrew/opt`. Elsewhere, point `BOOST_ROOT`,
-`OPENSSL_ROOT_DIR` or `CMAKE_PREFIX_PATH` at the installations.
+`BOOST_ROOT` must point at the Boost install prefix, as for any ecFlow build:
+
+```sh
+BOOST_ROOT=$(brew --prefix boost) cargo build
+```
 
 ## Crates
 
