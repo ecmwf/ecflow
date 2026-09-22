@@ -1,9 +1,9 @@
 suite label_spaces
    family f
       task t
-      
+
       	label foo ""
-      	
+
       	label fred ""
     endfamily
 endsuite

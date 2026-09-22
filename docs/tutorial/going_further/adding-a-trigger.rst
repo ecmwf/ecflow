@@ -4,8 +4,8 @@
 .. index::
    single: trigger (tutorial)
 
-.. _tutorial-add-trigger:  
-   
+.. _tutorial-add-trigger:
+
 Adding a trigger
 ================
 

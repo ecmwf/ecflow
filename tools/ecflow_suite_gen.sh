@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 exec 3> /dev/stdout
-commands="   autocancel   
-clock        complete     cron         date         day          defstatus    
-edit         endfamily    endsuite     endtask      event        extern       
-family       inlimit      label        late         limit        meter        
+commands="   autocancel
+clock        complete     cron         date         day          defstatus
+edit         endfamily    endsuite     endtask      event        extern
+family       inlimit      label        late         limit        meter
 repeat       suite        task              time    today        trigger      "
 
 # enable -n time || : # shell builtin removed
@@ -30,7 +30,7 @@ tot=10
 family ensemble
 limit  lim 5
 inlimit ensemble:lim
-while (( num <= tot)); do 
+while (( num <= tot)); do
   family $(printf "%02d" $num)
     task model; edit MEMBER $num; (( num += 1))
   endfamily
@@ -38,8 +38,8 @@ done
 endfamily
 
 family process
-  for param in "z" "u" "v" "t" "q"; do 
-    task $param; edit PARAM $param; 
+  for param in "z" "u" "v" "t" "q"; do
+    task $param; edit PARAM $param;
   done
 endfamily # process
 
@@ -47,7 +47,7 @@ family seq
   for num in $(seq 1 9); do
     family $(printf "%02d" $num)
       task model; edit MEMBER $num; (( num += 1))
-    endfamily  
+    endfamily
   done
 endfamily
 }
@@ -105,7 +105,7 @@ suite $SUITE_NAME
 
   task day
     day monday
-  
+
   family fam
     time 12:00
     date "1.*.*"

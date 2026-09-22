@@ -3,7 +3,7 @@
 
 .. index::
    single: Python (tutorial)
-  
+
 .. _tutorial-using-python-scripting:
 
 Using python scripting
@@ -19,10 +19,10 @@ As you have already seen, ecFlow has a :ref:`python_api`:
 
 .. code-block:: python
 
-    import ecflow    
+    import ecflow
 
 
-This allows the :term:`suite definition` to be built with python. It also allows communication with the :term:`ecflow_server`.  
+This allows the :term:`suite definition` to be built with python. It also allows communication with the :term:`ecflow_server`.
 
 This is a very powerful feature, that helps to define very complex suites in a relatively compact way. Consider the following :term:`suite`:
 
@@ -72,8 +72,8 @@ This is a very powerful feature, that helps to define very complex suites in a r
         task e
     endfamily
    endsuite
-                
-                
+
+
 This can be written in python as:
 
 .. code-block:: python

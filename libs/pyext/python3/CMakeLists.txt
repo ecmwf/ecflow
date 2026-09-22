@@ -39,7 +39,7 @@ set(ECFLOW_PYTHONPATH ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "Path to find e
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
 # had no effect
-#         
+#
 # by default cmake add prefix 'lib', we don't want this hence disable
 #
 # To avoid duplicate target names we chose to name the targets: ecflow2/ecflow3.
@@ -156,7 +156,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
         u_base
     )
   endforeach()
-  
+
   set_property(TEST py3_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
   set_property(TEST py3_s_TestPythonChildApi APPEND PROPERTY DEPENDS py3_s_TestClientApi)
 endif()

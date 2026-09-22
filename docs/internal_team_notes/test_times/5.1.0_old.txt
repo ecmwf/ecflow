@@ -1,5 +1,5 @@
 ##########################################################################
-# Changes after using -wpadded to ensure alignment. 
+# Changes after using -wpadded to ensure alignment.
 # Big performance improvements. perf shows with aligned data members we get:
 #
 # 1/ Drastic drop in task-clock      3161.641425 -> 1976.067513
@@ -24,8 +24,8 @@ PERF
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 50.92% )
            144,402      page-faults               #    0.073 M/sec                    ( +-  0.12% )
      7,660,607,774      cycles                    #    3.877 GHz                      ( +-  0.07% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     16,500,975,808      instructions              #    2.15  insns per cycle          ( +-  0.00% )
      4,099,656,396      branches                  # 2074.654 M/sec                    ( +-  0.00% )
         11,703,135      branch-misses             #    0.29% of all branches          ( +-  0.74% )
@@ -61,7 +61,7 @@ sys 0m0.13s
  Time for Defs::check(inlimit resolution)    = 0.05472 result(1)
  time for deleting all nodes                 = 0.256552
  Total elapsed time = 10 seconds
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time     = 1.20136 parse(1)
  Parsing Node tree *only* time               = 1.20124 parse(1)
@@ -77,7 +77,7 @@ sys 0m0.13s
  Time for Defs::check(inlimit resolution)    = 0.521291 result(0)
  time for deleting all nodes                 = 0.363313
  Total elapsed time = 18 seconds
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3160)

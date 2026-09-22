@@ -8,11 +8,11 @@ import getopt
 try: import ecflow
 except:
         sys.path.append("/usr/local/apps/ecflow/current/lib/python2.7/site-packages/ecflow")
-        import ecflow 
+        import ecflow
 import ecflow  as ec
 import os
 import sys
-""" a simple program to convert an expanded definition file to 
+""" a simple program to convert an expanded definition file to
 py script using ecf.py"""
 
 class Indent:
@@ -29,32 +29,32 @@ class Indent:
     def indent(cls, loc=''):
         out = ''
         for i in range(Indent._pos):
-            if loc is None: 
-                out += ' ' 
-            elif type(loc) == str: 
+            if loc is None:
+                out += ' '
+            elif type(loc) == str:
                 loc += ' '
-            else: 
+            else:
                 loc.write(' ')
-        if type(loc) == str: 
+        if type(loc) == str:
             return loc
         return out
 
 def adds(line=0):
-    if line is None: 
+    if line is None:
         return ""
 
     return Indent.indent() + line + "\n"
 
 def add(line, echo=0):
-    if line is None: 
+    if line is None:
         return ""
-    elif echo: 
-            return Indent.indent() + line 
-    else: 
+    elif echo:
+            return Indent.indent() + line
+    else:
             return Indent.indent() + line + "\n"
 
 class DefFormat(object):
-    def __init__(self, defs): 
+    def __init__(self, defs):
         self.defs = defs
 
     def process_attr(self, node, end=False):
@@ -62,18 +62,18 @@ class DefFormat(object):
         res = ""
         ind = Indent()
         defstatus = node.get_defstatus()
-        if defstatus: 
+        if defstatus:
             if defstatus != ec.DState.queued:
                 res += add("Defstatus('%s')," % defstatus)
 
         item = node.get_autocancel()
-        if item: 
+        if item:
             line = "%s" % item
             line = line.replace("autocancel ", "")
             res += add("Autocancel('%s')," % line)
 
         item = node.get_repeat()
-        if not item.empty(): 
+        if not item.empty():
             line = "%s" % item
             full = line.split()
             kind = full[1]
@@ -89,11 +89,11 @@ class DefFormat(object):
 
             if kind in ("integer", "date"):
                 res += add(
-                    "Repeat(kind='%s', name='%s', start=%s, end=%s, step=%s)," 
+                    "Repeat(kind='%s', name='%s', start=%s, end=%s, step=%s),"
                     % ( kind, name, beg, end, by))
             elif kind in ("day", ):
                 res += add(
-                    "Repeat(kind='%s', name='%s', step=%s)," 
+                    "Repeat(kind='%s', name='%s', step=%s),"
                     % ( kind, name, by))
             elif kind in ("string", "enumerated"):
                 line = "%s" % item
@@ -104,7 +104,7 @@ class DefFormat(object):
              # FIXME string enum
 
         item = node.get_late()
-        if item: 
+        if item:
             line = "%s" % item
             line = line.replace("late ", "")
             res +=  add("Late('%s')," % line)
@@ -113,25 +113,25 @@ class DefFormat(object):
         if item: res += add("Complete('%s')," % item)
 
         item = node.get_trigger()
-        if item: 
+        if item:
             res += add("Trigger('%s')," % item)
 
-        for item in node.meters: 
+        for item in node.meters:
             line = "%s" % item
             dummy, name, beg, end, thr = line.split(" ")
             res += add("Meter('%s', %s, %s, %s)," % (name, beg, end, thr))
 
-        for item in node.events: 
+        for item in node.events:
             line = "%s" % item
             line = line.replace("event ", "").strip()
             res += add("Event('%s')," % line)
 
-        for item in node.labels: 
+        for item in node.labels:
             res += add("Label('%s', '%s')," % (item.name(), item.value()))
 
-        for item in node.limits: 
+        for item in node.limits:
             val = item.value()
-            if val == "0" or val == 0: 
+            if val == "0" or val == 0:
                 val = "1"
             res += add("Limit('%s', %d)," % (
                     item.name(), int(val)))
@@ -141,45 +141,45 @@ class DefFormat(object):
             line = line.replace("inlimit ", "")
             res += add("InLimit('%s')," % line)
 
-        for item in node.times:  
+        for item in node.times:
             line = "%s" % item
             line = line.replace("time ", "")
-            res += add("Time('%s')," % line)  
+            res += add("Time('%s')," % line)
 
-        for item in node.todays: 
+        for item in node.todays:
             line = "%s" % item
             line = line.replace("today ", "")
-            res += add("Today('%s')," % line) 
+            res += add("Today('%s')," % line)
 
-        for item in node.dates:  
+        for item in node.dates:
             line = "%s" % item
-            line = line.replace("date ", "")            
-            res += add("Date('%s')," % line)  
+            line = line.replace("date ", "")
+            res += add("Date('%s')," % line)
 
-        for item in node.days:   
+        for item in node.days:
             line = "%s" % item
-            line = line.replace("day ", "")            
-            
-            res += add("Day('%s')," % item)   
-        for item in node.crons:  
+            line = line.replace("day ", "")
+
+            res += add("Day('%s')," % item)
+        for item in node.crons:
             line = "%s" % item
-            line = line.replace("cron ", "")            
-            res += add("Cron('%s')," % line)  
+            line = line.replace("cron ", "")
+            res += add("Cron('%s')," % line)
 
         var = "Variables("
-        vind = Indent()            
+        vind = Indent()
         num = 0
-        for item in node.variables: 
+        for item in node.variables:
             sep="'"
             if sep in item.value(): sep="\""
             var += ind.indent("\n") + item.name() + \
                 "= %s%s%s," % (sep, item.value(), sep)
             num += 1
-        del vind        
+        del vind
         if num: res += add(var + "),")
 
         del ind
-        if len(res) == 0: 
+        if len(res) == 0:
             return None
         return res
 
@@ -198,23 +198,23 @@ class DefFormat(object):
                 num += 1
             else: out += "#WAR no suite to process"
 
-            if num > 1: 
+            if num > 1:
                 if 0: raise BaseException("no more than one suite at a time")
                 out += "### WARNING: more than one suite defined"
 
-        elif isinstance(node, ec.Suite): 
+        elif isinstance(node, ec.Suite):
             if not STREAM: out += "s.add(\n"
             add( self.process_attr(node),1 )
             if STREAM: ind = Indent()
             for kid in node.nodes: out += self.process(kid)
             if STREAM: del ind
 
-        elif isinstance(node, ec.Family): 
+        elif isinstance(node, ec.Family):
             many = ""; one = ""; post = "" # circumvent limitation to 255 items
-            if inc % 200 == 0: 
+            if inc % 200 == 0:
                 one += "("; post = "),"
                 if inc > 200: many = "),"
-            if STREAM: 
+            if STREAM:
                 add( many + one + "Family('%s').add(" % node.name(), 1)
                 res = self.process_attr(node)
             else:
@@ -222,20 +222,20 @@ class DefFormat(object):
                 out += "fam.add(cur); fam = cur; fam.add("
                 res = self.process_attr(node)
 
-            if STREAM: 
-                if res is not None: 
+            if STREAM:
+                if res is not None:
                         out += Indent.indent(res) # add(res, 1)
                 ind = Indent()
             num = 0
             for kid in node.nodes: self.process(kid, num)            ; num += 1
-            if STREAM: 
+            if STREAM:
                 del ind
                 add( Indent.indent(post + "), # endfamily %s" % node.name()), 1 )
             out += "# %s " % num
 
-        elif isinstance(node, ec.Task): 
+        elif isinstance(node, ec.Task):
             res = self.process_attr(node)
-            if res is None:  
+            if res is None:
                 add( "Task('%s')," % node.name(), 1)
                 # print Indent.indent("Task('%s')," % node.name())
             else: add( "Task('%s').add(\n" % node.name() +
@@ -263,9 +263,9 @@ import ecf  as ecf
 
 if __name__ == '__main__':
     defs = Defs()
-    defs.add(suite0); 
+    defs.add(suite0);
     defs.auto_add_externs(True)
-    if 1: 
+    if 1:
       import cli_proc, ecf
       cli_proc.process(ie.Seed(defs), compare=False)
     else:
@@ -273,7 +273,7 @@ if __name__ == '__main__':
        node = "localhost"
        path = '/' + suite0.name()
        if 0: # test job creation
-         job_ctrl = ecflow.JobCreationCtrl()                    
+         job_ctrl = ecflow.JobCreationCtrl()
          defs.check_job_creation(job_ctrl)
 
        print "replacing %s on %s@%s" % (path, node, port)
@@ -311,7 +311,7 @@ def test(quiet=1):
                 num += 1
 
 def process(desc=None, path=None, fname=None):
-        if desc is not None: 
+        if desc is not None:
                 import tempfile
                 print("#desc: ", desc) # , "\n"
                 # import unicodedata
@@ -330,13 +330,13 @@ def process(desc=None, path=None, fname=None):
                                 # defs = ec.Defs(temp.name)
                                 # if DEBUG: print defs
                                 return process(fname= temp.name)
-                except RuntimeError as e:    
+                except RuntimeError as e:
                         out = "#WAR: failed: " + str(e)
                         # print "temp, NOK"; sys.exit(1)
                         print(out)
                         return out
                 # return "%s" % defs
-        elif path is not None: 
+        elif path is not None:
                 import re
                 node, rem = path.split("@")
                 port, suite = rem.split('/')[0:2]
@@ -375,5 +375,5 @@ if __name__ == '__main__':
                 if o in ("-q", "quiet"): QUIET = 1
 
         print(process(desc, path, fname))
-# ./def2def.py -q -t 
-# ./def2def.py -t 
+# ./def2def.py -q -t
+# ./def2def.py -t

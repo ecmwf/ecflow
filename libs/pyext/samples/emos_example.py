@@ -11,7 +11,7 @@ defs.suite("test").add(
     Variables(ECF_HOME= os.path.join(os.getenv("HOME"), "course")),
     Task("t1"))
 print defs
-print "Checking job creation: .ecf -> .job0"  
+print "Checking job creation: .ecf -> .job0"
 print defs.check_job_creation()
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -23,16 +23,16 @@ import os
 from ecf import *
 
 def generate():
-    # print "Creating suite definition"  
+    # print "Creating suite definition"
     return Defs().add(
         Suite("test").add(
             Variables(ECF_HOME= os.path.join(os.getenv("HOME"),  "course")),
             Task("t1")))
- 
+
 if __name__ == '__main__':
-    defs = generate()      
+    defs = generate()
     print defs
-    print "Checking job creation: .ecf -> .job0"  
+    print "Checking job creation: .ecf -> .job0"
     print defs.check_job_creation()
     print "Saving definition to file 'test.def'"
     defs.save_as_defs("test.def")
@@ -40,25 +40,25 @@ if __name__ == '__main__':
         print "Load the in memory definition(defs) into the server"
         Client("localhost@%s" % os.getenv("ECF_PORT")).load(defs)
     except RuntimeError as e: print "Failed:", e
-        
+
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # families
 #!/usr/bin/env python2.7
 import os
 from ecf import *
-print "Creating suite definition"  
+print "Creating suite definition"
 defs = Defs().add(Suite("test").add(
     Variable("ECF_HOME", os.path.join(os.getenv("HOME"),  "course")),
     Family("f1").add(
       Task("t1"),
       Task("t2"))))
 print defs
-print "Checking job creation: .ecf -> .job0"  
+print "Checking job creation: .ecf -> .job0"
 print defs.check_job_creation()
 print "Saving definition to file 'test.def'"
 defs.save_as_defs("test.def")
-print "Client -> Server: delete, then load a new definition"  
+print "Client -> Server: delete, then load a new definition"
 try:
     ci = Client()
     ci.replace("/test", "test.def") # replace the suite into the server
@@ -73,17 +73,17 @@ except RuntimeError as e:
 import os
 from ecf import *
 home = os.path.join(os.getenv("HOME"), "course")
- 
+
 def create_family_f1():
     return Family("f1" ).add(
         Task("t1").add(Variables(SLEEP= 20)),
         Task("t2").add(Variables(SLEEP= 20)))
- 
+
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
     create_family_f1() ))
- 
+
 print defs
 defs.save_as_defs("test.def")
 
@@ -141,7 +141,7 @@ def create_family_f1():
             Trigger(["t1"]),
             Event("a"),
             Event("b")),
-     
+
         Task("t3").add(Trigger("t2:a")),
         Task("t4").add(Trigger("t2:b")),
     )
@@ -169,10 +169,10 @@ def create_family_f1():
                        Event("a"),
                        Event("b")),
         Task("t3").add(Trigger("t2:a")),
-        Task("t4").add(Trigger("t2 eq complete"), 
+        Task("t4").add(Trigger("t2 eq complete"),
                        Complete("t2:b")  ))
-       
-print "Creating suite definition"  
+
+print "Creating suite definition"
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -191,21 +191,21 @@ def create_family_f1():
     return Family("f1").add(
         Variables(SLEEP= 20),
         Task("t1").add(Meter("progress", 1, 100, 90)),
-     
+
         Task("t2").add(Trigger("t1 eq complete"),
                        Event("a"),
                        Event("b")),
-     
+
         Task("t3").add(Trigger("t2:a")),
-     
+
         Task("t4").add(Trigger("t2 eq complete"),
                        Complete("t2:b")),
-      
+
         Task("t5").add(Trigger("t1:progress ge 30")),
         Task("t6").add(Trigger("t1:progress ge 60")),
         Task("t7").add(Trigger("t1:progress ge 90")))
-    
-print "Creating suite definition"  
+
+print "Creating suite definition"
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -221,7 +221,7 @@ defs.save_as_defs("test.def")
 import os
 
 home = os.path.join(os.getenv("HOME"),  "course")
- 
+
 def create_family_f2():
     return Family("f2").add(
         Variables(SLEEP= 20),
@@ -231,13 +231,13 @@ def create_family_f2():
         Task("t3").add(
             Date("1.*.*"),  # day month year, first of every month or every year
             Time("12:00")), # hour, minutes at 12 o'clock
-    
+
         Task("t4").add(Time("+00:02")), # hour, minutes, relative to suite start
                                         # 2 minutes after family f2 start
         Task("t5").add(Time("00:02"))   # hour, minutes suite site
                                         # 2 minutes past midnight
-)           
-    
+)
+
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -256,7 +256,7 @@ import os
 import sys
 sys.path.append('/home/ma/emos/def/o/def')
 from ecf import *
-print "Creating suite definition" 
+print "Creating suite definition"
 defs = Defs().add(# Stream like definition
     Suite("test").add(
         Variables({ # a dictionary to detect duplicated variables
@@ -283,7 +283,7 @@ defs = Defs().add(# Stream like definition
                            Time("12:00")),
             Task("t4").add(Time("+00:02")),
             Task("t5").add(Time("00:02")))))
-             
+
 out = file("test.def", "w")
 print >>out, defs
 
@@ -294,7 +294,7 @@ print >>out, defs
 import os
 from ecf import *
 home = os.getenv("HOME") + "/course"
-print "Creating suite definition"  
+print "Creating suite definition"
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -315,14 +315,14 @@ def create_family_f4():
     return Family("f4").add(
         Variables(SLEEP= 2),
         Repeat("NAME", ["a", "b", "c", "d", "e", "f" ], kind="enum"),
-    
+
         Family("f5").add(
             Repeat( "VALUE", 1, 10, kind= "integer"),
             Task("t1").add(
                 Repeat( "DATE", 20101230, 20110105, kind= "date"),
                 Label("info", ""))))
-     
-print "Creating suite definition"  
+
+print "Creating suite definition"
 defs = ecflow.Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -343,8 +343,8 @@ def create_family_f5() :
         Variables(SLEEP= 20),
         [ Task( "t" + str(i))     for i in range(1, 10)] # list comprehension
     )
-     
-print "Creating suite definition"  
+
+print "Creating suite definition"
 defs = Defs().add(Suite("test").add(
     Variables(ECF_INCLUDE= home,
               ECF_HOME=    home),
@@ -358,8 +358,8 @@ defs.save_as_defs("test.def")
 #  Data acquiation solution
 #!/usr/bin/env python2.7
 import os
-from ecf import * 
-home = os.getenv("HOME") + "/course")  
+from ecf import *
+home = os.getenv("HOME") + "/course")
 defs = Defs().add(Suite("data_aquisition").add(
     Repeat(kind="day", step=1),
     Variables(ECF_HOME= home,
@@ -379,7 +379,7 @@ defs = Defs().add(Suite("data_aquisition").add(
                     Day( "monday" )),
                 If( city in ("Montreal"),
                     Date("1.*.*")),
-          
+
                 Task("get"),
                 Task("process").add(Trigger("get eq complete")),
                 Task("store").add(Trigger("get eq complete")))
@@ -410,15 +410,15 @@ defs = Defs().add(Suite("operation_suite").add(
     [ Family(str(cycle)).add(
         Variables(CYCLE=  cycle,
                   LAST_STEP= last_step[cycle]),
-       
+
         cycle_trigger(cycle),
-                  
+
         Family("analysis").add(
             Task("get_observations"),
             Task("run_analysis").add(Trigger(["get_observations", ])),
             Task("post_processing").add(Trigger(["run_analysis", ])),
         ),
-  
+
         Family("forecast").add(
             Trigger("analysis == complete"),
             Task("get_input_data"),
@@ -443,7 +443,7 @@ defs = Defs().add(Suite("operation_suite").add(
     ) for cycle in ( 0 , 12 ) ] ))
 print defs
 
-!!!!!!! 
+!!!!!!!
 Baudouin Raoult
 range(6, last_step, 6) will not return last_step.
 

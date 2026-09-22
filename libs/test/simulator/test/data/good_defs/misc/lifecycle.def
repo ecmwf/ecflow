@@ -8,7 +8,7 @@ suite suite1
    endfamily
    family family2
    		task aa
-   			trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent 
+   			trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent
    		task bb
    			trigger ../family1/a:myMeter >= 50  or  ../family1/a:myEvent
     endfamily

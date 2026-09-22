@@ -22,8 +22,8 @@ The following show alternative styles of adding a late attribute. They produce t
 .. code-block:: python
 
   defs = Defs(
-      Suite("s1", 
-        Task("t1", 
+      Suite("s1",
+        Task("t1",
           Late(submitted="20:10", active="02:10", complete="+03:10")))
   )
 

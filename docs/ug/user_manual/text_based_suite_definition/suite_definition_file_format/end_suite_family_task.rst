@@ -9,7 +9,7 @@ end[suite, family, task]
 endsuite
 ===========
 
-This terminates a suite definition. **endsuite** is also an implicit **endfamily/endtask** for all families/tasks currently being defined. 
+This terminates a suite definition. **endsuite** is also an implicit **endfamily/endtask** for all families/tasks currently being defined.
 
 .. code-block::
 

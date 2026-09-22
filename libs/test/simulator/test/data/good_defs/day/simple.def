@@ -1,5 +1,5 @@
 suite simple
- clock real 19.04.2020   #  was a Sunday,  
+ clock real 19.04.2020   #  was a Sunday,
  family family
    verify complete:1     # family should complete once
    task t

@@ -15,7 +15,7 @@ REST API
      ^ for subsubsections
      " for paragraphs
 
-.. caution:: 
+.. caution::
   ecFlow's REST API is experimental, and its details are subject to change. The documentation reflects its current operation.
 
 Compilation
@@ -50,16 +50,16 @@ with option ``--no_ssl``.
 
 .. note::
 
-    SSL is a requirement for any state-altering commands.        
+    SSL is a requirement for any state-altering commands.
 
 When running in SSL mode, the server searches for **server.crt** and
 **server.key** in **$HOME/.ecflowrc/ssl**. For more details see :ref:`this page <open_ssl>`.
 
 .. note::
 
-    Even though the REST API requires SSL for any communication  
-    including passwords, the ecFlow server has no such requirement ie. 
-    ecFlow server can be run without SSL.                              
+    Even though the REST API requires SSL for any communication
+    including passwords, the ecFlow server has no such requirement ie.
+    ecFlow server can be run without SSL.
 
 Default interval to check any changes from ecFlow server is 10 seconds.
 This can be changed with option ``--polling_interval``.
@@ -226,7 +226,7 @@ The contents of the json file are:
       "expires_at": "yyyy-mm-ddTHH:MM:SSZ",
       "revoked_at": "yyyy-mm-ddTHH:MM:SSZ"
     }
-  ] 
+  ]
 
 And the field values are:
 
@@ -250,8 +250,8 @@ Currently supported hashing algorithms are:
 A token file can be created with a simple script:
 
 .. code-block:: bash
-    
-  > cat create-token-file.sh 
+
+  > cat create-token-file.sh
   set -eu
 
   desc=$1
@@ -1770,7 +1770,7 @@ Create a new attribute
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
-    
+
   curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive","value":"+01:00"}'
   curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel","value":"+01:00"}'
   curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore","value":"/test/a"}'
@@ -1814,7 +1814,7 @@ Update status
 ~~~~~~~~~~~~~
 
 .. code-block:: bash
-    
+
   curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"complete"}'
   curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"requeue"}'
 

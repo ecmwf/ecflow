@@ -4,11 +4,11 @@
 
        1451.668102      task-clock (msec)         #    0.999 CPUs utilized            ( +-  0.28% )
                  5      context-switches          #    0.004 K/sec                    ( +- 14.90% )
-                 0      cpu-migrations            #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec
            131,039      page-faults               #    0.090 M/sec                    ( +-  0.00% )
      5,579,374,218      cycles                    #    3.843 GHz                      ( +-  0.27% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,221,270,325      instructions              #    1.83  insns per cycle          ( +-  0.00% )
      2,902,079,486      branches                  # 1999.134 M/sec                    ( +-  0.00% )
         15,105,150      branch-misses             #    0.52% of all branches          ( +-  0.24% )
@@ -17,7 +17,7 @@
 
 
 
-+ bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def      
++ bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 + strace -c bin/ecflow_client --port 3160 --sync_full 0
 % time     seconds  usecs/call     calls    errors syscall
 ------ ----------- ----------- --------- --------- ----------------
@@ -73,15 +73,15 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 33.33% )
            143,940      page-faults               #    0.090 M/sec                    ( +-  0.13% )
      6,133,797,689      cycles                    #    3.844 GHz                      ( +-  0.24% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     11,866,026,306      instructions              #    1.93  insns per cycle          ( +-  0.00% )
      3,129,465,397      branches                  # 1961.324 M/sec                    ( +-  0.00% )
         11,632,324      branch-misses             #    0.37% of all branches          ( +-  0.70% )
 
        2.122416594 seconds time elapsed                                          ( +-  1.36% )
-       
-       
+
+
 
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def

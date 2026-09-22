@@ -1,6 +1,6 @@
 {
     "notification":  {
-            
+
             "settings" : {
                     "max_item_num" : {
                         "label" : "Maximum notification list size",
@@ -13,7 +13,7 @@
                         "label" : "Switch to parent's virtual desktop from popup dialogue",
                         "default" : "false"
                      }
-            },                                    
+            },
             "aborted": {
                 "use_status_colour" : {
                     "label" : "Use aborted status colour",
@@ -28,7 +28,7 @@
                     "label" : "Text colour",
                     "default": "rgb(0,0,0)",
                     "disabledRule" : "use_status_colour=true"
-                },    
+                },
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
                     "default": "rgb(58,126,194))"
@@ -36,22 +36,22 @@
                 "count_text_colour" : {
                     "label" : "Notification count text colour",
                     "default": "rgb(255,255,255)"
-                }, 
+                },
                 "sound_file_type" : {
-                    "label" : "Sound file type", 
+                    "label" : "Sound file type",
                     "default" : "system",
                     "values" : "system",
-                    "values_label" : "Built in" 
-                }, 
+                    "values_label" : "Built in"
+                },
                 "sound_system_file" : {
-                    "label" : "Built in sound", 
+                    "label" : "Built in sound",
                     "default" : "tone.ogg",
-                    "values" : ""                   
-                }, 
+                    "values" : ""
+                },
                 "sound_user_file" : {
-                    "label" : "Sound file", 
+                    "label" : "Sound file",
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds"                   
+                    "default_dir" : "/usr/share/sounds"
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -62,16 +62,16 @@
                 "sound_loop" : {
                      "label" : "Sound loop count",
                      "default" : "1",
-                     "values" : "1/2/3/4/5"                   
-                },                                    
+                     "values" : "1/2/3/4/5"
+                },
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aborted tasks",
                 "labelText" : "Aborted",
                 "widgetText" : "Aborted",
                 "tooltip"    : "Notifications for tasks which have been <b>aborted</b>",
-                "description" : "Notify when a task becomes aborted"        
+                "description" : "Notify when a task becomes aborted"
              },
- 
+
             "restarted": {
                 "fill_colour" : {
                     "label" : "Background colour",
@@ -80,7 +80,7 @@
                 "text_colour" : {
                     "label" : "Text colour",
                     "default": "rgb(10,10,10)"
-                },  
+                },
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
                     "default": "rgb(58,126,194))"
@@ -90,20 +90,20 @@
                     "default": "rgb(255,255,255)"
                 },
                 "sound_file_type" : {
-                    "label" : "Sound file type", 
+                    "label" : "Sound file type",
                     "default" : "system",
                     "values" : "system",
-                    "values_label" : "Built in" 
-                }, 
+                    "values_label" : "Built in"
+                },
                 "sound_system_file" : {
-                    "label" : "Built in sound", 
+                    "label" : "Built in sound",
                     "default" : "tone.ogg",
-                    "values" : ""                    
-                }, 
+                    "values" : ""
+                },
                 "sound_user_file" : {
-                    "label" : "Sound file", 
+                    "label" : "Sound file",
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds"                    
+                    "default_dir" : "/usr/share/sounds"
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -114,16 +114,16 @@
                 "sound_loop" : {
                      "label" : "Sound loop count",
                      "default" : "1",
-                     "values" : "1/2/3/4/5"                   
-                },                                    
-                                                   
+                     "values" : "1/2/3/4/5"
+                },
+
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: restarted tasks",
-                "labelText" : "Restarted", 
+                "labelText" : "Restarted",
                 "widgetText" : "Restarted",
                 "tooltip"    : "Notifications for tasks which have been <b>restarted</b>",
-                "description" : "Notify when a task is restarted"                    
-            }, 
+                "description" : "Notify when a task is restarted"
+            },
             "late": {
                 "fill_colour" : {
                     "label" : "Background colour",
@@ -132,7 +132,7 @@
                 "text_colour" : {
                     "label" : "Text colour",
                     "default": "rgb(10,10,10)"
-                },  
+                },
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
                     "default": "rgb(58,126,194))"
@@ -140,40 +140,40 @@
                 "count_text_colour" : {
                     "label" : "Notification count text colour",
                     "default": "rgb(255,255,255)"
-                },                               
+                },
                 "sound_file_type" : {
-                    "label" : "Sound file type", 
+                    "label" : "Sound file type",
                     "default" : "system",
                     "values" : "system",
-                    "values_label" : "Built in" 
-                }, 
+                    "values_label" : "Built in"
+                },
                 "sound_system_file" : {
-                    "label" : "Built in sound", 
+                    "label" : "Built in sound",
                     "default" : "tone.ogg",
-                    "values" : ""                    
-                }, 
+                    "values" : ""
+                },
                 "sound_user_file" : {
-                    "label" : "Sound file", 
+                    "label" : "Sound file",
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds"                    
+                    "default_dir" : "/usr/share/sounds"
                 },
                 "sound_volume" : {
                     "label" : "Volume",
                     "default" : "5",
                     "min" : "1",
                     "max" : "10"
-                },   
+                },
                 "sound_loop" : {
                      "label" : "Sound loop count",
                      "default" : "1",
-                     "values" : "1/2/3/4/5"                   
-                },                                                  
+                     "values" : "1/2/3/4/5"
+                },
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: late tasks",
-                "labelText" : "Late", 
+                "labelText" : "Late",
                 "widgetText" : "Late",
                 "tooltip"    : "Notifications for tasks which have become <b>late</b>",
-                "description" : "Notify when a task becomes late"                        
+                "description" : "Notify when a task becomes late"
             },
             "zombie": {
                 "fill_colour" : {
@@ -183,7 +183,7 @@
                 "text_colour" : {
                     "label" : "Text colour",
                     "default": "rgb(10,10,10)"
-                }, 
+                },
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
                     "default": "rgb(58,126,194))"
@@ -191,40 +191,40 @@
                 "count_text_colour" : {
                     "label" : "Notification count text colour",
                     "default": "rgb(255,255,255)"
-                },                
+                },
                 "sound_file_type" : {
-                    "label" : "Sound file type", 
+                    "label" : "Sound file type",
                     "default" : "system",
                     "values" : "system",
-                    "values_label" : "Built in" 
-                }, 
+                    "values_label" : "Built in"
+                },
                 "sound_system_file" : {
-                    "label" : "Built in sound", 
+                    "label" : "Built in sound",
                     "default" : "tone.ogg",
-                    "values" : ""                    
-                }, 
+                    "values" : ""
+                },
                 "sound_user_file" : {
-                    "label" : "Sound file", 
+                    "label" : "Sound file",
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds"                    
+                    "default_dir" : "/usr/share/sounds"
                 },
                 "sound_volume" : {
                     "label" : "Volume",
                     "default" : "5",
                     "min" : "1",
                     "max" : "10"
-                },   
+                },
                 "sound_loop" : {
                      "label" : "Sound loop count",
                      "default" : "1",
-                     "values" : "1/2/3/4/5"                   
-                },                                                                                        
+                     "values" : "1/2/3/4/5"
+                },
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: zombies",
-                "labelText" : "Zombies", 
+                "labelText" : "Zombies",
                 "widgetText" : "Zombie",
                 "tooltip"    : "Notifications for tasks which have become <b>zombies</b>",
-                "description" : "Notify when a task becomes a zombie"                     
+                "description" : "Notify when a task becomes a zombie"
             },
             "alias": {
                 "fill_colour" : {
@@ -234,7 +234,7 @@
                 "text_colour" : {
                     "label" : "Text colour",
                     "default": "rgb(10,10,10)"
-                }, 
+                },
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
                     "default": "rgb(58,126,194))"
@@ -242,65 +242,65 @@
                 "count_text_colour" : {
                     "label" : "Notification count text colour",
                     "default": "rgb(255,255,255)"
-                },                
+                },
                 "sound_file_type" : {
-                    "label" : "Sound file type", 
+                    "label" : "Sound file type",
                     "default" : "system",
                     "values" : "system",
-                    "values_label" : "Built in" 
-                }, 
+                    "values_label" : "Built in"
+                },
                 "sound_system_file" : {
-                    "label" : "Built in sound", 
+                    "label" : "Built in sound",
                     "default" : "tone.ogg",
-                    "values" : ""                    
-                }, 
+                    "values" : ""
+                },
                 "sound_user_file" : {
-                    "label" : "Sound file", 
+                    "label" : "Sound file",
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds"                    
+                    "default_dir" : "/usr/share/sounds"
                 },
                 "sound_volume" : {
                     "label" : "Volume",
                     "default" : "5",
                     "min" : "1",
                     "max" : "10"
-                },   
+                },
                 "sound_loop" : {
                      "label" : "Sound loop count",
                      "default" : "1",
-                     "values" : "1/2/3/4/5"                   
-                },                                                                  
+                     "values" : "1/2/3/4/5"
+                },
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aliases",
-                "labelText" : "Aliases", 
+                "labelText" : "Aliases",
                 "widgetText" : "Alias",
-                "tooltip"    : "Notifications for <b>aliases</b> which have become <b>aborted</b> or have been <b>restarted</b>", 
-                "description" : "Notify when an alias becomes aborted or is restarted"                      
+                "tooltip"    : "Notifications for <b>aliases</b> which have become <b>aborted</b> or have been <b>restarted</b>",
+                "description" : "Notify when an alias becomes aborted or is restarted"
             }
-       
+
        },
        "sound" : {
-            
+
             "sound_sys_folder" : "%SHAREDIR%/sound",
-            "sound_user_folder" : "%CONFDIR%/sound",           
-            
+            "sound_user_folder" : "%CONFDIR%/sound",
+
             "player"  : {
                 "label" : "Sound player",
                 "default" : "play",
                 "values" : "built-in/play"
-            },    
-            
+            },
+
             "players" : {
-                "built-in" : {                
-                    "type" : "internal"                    
+                "built-in" : {
+                    "type" : "internal"
                 },
-                    
+
                 "play" : {
                     "type" : "external",
                     "command" : "play -q %FILE% repeat %REPEAT%"
                 }
             }
-       }          
+       }
 
 
 

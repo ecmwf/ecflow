@@ -15,7 +15,7 @@ the following command in a start-up script:
 
 .. code-block:: shell
 
-    ecflow_server > /dev/null 2>&1                                 
+    ecflow_server > /dev/null 2>&1
 
 When learning how to use ECF, you may open a window and run ecFlow in
 that window interactively. Notice that server still writes the log file
@@ -88,7 +88,7 @@ You can contact the log server manually using:
 
 .. code-block:: shell
 
-    telnet <host><port> get_file_path                                  
+    telnet <host><port> get_file_path
 
 The actual log server is a Perl program: ecflow_logsvr.pl, which is run
 on the remote host.

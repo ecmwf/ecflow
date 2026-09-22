@@ -33,8 +33,8 @@
                         "label" : "Type colour",
                         "default": "rgb(110,110,110)"
                     }
-			},	
-            	
+			},
+
             "queued": {
         			"label": "Queued",
         			"tooltip": "queued",
@@ -75,7 +75,7 @@
     			"fill_colour" : {
     				"label" : "Colour",
     				"default": "rgb(64,224,208)"
-    			},    			
+    			},
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
@@ -92,7 +92,7 @@
     			"fill_colour" : {
     				"label" : "Colour",
     				"default": "rgb(74,255,61)"
-    			},    			
+    			},
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
@@ -109,7 +109,7 @@
     			"fill_colour" : {
     				"label" : "Colour",
     				"default": "rgb(239,191,0)"
-    			},    			
+    			},
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"

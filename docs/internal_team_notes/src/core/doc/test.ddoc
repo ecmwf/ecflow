@@ -8,7 +8,7 @@ and use some automated tool that will format this information as you like.
 To run individual tests.
 ========================
 
-<unit-test> --log_level=test_suite --run_test=<test suite>/<test name> 
+<unit-test> --log_level=test_suite --run_test=<test suite>/<test name>
 
 i.e.
 
@@ -17,9 +17,9 @@ bin/gcc-4.5/debug/u_acore --log_level=test_suite --run_test=CoreTestSuite/test_l
 To run Multiple tests in the same test suite
 ============================================
 
-<exe> --log_level=test_suite --run_test=<test suite>/<test name>,<test2> 
+<exe> --log_level=test_suite --run_test=<test suite>/<test name>,<test2>
 
-i.e 
+i.e
 
 bin/gcc-4.5/debug/u_acore --log_level=test_suite --run_test=CoreTestSuite/test_log,test_log_append
 
@@ -39,14 +39,14 @@ BOOST_AUTO_TEST_SUITE( s2 )
 BOOST_AUTO_TEST_CASE( test1 ){}
 BOOST_AUTO_TEST_CASE( test11 ){}
 
-<exe> --log_level=test_suite --run_test=<test suite> 
+<exe> --log_level=test_suite --run_test=<test suite>
 
 <exe> --log_level=test_suite --run_test=s2
 
 Reference
 ===========
-See: 
+See:
 
 http://www.boost.org/doc/libs/1_47_0/libs/test/doc/html/utf/user-guide/runtime-config/run-by-name.html
 
-  
+

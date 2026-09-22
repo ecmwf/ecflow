@@ -234,12 +234,12 @@ QTextDocument::FindFlags PlainTextSearchLine::findFlags()
 {
 	QTextDocument::FindFlags flags;
 
-	if(caseSensitive()) 
+	if(caseSensitive())
 	{
 		flags = flags | QTextDocument::FindCaseSensitively;
 	}
 
-	if(wholeWords()) 
+	if(wholeWords())
 	{
 		flags = flags | QTextDocument::FindWholeWords;
 	}

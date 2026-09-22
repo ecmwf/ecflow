@@ -70,7 +70,7 @@ This system can also be used to run and save arbitrary shell commands.
 To do this, simply replace 'ecflow_client' with 'sh', followed by the
 command and any arguments, for example::
 
-    sh ls -l                                                           
+    sh ls -l
 
 The command will have as its working directory the directory from where
 ecFlowUI was started. Expressions *<node_name>* and *<full_name>* are

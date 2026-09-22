@@ -22,9 +22,9 @@
             "dock_icon"    : "manual_dock.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>manual</b> tab in a new Info Panel dialog",
-            "visible_for" : "node"            
-        },    
-       
+            "visible_for" : "node"
+        },
+
         {
             "name"    : "script",
             "label"   : "Script",
@@ -32,18 +32,18 @@
             "dock_icon"    : "script_dock.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
-            "visible_for" : "task or alias"            
-        }, 
-        
+            "visible_for" : "task or alias"
+        },
+
         {
         	"name"    : "job",
             "label"   : "Job",
             "icon"	  : "job.svg",
             "dock_icon"	  : "job_dock.svg",
-            "show"    : "toolbar", 
+            "show"    : "toolbar",
             "button_tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
-            "visible_for" : "task or alias"            
-        },    
+            "visible_for" : "task or alias"
+        },
 
         {
             "name"    : "job_status",
@@ -61,9 +61,9 @@
             "dock_icon"    : "output_dock.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
-            "visible_for" : "task or alias"            
-        },    
-        
+            "visible_for" : "task or alias"
+        },
+
         {
         	"name"    : "why",
             "label"   : "Why",
@@ -71,9 +71,9 @@
             "dock_icon"    : "why_dock.svg",
             "show" : "toolbar",
             "button_tooltip" : "Open <b>why</b> tab in a new Info Panel dialog",
-            "visible_for" : "server or node"            
-        },  
-        
+            "visible_for" : "server or node"
+        },
+
         {
         	"name"    : "triggers",
             "label"   : "Triggers",
@@ -81,7 +81,7 @@
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
             "visible_for" : "node"
-        },  
+        },
 
         {
         	"name"    : "variable",
@@ -91,9 +91,9 @@
              "show"   : "toolbar",
              "button_tooltip" : "Open <b>variables</b> tab in a new Info Panel dialog",
              "visible_for" : "server or node"
-             
-        },  
-        
+
+        },
+
         {
             "name"    : "edit",
             "label"   : "Edit",
@@ -101,9 +101,9 @@
             "dock_icon"   : "edit.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",
-            "visible_for" : "task or alias"            
-        } ,           
-        
+            "visible_for" : "task or alias"
+        } ,
+
         {
         	 "name"   : "history",
              "label"  : "Server log",
@@ -112,17 +112,17 @@
              "show"   : "toolbar",
              "button_tooltip" : "Open <b>server log</b> tab in a new Info Panel dialog",
              "visible_for" : "server"
-             
-        },  
-        
+
+        },
+
         {
         	"name"    : "message",
             "label"   : "Node log",
-            "icon"	  : "node_log.svg",          
+            "icon"	  : "node_log.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>Node log</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"
-             
+
         },
 
         {
@@ -133,16 +133,16 @@
             "show" 	  : "toolbar",
             "button_tooltip" : "Open <b>zombies</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"
-             
-        },     
-        
+
+        },
+
         {
         	"name"    : "suite",
             "label"   : "Suite filter",
             "icon"    : "filter.svg",
             "show" 	  : "toolbar",
             "visible_for" : "server or node"
-             
+
         },
         {
             "name"    : "timeline",
@@ -166,7 +166,7 @@
             "icon"	  : "cogwheel_blue.svg",
             "show" 	  : "toolbar",
             "visible_for" : "server or node"
-             
+
         }
     ]
 }

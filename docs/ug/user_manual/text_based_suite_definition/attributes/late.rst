@@ -26,8 +26,8 @@ window). A separate list is also kept.
      - The time node must become complete (format [+]hh:mm). If relative, time is taken from the time node became active, otherwise node must be complete by the time given.
 
 
-The submitted late time is inherited from parent if not present in 
-the node itself. That is defining **late -s** on a suite all tasks 
+The submitted late time is inherited from parent if not present in
+the node itself. That is defining **late -s** on a suite all tasks
 will have that value:
 
 .. code-block:: shell

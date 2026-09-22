@@ -21,7 +21,7 @@ sys	0m0.12s
  Time for Defs::check(inlimit resolution)        = 0.085006 result(1)
  time for deleting all nodes                     = 0.279035
  Total elapsed time = 8 seconds
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time = 1.69666 parse(1)
  Parsing Node tree *only* time           = 1.66685 parse(1)
@@ -34,7 +34,7 @@ sys	0m0.12s
  Time for Defs::check(inlimit resolution)        = 0.578647 result(0)
  time for deleting all nodes                     = 0.39239
  Total elapsed time = 14 seconds
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3152)

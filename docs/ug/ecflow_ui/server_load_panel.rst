@@ -26,7 +26,7 @@ command:
     chd:label
 
 -  user commands: e.g. ::
-  
+
     --alter delete inlimit
 
 Most of the commands contain a path so the **suite** can be extracted
@@ -35,8 +35,8 @@ assigned to the command in the server load statistics.
 
 .. note::
 
-    Requests related to state changes and errors are not taken account 
-    for the server load statistics.                                    
+    Requests related to state changes and errors are not taken account
+    for the server load statistics.
 
 Total charts
 ============
@@ -104,7 +104,7 @@ is selected.
 .. image:: /_static/ecflow_ui/server_load_panel/image5.png
    :width: 3.72999in
    :height: 2.60417in
- 
+
 .. image:: /_static/ecflow_ui/server_load_panel/image6.png
    :width: 3.76708in
    :height: 2.60417in
@@ -124,7 +124,7 @@ the commands is selected.
 .. image:: /_static/ecflow_ui/server_load_panel/image7.png
    :width: 3.73213in
    :height: 2.60417in
- 
+
 .. image:: /_static/ecflow_ui/server_load_panel/image8.png
    :width: 3.76455in
    :height: 2.60417in

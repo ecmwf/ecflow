@@ -16,7 +16,7 @@ suite autorestore
     task t1
  endfamily
  family f4
-    autorestore /autorestore 
+    autorestore /autorestore
     task t1
  endfamily
  family f5

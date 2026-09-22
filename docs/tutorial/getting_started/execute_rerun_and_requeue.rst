@@ -47,7 +47,7 @@ to the node and all of its children.
    :header-rows: 1
    :widths: 22 26 26 26
 
-   * - 
+   * -
      - Execute
      - Rerun
      - Re-queue

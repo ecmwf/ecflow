@@ -84,7 +84,7 @@ The state of the elements of a suite definition can be set using the Client-serv
    :depth: 2
    :local:
    :backlinks: top
-    
+
 
 Container API
 =============
@@ -109,7 +109,7 @@ The Container API provides types capable of holding a set of objects.
    :depth: 2
    :local:
    :backlinks: top
-    
+
 
 Command API
 ===========
@@ -129,7 +129,7 @@ The Command API provides command types, that can be executed directly by the cli
    :depth: 2
    :local:
    :backlinks: top
-    
+
 
 Client-Server API
 =================
@@ -148,7 +148,7 @@ The Client-Server API provides the capability of communicating with the server.
    :depth: 2
    :local:
    :backlinks: top
-    
+
 
 Common API
 ==========
@@ -169,7 +169,7 @@ The Common API provides configuration or support types for other parts of the AP
    :depth: 2
    :local:
    :backlinks: top
-    
+
 
 Enums API
 =========
@@ -198,4 +198,4 @@ The Enums API provides types representing enumerations used in the Suite Definit
    :depth: 2
    :local:
    :backlinks: top
-    
+

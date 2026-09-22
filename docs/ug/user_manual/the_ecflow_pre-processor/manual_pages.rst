@@ -14,11 +14,11 @@ describing solutions to common problems. The ecFlow pre-processor can be used to
 the manual page from the script file to be displayed in the GUI. The manual page is the text contained within the %manual and %end tags. They can be seen
 using the manual tab in the info panel in :ref:`ecflow_ui`.
 
-Manual pages are a vital source of information for users. The text on 
-manual pages is not copied into the job-file when ecFlow sends a task 
-into execution. Suites, families, and tasks can have manual pages.    
-Manual pages for tasks are placed in the ecFlow script inside a pair  
-of **pre-processor lines** as in the following example:               
+Manual pages are a vital source of information for users. The text on
+manual pages is not copied into the job-file when ecFlow sends a task
+into execution. Suites, families, and tasks can have manual pages.
+Manual pages for tasks are placed in the ecFlow script inside a pair
+of **pre-processor lines** as in the following example:
 
 .. code-block:: shell
 

@@ -1,4 +1,4 @@
-# 
+#
 suite suite #  begun:1 state:queued suspended:1
 	defstatus suspended
 	edit ECF_HOME '/scratch/ma/ma0/nightly'

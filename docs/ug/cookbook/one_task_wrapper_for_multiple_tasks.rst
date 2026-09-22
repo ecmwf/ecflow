@@ -24,14 +24,14 @@ calling the task again as a single exclusive job:
          # process: create ${param}.grib
       done
    fi
-   
+
    if [[ %SERIAL:1% == 1 ]]; then
       for param in %PARAM:2t u v rh%; do
          # push into data base
       done
    fi
-   %include <tail.h>  
- 
+   %include <tail.h>
+
 .. code-block:: shell
    :caption: suite definition example
 
@@ -61,13 +61,13 @@ calling the task again as a single exclusive job:
          task process
       endfamily
    endfamily # parallel
-   
+
    family serial
       trigger parallel eq complete
       inlimit mutex
       edit PARALLEL 0
       edit SERIAL   1
-      task process   
+      task process
 
 A real case example is given by the family ensms (ensemble mean
 statistics) where few parameters and multiple level shall generate tasks

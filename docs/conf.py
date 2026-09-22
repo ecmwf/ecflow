@@ -108,7 +108,7 @@ def extract_project_version(file_path):
     """
     # Regex matches 3 groups of numbers separated by dots (e.g., 1.2.3)
     version_pattern = re.compile(r'\d+\.\d+\.\d+')
-    
+
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
@@ -122,7 +122,7 @@ def extract_project_version(file_path):
         print(f"Error: The file at {file_path} was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-        
+
     return None
 
 def get_ecflow_version():

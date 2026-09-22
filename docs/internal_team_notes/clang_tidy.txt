@@ -43,13 +43,13 @@ clang-tidy --list-checks -checks='*' | grep "modernize"
     modernize-use-override
     modernize-use-transparent-functors
     modernize-use-using
-    
+
 To refactor the code we would use  -fix.  Here we use 'modernize-use-override' to add the c++11 override feature
 clang-tidy -checks='modernize-use-override' -fix my_test.cpp -- -std=c++11
 However to individually list each source file  is not feasible for a large code base.
 
 Apply clang-tidy to a project
-- To refactor the whole project, we need to create a compiler command database which lists all the files, with the correct includes. 
+- To refactor the whole project, we need to create a compiler command database which lists all the files, with the correct includes.
   This can be done very simply using CMAKE. Just add the following CMAKE variable to your build step
 
   cd <my-project>
@@ -63,13 +63,13 @@ Apply clang-tidy to a project
   module unload gnu
   module load clang/9.0.1
   cd my_build_dir
- 
+
   # The parameter -header-filter=’.*’ makes sure clang-tidy actually refactors code in the headers being consumed in the translation unit
   # The parameter checks=’-*,…’ makes sure all default checks are disabled.
   run-clang-tidy.py -header-filter='.*' -checks='-*,modernize-use-override' -fix
 
   Not all checkers of clang-tidy actually carry fix-its, but the ones starting with modernize all do.
-  You can use fix-its from multiple checkers at the same time 
+  You can use fix-its from multiple checkers at the same time
   run-clang-tidy.py -header-filter='.*' -checks='-*,modernize-use-override,modernize-use-auto' -fix -j8     # run 8 tidy instances in parallel
   Note that the fixes are only applied in once run-clang-tidy has finished. The script will only record the changes to-be-performed and applies them all at once at the end.
 

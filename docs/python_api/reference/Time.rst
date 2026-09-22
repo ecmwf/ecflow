@@ -46,9 +46,9 @@ Usage:
 
 .. code-block:: python
 
-   time1 = Time( 10,10 )                                                   #  time 10:10 
-   time2 = Time( TimeSlot(10,10), true)                                    #  time +10:10 
-   time2 = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 
+   time1 = Time( 10,10 )                                                   #  time 10:10
+   time2 = Time( TimeSlot(10,10), true)                                    #  time +10:10
+   time2 = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10
 
    t = Task('t1',
             time1,time2,time3,

@@ -25,7 +25,7 @@ However, it is also possible to maintain several sessions, via the
 *session manager*. To access this, start ecFlowUI with the -s
 command-line option::
 
-    ecflow_ui -s                                                       
+    ecflow_ui -s
 
 The session management dialogue will appear, providing the following
 options:

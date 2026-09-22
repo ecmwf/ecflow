@@ -23,25 +23,25 @@ The example below shows some of the default variables you can configure.
 
     # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
     # SPDX-License-Identifier: Apache-2.0
-    
+
     #
     # This file is used to define the standard defaults for ECF.
     # Most are *variables* used in the server
     # Some like ECF_TASK_THRESHOLD are used to debug job generation
-    
+
     # ******************************************************************
     # Warning: Do *NOT* use quotes around the value part.
     #   WRONG: ECF_MICRODEF = "%"
     #   RIGHT: ECF_MICRODEF = %
     # ******************************************************************
-    
+
     #  *******************************************************************
     #  * ECF_HOME is typically the home/root for all '.ecf' files
     #  * Can be overridden with a environment variable of the same name
     #  *******************************************************************
     ECF_HOME  = .
-    
-    
+
+
     #  ******************************************************************
     #  * The name of check point file. i.e. defs file with state
     #  * Can be overridden with a environment variable of the same name
@@ -49,8 +49,8 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_CHECK = ecf.check
-    
-    
+
+
     #  ******************************************************************
     #  * The name of the backup checkpoint file
     #  * Can be overridden with a environment variable of the same name
@@ -58,16 +58,16 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_CHECKOLD = ecf.check.b
-    
-    
+
+
     #  ******************************************************************
     #  * The intervals within the server that the checkpoint file should
     #  * be saved.
     #  * Can be overridden with a environment variable of the same name
     #  ******************************************************************
-    ECF_CHECKINTERVAL = 120 
-    
-    
+    ECF_CHECKINTERVAL = 120
+
+
     #  ******************************************************************
     #  * Check point configuration:
     #  *
@@ -78,8 +78,8 @@ The example below shows some of the default variables you can configure.
     #  * The checkpoint filenames can be configured using environment variables
     #  ******************************************************************
     ECF_CHECKMODE = CHECK_ON_TIME
-    
-    
+
+
     #  ******************************************************************
     #  * The port number, this must be consistent between client and server
     #  * If we get "Address in use" then both client/server number should changed.
@@ -88,8 +88,8 @@ The example below shows some of the default variables you can configure.
     #  * Can be overridden with a environment variable of the same name
     #  ******************************************************************
     ECF_PORT = 3141
-    
-    
+
+
     #  ******************************************************************
     #  * The name of log file.
     #  * default log file name is: <host>.<port>.ecf.log, i.e. machine1.3141.ecf.log
@@ -100,24 +100,24 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_LOG = ecf.log
-    
-    
+
+
     #  ******************************************************************
     #  * The period in second for which we should traverse dependencies
     #  * and submit jobs. This should *RARELY* need changing, as it can affect
     #  * correspondence with real time
     #  ******************************************************************
-    ECF_INTERVAL = 60      
-    
-    
+    ECF_INTERVAL = 60
+
+
     #  ******************************************************************
     #  * The standard command use for job submission.
     #  *
     #  * Provides DEFAULT which can be overridden by a user variable
     #  ******************************************************************
     ECF_JOB_CMD = %ECF_JOB% 1> %ECF_JOBOUT% 2>&1
-    
-    
+
+
     #  ******************************************************************
     #  * Define the command for killing any jobs.
     #  * The output of the command should be written to %ECF_JOB%.kill
@@ -126,9 +126,9 @@ The example below shows some of the default variables you can configure.
     #  *
     #  * ecmwf: ${ECF_KILL:=/home/ma/emos/bin/ecfkill} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1
     #  ******************************************************************
-    ECF_KILL_CMD = kill -15 %ECF_RID% 
-    
-    
+    ECF_KILL_CMD = kill -15 %ECF_RID%
+
+
     #  ******************************************************************
     #  * The command to be executed, by the SERVER, to obtain the
     #  * current status of a Job.
@@ -139,7 +139,7 @@ The example below shows some of the default variables you can configure.
     #  * ecmwf: ${ECF_STAT:=trimurti} %USER% %HOST% %ECF_RID% %ECF_JOB% status> %ECF_JOB%.stat 2>&1
     #  ******************************************************************
     ECF_STATUS_CMD = ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1
-    
+
     #  ******************************************************************
     #  * The command to be executed, by the CLIENT (ecFlowUI), to obtain the
     #  * current status of a Job.
@@ -149,8 +149,8 @@ The example below shows some of the default variables you can configure.
     #  *
     #  ******************************************************************
     ECF_CHECK_CMD = ps --pid %ECF_RID% -f
-    
-    
+
+
     #  ******************************************************************
     #  * The command to be executed, bye the CLIENT (ecFlowUI) to open a
     #  * Browser with the specified URL.
@@ -160,13 +160,13 @@ The example below shows some of the default variables you can configure.
     ECF_URL_CMD    = ${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%
     ECF_URL_BASE   = https://confluence.ecmwf.int
     ECF_URL        = display/ECFLOW/ecflow+home
-    
+
     #  ******************************************************************
     #  * Defines the character used in ECF_ pre-processing. i.e. identifies includes
     #  * and is also used in variable substitution in '.ecf' scripts
     #  ******************************************************************
     ECF_MICRODEF = %
-    
+
     #  ******************************************************************
     #  * The ECF_LISTS is used to identify a file, that lists the user
     #  * who can access the server via client commands. Each client command
@@ -179,7 +179,7 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_LISTS = ecf.lists
-    
+
     #  ******************************************************************
     #  * Password file: Use when every user needs password authentication
     #  * Each server can potionally have a different password file.
@@ -187,8 +187,8 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_PASSWD = ecf.passwd
-    
-    
+
+
     #  ******************************************************************
     #  * Password file:, when only a few users need password, typically
     #  * when a users UID on the remote client, does not match that on the server
@@ -197,7 +197,7 @@ The example below shows some of the default variables you can configure.
     #  * Note: Any settings will be prepended with <host>.<port>.
     #  ******************************************************************
     ECF_CUSTOM_PASSWD = ecf.custom_passwd
-    
+
     # ***************************************************************************
     # * ECF_TASK_THRESHOLD:
     # * Report on an task taking longer than the threshold. !!

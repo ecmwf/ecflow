@@ -4,23 +4,23 @@ https://www.bfilipek.com/2019/11/perfguidecpu.html
 https://easyperf.net/notes/
 https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux
 
-PERF 
+PERF
 ====
 # Is a sampling profiler. Not 100% precies. Artifacts of measurement will have precision loss.
   perf stat <exe>  # course grain
-  
+
 # By default perf shows calle data. Expanding the tree will show the callers.
 # But des not show proper call graph
   perf record <exe>
   perf report
-  
+
 # For callgraph use -g,  this requires, frame pointers
-# Hence make sure to compile/link with -fno-omit-frame-ponter 
+# Hence make sure to compile/link with -fno-omit-frame-ponter
 # This tells the compiler to stop deleting the frame pointer,allowing us to walk up/down the call stack
-# At the cost of one register. 
+# At the cost of one register.
   perf record -g <exe>
   perf report -g
- 
+
 # Can have a flags file for compiler options:
 -O3
 -std=c++14
@@ -35,7 +35,7 @@ PERF
 # For proper callgraphs (top down) use:
 # # 0.5 if for filtering function ?, caller means caller on top, then callee
   perf record -g <exe>
-  oerf report -g "graph,0.5,caller"  
+  oerf report -g "graph,0.5,caller"
 
 ==================================================================
 - http://www.brendangregg.com/USEmethod/use-linux.html                - Good collection of performance debug
@@ -47,27 +47,27 @@ Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
   Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # Show system call overhead,as a summary.
   strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
   strace -e trace=open Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def  # show what files opened
-  
-  # track library calls. It intercepts and records the dynamic library calls which are called 
-  # by the executed process and the signals which are received by that process.  
+
+  # track library calls. It intercepts and records the dynamic library calls which are called
+  # by the executed process and the signals which are received by that process.
   # It can also intercept and print the system calls executed by the program
   ltrace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
   ltrace -S -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # Show page faults, data and instruction cache misses use:
   perf stat -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # perf stat to run the same test workload multiple times and get for each count, the standard deviation from the mean.
   perf stat -r 5 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # For more detail and higher level overview, compile debug, -g means record stack traces
   perf record -g Base/bin/gcc-7.3.0/debug/perf_job_gen ./metabuilder.def
   perf report --sort comm,dso  # high level overview
-  
+
   # show report to stdout, adjust sampling, avoid high number
   perf record -F 99 -g Base/bin/gcc-7.3.0/debug/perf_job_gen ./metabuilder.def
   perf report -n --stdio
@@ -81,24 +81,24 @@ Use of perf:  http://www.brendangregg.com/perf.html
   perf script | $HOME/FlameGraph/stackcollapse-perf.pl > out.perf-folded
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
-  
+
   *alternatively* view from the browser, as this will also show:
     - *full* function names
     - no of samples
     - percentage cpu times
 
 
-The metabuilder.def below needs preparation for perf test below: 
+The metabuilder.def below needs preparation for perf test below:
 o/ module load ecflow/5new
 o/ mb; git checkout ci; ./generate -a  # switch to metabuilder ci, and generate all, so job generate can find all includes and scripts
 o/ ecflow_client --port 3142 --host ecflow-metab --get > metabuilder.def
-o/ Edit metabuilder.def and replace 
+o/ Edit metabuilder.def and replace
       edit ECF_HOME '/home/ma/deploy/servers/ecflow-metab.5062/metabuilder/...'
    with
       edit ECF_HOME '/var/tmp/ma0/workspace/metabuilder/...'
 o/ Edit metabuilder.def and replace:
       edit REMOTE_HOST 'ecflow-metab' | edit WSHOST 'ecflow-metab'
-   with 
+   with
       edit REMOTE_HOST 'polonius' | edit WSHOST 'polonius'
 
 
@@ -106,20 +106,20 @@ Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
   time Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # Show system call overhead,as a summary.
   strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # Show page faults, data and instruction cache misses use:
   perf stat -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # perf stat to run the same test workload multiple times and get for each count, the standard deviation from the mean.
   perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-  
+
   # For more detail and higher level overview, compile debug, -g means record stack traces
   perf record -g Base/bin/gcc-7.3.0/debug/perf_job_gen ./metabuilder.def
   perf report --sort comm,dso  # high level overview
-  
+
   # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
   # and you must use -g (collect stack traces)
   # assume you have down loaded Flamegraph, git clone https://github.com/brendangregg/FlameGraph
@@ -128,8 +128,8 @@ Use of perf:  http://www.brendangregg.com/perf.html
   perf script | $HOME/FlameGraph/stackcollapse-perf.pl > out.perf-folded
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
-  
-  
+
+
 Using valgrind
 ==========================================================================
 # To see the callgraph make sure you use valgrind --tool=callgrind
@@ -142,7 +142,7 @@ test job creation
 ==========================================================================
  - Note writing to scratch can be slow, this can be overridden by user specfiying
  - thier own directory:
- 
+
 export PYTHONPATH=/var/tmp/ma0/workspace/ecflow/Pyext/ecflow
 cat > tmp.py << EOF
 import shutil
@@ -157,7 +157,7 @@ defs.check_job_creation(job_ctrl)
 print(job_ctrl.get_error_msg())
 
 #print("removing job generation directory tree " + job_ctrl.get_dir_for_job_creation())
-#shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
+#shutil.rmtree(job_ctrl.get_dir_for_job_creation())
 EOF
 
 strace -c python tmp.py

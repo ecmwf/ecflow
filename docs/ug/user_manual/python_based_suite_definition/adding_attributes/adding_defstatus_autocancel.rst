@@ -17,8 +17,8 @@ The defstatus sets the default state of a node when the begin or re-queue comman
 
    defs = Defs(
       Suite(
-         "s1", 
-            Task("t1", Defstatus("complete")), 
+         "s1",
+            Task("t1", Defstatus("complete")),
             Task("t2", Defstatus(DState.complete))
       )
    )
@@ -38,7 +38,7 @@ The following shows alternative styles that produce the same definition:
    defs = Defs().add(
       Suite("s1").add(
          Task("t1").add(Defstatus("complete")),
-         Task("t2").add(Defstatus(DState.complete)))) 
+         Task("t2").add(Defstatus(DState.complete))))
 
 .. code-block:: python
 

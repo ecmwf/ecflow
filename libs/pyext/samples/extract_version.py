@@ -12,7 +12,7 @@ def get_installed_ecflow_version():
     assert len(version_list) == 3 ,"Expected 3 items,release,major,minor but found " + ecflow_dir_ext
     print("Extracted ecflow version from /usr/local/apps/ecflow/current: " + ecflow_dir_ext)
     return version_list;
-    
+
 def get_ecflow_version( work_space ):
     "This will extract ecFlow version *list* from the source code."
     "The version is defined in the file CMakeList.txt"
@@ -37,12 +37,12 @@ def get_ecflow_version( work_space ):
                     ecflow_version = version.split(".")
         finally:
             cmake_file.close();
-        
+
         print("Extracted ecflow version '" + str(ecflow_version) + "' from " + file)
         return ecflow_version
     else:
         return get_installed_ecflow_version()
-    
-    
+
+
 print(get_ecflow_version("/Users/avibahra/git/ecflow"))
-    
+

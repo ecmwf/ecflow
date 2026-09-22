@@ -2,4 +2,4 @@ Special case where there are no manual directives.
 Just include contents of file as is:
 
 no directives in here either
-%include <manual.h> 
+%include <manual.h>

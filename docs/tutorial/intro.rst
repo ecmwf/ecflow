@@ -2,19 +2,19 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. _tutorial-intro:
-   
+
 
 Introduction
 ************
- 
-The aim of this tutorial is to go through most of ecFlow functionality by building 
+
+The aim of this tutorial is to go through most of ecFlow functionality by building
 a simple suite. Some extension exercises then follow.
 
-Each page will introduce a new concept and provides a list of things to do. 
-Within most pages, there are hypertext links that point to 
+Each page will introduce a new concept and provides a list of things to do.
+Within most pages, there are hypertext links that point to
 relevant information in the online ecFlow documentation.
 
-There are two main methods for describing a suite to the :term:`ecflow_server`.  The first is to write 
+There are two main methods for describing a suite to the :term:`ecflow_server`.  The first is to write
 a text definition file which is then loaded to the server.  The grammar of this text definition file
 is described :ref:`here <grammar>`.  This grammar does not support conditional statements (such as if,while,for)
 nor the ability to define functions. However, the text definition file can be generated using any language

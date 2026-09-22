@@ -13,7 +13,7 @@ suite trigger_relative
            trigger f4/a == complete
            family f4
               task a
-           endfamily   
+           endfamily
         endfamily
      endfamily
   endfamily

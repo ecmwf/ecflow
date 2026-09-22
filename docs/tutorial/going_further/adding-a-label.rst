@@ -22,7 +22,7 @@ To create a new family :code:`label` with a task :code:`t1`, start by creating t
    :caption: $HOME/course/test/label/t1.ecf
 
    %include <head.h>
-   
+
    n=1
    while [[ $n -le 5 ]]                      # Loop 5 times
    do
@@ -31,9 +31,9 @@ To create a new family :code:`label` with a task :code:`t1`, start by creating t
       sleep 30                               # Wait half a minute
       (( n = $n + 1 ))
    done
-   
+
    ecflow_client --label=info "Job is done!" # Set the final label
-   
+
    %include <tail.h>
 
 Update Suite Definition

@@ -17,8 +17,8 @@ try:
     print(os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
 except KeyError:
     print("Could not get LD_LIBRARY_PATH")
-    
-    
+
+
 class Client(object):
     """Encapsulate communication with the ecflow server. This will automatically call
        the child command init()/complete(), for job start/finish. It will also
@@ -46,11 +46,11 @@ class Client(object):
             self.ci.set_child_init_add_vars({"name1":"1", "name2":"2"})
             self.ci.set_child_init_add_vars([ecflow.Variable("name3","3"), ecflow.Variable("name4","4")])
             self.ci.set_child_complete_del_vars(["name","name1","name2","name3","name4"])
-    
+
         print("   Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing")
         self.ci.set_child_timeout(20)
         self.ci.set_zombie_child_timeout(10)
-     
+
         # Abort the task for the following signals
         signal.signal(signal.SIGINT,  self.signal_handler)
         signal.signal(signal.SIGHUP,  self.signal_handler)
@@ -64,10 +64,10 @@ class Client(object):
         signal.signal(signal.SIGUSR2, self.signal_handler)
         signal.signal(signal.SIGPIPE, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
-        signal.signal(signal.SIGXCPU, self.signal_handler) 
+        signal.signal(signal.SIGXCPU, self.signal_handler)
         if platform.system() != "Darwin":
             signal.signal(signal.SIGPWR,  self.signal_handler)
-     
+
     def at_time(self):
 %ecfmicro #
         return datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
@@ -76,12 +76,12 @@ class Client(object):
     def signal_handler(self,signum, frame):
         print('   Aborting: Signal handler called with signal ', signum)
         self.ci.child_abort("Signal handler called with signal " + str(signum));
-     
+
     def __enter__(self):
         print('Calling init at: ' + self.at_time())
         self.ci.child_init()
         return self.ci
-     
+
     def __exit__(self,ex_type,value,tb):
         print ("   Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\n   traceback:" + str(tb))
         if ex_type is not None:
@@ -90,4 +90,4 @@ class Client(object):
             return False
         print('Calling complete at: ' + self.at_time())
         self.ci.child_complete()
-        return False 
+        return False

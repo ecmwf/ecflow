@@ -42,7 +42,7 @@ To add large triggers and complete expression:
   exp1 = PartExpression('t1 == complete')
   # a simple expression can be added as a string
   ....
-  task2.add_part_trigger( PartExpression('t1 == complete or t4 == complete') ) 
+  task2.add_part_trigger( PartExpression('t1 == complete or t4 == complete') )
   task2.add_part_trigger( PartExpression('t5 == active',True) )    # anded with first expression
   task2.add_part_trigger( PartExpression('t7 == active',False) )   # or'ed with last expression added
 

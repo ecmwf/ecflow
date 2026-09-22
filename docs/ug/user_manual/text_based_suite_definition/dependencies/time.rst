@@ -45,9 +45,9 @@ times you can use two separate time commands.
     task t1
         time 15:00 # run at 15:00
         time 19:00 # also run at 19:00
-    
+
 .. warning::
-    
+
     Beware that tasks using a :code:`time` dependency may cause the Suite to cycle on fast systems.
 
     If a task takes less than a minute to run then there is a possibility that the trigger will still be

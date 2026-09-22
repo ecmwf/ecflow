@@ -25,20 +25,20 @@ some examples of the result of family status, depending on its children.
    :header-rows: 1
 
    * - Status
-     - Significance   
+     - Significance
    * - :yellow:`█` Complete
      - Least Significant
-   * - :lightblue:`█` Queued 
-     - 
+   * - :lightblue:`█` Queued
+     -
    * - :mediumturquoise:`█` Submitted
-     - 
-   * - :darkgreen:`█` Active 
-     - 
-   * - :orange:`█` Suspended 
-     - 
-   * - :red:`█` Aborted 
+     -
+   * - :darkgreen:`█` Active
+     -
+   * - :orange:`█` Suspended
+     -
+   * - :red:`█` Aborted
      - Most important for a task
-   * - :pink:`█` Shutdown 
+   * - :pink:`█` Shutdown
      - ecFlow server node check_only
    * - :magenta:`█` Halted
      - Most important, only for ecFlow server node
@@ -50,7 +50,7 @@ Example of how the status of a family is reported:
    :header-rows: 1
 
    * - After begin command
-     - First job sent  
+     - First job sent
      - Second job sent
      - A few tasks running
      - One task aborts!
@@ -85,7 +85,7 @@ Example of how the status of a family is reported:
      -   :mediumturquoise:`█` task4
      -   :mediumturquoise:`█` task4
      -   :yellow:`█` task4
-   
+
 
 The status of the ecFlow server itself can be:
 

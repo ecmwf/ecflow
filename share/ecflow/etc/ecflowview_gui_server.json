@@ -1,19 +1,19 @@
 {
     "gui_server" : {
-                                 
+
         "server": {
-            "label" : "Server options",     
+            "label" : "Server options",
             "icon" : "server.svg",
-            
+
             "note" : {
                 "default" : "These are the <i>Server options</i> and <i>Notifications</i> parameters specifically set for server %SERVER%."
             },
-            
+
             "group" : {
-                
+
                 "title" : "Refresh",
                 "prefix" : "server.update",
-                
+
                 "line" : "autoUpdate",
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
@@ -25,11 +25,11 @@
                 "line" : "maxAdaptiveUpdateRateInMin",
                 "line" : "outputRefreshInSec"
             },
-            
-            "group" : {                
+
+            "group" : {
                 "title" : "Fetching files",
                 "prefix" : "server.files",
-                
+
                 "line" : "readFilesFromDisk",
                 "line" : "maxOutputFileLines",
                 "line" : "logServerHost",
@@ -57,42 +57,42 @@
             },
 
             "custom-notification" : {
-                "title" : "Notifications",               
+                "title" : "Notifications",
                 "group" : "true",
-                
+
                 "row" : {
-                    "label" : "Aborted",            
+                    "label" : "Aborted",
                     "line" : "server.notification.aborted.enabled",
                     "line" : "server.notification.aborted.popup",
                     "line" : "server.notification.aborted.sound"
-                  
+
                 },
                 "row" : {
-                    "label" : "Restarted",                 
+                    "label" : "Restarted",
                     "line" : "server.notification.restarted.enabled",
                     "line" : "server.notification.restarted.popup",
-                    "line" : "server.notification.restarted.sound"                 
-                   
+                    "line" : "server.notification.restarted.sound"
+
                 },
                 "row" : {
                     "label" : "Late tasks",
-                    "line" : "server.notification.late.enabled",                   
+                    "line" : "server.notification.late.enabled",
                     "line" : "server.notification.late.popup",
                     "line" : "server.notification.late.sound"
                 },
                 "row" : {
-                    "label" : "Zombies",                    
+                    "label" : "Zombies",
                     "line" : "server.notification.zombie.enabled",
                     "line" : "server.notification.zombie.popup",
-                    "line" : "server.notification.zombie.sound"                                       
+                    "line" : "server.notification.zombie.sound"
                 },
                  "row" : {
-                    "label" : "Restarted or aborted aliases",                    
+                    "label" : "Restarted or aborted aliases",
                     "line" : "server.notification.alias.enabled",
                     "line" : "server.notification.alias.popup",
-                    "line" : "server.notification.alias.sound"                                   
-                }                                  
-            }                              
-        }                     
+                    "line" : "server.notification.alias.sound"
+                }
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
- 
+
 # using %include "filename"
 # include the contents of the file %ECF_HOME%/%SUITE%/%FAMILY%/filename
 #
@@ -16,4 +16,3 @@ echo end of job
 
 %include "tail.h"
 
- 

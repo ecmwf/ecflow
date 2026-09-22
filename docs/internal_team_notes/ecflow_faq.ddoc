@@ -19,6 +19,6 @@ This pattern consider the case where you design the t2 task wrapper with code li
    if [[ ! -f $file ]] ; then xevent nok; sleep 60; fi
    cmd || xevent nok # raise the event when the command has a problem
    set +e # in some section of the code known to raise issue, closed with set -e
-   
-   
+
+
 See: https://software.ecmwf.int/issues/browse/SUP-640

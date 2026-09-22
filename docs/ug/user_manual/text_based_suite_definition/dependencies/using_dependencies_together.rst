@@ -37,7 +37,7 @@ suite begins:
     task x
         time 10:00     ; time 20:00
         date 17.2.2012 ; date 19.2.2012
-    
+
 To run task after task is complete and if the day is Monday. If the
 suite is using a real clock, the task waits for the following Monday
 (unless today is Monday) and for task to be complete. Under a hybrid
@@ -50,7 +50,7 @@ auto-restarted, task is marked complete without being submitted:
     task x
         trigger ./y == complete
         day monday
-    
+
 
 The next example shows how to run a task after an earlier task has
 stopped, either by completing or aborting. It may be useful to continue
@@ -97,7 +97,7 @@ To run a task half after the previous task fc has done half of its work:
     task half
         trigger fc:hour >= 120
         # trigger fc:hour ge 120
-    
+
 
 There is no guarantee that a task will be sent at the exact moment
 requested. At the specified time, ecFlow might be busy processing other

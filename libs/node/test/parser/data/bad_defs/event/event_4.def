@@ -1,7 +1,7 @@
 suite suiteName
    family familyName0
       task taskName0
-           event 1  
+           event 1
            event "1"
       endfamily
 endsuite

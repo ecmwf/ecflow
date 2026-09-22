@@ -15,7 +15,7 @@ for (my $step=1; $step <= 100; $step++) {
    print "this is the step number $step\n";
    xmeter("step", $step);
 }
-	
-xevent("2");	  
+
+xevent("2");
 xlabel("info", "completion");
 ^include <tail.pl>

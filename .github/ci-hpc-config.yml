@@ -285,7 +285,7 @@ nvidia-22.11:
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
       # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
-    ctest_options: 
+    ctest_options:
       # disable all tests
       - --version
     requirements: libs/pyext/test/requirements-test.txt

@@ -1,5 +1,5 @@
 suite s
- family anon    
+ family anon
    task t1
     inlimit disk   # no path, find limit name up the tree, not found, should be warning
  endfamily

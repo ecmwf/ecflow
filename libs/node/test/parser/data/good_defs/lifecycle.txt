@@ -8,7 +8,7 @@ suite zombie_lifecycle
    endfamily
    family family2
    		task aa
-   			trigger ../family1/a:myMeter >= 3 and ../family1/a:myEvent 
+   			trigger ../family1/a:myMeter >= 3 and ../family1/a:myEvent
    		task bb
    			trigger ../family1/a:myMeter >= 4  or  ../family1/a:myEvent
     endfamily

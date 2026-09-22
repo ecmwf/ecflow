@@ -21,7 +21,7 @@ suite zombie
      zombie ecf_passwd:adopt::
      zombie path:fail::
      zombie user:adopt::
-    
+
    task t3
      zombie ecf:remove:init,event,meter,label,wait,queue,complete:2000     # comment
      zombie ecf_pid:remove:init,event,meter,label,wait,queue,complete:2000     # comment

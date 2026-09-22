@@ -57,13 +57,13 @@ suite is pretty straightforward.
 
 .. code-block:: python
 
-  class ExperimentalSuite(object):    
+  class ExperimentalSuite(object):
       def _init_(self,start,end) :
           self.start_ = start
           self.end_ = end
           self.start_cycle_ = 12
           self.end_cycle_ = 12
-      
+
       def generate(self) :
           suite = Suite("x")
           make_fam = suite.add_family("make")
@@ -82,7 +82,7 @@ suite is pretty straightforward.
               fam_fam.add_task("run_more").add_trigger( "run == complete")
               previous = FAM
           return suite
-      
+
       def add_complete(self,family,fam):
           if fam < self.start_cycle_ and fam > self.end_cycle_ :
               family.add_complete( "../main:YMD eq " + str(self.start_) + " or ../main:YMD ge " + str(self.end_) )

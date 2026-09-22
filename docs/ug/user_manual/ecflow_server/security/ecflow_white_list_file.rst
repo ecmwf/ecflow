@@ -35,7 +35,7 @@ Named users with write and read access (file ecf.lists):
   #Read-only users
   #
   -uid3
-  -uid4                                                 
+  -uid4
 
 
 Provide all users with read access:
@@ -51,7 +51,7 @@ Provide all users with read access:
   #
   #All other users have read access
   #
-  -*                                                            
+  -*
 
 Restrict access to given set of nodes:
 
@@ -60,16 +60,16 @@ Restrict access to given set of nodes:
   4.4.14
   fred             # has read /write access to all suites
   -joe             # has read access to all suites
-    
+
   *  /x /y    # all users have read/write access to suites /x /y
   -* /w /z    # all users have read access to suites /w /z
-    
+
   user1 /a,/b,/c  # user1 has read/write access to suite /a /b /c
   user2 /a
   user2 /b
   user2 /c       # user2 has read write access to suite /a /b /c
   user3 /a /b /c # user3 has read write access to suite /a /b /c
-    
+
   -user4 /a,/b,/c  # user4 has read access to suite /a /b /c
   -user5 /a
   -user5 /b
@@ -134,4 +134,4 @@ Reload the White List file
 If you edit this file while ecFlow is running you need to use the
 following command to activate the change in ECF::
 
-    ecflow_client --reloadwsfile                                       
+    ecflow_client --reloadwsfile

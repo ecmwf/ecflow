@@ -23,5 +23,5 @@ Pre-processing can be stopped in two ways:
     %end
 
     echo "otherwise we must write"
- 
+
     date +%%Y.%%m.%%d

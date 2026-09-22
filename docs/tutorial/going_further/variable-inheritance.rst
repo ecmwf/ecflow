@@ -4,8 +4,8 @@
 .. index::
    single: Variable inheritance (tutorial)
 
-.. _tutorial-variable-inheritance:   
-   
+.. _tutorial-variable-inheritance:
+
 Variable inheritance
 =====================
 
@@ -100,7 +100,7 @@ Compare the value of the :code:`SLEEP` used by each of the tasks in the followin
    /test/f1/g1/x2     89
    /test/f2/t1       100
    /test/f2/t2        77
-   /test/f2/g2/x1     12 
+   /test/f2/g2/x1     12
    /test/f2/g2/x2    100
    ==============  ======
 

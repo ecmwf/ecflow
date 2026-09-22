@@ -3,9 +3,9 @@
 
 .. index::
    single: cookbook
-   
+
 .. _monitor-task:
-   
+
 How can I monitor my suite independent of the GUI?
 **************************************************
 

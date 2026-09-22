@@ -298,7 +298,7 @@ set(viewer_srcs
   Animation.cpp
   AstCollateVNodesVisitor.cpp
   AttributeEditor.cpp
-  AttributeEditorFactory.cpp   
+  AttributeEditorFactory.cpp
   CaseSensitiveButton.cpp
   ChangeNotify.cpp
   ChangeNotifyDialog.cpp
@@ -335,7 +335,7 @@ set(viewer_srcs
   FetchTask.cpp
   FlagSet.hpp
   FileFetchTask.cpp
-  FileInfoLabel.cpp   
+  FileInfoLabel.cpp
   FileWatcher.cpp
   FilterWidget.cpp
   FontMetrics.cpp
@@ -345,8 +345,8 @@ set(viewer_srcs
   HistoryItemWidget.cpp
   HtmlEdit.cpp
   HtmlItemWidget.cpp
-  InfoPanel.cpp 
-  InfoPanelItem.cpp   
+  InfoPanel.cpp
+  InfoPanelItem.cpp
   InfoPanelHandler.cpp
   InfoProvider.cpp
   InputEventLog.cpp
@@ -354,18 +354,18 @@ set(viewer_srcs
   JobStatusItemWidget.cpp
   LabelEditor.cpp
   LimitEditor.cpp
-  LineEdit.cpp  
-  LogProvider.cpp   
+  LineEdit.cpp
+  LogProvider.cpp
   LogViewerCom.cpp
   MainWindow.cpp
-  ManualItemWidget.cpp 
+  ManualItemWidget.cpp
   MenuConfigDialog.cpp
   MenuHandler.cpp
   MessageItemWidget.cpp
   MeterEditor.cpp
   ModelColumn.cpp
   NodeExpression.cpp
-  NodeFilterDialog.cpp  
+  NodeFilterDialog.cpp
   NodePanel.cpp
   NodePathWidget.cpp
   NodeQuery.cpp
@@ -422,7 +422,7 @@ set(viewer_srcs
   ServerItem.cpp
   ServerList.cpp
   ServerListDialog.cpp
-  ServerListSyncWidget.cpp   
+  ServerListSyncWidget.cpp
   ServerLoadItemWidget.cpp
   ServerSettingsItemWidget.cpp
   SessionAutoSave.cpp
@@ -440,7 +440,7 @@ set(viewer_srcs
   SuiteFilter.cpp
   SuiteFilterObserver.hpp
   SuiteModel.cpp
-  TabWidget.cpp 
+  TabWidget.cpp
   TableFilterWidget.cpp
   TableNodeModel.cpp
   TableNodeSortModel.cpp
@@ -450,7 +450,7 @@ set(viewer_srcs
   TextEditSearchLine.cpp
   TextFilterHandler.cpp
   TextFilterHandlerDialog.cpp
-  TextFilterWidget.cpp   
+  TextFilterWidget.cpp
   TimelineHeaderView.cpp
   TimelineInfoDailyView.cpp
   TimelineInfoDailyWidget.cpp
@@ -468,9 +468,9 @@ set(viewer_srcs
   TreeNodeViewDelegate.cpp
   TreeNodeWidget.cpp
   TreeView.cpp
-  TriggerEditor.cpp   
+  TriggerEditor.cpp
   TriggerItemWidget.cpp
-  TriggerTextWidget.cpp  
+  TriggerTextWidget.cpp
   TriggerCollector.cpp
   TriggerGraphLayoutBuilder.cpp
   TriggerGraphModel.cpp
@@ -480,7 +480,7 @@ set(viewer_srcs
   TriggerTableView.cpp
   TriggerTableWidget.cpp
   TriggerViewDelegate.cpp
-  TriggeredScanner.cpp  
+  TriggeredScanner.cpp
   UiLogS.cpp
   UpdateTimer.cpp
   VAttribute.cpp
@@ -574,7 +574,7 @@ set(viewer_moc_files
   ClockWidget.hpp
   CodeItemWidget.hpp
   ComboMulti.hpp
-  CommandDesignerWidget.hpp  
+  CommandDesignerWidget.hpp
   CommandOutput.hpp
   CommandOutputDialog.hpp
   CommandOutputWidget.hpp
@@ -598,8 +598,8 @@ set(viewer_moc_files
   JobStatusItemWidget.hpp
   LabelEditor.hpp
   LimitEditor.hpp
-  LineEdit.hpp   
-  LogProvider.hpp  
+  LineEdit.hpp
+  LogProvider.hpp
   MainWindow.hpp
   MenuConfigDialog.hpp
   MessageItemWidget.hpp
@@ -653,9 +653,9 @@ set(viewer_moc_files
   SuiteModel.hpp
   TabWidget.hpp
   TableFilterWidget.hpp
-  TableNodeModel.hpp 
+  TableNodeModel.hpp
   TableNodeSortModel.hpp
-  TableNodeView.hpp 
+  TableNodeView.hpp
   TableNodeViewDelegate.hpp
   TableNodeWidget.hpp
   TextEditSearchLine.hpp
@@ -672,7 +672,7 @@ set(viewer_moc_files
   TreeNodeModel.hpp
   TreeNodeView.hpp
   TreeNodeViewDelegate.hpp
-  TreeNodeWidget.hpp  
+  TreeNodeWidget.hpp
   TriggerEditor.hpp
   TriggerGraphWidget.hpp
   TriggerGraphView.hpp
@@ -699,7 +699,7 @@ set(viewer_moc_files
   TextPager/TextPagerEdit_p.hpp
   TextPager/TextPagerSection_p.hpp
   TextPager/TextPagerWidget.hpp
-  TextPager/syntaxhighlighter.hpp   
+  TextPager/syntaxhighlighter.hpp
 )
 
 set(viewer_wrap_ui_files
@@ -710,7 +710,7 @@ set(viewer_wrap_ui_files
   ChangeNotifyDialog.ui
   ChangeNotifyDialogWidget.ui
   ChangeNotifyEditor.ui
-  CommandDesignerWidget.ui 
+  CommandDesignerWidget.ui
   CommandOutputDialog.ui
   CommandOutputWidget.ui
   CustomCommandDialog.ui
@@ -744,7 +744,7 @@ set(viewer_wrap_ui_files
   SaveSessionAsDialog.ui
   SearchLineWidget.ui
   ServerAddDialog.ui
-  ServerEditDialog.ui 
+  ServerEditDialog.ui
   ServerListDialog.ui
   ServerListSyncWidget.ui
   ServerLoadItemWidget.ui

@@ -23,7 +23,7 @@ def create_wrapper(name, content):
     print("#MSG: creating file %s/" % wdir + name)
     wrapper = open(wdir + "/%s" % name, 'w')
     print(content, file=wrapper)
-    wrapper.close()    
+    wrapper.close()
 ##############################################
 
 # ic.SUBM = "/home/ma/emos/bin/smssubmit.cray"
@@ -47,7 +47,7 @@ while [ $step -le %FIN:48% ]; do
   if [[ %PRODUCE:1% = yes ]]; then
     xevent p
   elif [[ %CALL_WAITER:0% != 0 ]]; then
-case %ECF_PROG:0% in 
+case %ECF_PROG:0% in
 0) smswait %TRIGGER:1==1%;;
 *) ecflow_client --wait "%TRIGGER:1==1%";;
 esac
@@ -60,7 +60,7 @@ esac
   xmeter step $step
   step=$((step + %BY:1%))
 done
- 
+
 %include <endt.h>
 '''
     create_wrapper("produce.sms", produce)
@@ -70,10 +70,10 @@ done
 
     head = """import os, time, signal
 import ecflow
-  
+
 print "PYTHONPATH====================================================="
 print os.environ['PYTHONPATH'].split(os.pathsep)
- 
+
 class Client(object):
     ''' communication with the ecflow server. This will automatically call
        the child command init()/complete(), for job start/finish. It will also
@@ -88,11 +88,11 @@ class Client(object):
       self.ci.set_child_path("$ECF_NAME$")
       self.ci.set_child_password("$ECF_PASS$")
       self.ci.set_child_try_no($ECF_TRYNO$)
-    
+
       print "Only wait 20 seconds, if the server cannot be contacted, before failing"
       self.ci.set_child_timeout(20)
       self.ci.set_zombie_child_timeout(10)
-     
+
       # Abort the task for the following signals
       signal.signal(signal.SIGINT,  self.signal_handler)
       signal.signal(signal.SIGHUP,  self.signal_handler)
@@ -108,15 +108,15 @@ class Client(object):
       signal.signal(signal.SIGTERM, self.signal_handler)
       signal.signal(signal.SIGXCPU, self.signal_handler)
       signal.signal(signal.SIGPWR,  self.signal_handler)
-     
+
     def signal_handler(self,signum, frame):
       print 'Aborting: Signal handler called with signal ', signum
       self.ci.child_abort("Signal handler called with signal " + str(signum));
-     
+
     def __enter__(self):
       self.ci.child_init()
       return self.ci
-     
+
     def __exit__(self,ex_type,value,tb):
       print "Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\\\n" + str(tb)
       if ex_type is not None:
@@ -127,7 +127,7 @@ class Client(object):
 """
     body = """#!/usr/bin/env python
 $include <head.py>
- 
+
 if __name__ == "__main__":
 # This will also handle call to sys.exit(), i.e Client.__exit__ will still be called.
    with Client() as ci:
@@ -138,16 +138,16 @@ if __name__ == "__main__":
          ci.child_meter('step',i)
          ci.child_label('info', "value_" + str(i))
          time.sleep(1)
-       
+
       ci.child_event('1')
       print "Finished event,meter and label child commands"
- 
+
 $manual
    This is the manual section. Instead of calling python from the ECF_JOB_CMD we could alternatively place,
        #!/bin/env/python
    on the first line of this file.
 $end
- 
+
 $comment
    Note: We do not need a include a tail.py, the head.py does it all.
 $end
@@ -173,7 +173,7 @@ $include <python_endt.h>
     content = """#!/usr/bin/env python
 import os
 import sys
-import signal 
+import signal
 
 ECF_PORT=$ECF_PORT:0$
 XECF="/usr/local/apps/ecflow/current/bin/ecflow_client ";
@@ -193,10 +193,10 @@ import atexit
 early_exit = True
 @atexit.register
 def goodbye():
-  if early_exit: 
+  if early_exit:
     print "too early"
     xabort()
-  else: 
+  else:
     xcomplete()
 
 # TIME_STAMP
@@ -218,7 +218,7 @@ class TimeStamper(object):
 
 class TeeFileLikeWrapper():
     def __init__(self, *files): self.files = files
-    def write(self, msg): 
+    def write(self, msg):
         for f in self.files: f.write(timestamp(msg.strip()))
 
 class FlushingWrapper:
@@ -246,18 +246,18 @@ if ECF_PORT > 0:
   os.environ['ECF_PASS'] = "$ECF_PASS:0$"
 
   def xinit():
-    os.system(XECF + " --init=" + str(os.getpid()))  
+    os.system(XECF + " --init=" + str(os.getpid()))
     print "init"
   def xabort():
-    os.system(XECF + " --abort")  
+    os.system(XECF + " --abort")
   def xcomplete():
-    os.system(XECF + " --complete")  
+    os.system(XECF + " --complete")
   def xmeter(name, step):
-    os.system(XECF + " --meter=" + name + " " + str(step))  
+    os.system(XECF + " --meter=" + name + " " + str(step))
   def xevent(name):
-    os.system(XECF + " --event=" + name)  
+    os.system(XECF + " --event=" + name)
   def xlabel(name, msg):
-    os.system(XECF + " --label=" + name + " '%s'" % msg)  
+    os.system(XECF + " --label=" + name + " '%s'" % msg)
 else:
   os.environ['SMS_PROG'] = "$SMS_PROG:0$"
   os.environ['SMSNAME'] = "$SMSNAME:0$"
@@ -306,8 +306,8 @@ for ( my $step=1; $step <= 100 ; $step++ ) {
    xmeter("step", $step);
 }
 xevent("1");
-            
-xlabel("info", "news from pure perl world");      
+
+xlabel("info", "news from pure perl world");
 ^include <perl_endt.h>
 """)
     # create_wrapper("perl.sms", content)
@@ -331,7 +331,7 @@ $xmeter = $client; $arg_m = "--meter";
 $xlabel = $client; $arg_l = "--label";
 $xevent = $client; $arg_e = "--event";
 $xcomplete = $client; $arg_c = "--complete";
-$xabort = $client; 
+$xabort = $client;
 
 system($client, "--init", "$$");
 } else {
@@ -342,11 +342,11 @@ system($client, "--init", "$$");
   $ENV{'SMSTRYNO'} = "^SMSTRYNO:0^" ; # job occurence number
 }
 
-sub xmeter($$){ my ($name, $step) = @_; 
+sub xmeter($$){ my ($name, $step) = @_;
   system($xmeter, $arg_m, $name, $step); }
-sub xevent($){ my ($name) = @_; 
+sub xevent($){ my ($name) = @_;
   system($xevent, $arg_e, $name); }
-sub xlabel($$){ my ($name, $msg) = @_; 
+sub xlabel($$){ my ($name, $msg) = @_;
   system($xlabel, $arg_l, $name, $msg); }
 sub xabort(){ system($xabort); }
 sub xcomplete(){ system($xcomplete, $arg_c, "$$"); }
@@ -378,7 +378,7 @@ SLEEP=%SLEEP:0%
 KIND=%KIND:start%
 type rsh && RSH=rsh || RSH=ssh
 
-case $HOST in 
+case $HOST in
 c2a*) rhost=c2a;;
 c2b*) rhost=c2b;;
 xxcct*) rhost=cctdtn1 ; RSH=ssh;;
@@ -397,11 +397,11 @@ ps -elf | grep logsvr | grep $USER | grep -v grep | \\\
 awk '{print $1}' | xargs kill -9
 
 case $ARCH in
-cray)  
+cray)
   case $HOST in
   cct*) logsvr=/usr/local/apps/sms/bin/logsvr.sh
         # /usr/local/apps/emos/bin/logsvr.sh
-        # $RSH $rhost 
+        # $RSH $rhost
         nohup $logsvr > /tmp/emos_logsvr.tmp 2>&1 &
         rhost=cct # start on both nodes cctdtn1  + cct (Avi serial jobs)
         trap 0; xcomplete; exit 0
@@ -432,7 +432,7 @@ cray) ps -elf | grep logsvr | grep $USER # grep -v grep || exit 1
       xlabel info "???"
      trap 0; xcomplete; exit 0
 ;;
-*) $RSH $rhost ps -elf | grep logsvr | grep -v grep | grep $USER || exit 1 
+*) $RSH $rhost ps -elf | grep logsvr | grep -v grep | grep $USER || exit 1
 ;;
 esac
 
@@ -446,7 +446,7 @@ esac
 
     ### task
     content = """#!/bin/bash
-%manual 
+%manual
 manual - this task is automatically created by cray.py
 %end
 %include <qsub.h>
@@ -466,7 +466,7 @@ case $HOST in
 cc*)xlabel info $(printenv | grep -E '(SUBMIT_|EC_)') ;;
 *) xlabel info OK
 esac
-  
+
 printenv | sort
 xevent 1
 step=0
@@ -480,7 +480,7 @@ done
     create_wrapper("test.sms", content)
 
     content = """#!/bin/bash
-%manual 
+%manual
 manual - this task is automatically created by cray.py
 
 expected to run in real-time mode only
@@ -493,19 +493,19 @@ expected to run in real-time mode only
 KIND=%KIND:when%
 NOW=$(date +%%H%%M)
 
-case $KIND in 
-when) TIME=0; 
+case $KIND in
+when) TIME=0;
 for when in $(echo %WHENS:0%); do
   if [[ $((NOW - when)) -le 1 ]]; then break; fi
   TIME=$when
 done
 for when in $(echo %WHENS:0%); do
   if   [[ $when -le $NOW ]] then  xmeter time $when; sleep %SLEEP:5%; fi
-  done;; 
+  done;;
 time) TIME=%TIME:0%
 
 main=/sapp/run/ext
-case $TIME in 
+case $TIME in
 1350) path=$main/DC1/00;;
 0120) path=$main/DC1/12;;
 0205) path=$main/DC1/18;;
@@ -532,7 +532,7 @@ esac
     create_wrapper("sapp.sms", content)
 
     content = """
-%manual 
+%manual
 manual - this task is automatically created by cray.py
 
 expected to run in real-time mode only
@@ -547,7 +547,7 @@ make etest | grep -v Node::addVariable:
 make teste | grep -v Node::addVariable:
 
 TEST="" make oe edae lawe lbce rd mce mofce
-TEST= "" make e eeda elbc elaw 
+TEST= "" make e eeda elbc elaw
 
 fi
 
@@ -570,7 +570,7 @@ make cov| grep -v Node::addVariable:
     create_wrapper("maker.sms", content)
 
     content = """#!/bin/bash
-%manual 
+%manual
 manual - this task is automatically created by cray.py
 expected to run in real-time mode only
 %end
@@ -614,7 +614,7 @@ echo "mkdir -p test; for f in $(ls :${EMOS_BASE}00:$MEMBER_FROM:*:); do FDB_ROOT
 echo "mv test/*$STREAM:*/* $FDB_ROOT/:od:$STREAM:g:$EXPVER:$YMD::/."
 done
 
-case $KIND in 
+case $KIND in
 VERSION) echo;;
 MEMBER) echo;;
 *) xabort;;
@@ -630,7 +630,7 @@ esac
 
 def create_de():
     try:    os.stat(wdir + "/de")
-    except: os.makedirs(wdir + "/de")       
+    except: os.makedirs(wdir + "/de")
     task = open(wdir + "/de/setup.ecf", 'w')
     print('''#!/bin/bash
 %include <head.h>
@@ -700,7 +700,7 @@ an example for include manual page
     shell = open(wdir + "/smhi.sh", 'w')
     print('''#!/bin/bash
 set -eux
-# use ecflow || 
+# use ecflow ||
 export PATH=/usr/local/apps/ecflow/current/bin:$PATH
 export SIGNAL_LIST='1 2 3 4 5 6 7 8 13 15 24 31'
 ecflow_client --init=$$
@@ -708,7 +708,7 @@ ecflow_client --init=$$
 ERROR() {
   ecflow_client --abort # raison:trap
   echo "#WAR: TRAPPING ERROR"
-  trap 0  
+  trap 0
   uname -a; date; times
   sleep 0
   exit 0
@@ -756,7 +756,7 @@ export SIGNAL_LIST='1 2 3 4 5 6 7 8 13 15 24 31'
 ERROR() {
   ecflow_client --abort trap
   echo "#WAR: TRAPPING ERROR"
-  trap 0 
+  trap 0
   uname -a; date; times
   exit 1
 }
@@ -802,7 +802,7 @@ $ECF_JOB > $ECF_JOBOUT 2>&1 &
     print("##cmd", cmd)
 
     print('''#!/bin/bash
-%manual 
+%manual
 %include <smhi_man.h>
 %end
 set -eux
@@ -818,7 +818,7 @@ export ECF_NAME ECF_PASS ECF_HOST ECF_PORT
 ERROR() {
   ecflow_client --abort # raise:trap
   echo "#WAR: TRAPPING ERROR"
-  trap 0  
+  trap 0
   uname -a; date; times; sleep 0
   exit 1
 }
@@ -893,13 +893,13 @@ def repeat():
             Repeat("YMD", "1 2 3 4 5".split(), kind="enum"),
             dummy()),
         )
-        
+
 
 def fam_ui():
     return Family("ui").add(
         Defcomplete(),
         repeat(),
-        
+
         Variables(VAR= 1),
 
         Family("limit").add(Limit("mutex", 1),
@@ -954,7 +954,7 @@ def smhi():
                 Label("info", "event is set by scan task"),
                 Event("1"),
                 Cron("00:00 23:59 00:05"),
-                Trigger("consume:1"),                
+                Trigger("consume:1"),
                 Task("proc1").add(Trigger("1==0", Complete("1==1"))),
                 Task("proc2").add(Trigger("1==0", Complete("1==1"))),
                 )),
@@ -964,7 +964,7 @@ def smhi():
                       ECF_STATUS_CMD= STATUS,
                       ECF_CHECK_CMD= CHECK,
                       # ECF_EXTN= ".sms",
-                      ACCOUNT=  "UNSET",                      
+                      ACCOUNT=  "UNSET",
                       ECF_INCLUDE= idir,
                       ECF_HOME= jdir,
                       ECF_FILES= wdir,
@@ -976,11 +976,11 @@ def smhi():
             Task("a1").add(Meter("step", -1, 100), Event("1")),
             Task("a11").add(Meter("step", -1, 100), Event("1")),
             ),
-        
+
         Family("ssh").add(
             Variables(USE_SSH_SUB= 1,
                       SCRIPT_PATH= wdir,
-                      SCRIPT_NAME= "smhi.sh"),            
+                      SCRIPT_NAME= "smhi.sh"),
             smhi_unit("ibis", "ibis", "none", jdir),
             smhi_unit("pikachu", "pikachu", "none", jdir),
             ),
@@ -989,12 +989,12 @@ def smhi():
             Variables(USE_SSH_SUB= 1,
                       ECF_JOB_CMD= "/home/ma/map/course/cray/smhisubmit.sh %ECF_JOB%",
                       SCRIPT_PATH= wdir,
-                      SCRIPT_NAME= "smhi.sh"),            
+                      SCRIPT_NAME= "smhi.sh"),
             smhi_unit_alter("ibis", "ibis", "none", jdir),
             smhi_unit_alter("pikachu", "pikachu", "none", jdir),
                           )
-        )        
-                          
+        )
+
 def acq():
     name = "acq_ex"
 
@@ -1033,10 +1033,10 @@ def unit(name, schost, queue, rdir, account="", leaf=True, add=None):
     return Family(name).add(
         If(account != "",
            Variables(ACCOUNT= account)),
-        Variables(QUEUE=    queue, 
+        Variables(QUEUE=    queue,
                   SCHOST=   schost,
                   ECF_OUT=  rdir,
-                  LOGDIR=   rdir,),        
+                  LOGDIR=   rdir,),
         If (leaf, Task("test").add(
                 add,
             Event(1),
@@ -1046,10 +1046,10 @@ def unit(name, schost, queue, rdir, account="", leaf=True, add=None):
 def smhi_nit(name, schost, queue, rdir, account=""):
     return Family(name).add(
         If(account != "", Variables(ACCOUNT= account)),
-        Variables(QUEUE=    queue, 
+        Variables(QUEUE=    queue,
                   SCHOST=   schost,
                   ECF_OUT=  rdir,
-                  LOGDIR=   rdir,),        
+                  LOGDIR=   rdir,),
         Task("smhi").add(
             Event(1),
             Meter("step", -1, 120, 100),
@@ -1060,10 +1060,10 @@ def smhi_unit(name, schost, queue, rdir, account=""): return None
 def smhi_unit_alter(name, schost, queue, rdir, account=""):
     return Family(name).add(
         If(account != "", Variables(ACCOUNT= account)),
-        Variables(QUEUE=    queue, 
+        Variables(QUEUE=    queue,
                   SCHOST=   schost,
                   ECF_OUT=  rdir,
-                  LOGDIR=   rdir,),        
+                  LOGDIR=   rdir,),
         Task("smhi_v").add(
             Event(1),
             Meter("step", -1, 120, 100),
@@ -1073,14 +1073,14 @@ def turkey_main(day, path):
     def runs(num, time):
         return Family('run%d' % num).add(
                Trigger(path + '/deps/%s eq complete' % time),
-            
+
                Family('feed_meb').add(
-                Task('strip_message'),                  
+                Task('strip_message'),
 
                 Task('insert_meb').add(
                     Trigger('strip_message eq complete'),
                   ),
-               ),               
+               ),
                Family('feed_reb').add(
                   Task('decode_synop').add(
                      Trigger('../feed_meb/insert_meb eq complete'),
@@ -1094,7 +1094,7 @@ def turkey_main(day, path):
                   Task('decode_metar').add(
                      Trigger('../feed_reb/decode_ship eq complete'),
                   ),
-               ),               
+               ),
                Family('rdb').add(
                   Task('rdb_synop').add(
                      Trigger('../feed_reb/decode_synop eq complete'),
@@ -1108,14 +1108,14 @@ def turkey_main(day, path):
                   Task('rdb_metar').add(
                      Trigger('../feed_reb/decode_metar eq complete'),
                   ),
-               ),               
-            ),            
+               ),
+            ),
 
     def task_trigger(name, condition):
         return Task(name).add(Trigger(condition))
 
     def echos():
-        echo = { 
+        echo = {
             "cleandb" : "0131",
             "cleanerrdb": "0136",
             "silmeb": "0141",
@@ -1148,13 +1148,13 @@ def turkey_main(day, path):
 
         for key in sorted(echo, key=echo.get, reverse=False): # order by value
             # for key in sorted(echo.keys()): # order by key
-            out.append(task_trigger("echo_%s" % key, 
+            out.append(task_trigger("echo_%s" % key,
                                     path + "/deps/%s" % echo[key] + " eq complete"))
         return out
-        
+
     return Family('main').add(
             Trigger('deps/0000 eq complete'),
-         
+
             Family('clean').add(
                task_trigger('cleandb',
                             path + '/deps/0130 eq complete'),
@@ -1168,7 +1168,7 @@ def turkey_main(day, path):
                Task('silreb').add(
                   Trigger(path + '/deps/0145 eq complete'),
                ),
-            ),         
+            ),
             runs(1, "0220"),
             runs(2, "0420"),
             runs(3, "0620"),
@@ -1183,7 +1183,7 @@ def turkey_main(day, path):
                Task('eksikveritamamla').add(
                   Trigger(path + '/deps/2200 eq complete'),
                ),
-            ),            
+            ),
             Family('tsmarc').add(
                Task('uydu_tsm').add(
                   Trigger(path + '/deps/0200 eq complete'),
@@ -1194,7 +1194,7 @@ def turkey_main(day, path):
                Task('radar_lokasyon_tip_tsm').add(
                   Trigger(path + '/deps/0500 eq complete'),
                ),
-            ),            
+            ),
             Family('ftpsenddata').add(
                Task('retObsAndFtp_for_00').add(
                   Trigger(path + '/deps/0230 eq complete'),
@@ -1217,7 +1217,7 @@ def turkey_main(day, path):
                Task('radar_report').add(
                   Trigger(path + '/deps/0700 eq complete'),
                ),
-            ),            
+            ),
             Family('cleanup').add(
                Task('backuplog').add(
                   Trigger(path + '/deps/2300 eq complete'),
@@ -1225,21 +1225,21 @@ def turkey_main(day, path):
                Task('cleanup').add(
                   Trigger(path + '/deps/2315 eq complete'),
                ),
-            ),            
+            ),
             Family('echo').add(
                Variables(
                   ECF_FILES= '/pp1/bin/dpp_sms/echo',),
 
-               echos(),           
+               echos(),
          ))
 
 
 def turkey_deps(num):
     def item(hhmm):
         return  Family(hhmm).add(
-               Complete("./%s/compl eq complete and " % hhmm + 
+               Complete("./%s/compl eq complete and " % hhmm +
                         './%s/dummy eq queued' % hhmm),
-            
+
                Task('dummy').add(
                   Cron('-w %d' % num + ' ' + hhmm[:2] + ":" + hhmm[-2:]),
                ),
@@ -1304,11 +1304,11 @@ def turkey_deps(num):
 "0701",
 "2301",
 "2316", ]
-    def loop_items(): 
+    def loop_items():
         out = []
-        for hhmm in items: 
+        for hhmm in items:
             out.append(item(hhmm))
-        return out 
+        return out
 
     return Family('deps').add(
             Variables(
@@ -1322,9 +1322,9 @@ def turkey_loop(suite_name):
     start = 20120723; end=20301231 # beware addition below does not consider start as a date
     path = "/%s/weekly/" % suite_name
 
-    for num in range(7): 
+    for num in range(7):
         out.append(Family(days[num]).add(
-                Repeat(kind='date', name='YMD', 
+                Repeat(kind='date', name='YMD',
                        start= start + num, end=end, step=7),
                 turkey_deps(1),
                 turkey_main(days[num], path=path + days[num]),))
@@ -1342,7 +1342,7 @@ def turkey(suite_name):
 ## PURE
 
 class Languages(object):
-    def __init__(self): pass 
+    def __init__(self): pass
     def task(self): return None
     def scripts(self): pass
 
@@ -1415,63 +1415,63 @@ WDIR= "/scratch/ma/map/sms"
 HLOG= "/home/ma/map/logs"
 
 hosts = {"lxb" : { "COMPILER": "gcc-4.3", # linux64
-                   "SCHOST": "lxb", 
+                   "SCHOST": "lxb",
                    "QUEUE_EPILOG": "serial",
-                   "LOGDIR": HLOG, "ECF_OUT": HLOG, 
+                   "LOGDIR": HLOG, "ECF_OUT": HLOG,
                    "QUEUE": "serial",
-                   "WDIR": WDIR, }, 
+                   "WDIR": WDIR, },
          "ibis" : { "COMPILER": "gcc",
-                    "SCHOST": "ibis", 
-                    "WDIR": WDIR, }, 
+                    "SCHOST": "ibis",
+                    "WDIR": WDIR, },
          "lxop" : {  "COMPILER": "gcc-4.3",
                     "SCHOST": "lxop",
-                     "QUEUE": "test", 
+                     "QUEUE": "test",
                      "QUEUE_EPILOG": "test",
-                     "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                     "COMPILE_DIR": "/gpfs/lxop/emos_data/sms", 
-                    "WDIR": "/gpfs/lxop/emos_data/sms", 
-                     }, 
+                     "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                     "COMPILE_DIR": "/gpfs/lxop/emos_data/sms",
+                    "WDIR": "/gpfs/lxop/emos_data/sms",
+                     },
          "opensuse103": { "COMPILER": "gcc-4.5",
-                         "SCHOST": "opensuse103", 
-                     "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                         "WDIR": WDIR, }, 
+                         "SCHOST": "opensuse103",
+                     "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                         "WDIR": WDIR, },
          "opensuse113": { "COMPILER": "gcc-4.5",
-                         "SCHOST": "opensuse113", 
-                     "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                         "WDIR": WDIR, }, 
+                         "SCHOST": "opensuse113",
+                     "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                         "WDIR": WDIR, },
          "opensuse131": { "COMPILER": "gcc-4.8",
-                         "SCHOST": "opensuse131", 
-                     "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                         "WDIR": WDIR, }, 
+                         "SCHOST": "opensuse131",
+                     "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                         "WDIR": WDIR, },
          "ecgb": { "COMPILER": "gcc-4.4.7", # redhat
-                   "QUEUE": "normal", 
+                   "QUEUE": "normal",
                    "QUEUE_EPILOG": "normal",
-                   "SCHOST": "ecgb", 
-                     "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                    "WDIR": WDIR, }, 
+                   "SCHOST": "ecgb",
+                     "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                    "WDIR": WDIR, },
          "lxc": { "COMPILER": "gcc-4.4.7", # redhat
-                   "QUEUE": "normal", 
+                   "QUEUE": "normal",
                    "QUEUE_EPILOG": "normal",
-                   "SCHOST": "lxc", 
-                   "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                   "WDIR": WDIR, }, 
+                   "SCHOST": "lxc",
+                   "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                   "WDIR": WDIR, },
          "cct": { "COMPILER": "gcc",
                   "QUEUE_EPILOG": "ns",
-                  "SCHOST": "cct", 
-                  "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                  "COMPILE_DIR": "/home/ma/map/sms", 
-                  "WDIR": "/home/ma/map/sms", }, 
+                  "SCHOST": "cct",
+                  "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                  "COMPILE_DIR": "/home/ma/map/sms",
+                  "WDIR": "/home/ma/map/sms", },
          "cca": { "COMPILER": "gcc",
                   "QUEUE_EPILOG": "ns",
-                      "SCHOST": "cca", 
-                       "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                       "WDIR": "/home/ma/map/sms", }, 
+                      "SCHOST": "cca",
+                       "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                       "WDIR": "/home/ma/map/sms", },
          "ccb": { "COMPILER": "gcc",
                   "QUEUE_EPILOG": "ns",
-                      "SCHOST": "ccb", 
-                       "LOGDIR": HLOG, "ECF_OUT": HLOG, 
-                      "WDIR": "/home/ma/map/sms", 
-                  "COMPILE_DIR": "/home/ma/map/sms", 
+                      "SCHOST": "ccb",
+                       "LOGDIR": HLOG, "ECF_OUT": HLOG,
+                      "WDIR": "/home/ma/map/sms",
+                  "COMPILE_DIR": "/home/ma/map/sms",
                   },          }
 
 class Compile(object):
@@ -1530,7 +1530,7 @@ class Compile(object):
 %%include <qsub.h>
 %%include <step1.h>
 %%include <trap.h>
-%s 
+%s
 %%include <endt.h>
 %%include <step2.h>''' % content
 
@@ -1539,15 +1539,15 @@ class Compile(object):
         compil = "%COMPILE_DIR:/scratch/ma/map/sms/$ARCH/%/%SCHOST:$HOST%"
         task = self.wrap("cd %s/sms; make clean; cd ../; tar -czf sms.tgz sms; " % source)
         create_wrapper("prepare.sms", task)
-        
-        task = self.wrap("comp=%s; " % compil + 
+
+        task = self.wrap("comp=%s; " % compil +
                          "mkdir -p $comp; cd $comp; scp ibis:%s/sms.tgz .;" % source +
 '''rm -rf sms.tar sms || :
 gzip -d sms.tgz; tar -xf sms.tar''')
         create_wrapper("get.sms", task)
 
-        task = self.wrap("comp=%s;" % compil + 
-                         '''cd $comp/sms; 
+        task = self.wrap("comp=%s;" % compil +
+                         '''cd $comp/sms;
 if [[ $ARCH == cray ]]; then
 module switch PrgEnv-cray PrgEnv-intel
 export CRAYPE_LINK_TYPE=dynamic
@@ -1555,8 +1555,8 @@ fi
 make %TARGET:linux%''')
         create_wrapper("make.sms", task)
 
-        task = self.wrap("comp=%s;" % compil +  
-                         '''cd $comp/sms; make tester; 
+        task = self.wrap("comp=%s;" % compil +
+                         '''cd $comp/sms; make tester;
 mkdir -p %SMSHOME:/tmp/$USER%
 SMS_PROG=900001 sms &
 sleep 10
@@ -1636,7 +1636,7 @@ def triggered(ref, tor=None, tand=None):
     tr2 = ""
     if tand: trg = " and %s" % tand
     if tor:  tr2 = " or %s" % tor
-    return Trigger("(%s != active and %s != submitted and %s != aborted" 
+    return Trigger("(%s != active and %s != submitted and %s != aborted"
                 % (ref, ref, ref) + trg + ")" + tr2)
 
 def philosopher(id, s1, s2, version):
@@ -1692,7 +1692,7 @@ def call_dinner():
 beg =  0
 fin = 48
 by  =  3
-    
+
 def not_consumer(): return Variables(CONSUME= "no")
 
 def not_producer(): return Variables(PRODUCE= "no")
@@ -1722,7 +1722,7 @@ def call_consumer(SELECTION):
                     call_task( "consume", "'%STEP%'", "'%STEP%'", leap_by).add(
                         Repeat("STEP", leap_beg, fin, leap_by, kind="integer"),
                         # same trigger as consume0
-                        # Trigger("(%s and (consume:STEP le %s1/produce:STEP)) or " % (lead, prod) + 
+                        # Trigger("(%s and (consume:STEP le %s1/produce:STEP)) or " % (lead, prod) +
                         #         "(not %s and (consume:STEP le %s0/produce:step))" % (lead, prod))
                         Trigger("(consume:STEP le %s1/produce:STEP)" % prod),
                        )))
@@ -1731,7 +1731,7 @@ def call_consumer(SELECTION):
 
     def consume2(idx, fin):
         out = []
-        while idx <= fin:  
+        while idx <= fin:
             out.append(Family("%03d" % idx).add(
                     call_task( "consume", idx, idx, by).add(
                         Variables(STEP= idx),
@@ -1795,7 +1795,7 @@ def call_consumer(SELECTION):
                           TRIGGER= "../produce:step -gt consume:$step or ../produce eq complete"),
                 call_task( "consume", beg, fin, by ).add(
                 )),
-             
+
              Family("consume0or1").add(
                 not_producer(),
                 Inlimit("limit:consume"),
@@ -1906,10 +1906,10 @@ class Cray(ic.SeedOD):
                 Event("cca"),
                 Event("ccb"),
                 Event("hps"),
-                
+
                 Defstatus("complete"))            )
 
-        msg = "have you? setup ssh login, created remote directory" 
+        msg = "have you? setup ssh login, created remote directory"
         msg += ", set START_LOGSVR=1 (edit task), once, to launch the logserver"
         if "eod" in host: user = "emos"
         print("#MSG: host, user", host, user)
@@ -1918,7 +1918,7 @@ class Cray(ic.SeedOD):
             unit("jonas", "ibis", "no", "/tmp/$USER/jobs", add=(Today("07:00"),
                                                                 Today("21:00"))),
             Variables(USER=     user,
-                      ACCOUNT=  account), # 
+                      ACCOUNT=  account), #
 
             # Time("09:00"),
 
@@ -1934,7 +1934,7 @@ class Cray(ic.SeedOD):
         out = []
         for num in range(0, 10):
             out.append(Family("%03d" % num).add(Task("test")))
-        
+
         return Family("arg3").add(
             Defstatus("complete"),
             Variables(SCHOST= "cca-b"),
@@ -1972,9 +1972,9 @@ class Cray(ic.SeedOD):
         global host, user
         def parallel(pes=1, thr=1, hyp="no"):
             return Family("p%d_%d_%s" %(pes, thr, hyp)).add(
-                Variables(NPES=pes, THREADS=thr,                           
-                          HYPER=hyp), 
-                Task("test").add(Label("info", ""), 
+                Variables(NPES=pes, THREADS=thr,
+                          HYPER=hyp),
+                Task("test").add(Label("info", ""),
                                  Meter("step", -1, 120),
                                  Event(1)))
         ct1logs= "/sc1/tcwork/emos/logs"
@@ -2007,7 +2007,7 @@ class Cray(ic.SeedOD):
                     parallel(2, 12),
                     parallel(2, 24),
                     parallel(2, 15),
-                    
+
                     parallel(1, 2, "yes"),
                     parallel(2, 24, "yes"),
                     parallel(24, 2, "yes"),
@@ -2025,7 +2025,7 @@ class Cray(ic.SeedOD):
                     parallel(2, 12),
                     parallel(2, 24),
                     parallel(2, 15),
-                    
+
                     parallel(1, 2, "yes"),
                     parallel(2, 24, "yes"),
                     parallel(24, 2, "yes"),
@@ -2037,7 +2037,7 @@ class Cray(ic.SeedOD):
                    Variables(LOGHOST= HCRAY,
                              LOGPORT= base + get_uid())),
                 )
-            ]      
+            ]
 
         lxop_out = "/vol/lxop_emos_nc/output"
         if user == "emos" or host in ("ode", "eode", "ecf"):
@@ -2113,7 +2113,7 @@ if __name__ == "__main__":
     suite   = None
     user = get_username()
     opts, args = getopt.getopt(
-          sys.argv[1:], "hp:u:es:n:p:", 
+          sys.argv[1:], "hp:u:es:n:p:",
           ["help", "port", "user", "ecflow", "suite", "node", "path"])
     print("#MSG: opts, args", opts, args)
 
@@ -2133,7 +2133,7 @@ if __name__ == "__main__":
 
     import cli_proc
 
-    if suite is None: 
+    if suite is None:
         cli_proc.ip.SELECTION = user
     elif '/' in suite:
         sel = suite
@@ -2144,7 +2144,7 @@ if __name__ == "__main__":
 
     if ecflow and host not in ("ode", "map", "pikachu"):
         ic.ecf.ECF_MODE = "ecflow"
-    else: 
+    else:
         import sms2ecf
         sms2ecf.ECF_MODE = "sms"
         ic.ecf.ECF_MODE = "sms"

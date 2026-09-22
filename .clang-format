@@ -69,7 +69,7 @@ IncludeCategories:
   # Then include every 'system' headers (i.e. in <>)
   - Regex:           '<[^Q][[:alnum:]_]+(\.h)?>'
     Priority:        10
-  # Then include '3rd party' headers 
+  # Then include '3rd party' headers
   - Regex:           '<[[:alnum:]/._]+>'
     Priority:        20
   # And finally, include every 'project' header

@@ -16,7 +16,7 @@ import os
 import pwd
 from threading import Thread
 try: from scrolledlist import ScrolledList
-except: 
+except:
     loc = "http://infohost.nmt.edu/tcc/help/lang/python/examples/scrolledlist"
     raise Exception("wget %s/scrolledlist.py; # Thanks NMT")
 
@@ -114,9 +114,9 @@ class TaskList(tki.Frame):
     # LINES = h / 10
 
     def __init__(self, parent, kind):
-        tki.Frame.__init__(self, parent, 
-                           # side="bottom", 
-                           # fill="both", 
+        tki.Frame.__init__(self, parent,
+                           # side="bottom",
+                           # fill="both",
                            # expand=True,
                            # sticky="nsew",
         )
@@ -140,9 +140,9 @@ class TaskList(tki.Frame):
         selectall.grid(row=2, column=0, sticky=tki.W)
 
         self.__scrolledList = ScrolledList(
-            self, 
+            self,
             # sticky="nsew",
-            width=self.WIDTH, 
+            width=self.WIDTH,
             height=self.LINES,  # selectmode=tki.EXTENDED,
             callback=self.__callback)
         self.__scrolledList.grid(row=3, column=0)
@@ -159,9 +159,9 @@ class TaskList(tki.Frame):
         for i in selected:
             item = self.__scrolledList.listbox.get(i)
             res.add(item)
-            for one in res: 
+            for one in res:
                 show_check(one)
-                
+
     def insert(self, path): self.__scrolledList.append(path)
 
     def clear(self): self.__scrolledList.clear()
@@ -196,7 +196,7 @@ class Client(object):
         # except: hhh = one; nick = None
         if "@" in one:
             host, port = one.split("@")
-        # except: 
+        # except:
         else: host = "localhost"; port = 31415
         self.nick = one
         # if nick is None: self.nick = "%s@%s" % (host, port)
@@ -423,7 +423,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         clients = []
-        for num in range(1, len(sys.argv)):            
+        for num in range(1, len(sys.argv)):
             sep = ','
             arg = sys.argv[num]
             if sep in arg:
@@ -432,7 +432,7 @@ if __name__ == '__main__':
             else:
                 client = Client(arg)
             clients.append(client)
-    else: 
+    else:
         one = "localhost%d" % port
         print("# using", one)
         clients = [Client(one), ]

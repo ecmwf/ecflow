@@ -38,8 +38,8 @@ The following example shows different ways of adding node hierarchy(they produce
    from ecflow import *
 
    defs = Defs(
-      Suite("s1", 
-         Family("f1", 
+      Suite("s1",
+         Family("f1",
             Task("t1"))))
 
 
@@ -62,7 +62,7 @@ The following example shows different ways of adding node hierarchy(they produce
    defs = Defs() + (Suite("s1") + (Family("f1") + Task("t1")))
 
 .. code-block:: python
-   :caption: Hybrid. mix and match. Uses += and + 
+   :caption: Hybrid. mix and match. Uses += and +
 
    from ecflow import *
 
@@ -89,9 +89,9 @@ The following example shows how a group of tasks could be created in a Python de
 The following examples show alternative styles of adding suites, families, and tasks: They produce exactly the same suite as above.
 
 .. code-block:: python
-      
+
    from ecflow import *
-   
+
    defs = Defs(
          Suite("s1",
             Family("f1",
@@ -99,19 +99,19 @@ The following examples show alternative styles of adding suites, families, and t
    defs.save_as_defs("test.def")
 
 .. code-block:: python
-         
+
    from ecflow import *
 
    defs = Defs().add(
             Suite("s1").add(
                Family("f1").add(
                   [Task("t{}".format(t))
-                  for t in ("a", "b", "c")])))    
+                  for t in ("a", "b", "c")])))
    defs.save_as_defs("test.def")
 
 
 .. code-block:: python
-            
+
    from ecflow import *
 
    defs = Defs()

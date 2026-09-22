@@ -136,11 +136,11 @@ It is also possible to use '+'
 
  defs = Defs() + Suite('s1')
  defs.s1 += Autocancel(1, 10, True)
- defs.s1 += Task('t1') + Edit({ 'e':1, 'f':'bb'}) +\ 
-            Event(1) + Event(11,'event') + Meter('meter',0,10,10) + Label('label','c') + Trigger('1==1') +\ 
-            Complete('1==1') + Limit('limit',10) + Limit('limit2',10) + InLimit('limitName','/limit',2) +\ 
-            Defstatus(DState.complete) + Today(0,30) + Today('00:59') + Today('00:00 11:30 00:01') +\ 
-            Time(0,30) + Time('00:59') + Time('00:00 11:30 00:01') + Day('sunday') + Day(Days.monday) +\ 
+ defs.s1 += Task('t1') + Edit({ 'e':1, 'f':'bb'}) +\
+            Event(1) + Event(11,'event') + Meter('meter',0,10,10) + Label('label','c') + Trigger('1==1') +\
+            Complete('1==1') + Limit('limit',10) + Limit('limit2',10) + InLimit('limitName','/limit',2) +\
+            Defstatus(DState.complete) + Today(0,30) + Today('00:59') + Today('00:00 11:30 00:01') +\
+            Time(0,30) + Time('00:59') + Time('00:00 11:30 00:01') + Day('sunday') + Day(Days.monday) +\
             Date(1,1,0) + Date(28,2,1960) + Autocancel(3)
 
 .. warning:: We can only use '+' when the left most object is a node, i.e Task('t1') in this case
@@ -213,7 +213,7 @@ Usage:
 .. code-block:: python
 
   defs = Defs()                # create a empty defs
-  suite = Suite('suite')       # create a stand alone Suite 
+  suite = Suite('suite')       # create a stand alone Suite
   defs.add_suite(suite)        # add suite to defs
   s2 = defs.add_suite('s2')    # create a suite and add to defs
 

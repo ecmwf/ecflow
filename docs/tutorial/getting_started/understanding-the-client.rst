@@ -3,9 +3,9 @@
 
 .. index::
    single: Client (tutorial)
-   
+
 .. _tutorial-understanding-the-client:
-   
+
 Understanding the client
 ========================
 
@@ -67,7 +67,7 @@ To configure the client (CLI and Python API) to contact a server on the given *h
         .. literalinclude:: src/understanding-the-client.py
            :language: python
            :caption: Ping an ecFlow server using the Python API
-    
+
 **What to do**
 
 #. List the available commands of :term:`ecflow_client` using the :code:`--help` option.
@@ -77,7 +77,7 @@ To configure the client (CLI and Python API) to contact a server on the given *h
    - Use the :code:`--help` option with the :term:`ecflow_client` to explore the available command categories.
 
 #. Take the opportunity to learn about the following commands: :code:`ping`, :code:`load`, :code:`replace`, :code:`begin`, and :code:`resume`.
-   
+
    - Use the :code:`--help` option with the :term:`ecflow_client` to explore the command descriptions.
 
 #. Ping the :term:`ecflow_server` using the CLI :term:`ecflow_client`, explicitly defining the :code:`--host` and :code:`--port` options.

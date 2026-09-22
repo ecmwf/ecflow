@@ -16,7 +16,7 @@ e.g. (ECF_TRYNO = 0).
 These variables are **generated** by ecFlow from the information in
 the definition file and are available for use in ecFlow files.
 Normally there is no need to **override** the value by using **edit**
-statement in the definition file. 
+statement in the definition file.
 
 The table below shows a list of generated variables.
 

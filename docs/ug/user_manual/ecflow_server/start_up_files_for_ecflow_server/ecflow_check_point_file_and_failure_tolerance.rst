@@ -22,11 +22,11 @@ checked for consistency.
 
 The checkpoint files can be read by any ecFlow running on any
 operating system
-  
+
 There are two separate checkpoint files::
 
   ECF_CHECK     ecf.check
-  ECF_CHECKOLD  ecf.check.b                                   
+  ECF_CHECKOLD  ecf.check.b
 
 When ecFlow needs to write a checkpoint file it first moves (renames)
 the previous file ECF_CHECK to ECF_CHECKOLD and then creates a new file
@@ -37,7 +37,7 @@ although that version is not quite as up to date.
 
 .. tip::
 
-    You can copy the checkpoint files between systems.            
+    You can copy the checkpoint files between systems.
 
 Another ecFlow server can be started with the original server's
 checkpoint file and take over from the original ecFlow server host in

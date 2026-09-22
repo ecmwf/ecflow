@@ -27,7 +27,7 @@ suite time
       task t1
          time 00:01
          time 23:59
-         
+
      task t2
          time 09:00
          time 12:00
@@ -39,7 +39,7 @@ suite time
      task t4
          time 18:00
          time 23:00
-         
+
      task t5_1
          time 08:00
     task t5

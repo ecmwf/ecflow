@@ -4,8 +4,8 @@
 .. index::
    single: embedded triggers (tutorial)
 
-.. _tutorial-embedded-triggers:  
-   
+.. _tutorial-embedded-triggers:
+
 Using embedded triggers
 =======================
 

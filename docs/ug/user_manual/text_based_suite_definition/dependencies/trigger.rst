@@ -21,24 +21,24 @@ every operand is an integer, and there are no string comparisons (see
 numerical expressions, instead logical functions (and, or, not, eq, ne)
 with node names should be used.
 
-The keywords in trigger mathematics are: **unknown, suspended,        
-complete, queued, submitted, active** and **aborted** for task and    
-family status; and **clear** and **set** for event status. These keywords are treated as numbers   
-starting from 0 (unknown) to 6 (aborted). There is no need to be      
-aware of the numerical values as long as you do not use a trigger in the form:               
+The keywords in trigger mathematics are: **unknown, suspended,
+complete, queued, submitted, active** and **aborted** for task and
+family status; and **clear** and **set** for event status. These keywords are treated as numbers
+starting from 0 (unknown) to 6 (aborted). There is no need to be
+aware of the numerical values as long as you do not use a trigger in the form:
 
 .. code-block:: shell
 
-  trigger plain_name # WARNING! DO NOT USE!                             
-                                                                      
-This is true only as long as the status of plain_name is unknown. It  
-is not advisable to use mathematical function names for node names.   
-                                                                      
-The **full name** or **relative name** of a node can also be used as  
-an operand. A full name starts from the super-node. A **relative      
-name** can include "../" to indicate the parent node level. A relative name can also include "./' 
-to indicate the same level, this is needed if the task name is        
-numeric (otherwise its numeric value would be used in the expression.)                       
+  trigger plain_name # WARNING! DO NOT USE!
+
+This is true only as long as the status of plain_name is unknown. It
+is not advisable to use mathematical function names for node names.
+
+The **full name** or **relative name** of a node can also be used as
+an operand. A full name starts from the super-node. A **relative
+name** can include "../" to indicate the parent node level. A relative name can also include "./'
+to indicate the same level, this is needed if the task name is
+numeric (otherwise its numeric value would be used in the expression.)
 
 .. code-block:: shell
 
@@ -50,7 +50,7 @@ numeric (otherwise its numeric value would be used in the expression.)
     task 00z
       trigger ../foo/foobar==complete # task from previous family
     task another
-      trigger ./00z == complete # the previous task 
+      trigger ./00z == complete # the previous task
 
 .. danger::
 
@@ -69,11 +69,11 @@ Notice that the following triggers will hold as long as the event is not set, wi
   trigger taskname:event
   trigger taskname:event == set
 
-Meters can be used in triggers the same as events, except that their  
-value should be compared against numerical expression. It is          
-important to remember to use **greater or equal** instead of **equals** . In the following  
-example **foobar** will not be submitted if, let's say, suite is      
-suspended while **foo** sets it meter to first 120 and then to 130. **bar** will still be submitted once the suite is resumed.                                                     
+Meters can be used in triggers the same as events, except that their
+value should be compared against numerical expression. It is
+important to remember to use **greater or equal** instead of **equals** . In the following
+example **foobar** will not be submitted if, let's say, suite is
+suspended while **foo** sets it meter to first 120 and then to 130. **bar** will still be submitted once the suite is resumed.
 
 .. code-block:: shell
 
@@ -106,7 +106,7 @@ The following example is a simple case:
 .. code-block:: shell
 
   task a ; trigger ./b == complete
-  task b ; trigger ./a == complete # DEADLOCKS tasks a & b 
+  task b ; trigger ./a == complete # DEADLOCKS tasks a & b
 
 There is no automatic simplification of the mathematics. ecFlow will
 read the whole of a suite definition into memory, but with comment lines

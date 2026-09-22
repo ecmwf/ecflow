@@ -13,7 +13,7 @@ ECF_PORT.
 .. code-block:: shell
 
     cd ECF_dir1
-    nohup ecflow_server & # start ecFlow with **default** port 3141    
+    nohup ecflow_server & # start ecFlow with **default** port 3141
 
 Multiple ECFs can be run on the same host using different port numbers.
 There are two mechanisms for specifying the port number:
@@ -39,7 +39,7 @@ output and checkpoint files are not overwritten
 
 Adding a new server to ecflow_ui adds the definition to the file::
 
-  ~/.ecflowrc/servers. 
+  ~/.ecflowrc/servers.
 
 This can be modified directly.
 
@@ -64,7 +64,7 @@ all open network ports on your machine, consider running the following command:
 .. code-block:: shell
 
    netstat -lnptu
-  
+
 Here is a breakdown of the parameters:
 
 -  l - List all listening ports

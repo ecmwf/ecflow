@@ -12,8 +12,8 @@ pure python tasks, then add the following variables.
 
 .. code-block:: shell
 
-    edit ECF_EXTN .py. # search for files matching task name and       
-    extension .py                                                      
+    edit ECF_EXTN .py. # search for files matching task name and
+    extension .py
 
 This is required since the default extension is '.ecf'. For more
 examples see the ecFlow looks for files using the following search process when trying to
@@ -51,8 +51,8 @@ locate the '.ecf' associated with a task.
 
       .. code-block:: shell
 
-         edit ECF_FILES_LOOKUP prune_leaf                                   
-   
+         edit ECF_FILES_LOOKUP prune_leaf
+
  Then ecFlow will use the following search pattern
 
       .. code-block:: shell
@@ -63,13 +63,13 @@ locate the '.ecf' associated with a task.
          /home/ecmwf/emos_ECF/def/o/ECFfiles/model.ecf
 
       .. warning::
-     
+
          However please be aware this will also affect the search in ECF_HOME
 
  If the ECF_FILES directory does not exist, the server will try variable substitution. This allows additional configuration.
 
       .. code-block:: shell
 
-         edit ECF_FILES /home/ecmwf/emos/def/o/%FILE_DIR:ECFfiles%          
+         edit ECF_FILES /home/ecmwf/emos/def/o/%FILE_DIR:ECFfiles%
 
 * Finally, it searches ECF_HOME directory. ( using the DEFAULT or ALTERNATIVE lookup methods)

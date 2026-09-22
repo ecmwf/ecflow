@@ -1,11 +1,11 @@
 suite limit_all_inlimit_types
  limit fam 2
  limit task 4
- inlimit task         
+ inlimit task
  family f1
      limit sub 1
-     inlimit -n fam 
-     inlimit -s sub         
+     inlimit -n fam
+     inlimit -s sub
      task t1
      task t2
      task t3
@@ -15,8 +15,8 @@ suite limit_all_inlimit_types
  endfamily
  family f2
      limit sub 3
-     inlimit -s sub         
-     inlimit -n fam 
+     inlimit -s sub
+     inlimit -n fam
      task t1
      task t2
      task t3
@@ -25,7 +25,7 @@ suite limit_all_inlimit_types
      task t6
  endfamily
  family f3
-     inlimit -n fam 
+     inlimit -n fam
      task t1
      task t2
      task t3

@@ -25,7 +25,7 @@ Triggers can also reference the late flag on a node. Trigger evaluation
 for node attributes uses integer arithmetic.
 See the :ref:`Glossary` for more details.
 
-.. code-block:: python 
+.. code-block:: python
 
    from ecflow import Defs, Suite, Task, Trigger, Complete
 
@@ -43,7 +43,7 @@ See the :ref:`Glossary` for more details.
 The following examples show alternative styles that produce the same
 definition:
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs()
    s1 = defs.add_suite("s1")
@@ -53,7 +53,7 @@ definition:
    t2.add_complete("t3 == complete")
    t3 = s1.add_task("t3")
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs().add(
       Suite("s1").add(
@@ -66,7 +66,7 @@ definition:
    )
 
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs(Suite("s1"))
    defs.s1 += [Task("t{}".format(i)) for i in range(1, 4)]
@@ -76,14 +76,14 @@ Adding triggers like '<nodepath> == complete' is extremely common. Hence
 there are a few short cuts;
 
 
-.. code-block:: python 
+.. code-block:: python
    :caption: Short cut for <node> == complete
 
    task = Task("task")
    # Using a trigger with a 'list' argument, each string/node element converted to <name> == complete
    t = Trigger(["a","b",task])  # because Task("task") does *NOT* have a parent, we will use the name
    assert str(t) == "a == complete AND b == complete AND task == complete","Trigger not as expected: " + str(t))
-   
+
    defs = Defs()
    task = defs.add_suite("s").add_family("f").add_task("task")
    t = Trigger(["a","b",task])      # Task('task') has a parent hierarchy, hence we use full path in trigger expression
@@ -97,7 +97,7 @@ There are many times where we want to add a chain of tasks, i.e. where
 tasks must be run sequentially one after the other. The following
 examples show different styles of chaining tasks which are identical:
 
-.. code-block:: python 
+.. code-block:: python
 
    from ecflow import *
 
@@ -112,7 +112,7 @@ examples show different styles of chaining tasks which are identical:
    )
 
 
-.. code-block:: python 
+.. code-block:: python
 
    from ecflow import *
 
@@ -121,8 +121,8 @@ examples show different styles of chaining tasks which are identical:
    defs.s1.t2 += Trigger(["t1"])
    defs.s1.t3 += Trigger(["t2"])
    defs.s1.t4 += Trigger(["t3"])
-   
-.. code-block:: python 
+
+.. code-block:: python
 
    from ecflow import *
 
@@ -137,7 +137,7 @@ It is also possible to << to reverse chain task.
 
 The following suites are identical:
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs() + Suite("s1")
    defs.s1 += [Task("t1"), Task("t2"), Task("t3"), Task("t4")]
@@ -145,7 +145,7 @@ The following suites are identical:
    defs.s1.t2 += Trigger("t3 == complete")
    defs.s1.t3 += Trigger("t4 == complete")
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs() + Suite("s1")
    defs.s1 << Task("t1") << Task("t2") << Task("t3") << Task("t4")

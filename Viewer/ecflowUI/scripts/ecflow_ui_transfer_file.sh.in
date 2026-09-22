@@ -7,7 +7,7 @@ set -e
 
 META_MSG_LEN=60
 #set -x #goes to stderr
- 
+
 function failed() {
     local msg=$1
     echo $msg >&2
@@ -15,7 +15,7 @@ function failed() {
 }
 
 function runSsh() {
-    local cmd=$1 
+    local cmd=$1
     if [[ $proxyCommand != "" ]] ; then
         (set -x; ssh ${sshProxyJump} ${sshOptions} -o ProxyCommand="${proxyCommand}" ${remoteUH} "${cmd}" > ${targetFile})
     else
@@ -43,7 +43,7 @@ function proc_md_result() {
     d=$(tail -c $usedLen $targetFile)
 
     echo "d=$d"
-   
+
     # get file size
     size=$(wc -c <"$targetFile")
 
@@ -82,14 +82,14 @@ function get_file_all() {
     echo "transfer the whole file"
     runScp
     #(set -x; scp ${scpOptions} ${remoteUH}:${sourceFile} ${targetFile})
-}      
+}
 
 # transfer the file from a given byte offset
 function get_file_pos() {
     cmd=$(cat <<-END
         tail -c +$((${byteValue}+1)) ${sourceFile}
 END
-)       
+)
     echo "transfer file from byte offset=${byteValue}"
     runSsh "$cmd"
     #(set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
@@ -99,7 +99,7 @@ END
 function get_file_last() {
     cmd=$(cat <<-END
         sourceSize=\$(wc -c < ${sourceFile})
-        if [[ \${sourceSize} -gt 0 && \${sourceSize} -le ${byteValue} ]] ; then 
+        if [[ \${sourceSize} -gt 0 && \${sourceSize} -le ${byteValue} ]] ; then
             cat ${sourceFile}
         else
             tail -c ${byteValue} ${sourceFile}
@@ -136,7 +136,7 @@ END
 )
     #echo $cmd
     runSsh "$cmd"
-  
+
     # extracts + removes metadata from the end of file
     proc_md_result
 }
@@ -146,7 +146,7 @@ END
 # - if data after the offset seems to be appended this delta + metadata is transferred
 # - otherwise the whole file + metadata is transferred back
 function get_file_pos_md() {
-    
+
     # the metadata is a fixed META_MSG_LEN bytes added to the end of the result.
     # So when we have the result:
     #  - we need to extract the metadata and write it into ${metaFile}
@@ -169,7 +169,7 @@ function get_file_pos_md() {
                 echo "1"
                 exit 0
             fi
-        elif [[ \$aSize -gt ${byteValue} && \$aCheckSum == "${checkSum}" ]] ; then 
+        elif [[ \$aSize -gt ${byteValue} && \$aCheckSum == "${checkSum}" ]] ; then
             all=0
         fi
 
@@ -180,7 +180,7 @@ function get_file_pos_md() {
             cat ${sourceFile}
             m="0:\$aModTime:\$aCheckSum:"
         fi
-            
+
         m=\$(printf %-${META_MSG_LEN}s \$m | tr  ' ' X)
         echo \$m
 END
@@ -191,7 +191,7 @@ END
     # extracts + removes metadata from end of file
     proc_md_result
 }
- 
+
 # fetching directory listing
 function get_dir() {
     dirPath=$(dirname ${sourceFile})
@@ -199,16 +199,16 @@ function get_dir() {
     echo "dirPath="$dirPath
     echo "sourceName="$sourceName
     pattern=$(echo $sourceName | cut -d '.' -f 1)".*"
-   
+
     # the task here is to get the file modification date, file size in bytes
     # and file name for each file matching the pattern in the remote directory.
-    # ls -l cannot be used here because apart from the parsing problems the 
+    # ls -l cannot be used here because apart from the parsing problems the
     # modification date is not always complete (e.g. for dates older than 6 months).
     # Using stat is not an option either since it can have different options on
     # different unix systems
     cmd=$(cat <<-END
     cd ${dirPath}
-    for f in \$(ls $pattern) ; do 
+    for f in \$(ls $pattern) ; do
         if [[ ! -d "\$f" ]] ; then
             echo \$(date -r "\$f" +%s) \$( wc -c "\$f" | awk '{print \$1}' ) \$f
         fi
@@ -288,15 +288,15 @@ fi
 if [[ $socksPort != "" ]] ; then
     proxyCommand='nc -x 127.0.0.1:'"${socksPort}"' %h %p'
     if [[ ${scpOptions} == "" ]] ; then
-        failed "scpOptions cannot be empty!" 
+        failed "scpOptions cannot be empty!"
     fi
     if [[ $remoteUid == "" || $remoteUid == "__USER__" ]]  ; then
         remoteUH=localhost
-    else    
+    else
         remoteUH="${remoteUid}@localhost"
-    fi  
+    fi
 # no SOCKS
-else 
+else
     if [[ $remoteHost == "" ]] ; then
         failed "remoteHost is empty!"
     fi
@@ -307,9 +307,9 @@ else
 
     if [[ $remoteUid == "__USER__" ]]  ; then
         remoteUid=${USER}
-    fi  
+    fi
     remoteUH="${remoteUid}@${remoteHost}"
- fi 
+ fi
 
 if [[ $remoteUH == "" ]] ; then
     failed "remoteUH is empty!"
@@ -323,7 +323,7 @@ fi
 if [[ $proxyJump != "" ]] ; then
     sshProxyJump="-J ${proxyJump}"
     if [[ ${scpOptions} == "" ]] ; then
-        failed "scpOptions cannot be empty!" 
+        failed "scpOptions cannot be empty!"
     fi
     scpOptions="${scpOptions} -o ProxyJump=${proxyJump}"
 fi
@@ -372,7 +372,7 @@ fi
 
 # fetching a file
 if [[ $mode == "file" ]] ; then
-    
+
     # transfer the whole file
     if [[ $byteMode == "all" ]] ; then
         get_file_all
@@ -388,7 +388,7 @@ if [[ $mode == "file" ]] ; then
 
 # fetching a file with metadata + checking
 elif [[ $mode == "file_md" ]] ; then
-    
+
     # transfer the whole file
     if [[ $byteMode == "all" ]] ; then
         get_file_all_md

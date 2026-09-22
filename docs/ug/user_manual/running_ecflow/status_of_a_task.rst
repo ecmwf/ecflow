@@ -41,13 +41,13 @@ The status of a task can vary as follows (default colours are shown):
    Jobs end by becoming either complete or aborted by the job itself sending a message back to ECFLOW server. The complete is set by calling:
 
    .. code-block:: shell
-      
+
       ecflow_client --complete
-      
+
    in the job file.
 
 - At any time the user can **suspend** a task. The task status is **saved.**
-  
+
 The above colours are the default, but they can be changed in the GUI. :numref:`state_change_for_a_task_colour` below shows the normal status changes for a task with default colours:
 
 .. figure:: /_static/ug/status_of_a_task/image1.png

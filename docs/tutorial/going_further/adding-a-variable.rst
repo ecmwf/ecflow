@@ -43,8 +43,8 @@ Update the existing tasks :code:`t1` and :code:`t2` to call the :code:`sleep` co
    :caption: $HOME/course/f1/t1.ecf and t2.ecf (Task Script using Variable)
 
    %include <head.h>
-   echo "I will now sleep for %SLEEP% seconds" 
-   sleep %SLEEP% 
+   echo "I will now sleep for %SLEEP% seconds"
+   sleep %SLEEP%
    %include <tail.h>
 
 Update Suite Definition

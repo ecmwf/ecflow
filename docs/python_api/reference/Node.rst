@@ -78,11 +78,11 @@ It is also possible to use '+'
 
  defs = Defs() + Suite('s1')
  defs.s1 += Autocancel(1, 10, True)
- defs.s1 += Task('t1') + Edit({ 'e':1, 'f':'bb'}) +\ 
-            Event(1) + Event(11,'event') + Meter('meter',0,10,10) + Label('label','c') + Trigger('1==1') +\ 
-            Complete('1==1') + Limit('limit',10) + Limit('limit2',10) + InLimit('limitName','/limit',2) +\ 
-            Defstatus(DState.complete) + Today(0,30) + Today('00:59') + Today('00:00 11:30 00:01') +\ 
-            Time(0,30) + Time('00:59') + Time('00:00 11:30 00:01') + Day('sunday') + Day(Days.monday) +\ 
+ defs.s1 += Task('t1') + Edit({ 'e':1, 'f':'bb'}) +\
+            Event(1) + Event(11,'event') + Meter('meter',0,10,10) + Label('label','c') + Trigger('1==1') +\
+            Complete('1==1') + Limit('limit',10) + Limit('limit2',10) + InLimit('limitName','/limit',2) +\
+            Defstatus(DState.complete) + Today(0,30) + Today('00:59') + Today('00:00 11:30 00:01') +\
+            Time(0,30) + Time('00:59') + Time('00:00 11:30 00:01') + Day('sunday') + Day(Days.monday) +\
             Date(1,1,0) + Date(28,2,1960) + Autocancel(3)
 
 .. warning:: We can only use '+' when the left most object is a node, i.e Task('t1') in this case
@@ -117,7 +117,7 @@ Usage:
   t1 = Task('t1')
   t1.add_autoarchive( Autoarchive(20,10,False) )  # hour,min, relative
   t2 = Task('t2')
-  t2.add_autoarchive( 3 )                        # 3 days 
+  t2.add_autoarchive( 3 )                        # 3 days
   t3 = Task('t3')
   t3.add_autoarchive( 20,10,True )               # hour,minutes,relative
   t4 = Task('t4')
@@ -161,7 +161,7 @@ Usage:
   t1 = Task('t1')
   t1.add_autocancel( Autocancel(20,10,False) )  # hour,min, relative
   t2 = Task('t2')
-  t2.add_autocancel( 3 )                        # 3 days 
+  t2.add_autocancel( 3 )                        # 3 days
   t3 = Task('t3')
   t3.add_autocancel( 20,10,True )               # hour,minutes,relative
   t4 = Task('t4')
@@ -204,9 +204,9 @@ Usage:
 .. code-block:: python
 
   t1 = Task('t1')
-  t1.add_autorestore( ['/s1/f1'] )   
+  t1.add_autorestore( ['/s1/f1'] )
   t2 = Task('t2')
-  t2.add_autorestore( Autorestore(['/s2/f1','/s1/f2']) )  
+  t2.add_autorestore( Autorestore(['/s2/f1','/s1/f2']) )
   # we can also create a Autorestore in the Task constructor like any other attribute
   t2 = Task('t2', Autorestore(['/s2/f1','/s1/f2'] ))
 

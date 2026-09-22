@@ -3,7 +3,7 @@
 
 .. index::
    single: event (tutorial)
-   
+
 .. _tutorial-add-event:
 
 Adding an event
@@ -21,7 +21,7 @@ Update Task Script
 
 Create new tasks :code:`t3` and :code:`t4` that will be triggered by the events emitted in task :code:`t2`.
 Create the :term:`task scripts <ecf script>` for task :code:`t3` and task :code:`t4` by copying the script from :code:`t1`.
-    
+
 To notify :term:`ecflow_server`, the task :code:`t2` uses the :term:`ecflow_client` with the :code:`--event` option (this is one of the :term:`child commands <child command>`).
 
 .. code-block:: shell
@@ -30,10 +30,10 @@ To notify :term:`ecflow_server`, the task :code:`t2` uses the :term:`ecflow_clie
    %include <head.h>
    echo "I will now sleep for %SLEEP% seconds"
    sleep %SLEEP%
-   ecflow_client --event a       # Set the first event 
-   sleep %SLEEP%                 # Sleep a bit more 
-   ecflow_client --event b       # Set the second event 
-   sleep %SLEEP%                 # A last nap... 
+   ecflow_client --event a       # Set the first event
+   sleep %SLEEP%                 # Sleep a bit more
+   ecflow_client --event b       # Set the second event
+   sleep %SLEEP%                 # A last nap...
    %include <tail.h>
 
 Update Suite Definition

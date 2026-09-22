@@ -293,7 +293,7 @@ parameter is not linked to the global setting).
    :height: 1.47036in
    :align: center
 
-   **Global settings**: From the main menu, choose **Edit > Preferences > Server options** 
+   **Global settings**: From the main menu, choose **Edit > Preferences > Server options**
 
 .. figure:: /_static/ecflow_ui/communication_with_ecflow_servers/image5.png
    :width: 2.89444in

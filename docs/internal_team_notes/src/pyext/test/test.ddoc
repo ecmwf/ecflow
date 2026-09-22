@@ -1,11 +1,11 @@
 
 
-    self.country_data_rep_list_ = sorted(self.country_data_rep_list_, key=lambda DataRep: DataRep.total_,reverse=True)    
-    
+    self.country_data_rep_list_ = sorted(self.country_data_rep_list_, key=lambda DataRep: DataRep.total_,reverse=True)
+
     from operator import itemgetter, attrgetter
-    self.country_data_rep_list_ = sorted(self.country_data_rep_list_, key=attrgetter('total_'),reverse=True)    
- 
- 
+    self.country_data_rep_list_ = sorted(self.country_data_rep_list_, key=attrgetter('total_'),reverse=True)
+
+
 To Use a library function in the Test do:
 
 

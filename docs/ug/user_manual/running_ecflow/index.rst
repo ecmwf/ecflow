@@ -6,7 +6,7 @@ Running ecFlow
 
 .. toctree::
    :maxdepth: 1
-    
+
    ecflow_overview
    status_of_a_task
    status_of_a_suite_family_or_server

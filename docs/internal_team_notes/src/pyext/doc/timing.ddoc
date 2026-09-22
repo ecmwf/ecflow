@@ -6,15 +6,15 @@ import ecflow
 # time a function using time.time() and the a @ function decorator
 #
 import time
- 
+
 def print_timing(func):
     #
     def wrapper(*arg):
-        
+
         t1 = time.time()
         res = func(*arg)
         t2 = time.time()
-        
+
         print '%s took %0.3f s' % (func.func_name, (t2-t1))
         return res
     #
@@ -32,7 +32,7 @@ def time_client_sync_local():
         ci.sync_local()                        # retrieve server definition, by sync with client defs
     except RuntimeError as e:
         print("Failed: " + str(e))
-        
+
 if __name__ == '__main__':
     time_client_sync_local()
 
@@ -65,7 +65,7 @@ with timer:
         ci.sync_local()                        # retrieve server definition, by sync with client defs
     except RuntimeError as e:
         print("Failed: " + str(e))
-        
+
     # time.sleep(2)
 
 print(timer.duration_in_seconds())s

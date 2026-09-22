@@ -2,38 +2,38 @@
   Mainwindow
 ------------------------------*/
 
-QMainWindow { 
+QMainWindow {
     icon-size:  18px;
-}  
+}
 
 /*QToolBar {
   	top-padding: 1px;
 	bottom-padding: 1px;
   	icon-size:  20px;
-}*/	
+}*/
 
 QToolBar > QToolButton {
   	padding:  1px;
-}	
+}
 
 /*QToolTip { color: black; background: rgb(192,218,255); border: 1px solid rgb(60,59,58);}*/
 QToolTip { color: rgb(247,247,247); background: rgb(59,64,69); border: 1px solid rgb(20,20,20);}
 
 /* ----------------------------
-  Breadcrumbs 
+  Breadcrumbs
 -------------------------------*/
 
 QWidget[breadcrumbs="1"] {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(255,255,255), stop: 1 rgb(255,255,255));
     border-radius: 0px;
     border: 1px solid rgb(140,140,140);
-    /*border-top-width: 4px;*/ 
+    /*border-top-width: 4px;*/
 }
 
 QToolButton#pathNameTb {
      	border-radius: 0px;
-     	padding: 0px; 
-		color: black;	
+     	padding: 0px;
+		color: black;
  }
 
 QToolButton#pathNameTb:hover{
@@ -45,27 +45,27 @@ QToolButton#pathNameTb:hover{
 
 QToolButton#pathIconTb{
         border: none;
-        padding: 0px; 		
+        padding: 0px;
  }
 
 QToolButton#pathIconTb:hover{
         background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(253,253,253), stop: 1 rgb(227,227,227));
 	    border: 1px solid rgb(180, 180, 180);
      	border-radius: 0px;
-        padding: 0px; 		
+        padding: 0px;
  }
 
 QToolButton#pathMenuTb{
         image: url(":/viewer/path_arrow.svg");
 	    border: none;
-        padding: 0px; 		
+        padding: 0px;
 }
 
 QToolButton#pathMenuTb:hover{
 	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 blue, stop 0.5 red, stop: 1 white);
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
-        padding: 0px; 	
+        padding: 0px;
 }
 
 QLabel[previewLabel="1"] {
@@ -77,10 +77,10 @@ QLabel[previewLabel="1"] {
 
 /* Property editor */
 
-QToolButton[colorTb="1"] {    
+QToolButton[colorTb="1"] {
        border-radius: 2px;
-       padding: 0px; 
-}           
+       padding: 0px;
+}
 
 /*-----------------------------
  Options
@@ -141,36 +141,36 @@ QTreeView[style="nodeView"]::branch:!has-children:!has-siblings:adjoins-item {
 ------------------------------*/
 
 /*QTreeView {
-    selection-background-color: transparent; 
-    outline: 0;  
+    selection-background-color: transparent;
+    outline: 0;
 }*/
 
-QTreeView::item:selected 
+QTreeView::item:selected
 {
     background: rgb(180,204,234);
     color: black;
-    /*border-top:  1px solid rgb(8,117,182); 
+    /*border-top:  1px solid rgb(8,117,182);
     border-bottom:  1px solid rgb(8,117,182);
-    border-left-color: transparent; 
+    border-left-color: transparent;
     border-right-color: transparent;*/
-    
+
 }
 
-/* 
+/*
 QTreeView[log="1"]::item:selected {
    background: rgb(245,245,245);
    border-top:  1px solid rgb(200,200,200);
    border-bottom:  1px solid rgb(180,180,180);
    color: black;
-   border-left-color: transparent; 
+   border-left-color: transparent;
    border-right-color: transparent;
-   
+
 }
 
 QTreeView[log="1"]::item {
     border: 1px solid rgb(230,230,230);
     border-top-color: transparent;
-    border-left-color: transparent; 
+    border-left-color: transparent;
     border-right-color: 1px solid rgb(230,230,230);
 }
 */
@@ -203,7 +203,7 @@ QTextEdit[readOnly="true"][trigger="1"] {
     background-color: rgb(255,255,255);
 }
 
-QLineEdit[readOnly="true"] { 
+QLineEdit[readOnly="true"] {
     background-color: rgb(245,245,245);
 }
 
@@ -214,7 +214,7 @@ QAbstractScrollArea[pager="1"] {
 /*----------------------------
   File info label
 ------------------------------*/
-  
+
 QLabel[fileInfo="1"] {
      border: 1px solid rgb(200,200,200);
      background: rgb(232, 233, 234);
@@ -263,7 +263,7 @@ QWidget[triggertitle="1"] {
 
 QLabel[triggertitle="1"] {
      color: rgb(255,255,255);
-     background: rgb(95, 97, 99);   
+     background: rgb(95, 97, 99);
 }
 
 QToolButton[triggertitle="1"] {
@@ -309,31 +309,31 @@ QToolButton[graphInfo="1"]:hover {
 /*----------------------------
   Property editor
 ------------------------------*/
- 
+
 QWidget[editorHeader="1"] {
      background: rgb(253, 253, 253);
      border: 1px solid rgb(160,160,160);
-} 
-  
+}
+
 QLabel#headerLabel_ {
      border: none;
      color:  rgb(40, 41, 42);
      font-weight: bold;
-     font-size: 11pt; 
+     font-size: 11pt;
 }
-   
+
 QLabel[editorNotifyHeader="1"] {
      background: rgb(253, 253, 253);
-     /*border: 1px solid rgb(160,160,160); */   
+     /*border: 1px solid rgb(160,160,160); */
      /*color:  rgb(40, 41, 42);
      font-weight: bold;
      font-size: 11pt;*/
 }
 
 QGroupBox#editorGroupBox {
-   
+
    font-weight: normal;
-}   
+}
 
 QScrollArea[editor="1"] {
     border: none;
@@ -341,7 +341,7 @@ QScrollArea[editor="1"] {
 
 QWidget[editorArea="1"] {
     background-color: rgb(245,244,244);
-} 
+}
 
 /*----------------------------
   Query
@@ -356,8 +356,8 @@ QWidget[attrArea="1"] {
 ------------------------------*/
 
 QWidget[dockTitle="11"]  {
-     background: rgb(26, 246, 246);       
-}  
+     background: rgb(26, 246, 246);
+}
 
 QToolButton[docktitle="1"] {
     border-radius: 0px;
@@ -389,7 +389,7 @@ QToolButton[docktitle="1"]:hover {
 }
 
 QToolButton[docktitle="1"]::menu-indicator {
-    image: url(:/viewer/dock_menu_indicator.png);   
+    image: url(:/viewer/dock_menu_indicator.png);
 }
 
 /*----------------------------

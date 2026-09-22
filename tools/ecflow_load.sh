@@ -41,7 +41,7 @@ elif ! `$client --ping`; then
 elif [[ $ECF_HOST != $(uname -n) ]]; then # try remote
     $SSH $ECF_HOST $O -p $ECF_PORT -l $ECF_LOG -n $ECF_HOST -h $ECF_HOME
 else
-    $client --server_load || $client --server_load=$ECF_LOG || $client --server_load=$ECF_HOME/$ECF_LOG 
+    $client --server_load || $client --server_load=$ECF_LOG || $client --server_load=$ECF_HOME/$ECF_LOG
 fi
 
 $VIEWER ${ECF_HOST}.${ECF_PORT}.png

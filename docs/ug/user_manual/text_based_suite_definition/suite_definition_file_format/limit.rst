@@ -85,5 +85,5 @@ each. This means that only two of them can be running any given time.
       task t1
       task t2
       task t3
-      
+
 Where disk is the "name" of the limit, 50 is the maximum value this limit can be.

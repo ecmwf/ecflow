@@ -3,16 +3,16 @@
 
 .. index::
    single: Tutorial
-   
+
 .. _tutorial:
-   
+
 Tutorial
 ********
 
 .. toctree::
    :maxdepth: 3
    :includehidden:
-    
+
    intro
    overview
    getting_started/getting-started.rst

@@ -7,18 +7,18 @@
                     "default" : "modern",
                     "values"  : "classic/modern",
                     "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
-                },    
+                },
                 "node_gradient" : {
                     "label" : "Use gradient shading",
                     "default" : "true"
-                },    
+                },
                 "fontSize" : {
                     "label": "Application",
-                    "suffix" : "points",                                           
+                    "suffix" : "points",
                     "default": "9",
                     "min" : "7",
                     "max" : "20"
-                  } 
+                  }
             },
             "tree": {
                 "layoutStyle" : {
@@ -37,16 +37,16 @@
 					"label" : "Nodes",
 					"default": "font(,)"
 				},
-				 
+
 				"attributeFont" : {
                     "label" : "Attributes",
                     "default": "font(,)"
                 },
-				
+
 				"display_child_count" : {
 					"label" : "Display number of children for servers/suites",
                     "default": "false"
-				}, 
+				},
 
                 "displayNodeType" : {
                     "label" : "Display node type",
@@ -108,11 +108,11 @@
             },
 
             "table": {
-            
+
             	"background"  : {
                     "label"   : "Background colour",
                     "default" : "rgb(250,250,250)"
-                },               
+                },
                 "font" : {
  					"label" : "Font",
  					"default": "font(,)"
@@ -214,7 +214,7 @@
             }
            },
 
-           "label": {               
+           "label": {
                "defaultFontColour" : {
                    "label"   : "Font colour",
                    "default" : "rgb(0,0,0)",
@@ -232,7 +232,7 @@
                 "errorEnabled" : {
                     "label"   : "Enable error style",
                     "default" : "true"
-                },                
+                },
                 "errorFontColour" : {
                     "label"   : "Font colour",
                     "default" : "rgb(255,255,255)",
@@ -321,7 +321,7 @@
                 }
            },
            "textEdit" : {
-			     
+
                  "numAreaBackground" : {
                     "label": "Line number area background",
                     "default": "rgb(232,231,230)"
@@ -378,9 +378,9 @@
             }
         }
     },
-    
+
     "query_columns": {
-        
+
         "server" : {
             "label" : "Server",
             "tooltip" : "Server"
@@ -403,11 +403,11 @@
         },
         "attribute" : {
             "label" : "Attribute"
-        }       
+        }
     },
-    
+
     "trigger_graph_columns": {
-        
+
         "trigger" : {
             "label" : "Trigger",
             "tooltip" : "Trigger"
@@ -436,7 +436,7 @@
         },
         "event" : {
             "label" : "Event"
-        },    
+        },
         "meter" : {
     		"label" : "Meter"
         },
@@ -444,9 +444,9 @@
             "label" : "Status changed"
         }
     },
-    
+
     "zombie_columns": {
-    	
+
     	"path" : {
     		"label" : "Path",
     		"tooltip" : "Path of task node"
@@ -466,7 +466,7 @@
     	"password" : {
     		"label" : "Password",
     		"tooltip" : "Password of the job"
-    	},    	
+    	},
     	"pid" : {
     		"label" : "Pid",
     		"tooltip" : "Process or remote id"

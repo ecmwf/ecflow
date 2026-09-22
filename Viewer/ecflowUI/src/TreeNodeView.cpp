@@ -462,7 +462,7 @@ void TreeNodeView::slotSaveExpand()
 }
 
 void TreeNodeView::slotRestoreExpand()
-{    
+{
     //For each server we restore the expand state
     for(int i=0; i < model_->rowCount(); i++)
     {

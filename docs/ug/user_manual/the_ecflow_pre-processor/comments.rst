@@ -19,7 +19,7 @@ that you cannot use comments inside manual pages. (You can, of course, change th
 The following extract is an example of using comments:
 
 .. code-block:: shell
-    
+
     mars << EOF
         RETRIEVE,
         PARAM=10U/10V,DATE=...,

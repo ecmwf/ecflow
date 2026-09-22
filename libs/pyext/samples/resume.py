@@ -4,43 +4,43 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import ecflow
-import argparse # for argument parsing     
+import argparse # for argument parsing
 import sys
 
 if __name__ == "__main__":
-    
+
     DESC = """Will resume any suspended 'node' who name matches input
               Usage:
                 Example1: resume all suspended node whose name matches 'fred' for suite grib_api
                    resume.py --host cca --port 4141 --suite grib_api --name fred
-            """    
-    PARSER = argparse.ArgumentParser(description=DESC,  
+            """
+    PARSER = argparse.ArgumentParser(description=DESC,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    PARSER.add_argument('--host', default="localhost",   
+    PARSER.add_argument('--host', default="localhost",
                         help="The name of the host machine, defaults to 'localhost'")
-    PARSER.add_argument('--port', default="3141",   
+    PARSER.add_argument('--port', default="3141",
                         help="The port on the host, defaults to 3141")
-    PARSER.add_argument('--suite',   
+    PARSER.add_argument('--suite',
                         help="The name of the suite")
-    PARSER.add_argument('--name', default="install",   
+    PARSER.add_argument('--name', default="install",
                         help="The name of the node")
     ARGS = PARSER.parse_args()
-    print(ARGS)    
-     
+    print(ARGS)
+
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
-        CL.ping() 
+        CL.ping()
 
-        # get the incremental changes, and merge with defs stored on the Client 
+        # get the incremental changes, and merge with defs stored on the Client
         CL.sync_local()
-        
+
         # check to see if definition exists in the server
         defs = CL.get_defs()
         if len(defs) == 0 :
             print("No suites found, exiting...")
-            sys.exit(0) 
-         
+            sys.exit(0)
+
         paths_list = []
         node_vec = defs.get_all_nodes()
         for node in node_vec:
@@ -50,8 +50,8 @@ if __name__ == "__main__":
             path = node.get_abs_node_path()
             paths = path.split('/')
             if paths[1] == ARGS.suite:
-                paths_list.append(path) 
-                
+                paths_list.append(path)
+
         if len(paths_list) > 0:
             CL.resume(paths_list)
 
@@ -63,11 +63,11 @@ if __name__ == "__main__":
 #             for node in node_vec:
 #                 if node.name() == ARGS.name and node.get_dstate() == DState.SUSPENDED:
 #                     paths_list.append(node.get_abs_node_path())
-# 
+#
 #             print paths_list
 #             if len(paths_list) > 0:
 #                  CL.resume(paths_list)
-        
+
     except RuntimeError as ex:
         print("Error: " + str(ex))
         print("Check host and port number are correct.")

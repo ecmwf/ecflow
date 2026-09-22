@@ -204,7 +204,7 @@ The following describes the parameters in more detail:
 
  delete meter name
    # To delete a specific meter , enter the meter name
-   # an empty name will delete all meter on the node 
+   # an empty name will delete all meter on the node
 
  delete label name
    # To delete a specific label , enter the label name
@@ -1013,7 +1013,7 @@ get script for Edit Preprocess
 .. py:method:: Client.edit_script_submit(self: ecflow.Client, arg0: str, arg1: list, arg2: list, arg3: bool, arg4: bool) -> int
    :module: ecflow
 
-submit script from Edit/Preprocess 
+submit script from Edit/Preprocess
 to run as alias or not:
 
 .. code-block:: python
@@ -1167,7 +1167,7 @@ Lets see the effect of forcing complete on the following defs
 
    suite s1
       task t1; time 10:00             # will complete straight away
-      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth 
+      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth
 
 In the last case (task t2) after each force complete, the next time slot is incremented.
 This can be seen by calling the Why command.
@@ -1489,7 +1489,7 @@ Allows a series of commands to be executed in the :term:`ecflow_server`
 ::
 
    void group(
-       string cmds : a list of ';' separated commands 
+       string cmds : a list of ';' separated commands
    )
 
 Usage:
@@ -1574,7 +1574,7 @@ Usage:
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-       ci.job_generation('/s1')  # generate jobs for suite '/s1 
+       ci.job_generation('/s1')  # generate jobs for suite '/s1
    except RuntimeError, e:
        print(str(e))
 
@@ -1652,7 +1652,7 @@ Usage:
 
 .. code-block:: python
 
-   defs_file = 'Hello.def' 
+   defs_file = 'Hello.def'
    defs = Defs()
    suite = def.add_suite('s1')
    family = suite.add_family('f1')
@@ -1686,7 +1686,7 @@ Usage:
    defs = Defs()
    suite = defs.add_suite('s1')
    family = suite.add_family('f1')
-   for i in [ '_1', '_2', '_3' ]: 
+   for i in [ '_1', '_2', '_3' ]:
        family.add_task( Task( 't' + i) )
    ...
    try:
@@ -1875,11 +1875,11 @@ returned as a string.
 - trigger,   returns :code:`true` if the expression is true, otherwise :code:`false`
 
 
-.. important:: 
+.. important::
 
   When path_to_attribute is '/', the variable is looked up on the server itself
 
-.. warning:: 
+.. warning::
 
   :code:`evaluate=True` requires an ecFlow server of version 5.20 or later. An older server ignores
   the request for evaluation silently and returns the value as stored, without raising any error;
@@ -2741,7 +2741,7 @@ Returns the current client version
 Wait for a response from the :term:`ecflow_server`::
 
    void wait_for_server_reply(
-      int time_out     : (default = 60) 
+      int time_out     : (default = 60)
    )
 
 This is used to check if server has started. Typically for tests.

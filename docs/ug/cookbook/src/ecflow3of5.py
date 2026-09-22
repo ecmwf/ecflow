@@ -22,7 +22,7 @@ while 1:
     for item in node.nodes:
         count += 1
         status = "%s" % item.get_state()
-        # print item.get_abs_node_path(), status, outof5, tot   
+        # print item.get_abs_node_path(), status, outof5, tot
         if status == "complete":
             tot += 1
             if tot >= outof5: stop("# OK", 0)

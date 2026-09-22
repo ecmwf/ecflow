@@ -5,14 +5,14 @@ suite family_hier
       edit VAR value
       task t
          edit VAR1 "value"
-         event 0 
+         event 0
          event 1 eventName
          meter myMeter 0 100
       family heir_f
          edit VAR1 value
          task taskName0
             edit VAR1 value
-            event 0 
+            event 0
             event 1 eventName
             meter myMeter 0 100
       endfamily
@@ -21,7 +21,7 @@ suite family_hier
       edit VAR value
       task t
          edit VAR1 "value"
-         event 1 
+         event 1
          event 2 eventName
          meter myMeter 0 100
    endfamily
@@ -30,7 +30,7 @@ suite family_hier
       task t
          trigger ../f1/t == complete
          edit VAR1 "value"
-         event 2 
+         event 2
          event 3 eventName
          meter myMeter 0 100
    endfamily

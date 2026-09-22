@@ -57,13 +57,13 @@ below:
 
 .. note::
 
-   **String match options**                                           
-                                                                       
-   *  **Matches** is a wildcard match, similar to UNIX file syntax, where "*" means "any number of any characters"  and "?" means "one of any character", e.g. "*monitor?*". If no wildcard characters are used, the result will be that only those nodes hose names/paths exactly match the string will be found. This is often the simplest way of searching. See http://doc.qt.io/qt-5qregexphtml#wildcard-matching. 
-                                                      
-   *  **Regexp** is a regular expression match, using the Qt regexp syntax. The regexp equivalent of the above example would be ".*monitor.". See http://doc.qt.io/qt-5/qregexp.html#introduction.                
-                                                                       
-   * **Contains** finds nodes whose names/paths *contain* the given regular expression as a substring; similar to   **Regexp**, but an find more nodes since the regexp only needs to match a substring rather than the whole name                            
+   **String match options**
+
+   *  **Matches** is a wildcard match, similar to UNIX file syntax, where "*" means "any number of any characters"  and "?" means "one of any character", e.g. "*monitor?*". If no wildcard characters are used, the result will be that only those nodes hose names/paths exactly match the string will be found. This is often the simplest way of searching. See http://doc.qt.io/qt-5qregexphtml#wildcard-matching.
+
+   *  **Regexp** is a regular expression match, using the Qt regexp syntax. The regexp equivalent of the above example would be ".*monitor.". See http://doc.qt.io/qt-5/qregexp.html#introduction.
+
+   * **Contains** finds nodes whose names/paths *contain* the given regular expression as a substring; similar to   **Regexp**, but an find more nodes since the regexp only needs to match a substring rather than the whole name
 
 The **Query** section shows the query which is generated from the
 selections in the dialogue. It is presented using a MySQL-like syntax
@@ -89,10 +89,10 @@ Currently there is no context menu assigned to the attributes.
 
 .. note::
 
-    An important thing to note about the search results is that the    
-    found nodes will be updated when ecFlowUI syncs with the server.   
-    The list of found nodes will not be changed, but their latest      
-    state will be reflected.                                           
+    An important thing to note about the search results is that the
+    found nodes will be updated when ecFlowUI syncs with the server.
+    The list of found nodes will not be changed, but their latest
+    state will be reflected.
 
 .. image:: /_static/ecflow_ui/searching_for_nodes/image3.png
    :width: 3.33333in

@@ -32,7 +32,7 @@ if __name__ == "__main__":
               It should show that it is quicker to register and then sync_local()
               as this limits the amount of data that needs to be down loaded from the  server.
               Usage:
-                   TestSyncLocalPerf.py --host <hostname> --port <portname> 
+                   TestSyncLocalPerf.py --host <hostname> --port <portname>
             """
     PARSER = argparse.ArgumentParser(
         description=DESC, formatter_class=argparse.RawDescriptionHelpFormatter

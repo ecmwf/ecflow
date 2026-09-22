@@ -10,8 +10,8 @@ ecFlowUI
    :width: 450px
 
 ecFlowUI is a desktop-based graphical user interface to ecFlow. The command to start the application is::
-                                    
-   ecflow_ui                                                          
+
+   ecflow_ui
 
 **Documentation**
 

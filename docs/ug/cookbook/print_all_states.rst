@@ -3,9 +3,9 @@
 
 .. index::
    single: cookbook
-   
+
 .. _print-all-states:
-   
+
 How can I access the path and task states?
 ******************************************
 

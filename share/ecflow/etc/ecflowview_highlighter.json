@@ -4,20 +4,20 @@
         		"main" : {
                         "pattern" : "^\\s*(name|type|status|flags|at|aborted reason)\\s+:",
                         "colour"  : "rgb(0,0,128)",
-                        "bold"    : "true"                               
+                        "bold"    : "true"
                 },
-                
+
                 "def" : {
-                    "pattern" : "^(task|endtask|suite|endsuite|family|endfamily|server|endserver)",                       
+                    "pattern" : "^(task|endtask|suite|endsuite|family|endfamily|server|endserver)",
                     "colour"  : "rgb(0,0,0)",
                     "bold"    : "true"
-                }, 
-                
+                },
+
                 "keyword" : {
                     "pattern" : "^\\s*(edit|cron|date|day|inlimit|label|late|limit|meter|event|repeat|time|today|trigger|complete|defstatus|autoarchive|autocancel|autorestore|queue)\\s+",
-                    "colour"  : "rgb(136,0,136)",               
+                    "colour"  : "rgb(136,0,136)",
                     "bold"    : "true"
-                }, 
+                },
 
                 "aborted_reason" : {
                     "pattern" : "aborted reason : ([^\n]*)",
@@ -41,205 +41,205 @@
                 },
 
                 "comment" : {
-                    "pattern" : "(#[^\n]*)",                     
+                    "pattern" : "(#[^\n]*)",
                     "colour"  : "rgb(100,100,100)",
-                    "italic"  : "true"                                         
-                }               
-                
+                    "italic"  : "true"
+                }
+
         },
 
         "script"  : {
 
                 "preproc" : {
-                        "pattern" : "^\\s*(%include\\s*<\\S*>|%manual|%comment|%nopp|%end|%ecfmicro \\S+)",                      
-                        "colour"  : "rgb(0,140,0)"                           
-                                
+                        "pattern" : "^\\s*(%include\\s*<\\S*>|%manual|%comment|%nopp|%end|%ecfmicro \\S+)",
+                        "colour"  : "rgb(0,140,0)"
+
                  },
-           
+
                  "keyword" : {
-                     "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",                       
+                     "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",
                      "colour"  : "rgb(0,0,0)",
                      "bold"    : "true"
-                 },                        
-                 
+                 },
+
                  "ecfcommand" : {
-                     "pattern" : "\\b(ecflow_client)\\b",                       
+                     "pattern" : "\\b(ecflow_client)\\b",
                      "colour"  : "rgb(204,0,204)",
                      "bold"    : "true"
-                 }, 
-                 
+                 },
+
                  "oper" : {
-                     "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",                       
-                     "colour"  : "rgb(0,110,40)"                    
-                 }, 
-                    
+                     "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",
+                     "colour"  : "rgb(0,110,40)"
+                 },
+
                  "heredoc" : {
-                     "pattern" : "(<<\\s*\\S+\\s*>|EOF)",                       
+                     "pattern" : "(<<\\s*\\S+\\s*>|EOF)",
                      "colour"  : "rgb(34,51,136)",
                      "bold"    : "true"
-                 }, 
-                            
+                 },
+
                  "ecfvar" : {
-                     "pattern" : "(%\\S+%)",                       
+                     "pattern" : "(%\\S+%)",
                      "colour"  : "rgb(16,40,170)",
                      "bold"  : "true"
                 },
-                    
+
                 "leftvalue" : {
-                    "pattern" : "(\\S+)\\s*=",                       
-                    "colour"  : "rgb(0,110,40)"                   
+                    "pattern" : "(\\S+)\\s*=",
+                    "colour"  : "rgb(0,110,40)"
                },
-                
+
                "shellvar" : {
-                   "pattern" : "(\\$\\S+|\\))",                       
-                   "colour"  : "rgb(0,110,40)"                   
+                   "pattern" : "(\\$\\S+|\\))",
+                   "colour"  : "rgb(0,110,40)"
               },
-               
-              
+
+
               "command" : {
-                  "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",                       
+                  "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",
                   "colour"  : "rgb(136,0,136)",
                   "bold"    : "true"
-              }, 
-              
+              },
+
               "othercommand" : {
-                  "pattern" : "\\b(cmake|ctest|git|module)\\b",                       
+                  "pattern" : "\\b(cmake|ctest|git|module)\\b",
                   "colour"  : "rgb(204,0,204)",
                   "bold"    : "true"
-              }, 
-              
+              },
+
               "function" : {
             	  "pattern" : "(\\S+\\s*\\(\\))",
-            	  "colour"  : "rgb(16,40,170)"        
+            	  "colour"  : "rgb(16,40,170)"
               },
-              
+
                "string" : {
-                   "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+                   "pattern" : "(\"[^\"]*\"|'[^']*')",
                    "colour"  : "rgb(191,3,3)"
-               },   
- 
+               },
+
                "shell-syntax" : {
-                   "pattern" : "(\\[|\\]|;)",                       
+                   "pattern" : "(\\[|\\]|;)",
                    "colour"  : "rgb(0,0,0)",
                    "bold"	 : "true"
-               }, 
-               
+               },
+
                  "comment" : {
-                     "pattern" : "(#[^\n]*)",                     
+                     "pattern" : "(#[^\n]*)",
                      "colour"  : "rgb(100,100,100)",
-                     "italic"  : "true"                                         
+                     "italic"  : "true"
                  }
-                 
-                 
+
+
         },
-        
+
         "job"  : {
-         
+
              "keyword" : {
-                 "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",                       
+                 "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",
                  "colour"  : "rgb(0,0,0)",
                  "bold"    : "true"
-             },                        
-             
+             },
+
              "ecfcommand" : {
-                 "pattern" : "\\b(ecflow_client)\\b",                       
+                 "pattern" : "\\b(ecflow_client)\\b",
                  "colour"  : "rgb(204,0,204)",
                  "bold"    : "true"
-             }, 
-             
+             },
+
              "oper" : {
-                 "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",                       
-                 "colour"  : "rgb(0,110,40)"                    
-             }, 
-                
+                 "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",
+                 "colour"  : "rgb(0,110,40)"
+             },
+
              "heredoc" : {
-                 "pattern" : "(<<\\s*\\S+\\s*>|EOF)",                       
+                 "pattern" : "(<<\\s*\\S+\\s*>|EOF)",
                  "colour"  : "rgb(34,51,136)",
                  "bold"    : "true"
-             }, 
-                        
-                
+             },
+
+
             "leftvalue" : {
-                "pattern" : "(\\S+)\\s*=",                       
-                "colour"  : "rgb(0,110,40)"                   
+                "pattern" : "(\\S+)\\s*=",
+                "colour"  : "rgb(0,110,40)"
            },
-            
+
            "shellvar" : {
-               "pattern" : "(\\$\\S+|\\))",                       
-               "colour"  : "rgb(0,110,40)"                   
+               "pattern" : "(\\$\\S+|\\))",
+               "colour"  : "rgb(0,110,40)"
           },
-           
+
           "command" : {
-              "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|eval|exec|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",                       
+              "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|eval|exec|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",
               "colour"  : "rgb(136,0,136)",
               "bold"    : "true"
-          }, 
-        
+          },
+
           "othercommand" : {
-              "pattern" : "\\b(cmake|ctest|git|module)\\b",                       
+              "pattern" : "\\b(cmake|ctest|git|module)\\b",
               "colour"  : "rgb(204,0,204)",
               "bold"    : "true"
-          }, 
-          
+          },
+
           "function" : {
         	  "pattern" : "(\\S+\\s*\\(\\))",
-        	  "colour"  : "rgb(16,40,170)"        
+        	  "colour"  : "rgb(16,40,170)"
           },
-          
+
            "string" : {
-               "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+               "pattern" : "(\"[^\"]*\"|'[^']*')",
                "colour"  : "rgb(191,3,3)"
-           },   
+           },
 
            "shell-syntax" : {
-               "pattern" : "(\\[|\\]|;)",                       
+               "pattern" : "(\\[|\\]|;)",
                "colour"  : "rgb(0,0,0)",
                "bold"	 : "true"
-           }, 
-           
+           },
+
            "comment" : {
-                 "pattern" : "(#[^\n]*)",                     
+                 "pattern" : "(#[^\n]*)",
                  "colour"  : "rgb(100,100,100)",
-                 "italic"  : "true"                                         
-            }                          
+                 "italic"  : "true"
+            }
         },
- 
+
         "query"  : {
 
              "oper" : {
-                 "pattern" : "(=|~)",                       
+                 "pattern" : "(=|~)",
                  "colour"  : "rgb(0,0,0)"
-             }, 
+             },
              "logical" : {
-                "pattern" : "(or|and)",                       
-                "colour"  : "rgb(40,40,40)",               
+                "pattern" : "(or|and)",
+                "colour"  : "rgb(40,40,40)",
                 "bold"    : "false"
-             },             
+             },
             "select" : {
                 "pattern" : "(node|date|event|label|late|limit|limiter|meter|repeat|time|trigger|variable)",
                 "colour"  : "rgb(0,0,200)",
                 "bold"    : "false"
              },
              "node" : {
-              "pattern" : "\\b(node_path|node_name)\\b",                       
+              "pattern" : "\\b(node_path|node_name)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
-            },        
+            },
             "state" : {
-              "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",                       
+              "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
             },
              "type" : {
-              "pattern" : "\\b(server|suite|family|task|alias)\\b",                       
+              "pattern" : "\\b(server|suite|family|task|alias)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
-            }, 
+            },
              "flag" : {
               "pattern" : "\\b(has_date|has_message|has_time|is_archived|is_ecfcmd_failed|is_killed|is_killcmd_failed|is_late|is_rerun|is_restored|is_statuscmd_failed|is_waiting|is_zombie|no_script|threshold)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
-            }, 
+            },
             "period" : {
              "pattern" : "\\b(status_change_time)\\b",
              "colour"  : "rgb(102,43,130)",
@@ -249,7 +249,7 @@
               "pattern" : "\\b(date_name|event_name|event_value|label_name|label_value|late_name|limit_name|limit_value|limit_max|limiter_name|meter_name|meter_value|repeat_name|repeat_value|time_name|trigger_expression|var_type|var_name|var_value)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
-            },   
+            },
             "int" : {
                "pattern" : "\\b(\\d+)",
                "colour"  : "rgb(128,128,0)"

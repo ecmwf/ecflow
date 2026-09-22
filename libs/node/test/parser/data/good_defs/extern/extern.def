@@ -42,11 +42,11 @@ suite extern_obs
     family limits
     	limit hpcd 20
     endfamily
-    
+
     family anon
     	task t1
     		inlimit /extern:sg1
    		task t2
-   			inlimit /extern_obs/limits:hpcd         
+   			inlimit /extern_obs/limits:hpcd
     endfamily
 endsuite

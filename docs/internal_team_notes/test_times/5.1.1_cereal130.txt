@@ -7,8 +7,8 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 40.82% )
            131,029      page-faults               #    0.090 M/sec                    ( +-  0.00% )
      5,590,173,308      cycles                    #    3.835 GHz                      ( +-  0.38% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,178,261,469      instructions              #    1.82  insns per cycle          ( +-  0.00% )
      2,884,762,719      branches                  # 1978.954 M/sec                    ( +-  0.00% )
         16,300,673      branch-misses             #    0.57% of all branches          ( +-  1.61% )
@@ -74,15 +74,15 @@ run strace
                  1      cpu-migrations            #    0.001 K/sec                    ( +- 29.92% )
            143,758      page-faults               #    0.088 M/sec                    ( +-  0.13% )
      6,256,415,063      cycles                    #    3.836 GHz                      ( +-  1.03% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     11,866,948,582      instructions              #    1.90  insns per cycle          ( +-  0.00% )
      3,130,754,122      branches                  # 1919.710 M/sec                    ( +-  0.00% )
         13,075,139      branch-misses             #    0.42% of all branches          ( +-  2.07% )
 
        2.237640976 seconds time elapsed                                          ( +-  2.89% )
 
-                                                                                                        
+
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real    0m0.91s

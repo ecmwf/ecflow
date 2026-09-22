@@ -8,7 +8,7 @@ Black list file (experimental)
 
 This allows user commands to be authenticated via passwords.
 
-**In ecFlow 5 this functionality is enabled by default**.       
+**In ecFlow 5 this functionality is enabled by default**.
 
 One password file must be specified for the client and server. In both
 cases, the file is located via ECF_PASSWD environment variable.
@@ -21,8 +21,8 @@ The format of the file is the same for both client and server. 
 
 .. warning::
 
-    Is up to the user and server administrator, to **set the right     
-    permissions** on the file.                                         
+    Is up to the user and server administrator, to **set the right
+    permissions** on the file.
 
 .. code-block:: shell
     :caption: Client side password file, for user fred
@@ -34,15 +34,15 @@ The format of the file is the same for both client and server. 
     fred machine2 3141 xydd5j
     fred machine3 3141 xydd5jggg
 
-This format allows the same file to be used for multiple servers. 
+This format allows the same file to be used for multiple servers.
 
 .. code-block:: shell
     :caption: Example server password file, running on machine1 and port 3141
-    
+
     4.5.0
     user1 machine1 3141 sdfrg
     user2 machine1 3141 ssdft
-    fred  machine1 3141 xydd5j                                          
+    fred  machine1 3141 xydd5j
 
 The password file for the server must contain at **least one** user that
 matches the host and port of the server, otherwise, an error is issued,
@@ -64,10 +64,10 @@ users who appear in the password file can do this:
 .. code-block:: shell
    :caption: Reload password file, after adding/removing user
 
-    ecflow_client --reloadpasswdfile                                   
+    ecflow_client --reloadpasswdfile
 
 
 .. warning::
 
-    Although the password file can be re-loaded, its file location can 
-    not be changed.                                                    
+    Although the password file can be re-loaded, its file location can
+    not be changed.

@@ -54,7 +54,7 @@ Triggers can also use :code:`AND`/:code:`OR` logic, and the full range of operat
     task t         # combination of time attributes and time trigger
         day monday
         trigger :TIME >= 1300
-    
+
 .. important::
 
     Relative time (e.g. :code:`time +00:01`) are not possible with time-based triggers.

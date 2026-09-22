@@ -1,8 +1,8 @@
 suite trigger_simple
     family f
-		task a             
-         	event eventName 
-    	task b             
+		task a
+         	event eventName
+    	task b
    			trigger a  == complete                  # a comment at end of trigger
     endfamily
 endsuite

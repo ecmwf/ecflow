@@ -7,12 +7,12 @@
    single: Client (tutorial)
    single: add_variable (tutorial)
    single: add_task (tutorial)
-   
+
 .. _tutorial-load-file:
-   
+
 Loading the suite
 =================
- 
+
 The next step is to *load* the :term:`suite definition` to the :term:`ecflow_server`, and thus inform the server about the :term:`suite` structure and components.
 As part of loading the :term:`suite definition`, the :term:`ecflow_server` performs several validation steps, and only if the validation is successful will the :term:`suite definition` be accepted.
 

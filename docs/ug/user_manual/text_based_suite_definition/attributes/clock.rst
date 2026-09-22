@@ -21,7 +21,7 @@ Clock gain is expressed in seconds and can be given as an integer, a
 time or a date. Seconds and time can have a sign:
 
 .. code-block:: shell
-                                                  
+
     clock real 300              # the clock gains 300 sec from now
     clock real +01:00           # the clock gains 3600 sec from now
     clock real 01:00            # clock is 01:00 in the morning
@@ -32,4 +32,4 @@ The clock can only be modified using alter command, e.g.
 
 .. code-block:: shell
 
-    ecflow_client --alter=change clock_type real /suite                
+    ecflow_client --alter=change clock_type real /suite

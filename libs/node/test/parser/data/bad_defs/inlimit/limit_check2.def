@@ -1,5 +1,5 @@
 suite s
- family anon    
+ family anon
    task t1
      inlimit /s:disk        # absolute path to node defining the limit, limit missing
  endfamily

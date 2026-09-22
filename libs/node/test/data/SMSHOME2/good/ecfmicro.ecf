@@ -1,6 +1,6 @@
 
 # test exfmicro with a pound sign, this is multi-character
-%ecfmicro £  
+%ecfmicro £
 
 £VAR:sub£
 

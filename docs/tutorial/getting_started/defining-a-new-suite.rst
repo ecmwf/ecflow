@@ -4,7 +4,7 @@
 .. index::
    single: Defining a new suite (tutorial)
    single: ECF_HOME (tutorial)
-    
+
 .. _tutorial-defining-a-suite:
 
 Defining a new suite

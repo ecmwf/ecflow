@@ -10,9 +10,9 @@ suite suite
     	task t8
     	task t9
     	task t10
-		task a             
-         	event eventName 
-    	task b             
+		task a
+         	event eventName
+    	task b
    			trigger -a t2  == complete     # option -a and -o should be last
    			trigger -o t3  == complete     # option -a and -o should be last
    			trigger t1  == complete        # trigger with out options should be first

@@ -6,21 +6,21 @@
             "update": {
                 "label" : "Refresh",
                 "tooltip" : "refresh",
-            
+
                 "autoUpdate": {
                     "label": "Refresh server state automatically",
                     "tooltip" : "When enabled the server is queried for updates at regular intervals.",
             		"default": "true"
                 },
-            	           	
+
             	"updateRateInSec": {
                     "label": "Server refresh period",
-            		"suffix" : "seconds", 
+            		"suffix" : "seconds",
                     "tooltip": "Defines the automatic server refresh period.",
             		"default": "60",
             		"min" : "0"
                 },
-                
+
                 "adaptiveUpdate": {
                     "label": "Drift (increase) server refresh period when inactive",
                     "tooltip" : "When enabled the server refresh period is <b>increased at every automatic refresh</b> until the maximum period is reached. If the user in the meantime interact with the server the refresh period is set back to its original value and whole process starts again.",
@@ -42,7 +42,7 @@
                 },
                 "maxAdaptiveUpdateRateInMin": {
                     "label": "Do not increase server refresh period over",
-                	"suffix" : "minutes", 
+                	"suffix" : "minutes",
                     "tooltip": "Defines the <b>maximum</b> server refresh period. When it is reached the refresh period is not increased any more.",
                 	"default": "60",
                 	"min" : "0"
@@ -72,20 +72,20 @@
 
 			"files": {
 				"label" : "Files",
-				"tooltip" : "files", 
-				
+				"tooltip" : "files",
+
 				"readFilesFromDisk": {
                     "label": "Read files from disk when appropriate",
                     "tooltip": "The following steps are tried to fetch the files: <ol><li>fetch the files from the logserver (if defined)</li><li>read from disk (if option is <b>enabled</b> and file is accessible)</li><li>fetch from the ecflow server</li></ul>",
             		"default": "true"
                 	},
-            
+
             	"maxOutputFileLines": {
                 	"label": "Fetch the last",
-                	"suffix" : "lines of files from the server", 
-                	"tooltip": "",                          
+                	"suffix" : "lines of files from the server",
+                	"tooltip": "",
                 	"default": "15000",
-                	"min" : "0"	
+                	"min" : "0"
                     },
 
                 "logServerHost" : {
@@ -111,7 +111,7 @@
                     "suffix" : "MB"
                 }
             },
-            
+
             "menu":  {
 
                 "label" : "Menu options",
@@ -136,24 +136,24 @@
 
             "notification": {
 				"label" : "Popup notifications",
-				"tooltip" : "Popup notifications", 
-				
+				"tooltip" : "Popup notifications",
+
                 "aborted" : {
                     "label" : "Aborted",
 
                     "enabled" : {
                         "label"   : "Enabled",
-                        "default" : "true"    
+                        "default" : "true"
                     },
                     "popup" : {
                          "label"   : "Popup dialog",
                          "default" : "true"
                     },
-				    "sound" : {				 
+				    "sound" : {
                         "label": "Play sound",
-                        "tooltip": "Play sound",                          
+                        "tooltip": "Play sound",
                         "default": "false"
-                    }    
+                    }
 				},
                 "restarted" : {
                     "label" : "Restarted",
@@ -161,70 +161,70 @@
                     "enabled" : {
                          "label"   : "Enabled",
                          "default" : "true"
-    
+
                     },
                     "popup" : {
                         "label"   : "Popup dialog",
                         "default" : "true"
                     },
-                    "sound" : {                     
+                    "sound" : {
                         "label": "Play sound",
-                        "tooltip": "Play sound",                          
+                        "tooltip": "Play sound",
                         "default": "false"
-                    }    
+                    }
                 },
                "late" : {
                     "label" : "Late tasks",
 
                     "enabled" : {
                         "label"   : "Enabled",
-                        "default" : "true"    
+                        "default" : "true"
                     },
                     "popup" : {
                         "label"   : "Popup dialog",
                         "default" : "true"
                     },
-                    "sound" : {                       
+                    "sound" : {
                         "label": "Play sound",
-                        "tooltip": "Play sound",                          
+                        "tooltip": "Play sound",
                         "default": "false"
-                    }    
-                },		
+                    }
+                },
                "zombie" : {
                     "label" : "Zombies",
 
                     "enabled" : {
                         "label"   : "Enabled",
                         "default" : "false"
-    
+
                     },
                     "popup" : {
                         "label"   : "Popup dialog",
                         "default" : "false"
                     },
-                    "sound" : {                        
+                    "sound" : {
                         "label": "Play sound",
-                        "tooltip": "Play sound",                          
+                        "tooltip": "Play sound",
                         "default": "false"
-                    }    
-                },              	
+                    }
+                },
                "alias" : {
                     "label" : "Aborted or restarted aliases",
 
                     "enabled" : {
                         "label"   : "Enabled",
                         "default" : "false"
-    
+
                     },
                     "popup" : {
                          "label"   : "Popup dialog",
                          "default" : "false"
                     },
-                    "sound" : {                     
-                        "label": "Play sound",                          
+                    "sound" : {
+                        "label": "Play sound",
                         "default": "false"
-                    }    
-                }                            	
+                    }
+                }
             } ,
             "systemList": {
                 "paths": {

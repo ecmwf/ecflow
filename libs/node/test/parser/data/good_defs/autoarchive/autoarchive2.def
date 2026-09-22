@@ -1,31 +1,31 @@
 suite autoarchive_with_family_limit
  limit fam 1
  family f1
-     inlimit -n fam 
+     inlimit -n fam
      autoarchive 0      # archive immediately after complete
      task t1
      task t2
  endfamily
  family f2
-     inlimit -n fam 
+     inlimit -n fam
      autoarchive 0      # archive immediately after complete
      task t1
      task t2
  endfamily
  family f3
-     inlimit -n fam 
+     inlimit -n fam
      autoarchive 0      # archive immediately after complete
      task t1
      task t2
  endfamily
  family f4
-     inlimit -n fam 
+     inlimit -n fam
      autoarchive 0      # archive immediately after complete
      task t1
      task t2
  endfamily
  family f5
-     inlimit -n fam 
+     inlimit -n fam
      autoarchive 0      # archive immediately after complete
      task t1
      task t2

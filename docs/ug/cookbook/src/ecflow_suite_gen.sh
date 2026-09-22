@@ -1,11 +1,11 @@
 #!/bin/bash
 exec 3> /dev/stdout
-commands="   autocancel  
-clock        complete     cron         date         day          defstatus   
-edit         endfamily    endsuite     endtask      event        extern      
-family       inlimit      label        late         limit        meter       
+commands="   autocancel
+clock        complete     cron         date         day          defstatus
+edit         endfamily    endsuite     endtask      event        extern
+family       inlimit      label        late         limit        meter
 repeat       suite        task              time    today        trigger      "
- 
+
 for fname in $commands; do
 source /dev/stdin <<EOF
 function $fname()
@@ -17,7 +17,7 @@ done
 alias time="echo time \"\${*}\" >&3"
 init="ECF_NAME=%ECF_NAME% ECF_PASS=%ECF_PASS% ecflow_client --init;"
 complete="ECF_NAME=%ECF_NAME% ECF_PASS=%ECF_PASS% ecflow_client --complete;"
- 
+
 ensemble() {
 num=0
 tot=10
@@ -30,22 +30,22 @@ while (( num <= tot)); do
   endfamily
 done
 endfamily
- 
+
 family process
   for param in "z" "u" "v" "t" "q"; do
     task $param; edit PARAM $param;
   done
 endfamily # process
- 
+
 family seq
   for num in $(seq 1 9); do
     family $(printf "%02d" $num)
       task model; edit MEMBER $num; (( num += 1))
-    endfamily 
+    endfamily
   done
 endfamily
  }
- 
+
 producer() {
     family producer
       repeat date YMD 20160101 20321212
@@ -90,7 +90,7 @@ suite $SUITE_NAME
     late -s 00:05 -c 00:10
   task day
     day monday
-   
+
   family fam
     time 12:00
     date "1.*.*"

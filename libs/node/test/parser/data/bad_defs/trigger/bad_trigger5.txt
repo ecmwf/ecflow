@@ -6,7 +6,7 @@
 
 suite suite
     family family
-      task a             
+      task a
          trigger /suite/family/m:meter gt  0 or /suite/family/m:meter eq complete
       task m
          meter meter  0 100 100  # meter <name> <min> <max> [optional color change]

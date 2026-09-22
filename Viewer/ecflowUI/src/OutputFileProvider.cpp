@@ -536,7 +536,7 @@ bool OutputFileProvider::isTryNoZero(const std::string& filename) const {
 void OutputFileProvider::setDirectories(const std::vector<VDir_ptr>& dirs) {
 #if 0
     if(outClient_)
-        outClient_->setDir(dir);  
+        outClient_->setDir(dir);
 
     if(dir != dir_)
         dir_=dir;

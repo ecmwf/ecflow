@@ -3,9 +3,9 @@
 
 .. index::
    single: Using ecflow_ui (tutorial)
-   
+
 .. _tutorial-using_ecflowui:
-   
+
 Using ecflow_ui
 ================
 
@@ -19,7 +19,7 @@ The following diagram shows the typical status changes for a :term:`task`.
 The :ref:`ecflow_ui` provides the GUI for ecFlow, which can be launched using to following command:
 
 .. code-block:: shell
-  
+
    ecflow_ui
 
 In order to have an enhanced set of menu options, change the preferences to *Administrator* mode by performing the following steps:
@@ -62,7 +62,7 @@ The boxes are called nodes, and represent the hierarchy *Server* > *Suite* > *Fa
 Nodes can be expanded by clicking on the black triangle on the left-side of the node.
 
 .. note::
-  
+
   :code:`S` - stands for the suite, :code:`F` stands for Family, and :code:`T` - stands for Task
 
 After expanding the nodes, :term:`ecflow_ui` should display something similar to the following:
@@ -79,7 +79,7 @@ Add an info view pannel by performing the following steps:
 
 The info panel displays detailed information about the selected node.
 For example, selecting a task node will display the task :term:`ecf script`, :term:`job file` and the job output.
-                                                                       
+
 Selecting the :term:`node` related to :code:`t1`, and then the *Script* tab in the info panel should display the :term:`ecf script` as follows:
 
 .. image:: /_static/tutorial/using_ecflow_ui/image24.png

@@ -64,18 +64,18 @@ if [[ "${EC_TIMECRIT_UID}" == "yes" ]] ; then
 # Time-critical user with no $HOME set
 
   if [[ "${server_dir:-}" == "" ]] ; then
-    echo "Set the location of the server directory with -d" 
+    echo "Set the location of the server directory with -d"
     echo ""
     USAGE
     exit 1
   fi
   if  [[ "${server_logfile:-}" == "" ]] ; then
-    echo "Set the location of the server log file with -l" 
+    echo "Set the location of the server log file with -l"
     echo ""
     USAGE
     exit 1
   fi
-else 
+else
 # Source the profile to set $HOME and $TEMP/$SCRATCH
   . ~/.profile > /dev/null 2>&1
 fi
@@ -135,6 +135,6 @@ if [[ -f ${LOGSERVERLIST} ]] ; then
   logserverfound=$(grep $LOGPORT ${LOGSERVERLIST} | grep $USER)
   if [[ -z $logserverfound ]]; then
     echo $USER    $LOGPORT   $LOGPATH $LOGMAP>> ${LOGSERVERLIST}
-  fi  
+  fi
 fi
 

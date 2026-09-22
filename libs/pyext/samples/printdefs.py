@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import ecflow
-import argparse # for argument parsing  
-import sys   
+import argparse # for argument parsing
+import sys
 
 class Indentor:
-    """This class manages indentation, 
+    """This class manages indentation,
     It is used to correctly indent the definition node tree hierarchy
     """
     _index = 0
@@ -20,24 +20,24 @@ class Indentor:
     def indent(cls):
         for i in range(Indentor._index):
             print(' ', end=' ')
-     
+
 class DefsTraverser:
     """Traverse the ecflow.Defs definition and writes to standard out.
-    
+
     Ecflow has the following hierarchy::
        Task   --> Submittable   -->Node
        Family --> NodeContainer -->Node
        Suite  --> NodeContainer -->Node
-    
+
     This demonstrates that all nodes in the node tree and all attributes are accessible.
     Additionally the state data is also accessible. This class will write state data as
-    comments. If the definition was returned from the server, it allows access to latest 
-    snapshot of the state data held in the server. 
+    comments. If the definition was returned from the server, it allows access to latest
+    snapshot of the state data held in the server.
     """
     def __init__(self,defs):
         assert (isinstance(defs,ecflow.Defs)),"Expected ecflow.Defs as first argument"
         self.__defs = defs
-        
+
     def do_print(self):
         for extern in self.__defs.externs:
             self.__println("extern " + extern)
@@ -50,8 +50,8 @@ class DefsTraverser:
                 self.__println(str(clock))
                 del indent
             self.__print_nc(suite)
-            self.__println("endsuite")  
- 
+            self.__println("endsuite")
+
     def __print_nc(self,node_container):
         indent = Indentor()
         for node in node_container.nodes:
@@ -59,7 +59,7 @@ class DefsTraverser:
                 self.__print("task ")
                 self.__print_node(node)
                 self.__print_alias(node)
-            else: 
+            else:
                 self.__print("family ")
                 self.__print_node(node)
                 self.__print_nc(node)
@@ -75,19 +75,19 @@ class DefsTraverser:
        del indent
 
     def __print_node(self,node):
-        print(node.name() + " # state:" + str(node.get_state())) 
-        
+        print(node.name() + " # state:" + str(node.get_state()))
+
         indent = Indentor()
         defStatus = node.get_defstatus()
-        if defStatus != ecflow.DState.queued: 
+        if defStatus != ecflow.DState.queued:
             self.__println("defstatus " + str(defStatus))
-            
+
         autocancel = node.get_autocancel()
         if autocancel: self.__println(str(autocancel))
-        
+
         repeat = node.get_repeat()
         if not repeat.empty(): self.__println(str(repeat)  + " # value: " + str(repeat.value()))
-    
+
         late = node.get_late()
         if late: self.__println(str(late) + " # is_late: " + str(late.is_late()))
 
@@ -106,8 +106,8 @@ class DefsTraverser:
                 if part_expr.and_expr(): trig = trig + "-a "
                 if part_expr.or_expr():  trig = trig + "-o "
                 self.__print(trig)
-                print(part_expr.get_expression()) 
-                
+                print(part_expr.get_expression())
+
         for var in node.variables:    self.__println("edit " + var.name() + " '" + var.value() + "'")
         for meter in node.meters:     self.__println(str(meter) + " # value: " + str(meter.value()))
         for event in node.events:     self.__println(str(event) + " # value: " + str(event.value()))
@@ -115,14 +115,14 @@ class DefsTraverser:
         for limit in node.limits:     self.__println(str(limit) + " # value: " + str(limit.value()))
         for inlimit in node.inlimits: self.__println(str(inlimit))
         for the_time in node.times:   self.__println(str(the_time))
-        for today in node.todays:     self.__println(str(today))   
-        for date in node.dates:       self.__println(str(date))  
-        for day in node.days:         self.__println(str(day))   
-        for cron in node.crons:       self.__println(str(cron))    
+        for today in node.todays:     self.__println(str(today))
+        for date in node.dates:       self.__println(str(date))
+        for day in node.days:         self.__println(str(day))
+        for cron in node.crons:       self.__println(str(cron))
         for verify in node.verifies:  self.__println(str(verify))
         for zombie in node.zombies:   self.__println(str(zombie))
         for queue in node.queues:     self.__println(str(queue))
-        
+
         del indent
 
     def __print(self,the_string):
@@ -132,37 +132,37 @@ class DefsTraverser:
     def __println(self,the_string):
         Indentor.indent()
         print(the_string)
- 
+
 if __name__ == "__main__":
-    
+
     DESC = """Will list all the nodes and attributes in the definition
               Usage:
                 Example1: List all the states
-                   printdefs.py --host cca --port 4141  
-            """    
-    PARSER = argparse.ArgumentParser(description=DESC,  
+                   printdefs.py --host cca --port 4141
+            """
+    PARSER = argparse.ArgumentParser(description=DESC,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    PARSER.add_argument('--host', default="localhost",   
+    PARSER.add_argument('--host', default="localhost",
                         help="The name of the host machine, defaults to 'localhost'")
-    PARSER.add_argument('--port', default="3141",   
+    PARSER.add_argument('--port', default="3141",
                         help="The port on the host, defaults to 3141")
     ARGS = PARSER.parse_args()
-    #print ARGS    
-    
+    #print ARGS
+
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
-        CL.ping() 
+        CL.ping()
 
-        # get the incremental changes, and merge with defs stored on the Client 
+        # get the incremental changes, and merge with defs stored on the Client
         CL.sync_local()
-        
+
         # check to see if definition exists in the server
         defs = CL.get_defs()
         if len(defs) == 0 :
             print("No suites found, exiting...")
-            sys.exit(0) 
-            
+            sys.exit(0)
+
         # print defs;
         defs_traverser = DefsTraverser(defs)
         defs_traverser.do_print()

@@ -7,5 +7,5 @@ suite made_up
     label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
 setup ssh login
 created remote /tmp/map/cray"
-  zombie ecf:fob:label:3600 
+  zombie ecf:fob:label:3600
 endsuite

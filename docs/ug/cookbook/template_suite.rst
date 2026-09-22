@@ -22,7 +22,7 @@ simple "one liner" command, but error message may not be clear, would
 there be any, "when things go wrong"
 
 .. literalinclude:: src/ecflow_suite.py
-   :language: python    
+   :language: python
 
 
 This script can be run from emos def:
@@ -67,7 +67,7 @@ where families may have to work with previous month date.
             Task("always").add(
                 Trigger("1==0"),
                 Complete("1==1")),
-        ), 
+        ),
 
 
 .. image:: /_static/template_suite/image2.png

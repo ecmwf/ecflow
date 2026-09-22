@@ -14,11 +14,11 @@ suite obs
     family limits
     	limit hpcd 20
     endfamily
-    
-    family anon    
-            inlimit /suiteName:sg1        #  
+
+    family anon
+            inlimit /suiteName:sg1        #
     	task t1
-            inlimit /suiteName:sg1        #  
+            inlimit /suiteName:sg1        #
             inlimit /suiteName:sg1        # duplicate inlimit
    		task t2
    		task t3

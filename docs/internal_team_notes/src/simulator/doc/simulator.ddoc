@@ -9,7 +9,7 @@ This allows allows a known starting point, allowing for a deterministic behaviou
 suite suite
   clock real 12.10.2009        # 12 October 2009 was a Monday. When the simulation starts
   family family
-     task t                     
+     task t
        time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
        verify complete:6       # Verify that task t to completes 6 times.
   endfamily
@@ -19,19 +19,19 @@ suite suite
   clock real 5.1.2017
   family family
     task t
-      date 05.01.2017     
+      date 05.01.2017
       date 06.01.2017
-      time 00:30 23:59 04:00  
+      time 00:30 23:59 04:00
       verify complete:12
   endfamily
 endsuite
 
-suite cron             
-  clock real  1.1.2006 # Define a start date for deterministic simulation 
+suite cron
+  clock real  1.1.2006 # Define a start date for deterministic simulation
   family cronFamily
     task t
-      cron -d 15,16  -m 1 10:00 11:00 01:00  # run 15,16 January at 10 and 11am    
-      verify complete:4    
+      cron -d 15,16  -m 1 10:00 11:00 01:00  # run 15,16 January at 10 and 11am
+      verify complete:4
    endfamily
 endsuite
 
@@ -39,10 +39,10 @@ suite dead_lock
   family family
     task t1
        trigger t2 == complete
-       verify complete:1   
+       verify complete:1
     task t2
        trigger t1 == complete
-       verify complete:1   
+       verify complete:1
   endfamily
 endsuite
 

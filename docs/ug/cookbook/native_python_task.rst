@@ -10,7 +10,7 @@ There are several ways of doing this. The following are examples.
 
 * There are two ways of accessing the ecFlow child commands (init, event, meter, label, abort, complete). We can either call the child commands directly using ecFlow extension, or we can call system command to access :term:`ecflow_client`. The following examples will use the ecFlow Python extension. This requires that the PYTHONPATH is set to the directory where ecflow.so extension was installed.
 
-* definition file: The default ECF_MICRO is %, this may interfere with your Python scripts. In this case you either redefine it, in the task definition or directly in the Python script. 
+* definition file: The default ECF_MICRO is %, this may interfere with your Python scripts. In this case you either redefine it, in the task definition or directly in the Python script.
 
     .. literalinclude:: src/python.def
         :language: shell

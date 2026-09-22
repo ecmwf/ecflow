@@ -3,7 +3,7 @@
 
 .. index::
    single: complete (tutorial)
-   
+
 .. _tutorial-add-complete:
 
 Adding a complete
@@ -50,7 +50,7 @@ Update the suite definition to add a :term:`complete expression` to task :code:`
                     complete t2:b
               endfamily
            endsuite
-   
+
     .. tab:: Python
 
         .. literalinclude:: src/add-a-complete.py

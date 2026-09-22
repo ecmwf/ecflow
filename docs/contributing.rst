@@ -10,7 +10,7 @@ The main repository is hosted on GitHub, testing, bug reports and contributions 
 
 https://github.com/ecmwf/ecflow
 
-Code contributions on ECMWF GitHub space should follow the standard fork-based contribution model on GitHub, which ends with opening of a pull request. 
+Code contributions on ECMWF GitHub space should follow the standard fork-based contribution model on GitHub, which ends with opening of a pull request.
 Any contribution should follow these steps:
 
 - Fork the develop branch of the targeted package from GitHub to your own GitHub space

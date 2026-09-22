@@ -11,18 +11,18 @@ endsuite
 suite limit_with_node_inlimit
     limit fred 1000
     inlimit -n /limits:c1a
-    
+
     family limits
         limit hpcd 20
     endfamily
-    
+
     family X
         inlimit -n fred 3
         task t1
     endfamily
-    
-    family anon    
-        inlimit -n fred      
+
+    family anon
+        inlimit -n fred
         task t1
             inlimit -n /limit:sg1 3          # another suite limit
             inlimit -n /limit_with_node_inlimit/limits:hpcd      # This suite limit

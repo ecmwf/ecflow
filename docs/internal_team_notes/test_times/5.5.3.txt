@@ -4,11 +4,11 @@
 
        1653.914775      task-clock (msec)         #    0.999 CPUs utilized            ( +-  2.69% )
                  4      context-switches          #    0.003 K/sec                    ( +-  5.97% )
-                 0      cpu-migrations            #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec
            131,024      page-faults               #    0.079 M/sec                    ( +-  0.00% )
      6,363,086,693      cycles                    #    3.847 GHz                      ( +-  2.73% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,426,796,608      instructions              #    1.64  insns per cycle          ( +-  0.00% )
      2,961,238,810      branches                  # 1790.442 M/sec                    ( +-  0.00% )
         15,473,825      branch-misses             #    0.52% of all branches          ( +-  0.73% )
@@ -64,7 +64,7 @@ run strace
   0.00    0.000000           0         1           execve
 ------ ----------- ----------- --------- --------- ----------------
 100.00    0.051082                  6478        22 total
- 
+
 + perf stat -r 10 bin/ecflow_client --port 45159 --sync_full 0
 
  Performance counter stats for 'bin/ecflow_client --port 45159 --sync_full 0' (10 runs):
@@ -74,15 +74,15 @@ run strace
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
            266,668      page-faults               #    0.152 M/sec                    ( +-  0.00% )
      6,771,450,310      cycles                    #    3.868 GHz                      ( +-  2.10% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     12,165,168,987      instructions              #    1.80  insns per cycle          ( +-  0.01% )
      3,181,346,899      branches                  # 1817.039 M/sec                    ( +-  0.01% )
         11,825,120      branch-misses             #    0.37% of all branches          ( +-  1.00% )
 
        2.347363482 seconds time elapsed                                          ( +-  2.83% )
 
- 
+
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real  0m0.89s
@@ -306,4 +306,3 @@ auto_restore        0
 verifys             0
 queues              0
 generics            0
- 

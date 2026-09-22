@@ -4,11 +4,11 @@
 
        1714.019402      task-clock (msec)         #    0.999 CPUs utilized            ( +-  3.71% )
                  5      context-switches          #    0.003 K/sec                    ( +-  8.92% )
-                 0      cpu-migrations            #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec
            131,024      page-faults               #    0.076 M/sec                    ( +-  0.00% )
      6,554,772,331      cycles                    #    3.824 GHz                      ( +-  3.67% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,396,832,359      instructions              #    1.59  insns per cycle          ( +-  0.00% )
      2,949,376,438      branches                  # 1720.737 M/sec                    ( +-  0.00% )
         15,171,733      branch-misses             #    0.51% of all branches          ( +-  0.65% )
@@ -74,15 +74,15 @@ run strace
                  1      cpu-migrations            #    0.000 K/sec                    ( +- 30.49% )
            143,778      page-faults               #    0.088 M/sec                    ( +-  0.13% )
      6,323,640,702      cycles                    #    3.872 GHz                      ( +-  4.03% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     11,858,876,975      instructions              #    1.88  insns per cycle          ( +-  0.00% )
      3,127,953,305      branches                  # 1915.396 M/sec                    ( +-  0.00% )
         11,435,916      branch-misses             #    0.37% of all branches          ( +-  0.35% )
 
        2.188386706 seconds time elapsed                                          ( +-  3.08% )
-       
-       
+
+
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real  0m0.89s
@@ -305,4 +305,4 @@ auto_archive        0
 auto_restore        0
 verifys             0
 queues              0
-generics            0       
+generics            0

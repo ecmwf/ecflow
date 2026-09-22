@@ -51,22 +51,22 @@ Triggers panel so we will explain their usage in detail.
 .. note::
 
     **Updated states and interaction**
-                                    
-    The graphical representation of the nodes and attributes appearing 
-    in the trigger lists are the same as in the tree view. The states  
-    of these items are updated with each server sync and they come     
-    with a large set of actions in their context menu.                 
+
+    The graphical representation of the nodes and attributes appearing
+    in the trigger lists are the same as in the tree view. The states
+    of these items are updated with each server sync and they come
+    with a large set of actions in their context menu.
 
 .. note::
 
     **Broadcast selection**
 
-    *Double click* on a node/attribute in the trigger list or run      
-    action '*Lookup in tree*' from the context menu to broadcast this  
-    selection to the other views, e.g. to make it selected in the tree 
-    view.The dependency details list contains textual information with      
-    *hyperlinks*: when you click on a path the selection will be       
-    broadcast to the other views.                                      
+    *Double click* on a node/attribute in the trigger list or run
+    action '*Lookup in tree*' from the context menu to broadcast this
+    selection to the other views, e.g. to make it selected in the tree
+    view.The dependency details list contains textual information with
+    *hyperlinks*: when you click on a path the selection will be
+    broadcast to the other views.
 
 Triggers of the selected node
 =============================
@@ -93,8 +93,8 @@ and /eda/lag:YMD, and the nodes an and fc) are direct triggers because
 they all appear in the selected node's trigger expression, which reads
 as::
 
-    (/eda/main:YMD gt /eda/lag:YMD) or (/eda/main:YMD eq /eda/lag:YMD  
-    and /eda/main/12/an==complete and /eda/main/12/fc==complete)       
+    (/eda/main:YMD gt /eda/lag:YMD) or (/eda/main:YMD eq /eda/lag:YMD
+    and /eda/main/12/an==complete and /eda/main/12/fc==complete)
 
 When the **dependencies** are enabled (using the **Dependencies** button
 at the top-right corner of this panel) an additional set of triggers
@@ -134,7 +134,7 @@ example, in our snapshot the first item (node /eda/lag/12/clean) is
 directly triggered by the currently-selected node (/eda/lag/12/archive)
 because the former node's trigger expression reads as::
 
-    fb == complete and archive == complete                             
+    fb == complete and archive == complete
 
 When the **dependencies** are enabled an additional set of triggered
 nodes will be shown with grey background. A node is regarded as a
@@ -154,8 +154,8 @@ selected node (/eda/lag/12/archive), directly triggers
 /eda/lag/logfiles. The trigger expression of /eda/lag/logfiles verifies
 this fact::
 
-    ./00 == complete and ./12 == complete and /eda/main:YMD gt         
-    /eda/lag:YMD                                                       
+    ./00 == complete and ./12 == complete and /eda/main:YMD gt
+    /eda/lag:YMD
 
 .. image:: /_static/ecflow_ui/viewing_dependencies/image2.png
    :width: 0.29036in

@@ -23,7 +23,7 @@ externs. Externs can be added manually or automatically
 - Automatic Method; this will scan all trigger and complete expressions, looking for paths and variables that have not been defined. The added benefit of this approach is that duplicates will not be added. It is the user's responsibility to check that extern's are eventually defined otherwise trigger expression will not evaluate correctly
 
   .. code-block:: python
-    
+
       defs = ecflow.Defs("file.def") # open and load file 'file.def' into memory
       ...
       defs.auto_add_extern(True) # True means remove existing extern first.

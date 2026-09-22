@@ -4,11 +4,11 @@
     The Suite Definition API is used to define suites, families, tasks and their attributes,
     and can be used to create a suite definition in memory, which can then be written to a
     file or submitted to the server.
-    
+
     The elements in this API do not allow to directly set the state of a suite, family or task,
     or any of their attributes. Such a state is only relevant when the suite definition is submitted to the server,
     and the server is responsible for maintaining the state of the suite, family, task and their attributes.
-    
+
     The state of the elements of a suite definition can be set using the Client-server API.
 
   items:

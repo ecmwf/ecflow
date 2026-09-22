@@ -1,4 +1,3 @@
 suite s1
   queue name  # status 0
 endsuite
- 

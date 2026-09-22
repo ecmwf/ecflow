@@ -1,5 +1,5 @@
 suite suite
-  clock real 5.1.2017        
+  clock real 5.1.2017
   family family
      task t1
         event event

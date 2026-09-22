@@ -10,9 +10,9 @@ ecFlow makes heavy use of different kinds of variables. There are
 several kinds of variables:
 
 - **Environment variables** that are set in the UNIX shell before the ECFLOW-programs start. These control the server, and client (CLI).
-  
+
 - **Internal variables**: **suite definition variables**. These control servers, ecflow_ui, and CLI.
-  
+
 - **Generated variables**: These are generated within the suite definition node tree during job creation and are available for use in the job file.
 
 This chapter lists the generated and user-defined variables which have

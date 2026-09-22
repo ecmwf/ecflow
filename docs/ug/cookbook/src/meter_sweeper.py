@@ -2,23 +2,23 @@
 
 """
 python docstring: demonstrate python cli + ecFlow task wrapper + task loader
- 
+
 $manual
 DESCRIPTION:
- 
+
 sweeper:
- 
+
 find out min/max among modeleps_nemo tasks
- 
+
 OPERATORS: please, set complete if problematic
- 
+
 ANALYST: example as pure python task - job
 $end
- 
+
 $comment
   comments can be added ...
 $end
- 
+
 """
 import time
 import os.path
@@ -331,9 +331,9 @@ def usage():
   -r: replace task node
   -p: path to look below, by default internal list MC_STEPS_LIST will be used
   -h: this help
- 
+
 ECF_NODE=localhost ECF_PORT=31415 ./client.py --path /mc/main/18bc/legA/fc -e
- 
+
 """
     )
 

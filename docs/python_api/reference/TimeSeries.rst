@@ -21,18 +21,18 @@ e.g time 10:00 20:00 01:00, if the 10.00 run takes more than an hour the 11.00 i
 Constructor::
 
    TimeSeries(single,relative_to_suite_start)
-      TimeSlot single :  A single point in a 24 clock 
+      TimeSlot single :  A single point in a 24 clock
       optional bool relative_to_suite_start : depend on suite begin time or
                                               start of repeating node. Default is false
 
    TimeSeries(hour,minute,relative_to_suite_start)
-      int hour   :  hour in 24 clock 
-      int minute :  minute < 59 
+      int hour   :  hour in 24 clock
+      int minute :  minute < 59
       bool relative_to_suite_start<optional> : depend on suite begin time or
                                               start of repeating node. Default is false
 
    TimeSeries(start,finish,increment,relative_to_suite_start)
-      start TimeSlot :     The start time  
+      start TimeSlot :     The start time
       finish TimeSlot :    The finish time, when used in a series. This must greater than the start.
       increment TimeSlot : The increment. This must be less that difference between start and finish
       bool relative_to_suite_start<optional> : The time is relative suite start, or start of repeating node.

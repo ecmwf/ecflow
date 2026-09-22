@@ -1,6 +1,6 @@
    suite suiteName
        family familyName0
-          family heir_familyName0      
+          family heir_familyName0
           		task fred                      # duplicate tasks within hier family
           		task fred
           endfamily

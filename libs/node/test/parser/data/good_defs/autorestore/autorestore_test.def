@@ -9,7 +9,7 @@ suite autorestore_test
  endfamily
  family frestore_from_family_now
     trigger ./farchive_now<flag>archived
-    autorestore ./farchive_now       
+    autorestore ./farchive_now
     task t1
        edit SLEEP 60
  endfamily
@@ -17,6 +17,6 @@ suite autorestore_test
     trigger ./frestore_from_family_now<flag>archived
     task t1
        edit SLEEP 60
-       autorestore ../farchive2_now       
+       autorestore ../farchive2_now
  endfamily
 endsuite

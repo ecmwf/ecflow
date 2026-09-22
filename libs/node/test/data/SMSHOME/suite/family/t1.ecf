@@ -1,7 +1,7 @@
 %manual
 	OPERATORS: This is an example of using a manual
-	
-	This is used to also test variable subsitution of 
+
+	This is used to also test variable subsitution of
 	generated variables
 	SUITE     = %SUITE%
 	DATE      = %DATE%
@@ -27,7 +27,7 @@
 	ECF_SCRIPT = %ECF_SCRIPT%
 	ECF_JOB    = %ECF_JOB%
 	ECF_JOBOUT = %ECF_JOBOUT%
-    
+
     Other ECF_ variables
    ECF_KILL_CMD    = %ECF_KILL_CMD:<not defined yet>%
    ECF_STATUS_CMD  = %ECF_STATUS_CMD:<not defined yet>%

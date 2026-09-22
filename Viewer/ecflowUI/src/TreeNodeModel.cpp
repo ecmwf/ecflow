@@ -864,7 +864,7 @@ QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
     if(VModelServer *mserver=data_->server(node->server()))
     {
         VTreeServer* server=mserver->treeServer();
-        Q_ASSERT(server);        
+        Q_ASSERT(server);
         server->setForceShowAttribute(a);
         return attributeToIndex(a);
     }

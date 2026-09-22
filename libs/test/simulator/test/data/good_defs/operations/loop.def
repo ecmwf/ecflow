@@ -1,5 +1,5 @@
 # This file was taken from one of operational suites
-  
+
 suite limits
   defstatus complete
   clock hybrid 0 # 01.07.2009 14:47
@@ -10,7 +10,7 @@ suite admin
   #defstatus suspended
   clock hybrid  22.12.2005   # run at midnight to ensure test is deterministice
   inlimit /limits:metis
-  
+
   family daily
     repeat date YMD 20070115 20070118 1 #  run 4 times
  	verify complete:4
@@ -21,4 +21,4 @@ suite admin
  	    verify complete:576       # 576 = 24(hours) * 6( completions per hour) * 4 times
  	endfamily
   endfamily
-endsuite 
+endsuite

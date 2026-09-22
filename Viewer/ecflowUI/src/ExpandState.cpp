@@ -86,7 +86,7 @@ void ExpandState::save(const VNode* vnode) {
 #if 0
 //Save the expand state for a whole subtree (it can be the whole VNode tree as well)
 void ExpandState::save(const VNode *root)
-{    
+{
     UI_FUNCTION_LOG
     UI_ASSERT(root,"root is null");
     UiLog().dbg() << " " << root->name();

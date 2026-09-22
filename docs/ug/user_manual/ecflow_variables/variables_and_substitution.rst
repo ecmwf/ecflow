@@ -28,7 +28,7 @@ In a job, you must enter it as following into an ecFlow file:
 
 .. code-block:: shell
 
-  date +%%d  
+  date +%%d
 
 At present, the default micro-character is %. It can only be defined
 when ecFlow is compiled. It can be redefined by setting the variable

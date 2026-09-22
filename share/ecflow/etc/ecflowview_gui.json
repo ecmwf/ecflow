@@ -17,7 +17,7 @@
             "label": "Appearance",
             "desc" : "Appearance",
             "icon" : "colour.svg",
-            
+
             "tabs"  : {
                 "tab" : {
                     "label"  : "Status",
@@ -146,12 +146,12 @@
                     "group" : {
                         "title" : "Attributes",
                         "prefix" : "view.tree",
-                        
+
                         "line" : "attributesPolicy",
                         "line" : "defaultAttributes"
                     }
                 },
-                
+
                 "tab" : {
 
                     "label"  : "Table view",
@@ -198,7 +198,7 @@
                         "line" : "warningBgEnabled",
                         "line" : "warningBgColour",
                         "line" : "warningPattern"
-                    },                   
+                    },
                     "group" : {
                         "title" : "Info label style",
                         "prefix" : "view.label",
@@ -231,7 +231,7 @@
                         "prefix" : "view.attribute",
                         "line" : "limitShape",
                         "line" : "limitFillColour",
-                        "line" : "limitExtraFillColour"    
+                        "line" : "limitExtraFillColour"
                     },
                     "group" : {
                         "title" : "Repeats",
@@ -312,22 +312,22 @@
             "group" : {
                 "title" : "Tree view",
                 "prefix" : "view.tree",
-                
+
                 "line" : "nodeFont",
                 "line" : "attributeFont"
             },
-            
+
             "group" : {
                 "title" : "Table view",
                 "prefix" : "view.table",
-                
+
                 "line" : "font"
             },
 
             "group" : {
                 "title" : "Info panel text browsers",
                 "prefix" : "panel",
-                
+
                 "line" : "overview.font",
                 "line" : "manual.font",
                 "line" : "script.font",
@@ -438,7 +438,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },                  
+                    },
                     "group" : {
                         "title" : "Colour",
                         "line" : "notification.aborted.use_status_colour",
@@ -501,7 +501,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },                    
+                    },
                     "group" : {
                         "title" : "Colour",
                         "line" : "notification.late.fill_colour",
@@ -532,7 +532,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },                   
+                    },
                     "group" : {
                         "title" : "Colour",
                         "line" : "notification.zombie.fill_colour",
@@ -598,7 +598,7 @@
                     "group" : {
                         "title" : "Options",
                         "prefix" : "server.update",
-                        "line" : "autoUpdate",                        
+                        "line" : "autoUpdate",
                         "line" : "updateRateInSec",
                         "line" : "adaptiveUpdate",
                         "note" : {
@@ -669,7 +669,7 @@
                 "h1" : "Show in status bar",
                 "h2" : "Popup dialog",
                 "h3" : "Play sound",
-                
+
                 "row" : {
                     "label" : "Aborted",
                     "prefix" : "server.notification.aborted",

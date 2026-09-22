@@ -7,12 +7,12 @@ o Disk io is required for:
    1/ Logging
    2/ Check Pointing.
    3/ Job generation
-   
+
 o Running the server on $SCRATCH (slow file system) shows that
   disk IO, can interfere with scheduling. Especially when
-  saving the check pt, file. 
-  
-  
+  saving the check pt, file.
+
+
 One way of addressing this is to use async disk IO. From reading
 research, lib AIO, (linux specific) is not always that fast.
 Looks like the internal implementation uses threads, so for
@@ -20,7 +20,7 @@ small disk IO it not that efficient.
 
 
 Another way of addressing is to use a dedicated thread for
-disk io. 
+disk io.
 
 //------------------------------------------------------------
 http://think-async.com/Asio/Recipes
@@ -28,19 +28,19 @@ http://think-async.com/Asio/Recipes
 
 Create an io_service:
   asio::io_service io_service;
-  
+
 and some work to stop its run() function from exiting if it has nothing else to do:
   asio::io_service::work work(io_service);
-  
+
 Start some worker threads:
   boost::thread_group threads;
   for (std::size_t i = 0; i < my_thread_count; ++i)
     threads.create_thread(boost::bind(&asio::io_service::run, &io_service));
-    
+
 Post the tasks to the io_service so they can be performed by the worker threads:
   io_service.post(boost::bind(an_expensive_calculation, 42));
   io_service.post(boost::bind(a_long_running_task, 123));
-  
+
 Finally, before the program exits shut down the io_service and wait for all threads to exit:
   io_service.stop();
   threads.join_all();
@@ -50,25 +50,25 @@ thread pool example:
 http://stackoverflow.com/questions/12215395/thread-pool-using-boost-asio?rq=1
 
 
-I may not be understanding all the requirements for this thread pool. 
+I may not be understanding all the requirements for this thread pool.
 Thus, for clarity, here is an explicit list as to what I believe are the requirements:
 
-The pool manages the lifetime of the threads. 
+The pool manages the lifetime of the threads.
  - The user should not be able to delete threads that reside within the pool.
  - The user can assign a task to the pool in a non-intrusive way.
  - When a task is being assigned, if all threads in the pool are currently running other tasks, then the task is discarded.
 Before I provide an implementation, there are a few key points I would like to stress:
 
 Once a thread has been launched, it will run until completion, cancellation, or termination.
- The function the thread is executing cannot be reassigned. 
- 
- To allow for a single thread to execute multiple functions over the course of its life, 
+ The function the thread is executing cannot be reassigned.
+
+ To allow for a single thread to execute multiple functions over the course of its life,
  the thread will want to launch with a function that will read from a queue, such as io_service::run(),
  and callable types are posted into the event queue, such as from io_service::post().
-io_service::run() returns if there is no work pending in the io_service, the io_service is stopped, 
-or an exception is thrown from a handler that the thread was running. 
+io_service::run() returns if there is no work pending in the io_service, the io_service is stopped,
+or an exception is thrown from a handler that the thread was running.
 To prevent io_serivce::run() from returning when there is no unfinished work, the io_service::work class can be used.
-Defining the task's type requirements (i.e. the task's type must be callable by object() syntax) 
+Defining the task's type requirements (i.e. the task's type must be callable by object() syntax)
 instead of requiring a type (i.e. task must inherit from process), provides more flexibility to the user.
  It allows the user to supply a task as a function pointer or a type providing a nullary operator().
 
@@ -150,22 +150,22 @@ private:
 
 A few comments about the implementation:
 
-Exception handling needs to occur around the user's task. 
-If the user's function or callable object throws an exception that is not 
-of type boost::thread_interrupted, then std::terminate() is called. 
+Exception handling needs to occur around the user's task.
+If the user's function or callable object throws an exception that is not
+of type boost::thread_interrupted, then std::terminate() is called.
 
-This is the the result of Boost.Thread's exceptions in thread functions behavior. 
+This is the the result of Boost.Thread's exceptions in thread functions behavior.
 It is also worth reading Boost.Asio's effect of exceptions thrown from handlers.
 If the user provides the task via boost::bind, then the nested boost::bind will fail to compile.
  One of the following options is required:
 Not support task created by boost::bind.
 Meta-programming to perform compile-time branching based on whether or not the user's type
- if the result of boost::bind so that boost::protect could be used, as boost::protect 
+ if the result of boost::bind so that boost::protect could be used, as boost::protect
  only functions properly on certain function objects.
- 
-Use another type to pass the task object indirectly. 
-I opted to use boost::function for readability at the cost of losing the exact type. 
-boost::tuple, while slightly less readable, could also be used to preserve the exact type, 
+
+Use another type to pass the task object indirectly.
+I opted to use boost::function for readability at the cost of losing the exact type.
+boost::tuple, while slightly less readable, could also be used to preserve the exact type,
 as seen in the Boost.Asio's serialization example.
 Application code can now use the thread_pool type non-intrusively:
 
@@ -179,15 +179,15 @@ struct worker
 void more_work( int ) {};
 
 int main()
-{ 
+{
   thread_pool pool( 2 );
   pool.run_task( work );                        // Function pointer.
   pool.run_task( worker() );                    // Callable object.
   pool.run_task( boost::bind( more_work, 5 ) ); // Callable object.
 }
 
-The thread_pool could be created without Boost.Asio, and may be slightly easier 
-for maintainers, as they no longer need to know about Boost.Asio behaviors, 
+The thread_pool could be created without Boost.Asio, and may be slightly easier
+for maintainers, as they no longer need to know about Boost.Asio behaviors,
 such as when does io_service::run() return, and what is the io_service::work object:
 
 #include <queue>

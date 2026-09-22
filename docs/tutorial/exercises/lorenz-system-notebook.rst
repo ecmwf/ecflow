@@ -15,4 +15,4 @@ The following notebook is closer to the tutorial, with head.h, tail.h and task t
 
 .. code-block:: shell
 
-    jupyter notebook ecflow-jupyter-ecf-2018.ipynb    
+    jupyter notebook ecflow-jupyter-ecf-2018.ipynb

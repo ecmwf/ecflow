@@ -40,7 +40,7 @@ foreach( f ${files} )
   if (NOT EXISTS ${DIR}/${f})
     message(FATAL_ERROR "File ${DIR}/${f} does not exist after configuration")
   endif ()
-    
+
   install(
     FILES
       ${DIR}/${f}

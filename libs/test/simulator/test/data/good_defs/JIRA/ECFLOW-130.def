@@ -1,6 +1,6 @@
 # 4.0.3
 suite radarlvl2
-  clock real 1.1.2014  # need to define a date otherwise log file/verify content varies according to the time 
+  clock real 1.1.2014  # need to define a date otherwise log file/verify content varies according to the time
   # repeat day 1
   family prod
     task jradar_level2_cleanup

@@ -10,7 +10,7 @@ The suite definition variables are created like:
 
 .. code-block:: shell
 
-    edit VAR 'the name of the variable'                                
+    edit VAR 'the name of the variable'
 
 https://confluence.ecmwf.int/display/ECFLOW/Adding+Variables can also be created via the :ref:`python_api`.
 
@@ -19,7 +19,7 @@ variable of the same name.
 
 These suite definition variables control the execution of ECF.
 Defining these variables you can, for example, control how a job is
-run, how ecFlow files are located, or where the job output should go. 
+run, how ecFlow files are located, or where the job output should go.
 
 The table below shows a list of ecFlow variables.
 
@@ -27,7 +27,7 @@ The table below shows a list of ecFlow variables.
 .. list-table::
    :header-rows: 1
    :widths: 8 57 5 30
- 
+
    * - Variable name
      - Explanation
      - Default
