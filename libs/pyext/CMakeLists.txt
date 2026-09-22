@@ -122,6 +122,7 @@ set(u_tests
   u_TestNodeChaining
   u_TestNodeReplace
   u_TestParent
+  u_TestParsingMultiStatement
   u_TestPrint
   u_TestPythonBindings
   u_TestRemove

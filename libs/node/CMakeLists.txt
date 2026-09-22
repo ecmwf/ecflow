@@ -88,6 +88,7 @@ set(test_srcs
   test/parser/TestMementoPersistAndReload.cpp
   test/parser/TestMigration.cpp
   test/parser/TestMirrorAttr.cpp
+  test/parser/TestMultiStatementParsing.cpp
   test/parser/TestParser.cpp
   test/parser/TestParser_main.cpp # test entry point
   test/parser/TestVariableParsing.cpp

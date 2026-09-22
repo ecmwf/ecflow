@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -9,6 +10,7 @@
 #include "PersistHelper.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
@@ -37,6 +39,64 @@ std::vector<fs::path> list_test_data_files(const std::string& base_directory, co
         }
     }
     return files;
+}
+
+///
+/// @brief Collects the paths of the nodes declared in the given definition file.
+///
+/// @details The statements are extracted the same way the parser handles them, that is by
+/// discarding the comment at the end of a line and splitting the line at ';', so that nodes
+/// sharing a line with other statements are taken into account. Only suites, families and tasks
+/// are considered, since their path can be reconstructed from the enclosing declarations alone.
+///
+/// @param[in] path Path to an existing definition file
+/// @return The paths of the declared nodes, in order of appearance
+///
+std::vector<std::string> declared_node_paths(const std::string& path) {
+    std::vector<std::string> paths;
+    std::vector<std::string> ancestors;
+
+    auto current_path = [&ancestors](const std::string& name) {
+        std::string result;
+        for (const auto& ancestor : ancestors) {
+            result += "/" + ancestor;
+        }
+        return result + "/" + name;
+    };
+
+    std::ifstream file(path);
+    std::string line;
+    while (std::getline(file, line)) {
+        auto comment = line.find('#');
+        if (comment != std::string::npos) {
+            line = line.substr(0, comment);
+        }
+
+        std::vector<std::string> statements;
+        ecf::algorithm::split_at(statements, line, ";");
+        for (const auto& statement : statements) {
+            std::vector<std::string> tokens;
+            ecf::algorithm::split_at(tokens, statement);
+            if (tokens.empty()) {
+                continue;
+            }
+
+            if (tokens[0] == "endsuite" || tokens[0] == "endfamily") {
+                if (!ancestors.empty()) {
+                    ancestors.pop_back();
+                }
+            }
+            else if (tokens.size() >= 2 && (tokens[0] == "suite" || tokens[0] == "family")) {
+                paths.push_back(current_path(tokens[1]));
+                ancestors.push_back(tokens[1]);
+            }
+            else if (tokens.size() >= 2 && tokens[0] == "task") {
+                paths.push_back(current_path(tokens[1]));
+            }
+        }
+    }
+
+    return paths;
 }
 
 void test_defs(const std::string& directory, bool pass) {
@@ -105,6 +165,14 @@ void test_defs(const std::string& directory, bool pass) {
                                         "restore from string failed for file " << relPath << "\n"
                                                                                << errorMsg2);
                     BOOST_CHECK_MESSAGE(defs2 == defs, "Parse by string != parse by filename for file:\n" << relPath);
+                }
+
+                // Make sure every declared node is present, since a statement silently dropped
+                // by the parser would otherwise go unnoticed
+                for (const auto& node_path : declared_node_paths(relPath.string())) {
+                    BOOST_CHECK_MESSAGE(defs.findAbsNode(node_path),
+                                        "Node " << node_path << " is declared in " << relPath.string()
+                                                << " but was not parsed");
                 }
 
                 // Make sure all nodes can be found
