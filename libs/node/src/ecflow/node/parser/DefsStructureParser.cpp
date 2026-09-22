@@ -97,7 +97,7 @@ bool DefsStructureParser::do_parse_file(std::string& errorMsg) {
     lineTokens.reserve(64);
     std::string line;
     line.reserve(1024);
-    while (infile_.good()) {
+    while (infile_.good() || !multi_statements_per_line_vec_.empty()) {
         getNextLine(line); // will increment lineNumer_
         if (!do_parse_line(line, lineTokens, errorMsg)) {
             return false;
@@ -111,7 +111,7 @@ bool DefsStructureParser::do_parse_string(std::string& errorMsg) {
     lineTokens.reserve(64);
     std::string line;
     line.reserve(1024);
-    while (defs_as_string_.good()) {
+    while (defs_as_string_.good() || !multi_statements_per_line_vec_.empty()) {
         getNextLine(line); // will increment lineNumer_
         if (!do_parse_line(line, lineTokens, errorMsg)) {
             the_node_ptr_ = node_ptr();
