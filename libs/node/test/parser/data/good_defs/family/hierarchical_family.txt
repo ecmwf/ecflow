@@ -35,4 +35,3 @@ suite family_hier
          meter myMeter 0 100
    endfamily
 endsuite
-

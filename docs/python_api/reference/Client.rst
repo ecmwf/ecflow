@@ -2820,4 +2820,3 @@ Overloaded function.
 1. zombie_remove(self: ecflow.Client, arg0: str) -> int
 
 2. zombie_remove(self: ecflow.Client, arg0: list) -> None
-

@@ -76,4 +76,3 @@ Members:
 .. py:attribute:: ZombieType.values
    :module: ecflow
    :value: {0: ecflow.ZombieType.user, 1: ecflow.ZombieType.ecf, 2: ecflow.ZombieType.ecf_pid, 3: ecflow.ZombieType.ecf_passwd, 4: ecflow.ZombieType.ecf_pid_passwd, 5: ecflow.ZombieType.path}
-

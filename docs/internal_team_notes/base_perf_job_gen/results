@@ -133,4 +133,3 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
            952,271      LLC-load-misses           #    1.08% of all LL-cache hits     ( +-  4.52% )  (37.53%)
 
        2.259696222 seconds time elapsed                                          ( +-  0.20% )
-

@@ -69,4 +69,3 @@ Returns the :term:`suite` :term:`clock`
    :module: ecflow
 
 Return the suite's end clock. Can be NULL
-

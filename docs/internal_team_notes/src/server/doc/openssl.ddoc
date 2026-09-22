@@ -163,6 +163,3 @@ The Fix
 Python
 ====================================================
 python -c "import ssl; print(ssl.OPENSSL_VERSION)"
-
-
-

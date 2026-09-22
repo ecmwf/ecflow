@@ -44,4 +44,3 @@ Return the step as an integer value (n.b. RepeatDay has no position concept; the
    :module: ecflow
 
 Return the step value as an integer value.
-

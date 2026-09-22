@@ -58,4 +58,3 @@ This would produce the following results:
      - abc
      - 10
      - 10
-

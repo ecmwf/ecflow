@@ -78,6 +78,3 @@ provided. It has been replaced by ecFlow 5.
 You can find an introduction to ecFlow in the `ECMWF Newsletter
 article <http://www.ecmwf.int/sites/default/files/elibrary/2011/14594-newsletter-no129-autumn-2011.pdf>`__ 
 (Autumn 2011), starting on page 30.
-
-
-

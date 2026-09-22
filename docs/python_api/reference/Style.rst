@@ -80,4 +80,3 @@ Members:
 .. py:attribute:: Style.values
    :module: ecflow
    :value: {0: ecflow.Style.NOTHING, 1: ecflow.Style.DEFS, 2: ecflow.Style.STATE, 3: ecflow.Style.MIGRATE}
-

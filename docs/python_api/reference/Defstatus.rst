@@ -24,4 +24,3 @@ See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`
 
 .. py:method:: Defstatus.state(self: ecflow.Defstatus) -> ecflow.DState
    :module: ecflow
-

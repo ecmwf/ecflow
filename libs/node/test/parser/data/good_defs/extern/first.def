@@ -17,4 +17,3 @@ suite extern_first
    			trigger /a/b/c/d/e:meter le 30		  # extern meter path
     endfamily
 endsuite
-

@@ -65,4 +65,3 @@ Return the name of the :term:`repeat`.
 
 .. py:method:: RepeatEnumerated.step(self: ecflow.RepeatEnumerated) -> int
    :module: ecflow
-

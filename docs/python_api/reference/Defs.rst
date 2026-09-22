@@ -628,4 +628,3 @@ Returns a list of :term:`suite`\ s
    :module: ecflow
 
 Returns a list of user defined :term:`variable`\ s
-

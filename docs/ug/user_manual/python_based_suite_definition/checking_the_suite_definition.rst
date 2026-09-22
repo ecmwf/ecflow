@@ -28,4 +28,3 @@ paradigm.
     result = defs.check()  # check trigger expressions and limits
     print("Message: '" + result + "'")
     assert len(result) != 0, "Expected Error: mis-matched brackets in expression."
-

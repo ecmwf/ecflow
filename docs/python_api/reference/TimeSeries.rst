@@ -75,4 +75,3 @@ returns a boolean where true means that the time series is relative
    :module: ecflow
 
 returns the start time
-

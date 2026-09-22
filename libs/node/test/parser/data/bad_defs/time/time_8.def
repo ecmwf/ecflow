@@ -3,4 +3,3 @@ suite suiteName
         time 00:00 01:00 10:00  # ERROR  increment duration is greater than duration between start/finish
    endfamily
 endsuite
-

@@ -117,4 +117,3 @@ AFTER the release
       If there is nothing sensitive, then set security level to None
 
 0/ Update metabuilder server to use the latest server
-

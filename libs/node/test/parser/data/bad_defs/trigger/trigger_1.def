@@ -7,4 +7,3 @@ suite suiteName
    			trigger a == complete
       endfamily
 endsuite
-

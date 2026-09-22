@@ -86,4 +86,3 @@ Set the gain in seconds
    :module: ecflow
 
 Returns the year as an integer, > 1400
-

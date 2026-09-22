@@ -1549,4 +1549,3 @@ Returns a list of Verify's
    :module: ecflow
 
 Returns a list of :term:`zombie`\ s
-

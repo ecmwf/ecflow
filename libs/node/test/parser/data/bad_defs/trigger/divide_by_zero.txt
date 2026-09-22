@@ -6,4 +6,3 @@ suite suiteName
             trigger ((/suiteName/f1/a:event / 0) == 0)   # divide by zero
     endfamily
 endsuite
-

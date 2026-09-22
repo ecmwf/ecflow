@@ -76,4 +76,3 @@ ci = ecflow.Client()
 ci.set_host_port(socket.gethostname(),os.geteuid()+1500)
 ci.load(defs)
 ci.begin_suite(node_name)
-

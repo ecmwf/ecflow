@@ -83,4 +83,3 @@ To configure the client (CLI and Python API) to contact a server on the given *h
 #. Ping the :term:`ecflow_server` using the CLI :term:`ecflow_client`, explicitly defining the :code:`--host` and :code:`--port` options.
 
 #. Ping the :term:`ecflow_server` using the CLI :term:`ecflow_client`, exporting environment variables :code:`ECF_HOST` and :code:`ECF_PORT`.
-

@@ -7,4 +7,3 @@ suite cron4             # use real clock otherwise the date wont change
   			 verify complete:62              # Jan has 31 days hence expect task completeion 62 times
    endfamily
 endsuite
-

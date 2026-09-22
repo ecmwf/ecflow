@@ -11,4 +11,3 @@ endsuite
 suite complete_s1; family f; task t;meter step 0 6 3;task tt;complete t:step ge 1;trigger t == complete
 endfamily
 endsuite
-

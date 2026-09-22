@@ -59,4 +59,3 @@ Usage:
    :module: ecflow
 
 Return the Time attributes time series
-

@@ -13,4 +13,3 @@ suite suite1
    			trigger ../family1/a:myMeter >= 50  or  ../family1/a:myEvent
     endfamily
 endsuite
-

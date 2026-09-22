@@ -54,4 +54,3 @@ Members:
 .. py:attribute:: SState.values
    :module: ecflow
    :value: {0: ecflow.SState.HALTED, 1: ecflow.SState.SHUTDOWN, 2: ecflow.SState.RUNNING}
-

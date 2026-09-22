@@ -9,4 +9,3 @@ suite cron4             # use real clock otherwise the date wont change
    verify complete:2
  endfamily
 endsuite
-

@@ -69,4 +69,3 @@ How do we resolve these problems:
 The last option was chosen, even though there is small performance penalty
 This requires the least amount of explanation to the end user.
 Allowing them to use any ECF_CMD/EF_JOB_CMD with out worry.
-

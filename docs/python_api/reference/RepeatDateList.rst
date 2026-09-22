@@ -76,4 +76,3 @@ Return the name of the repeat.
    :module: ecflow
 
 Return the start date as an integer in yyyymmdd format
-

@@ -56,4 +56,3 @@ Usage:
    :module: ecflow
 
 Return the Today's time series
-

@@ -15,4 +15,3 @@ echo end of job
 
 
 %include "tail.h"
-

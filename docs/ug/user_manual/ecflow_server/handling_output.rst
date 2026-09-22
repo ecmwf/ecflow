@@ -102,4 +102,3 @@ It needs:
 
 -  LOGMAP  This is the mapping: ECF_OUT:ECF_OUT, and then
    ECF_HOME:ECF_OUT lists,
-

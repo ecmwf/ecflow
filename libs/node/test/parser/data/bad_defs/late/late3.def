@@ -4,4 +4,3 @@ suite suiteName
       	  late  # oops no -s -a -c specified
     endfamily
 endsuite
-

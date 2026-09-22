@@ -11,4 +11,3 @@ suite simple
            trigger ./t1 == complete
       endfamily
 endsuite
-

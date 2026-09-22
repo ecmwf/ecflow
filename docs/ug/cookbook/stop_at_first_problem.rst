@@ -21,4 +21,3 @@ Alternatively a limit may play a similar role, as it may be reduced to 0 manuall
   family forecast
   limit hpc 100
   inlimit hpc # use: ecflow_client --alter=change limit hpc 0 $path # to stop
-

@@ -49,4 +49,3 @@ Sets the given flag. Used in test only
    :staticmethod:
 
 Convert type to a string. Tests only
-

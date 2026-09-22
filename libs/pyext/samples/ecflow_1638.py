@@ -26,4 +26,3 @@ print(defs)
 
 theResult = defs.simulate()
 assert len(theResult) == 0,  "Expected simulation to return without any errors, but found:\n" + theResult
-

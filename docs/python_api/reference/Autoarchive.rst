@@ -73,4 +73,3 @@ Returns a boolean where true means the time is relative
    :module: ecflow
 
 returns archive time as a TimeSlot
-

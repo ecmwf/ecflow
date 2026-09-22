@@ -98,4 +98,3 @@ Members:
 .. py:attribute:: DState.values
    :module: ecflow
    :value: {0: ecflow.DState.unknown, 1: ecflow.DState.complete, 2: ecflow.DState.queued, 3: ecflow.DState.aborted, 4: ecflow.DState.submitted, 5: ecflow.DState.active, 6: ecflow.DState.suspended}
-

@@ -69,5 +69,3 @@ with timer:
     # time.sleep(2)
 
 print(timer.duration_in_seconds())s
-
-

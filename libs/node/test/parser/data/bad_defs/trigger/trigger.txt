@@ -6,4 +6,3 @@ suite suiteName
    			trigger b == complete               # duplicate task trigger
      endfamily
 endsuite
-

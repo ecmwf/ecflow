@@ -7,4 +7,3 @@ suite cron              # use real clock otherwise the date will change
   			 verify complete:11      # verify tasks complete 11 times.
    endfamily
 endsuite
-

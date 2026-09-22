@@ -35,4 +35,3 @@ Return the queue name as string
    :module: ecflow
 
 Return the queue current value as string
-

@@ -36,4 +36,3 @@ Usage:
    :module: ecflow
 
 returns a list of nodes to be restored
-

@@ -37,4 +37,3 @@ Usage:
    :module: ecflow
 
 Return the day as enumerator
-

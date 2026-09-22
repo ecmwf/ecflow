@@ -87,4 +87,3 @@ Returns the port of the remote ecFlow server
    :module: ecflow
 
 Returns a boolean, where true means that SSL is enabled
-

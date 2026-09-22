@@ -45,4 +45,3 @@ def get_ecflow_version( work_space ):
 
 
 print(get_ecflow_version("/Users/avibahra/git/ecflow"))
-

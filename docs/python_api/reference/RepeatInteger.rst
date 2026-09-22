@@ -67,4 +67,3 @@ Return the name of the repeat.
 
 .. py:method:: RepeatInteger.step(self: ecflow.RepeatInteger) -> int
    :module: ecflow
-

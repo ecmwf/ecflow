@@ -86,4 +86,3 @@ Return the start date as an integer (i.e. seconds since 19700101T000000)
    :module: ecflow
 
 Return the step increment (in seconds). This is used to update the repeat, until end instant is reached
-

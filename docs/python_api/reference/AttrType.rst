@@ -73,4 +73,3 @@ Members:
 .. py:attribute:: AttrType.variable
    :module: ecflow
    :value: ecflow.AttrType.variable
-

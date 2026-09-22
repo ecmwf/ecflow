@@ -45,4 +45,3 @@ It is safer for a job to always use the suite generated time and date :term:`var
 
    * Be aware that :term:`cron` with a single time dependency will automatically resubmit indefinitely
    * Altering the clock, requires that the suite is re-queued
-

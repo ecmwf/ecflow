@@ -70,4 +70,3 @@ Return the name of the repeat.
    :module: ecflow
 
 Return the start instant as seconds since epoch
-

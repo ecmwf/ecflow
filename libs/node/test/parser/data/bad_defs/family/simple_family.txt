@@ -2,4 +2,3 @@ suite suiteName
    family
    endfamily
 endsuite
-

@@ -29,4 +29,3 @@ Return the generic name as string
    :module: ecflow
 
 The list of values for the generic
-

@@ -240,4 +240,3 @@ Members:
 .. py:attribute:: FlagType.zombie
    :module: ecflow
    :value: ecflow.FlagType.zombie
-

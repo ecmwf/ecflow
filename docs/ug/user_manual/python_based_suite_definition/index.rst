@@ -32,5 +32,3 @@ Since the full power of python is available to specify the suite definition, the
    handling_dummy_tasks
    debugging_suite_definition/index
    error_handling
-
-

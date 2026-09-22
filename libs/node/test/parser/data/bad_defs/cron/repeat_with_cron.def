@@ -6,4 +6,3 @@ suite suiteName
         task t2
     endfamily
 endsuite
-

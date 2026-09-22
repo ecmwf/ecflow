@@ -20,4 +20,3 @@ How to list variable used by a task?
 
 .. literalinclude:: src/list_variables.py
    :language: python
-

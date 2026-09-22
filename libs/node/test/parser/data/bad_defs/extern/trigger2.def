@@ -7,4 +7,3 @@ suite bad_extern
             trigger /a/b/c/d == complete          # extern path
     endfamily
 endsuite
-

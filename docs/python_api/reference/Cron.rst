@@ -162,4 +162,3 @@ return cron time as a TimeSeries
    :module: ecflow
 
 returns a integer list of week days
-

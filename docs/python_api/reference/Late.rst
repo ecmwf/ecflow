@@ -109,4 +109,3 @@ submitted longer than the time specified, the late flag is set
 3. submitted(self: ecflow.Late) -> ecflow.TimeSlot
 
 Return the submitted time as a TimeSlot
-

@@ -69,4 +69,3 @@ Return the new label value as string
    :module: ecflow
 
 Return the original :term:`label` value as string
-

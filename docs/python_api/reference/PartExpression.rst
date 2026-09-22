@@ -62,4 +62,3 @@ returns the part expression as a string
 
 .. py:method:: PartExpression.or_expr(self: ecflow.PartExpression) -> bool
    :module: ecflow
-

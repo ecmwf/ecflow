@@ -55,4 +55,3 @@ Lets assume that the server has the following definition::
    :module: ecflow
 
 Displays url in the chosen browser
-

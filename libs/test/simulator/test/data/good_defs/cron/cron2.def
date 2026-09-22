@@ -7,4 +7,3 @@ suite cron2              # use real clock otherwise the date wont change
   			 verify complete:4                      # task should complete 16 times
    endfamily
 endsuite
-

@@ -57,4 +57,3 @@ Returns a boolean where true means the time is relative
    :module: ecflow
 
 returns cancel time as a TimeSlot
-

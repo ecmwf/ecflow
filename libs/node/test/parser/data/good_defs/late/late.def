@@ -12,4 +12,3 @@ suite late
             late  -s 00:01 -a 14:30 -c +00:01
     endfamily
 endsuite
-

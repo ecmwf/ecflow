@@ -71,4 +71,3 @@ If however node taskx has not yet been added to its parent, we use a relative na
    :module: ecflow
 
 returns the trigger expression as a string
-

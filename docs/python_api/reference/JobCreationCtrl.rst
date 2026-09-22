@@ -78,4 +78,3 @@ The node we want to check job creation for. If no node specified check all tasks
    :module: ecflow
 
 Output each task as its being checked.
-

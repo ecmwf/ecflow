@@ -137,4 +137,3 @@ if [[ -f ${LOGSERVERLIST} ]] ; then
     echo $USER    $LOGPORT   $LOGPATH $LOGMAP>> ${LOGSERVERLIST}
   fi
 fi
-

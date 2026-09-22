@@ -56,4 +56,3 @@ suite day_s1; family f ; day tuesday
       endtask
    endfamily
 endsuite
-

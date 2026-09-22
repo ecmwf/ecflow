@@ -94,4 +94,3 @@ Find a task given a name
    :module: ecflow
 
 Returns a list of Node's
-

@@ -37,4 +37,3 @@ Usage::
 
 .. py:method:: TimeSlot.minute(self: ecflow.TimeSlot) -> int
    :module: ecflow
-

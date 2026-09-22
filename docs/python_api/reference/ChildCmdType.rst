@@ -99,4 +99,3 @@ Members:
 .. py:attribute:: ChildCmdType.wait
    :module: ecflow
    :value: ecflow.ChildCmdType.wait
-

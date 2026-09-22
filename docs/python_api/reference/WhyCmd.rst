@@ -42,4 +42,3 @@ Usage::
    :module: ecflow
 
 returns a '/n' separated string, with reasons why node is not running
-

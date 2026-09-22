@@ -95,4 +95,3 @@ Members:
 .. py:attribute:: ZombieUserActionType.values
    :module: ecflow
    :value: {0: ecflow.ZombieUserActionType.fob, 1: ecflow.ZombieUserActionType.fail, 2: ecflow.ZombieUserActionType.adopt, 3: ecflow.ZombieUserActionType.remove, 4: ecflow.ZombieUserActionType.block, 5: ecflow.ZombieUserActionType.kill}
-

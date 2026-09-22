@@ -169,4 +169,3 @@ strace
 # strace with table of system calls and percentages ******
 cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
 strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-

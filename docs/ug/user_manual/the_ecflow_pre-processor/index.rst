@@ -79,4 +79,3 @@ definition.
    stopping_pre-processing
    ecf_micro
    how_a_job_file_is_created_from_an_ecflow_file
-

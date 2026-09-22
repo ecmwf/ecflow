@@ -13,4 +13,3 @@ suite zombie_lifecycle
    			trigger ../family1/a:myMeter >= 4  or  ../family1/a:myEvent
     endfamily
 endsuite
-

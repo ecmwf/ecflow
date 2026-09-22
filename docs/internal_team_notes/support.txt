@@ -99,6 +99,3 @@ o If there is a performance problem::
         > netcat <host> <port>
         > netcat ecflow-metab 3141
           > type a message this should be seen on the server side
-
-
-

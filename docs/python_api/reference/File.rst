@@ -39,4 +39,3 @@ Provides pathname to the server
    :staticmethod:
 
 Path name to ecflow source directory
-

@@ -8,4 +8,3 @@ suite suiteName
    			trigger /a/b/c/d/e/f == complete  		   # non existing path, not even extern
    endfamily
 endsuite
-

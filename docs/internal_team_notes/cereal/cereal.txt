@@ -54,4 +54,3 @@ It will not be possible in a single pass to load binary to a versioned function,
 but it can be done by loading from binary, then writing out to json and saving that.
 Then migrate your code to use the version parameter, and comment out the portion of cereal that throws
 if the version key is missing from the json, then save again.
-

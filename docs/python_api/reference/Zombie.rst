@@ -103,4 +103,3 @@ Represent a zombie process stored by the server
 
 .. py:method:: Zombie.user_cmd(self: ecflow.Zombie) -> str
    :module: ecflow
-

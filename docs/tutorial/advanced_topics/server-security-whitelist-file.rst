@@ -51,4 +51,3 @@ For more information see :ref:`ecflow_white_list_file` and :ref:`reloadwsfile_cl
 #. Load the white list file onto your server using the client command::
 
     ecflow_client --reloadwsfile
-

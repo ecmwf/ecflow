@@ -73,4 +73,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  6001 tasks  : 0.094   news_local() : 0.001   sync_local() : 0.511
  Check pt:            254 265 251 248 257 255 255 254 255 250 : Avg:0.2544ms
  Delete:              56ms
-
