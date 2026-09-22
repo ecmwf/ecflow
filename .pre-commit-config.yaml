@@ -39,8 +39,8 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      # - id: mixed-line-ending     # 17 files
-      #   args: [--fix=lf]
+      - id: mixed-line-ending
+        args: [--fix=lf]
 
   # Off until the tree is cleaned up; the counts are what each would rewrite today.
   # ruff-format rewrites 52 of 85 files (7509 lines). ruff-check reports 1440
