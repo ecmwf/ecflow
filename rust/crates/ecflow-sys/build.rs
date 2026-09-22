@@ -115,6 +115,8 @@ fn configure(
         ))
         // Client only: no server, UI, Python module or tests.
         .arg("-DENABLE_SERVER=OFF")
+        .arg("-DENABLE_HTTP=OFF")
+        .arg("-DENABLE_UDP=OFF")
         .arg("-DENABLE_UI=OFF")
         .arg("-DENABLE_PYTHON=OFF")
         .arg("-DENABLE_TESTS=OFF")
