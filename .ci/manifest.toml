@@ -26,54 +26,63 @@ package = "stack-deps"
 ref = "master"
 compiler-inputs = ["cxx-compiler"]
 
+[matrix.build.defaults]
+build-type = "RelWithDebInfo"
+runs-on = "arc-runner-very-large"
+
 [[matrix.build.include]]
 cxx-compiler = "g++-13"
-build-type = "Release"
-runs-on = "arc-runner-very-large"
-container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gfortran13-boost-qt6:latest"
+c-compiler = "gcc-13"
+container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gcc13-gfortran13-boost-qt6:latest"
 platform = "ubuntu-24.04"
 
 [[matrix.build.include]]
 cxx-compiler = "g++-8"
-build-type = "Release"
-runs-on = "arc-runner-very-large"
-container = "eccr.ecmwf.int/public-ci-images/rocky8-gfortran8-boost-qt5:latest"
+c-compiler = "gcc-8"
+container = "eccr.ecmwf.int/public-ci-images/rocky8-gcc8-gfortran8-boost-qt5:latest"
 platform = "rocky-8"
 
 [[matrix.build.include]]
 cxx-compiler = "g++-10"
-build-type = "Release"
-runs-on = "arc-runner-very-large"
-container = "eccr.ecmwf.int/public-ci-images/debian11-gfortran10-boost-qt5:latest"
+c-compiler = "gcc-10"
+container = "eccr.ecmwf.int/public-ci-images/debian11-gcc10-gfortran10-boost-qt5:latest"
 platform = "debian-11"
 
 [[matrix.build.include]]
 cxx-compiler = "clang++"
-build-type = "Release"
+c-compiler = "clang"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
 platform = "macos-13-arm"
 
 [[matrix.build.include]]
 cxx-compiler = "clang++"
-build-type = "Release"
+c-compiler = "clang"
 runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
 platform = "macos-13-x86"
 
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]
 action = "./.github/actions/build-ecflow"
-forwarded-inputs = ["cxx-compiler", "build-type"]
+forwarded-inputs = ["c-compiler", "cxx-compiler", "build-type"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
 needs = ["ecbuild/build", "stack-deps/build"]
 ctest = true
 ctest-args = "-L nightly -j 8"
 
-[[matrix.build-hpc.include]]
-cxx-compiler = "g++-8"
-build-type = "Release"
+[matrix.build-hpc.defaults]
+build-type = "RelWithDebInfo"
 runs-on = "hpc-submit"
 container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
 site = "hpc-batch"
+ctest-args = "-L nightly -j 8"
+time = "01:00:00"
+ntasks = 1
+cpus-per-task = 64
+mem = "64GB"
+ssdtmp = "30G"
+
+[[matrix.build-hpc.include]]
+cxx-compiler = "g++-8"
 platform = "hpc-atos-gnu"
 # gcc/old, not a version number: as of now gives you 8.5.0
 # `module avail gcc` lists no 8.5.0 to pin directly.
@@ -83,14 +92,9 @@ cxx = "g++"
 boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
 python-root = "/usr/local/apps/python3/3.11.8-01"
 tests = true
-ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "icpx"
-build-type = "Release"
-runs-on = "hpc-submit"
-container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
-site = "hpc-batch"
 platform = "hpc-atos-intel"
 modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.3.1", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
 cc = "icx"
@@ -98,14 +102,9 @@ cxx = "icpx"
 boost-root = "/usr/local/apps/boost/1.90.0/INTEL/2025.3"
 python-root = "/usr/local/apps/python3/3.13.13-01"
 tests = true
-ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "clang++"
-build-type = "Release"
-runs-on = "hpc-submit"
-container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
-site = "hpc-batch"
 platform = "hpc-atos-aocc"
 modules = ["load prgenv/amd", "unload aocc", "load aocc/4.0.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
 cc = "clang"
@@ -113,14 +112,9 @@ cxx = "clang++"
 boost-root = "/usr/local/apps/boost/1.81.0/AMD/4.0"
 python-root = "/usr/local/apps/python3/3.10.10-01"
 tests = false
-ctest-args = "-L nightly -j 8"
 
 [[matrix.build-hpc.include]]
 cxx-compiler = "nvc++"
-build-type = "Release"
-runs-on = "hpc-submit"
-container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
-site = "hpc-batch"
 platform = "hpc-atos-nvidia"
 modules = ["load prgenv/nvidia", "unload nvidia", "load nvidia/24.11", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
 cc = "nvc"
@@ -128,7 +122,6 @@ cxx = "nvc++"
 boost-root = "/usr/local/apps/boost/1.87.0/NVIDIA/24.11"
 python-root = "/usr/local/apps/python3/3.12.9-01"
 tests = false
-ctest-args = "-L nightly -j 8"
 
 [matrix.build-hpc]
 execution = "hpc"
