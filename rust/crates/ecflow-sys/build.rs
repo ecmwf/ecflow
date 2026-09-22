@@ -4,9 +4,9 @@
 //! Build script for ecflow-sys
 //!
 //! Builds ecFlow the documented way (`cmake -B build -S .` with ecbuild on
-//! `CMAKE_PREFIX_PATH`), then compiles the CXX bridge with the public include
-//! directories and definitions of the `ecflow_all` target and links that
-//! archive with its public libraries. The lists mirror `libs/CMakeLists.txt`.
+//! `CMAKE_PREFIX_PATH`), compiles the CXX bridge with the public include
+//! directories and definitions of the `ecflow_all` target, and links that
+//! archive with the libraries `CMake` found for it, read from `CMakeCache.txt`.
 
 use std::env;
 use std::fs;
@@ -21,13 +21,7 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=cpp");
-    for var in [
-        "ECBUILD_DIR",
-        "BOOST_ROOT",
-        "OPENSSL_ROOT_DIR",
-        "CMAKE_PREFIX_PATH",
-        "DOCS_RS",
-    ] {
+    for var in ["ECBUILD_DIR", "BOOST_ROOT", "CMAKE_PREFIX_PATH", "DOCS_RS"] {
         println!("cargo:rerun-if-env-changed={var}");
     }
 
@@ -44,16 +38,8 @@ fn main() {
 
     let ecbuild = resolve_ecbuild(&src_dir);
     let ecflow = resolve_ecflow_src(&src_dir);
-    let boost = dependency_prefix("BOOST_ROOT", "boost");
-    let openssl = dependency_prefix("OPENSSL_ROOT_DIR", "openssl@3");
 
-    configure(
-        &ecflow,
-        &build_dir,
-        &ecbuild,
-        boost.as_deref(),
-        openssl.as_deref(),
-    );
+    configure(&ecflow, &build_dir, &ecbuild);
     bindman_utils::run_command(
         Command::new("cmake").args([
             "--build",
@@ -66,15 +52,11 @@ fn main() {
         "cmake build ecflow",
     );
 
+    let cache = CMakeCache::read(&build_dir);
+
     // The bridge archive must precede the ecFlow archive on the link line.
-    build_bridge(
-        &crate_dir,
-        &ecflow,
-        &build_dir,
-        boost.as_deref(),
-        openssl.as_deref(),
-    );
-    link(&build_dir, boost.as_deref(), openssl.as_deref());
+    build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
+    link(&build_dir, &cache);
 
     bindman_build::check_cpp_api(
         &ecflow.join("libs/client/src"),
@@ -88,13 +70,7 @@ fn main() {
 }
 
 /// `cmake -B build -S .` as the install documentation describes it.
-fn configure(
-    ecflow: &Path,
-    build_dir: &Path,
-    ecbuild: &Path,
-    boost: Option<&Path>,
-    openssl: Option<&Path>,
-) {
+fn configure(ecflow: &Path, build_dir: &Path, ecbuild: &Path) {
     // ecbuild is found through CMAKE_PREFIX_PATH, the way CI provides it.
     let mut prefix_path = vec![ecbuild.display().to_string()];
     if let Ok(user) = env::var("CMAKE_PREFIX_PATH")
@@ -121,15 +97,16 @@ fn configure(
         .arg("-DENABLE_PYTHON=OFF")
         .arg("-DENABLE_TESTS=OFF")
         .arg("-DENABLE_DOCS=OFF")
+        // FindBoost module mode, as CI uses: it caches the include and library paths.
+        .arg("-DENABLE_CONFIG_MODE_BOOST=OFF")
         .arg(format!(
             "-DENABLE_SSL={}",
             bindman_utils::on_off(cfg!(feature = "ssl"))
         ));
-    if let Some(boost) = boost {
-        cmd.arg(format!("-DBoost_ROOT={}", boost.display()));
-    }
-    if let Some(openssl) = openssl {
-        cmd.arg(format!("-DOPENSSL_ROOT_DIR={}", openssl.display()));
+    if let Ok(boost) = env::var("BOOST_ROOT")
+        && !boost.is_empty()
+    {
+        cmd.arg(format!("-DBoost_ROOT={boost}"));
     }
 
     bindman_utils::run_command(&mut cmd, "cmake configure ecflow");
@@ -137,13 +114,7 @@ fn configure(
 
 /// Compile the CXX bridge against the public includes and definitions of
 /// `ecflow_all`.
-fn build_bridge(
-    crate_dir: &Path,
-    ecflow: &Path,
-    build_dir: &Path,
-    boost: Option<&Path>,
-    openssl: Option<&Path>,
-) {
+fn build_bridge(crate_dir: &Path, ecflow: &Path, build_dir: &Path, cache: &CMakeCache) {
     let mut build = cxx_build::bridge("src/lib.rs");
     build
         .file(crate_dir.join("cpp/ClientWrapper.cc"))
@@ -164,11 +135,10 @@ fn build_bridge(
     for vendored in ["cereal", "json", "cpp-httplib"] {
         build.include(ecflow.join("3rdparty").join(vendored).join("include"));
     }
-    if let Some(boost) = boost {
-        build.include(boost.join("include"));
-    }
-    if let Some(openssl) = openssl {
-        build.include(openssl.join("include"));
+    for var in ["Boost_INCLUDE_DIR", "OPENSSL_INCLUDE_DIR"] {
+        if let Some(dir) = cache.path(var) {
+            build.include(dir);
+        }
     }
 
     build
@@ -181,56 +151,85 @@ fn build_bridge(
 
     build
         .std("c++17")
-        .flag_if_supported("-ftemplate-depth=1024")
-        .flag_if_supported("-Wno-unused-parameter")
+        .warnings(false)
         .compile("ecflow_sys_bridge");
 }
 
-/// Link `ecflow_all` and its public libraries, in link order.
-fn link(build_dir: &Path, boost: Option<&Path>, openssl: Option<&Path>) {
-    let archive_dir = ["libs", "lib"]
-        .iter()
-        .map(|dir| build_dir.join(dir))
-        .find(|dir| dir.join("libecflow_all.a").exists())
-        .expect("the ecflow build produced no libecflow_all.a");
-    println!("cargo:rustc-link-search=native={}", archive_dir.display());
+/// Link `ecflow_all` and the libraries `CMake` found for it, in link order.
+fn link(build_dir: &Path, cache: &CMakeCache) {
+    println!(
+        "cargo:rustc-link-search=native={}",
+        build_dir.join("libs").display()
+    );
     println!("cargo:rustc-link-lib=static=ecflow_all");
 
-    // ecFlow links Boost statically by default; Boost.Process joined the list
-    // with Boost 1.86 and brings Boost.Filesystem with it.
-    let mut boost_libs = vec!["boost_program_options", "boost_date_time"];
-    if let Some(boost) = boost {
-        let lib_dir = bindman_utils::resolve_lib_dir(boost);
-        println!("cargo:rustc-link-search=native={}", lib_dir.display());
-        for lib in ["boost_process", "boost_filesystem"] {
-            if lib_dir.join(format!("lib{lib}.a")).exists() {
-                boost_libs.push(lib);
-            }
-        }
-        for lib in &boost_libs {
-            println!("cargo:rustc-link-lib=static={lib}");
-        }
-    } else {
-        for lib in &boost_libs {
-            println!("cargo:rustc-link-lib={lib}");
+    for library in cache.paths_matching("Boost_", "_LIBRARY_RELEASE") {
+        link_library(&library);
+    }
+    for var in [
+        "OPENSSL_SSL_LIBRARY",
+        "OPENSSL_CRYPTO_LIBRARY",
+        "ZLIB_LIBRARY_RELEASE",
+        "Crypt_LIBRARIES",
+    ] {
+        if let Some(library) = cache.path(var) {
+            link_library(&library);
         }
     }
 
-    if cfg!(feature = "ssl") {
-        if let Some(openssl) = openssl {
-            println!(
-                "cargo:rustc-link-search=native={}",
-                bindman_utils::resolve_lib_dir(openssl).display()
-            );
-        }
-        println!("cargo:rustc-link-lib=ssl");
-        println!("cargo:rustc-link-lib=crypto");
-    }
-
-    println!("cargo:rustc-link-lib=z");
-    #[cfg(target_os = "linux")]
-    println!("cargo:rustc-link-lib=crypt");
     bindman_utils::link_cpp_stdlib();
+}
+
+/// Link a library given by its file path: static for an archive, dynamic
+/// otherwise.
+fn link_library(path: &Path) {
+    let (Some(dir), Some(name)) = (path.parent(), path.file_name().and_then(|n| n.to_str())) else {
+        return;
+    };
+    let stem = name.strip_prefix("lib").unwrap_or(name);
+    let (kind, stem) = stem.strip_suffix(".a").map_or_else(
+        || ("dylib", stem.split('.').next().unwrap_or(stem)),
+        |stem| ("static", stem),
+    );
+    println!("cargo:rustc-link-search=native={}", dir.display());
+    println!("cargo:rustc-link-lib={kind}={stem}");
+}
+
+/// The variables `CMake` cached while configuring ecFlow.
+struct CMakeCache(String);
+
+impl CMakeCache {
+    fn read(build_dir: &Path) -> Self {
+        Self(
+            fs::read_to_string(build_dir.join("CMakeCache.txt"))
+                .expect("CMake wrote no CMakeCache.txt"),
+        )
+    }
+
+    /// The value of a path variable, when set and found.
+    fn path(&self, name: &str) -> Option<PathBuf> {
+        self.entries()
+            .find(|(key, _)| *key == name)
+            .map(|(_, value)| PathBuf::from(value))
+    }
+
+    /// The values of all found path variables whose names have the given
+    /// prefix and suffix, in the order of the cache.
+    fn paths_matching(&self, prefix: &str, suffix: &str) -> Vec<PathBuf> {
+        self.entries()
+            .filter(|(key, _)| key.starts_with(prefix) && key.ends_with(suffix))
+            .map(|(_, value)| PathBuf::from(value))
+            .collect()
+    }
+
+    /// `NAME=value` for every `NAME:TYPE=value` line with a found value.
+    fn entries(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.0.lines().filter_map(|line| {
+            let (key, value) = line.split_once('=')?;
+            let (name, _) = key.split_once(':')?;
+            (!value.is_empty() && !value.ends_with("-NOTFOUND")).then_some((name, value))
+        })
+    }
 }
 
 /// Locate ecbuild: `ECBUILD_DIR` when set, else a shallow clone of the
@@ -288,21 +287,4 @@ fn project_version(cmakelists: &Path) -> Option<String> {
     let mut tokens = line.split_whitespace().skip_while(|t| *t != "VERSION");
     tokens.next()?;
     tokens.next().map(|v| v.trim_end_matches(')').to_string())
-}
-
-/// The install prefix of a dependency: the environment variable when set,
-/// else the Homebrew keg on macOS, else none (system paths).
-fn dependency_prefix(var: &str, homebrew_name: &str) -> Option<PathBuf> {
-    if let Ok(dir) = env::var(var)
-        && !dir.is_empty()
-    {
-        return Some(PathBuf::from(dir));
-    }
-    if cfg!(target_os = "macos") {
-        return ["/opt/homebrew/opt", "/usr/local/opt"]
-            .iter()
-            .map(|root| Path::new(root).join(homebrew_name))
-            .find(|prefix| prefix.exists());
-    }
-    None
 }
