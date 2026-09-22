@@ -98,10 +98,13 @@ fn configure(ecflow: &Path, build_dir: &Path, ecbuild: &Path) {
             "-DENABLE_SSL={}",
             bindman_utils::on_off(cfg!(feature = "ssl"))
         ));
+    // Passed as the CMake variable find_package reads; the environment
+    // variable itself would only draw CMake's CMP0144 warning.
     if let Ok(boost) = env::var("BOOST_ROOT")
         && !boost.is_empty()
     {
         cmd.arg(format!("-DBoost_ROOT={boost}"));
+        cmd.env_remove("BOOST_ROOT");
     }
 
     bindman_utils::run_command(&mut cmd, "cmake configure ecflow");
@@ -112,7 +115,7 @@ fn configure(ecflow: &Path, build_dir: &Path, ecbuild: &Path) {
 fn build_bridge(crate_dir: &Path, ecflow: &Path, build_dir: &Path, cache: &CMakeCache) {
     let mut build = cxx_build::bridge("src/lib.rs");
     build
-        .file(crate_dir.join("cpp/ClientWrapper.cc"))
+        .file(crate_dir.join("cpp/EcflowBridge.cc"))
         .include(crate_dir.join("cpp"))
         .include(build_dir.join("generated/src"));
     for lib in [

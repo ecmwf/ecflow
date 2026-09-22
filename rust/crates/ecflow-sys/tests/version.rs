@@ -31,5 +31,5 @@ fn crate_version_matches_cmake_project_version() {
 
 #[test]
 fn library_reports_its_version() {
-    assert!(ecflow_sys::version().starts_with(env!("CARGO_PKG_VERSION")));
+    assert!(ecflow_sys::Client::version().starts_with(env!("CARGO_PKG_VERSION")));
 }

@@ -3,7 +3,7 @@
 
 //! FFI bindings to the client side of ECMWF's ecFlow C++ library.
 //!
-//! This crate builds ecFlow from source and exposes `ClientInvoker` through a
+//! This crate builds ecFlow from source and binds `ClientInvoker` through a
 //! CXX bridge. Use the `ecflow` crate for a safe API.
 //!
 //! The `ignore` list holds the `ClientInvoker` methods without a bridge
@@ -20,8 +20,8 @@ use bindman::track_cpp_api;
         "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "round_trip_time", "set_cli", "cli",
         "enable_ssl_if_defined", "get_certificate", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
-        "defs", "get_string", "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args",
-        "is_not_retrying", "load_in_memory_defs", "client_env_host_port", "check_child_parameters",
+        "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args", "is_not_retrying",
+        "load_in_memory_defs", "loadDefs", "client_env_host_port", "check_child_parameters",
         // Task commands taking their arguments from the environment
         "initTask", "abortTask", "eventTask", "meterTask", "labelTask", "waitTask", "queueTask", "completeTask",
         "set_child_host_file", "set_child_denied", "set_child_no_ecf", "set_child_init_add_vars",
@@ -37,14 +37,14 @@ use bindman::track_cpp_api;
         "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
         "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths", "job_gen",
         "edit_history", "kill", "status", "suspend", "resume", "check", "delete_nodes", "delete_node",
-        "delete_all", "archive", "restore", "replace_1", "requeue", "run", "order", "checkPtDefs",
+        "delete_all", "archive", "restore", "requeue", "run", "order", "checkPtDefs",
         "restoreDefsFromCheckPt", "force", "freeDep", "file", "plug", "query", "alter", "alter_sort",
         "reloadwsfile", "reloadpasswdfile", "reloadcustompasswdfile", "group", "logMsg", "new_log", "getLog",
         "clearLog", "flushLog", "get_log_path", "forceDependencyEval", "edit_script", "edit_script_edit",
         "edit_script_preprocess", "edit_script_submit",
     ]
 )]
-#[cxx::bridge(namespace = "ecflow_bridge")]
+#[cxx::bridge]
 mod ffi {
     /// The class of failure observed while communicating with a server.
     ///
@@ -80,6 +80,7 @@ mod ffi {
     /// Declared as the existing `PrintStyle::Type_t` (aliased in the bridge
     /// header), so cxx verifies at compile time that each discriminant
     /// matches the C++ enum.
+    #[namespace = "ecflow_bridge"]
     #[repr(i32)]
     enum DefsStyle {
         /// Nothing is written.
@@ -104,130 +105,156 @@ mod ffi {
 
         #[namespace = "ecf"]
         type ConnectionFailure;
+
+        /// A suite definition.
+        type Defs;
+    }
+
+    #[namespace = "ecflow_bridge"]
+    unsafe extern "C++" {
         type DefsStyle;
 
+        /// The ecFlow client: a `ClientInvoker`, every request in its
+        /// throw-on-error mode.
+        type Client;
+
+        /// Create a client configured from the environment (`ECF_HOST`, `ECF_PORT`, `ECF_SSL`, ...).
+        #[Self = "Client"]
+        fn create() -> Result<UniquePtr<Client>>;
+        /// Create a client for the given host and port.
+        #[Self = "Client"]
+        fn from_host_port(host: &str, port: &str) -> Result<UniquePtr<Client>>;
+        /// Parse definitions given in the ecFlow text format.
+        #[Self = "Client"]
+        fn parse_defs(text: &str) -> Result<SharedPtr<Defs>>;
         /// The ecFlow version the library was built from.
+        #[Self = "Client"]
         #[must_use]
         fn version() -> String;
-
         /// Whether the library was built with OpenSSL support.
+        #[Self = "Client"]
         #[must_use]
         fn ssl_supported() -> bool;
-
-        // ==================== Client ====================
-
-        /// Wraps a `ClientInvoker`; every request runs in its throw-on-error mode.
-        type ClientWrapper;
-
-        /// Create a client configured from the environment (`ECF_HOST`, `ECF_PORT`, ...).
-        #[Self = "ClientWrapper"]
-        fn create() -> Result<UniquePtr<ClientWrapper>>;
-
-        /// Create a client for the given host and port.
-        #[Self = "ClientWrapper"]
-        fn from_host_port(host: &str, port: &str) -> Result<UniquePtr<ClientWrapper>>;
 
         // Connection configuration
 
         /// Override the host and port from the environment.
-        fn set_host_port(self: Pin<&mut ClientWrapper>, host: &str, port: &str) -> Result<()>;
+        fn set_host_port(self: Pin<&mut Client>, host: &CxxString, port: &CxxString) -> Result<()>;
         /// The configured host.
-        fn host(self: &ClientWrapper) -> String;
+        fn host(self: &Client) -> &CxxString;
         /// The configured port.
-        fn port(self: &ClientWrapper) -> String;
+        fn port(self: &Client) -> &CxxString;
         /// Override the user name from `ECF_USER`.
-        fn set_user_name(self: Pin<&mut ClientWrapper>, user: &str);
+        fn set_user_name(self: Pin<&mut Client>, user: &CxxString);
         /// Set the password for the user name.
-        fn set_password(self: Pin<&mut ClientWrapper>, password: &str);
+        fn set_password(self: Pin<&mut Client>, password: &CxxString);
         /// Use SSL, whatever `ECF_SSL` says; fails when built without the `ssl` feature.
-        fn enable_ssl(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        fn enable_ssl(self: Pin<&mut Client>) -> Result<()>;
         /// Do not use SSL, whatever `ECF_SSL` says.
-        fn disable_ssl(self: Pin<&mut ClientWrapper>);
+        fn disable_ssl(self: Pin<&mut Client>);
         /// Use the HTTP transport.
-        fn enable_http(self: Pin<&mut ClientWrapper>);
+        fn enable_http(self: Pin<&mut Client>);
         /// Use the HTTPS transport.
-        fn enable_https(self: Pin<&mut ClientWrapper>);
+        fn enable_https(self: Pin<&mut Client>);
         /// Time to wait for a server reply before a request fails.
-        fn set_connect_timeout(self: Pin<&mut ClientWrapper>, milliseconds: u64);
+        fn set_connect_timeout(self: Pin<&mut Client>, milliseconds: u64);
         /// Time to wait between connection attempts.
-        fn set_retry_connection_period(self: Pin<&mut ClientWrapper>, milliseconds: u64);
+        fn set_retry_connection_period(self: Pin<&mut Client>, milliseconds: u64);
         /// Number of connection attempts per host before giving up.
-        fn set_connection_attempts(self: Pin<&mut ClientWrapper>, attempts: u32);
+        fn set_connection_attempts(self: Pin<&mut Client>, attempts: u32);
         /// Print each request and its round trip time to standard output.
-        fn debug(self: Pin<&mut ClientWrapper>, enabled: bool);
-
-        /// Failure class of the request that last threw.
-        fn last_failure(self: &ClientWrapper) -> ConnectionFailure;
+        fn debug(self: Pin<&mut Client>, flag: bool);
+        /// The failure class of the most recent request.
+        fn last_failure(self: &Client) -> ConnectionFailure;
 
         // Server probes
 
         /// Check that the server answers.
-        fn ping_server(self: Pin<&mut ClientWrapper>) -> Result<()>;
-        /// The server's version.
-        fn server_version(self: Pin<&mut ClientWrapper>) -> Result<String>;
-        /// The server's statistics, formatted by the server.
-        fn stats(self: Pin<&mut ClientWrapper>) -> Result<String>;
+        fn pingServer(self: &Client) -> Result<i32>;
+        /// Ask for the server's version; the reply is in `get_string`.
+        fn server_version(self: &Client) -> Result<i32>;
+        /// Ask for the server's statistics; the reply is in `get_string`.
+        fn stats(self: &Client) -> Result<i32>;
+        /// The string of the most recent reply, for commands that return one.
+        fn get_string(self: &Client) -> &CxxString;
+
+        // Any command
 
         /// Run any command given as `ecflow_client` command line arguments.
-        fn invoke(self: Pin<&mut ClientWrapper>, args: &[String]) -> Result<String>;
-
+        fn invoke(self: &Client, args: &[String]) -> Result<()>;
         /// The list of strings in the most recent reply, for commands that return one.
-        fn reply_strings(self: &ClientWrapper) -> Vec<String>;
+        fn reply_strings(self: &Client) -> Vec<String>;
 
         // Child (task) commands
 
         /// The task path the child commands report for (`ECF_NAME`).
-        fn set_child_path(self: Pin<&mut ClientWrapper>, path: &str);
+        fn set_child_path(self: Pin<&mut Client>, path: &CxxString);
         /// The job password the child commands carry (`ECF_PASS`).
-        fn set_child_password(self: Pin<&mut ClientWrapper>, password: &str);
+        fn set_child_password(self: Pin<&mut Client>, pass: &CxxString);
         /// The process or remote id the child commands carry (`ECF_RID`).
-        fn set_child_pid(self: Pin<&mut ClientWrapper>, pid: &str);
+        fn set_child_pid(self: Pin<&mut Client>, pid: &CxxString);
         /// The try number the child commands carry (`ECF_TRYNO`).
-        fn set_child_try_no(self: Pin<&mut ClientWrapper>, try_no: u32);
+        fn set_child_try_no(self: Pin<&mut Client>, try_no: u32);
         /// How long a child command keeps trying to reach the server (`ECF_TIMEOUT`).
-        fn set_child_timeout(self: Pin<&mut ClientWrapper>, seconds: u32);
+        fn set_child_timeout(self: Pin<&mut Client>, seconds: u32);
         /// How long a child command keeps trying when reported as a zombie (`ECF_ZOMBIE_TIMEOUT`).
-        fn set_zombie_child_timeout(self: Pin<&mut ClientWrapper>, seconds: u32);
+        fn set_zombie_child_timeout(self: Pin<&mut Client>, seconds: u32);
         /// Report that the job started.
-        fn child_init(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        fn child_init(self: Pin<&mut Client>) -> Result<()>;
         /// Report that the job failed.
-        fn child_abort(self: Pin<&mut ClientWrapper>, reason: &str) -> Result<()>;
+        fn child_abort(self: Pin<&mut Client>, reason: &CxxString) -> Result<()>;
         /// Set or clear an event of the task.
-        fn child_event(self: Pin<&mut ClientWrapper>, name: &str, value: bool) -> Result<()>;
+        fn child_event(
+            self: Pin<&mut Client>,
+            event_name_or_number: &CxxString,
+            value: bool,
+        ) -> Result<()>;
         /// Set a meter of the task.
-        fn child_meter(self: Pin<&mut ClientWrapper>, name: &str, value: i32) -> Result<()>;
+        fn child_meter(
+            self: Pin<&mut Client>,
+            meter_name: &CxxString,
+            meter_value: i32,
+        ) -> Result<()>;
         /// Set a label of the task.
-        fn child_label(self: Pin<&mut ClientWrapper>, name: &str, value: &str) -> Result<()>;
+        fn child_label(
+            self: Pin<&mut Client>,
+            label_name: &CxxString,
+            label_value: &CxxString,
+        ) -> Result<()>;
         /// Block until the expression holds on the server.
-        fn child_wait(self: Pin<&mut ClientWrapper>, expression: &str) -> Result<()>;
+        fn child_wait(self: Pin<&mut Client>, on_expression: &CxxString) -> Result<()>;
         /// Act on a queue and return the step the server handed out.
         fn child_queue(
-            self: Pin<&mut ClientWrapper>,
-            queue: &str,
-            action: &str,
-            step: &str,
-            path: &str,
+            self: Pin<&mut Client>,
+            queue: &CxxString,
+            action: &CxxString,
+            step: &CxxString,
+            path: &CxxString,
         ) -> Result<String>;
         /// Report that the job finished.
-        fn child_complete(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        fn child_complete(self: Pin<&mut Client>) -> Result<()>;
 
-        // Definitions as text
+        // Definitions
 
-        /// Fetch the server's definitions as text in the given style.
-        fn get_defs_text(self: Pin<&mut ClientWrapper>, style: DefsStyle) -> Result<String>;
-        /// Load definitions given as text; with `force`, suites of the same name are replaced.
-        fn load_defs_text(self: Pin<&mut ClientWrapper>, defs: &str, force: bool) -> Result<()>;
-        /// Replace the node at `path` with the node of that path in the definitions given as text.
-        fn replace_text(
-            self: Pin<&mut ClientWrapper>,
-            path: &str,
-            defs: &str,
-            create_parents: bool,
+        /// Fetch the server's definitions; they are then in `defs`.
+        fn getDefs(self: &Client) -> Result<i32>;
+        /// The definitions of the most recent reply.
+        fn defs(self: &Client) -> SharedPtr<Defs>;
+        /// Fetch the server's definitions and write them as text in the given style.
+        fn defs_text(self: &Client, style: DefsStyle) -> Result<String>;
+        /// Load definitions into the server; with `force`, suites of the same name are replaced.
+        fn load(self: &Client, defs: &SharedPtr<Defs>, force: bool) -> Result<i32>;
+        /// Replace the node at `path` with the node of that path in the given definitions.
+        fn replace_1(
+            self: &Client,
+            path: &CxxString,
+            client_defs: &SharedPtr<Defs>,
+            create_parents_as_required: bool,
             force: bool,
-        ) -> Result<()>;
+        ) -> Result<i32>;
     }
 }
 
 // Public re-exports for the safe wrapper crate
-pub use cxx::{Exception, UniquePtr};
+pub use cxx::{Exception, SharedPtr, UniquePtr, let_cxx_string};
 pub use ffi::*;
