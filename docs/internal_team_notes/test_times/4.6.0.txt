@@ -15,12 +15,12 @@ sys     0m0.14s
  Parsing Node tree and AST creation time = 1.28228 parse(1)
  Checkpt(TEXT_ARCHIVE) and reload , time taken   = 3.491 file_size(55961156)  result(1) msg()
  Total elapsed time = 5 seconds
- 
+
 + AParser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time = 2.64425 parse(1)
  Checkpt(TEXT_ARCHIVE) and reload , time taken   = 5.40431 file_size(148518132)  result(1) msg()
  Total elapsed time = 8 seconds
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3142)
@@ -73,4 +73,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  6001 tasks  : 0.094   news_local() : 0.001   sync_local() : 0.511
  Check pt:            254 265 251 248 257 255 255 254 255 250 : Avg:0.2544ms
  Delete:              56ms
- 

@@ -20,7 +20,7 @@ if( DEFINED SITE_SPECIFIC_SERVER_SCRIPT )
     install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
     install(CODE "message(\"-- Created symlink: ${sympath} -> ${filepath}\")")
   endmacro(install_symlink)
-  
+
   install_symlink(${SITE_SPECIFIC_SERVER_SCRIPT} ${CMAKE_INSTALL_PREFIX}/bin/ecflow_site.sh )
 endif()
 

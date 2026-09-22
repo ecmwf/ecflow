@@ -85,4 +85,3 @@ Return events number as a integer. If not specified return max integer value
    :module: ecflow
 
 Return events current value
-

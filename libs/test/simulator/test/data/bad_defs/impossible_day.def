@@ -6,9 +6,9 @@ suite csim_repeat_day3
     family f1
        day monday
        task t1
-            day tuesday            # cant be free on Monday and Tuesday, 
-            time 10:00   
-            verify complete:0     
+            day tuesday            # cant be free on Monday and Tuesday,
+            time 10:00
+            verify complete:0
     endfamily
   endfamily
 endsuite

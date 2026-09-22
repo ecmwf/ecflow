@@ -39,4 +39,3 @@ Set debugging for equality
    :staticmethod:
 
 Set debug level. debug_level > 0 will disable some warning messages
-

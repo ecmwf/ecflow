@@ -6,10 +6,10 @@ suite autorestore2
  endfamily
  family f2
     autoarchive 0
-    task t1   
+    task t1
  endfamily
  family f3
-    autoarchive 0   
-    task t1   
+    autoarchive 0
+    task t1
  endfamily
 endsuite

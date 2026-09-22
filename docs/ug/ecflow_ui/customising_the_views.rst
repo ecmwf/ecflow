@@ -34,7 +34,7 @@ node.
    :align: center
 
    * - Standard layout
-     - Compact layout 
+     - Compact layout
 
    * - .. image:: /_static/ecflow_ui/customising_the_views/image2.png
           :width: 2.5in

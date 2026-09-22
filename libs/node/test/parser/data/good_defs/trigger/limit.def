@@ -11,9 +11,9 @@ suite trigger_limit_obs
     family limits
         limit hpcd 20
     endfamily
-    
-    family anon    
-        inlimit limits:hpcd       
+
+    family anon
+        inlimit limits:hpcd
         task t1
             inlimit /trigger_limit:sg1        # another suite limit
             trigger /trigger_limit:sg1 < 30

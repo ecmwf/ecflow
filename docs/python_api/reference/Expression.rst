@@ -76,4 +76,3 @@ returns the complete expression as a string
    :module: ecflow
 
 Returns a list of PartExpression's
-

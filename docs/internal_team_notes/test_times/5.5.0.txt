@@ -7,8 +7,8 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 33.33% )
            131,032      page-faults               #    0.083 M/sec                    ( +-  0.00% )
      6,031,288,923      cycles                    #    3.838 GHz                      ( +-  3.90% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,222,646,781      instructions              #    1.69  insns per cycle          ( +-  0.00% )
      2,895,270,850      branches                  # 1842.265 M/sec                    ( +-  0.00% )
         14,725,732      branch-misses             #    0.51% of all branches          ( +-  0.42% )
@@ -74,8 +74,8 @@ run strace
                  0      cpu-migrations            #    0.000 K/sec                    ( +-100.00% )
            144,249      page-faults               #    0.091 M/sec                    ( +-  0.13% )
      6,155,163,981      cycles                    #    3.868 GHz                      ( +-  0.25% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     11,870,683,027      instructions              #    1.93  insns per cycle          ( +-  0.00% )
      3,133,369,534      branches                  # 1969.202 M/sec                    ( +-  0.00% )
         11,390,851      branch-misses             #    0.36% of all branches          ( +-  0.28% )
@@ -306,5 +306,3 @@ auto_restore        0
 verifys             0
 queues              0
 generics            0
-
-

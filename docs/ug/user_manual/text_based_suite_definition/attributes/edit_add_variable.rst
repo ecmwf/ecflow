@@ -46,7 +46,7 @@ during the job script rendering at submission time.
     edit ECF_JOB_CMD '/bin/sh %ECF_JOB% &'
     edit ECF_JOB_CMD '/usr/local/bin/qsub %ECF_JOB%'
     edit ECF_JOB_CMD 'rsh %ECF_HOST% sh <%ECF_JOB% 1>%ECF_JOBOUT% 2>&1'
-    edit KEEPLOGS no  
+    edit KEEPLOGS no
 
 When defining a variable value, care is needed to ensure that the value is correctly interpreted.
 

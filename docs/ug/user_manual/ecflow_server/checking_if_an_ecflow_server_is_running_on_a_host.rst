@@ -13,19 +13,19 @@ command, e.g.
 
     # Check if server is running on 'localhost' on port 3141*
     ecflow_client --ping
-    
+
     # Check if server running on machine 'fred' with default port 3141
     ecflow_client –-ping -–host=fred
-    
+
     # Check if server running on 'fred' with port 3222
     ecflow_client –-ping –-host=fred –-port=3222
-    
+
     # Check if server running using ECF_PORT and ECF_HOST
     export ECF_PORT=3144
     export ECF_HOST=fred
     ecflow_client --ping
-                                      
+
 
 .. note::
-    
+
     When ECF_NODE and ECF_PORT are used in conjunction with command-line arguments, then the command line argument takes precedence.

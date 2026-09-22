@@ -73,7 +73,7 @@ msan_arg=
 ubsan_arg=
 iwyu_arg=
 boost_arg=
-while [[ "$#" != 0 ]] ; do   
+while [[ "$#" != 0 ]] ; do
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
    elif  [[ "$1" = make_only ]] ; then
@@ -92,14 +92,14 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
-   elif [[ "$1" = clang_tidy ]] ; then 
+   elif [[ "$1" = clang_tidy ]] ; then
       clang_tidy_arg=$1 ;
       shift
       while [[ "$#" != 0 ]] ; do
          clang_tidy_args="$clang_tidy_args $1"
          shift
       done
-      break      
+      break
    elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
    elif [[ "$1" = shared ]] ;  then shared_arg=$1 ;
    elif [[ "$1" = boost ]] ;   then boost_arg=$1 ;
@@ -119,8 +119,8 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
    elif [[ "$1" = test_safe ]] ; then test_safe_arg=$1 ;
-   elif [[ "$1" = ctest ]] ; then  
-      ctest_arg=$1 ; 
+   elif [[ "$1" = ctest ]] ; then
+      ctest_arg=$1 ;
       shift
       while [[ "$#" != 0 ]] ; do
          ctest_arg="$ctest_arg $1"
@@ -153,10 +153,10 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 source_dir=$(pwd)
 
 # ==================== compiler flags ========================================
-# 
+#
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 5.3  -Wno-unused-variable         -> get round warning in boost headers
-# GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
+# GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers
 # GNU 7.3  -Wno-maybe-uninitialized     -> boost python warnings, specific to Pyext only
 # CLANG    -ftemplate-depth=512
 #
@@ -166,7 +166,7 @@ CXX_LINK_FLAGS=""
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module swap gnu/7.3.0     
+module swap gnu/7.3.0
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy || "$iwyu_arg" = iwyu ]] ; then
@@ -201,12 +201,12 @@ if [[ "$intel_arg" = intel ]] ; then
 fi
 
 if [[ $ecbuild_arg != ecbuild ]] ; then
-    module load ecbuild/new   
+    module load ecbuild/new
 fi
 module load python
 module load python3/3.6.10-01
 #module load python3/3.8.8-01
-module load cmake/new   # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+module load cmake/new   # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found
 
 
 # ==============================================================================================
@@ -247,12 +247,12 @@ if [[ "$ARCH" = cray ]] ; then
     # Use the cray wrappers, these will add the correct flags.
     # Assumes we have CRAY_ADD_RPATH=yes
     cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC"
-    
+
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
     else
     	module swap PrgEnv-cray PrgEnv-gnu
-    	module swap gcc/7.3.0     
+    	module swap gcc/7.3.0
     fi
     module unload eccodes                 # Otherwise ecflow.so pulls in libeccodes.so
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
@@ -271,12 +271,12 @@ fi
 if [[ $boost_arg = boost ]] ; then
     echo "Using environment variable BOOST_ROOT=$BOOST_ROOT"
 else
-    module load boost/1.71.0      
+    module load boost/1.71.0
 fi
 
 
 # ====================================================================================
-# default to Release  
+# default to Release
 cmake_build_type=
 if [[ $mode_arg = debug ]] ; then
     cmake_build_type=Debug
@@ -340,30 +340,30 @@ fi
 
 if [[ "$ctest_arg" != "" ]] ; then
     if [[ "$asan_arg" = asan ]] ; then
-    
+
         # LD_PRELOAD is only required when creating a shared lib, than needs asan
-        # export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libasan.so  
+        # export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libasan.so
         #if [[ $clang_arg != "clang" ]] ; then
         #    # for python module we need to preload asan as it needs to be the very first library
-        #    # ==2971==ASan runtime does not come first in initial library list; 
+        #    # ==2971==ASan runtime does not come first in initial library list;
         #    #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
-	    #    export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libasan.so 
+	    #    export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libasan.so
 	    #fi
-	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp
 	    export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
-	    $ctest_arg  
+	    $ctest_arg
     elif [[ "$tsan_arg" = tsan ]] ; then
-        export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libtsan.so  
+        export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libtsan.so
 
         if [[ $clang_arg != "clang" ]] ; then
             # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
             export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libtsan.so
         fi
-        export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+        export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp
         export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
-        $ctest_arg 
+        $ctest_arg
     else
-        $ctest_arg 
+        $ctest_arg
 	fi
 	exit 0
 fi
@@ -402,7 +402,7 @@ fi
 
 if [[ $package_source_arg = package_source ]] ; then
     # for packaging we build GUI by default, and do not run all tests
-    gui_options=  
+    gui_options=
 fi
 
 ecbuild=ecbuild
@@ -430,17 +430,17 @@ $ecbuild $source_dir \
             ${ssl_options} \
             ${log_options} \
             ${test_options} \
-            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.7.0/5.7/gcc_64/" 
-            
-            
+            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.7.0/5.7/gcc_64/"
+
+
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.8-01/bin/python3 \
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python/2.7.12-01/bin/python \
-            #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
+            #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie'
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
             #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
-            #-DENABLE_UI=ON        \  # ecflow_ui      
+            #-DENABLE_UI=ON        \  # ecflow_ui
             #-DENABLE_ALL_TESTS=ON \
             #-DENABLE_SERVER=OFF   \
             #-DENABLE_PROFILING=ON \
@@ -454,9 +454,9 @@ fi
 
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
-	$make_arg 
+	$make_arg
 	# $make_arg VERBOSE=1
-	
+
    # generate the server file locally, and install it. Otherwise list of server will not be complete set
    echo $make_arg | grep -q "install"
 	if [[ $? -eq 0 ]] ; then
@@ -475,7 +475,7 @@ fi
 # =============================================================================================
 if [[ $package_source_arg = package_source ]] ; then
 	make package_source
-	
+
 	if [[ $copy_tarball_arg = copy_tarball ]] ; then
 		rm -rf /tmp/$USER/tmp
 		mkdir -p /tmp/$USER/tmp
@@ -483,7 +483,7 @@ if [[ $package_source_arg = package_source ]] ; then
 		cd /tmp/$USER/tmp/
 		tar -zxf ecFlow-$release.$major.$minor-Source.tar.gz
 	fi
-	
+
 	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
 

@@ -56,7 +56,7 @@ cmake --preset linux.gcc.serveronly.relwithdebinfo
 # build
 cmake --build --preset linux.gcc.serveronly.relwithdebinfo --target all
 
-# install 
+# install
 cmake --build --preset linux.gcc.serveronly.relwithdebinfo --target install
 
 # package

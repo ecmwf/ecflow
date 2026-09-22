@@ -4,7 +4,7 @@
 ..
    This is the documentation for ecFlow, a workflow management system developed by ECMWF.
    The documentation is built using Sphinx and, by convention, we use the following heading markup in our reStructuredText files:
- 
+
      ******************************************** (h1)
      ============================================ (h2)
      -------------------------------------------- (h3)
@@ -55,6 +55,6 @@ Indices and tables
 ******************
 
 * :ref:`genindex`
-  
+
 .. * :ref:`modindex`
 .. * :ref:`search`

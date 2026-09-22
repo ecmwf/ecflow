@@ -59,4 +59,3 @@ The following show alternative styles that produce the same definition.
 .. warning::
 
    In the second example above we use 'defs.s1.f1' to reference a node by name. This is useful in small designs but will produce maintenance issues in large designs IF the node names are changed.
-

@@ -76,4 +76,3 @@ Return the variable name as string
    :module: ecflow
 
 Return the variable value as a string
-

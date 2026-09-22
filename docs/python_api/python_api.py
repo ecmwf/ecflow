@@ -79,7 +79,7 @@ def build_toc():
    :depth: 2
    :local:
    :backlinks: top
-    
+
 """
 
     with open("python_api.rst", "w") as f:

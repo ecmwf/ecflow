@@ -34,4 +34,3 @@ Returns the style, static method
    :staticmethod:
 
 Set the style, static method
-

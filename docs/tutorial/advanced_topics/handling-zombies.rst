@@ -29,7 +29,7 @@ When :term:`zombie` s arise they can be handled manually by :term:`ecflow_ui` . 
    ecflow_client –-zombie_block =<task-path> # Ask the jobs to block at the child command in the job. Prevents the job from proceeding.
                                              # (This is the default behaviour for the init, complete and abort child commands)
 
-Sometimes we may want the job to proceed but  "ecflow_client –zombie_adopt=<task-path>" does not work. i.e. we have the case where zombies password matches, but the process id (ECF_RID) are different. ecflow_client –zombie_adopt=<task-path>, will not allow this, due to the potential for data corruption. 
+Sometimes we may want the job to proceed but  "ecflow_client –zombie_adopt=<task-path>" does not work. i.e. we have the case where zombies password matches, but the process id (ECF_RID) are different. ecflow_client –zombie_adopt=<task-path>, will not allow this, due to the potential for data corruption.
 
 **In this case, the normal behaviour would kill both processes, and re-queue the task.**
 
@@ -89,23 +89,23 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
 **Example**: For tasks under suite “s1” add a zombie attribute, such that child label commands(i.e.. ecflow_client –label) never blocks the job: (not strictly needed as this is the default behaviour):
 
 * python:
-   
-  .. code-block:: python 
-        
+
+  .. code-block:: python
+
     s1 = ecflow.Suite(\ s1')
     child_list = [ ChildCmdType.label ]
     zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob, 300)
     s1.add_zombie(zombie_attr)
 
 * text:
-  
+
   .. code-block:: shell
-        
+
     suite s1
         zombie ecf:fob:label:
 
 *  --alter:
-  
+
   .. code-block:: shell
 
     ecflow_client --alter=add zombie "ecf:fob:label:"  /s1
@@ -113,9 +113,9 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
 **Example**: For tasks under suite “s1” add a zombie attribute, such that job that issues the child commands( event, meter, label) never blocks: (not strictly needed as this is the default behaviour):
 
 * python:
-  
-  .. code-block:: python 
-        
+
+  .. code-block:: python
+
     s1 = ecflow.Suite(\ s1')
     child_list = [ ChildCmdType.label, ChildCmdType.event, ChildCmdType.meter ]
     zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob, 300)
@@ -124,12 +124,12 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
 * text:
 
   .. code-block:: shell
-            
+
     suite s1
         zombie ecf:fob:label,event,meter:
 
 * --alter:
- 
+
   .. code-block:: shell
 
     ecflow_client --alter=add zombie "ecf:fob:label,event,meter:"  /s1
@@ -138,17 +138,17 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
 
 * python:
 
-  .. code-block:: python 
+  .. code-block:: python
 
     with ecflow.Suite(\ s1') as s1:
         with s1.add_family("critical") as crit :
             child_list = []  # empty child list means apply to all child commands
             for zombie_type in (ZombieType.ecf,ZombieType.path,ZombieType.user,ZombieType.ecf_pid,ZombieType.ecf_passwd,ZombieType.ecf_pid_passwd):
-                crit.add_zombie(ZombieAttr(zombie_type, child_list, ZombieUserActionType.fail, 300))   
+                crit.add_zombie(ZombieAttr(zombie_type, child_list, ZombieUserActionType.fail, 300))
 * text:
-  
+
   .. code-block:: shell
-        
+
     suite s1
         family critical
             zombie ecf:fail::
@@ -158,9 +158,9 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
             zombie ecf_passwd:fail::
             zombie ecf_pid_passwd:fail::
 * --alter:
-  
+
   .. code-block:: shell
-        
+
     ecflow_client --alter=add zombie "ecf:fail::"    /s1
     ecflow_client --alter=add zombie "path:fail::"  /s1
     ecflow_client --alter=add zombie "user:fail::"  /s1
@@ -194,13 +194,13 @@ Here are some more examples:
     ecflow_client --alter=add zombie "ecf:kill:init,complete:" /suiteZ
 
 * Add a zombie automatically kills zombies process, created out of user action:
-    
+
   .. code-block:: shell
 
     ecflow_client --alter=add zombie "user:kill::" /suiteZ
 
 * Add a zombie attribute that adopts all child complete zombies:
-  
+
   .. code-block:: shell
 
     ecflow_client --alter=add zombie "ecf:adopt:complete:" /suiteZ

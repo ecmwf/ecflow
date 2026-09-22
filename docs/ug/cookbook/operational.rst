@@ -3,9 +3,9 @@
 
 .. index::
    single: cookbook
-   
+
 .. _operational:
-   
+
 Toward an operational server
 ****************************
 
@@ -54,7 +54,7 @@ For a maintainable operational suite, we recommend to:
   best expected behaviour.
 
 * use ecf.list file to restrict access to the server for read-write or read only access
-    
+
   .. code-block:: shell
 
     # ecflow_client --help=reloadwsfile
@@ -72,11 +72,11 @@ It is possible to setup a **log-server**, to access 'live'
 output from the jobs. ecFlow is provided with the perl script
 logsvr.pl.
 
-* it is configured to deliver files under specific directories, 
+* it is configured to deliver files under specific directories,
 
 * configuration variables are
 
-  * LOGPORT # 9316 
+  * LOGPORT # 9316
   * LOGPATH # <path1>:<path2>:<path3>
   * LOGMAP  # mapping between requested path and real actual location
 
@@ -84,7 +84,7 @@ logsvr.pl.
 
   .. code-block:: shell
 
-    export LOGPATH=/s2o1/logs:/s2o2/logs # two possible 
+    export LOGPATH=/s2o1/logs:/s2o2/logs # two possible
     export LOGMAP=/s2o1/logs:/s2o1/logs:/s2o2/logs:/s2o2/logs # maps itself
     export LOGMAP=$LOGMAP:/tmp:/s2o1/logs:/tmp:/s2o2/logs     # map from /tmp
 
@@ -154,12 +154,12 @@ A task should abort as close to the problem as possible:
   consumption threshold, a kill request from the server (kill -2),
   or a 'command line' kill from the (root) user.
 
-* loosing the trapping capability is easy: 
+* loosing the trapping capability is easy:
 
   * trapping inheritance between the main ksh script and ksh function
     is system dependent. To maintain deterministic behaviour, do not
     hesitate to repeat trap setting:
-  
+
     .. code-block:: shell
 
       # ... a function in a task wrapper ...
@@ -168,7 +168,7 @@ A task should abort as close to the problem as possible:
         %include <trap_func.h>
         # body of the function
         set -e; trap 0; return 0 ##### reset trap
-      }      
+      }
 
       # trap_func.h example:
       for sgn in $SIGNAL_LIST 0 ; do
@@ -176,7 +176,7 @@ A task should abort as close to the problem as possible:
       done
 
   * calling rsh or ssh within a task will not propagate a remote
-    error locally. 
+    error locally.
 
     In most cases, a suite may run "as requested", with
     jobs completing. It is only possible to identify the problem
@@ -206,7 +206,7 @@ A task should abort as close to the problem as possible:
 Server Administration
 =====================
 
-An 'admin' suite will be required: 
+An 'admin' suite will be required:
 
 * to ensure that ecflow logfile is not filling up the disk, nor
   touching a quota limit, issuing regularly the command:
@@ -255,7 +255,7 @@ locally and remotely. They are:
 
     This command was used to check the status of a job, and was designed to be called by ecFlowUI.
 
-    .. code-block:: shell 
+    .. code-block:: shell
 
       edit ECF_CHECK_CMD '%ps --sid %ECF_RID% -f'
 
@@ -270,7 +270,7 @@ locally and remotely. They are:
     arrival pages.
 
     .. code-block:: shell
-  
+
      edit URLBASE https://confluence.ecmwf.int/display/
      edit URL     ECFLOW/Home
      edit ECF_CHECK_CMD '${BROWSER:=firefox} -remote "openURL(%URLBASE%/%URL%)"'
@@ -278,7 +278,7 @@ locally and remotely. They are:
 * alternatively, a script may be responsible for jobs
   submission/kill/query. At ECMWF, we use a submit script that tunes
   the generated job file to the remote destination.  It does:
-    
+
   * translate queuing system directives to the expected syntax,
 
   * tune submission timeout according to submit user and remote destination,
@@ -287,7 +287,7 @@ locally and remotely. They are:
     the way we want the job to be submitted there: nohup,
     standalone, rsh, ssh, ecrcmd
 
-  * keep memory of the **remote queuing id** given to the job, stores it in a 
+  * keep memory of the **remote queuing id** given to the job, stores it in a
     ".sub" file, that may be used later by kill and query commands
 
   * handle frequent or specific errors with the submission: job may
@@ -300,7 +300,7 @@ locally and remotely. They are:
 
       edit ECF_JOB_CMD    '$HOME/bin/ecf_submit %USER% %HOST% %ECF_JOB% %ECF_JOBOUT%
       edit ECF_KILL_CMD   '$HOME/bin/ecf_kill %USER% %HOST% %ECF_RID% %ECF_JOB%
-      edit ECF_STATUS_CMD '$HOME/bin/ecf_status %USER% %HOST% %ECF_RID% %ECF_JOB% 
+      edit ECF_STATUS_CMD '$HOME/bin/ecf_status %USER% %HOST% %ECF_RID% %ECF_JOB%
 
 * remote jobs submission needs the server administrator, or the suite
   designer, to communicate with the system administration team, in
@@ -309,7 +309,7 @@ locally and remotely. They are:
   * shared, mounted, or local file systems according to best choice or
     topology, in the local network.
 
-  * main submission schemes (rsh, ssh), 
+  * main submission schemes (rsh, ssh),
 
   * alternative submission scheme (we may use nicknames to distinguish
     direct job submission from submission through a queueing system on
@@ -319,7 +319,7 @@ locally and remotely. They are:
     be used, as alternative)
 
   * the best way to handle cluster switch (from c2a to c2b, as a
-    variable on the top node, or multiple variables among the suites,  
+    variable on the top node, or multiple variables among the suites,
     a shell variable, or even a one-line-switch in the submit script)
 
   * to handle remote storage switch (from /s2o1 to /s22o, as a server

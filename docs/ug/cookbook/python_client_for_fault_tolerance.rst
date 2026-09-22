@@ -22,4 +22,3 @@ Such client can be used as an ecFlow task wrapper, with few more lines.
 
 .. literalinclude:: src/ecflow3of5.py
     :language: python
-

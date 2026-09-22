@@ -1,5 +1,5 @@
 suite suite
-  clock real 5.1.2017        
+  clock real 5.1.2017
   family family
      task t1
         time 13:00       # with time attribute simulator will run for 24 hours

@@ -30,28 +30,28 @@ Where:
 Some examples using the query command:
 
 .. code-block:: shell
-    
-    # return node state 
+
+    # return node state
     state=$(ecflow_client --query state /path/to/node)
 
     # state that can includes suspended
-    dstate=$(ecflow_client --query dstate /path/to/node) 
-    
+    dstate=$(ecflow_client --query dstate /path/to/node)
+
     # return the current value as a string
     value=$(ecflow_client --query repeat /path/to/node )
 
     # return the previous value as a string, does not modify real repeat
-    value=$(ecflow_client --query repeat /path/to/node   prev ) 
+    value=$(ecflow_client --query repeat /path/to/node   prev )
 
     # return the next value as a string, does not modify real repeat
-    value=$(ecflow_client --query repeat /path/to/node   next) 
+    value=$(ecflow_client --query repeat /path/to/node   next)
 
     # return set | clear to standard out
-    event=$(ecflow_client --query event /path/to/task/with/event:event_name) 
-    
-    # returns the current value of the meter 
-    meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name) 
-    
+    event=$(ecflow_client --query event /path/to/task/with/event:event_name)
+
+    # returns the current value of the meter
+    meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name)
+
     # returns the variable value, as stored (e.g. '%YYYY%%MM%%DD%')
     value=$(ecflow_client --query variable /path/to/task/with/var:var_name)
 
@@ -61,17 +61,17 @@ Some examples using the query command:
     # returns the value of a variable attached to the server itself
     value=$(ecflow_client --query variable /:ECF_PORT)
 
-    # returns the current value of the limit 
-    limit_value=$(ecflow_client --query limit  /path/to/task/with/limit:limit_name) 
-    
-    # returns the max value of the limit 
+    # returns the current value of the limit
+    limit_value=$(ecflow_client --query limit  /path/to/task/with/limit:limit_name)
+
+    # returns the max value of the limit
     limit_max=$(ecflow_client --query limit_max /path/to/task/with/limit:limit_name)
-    
-    # returns the current value of the label 
-    label_value=$(ecflow_client --query label %ECF_NAME%:label_name) 
-    
+
+    # returns the current value of the label
+    label_value=$(ecflow_client --query label %ECF_NAME%:label_name)
+
     # return true if expression evaluates false otherwise
-    value=$(ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\") 
+    value=$(ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\")
 
 A variable value may itself refer to other variables, for example :code:`edit YMD '%YYYY%%MM%%DD%'`.
 By default :code:`--query variable` returns such a value exactly as stored; the :code:`--evaluate`
@@ -98,9 +98,9 @@ Create a :term:`task script <ecf script>` for a new :term:`task` named :code:`qu
 
 .. code-block:: shell
     :caption: $HOME/course/f1/query.ecf
-        
+
     %include <head.h>
-    
+
     meter=$(ecflow_client --query meter /test/f1/t1:progress)
     while [[ $meter -lt 100 ]]
     do
@@ -111,7 +111,7 @@ Create a :term:`task script <ecf script>` for a new :term:`task` named :code:`qu
         t5_state=$(ecflow_client --query state /test/f1/t5)
         ecflow_client --label=query "meter($meter) eventa($eventa) eventb($eventb) t5_state($t5_state)"
     done
-    
+
     %include <tail.h>
 
 Update Suite Definition

@@ -21,4 +21,3 @@ ecflow_client --host=${host} --port=${port} --migrate ${nodePath} > ${serverDefs
 echo "Compare defs with meld:"
 echo "meld ${uiDefs} ${serverDefs} &"
 meld ${uiDefs} ${serverDefs} &
-

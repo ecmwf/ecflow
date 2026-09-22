@@ -11,10 +11,10 @@ import argparse
 PARSER = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 PARSER.add_argument('--file', help="Tar file to upload")
 ARGS = PARSER.parse_args()
-    
+
 conflunce_base_url = "https://software-test.ecmwf.int/wiki"
 confluence = rest.Confluence(conflunce_base_url,"deploy","deploy2013")
-page_id = confluence.get_page_id("ECFLOW","Releases") 
+page_id = confluence.get_page_id("ECFLOW","Releases")
 if page_id is None:
     sys.exit(1)
 
@@ -23,15 +23,15 @@ if attachment is not None:
     print("space key:",space_key," allready has an attachment for file ",ARGS.file)
 else:
     confluence.create_attachment(page_id,"%TARBALL_COMMENT%",ARGS.file)
-    
+
 #     # ===========================================================================
 #     CL = ecflow.Client("localhost", 4141)
 #     try:
-#         CL.ping() 
+#         CL.ping()
 #         print "ping worked";
-#         
+#
 #         alter = 'alter add variable X "X XX" /ecflow/test_local_actions; alter add variable xx "y a" /ecflow/test_local_actions;'
 #         CL.group(alter)
-#  
+#
 #     except RuntimeError, ex:
 #         print "Error: " + str(ex)

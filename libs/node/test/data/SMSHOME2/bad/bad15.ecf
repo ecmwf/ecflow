@@ -1,4 +1,4 @@
 # test unrecognized pre-processing directive
-%ecfmicro * 
+%ecfmicro *
 *VAR
 *ecfmicro %

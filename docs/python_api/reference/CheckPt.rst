@@ -65,4 +65,3 @@ Members:
 .. py:attribute:: CheckPt.values
    :module: ecflow
    :value: {0: ecflow.CheckPt.NEVER, 1: ecflow.CheckPt.ON_TIME, 2: ecflow.CheckPt.ALWAYS, 3: ecflow.CheckPt.UNDEFINED}
-

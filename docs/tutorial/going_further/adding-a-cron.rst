@@ -4,8 +4,8 @@
 .. index::
    single: cron (tutorial)
 
-.. _tutorial-add-a-cron:  
-   
+.. _tutorial-add-a-cron:
+
 Adding a cron
 =============
 
@@ -27,13 +27,13 @@ Create a new task script named :file:`clear_log.ecf`.
     :caption: $HOME/course/test/house_keeping/clear_log.ecf
 
     %include <head.h>
-    
+
     # copy the log file to the ECF_HOME/log directory
     cp %ECF_LOG% %ECF_HOME%/log/.
-    
+
     # clear the log file
     ecflow_client  --log=clear
-    
+
     %include <tail.h>
 
 Update Suite Definition
@@ -64,7 +64,7 @@ Create a new family named :code:`house_keeping` and add the task :code:`clear_lo
         .. literalinclude:: src/add-a-cron.py
            :language: python
            :caption: $HOME/course/test.py
-  
+
 **What to do:**
 
 #. Update the :term:`suite definition` to include the new family and task.

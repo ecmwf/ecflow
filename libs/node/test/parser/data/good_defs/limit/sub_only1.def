@@ -1,6 +1,6 @@
 suite limit_with_submission_limits
     limit disk 2
-    family anon    
+    family anon
     	inlimit -s disk   # Inlimit submission
     	task t1
     	task t2

@@ -63,7 +63,7 @@ def loader(test=1, # host=os.getenv("ECF_TEST_HOST", None),
                "port": os.getenv("ECF_OPER_PORT", None),
                "path": '/' + SUITE + "/submit", }
     defs = ecf.Defs()
-     
+
     if host: env["host"] = host
     if port: env["port"] = port
     if env["host"] != "eurus": print host, env["host"]; raise
@@ -74,11 +74,11 @@ def loader(test=1, # host=os.getenv("ECF_TEST_HOST", None),
     except: fname = "submit"
     user = get_username()
     submit = "/home/ma/emos/bin/trimurti.41r2"
-    rid = submit + " %USER% %HOST% %ECF_RID:0% %ECF_JOB% $ECF_JOBOUT% "   
+    rid = submit + " %USER% %HOST% %ECF_RID:0% %ECF_JOB% $ECF_JOBOUT% "
     ecf_home = pwd.getpwnam(user).pw_dir + "/ecflow_server"
-    ecf_files = ecf_home + "/smsfiles"       
+    ecf_files = ecf_home + "/smsfiles"
     ecf_include = ecf_home + "/include"
-               
+
     client=" ECF_PASS=%ECF_PASS% ECF_NAME=%ECF_NAME% ecflow_client "
     hosts = ["cca", "ccb", "cct", "ecgb", "lxc", "opensuse131", "localhost"]
     suite = ecf.Suite(sname).add(
@@ -100,7 +100,7 @@ def loader(test=1, # host=os.getenv("ECF_TEST_HOST", None),
                              Label("example", "four cases: no job, no submit - no job but submit - job created but no submit - job + submit"),
                              Limit("tasks", 10)),
         Inlimit("/%s/limits:tasks" % sname),
-         
+
         Task("dummy").add(Variables(ECF_DUMMY_TASK= 1)),
         Family("ssh_login").add(
             Label("one_liner", "dummy script, no need for job, execute ECF_JOB_CMD"),

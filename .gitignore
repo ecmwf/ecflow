@@ -32,7 +32,7 @@ build/
 bdir/
 bdir_xcode
 
-# ecflow 
+# ecflow
 Pyext/setup.py
 bin/
 swap
@@ -48,10 +48,10 @@ swap
 
 # hack to ignore naw.def.glog
 **/naw.def.glog
- 
+
 # Mac
 .DS_Store
- 
+
 *.lock
 *.log
 *.so

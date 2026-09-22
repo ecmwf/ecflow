@@ -8,7 +8,6 @@ suite today1
    			today 15:00
    			today 19:00
    			today 10:00 20:00 01:00
-   			today 11:00 20:00 01:00		   		
+   			today 11:00 20:00 01:00
    endfamily
 endsuite
-

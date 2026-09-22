@@ -6,7 +6,7 @@
 Adding Large Trigger Dependencies
 ////////////////////////////////////////////////
 
-.. code-block:: python 
+.. code-block:: python
 
    from ecflow import Defs, Suite, Task, Trigger, Complete
 
@@ -25,14 +25,14 @@ Adding Large Trigger Dependencies
    )  # False mean add with OR
 
 
-.. code-block:: python 
+.. code-block:: python
    :caption: t3 TRIGGER
 
    (t1 == complete and t2 == active or t2 == active)
 
 The following show alternative styles that produce the same definition:
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs()
    s1 = defs.add_suite("s1")
@@ -45,7 +45,7 @@ The following show alternative styles that produce the same definition:
    t3.add_part_trigger("t2 == aborted", False)
    # here False means add as 'OR'
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs().add(
       Suite("s1").add(
@@ -60,7 +60,7 @@ The following show alternative styles that produce the same definition:
    )
 
 
-.. code-block:: python 
+.. code-block:: python
 
    defs = Defs() + Suite("s1")
    defs.s1 += [Task("t{}".format(i)) for i in range(1, 4)]

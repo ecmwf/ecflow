@@ -23,7 +23,7 @@ sys	0m0.12s
  Time for Defs::check(inlimit resolution)        = 0.072606 result(1)
  time for deleting all nodes                     = 0.290791
  Total elapsed time = 10 seconds
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time = 2.64565 parse(1)
  Parsing Node tree *only* time           = 2.65194 parse(1)
@@ -101,4 +101,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  27436 tasks  : 0.283   news_local() : 0.001   sync_local() : 0.498
  Check pt:            115 109 100 96 95 95 96 99 98 98 : Avg:0.1001(sec)
  Delete:              116ms
- 

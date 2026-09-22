@@ -11,8 +11,8 @@ Starting ecFlowUI
 
 The command to start the application on the ECMWF HPC::
 
-   module load ecflow/new                                            
-   ecflow_ui                                                          
+   module load ecflow/new
+   ecflow_ui
 
 .. warning::
 

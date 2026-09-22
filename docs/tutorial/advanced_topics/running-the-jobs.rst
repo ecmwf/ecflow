@@ -6,7 +6,7 @@
    single: ECF_JOB (tutorial)
    single: ECF_JOB_CMD (tutorial)
    single: ECF_JOBOUT (tutorial)
-   
+
 .. _tutorial-running-the-jobs:
 
 Running (remote) jobs
@@ -28,7 +28,7 @@ Updating :code:`ECF_JOB_CMD` allows to run the tasks on a remote machine, taking
 In the following examples, consider a variable :code:`HOST` that defines the name of the remote host, and assume that all the files are visible on all the hosts (i.e. using NFS).
 replace the string :code:`<REMOTE-HOSTNAME>` with a host name of your choice.
 
-.. note:: 
+.. note::
 
    The environment of a task running on a remote host is different from that of a task running locally.
    This depends on how the local and remote systems are set up.

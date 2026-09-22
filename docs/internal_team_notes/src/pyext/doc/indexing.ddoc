@@ -20,8 +20,8 @@
             )
    .def(vector_indexing_suite<std::vector<std::string> >())
    ;
-   
-   
+
+
 These function would then be placed in __init.py__, and therefore be loaded
 when the module was loaded.
 
@@ -32,4 +32,4 @@ when the module was loaded.
       strvec = StrVec()
       for theStr in theList:
          StrVec.append(strvec,theStr)
-      return strvec; 
+      return strvec;

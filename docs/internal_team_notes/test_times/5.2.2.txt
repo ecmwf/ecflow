@@ -7,15 +7,15 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
            131,043      page-faults               #    0.085 M/sec                    ( +-  0.00% )
      5,952,972,012      cycles                    #    3.842 GHz                      ( +-  3.36% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,221,960,351      instructions              #    1.72  insns per cycle          ( +-  0.00% )
      2,898,735,647      branches                  # 1870.637 M/sec                    ( +-  0.01% )
         15,162,057      branch-misses             #    0.52% of all branches          ( +-  0.78% )
 
        1.550711582 seconds time elapsed                                          ( +-  3.37% )
 
- 
+
 
 + bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 + strace -c bin/ecflow_client --port 3160 --sync_full 0
@@ -62,7 +62,7 @@
   0.00    0.000000           0         1           epoll_create1
 ------ ----------- ----------- --------- --------- ----------------
 100.00    0.052251                  6489        22 total
- 
+
 
 + perf stat -r 10 bin/ecflow_client --port 3160 --sync_full 0
 
@@ -73,8 +73,8 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 40.82% )
            244,238      page-faults               #    0.140 M/sec                    ( +-  0.32% )
      6,676,664,519      cycles                    #    3.840 GHz                      ( +-  0.33% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     12,122,224,843      instructions              #    1.82  insns per cycle          ( +-  0.02% )
      3,177,509,183      branches                  # 1827.448 M/sec                    ( +-  0.01% )
         11,785,804      branch-misses             #    0.37% of all branches          ( +-  0.42% )

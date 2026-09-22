@@ -8,15 +8,15 @@ time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --sync_full 0  # fir
 real    0m4.57s   real    0m4.12s    real    0m4.12s
 user    0m3.03s   user    0m3.09s    user    0m3.04s
 sys     0m0.23s   sys     0m0.22s    sys     0m0.22s
- 
- 
+
+
 Compare with GNU/6.3 ecflow 4.16.0
 ==================================
 time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 real    0m7.86s   real    0m7.81s  real    0m7.81s
 user    0m4.77s   user    0m4.80s  user    0m4.78s
 sys     0m0.29s   sys     0m0.25s  sys     0m0.26s
- 
+
 time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --sync_full 0  # first one caches
 real    0m5.62s   real    0m3.08s  real    0m3.15s
 user    0m2.73s   user    0m2.74s  user    0m2.82s
@@ -24,8 +24,8 @@ sys     0m0.23s   sys     0m0.22s  sys     0m0.20s
 
 
 This shows that the sync_local/sync_full() in ecflow 4.X is quicker when using the cache ?
- 
- 
+
+
 PERF
 ===================================================================================================
 
@@ -38,8 +38,8 @@ PERF
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
            266,665      page-faults               #    0.084 M/sec                    ( +-  0.00% )
     12,162,288,156      cycles                    #    3.847 GHz                      ( +-  0.36% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     16,775,736,104      instructions              #    1.38  insns per cycle          ( +-  0.00% )
      4,146,381,130      branches                  # 1311.465 M/sec                    ( +-  0.00% )
        206,823,695      branch-misses             #    4.99% of all branches          ( +-  0.06% )
@@ -74,7 +74,7 @@ sys     0m0.18s
  Time for Defs::check(inlimit resolution)    = 0.067343 result(1)
  time for deleting all nodes                 = 0.295432
  Total elapsed time = 14 seconds
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time     = 1.61971 parse(1)
  Parsing Node tree *only* time               = 1.63939 parse(1)
@@ -90,7 +90,7 @@ sys     0m0.18s
  Time for Defs::check(inlimit resolution)    = 0.710233 result(0)
  time for deleting all nodes                 = 0.404903
  Total elapsed time = 27 seconds
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3160)
@@ -186,5 +186,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  0 tasks  : 0 : auto-sync
  Check pt:            2 1 0 0 0 0 0 0 0 0 : Avg:0.0003(sec)
  Delete:              0ms
-
- 

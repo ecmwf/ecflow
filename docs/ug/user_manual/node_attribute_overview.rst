@@ -42,7 +42,7 @@ Node attribute overview
      -
      -
      - ❎
-     - 
+     -
      -
      -
    * - :term:`complete`
@@ -155,8 +155,8 @@ Node attribute overview
      -
    * - :term:`repeat`
      - ❎
-     -  
-     - 
+     -
+     -
      -
      -
      - ❎
@@ -164,11 +164,11 @@ Node attribute overview
      -
    * - :term:`time` / :term:`today`
      - ❎
-     - ❎ 
-     - 
+     - ❎
      -
      -
-     - 
+     -
+     -
      -
      -
    * - :term:`trigger`
@@ -181,20 +181,20 @@ Node attribute overview
      -
      -
    * - :term:`variable`
-     - 
-     -  
-     - 
+     -
+     -
+     -
      - ❎
      -
      - ❎
      -
      -
    * - :term:`zombie`
-     - 
-     - 
-     - 
      -
      -
-     - 
+     -
+     -
+     -
+     -
      - ❎
      -

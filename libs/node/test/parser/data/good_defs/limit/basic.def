@@ -1,7 +1,7 @@
 suite limit_basic
  limit disk 1
- family anon    
-   inlimit disk  
+ family anon
+   inlimit disk
    task t1
    task t2
    task t3

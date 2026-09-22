@@ -29,4 +29,3 @@ To run the task **/b/f/t** when suite ' is not present, use the following trigge
     family f
         task t
             trigger /a/f/t == complete or /a/f/t == unknown
-        

@@ -5,4 +5,3 @@ suite suiteName
            event 1 eventName
       endfamily
 endsuite
-

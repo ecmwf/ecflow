@@ -43,10 +43,10 @@ Usage:
 
 .. code-block:: python
 
-   today1 = Today( 10,10 )                                                   #  today 10:10 
-   today2 = Today( TimeSlot(10,10) )                                         #  today 10:10 
-   today3 = Today( TimeSlot(10,10), true)                                    #  today +10:10 
-   today4 = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 
+   today1 = Today( 10,10 )                                                   #  today 10:10
+   today2 = Today( TimeSlot(10,10) )                                         #  today 10:10
+   today3 = Today( TimeSlot(10,10), true)                                    #  today +10:10
+   today4 = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10
    t = Task('t1',
             today1,today2,today3,today4,
             Today('10:30 20:10 00:10')) # Create today in place
@@ -56,4 +56,3 @@ Usage:
    :module: ecflow
 
 Return the Today's time series
-

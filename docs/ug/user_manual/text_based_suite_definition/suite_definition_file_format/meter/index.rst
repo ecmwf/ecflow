@@ -34,7 +34,7 @@ that the meter will have a value, e.g.
 
     task plot5days
         trigger fc/model:step eq 120 # 5 days done
-    
+
 The numeric value used in the triggering means that there is an
 ambiguity if you have a node with the same name, let's say task "120".
 

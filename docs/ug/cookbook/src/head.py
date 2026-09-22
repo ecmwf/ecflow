@@ -6,13 +6,13 @@ ECF_PORT = ^ECF_PORT:0^
 XSVR = "ecflow_client --port=%s --host=^ECF_HOST:0^ --" % ECF_PORT
 pid = os.getpid()
 
-def xinit(): 
+def xinit():
     os.system(XSVR + "init %s"%pid)
-def xabort(): 
+def xabort():
     os.system(XSVR + "abort %s"%pid)
-def xcomplete(): 
-    os.system(XSVR + "complete")  
-def SigHandler(signum, frame): 
+def xcomplete():
+    os.system(XSVR + "complete")
+def SigHandler(signum, frame):
     xabort(); sys.exit(0)
 
 signal.signal (signal.SIGINT,  SigHandler); # ...
@@ -22,9 +22,9 @@ os.environ['ECF_HOST'] = "^ECF_HOST:0^"
 os.environ['ECF_PASS'] = "^ECF_PASS:0^"
 
 def xmeter(name, step):
-   os.system(XSVR + "meter %s %s"%(name,step))  
+   os.system(XSVR + "meter %s %s"%(name,step))
 def xevent(name):
-   os.system(XSVR + "event %s"%name)  
+   os.system(XSVR + "event %s"%name)
 def xlabel(name, info):
    os.system(XSVR + "label %s %s"%(name,info))
 

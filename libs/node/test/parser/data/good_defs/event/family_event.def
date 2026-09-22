@@ -2,7 +2,7 @@ suite event_family_1
    family f
       # Events added to suite/family cannot be signaled by child commands
       # However alter/force should allow events to set/cleared on Family/suite
-      event 0 
+      event 0
       event name
       event 1 eventName
       event 2 eventNamea

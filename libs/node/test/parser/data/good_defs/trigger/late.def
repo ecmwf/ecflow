@@ -4,7 +4,7 @@ suite trigger_late_flag
         task t1
             event event
     endfamily
-    family anon    
+    family anon
         task t1
            trigger /trigger_late_flag/f1/t<flag>late
         task t2

@@ -10,7 +10,7 @@ real    0m2.59s
 user    0m2.39s
 sys     0m0.20s
 
-ANode/parser/bin/gcc-6.3.0/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def                                                         
+ANode/parser/bin/gcc-6.3.0/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree and AST creation time = 1.19213 parse(1)
  Parsing Node tree *only* time           = 0.91323 parse(1)
  Save as DEFS checkpoint, time taken                                   = 0.247417
@@ -22,7 +22,7 @@ ANode/parser/bin/gcc-6.3.0/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199
  Time for Defs::check(inlimit resolution)        = 0.072298 result(1)
  time for deleting all nodes                     = 0.290732
  Total elapsed time = 10 seconds
- 
+
  ANode/parser/bin/gcc-6.3.0/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time = 2.33046 parse(1)
  Parsing Node tree *only* time           = 2.27001 parse(1)
@@ -35,9 +35,9 @@ ANode/parser/bin/gcc-6.3.0/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199
  Time for Defs::check(inlimit resolution)        = 0.701547 result(0)
  time for deleting all nodes                     = 0.374189
  Total elapsed time = 17 seconds
- 
- 
- Client/bin/gcc-6.3.0/release/perf_test_large_defs                                                                                            
+
+
+ Client/bin/gcc-6.3.0/release/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3142)
 
@@ -102,4 +102,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  27436 tasks  : 0.293   news_local() : 0   sync_local() : 0.456
  Check pt:            108 103 92 92 93 92 93 93 93 92 : Avg:0.0951(sec)
  Delete:              115ms
- 

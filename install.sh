@@ -38,7 +38,7 @@ cd build
 #    > make # OR
 #    > make -j8 -k
 #
-# Boost:  
+# Boost:
 #  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
 #  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
 #
@@ -48,7 +48,7 @@ cd build
 #                     Be sure to remove cache first.
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
-         # -DCMAKE_BUILD_TYPE=Release 
+         # -DCMAKE_BUILD_TYPE=Release
          # -DENABLE_UI=OFF        \
          # -DENABLE_PYTHON=OFF    \
          # -DENABLE_ALL_TESTS=ON  \
@@ -57,6 +57,6 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
          # -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-local-typedefs" \
          # -DCMAKE_CXX_COMPILER=xlC_r"
          # -DBOOST_ROOT=/var/tmp/$USER/boost/boost_1_53_0
-         
+
 make -j8 -k
 make install

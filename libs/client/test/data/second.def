@@ -1,4 +1,4 @@
- 
+
 #
 # The defs is used conjunction with first.def to test resolution of externs
 #
@@ -14,4 +14,3 @@ suite a
     	endfamily
     endfamily
 endsuite
-

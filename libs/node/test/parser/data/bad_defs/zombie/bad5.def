@@ -1,4 +1,3 @@
 suite suiteName
     zombie user:fob:fred:100    # fred is not a valid child cmd
 endsuite
-

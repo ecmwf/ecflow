@@ -10,7 +10,7 @@ You can check definition for valid trigger expression and in-limits for
 existing definition file.
 
 .. code-block:: shell
-    :caption: Command line 
+    :caption: Command line
 
     ecflow_client --load=/my/home/exotic.def check_only
 
@@ -31,17 +31,17 @@ duplicate node names at the same level).
 
 .. code-block:: python
     :caption: Check defs built with the ecFlow Python API
-    
+
     import os
     from ecflow import Defs,Suite,Task,Edit
-     
+
     home = os.path.join(os.getenv("HOME"),  "course")
     defs = Defs(
         Suite('test',
             Edit(ECF_HOME=home),
             Task('t1')))
     print(defs.check())
-                                            
+
 
 Simulation and Verification
 ===========================
@@ -61,7 +61,7 @@ time(optional).
 
 .. code-block:: shell
     :caption: suite.def
-    
+
     suite cron3               # use real clock otherwise clock starts when the simulations starts
         clock real  1.1.2006  # define a start date for deterministic behaviour
         endclock   13.1.2006  # When to finish. end clock is *only* used for the simulator
@@ -70,7 +70,7 @@ time(optional).
                 cron -d 10,11,12   10:00 11:00 01:00  # run on 10,11,12 of the month at 10am and 11am
                 verify complete:6                     # task should complete 6 times between 1.1.2006 -> 13.1.2006
         endfamily
-    endsuite                                             
+    endsuite
 
 Please note, for deterministic behaviour, the start and end clock
 should be specified when using time-based attributes. However, if no 'endclock' is specified the simulation run will assume
@@ -93,7 +93,7 @@ dependencies then the simulator will by default use **1-hour
 resolution**.
 
 This needs to be taken into account when specifying the verify attribute. If the simulation does not complete it creates defs.flat and defs.depth files. This provides clues as to the state of the definition at the end of the
-simulation. 
+simulation.
 
     .. code-block:: python
         :caption: Calling the simulator in Python

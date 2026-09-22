@@ -17,9 +17,9 @@ suite limit_with_externs
     family limits
     	limit hpcd 20
     endfamily
-    
-    family anon    
-   		inlimit limits:hpcd       
+
+    family anon
+   		inlimit limits:hpcd
     	task t1
     		inlimit /suiteName:sg1        # another suite limit
     		inlimit /suiteName:mars       # another suite limit

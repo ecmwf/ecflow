@@ -73,4 +73,3 @@ Returns the lifetime in seconds of :term:`zombie` in the server
    :module: ecflow
 
 Returns the :term:`zombie type`
-

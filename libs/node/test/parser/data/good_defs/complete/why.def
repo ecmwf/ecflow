@@ -1,4 +1,4 @@
-suite complete_why  
+suite complete_why
  family hold
   defstatus queued
   time 07:20
@@ -6,5 +6,5 @@ suite complete_why
   task dummy
     trigger 1==0
     complete 1==1 # ECFLOW-1629, why should not report on trigger since complete expression is true
- endfamily 
+ endfamily
 endsuite

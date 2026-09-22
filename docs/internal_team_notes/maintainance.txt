@@ -53,7 +53,7 @@ Change in major and minor numbers means that the check point
 file are compatible.
 
 From 3.0.1 we have provides a mechanism to migrate to all future version.
-irrespective of check point files.  
+irrespective of check point files.
 
     ecflow_client --migrate > defs_with_state.def
 
@@ -62,10 +62,9 @@ all the state information is written as comments. This can then
 be loaded in a future release by calling:
 
    ecflow_client --load defs_with_state.def
-   
+
 If there are problems with 'defs_with_state.def', (See ecflow_migrate.py)
 these can be handled with ecflow_migrate.py :
-    
+
    python  4.5.0/bin/ecflow_migrate.py/ecflow_migrate.py --d  ./defs_with_state.def # -> defs_with_state.def.mig
    ecflow_client --load defs_with_state.def.mig
-   

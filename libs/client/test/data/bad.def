@@ -1,5 +1,4 @@
 suite suite1
    task dodgy
-      trigger a non sensical trigger and that should fail to parse 
+      trigger a non sensical trigger and that should fail to parse
 endsuite
-

@@ -11,7 +11,7 @@ Limit
 =====
 
 Limits provide simple load management by limiting the number of tasks submitted by a specific :term:`ecflow_server`
-      
+
 At ECMWF, suite designers tend to use :term:`triggers <trigger>` in two different ways: to represent data dependency, or as *courtesy* triggers (i.e. a means to manage resources).
 Triggers where originally designed to represent data dependency, but can artificially prevent too many jobs from executing at once and thus be used to manage queues.
 

@@ -19,8 +19,8 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
                     yield os.path.join(path, name)
                     break
         if single_level:
-            break    
-        
+            break
+
 for cpp_file in all_files('.', '*.cpp'):
     if 'cereal' in cpp_file:
         continue
@@ -28,7 +28,7 @@ for cpp_file in all_files('.', '*.cpp'):
     file_obj = open(cpp_file,'r')
     try:
         list_of_all_lines = file_obj.readlines()
-        
+
         has_runtime_error = False
         has_correct_include = False
         for line in list_of_all_lines:
@@ -36,7 +36,7 @@ for cpp_file in all_files('.', '*.cpp'):
                 has_runtime_error = True
             if '#include <stdexcept>' in line:
                 has_correct_include = True
-                
+
         if has_runtime_error:
             #print(cpp_file, " uses std::runtime_error ", has_correct_include )
             if not has_correct_include:
@@ -49,10 +49,9 @@ for cpp_file in all_files('.', '*.cpp'):
                         new_list.append('#include <stdexcept>\n')
                         added_include = True
                     new_list.append(line)
-                    
+
                 changed_file = open(cpp_file,'w')
                 changed_file.writelines(new_list)
                 changed_file.close()
     finally:
         file_obj.close()
-        

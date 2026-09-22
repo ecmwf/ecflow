@@ -6,8 +6,8 @@ suite csim_repeat_day2
     family f1
        time 08:00 20:00 01:00  # no guard so has no effect
        task t1
-            day monday         # run at midnight, 2 times  
-            verify complete:2     
+            day monday         # run at midnight, 2 times
+            verify complete:2
     endfamily
   endfamily
 endsuite

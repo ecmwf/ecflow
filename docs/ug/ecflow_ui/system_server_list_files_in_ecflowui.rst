@@ -8,7 +8,7 @@ System server list files in ecFlowUI
 
 .. note::
 
-    This documentation is only valid for versions **>= 5.9.0**.        
+    This documentation is only valid for versions **>= 5.9.0**.
 
 System server list
 ==================
@@ -19,9 +19,9 @@ either a path to another system server list file or specifies a server
 (name, host and port with a space separator)::
 
     path_to_another_system_server_list_file1
-    name1 host1 port1                                             
-    name2 host2 port2                                               
-    ...                                                                
+    name1 host1 port1
+    name2 host2 port2
+    ...
 
 Servers from these lists are marked as "system" in ecFlowUI and
 represented by a different colour and icon decoration (in column "S") in
@@ -34,9 +34,9 @@ below).
 
 .. warning::
 
-    Please note that servers marked as "system" **cannot be modified   
-    or removed**. Instead they are managed by an automatic update      
-    process (see below).                                               
+    Please note that servers marked as "system" **cannot be modified
+    or removed**. Instead they are managed by an automatic update
+    process (see below).
 
 Specifying the system server lists
 ==================================
@@ -64,7 +64,7 @@ here <using_ecflowui_via_the_ecmwf_teleport_gateway>`).
 You can always check the current value of ECFLOW_SYSTEM_SERVERS_LIST
 before starting up ecFlowUI with the following command::
 
-    ecflow_ui -h                                                       
+    ecflow_ui -h
 
 However, it does not show what has been set in the ecFlowUI Preferences.
 

@@ -43,4 +43,3 @@ The process or remote id of the running job
    :module: ecflow
 
 The current try number as a string.
-

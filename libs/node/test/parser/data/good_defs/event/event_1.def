@@ -1,7 +1,7 @@
 suite event_1
    family f
       task t
-         event 0 
+         event 0
          event name
          event 1 eventName
          event 2 eventNamea
@@ -11,4 +11,3 @@ endsuite
 suite event_1s1;family f ; task t ; event 0  ;event name ;event 1 eventName
    event 2 eventNamea ; endfamily
 endsuite
-

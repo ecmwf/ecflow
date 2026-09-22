@@ -7,16 +7,16 @@
                  0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
            131,042      page-faults               #    0.091 M/sec                    ( +-  0.00% )
      5,548,454,038      cycles                    #    3.858 GHz                      ( +-  0.52% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,236,059,020      instructions              #    1.84  insns per cycle          ( +-  0.00% )
      2,897,759,191      branches                  # 2015.139 M/sec                    ( +-  0.01% )
         14,757,687      branch-misses             #    0.51% of all branches          ( +-  0.35% )
 
        1.438958964 seconds time elapsed                                          ( +-  0.55% )
-       
-       
-       
+
+
+
 + bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 + strace -c bin/ecflow_client --port 3160 --sync_full 0
 % time     seconds  usecs/call     calls    errors syscall
@@ -62,9 +62,9 @@
   0.00    0.000000           0         1           epoll_create1
 ------ ----------- ----------- --------- --------- ----------------
 100.00    0.053254                  6491        22 total
- 
- 
- 
+
+
+
 + perf stat -r 10 bin/ecflow_client --port 3160 --sync_full 0
 
  Performance counter stats for 'bin/ecflow_client --port 3160 --sync_full 0' (10 runs):
@@ -74,16 +74,16 @@
                  1      cpu-migrations            #    0.000 K/sec                    ( +- 27.22% )
            266,669      page-faults               #    0.126 M/sec                    ( +-  0.00% )
      8,201,109,950      cycles                    #    3.864 GHz                      ( +-  0.23% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     16,800,974,193      instructions              #    2.05  insns per cycle          ( +-  0.00% )
      4,152,931,216      branches                  # 1956.796 M/sec                    ( +-  0.00% )
         12,106,160      branch-misses             #    0.29% of all branches          ( +-  0.53% )
 
-       2.681030628 seconds time elapsed       
-       
-       
-       
+       2.681030628 seconds time elapsed
+
+
+
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real    0m0.91s
 user    0m0.83s
@@ -109,7 +109,7 @@ sys     0m0.15s
  Time for Defs::check(inlimit resolution)       = 0.056s wall, (0.050s user + 0.000s system = 0.050s) CPU (89.7%) result(1)
  time for deleting all nodes                    = 0.276s wall, (0.280s user + 0.000s system = 0.280s) CPU (101.6%)
  10.319414s wall, 9.900000s user + 0.410000s system = 10.310000s CPU (99.9%)
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree & AST creation time parse(1) = 1.247s wall, (1.110s user + 0.130s system = 1.240s) CPU (99.5%)
  Parsing Node tree *only* time         parse(1) = 1.233s wall, (1.130s user + 0.100s system = 1.230s) CPU (99.8%)
@@ -125,7 +125,7 @@ sys     0m0.15s
  Time for Defs::check(inlimit resolution)       = 0.535s wall, (0.540s user + 0.000s system = 0.540s) CPU (100.9%) result(0)
  time for deleting all nodes                    = 0.380s wall, (0.380s user + 0.000s system = 0.380s) CPU (100.1%)
  19.427831s wall, 18.480000s user + 0.930000s system = 19.410000s CPU (99.9%)
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3160)
@@ -295,4 +295,3 @@ auto_restore        0
 verifys             0
 queues              0
 generics            0
-                              

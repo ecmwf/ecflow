@@ -69,4 +69,3 @@ List of nodes(paths) that have consumed a limit
    :module: ecflow
 
 The :term:`limit` token value as an integer
-

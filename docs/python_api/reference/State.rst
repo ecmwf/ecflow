@@ -101,4 +101,3 @@ Members:
 .. py:attribute:: State.values
    :module: ecflow
    :value: {0: ecflow.State.unknown, 1: ecflow.State.complete, 2: ecflow.State.queued, 3: ecflow.State.aborted, 4: ecflow.State.submitted, 5: ecflow.State.active}
-

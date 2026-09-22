@@ -25,7 +25,7 @@ The effect of **autocancel** is the same as if the user would use:
 
 .. code-block:: shell
 
-    ecflow_client –-delete=/path/to/node/with/autocancel               
+    ecflow_client –-delete=/path/to/node/with/autocancel
 
 This means the deleted nodes if used to trigger other nodes, may leave a
 node to wait for the (now missing) node. To solve this problem use a
@@ -34,8 +34,8 @@ trigger like:
 .. code-block:: shell
 
     task t
-    trigger node_name==complete or node_name==unknown   
-    
+    trigger node_name==complete or node_name==unknown
+
 It is best not to use autocancelled nodes in the triggers.
 
 Using autocancel
@@ -59,14 +59,14 @@ they become complete and the time defined has elapsed.
     endsuite
 
 
-In this example family **fam** will be removed from the suite once it 
-has been complete for more than five hours.                           
-                                                                    
-This is equivalent to the user issuing the CLI command                
+In this example family **fam** will be removed from the suite once it
+has been complete for more than five hours.
+
+This is equivalent to the user issuing the CLI command
 
 .. code-block:: shell
 
-    ecflow_client –-delete=/x/fam                                      
+    ecflow_client –-delete=/x/fam
 
 This means that if there are other tasks dependent on **fam** or its
 children their triggers may never allow them to run. To guard against

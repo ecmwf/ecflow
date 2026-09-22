@@ -16,7 +16,7 @@ To add another task to the existing :term:`suite` :code:`test` perform the follo
 #. Reload and begin the modified :term:`suite definition` into the :term:`ecflow_server`.
 
 The following shows the two methods of reloading the modified :term:`suite definition` into
-the :term:`ecflow_server`. The options presented are: 
+the :term:`ecflow_server`. The options presented are:
 
 * manually updating the text definition, and loading it via the CLI :term:`ecflow_client`
 * to use the :ref:`Python API <python_api>` to programmatically update and load the :term:`suite definition`

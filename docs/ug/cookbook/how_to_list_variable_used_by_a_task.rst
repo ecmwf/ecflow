@@ -5,7 +5,7 @@
 
 How to list variable used by a task?
 ************************************
- 
+
 **Example 1**: I need to list all variable accessible by all task's called 'fred' under a given path: /suite/main
 
   .. code-block:: shell
@@ -16,8 +16,7 @@ How to list variable used by a task?
 
   .. code-block:: shell
 
-    ./list_variables.py --host machine1 --port 43333 --path /emc --task prodgen --var_name PGNODES --not_value 12  
+    ./list_variables.py --host machine1 --port 43333 --path /emc --task prodgen --var_name PGNODES --not_value 12
 
 .. literalinclude:: src/list_variables.py
    :language: python
-

@@ -1,5 +1,5 @@
 suite queue_string
-  queue name red orange 002 003 blue green indigo  
+  queue name red orange 002 003 blue green indigo
   family f1
     task t
   endfamily

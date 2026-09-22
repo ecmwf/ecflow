@@ -16,7 +16,7 @@ definition file, e.g.
       family f
          task t
             meter foo 0 100 100
-         
+
 
 foo is the "name" of the meter and the three numbers are minimum,
 maximum, and threshold values for the meter. The default value is the

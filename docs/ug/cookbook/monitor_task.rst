@@ -3,9 +3,9 @@
 
 .. index::
    single: cookbook
-   
+
 .. _monitor-task:
-   
+
 How can I monitor my suite independent of the GUI?
 **************************************************
 
@@ -13,4 +13,3 @@ In this example we want to monitor a particular task. If this :term:`task` is :t
 
 .. literalinclude:: src/monitor-task.py
    :language: python
-

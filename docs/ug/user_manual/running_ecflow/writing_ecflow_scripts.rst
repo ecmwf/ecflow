@@ -17,9 +17,9 @@ the % character. A simple example task file is given below.
 
 .. code-block:: shell
 
-    %include <head.h>                                                                                                                   
-    echo "I am testing a ecFlow script in %ECF_HOME%"                                                                                      
-    %include <tail.h>                                                  
+    %include <head.h>
+    echo "I am testing a ecFlow script in %ECF_HOME%"
+    %include <tail.h>
 
 Before submitting the task, ecFlow will parse the script for ecFlow
 directives and substitute relevant strings.

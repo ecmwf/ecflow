@@ -11,7 +11,7 @@ ECF_MODE = "ecflow" # "sms"
 # False: translate *_CMD (submit, kill, status) variables values for %ECF_ + number args
 # True:  just translate the name, and %ECF_, not arguments number
 
-RAW_MODE = False    
+RAW_MODE = False
 # ECF_MODE = "sms"
 CDP = "/usr/local/apps/sms/bin/cdp"
 subm = "/home/ma/emos/bin/trimurti"
@@ -59,7 +59,7 @@ DICT_SMS_ECF = {
 }
 
 DICT_ECF_SMS = dict((v, k) for k, v in DICT_SMS_ECF.items())
-      
+
 def translate(name, value=None):
     """ find and replace submit, kill and status command, according to
     sms/ecflow mode """
@@ -73,19 +73,19 @@ def translate(name, value=None):
             elif "kill" in value or "stat" in value:
                 if "WSHOST" in value: rc = RIDCLWS
                 else: rc = RIDCL
-            # if "submit" in value: 
+            # if "submit" in value:
             #     if "WSHOST" in value: rc = JOBCLWS
             #     else: rc = JOBCL
             elif "WSHOST" in value: rc = JOBCLWS
             else: rc = JOBCL
 
             if name in  ('ECF_JOB_CMD', 'SMSCMD'):
-                 rc = SUBCMD + " " + rc 
+                 rc = SUBCMD + " " + rc
             elif name in ('ECF_KILL_CMD', 'SMSKILL'):
                 if "submit" in KILLCMD:
                     rc = KILLCMD + " %s kill" % rc
                 else: rc = KILLCMD + " %s " % rc
-            elif name in ('ECF_STATUS_CMD', 'SMSSTATUS', 
+            elif name in ('ECF_STATUS_CMD', 'SMSSTATUS',
                            'ECF_CHECK_CMD', 'SMSJOBCHECK'):
                 if "submit" in STATCMD:
                      rc = STATCMD + " %s status" % rc
@@ -103,7 +103,7 @@ def translate(name, value=None):
 
     elif ECF_MODE == "sms"  and name in DICT_ECF_SMS:
         if name in  ('ECF_CMD_CMD', 'ECF_KILL_CMD', 'ECF_STATUS_CMD'):
-            value2 = value.replace('ECF_', 'SMS')  
+            value2 = value.replace('ECF_', 'SMS')
         transl = DICT_ECF_SMS[name]
 
     else: pass
@@ -111,7 +111,7 @@ def translate(name, value=None):
     if ECF_MODE == "sms" and RAW_MODE:
         value2 = value.replace("ECF_", "SMS")
         return transl, value2
- 
+
     elif ECF_MODE == "sms" and "CMD" in name and not "submit" in value:
         if name in ('ECF_JOB_CMD'): name = "SMSCMD"
         elif name in ('ECF_KILL_CMD'): name = "SMSKILL"
@@ -137,7 +137,7 @@ def translate(name, value=None):
                  if "submit" in KILLCMD:
                      value2 = KILLCMD + add_ext(value, value) + " kill"
                  else: value2 = KILLCMD + add_ext(value, value)
-             elif name in ('ECF_STATUS_CMD', 'SMSSTATUS', 
+             elif name in ('ECF_STATUS_CMD', 'SMSSTATUS',
                            'ECF_CHECK_CMD', 'SMSJOBCHECK'):
                  if "submit" in STATCMD:
                      value2 = STATCMD + add_ext(value, value) + " status"
@@ -163,8 +163,8 @@ def sms2ecf(orig, dest):
             try:
                 for line in source:
                     for key in ignored:
-                        if " %s " % key in line: 
-                            continue                
+                        if " %s " % key in line:
+                            continue
                     print(line, file=fop)
             except:
                 print("oops")

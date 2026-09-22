@@ -57,4 +57,3 @@ Returns a list of aliases
    :module: ecflow
 
 Returns a list of aliases
-

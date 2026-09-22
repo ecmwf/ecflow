@@ -22,7 +22,7 @@ The instructions here will assume we are working in the directory:
 
    mkdir -p $HOME/ecflow/quickstart
    cd $HOME/ecflow/quickstart
-   
+
 but any directory will do.
 
 Download the example suite definition
@@ -44,7 +44,7 @@ Now, move it into your chosen working directory and untar it:
 .. code-block:: shell
 
    tar xzvf ecflow_quickstart.tar.gz
-   
+
 Inspect and update the suite definition
 =======================================
 
@@ -92,7 +92,7 @@ Start an ecFlow server
 
             module load ecflow
 
-        From your terminal, check that you can communicate with your server. Note that 
+        From your terminal, check that you can communicate with your server. Note that
         we do not need to specify ``--port=3141`` because that is the default port number.
 
         .. code-block:: shell
@@ -100,7 +100,7 @@ Start an ecFlow server
             ecflow_client --ping --host=ecfg-$USER-1
             ecflow_client --stats
 
-       
+
        If that succeeds, then it would be a good idea to do the following in order to avoid
        adding ``--host`` to each command:
 
@@ -134,14 +134,14 @@ Load your suite definition into the server
 
 .. code-block:: shell
 
-   ecflow_client --load=quickstart.def   
+   ecflow_client --load=quickstart.def
 
 Check that it is loaded by asking the server to give you back the suite
 definition:
 
 .. code-block:: shell
 
-   ecflow_client --get 
+   ecflow_client --get
 
 Monitor and interact via the GUI
 ================================
@@ -150,14 +150,14 @@ Start :ref:`ecflow_ui`:
 
 .. code-block:: shell
 
-    ecflow_ui &  
-    
+    ecflow_ui &
+
 Once :ref:`ecflow_ui` has started, you must tell it how to reach your server. Go
 to the Servers → Manage Servers menu, click "Add server", then enter the
 details of your server. **Name** can be anything you want - it's for you
 to identify the server to your self; something like "myserver" would be
 fine here. **Host** should in this case be either "localhost" in the case of running
-on a single machine, or at ECMWF the name of your ecFlow server VM 
+on a single machine, or at ECMWF the name of your ecFlow server VM
 (e.g. "ecf-gen-<user>-1" where <user> is spelled out to your user id),
 and **Port**
 should be 3141 unless you changed it when starting the server. The other fields can be

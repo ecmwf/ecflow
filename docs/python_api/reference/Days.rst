@@ -94,4 +94,3 @@ Members:
 .. py:attribute:: Days.wednesday
    :module: ecflow
    :value: ecflow.Days.wednesday
-

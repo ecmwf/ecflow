@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from ecflow import *
-  
+
 print ("Simulator test ecflow_1638")
 
 # the following test fails in ecflow 5.3.1
@@ -26,5 +26,3 @@ print(defs)
 
 theResult = defs.simulate()
 assert len(theResult) == 0,  "Expected simulation to return without any errors, but found:\n" + theResult
-
-    

@@ -51,11 +51,11 @@ or from the **Servers** menu or using the Ctrl+N short-cut.
 This dialogue is also where servers can be set as *favourites* for easy
 access.
 
-.. note:: 
-                                                       
-    A server is identified by its name, host and port. A server name   
-    is just an alias that you are free to customise. The only          
-    requirement is that each server **must have a unique name**.       
+.. note::
+
+    A server is identified by its name, host and port. A server name
+    is just an alias that you are free to customise. The only
+    requirement is that each server **must have a unique name**.
 
 This dialogue is also where the **protocol** used to reach each server is
 chosen. It must match the protocol the server serves; see

@@ -9,9 +9,9 @@ suite obs
     family limits
     	limit hpcd 20
     endfamily
-    
-    family anon    
-        inlimit -n -s sg1 # cant have -n(limit node only) and -s(limit submission) together       
+
+    family anon
+        inlimit -n -s sg1 # cant have -n(limit node only) and -s(limit submission) together
     	task t1
    		task t2
    		task t3

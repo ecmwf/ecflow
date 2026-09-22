@@ -32,12 +32,12 @@ Setting up the Authentication Service
 The Authentication Service (Auth-o-tron) is responsible for managing user authentication.
 It should be configured to handle authentication requests and provide secure access to the ecFlow server.
 
-Using Docker is a convenient way to deploy Auth-o-tron. 
+Using Docker is a convenient way to deploy Auth-o-tron.
 
 Start by providing a configuration file (e.g., `config.yaml`) that defines the authentication providers.
 An example `config.yaml` file, configuring the ECMWF API provider and running Auth-o-tron on port `8080`, might look like this:
 
-.. code-block:: yaml 
+.. code-block:: yaml
 
   version: 1.0.0
 
@@ -78,7 +78,7 @@ An example `config.yaml` file, configuring the ECMWF API provider and running Au
 
 Then, run the Auth-o-tron Docker container with the following command, which binds the configuration file and exposes the service on port 8080:
 
-.. code-block:: shell 
+.. code-block:: shell
 
   docker run -d -p 8080:8080 -v /path/to/your/config.yaml:/app/config.yaml eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
 
@@ -89,7 +89,7 @@ Setting up the Reverse Proxy
 
 Considering NginX as the reverse proxy server, configure it to listen for HTTPS requests on port `443` which are forwarded to the ecFlow server after authentication.
 
-Below is an example configuration for NginX:      
+Below is an example configuration for NginX:
 
 .. code-block:: nginx
 
@@ -142,7 +142,7 @@ Below is an example configuration for NginX:
       proxy_set_header X-Original-URI $request_uri;
     }
 
-    # Define the ecFlow redirection 
+    # Define the ecFlow redirection
     #  -- to the ecFlow server running on port 8888
     location /v1/ecflow {
       proxy_read_timeout 500s;
@@ -185,7 +185,7 @@ Below is an example configuration for NginX:
 
 The NginX reverse proxy can be run as a Docker container as well. Make sure to mount the NginX configuration file and SSL certificates into the container.  :
 
-.. code-block:: shell 
+.. code-block:: shell
 
   docker run -d -p 443:443 -v /path/to/your/nginx.conf:/etc/nginx/nginx.conf -v /path/to/your/certificate.crt:/etc/ssl/certs/certificate.crt -v /path/to/your/private.key:/etc/ssl/private/private.key nginx
 
@@ -207,7 +207,7 @@ The client uses the `.ecflowapirc` configuration file to define the server conne
 
 The `.ecflowapirc` file should contain the following entries:
 
-.. code-block:: json 
+.. code-block:: json
 
   {
     "version": 1,
@@ -226,7 +226,7 @@ The `.ecflowapirc` file should contain the following entries:
         "type"  : "basic",
         "api"   : {
           "username": "<username>",
-          "password": "<password>"  
+          "password": "<password>"
         }
       }
     ]
@@ -245,7 +245,7 @@ To interact with the ecFlow server using the command-line interface (CLI), the c
 
 The following command can be used to ping the ecFlow server through the reverse proxy using HTTPS.
 Notice that the `--https` option is used to indicate that the connection should be made over HTTPS, using the provided host and port.
-The Authentication mechanism is automatically handled by the client based on the `.ecflowapirc` configuration. 
+The Authentication mechanism is automatically handled by the client based on the `.ecflowapirc` configuration.
 
 .. code-block:: shell
 
@@ -285,7 +285,7 @@ In the connection dialog "Add server", specify the Host (e.g., `your_domain.com`
    :alt: ecFlow UI HTTPS connection dialog
 
    ecFlow UI HTTPS connection dialog
-  
+
 The Authentication mechanism is automatically handled by the UI based on the `.ecflowapirc` configuration.
 
 Technical Notes

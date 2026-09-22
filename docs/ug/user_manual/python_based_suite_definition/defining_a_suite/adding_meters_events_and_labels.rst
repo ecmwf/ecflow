@@ -9,7 +9,7 @@ Adding Meters, Events and Labels
 .. code-block:: python
 
    from ecflow import Defs,Suite,Task,Meter,Event,Label
-   
+
    defs = Defs(
       Suite('s1',
          Task("t1",
@@ -18,7 +18,7 @@ Adding Meters, Events and Labels
                Event(10,"Eventname2" ),          # event referenced with name "Eventname2"
                Meter("metername3",0,100),        # name, min, max
                Label("label_name4", "value"))))  # name, value
-  
+
 The following show alternative styles, which produce the same definition.
 
 .. code-block:: python
@@ -30,7 +30,7 @@ The following show alternative styles, which produce the same definition.
                Event("wow"),
                Event(10,"Eventname2" ),
                Meter("metername3",0,100),
-               Label("label_name4", "value"))))   
+               Label("label_name4", "value"))))
 
 .. code-block:: python
 

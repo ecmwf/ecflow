@@ -1,15 +1,15 @@
 suite Icemap2_to_DB_ecflow_833
   clock    real 04.12.2016     # Sunday
   endclock      09.12.2016     # Saturday, and endclock otherwise we simulate for year due to repeat.
-  repeat enumerated VARIABLE first        
+  repeat enumerated VARIABLE first
 
   family icemap
 
-    verify complete:2  # after Monday@8am we re-queue due to future time dependency     
+    verify complete:2  # after Monday@8am we re-queue due to future time dependency
     day monday
     day thursday
     time 08:00
-     
+
     task from_Icemap2
         verify complete:2        # task should complete twice
 

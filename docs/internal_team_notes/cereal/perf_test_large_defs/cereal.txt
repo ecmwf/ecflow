@@ -1,6 +1,6 @@
 CEREAL - boost 1.67 ecflow 5.0.0 gcc-6.3.0
 
-eurydice{/var/tmp/ma0/workspace/ecflow}:216 --> Client/bin/gcc-6.3.0/release/perf_test_large_defs                                                                                            
+eurydice{/var/tmp/ma0/workspace/ecflow}:216 --> Client/bin/gcc-6.3.0/release/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3142)
 

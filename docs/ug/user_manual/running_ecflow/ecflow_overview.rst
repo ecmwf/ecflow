@@ -45,7 +45,7 @@ The process of **job creation** includes:
 
 The running jobs will communicate back to the server using :term:`child commands<child command>`.
 This causes **status changes** on the **nodes** in the server and flags can be set to indicate various events.
-  
+
 ecFLow has a specialised GUI client, called :term:`ecflow_ui`. This is used to visualise and monitor:
 
 -  The hierarchical structure of the **suite definition** (Suite,

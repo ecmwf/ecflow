@@ -6,6 +6,6 @@ suite suiteName
       task q
             complete /a/b/c/d/e:event == set       # extern event path
       task r
-            complete /a/b/c/d/e:meter le 30        # extern meter path   
+            complete /a/b/c/d/e:meter le 30        # extern meter path
     endfamily
 endsuite

@@ -89,4 +89,3 @@ Return the start date as an integer in yyyymmdd format
    :module: ecflow
 
 Return the step increment. This is used to update the repeat, until end date is reached
-

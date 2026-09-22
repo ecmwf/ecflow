@@ -1,6 +1,6 @@
-extern /a/b/c/d         
-extern /a/b/c/d/e:event        
-extern /a/b/c/d/e:meter        
+extern /a/b/c/d
+extern /a/b/c/d/e:event
+extern /a/b/c/d/e:meter
 
 suite suiteName
   family familyName
@@ -8,4 +8,3 @@ suite suiteName
    			trigger /a/b/c/d/e/f == complete  		   # non existing path, not even extern
    endfamily
 endsuite
-

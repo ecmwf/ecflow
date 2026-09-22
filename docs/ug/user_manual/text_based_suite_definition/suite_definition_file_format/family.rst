@@ -38,4 +38,3 @@ following definition file.
         task t11
             trigger ff==complete
     endfamily
-

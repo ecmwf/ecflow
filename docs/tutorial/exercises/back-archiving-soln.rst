@@ -10,5 +10,3 @@ One possible solution:
 
 .. literalinclude:: src/back-archiving.py
    :language: python
-
-

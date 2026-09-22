@@ -3,9 +3,9 @@
 
 .. index::
    single: Starting the suite (tutorial)
-   
+
 .. _tutorial-starting-suite:
-   
+
 Starting the suite
 ==================
 

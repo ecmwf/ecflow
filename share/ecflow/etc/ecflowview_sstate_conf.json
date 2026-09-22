@@ -26,7 +26,7 @@
                     "default": "rgb(0,0,0)"
                 }
             },
-          
+
             "running": {
                 "label": "Running",
                 "tooltip": "running",
@@ -51,7 +51,7 @@
                     "default": "rgb(0,0,0)"
                 }
             }
-       
+
        }
 
 }

@@ -1,24 +1,24 @@
 {
 	"icon"  : {
-			
+
 			"label" : "Node state",
 			"editable" : "false",
- 			
+
         	"wait" : {
-        		"label" : "Waiting", 
+        		"label" : "Waiting",
         		"tooltip" : "A running task is waiting for a trigger.",
                 "shortDesc" : "Waiting for a trigger",
-                "icon" : {      
+                "icon" : {
                 	"default" : "icon_waiting.svg"
                 }
-        	},      
+        	},
             "rerun" : {
                  "label" : "Rerun",
                  "tooltip" : "Task has been restarted",
                  "shortDesc" : "Has been restarted",
-                 "icon" : {      
+                 "icon" : {
                      "default" : "icon_rerun.svg"
-                }            
+                }
             },
             "message" : {
                  "label" : "Has node log entry",
@@ -32,9 +32,9 @@
             	 "label" : "Complete",
             	 "tooltip" : "",
                  "shortDesc" : "Complete by default status or by complete expression",
-                 "icon"  : {	 
+                 "icon"  : {
                 	 "default" : "icon_complete.svg"
-                 }		 
+                 }
             },
             "time" : {
                  "label" : "Time",
@@ -43,7 +43,7 @@
                  "icon"  : {
                 	 "default" : "icon_clock.svg"
                  }
-            },                      
+            },
             "time_free" : {
                  "label" : "Time (non-holding)",
                  "tooltip" : "Node has a non-holding time dependency.",
@@ -56,7 +56,7 @@
                  "label" : "Date",
                  "tooltip" : "Node has date or day dependency.",
                   "shortDesc" : "Has date or day dependency",
-                  "icon"  : { 
+                  "icon"  : {
                 	 "default" : "icon_calendar.svg"
                  }
             },
@@ -70,7 +70,7 @@
             },
             "late" : {
                 "label" : "Late",
-                "tooltip" : "Node is late.",               
+                "tooltip" : "Node is late.",
                 "shortDesc" : "Is late",
                 "icon"  : {
                 	"default" : "icon_late.svg"

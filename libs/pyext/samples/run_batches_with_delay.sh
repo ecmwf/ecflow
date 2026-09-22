@@ -43,9 +43,9 @@ echo "port:$port"
 echo "batch_size=$batch_size"
 echo "sleep_between_batch=$sleep_between_batch"
 echo "paths='${node_paths[@]}'"
- 
+
 for path in $node_paths; do
    echo $path
-done   
+done
 
 python3 /var/tmp/ma0/workspace/ecflow/libs/pyext/samples/run_batches_with_delay.py --host $host --port $port --batch_size $batch_size --sleep_between_batch $sleep_between_batch --paths "$node_paths"

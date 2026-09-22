@@ -3,9 +3,9 @@
 
 .. index::
    single: Cookbook
-   
+
 .. _cookbook:
-   
+
 Cookbook
 ********
 
@@ -15,13 +15,13 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
 
 .. toctree::
    :maxdepth: 1
-    
+
    intro
    print_all_states
    monitor_task
    how_to_list_variable_used_by_a_task
    how_to_list_the_variables_on_the_server
-   traverse_defs 
+   traverse_defs
    operational
    acquisition_task_pattern
    python_definition_example

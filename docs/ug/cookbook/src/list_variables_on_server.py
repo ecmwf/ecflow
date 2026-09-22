@@ -13,7 +13,7 @@ if __name__ == "__main__":
               Usage:
                 Example1: List all the server variables
                    ListVariables.py --host cca --port 4141 --path /
- 
+
                 Example2: List the variables for the given node
                    ListVariables.py --host cca --port 4141 --path /path/to/node
             """

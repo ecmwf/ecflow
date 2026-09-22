@@ -55,14 +55,14 @@ run perf on sync_local
                  1      cpu-migrations            #    0.000 K/sec                    ( +- 27.22% )
            209,348      page-faults               #    0.090 M/sec                    ( +-  0.00% )
      8,973,201,803      cycles                    #    3.852 GHz                      ( +-  0.10% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     16,642,677,819      instructions              #    1.85  insns per cycle          ( +-  0.00% )
      4,004,056,850      branches                  # 1718.639 M/sec                    ( +-  0.00% )
          9,426,248      branch-misses             #    0.24% of all branches          ( +-  1.67% )
 
        2.467560902 seconds time elapsed                                          ( +-  0.11% )
-    
+
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real    0m1.03s
 user    0m0.94s
@@ -85,7 +85,7 @@ sys     0m0.14s
  Time for Defs::check(inlimit resolution)        = 0.066238 result(1)
  time for deleting all nodes                     = 0.287267
  Total elapsed time = 8 seconds
- 
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
  Parsing Node tree and AST creation time = 1.72553 parse(1)
  Parsing Node tree *only* time           = 1.72755 parse(1)
@@ -98,7 +98,7 @@ sys     0m0.14s
  Time for Defs::check(inlimit resolution)        = 0.564626 result(0)
  time for deleting all nodes                     = 0.388531
  Total elapsed time = 14 seconds
- 
+
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3160)
@@ -179,5 +179,3 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  force  0 tasks  : 0   news_local() : 0   sync_local() : 0
  Check pt:            1 1 0 0 0 0 0 0 0 0 : Avg:0.0002(sec)
  Delete:              0ms
-   
-       

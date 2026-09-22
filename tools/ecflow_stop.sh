@@ -17,7 +17,7 @@ fi
 # This avoids mixing 4/5 version of ecflow.
 # and need absolute since we change dir later on.
 #
-ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )" 
+ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )"
 #echo "-----> ${ECFLOW_BINDIR} <-------"
 
 
@@ -86,8 +86,8 @@ export ECF_PORT=$port_number
 date -u
 
 rcdir=$HOME/.ecflowrc
-fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 
-# cut is useful when the server may be moved from node to node 
+fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
+# cut is useful when the server may be moved from node to node
 # 4 is common string here, so that the same file is used for all nodes
 
 if [ -f $fname ]; then host=$(cat $fname); fi
@@ -95,14 +95,14 @@ if [ -f $fname ]; then host=$(cat $fname); fi
 echo ""
 echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
 echo "";
-echo "Checking if the server is running on $host:$port_number" 
+echo "Checking if the server is running on $host:$port_number"
 
 export ECF_HOST=$host
 
-${ECFLOW_BINDIR}/ecflow_client --ping 
+${ECFLOW_BINDIR}/ecflow_client --ping
 if [ $? -eq 1 ]; then
   echo "";
-  echo "... The server on $host:$port_number has already been stopped" 
+  echo "... The server on $host:$port_number has already been stopped"
   exit 1
 fi
 

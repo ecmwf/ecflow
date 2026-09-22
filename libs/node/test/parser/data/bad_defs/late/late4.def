@@ -5,4 +5,3 @@ suite suiteName
       	  late -a 00:15 -c +02:00   #  Con only have one late per node
     endfamily
 endsuite
-

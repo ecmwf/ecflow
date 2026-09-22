@@ -1,6 +1,6 @@
-extern /a/b/c/d         
-extern /a/b/c/d/e:event        
-extern /a/b/c/d/e:meter        
+extern /a/b/c/d
+extern /a/b/c/d/e:event
+extern /a/b/c/d/e:meter
 
 suite trigger_complex
   edit int_var 20
@@ -11,7 +11,7 @@ suite trigger_complex
    		task b
      	family heir_familyName
          	task taskName0
-            	event 0 
+            	event 0
             	event 1 eventName
             	meter myMeter 0 100
       	endfamily
@@ -65,4 +65,3 @@ suite trigger_complex
    			trigger /a/b/c/d/e:meter le 30		                                   # extern meter path
     endfamily
 endsuite
-

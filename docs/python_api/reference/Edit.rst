@@ -58,4 +58,3 @@ The following use example of using Edit, which allow multiple variables to added
   defs.s1.a += [ Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b'),
                  Edit({ 'var':10, 'aa':'bb'}),
                  Edit(d='d') ]
-

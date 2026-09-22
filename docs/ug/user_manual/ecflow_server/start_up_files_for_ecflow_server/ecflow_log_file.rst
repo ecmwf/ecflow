@@ -57,13 +57,13 @@ Where *XXX* is one of the symbols in the above table. The
 **timestamp** inside [] is the system time, not the suite time, which
 may differ.
 
-.. note:: 
-  
+.. note::
+
   User commands often generate both **MSG** and **LOG**
   level messages. **MSG** is the command executed and **LOG** is the
   effect it had on the node or nodes.
 
-.. note:: 
+.. note::
 
   The log file is not removed so it needs to be managed. We
   tend to compress and archive our log files each day using an ecFlow
@@ -73,5 +73,5 @@ The log file grows over time and **should** be managed. You can
 manipulate the log files using the client command --log. Type::
 
   ecflow_client --help log
-  
+
 for details. This allows you to get, clear, flush, or create a new log file.

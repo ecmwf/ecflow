@@ -61,13 +61,13 @@ if __name__ == "__main__":
 
     DESC = """Will allow any definition to be loaded and played on the server
             This is done by:
-            o Remove existing ECF_ variables that affect job generation. 
+            o Remove existing ECF_ variables that affect job generation.
               i.e variables that refer to customer specific directories are removed
             o Allows ECF_HOME to specified, defaults to ./CUSTOMER/ECF_HOME
             o Generates the scripts(.ecf files) automatically based on the definition.
               i.e if a task has events,meters,labels then the client request for these are
               automatically injected in the generated .ecf script files
-            o Will clear out existing data both on disk and on the server to allow 
+            o Will clear out existing data both on disk and on the server to allow
               multiple re-runs of this script. ** If this is an issue please use
               a test server **
             o All suites are put into a suspended state. This allows the GUI to resume them

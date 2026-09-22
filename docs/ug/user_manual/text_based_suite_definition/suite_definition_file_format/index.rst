@@ -16,7 +16,7 @@ limitations on the use of this functionality, i.e.:
 
    `ecFlow Syntax Highlighting <https://marketplace.visualstudio.com/items?itemName=ajdawson.ecflow-syntax>`__ is available when using Microsoft Visual Studio Code.
 
-The following topics are covered:   
+The following topics are covered:
 
 .. toctree::
    :maxdepth: 1

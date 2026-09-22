@@ -50,4 +50,3 @@
 |+ (=plus)|Expand graph|
 |- (=minus)|Collapse graph|
 |Space|Expand/collapse graph|
-

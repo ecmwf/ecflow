@@ -168,7 +168,7 @@ class Ls(object):
         else:
             return None
 
-        status = None        
+        status = None
         if nam is None or self.parsed.display:
             if status is None: status = "%s" % node.get_state()
             if type(node) == ecflow.Task:

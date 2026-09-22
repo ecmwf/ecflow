@@ -18,17 +18,17 @@ hardware and software failures, combined with restart capabilities. It
 is used at ECMWF to run all our operational suites across a range of
 platforms.
 
-ecFlow runs as a :term:`server <ecflow_server>` receiving requests from clients. The :ref:`command line interface <ecflow_cli>`, 
-the :ref:`graphical interface <ecflow_ui>`, scripts and the :ref:`Python API (application interface) <python_api>` are the clients. 
+ecFlow runs as a :term:`server <ecflow_server>` receiving requests from clients. The :ref:`command line interface <ecflow_cli>`,
+the :ref:`graphical interface <ecflow_ui>`, scripts and the :ref:`Python API (application interface) <python_api>` are the clients.
 The server is based on C++/boost ASIO and uses TCP/IP for communication. Multiple servers
-can be run on the same hardware. 
+can be run on the same hardware.
 
 **ecFlow** submits :term:`task`\ s (jobs) and receives acknowledgments from
 the tasks when they change :term:`status` and when they send :term:`event`\ s,
 using :term:`child command`\s embedded in your scripts. ecFlow stores the
 relationships between tasks, and is able to submit tasks dependent on
 :term:`trigger`\ s, such as when a given task changes its status, for example when
-it finishes. 
+it finishes.
 
 **ecFlow** functionality is provided by the following executables and
 shared libraries
@@ -78,6 +78,3 @@ provided. It has been replaced by ecFlow 5.
 You can find an introduction to ecFlow in the `ECMWF Newsletter
 article <http://www.ecmwf.int/sites/default/files/elibrary/2011/14594-newsletter-no129-autumn-2011.pdf>`__ 
 (Autumn 2011), starting on page 30.
-
-
-

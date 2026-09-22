@@ -18,7 +18,7 @@ found on the system.
    :caption:  Check if openssl enabled for ecflow
 
    ecflow_client --version # look for a string openssl
-   ecflow_server --version # look for a string openssl           
+   ecflow_server --version # look for a string openssl
 
 Certificates
 ===============
@@ -79,23 +79,23 @@ The following steps, show you how to create these files:
 
    .. code-block:: shell
       :caption: Remove password requirement
-      
+
       cp server.key server.key.secure
-      openssl rsa -in server.key.secure -out server.key                     
+      openssl rsa -in server.key.secure -out server.key
 
 -  Sign a certificate with a private key (self-signed certificate).
    Generate Certificate Signing Request(CSR).
 
    .. warning::
 
-      This will prompt a number of questions. However please ensure         
-      '**common name**' **matches** the host where your server is going to  
-      run.                                                                  
+      This will prompt a number of questions. However please ensure
+      '**common name**' **matches** the host where your server is going to
+      run.
 
    .. code-block:: shell
       :caption: Generate Certificate Signing Request(CSR)
-      
-      openssl req -new -key server.key -out server.csr                  
+
+      openssl req -new -key server.key -out server.csr
 
 
 -  generate a self-signed certificate CRT, by using the CSR and private
@@ -103,11 +103,11 @@ The following steps, show you how to create these files:
 
    .. code-block:: shell
       :caption: Sign the certificate server.crt must be accessible by client and server
-   
+
       openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
 -  Generate dhparam file. ecFlow expects 2048 key.
 
    .. code-block:: shell
-      
-      openssl dhparam -out dh2048.pem 2048                                  
+
+      openssl dhparam -out dh2048.pem 2048

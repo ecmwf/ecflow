@@ -2,11 +2,11 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. index::
-   single: Dependencies (tutorial) 
-   single: time (tutorial) 
-   single: date (tutorial) 
-   single: day (tutorial) 
-   single: cron (tutorial) 
+   single: Dependencies (tutorial)
+   single: time (tutorial)
+   single: date (tutorial)
+   single: day (tutorial)
+   single: cron (tutorial)
 
 .. _tutorial-time-dependencies:
 
@@ -29,7 +29,7 @@ Time Dependencies
 
 .. _time:
 
-time  
+time
 ~~~~
 
 A :term:`time` dependency can be:
@@ -74,7 +74,7 @@ A :term:`cron` dependency differs from :term:`time` by immediately requeing a ta
 
 .. _date-or-day:
 
-date or day  
+date or day
 ~~~~~~~~~~~
 
 A :term:`date` dependency is always absolute (i.e. no relative dates are allowed), but wildcards specification are allowed.
@@ -142,7 +142,7 @@ When time dependencies are placed at different levels of the nodes hierarchy, th
 The following example enables the :term:`task` :code:`t` to run on Monday at 10 am.
 
 .. code-block::
-      
+
    family f
       day monday    # day allows only Monday's
       task t
@@ -167,8 +167,8 @@ In this case, any task in this family will only run according to these :term:`de
 
 .. note::
 
-   All time related dependencies(like :term:`cron`, :term:`time`, :term:`today`, :term:`date` and :term:`day`) are relative to the :term:`clock` of the :term:`suite`. 
-   
+   All time related dependencies(like :term:`cron`, :term:`time`, :term:`today`, :term:`date` and :term:`day`) are relative to the :term:`clock` of the :term:`suite`.
+
    For more information, see :ref:`tutorial-dates-and-clocks`
 
 Update Suite Definition

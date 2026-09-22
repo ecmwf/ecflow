@@ -2,7 +2,7 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. index:: single: cookbook-acquisition_task_pattern
-   
+
 .. _cookbook-acquisition_task_pattern:
 
 Acquisition task pattern example

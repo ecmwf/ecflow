@@ -8,8 +8,8 @@ June 14 2020: gcc 7.3.0  polonius/leap42 boost 1.71
                  1      cpu-migrations            #    0.001 K/sec                    ( +- 11.11% )
            131,030      page-faults               #    0.089 M/sec                    ( +-  0.00% )
      5,687,455,210      cycles                    #    3.858 GHz                      ( +-  1.26% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     10,239,926,729      instructions              #    1.80  insns per cycle          ( +-  0.00% )
      2,904,235,065      branches                  # 1970.108 M/sec                    ( +-  0.00% )
         15,203,651      branch-misses             #    0.52% of all branches          ( +-  0.88% )
@@ -74,8 +74,8 @@ run strace
                  0      cpu-migrations            #    0.000 K/sec                    ( +-100.00% )
            144,579      page-faults               #    0.091 M/sec                    ( +-  0.10% )
      6,136,194,514      cycles                    #    3.877 GHz                      ( +-  0.19% )
-   <not supported>      stalled-cycles-frontend  
-   <not supported>      stalled-cycles-backend   
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
     11,860,551,515      instructions              #    1.93  insns per cycle          ( +-  0.00% )
      3,128,227,586      branches                  # 1976.285 M/sec                    ( +-  0.00% )
         11,492,365      branch-misses             #    0.37% of all branches          ( +-  0.23% )

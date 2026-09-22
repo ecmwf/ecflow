@@ -19,7 +19,7 @@ export SGE_ROOT=/usr/local/apps/sge
 export SLURM_ROOT=/usr/local/apps/slurm/current/bin
 export LL_ROOT=/usr/lpp/LoadL/full/bin
 STANDALONE=/usr/local/apps/sms/bin/standalone
-RUNSHELL=/bin/ksh 
+RUNSHELL=/bin/ksh
 TIMEOUT=300  # timeout period (seconds)
 SSH="ssh -o ConnectTimeout=$TIMEOUT -o BatchMode=yes -o StrictHostKeyChecking=no "
 RSH=rsh
@@ -32,7 +32,7 @@ type rsh > /dev/null || RSH=$SSH
 
 SSH="ssh -o ConnectTimeout=$TIMEOUT -o BatchMode=yes -o StrictHostKeyChecking=no "
 
-ERROR() { 
+ERROR() {
   err=$?
   echo "ERROR $0: $* $? - Exiting."
   # CP_SUB
@@ -45,8 +45,8 @@ ERROR() {
 }
 
 kill_submitted_and_abort() {
-    # not used while not deterministic: job may run in between and 
-    # become a zombie 
+    # not used while not deterministic: job may run in between and
+    # become a zombie
     outf=$TMPDIR/kill$$
     if [[ $? == 0 ]] && [[ -d $TMPDIR ]] ; then
         touch $outf
@@ -74,12 +74,12 @@ kill_nqs() {
       # where=`tail -1 $subfile | cut -d\. -f2 `
       $RSH $host -l $user qsig -s 2 $tid || qsig -s 2 $tid
       $RSH $host -l $user qdel -W 10 $tid || qdel -W 10 $tid
-      
+
     elif [[ -s $4 ]] ; then
       tid=$(grep PBS_JOB ${4}.1 | cut -d= -f2)
       $RSH $host -l $user qsig -s 2 $tid
       $RSH $host -l $user qdel -W 10 $tid
-      
+
     else
       # Signal the job
       $RSH $host -l $user qsig -s 2 $smsid
@@ -150,7 +150,7 @@ kill_slurm() {
              cut -d= -f2) && \
              $SSH $host -l $user kill -9 $id
      fi
-     
+
      $SSH $host -l $user $SLURM_ROOT/scancel $id
  fi
 }
@@ -224,23 +224,23 @@ status_ll() {
         tid=$(grep " has been submitted." $subfile | cut -d\" -f2)
         host=$(echo $tid | cut -d\. -f1)
         host4=$(echo $host | cut -c1-4)
-               
+
         $RSH $host $LL_ROOT/llq -f %id %jn %o %c %st %nh $tid  | grep $user && OK=OK &
 
     else
-        
+
         if [[ -s $smsjob ]] ; then
             host=$(grep HOST= $smsjob | cut -d= -f2)
         fi
-        
+
         if [[ "$host" == hpc* ]] ; then
             host=$(echo $host | cut -c1-4)
             host4=$(echo $host | cut -c1-4)
             id=${host}0$(echo $smsid % 1000 | bc).$( echo $smsid / 1000 | bc)
-        else 
+        else
             id=$host.$smsid
         fi
-        
+
         $RSH $host $LL_ROOT/llq -f %id %jn %o %c %st %nh $tid  | grep $user
     fi
 }
@@ -259,16 +259,16 @@ status_slurm() {
 status_rsh() {
     if [[ $smsid == 0 ]]; then echo "too early"; exit 0; fi
     $RSH $host -l $user ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && \
-        $RSH $host -l $user ps --sid $smsid -f 
+        $RSH $host -l $user ps --sid $smsid -f
 
     \ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && OK=OK &
-    \ps --sid $smsid -f && OK=OK &   
+    \ps --sid $smsid -f && OK=OK &
 }
 
 disp_subfile() {
   if [[ -s $subfile ]]; then # && [[ $OK = NOK ]] ; then
     ls -la $subfile
-    # echo #    grep "^# +++ hpc" $subfile 
+    # echo #    grep "^# +++ hpc" $subfile
     cat $subfile
     # && type=ll
 fi
@@ -288,7 +288,7 @@ if [ $# -lt 3 ] ; then
   echo "example: $0 uid host task.job1"
   echo "while node_suffix is empty, host-batch node is the target, "
   echo "      else \$node\$nodesuffix is the replacement target"
-  echo  
+  echo
   exit 1
 fi
 
@@ -356,7 +356,7 @@ elif egrep -i "^#.*SBATCH " $file > /dev/null ; then
   if [[ output == "" ]]; then output=$uout; fi
   if [[ output != "" ]]; then
     head -1 $output && grep "#!/" && RUNSHELL=$(head -1 $output | cut -d! -f2)
-  else 
+  else
     RUNSHELL="/bin/bash"
   fi
   case $RUNSHELL in
@@ -397,7 +397,7 @@ then
 fi
 
 [[ "$output" == "" ]] || outputdir=$(dirname $output)
-if [[ "$outputdir" != "" ]] ; then 
+if [[ "$outputdir" != "" ]] ; then
 #--------------------------------------------------------------------------
 #  Create the output directory if it can be found
 #--------------------------------------------------------------------------
@@ -416,7 +416,7 @@ case $type in
   pbs )
 #==========================================================================
 
-case $last in 
+case $last in
 kill) kill_pbs; exit 0;;
 status) status_pbs; exit 0;;
 esac
@@ -468,11 +468,11 @@ fi
 
 if [[ $(uname -n) == @(xxx_slurm) ]]; then
   $SSH -l $user $host /usr/local/apps/propbs/bin/pbsqsub -f $file > $subfile 2>&1 || \
-      ERROR "Failed to submit job to PBS. " 
+      ERROR "Failed to submit job to PBS. "
 else
     ecrcmd --timeout=$TIMEOUT < $file $user@$host $LC \
         /usr/local/apps/propbs/bin/pbsqsub -f $file > $subfile || \
-        ERROR "Failed to submit job to PBS." 
+        ERROR "Failed to submit job to PBS."
 fi
 
   ;;
@@ -481,7 +481,7 @@ fi
   vppnqs )
 #==========================================================================
 
-case $last in 
+case $last in
 kill) kill_vpp; exit 0;;
 status) status_vpp; exit 0;;
 esac
@@ -497,7 +497,7 @@ else
   grep -v "QSUB -p" $file | grep -v "QSUB -lh" > ${file}__
   mv -f ${file}__ $file
 fi
-  
+
 #--------------------------------------------------------------------------
 #  Send the file using qsub
 #  If send failed, sleep a while and try again, until maximum number of
@@ -509,9 +509,9 @@ $SSH $host -l $user /usr/local/bin/vppqsub < $file | grep -i submitted  > $subfi
 
   ;;
 #==========================================================================
-  sge_qsub ) # swarm linux cluster 
+  sge_qsub ) # swarm linux cluster
 
-case $last in 
+case $last in
 kill) kill_sge; exit 0;;
 status) status_sge; exit 0;;
 esac
@@ -557,22 +557,22 @@ EOF
     if [[ $host == @(lxa|lxb|lxab) ]] ; then
         cat $file | $SSH $host \
             $SGE_ROOT/sge6_2u5/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
-            ERROR "Job submission failed (${file}__)." 
+            ERROR "Job submission failed (${file}__)."
     elif [[ $HOST == @(ibis|pikachu) ]] ; then
       cat $file | $RSH drn01 \
           SGE_ROOT=$SGE_ROOT $SGE_ROOT/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
-          ERROR "Job submission failed (${file}__)." 
+          ERROR "Job submission failed (${file}__)."
     elif [[ -d $SGE_ROOT ]]; then
       /usr/local/share/sge_qsub -notify $file > $subfile 2>&1 || \
-          ERROR "Job submission failed (${file}__)." 
+          ERROR "Job submission failed (${file}__)."
     else
       cat $file | $SSH drn01 \
           ${SGE_ROOT:=/usr/local/apps/sge}/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
           cat $file | $SSH drn01 \
           SGE_ROOT=$SGE_ROOT $SGE_ROOT/bin/lx24-amd64/qsub -notify $file > $subfile 2>&1 || \
-          ERROR "Job submission failed (${file}__)." 
-      
-      # || ERROR "Job submission failed (${file}__)." 
+          ERROR "Job submission failed (${file}__)."
+
+      # || ERROR "Job submission failed (${file}__)."
     fi
 #     sge_qsub -notify $file  > $subfile || ERROR "Job submission failed (${file}__)."
     ;;
@@ -582,7 +582,7 @@ EOF
   nqs )
 #==========================================================================
 
-case $last in 
+case $last in
 kill) kill_nqs; exit 0;;
 status) status_nqs; exit 0;;
 esac
@@ -621,7 +621,7 @@ sleep 10
   ll )
 #==========================================================================
 
-case $last in 
+case $last in
 kill) kill_ll; exit 0;;
 status) status_ll; exit 0;;
 esac
@@ -657,7 +657,7 @@ fi
 if [[ $(uname -n) == @(xxx_slurm) ]]; then
   $SSH -l $user ${host} \
       "unset WAITQUEUE ; $LL_ROOT/llsubmit - 2>&1 " < $file > $subfile 2>&1 || \
-      ERROR "Failed to submit job to LoadLeveler. $?" 
+      ERROR "Failed to submit job to LoadLeveler. $?"
 else
   ecrcmd --timeout=$TIMEOUT < $file $user@$host $LC \
       "unset WAITQUEUE ; $LL_ROOT/llsubmit -"  > $subfile || \
@@ -666,9 +666,9 @@ fi
 
   ;;
 
-  slurm ) # swarm linux cluster 
+  slurm ) # swarm linux cluster
 
-case $last in 
+case $last in
 kill) kill_slurm; exit 0;;
 status) status_slurm; exit 0;;
 esac
@@ -678,7 +678,7 @@ if [[ $jtype == nqs ]] ; then
   queue=$(grep 'QSUB -q ' $file | cut -d" " -f 4 | head -1)
   jname=$(grep 'QSUB -r ' $file | cut -d" " -f 4 | head -1)
 
-# srun sinfo 
+# srun sinfo
   cat > ${file}__ <<- EOF
 #!$RUNSHELL
 #SBATCH --output=${output:-/dev/null}
@@ -713,10 +713,10 @@ EOF
       grep -E -v '(^#.*SBATCH --output.*|#.*SBATCH --error.*|^#.*SBATCH --uid.*|^#.*SBATCH --qos.*)'  >> ${file}__
   chmod 755 ${file}__
 
-elif [[ $jtype == ll ]] ; then 
+elif [[ $jtype == ll ]] ; then
   $PROFILE
   # /usr/local/apps/slurm/utils/bin/ll2slurm
-  ll2slurm -q -i $file -o ${file}__  || ERROR "Job conversion to slurm failed (${file})." 
+  ll2slurm -q -i $file -o ${file}__  || ERROR "Job conversion to slurm failed (${file})."
 elif [[ $jtype != slurm ]]; then
   ERROR "No conversion available for these types ($jtype -> $type)."
 fi
@@ -729,11 +729,11 @@ fi
   if [[ $hostname == @(xxx_slurm) ]]; then
       touch $output
       $SLURM_ROOT/sbatch < ${file} > $subfile 2>&1 \
-      || ERROR "Job submission failed (${file})." 
+      || ERROR "Job submission failed (${file})."
   else
       $SSH $host -l $user touch $output
       cat ${file} | $SSH $host -l $user $SLURM_ROOT/sbatch > $subfile 2>&1 \
-          || ERROR "Job submission failed (${file})." 
+          || ERROR "Job submission failed (${file})."
   fi
 ;;
 #==========================================================================
@@ -741,7 +741,7 @@ fi
 #==========================================================================
   ssh )
 
-case $last in 
+case $last in
 kill) kill_ssh; exit 0;;
 status) status_ssh; exit 0;;
 esac
@@ -783,7 +783,7 @@ $cmd "/usr/local/bin/standalone -o $output -s $RUNSHELL " < ${file}__ || ERROR "
   rsh | local )
 #==========================================================================
 
-case $last in 
+case $last in
 kill) kill_rsh; exit 0;;
 status) status_rsh; exit 0;;
 esac
@@ -795,7 +795,7 @@ elif [[ $hostname == @(xxx_slurm) ]] ; then
 else
   cmd="rsh $host -l $user "
 fi
-   
+
 #
 #  Add the header with requested shell
 #

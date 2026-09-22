@@ -1,6 +1,5 @@
 suite suiteName
    family familyName0
-      task  
+      task
    endfamily
 endsuite
-

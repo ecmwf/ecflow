@@ -13,7 +13,7 @@ suite time_1
    endfamily
 endsuite
 
-suite time_1s1 
+suite time_1s1
    family f
    	time 15:00 ; time 00:00 23:59 00:30 ;time 00:00 06:59 00:30
    task t

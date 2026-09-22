@@ -134,4 +134,3 @@ smsinit $ECF_RID &
 smsmsg "#ID ECF_NAME=%ECF_NAME%;ECF_JOBOUT=%ECF_JOBOUT%;ECF_HOME=%ECF_HOME%;JOB_ID=${JOB_ID:-}"
 
 date
-

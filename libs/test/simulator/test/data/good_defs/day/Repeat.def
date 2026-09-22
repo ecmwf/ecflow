@@ -6,9 +6,9 @@ suite csim_repeat_day
     family f1
        day monday                   # This acts like a guard over time attributes. They are not freed until day is free
        task t1
-            time 10:00   
-            time 12:00   
-            verify complete:4      
+            time 10:00
+            time 12:00
+            verify complete:4
     endfamily
   endfamily
 endsuite
@@ -21,9 +21,9 @@ suite csim_repeat_day3
     family f1
        repeat integer rep 0 1
        task t1
-            time 11:00   
-            day monday          
-            verify complete:4     
+            time 11:00
+            day monday
+            verify complete:4
     endfamily
   endfamily
 endsuite

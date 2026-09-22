@@ -63,7 +63,7 @@ Then you can modify your task to change this event while the job is running, e.g
 
    ecflow_client --init=$$
    ecflow_client --event=foo
-   ecflow_client --complete  
+   ecflow_client --complete
 
 After the job has modified the event it looks like:
 

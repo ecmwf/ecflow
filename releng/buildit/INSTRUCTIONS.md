@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/ecmwf/ecflow/develop/releng/buildit
 ```
 
 When using the default options, this script clones `ecflow` and `ecbuild` (`develop` branch) into `${PWD}/sandbox`,
-loads the default toolchain (`gcc8qt5`) configuration, and configures, builds, and installs ecFlow considering 
+loads the default toolchain (`gcc8qt5`) configuration, and configures, builds, and installs ecFlow considering
 build type `RelWithDebInfo`.
 
 The install prefix defaults to `<build_dir>/.install/<tag>`, where `<tag>` encodes the build type, configuration, and

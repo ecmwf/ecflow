@@ -15,4 +15,3 @@ suite family_simple
      task 2
    endfamily
 endsuite
-

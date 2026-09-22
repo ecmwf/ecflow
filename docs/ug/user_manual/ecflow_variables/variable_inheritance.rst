@@ -41,7 +41,7 @@ This would produce the following results:
 
 .. list-table::
    :header-rows: 1
-  
+
    * - Command
      - task t
      - task t2
@@ -58,4 +58,3 @@ This would produce the following results:
      - abc
      - 10
      - 10
-

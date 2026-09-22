@@ -351,9 +351,9 @@ definitions = {  # strings as path for all nodes below sync
     ),
     "mc": Suite("mc").add(
         Defstatus("suspended"), Family("main").add(
-            Edit(YMD=20990101), 
+            Edit(YMD=20990101),
             Family("06bc").add(
-                Task("sweeper"), 
+                Task("sweeper"),
                 Family("fc0006d").add(Task("fc")),
             ),
     ), ),
@@ -957,10 +957,10 @@ ecflow_client --host localhost --port 5001 --replace /mc mc.dump # we take it as
 # destinations = { # contains one destination for mc at least
  export  SUITE=mc ECF_HOST=localhost ECF_PORT=5001
  ./mirror.py -p /mirror/mc -r # load mirror on source server # might be destination or another server yet
-# ImportError: No module named ecf # ecf shall be in the path, at least it can found in ecflow distrib as 
+# ImportError: No module named ecf # ecf shall be in the path, at least it can found in ecflow distrib as
 # ecflow/libs/pyext/samples/api/ecf.py
 # ('#MSG: replacing /mirror/test in ', 'localhost', '5001', #5.7.0 # loading OK
-# begin mirror - 
+# begin mirror -
 # Script OK? mirror.py undef ECF_FILES directory?
 # Edit OK? $ is used as ECF_MICRO
 # cron OK?
@@ -976,7 +976,7 @@ ECF_PORT=5003 python3 ./mirror.py -m localhost:5003 -p /mc -r # ok mc loaded on 
 # python3 /home/ma/map/mirror/mc/mirror.job1 # OK after ECF_PASS FREE running as zombie ommand line
 # ImportError: No module named 'ecf' # jobs lost in submit
 
-# mirror jobs submits and complete OKWITH ECF_JOB_CMD updated as 
+# mirror jobs submits and complete OKWITH ECF_JOB_CMD updated as
 module load python3 && module load ecflow/5.7.0 && cd /home/ma/map && python3 $ECF_JOB$ > $ECF_JOBOUT$ 2>&1 &
 """
         )

@@ -10,7 +10,7 @@ In :ref:`ecflow_ui` just click the ode context menu and select **User Defined > 
 
 .. code-block:: shell
 
-    sh %ECF_URL_CMD% # Web                                             
+    sh %ECF_URL_CMD% # Web
 
 Then **Save Option > sName "Web" > Save As New**
 

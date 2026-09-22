@@ -8,7 +8,7 @@
 
 Adding a manual
 ===============
-  
+
 A :term:`manual page` allows including documentation directly **in** a :term:`ecf script` to be viewed in :term:`ecflow_ui`.
 
 The manual page is the concatenation of all the text within the :code:`%manual` and :code`%end` :term:`directives`.
@@ -24,9 +24,9 @@ To include the manual for task :code:`t2`, modify :file:`t2.ecf` to include the 
       Analyst:    Check something ?
    %end
 
-   %include "../head.h" 
-   echo "I am part of a suite that lives in %ECF_HOME%" 
-   %include "../tail.h" 
+   %include "../head.h"
+   echo "I am part of a suite that lives in %ECF_HOME%"
+   %include "../tail.h"
 
    %manual
 

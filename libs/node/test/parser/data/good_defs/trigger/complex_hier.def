@@ -1,5 +1,5 @@
 # test node referencing in triggers
-#      o/ <node> == complete    i.e   a == complete   sibling    
+#      o/ <node> == complete    i.e   a == complete   sibling
 #      o/ ./<node> == complete  i.e  ./a == complete  sibling
 #      o/ ../<node> == complete i.e  ../a == complete means trigger nodes parent
 suite trigger_s0
@@ -15,12 +15,12 @@ suite trigger_s1
               task a
                  event 1 theEventName
                  meter myMeter 0 100
-                 trigger ./b == complete or c == complete or ../f4 == complete or ../../f3 == complete or ../../../f2 == aborted 
+                 trigger ./b == complete or c == complete or ../f4 == complete or ../../f3 == complete or ../../../f2 == aborted
                task b
                   trigger ../../../../../trigger_s0 == complete or  ../../../../../trigger_s0/t1<flag>late
                task c
-                  trigger ../../../../../trigger_s0:FIRE_YMD == 10 
-            endfamily   
+                  trigger ../../../../../trigger_s0:FIRE_YMD == 10
+            endfamily
          endfamily
       endfamily
    endfamily
@@ -45,4 +45,3 @@ suite trigger_s1
       endfamily
    endfamily
 endsuite
-

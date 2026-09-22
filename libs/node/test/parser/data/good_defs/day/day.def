@@ -13,26 +13,26 @@ suite day
        endtask
    endfamily
    family f2
-      repeat datelist YMD 20090331 20121212 20121212 20121213 20121214 20121215 
+      repeat datelist YMD 20090331 20121212 20121212 20121213 20121214 20121215
       task t
          day tuesday
          time 13:00
    endfamily
    family f3
-      repeat date YMD 20090331 20121212 1  
+      repeat date YMD 20090331 20121212 1
       task t
          day wednesday
          time 13:00
          time 14:00
    endfamily
    family f4
-      repeat enumerated quotes "first" "second" "third" 
+      repeat enumerated quotes "first" "second" "third"
       task t
          day tuesday
          time 00:00 23:59 00:30
    endfamily
    family f5
-      repeat integer VARIABLE_XX 0 10 2  
+      repeat integer VARIABLE_XX 0 10 2
       task t
          day tuesday
          today 09:00
@@ -56,4 +56,3 @@ suite day_s1; family f ; day tuesday
       endtask
    endfamily
 endsuite
-

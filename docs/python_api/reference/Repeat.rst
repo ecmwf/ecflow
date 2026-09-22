@@ -74,4 +74,3 @@ The increment for the repeat, as an integer
    :module: ecflow
 
 The current value of the repeat as an integer
-

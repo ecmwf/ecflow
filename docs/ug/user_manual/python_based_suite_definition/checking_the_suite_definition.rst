@@ -11,9 +11,9 @@ The following python code shows how to check expression and limits.
 Checking existing definition file that has been saved as a file:
 
 .. code-block:: python
-   
-    def = ecflow.Defs("/my/path.def")  # will load file '/my/path.def'  
-    print(def.check())  # check trigger expressions and limits 
+
+    def = ecflow.Defs("/my/path.def")  # will load file '/my/path.def'
+    print(def.check())  # check trigger expressions and limits
 
 Here is another example where we create the suite definition on the fly.
 In fact, using the python API allows for a correct by construction
@@ -28,4 +28,3 @@ paradigm.
     result = defs.check()  # check trigger expressions and limits
     print("Message: '" + result + "'")
     assert len(result) != 0, "Expected Error: mis-matched brackets in expression."
-

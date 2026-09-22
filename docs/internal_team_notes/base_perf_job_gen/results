@@ -7,7 +7,7 @@ submitted 4553 out of 4559
 real    0m2.22s
 user    0m1.82s
 sys     0m0.39s
- 
+
 
 
 strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
@@ -63,8 +63,8 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
          1,055,192      LLC-load-misses           #    1.21% of all LL-cache hits     ( +-  5.56% )  (37.50%)
 
        2.647587094 seconds time elapsed                                          ( +-  2.27% )
-       
-       
+
+
 # move check for holding day/date to where we check for time dependencies. Avoid redundant class, and reuse calendar
 git develop/55f9b8c6fae
 perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
@@ -133,5 +133,3 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
            952,271      LLC-load-misses           #    1.08% of all LL-cache hits     ( +-  4.52% )  (37.53%)
 
        2.259696222 seconds time elapsed                                          ( +-  0.20% )
-
- 

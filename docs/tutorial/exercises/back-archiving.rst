@@ -17,18 +17,18 @@ This is an example of a suite that is designed to run only once.
 
 **What to do**
 
-1. Write the :term:`suite definition`  
+1. Write the :term:`suite definition`
 2. Design it so new data types can be easily added with their own periods
 
 
 Useful pointers:
 
-    * :ref:`tutorial-limits`  
-    * :ref:`tutorial-inlimit`  
+    * :ref:`tutorial-limits`
+    * :ref:`tutorial-inlimit`
     * :ref:`tutorial-add-variable`
-    * :ref:`tutorial-add-trigger`  
-    * :ref:`tutorial-repeat` 
+    * :ref:`tutorial-add-trigger`
+    * :ref:`tutorial-repeat`
     * :ref:`tutorial-using-python-scripting`
     * :ref:`python_based_suite_definition`
-    
+
 One possible :ref:`tutorial-back_archiving_soln`

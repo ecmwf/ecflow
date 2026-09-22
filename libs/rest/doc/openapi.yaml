@@ -195,7 +195,7 @@ paths:
                           type: string
                       top_down_why:
                         type: array
-                        items: 
+                        items:
                           type: string
               example:
                 default_status: queued
@@ -1388,7 +1388,7 @@ components:
           type: object
           allOf:
             - $ref: "#/components/schemas/AutoArchive"
- 
+
   securitySchemes:
     BasicAuth:
       type: http

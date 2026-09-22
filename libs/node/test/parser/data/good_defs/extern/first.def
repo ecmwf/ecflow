@@ -1,9 +1,9 @@
 #
 # This defines extern which are defined in second.def
 #
-extern /a/b/c/d         
-extern /a/b/c/d/e:event        
-extern /a/b/c/d/e:meter       
+extern /a/b/c/d
+extern /a/b/c/d/e:event
+extern /a/b/c/d/e:meter
 
 extern /a/b/c/d/e/f/g/h/j     # this does not exist in second.def
 
@@ -14,7 +14,6 @@ suite extern_first
   		task q
    			trigger /a/b/c/d/e:event == set  	  # extern event path
  		task r
-   			trigger /a/b/c/d/e:meter le 30		  # extern meter path	
+   			trigger /a/b/c/d/e:meter le 30		  # extern meter path
     endfamily
 endsuite
-

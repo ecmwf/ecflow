@@ -36,7 +36,7 @@ Constructor::
       bool idle:     True includes queued,aborted and complete, False means archive after completion only
 
    AutoArchive(days,idle)
-      int days:      archive the node after 'days' elapsed 
+      int days:      archive the node after 'days' elapsed
       bool idle:     True archive if node queued,aborted and complete, False means archive after completion only
 
 
@@ -73,4 +73,3 @@ Returns a boolean where true means the time is relative
    :module: ecflow
 
 returns archive time as a TimeSlot
-

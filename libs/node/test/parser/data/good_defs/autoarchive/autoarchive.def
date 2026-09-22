@@ -1,6 +1,6 @@
 suite autoarchive
  family f1
-    autoarchive +00:02  
+    autoarchive +00:02
     task t1
  endfamily
  family f2
@@ -21,24 +21,24 @@ suite autoarchive
  endfamily
  family f5_1
     defstatus aborted
-    autoarchive +00:01  
+    autoarchive +00:01
     task t1
  endfamily
  family f5_2
-    autoarchive 0  
+    autoarchive 0
     task t1
       trigger 1== 0
  endfamily
   family f6
-    autoarchive +00:02 -i  
+    autoarchive +00:02 -i
     task t1
  endfamily
  family f7
-     autoarchive 01:00 -i  
+     autoarchive 01:00 -i
     task t1
  endfamily
  family f8
-    autoarchive 1 -i     
+    autoarchive 1 -i
     task t1
  endfamily
  family f9
@@ -56,13 +56,13 @@ suite autoarchive
  endfamily
  family f12
     defstatus aborted
-    autoarchive 0 -i  
+    autoarchive 0 -i
     task t1
        trigger 1 == 0
  endfamily
  family f13
     defstatus aborted
-    autoarchive +00:01 -i 
+    autoarchive +00:01 -i
     task t1
       trigger 1 == 0
  endfamily

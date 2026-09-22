@@ -26,7 +26,7 @@ Flags store state associated with a node
 - MESSAGE       - Node
 - BYRULE        - Node*, set if node is set to complete by complete trigger expression
 - QUEUELIMIT    - Node
-- WAIT          - task* 
+- WAIT          - task*
 - LOCKED        - Server
 - ZOMBIE        - task*
 - NO_REQUE      - task
@@ -35,7 +35,7 @@ Flags store state associated with a node
 - THRESHOLD     - task
 - SIGTERM       - Defs, records that server received a SIGTERM signal
 - LOG_ERROR     - Error in opening or writing to log file
-- CHECKPT_ERROR - Error in opening or writing to checkpt file 
+- CHECKPT_ERROR - Error in opening or writing to checkpt file
 - NOT_SET
 
 
@@ -240,4 +240,3 @@ Members:
 .. py:attribute:: FlagType.zombie
    :module: ecflow
    :value: ecflow.FlagType.zombie
-

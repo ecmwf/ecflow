@@ -4,7 +4,7 @@
 .. index::
    single: script (tutorial)
    single: ECF_HOME (tutorial)
-    
+
 .. _tutorial-defining-a-task:
 
 Defining the first task

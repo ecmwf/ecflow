@@ -4,7 +4,7 @@ defs_state MIGRATE state>:aborted flag:late,message state_change:983039 modify_c
 suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
   defstatus suspended
   edit ECF_EXTN '.sms'
-  clock real 
+  clock real
   calendar initTime:2013-Sep-10 12:37:03 suiteTime:2013-Sep-10 15:56:00 duration:03:18:57 initLocalTime:2013-Sep-10 12:37:03 lastTime:2013-Sep-10 15:56:00 calendarIncrement:00:01:00
   family family # state:aborted dur:02:18:57 flag:message
     task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task cannot be found:

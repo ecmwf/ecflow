@@ -21,14 +21,14 @@ the :term:`meter` (named *use*) while an *update_disk* task runs periodically, b
    :caption: Family definition
 
    from ecf import Family,Meter,Task,Cron, ...
-   
+
    ...
-   
+
    Family("check_disk").add(
       Meter("use",-1,100),
       Task("update_disk").add(
          Cron("00:00 23:59 00:05"))
-      
+
    ...
 
 .. code-block::

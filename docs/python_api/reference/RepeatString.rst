@@ -65,4 +65,3 @@ Return the name of the :term:`repeat`.
 
 .. py:method:: RepeatString.step(self: ecflow.RepeatString) -> int
    :module: ecflow
-

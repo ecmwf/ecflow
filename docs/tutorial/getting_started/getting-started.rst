@@ -124,12 +124,12 @@ When relaunching an :term:`ecflow_server`, the server will attempt to automatica
 
     .. code-block:: shell
         :caption: Check ecFlow installation
-            
+
         ecflow_server --version
         ecflow_client --version
 
 #. Setup the Tutorial directory, and start the :term:`ecflow_server` using:
-      
+
       .. code-block:: shell
         :caption: Start the ecflow_server (with verbose output)
 
@@ -140,8 +140,8 @@ When relaunching an :term:`ecflow_server`, the server will attempt to automatica
         # n.b. the server runs in the foreground, on port 3141 -- use Ctrl-C to stop it
 
 #. Check if the server is running by using the command:
- 
+
       .. code-block:: shell
         :caption: Ping the server
-      
+
         ecflow_client --ping

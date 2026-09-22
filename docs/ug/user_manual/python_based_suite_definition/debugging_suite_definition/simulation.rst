@@ -60,7 +60,7 @@ behaviour.
             verify complete:365 # verify that this task completes 365 times
       endfamily
    endsuite
-      
+
    suite leap_year       # use real clock otherwise the date wont change
       clock real 1.1.2016  # define a start date for deterministic simulation
       endclock   1.1.2017  # When to finish. A endclock is *ONLY* for use with the simulator.
@@ -70,7 +70,7 @@ behaviour.
             verify complete:366 # verify that this task completes 366 times in a leap year
       endfamily
    endsuite
-  
+
 This python segment shows how to load a text-based suite
 definition(cron.def) and simulate it in python.
 

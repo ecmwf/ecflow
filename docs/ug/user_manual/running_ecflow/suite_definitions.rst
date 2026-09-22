@@ -10,11 +10,11 @@ Once you have the server running you can **define** a suite to run on it. The su
 
 .. code-block:: shell
 
-    # Definition of the suite test                                                                                                      
+    # Definition of the suite test
     suite test
       edit ECF_HOME /tmp/COURSEDIR
       task t1
-    endsuite                                                     
+    endsuite
 
 1. The first line is a comment line. Any characters between the # and
    the end of the line are ignored.

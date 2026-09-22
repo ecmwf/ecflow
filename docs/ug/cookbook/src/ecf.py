@@ -26,8 +26,8 @@ ECF_MODE = "ecflow"
 # ECF_MODE = "sms"
 
 if DECORATE == "ONLY_TRIGGER":
-    USE_TRIGGER = True 
-    USE_LIMIT = False 
+    USE_TRIGGER = True
+    USE_LIMIT = False
     USE_EVENT = False
 elif DECORATE == "NO_ATTRIBUTE":
     USE_TRIGGER = False
@@ -69,7 +69,7 @@ class State:
     def __init__(self, state):
         """ store the status """
         self.state = str(state)
-    
+
     def __str__(self):
         """ translate into string """
         return "%s" % self.state
@@ -79,7 +79,7 @@ class State:
         if type(arg) == str:
             add = ""
             if type(arg[0]) == int:
-                add = "./"                
+                add = "./"
             return add + arg + " == " + self.state
         elif isinstance(arg, ecflow.Node):
             return arg.get_abs_node_path() + " == " + self.state
@@ -90,7 +90,7 @@ class State:
         if type(arg) == str:
             add = ""
             if type(arg[0]) == int:
-                add = "./"                
+                add = "./"
             return add + arg + " != " + self.state
         elif isinstance(arg, ecflow.Node):
             return arg.get_abs_node_path() + " != " + self.state
@@ -147,15 +147,15 @@ class Event(Attribute, ecflow.Event):
 
 class InLimit(Attribute):
     """ a class to host a path for a limit
-        silently ignore if USE_LIMIT is False, 
+        silently ignore if USE_LIMIT is False,
         (in debug mode) """
 
     def __init__(self, fullpath):
         self.data = None
-        if USE_LIMIT: 
+        if USE_LIMIT:
             try: path, name = fullpath.split(":")
             except: name = fullpath; path = ""
-            if name is None: 
+            if name is None:
                 raise BaseException
             self.data  = ecflow.InLimit(name, path)
             self.path_ = path
@@ -163,12 +163,12 @@ class InLimit(Attribute):
 
     def add_to(self, node):
         """ add_inlimit"""
-        if USE_LIMIT and self.data is None: 
+        if USE_LIMIT and self.data is None:
             raise BaseException
         if  USE_LIMIT and self.data is not None:
             node.add_inlimit(self.data)
 
-    def value(self):        
+    def value(self):
         """ get limit fullpath-name """
         return self.path_ + ":" + self.name_
 
@@ -187,9 +187,9 @@ class Trigger(Attribute):
     """
     def __init__(self, expr, unk=False, anded=True):
         self.expr = None
-        if expr is None: 
+        if expr is None:
             return
-        if expr == "": 
+        if expr == "":
             return
         if type(expr) == str:
             # self.expr = ecflow.Expression(expr)
@@ -202,7 +202,7 @@ class Trigger(Attribute):
 
         if type(expr) == list:
             for index, name in enumerate(expr):
-                if name is None: 
+                if name is None:
                     continue
                 pre = ""
 
@@ -227,7 +227,7 @@ class Trigger(Attribute):
                 else:
                     self.expr.add(ecflow.PartExpression(item,anded))
 
-        elif type(expr) in (ecflow.Expression, 
+        elif type(expr) in (ecflow.Expression,
                             ecflow.PartExpression):
             self.expr = ecflow.Expression(str(item))
         else:
@@ -250,7 +250,7 @@ class TriggerAnd(Trigger):
         self.expr = expr
         if not ":" in expr and not " eq " in expr and not "==" in expr:
             self.expr += " eq complete"
-    def add_to(self, node):        
+    def add_to(self, node):
         node.add_part_trigger(ecflow.PartExpression(self.expr, True))
 
 class TriggerImpossible(Trigger):
@@ -352,11 +352,11 @@ class Cron(Time):
         # print cli, parsed.bes, parsed.w, parsed.d, parsed.m
         # self.data.set_time_series(cli)
         self.data = ecflow.Cron()
-        if wdays: 
+        if wdays:
             self.data.set_week_days([int(x) for x in wdays.split(',')])
-        if days: 
+        if days:
             self.data.set_days_of_month([int(x) for x in days.split(',')])
-        if months: 
+        if months:
             self.data.set_months([int(x) for x in months.split(',')])
         self.data.set_time_series(bes)
     def add_to(self, node):
@@ -419,7 +419,7 @@ class Defstatus(Defcomplete):
         node.add_defstatus(self.data)
 
 class DefcompleteIf(Defcomplete):
-    """ wrapper to add conditional defstatus complete 
+    """ wrapper to add conditional defstatus complete
     just change name to make it explicit
     """
     def __init__(self, arg=True):
@@ -459,20 +459,20 @@ class Late(Attribute):
         rel = False
         self.data = ecflow.Late()
         for item in arg.split(" "):
-            if   item == "-s": 
+            if   item == "-s":
                 sub = True
-            elif item == "-c": 
+            elif item == "-c":
                 com = True
-            elif item == "-a": 
+            elif item == "-a":
                 act = True
             else:
                 hour, mins = item.split(":")
                 rel = "+" in hour
-                if   sub: 
+                if   sub:
                     self._add_sub(hour, mins)
-                elif com: 
+                elif com:
                     self._add_com(hour, mins, rel)
-                elif act: 
+                elif act:
                     self._add_act(hour, mins, rel)
                 sub = False
                 act = False
@@ -497,8 +497,8 @@ class Late(Attribute):
 class Variables(Attribute):
     """ dedicated class to enable variable addition with different
     syntax """
-    
-    def _set_tvar(self, key, val):        
+
+    def _set_tvar(self, key, val):
         """ facilitate to load an ecflow suite to SMS, translating
         variable names"""
         keyt, valt = translate(str(key), str(val))
@@ -521,13 +521,13 @@ class Variables(Attribute):
                     self._set_tvar(key, val)
             else:
                 raise BaseException()
-        if len(kwargs) > 0: 
+        if len(kwargs) > 0:
             for key, val in kwargs.items():
                 self._set_tvar(key, val)
         if type(__a) == dict:
             for key, val in __a.items():
                 self._set_tvar(key, val)
-        elif type(__a) == tuple: 
+        elif type(__a) == tuple:
             raise BaseException()
             # for key, val in __a.items(): self._set_tvar(key, val)
         elif type(__a) == list: raise BaseException()
@@ -536,7 +536,7 @@ class Variables(Attribute):
             self._set_tvar(__a, __b)
         elif __a is None and __b is None: pass
         else:
-            print __a, __b, __next, args, kwargs; 
+            print __a, __b, __next, args, kwargs;
             raise BaseException()
 
     def add_to(self, node):
@@ -551,8 +551,8 @@ class Variables(Attribute):
 
 class Limits(Attribute):
     """ dedicated class to enable limits addition with different syntax """
-    
-    def _set_tvar(self, key, val):        
+
+    def _set_tvar(self, key, val):
         """ append limits """
         if self.data is None:
             self.data = Limit(key, val)
@@ -571,7 +571,7 @@ class Limits(Attribute):
             elif type(args) == tuple:
                 for key, val in args.items():
                     self._set_tvar(key, val)
-        elif len(kwargs) > 0: 
+        elif len(kwargs) > 0:
             for key, val in kwargs.items():
                 self._set_tvar(key, val)
         elif type(__a) == dict:
@@ -590,7 +590,7 @@ class Limits(Attribute):
 class Repeat(Attribute):
     def __init__(self, name="YMD", start=20120101, end=20120101, step=1, kind="date"):
        if kind == "date":
-           self.data = ecflow.RepeatDate(name, int(start), int(end), 
+           self.data = ecflow.RepeatDate(name, int(start), int(end),
                                          int(step))
        elif kind == "integer":
            self.data = ecflow.RepeatInteger(name, int(start), int(end), int(step))
@@ -599,7 +599,7 @@ class Repeat(Attribute):
        elif kind == "enumerated":
            self.data = ecflow.RepeatEnumerated(name, start)
        elif kind == "day":
-           self.data = ecflow.RepeatDay(step)        
+           self.data = ecflow.RepeatDay(step)
        else:
            self.data = None
 
@@ -616,7 +616,7 @@ def If(test=True, then=None, otow=None):
 
         using If to distinguish od/rd mode request that both users share
         the variables (parameter.py) and ecf.py
-                                 
+
         otow: on the other way?
         """
     if test:
@@ -636,7 +636,7 @@ class Root(object): # from where Suite and Node derive
             return "%s == " % self.fullname() + str(node)
         return False
 
-    def __ne__(self, node):        
+    def __ne__(self, node):
         if isinstance(self, ecflow.Node):
             return "%s != " % self.fullname() + str(node)
         return False
@@ -656,12 +656,12 @@ class Root(object): # from where Suite and Node derive
         if isinstance(self, ecflow.Node):
             return self.get_abs_node_path()
         return str(self)
-    
+
     def repeat(self, name="YMD", start=20120101, end=20321212, step=1,
                kind="date"):
         """ add repeat attribute"""
         if kind == "date":
-            self.add_repeat(ecflow.RepeatDate(name, int(start), int(end), 
+            self.add_repeat(ecflow.RepeatDate(name, int(start), int(end),
                                               int(step)))
         elif kind == "integer":
             self.add_repeat(ecflow.RepeatInteger(name, int(start), int(end), int(step)))
@@ -708,7 +708,7 @@ class Root(object): # from where Suite and Node derive
                 except Exception, exc:
                     try: print item.fullname(), item.name(), self.name()
                     except: pass
-                    print "not yet", self, type(item), item, exc 
+                    print "not yet", self, type(item), item, exc
                     raise BaseException
 
         if len(args) > 0:
@@ -726,17 +726,17 @@ class Root(object): # from where Suite and Node derive
             raise BaseException()
 
         return self
- 
+
     def limit(self, name, size):
         """ add limit attribute"""
-        if name is None: 
+        if name is None:
             raise BaseException
         self.add_limit(name, size)
         return self
 
     def inlimit(self, full_path):
         """ add inlimit attribute"""
-        if not USE_LIMIT: 
+        if not USE_LIMIT:
             return self
 
         path, name = full_path.split(":")
@@ -777,7 +777,7 @@ class Node(Root): # from where Task and Family derive
 
     def event(self, name=1):
         """ add event attribute"""
-        if USE_EVENT: 
+        if USE_EVENT:
             self.add_event(name)
         return self
 
@@ -795,7 +795,7 @@ class Node(Root): # from where Task and Family derive
         self.add_cron(cron)
         return self
 
-    def today(self, hhmm): 
+    def today(self, hhmm):
         """ wrapper around time """
         self.time(hhmm)
         return self # ???
@@ -864,14 +864,14 @@ class Client(ecflow.Client):
     def __init__(self, host="localhost", port="31415"):
         if "@" in host:
             host, port = host.split("@")
-            super(Client, self).__init__(host, int(port))            
+            super(Client, self).__init__(host, int(port))
         else:
             super(Client, self).__init__(host, int(port))
         self.host = host
         self.port = port
 
     def __str__(self):
-        return "#MSG: ecflow client %s@%s v%s" % (self.host, self.port, 
+        return "#MSG: ecflow client %s@%s v%s" % (self.host, self.port,
                                                  self.version())
 
 class Suite(ecflow.Suite, Root):
@@ -910,7 +910,7 @@ class Family(ecflow.Family, Node, Attribute):
         self.add_task(tsk)
         return tsk
 
-    def add_to(self, node):        
+    def add_to(self, node):
         node.add_family(self)
 
     # def __enter__(self):
@@ -958,8 +958,8 @@ class TestEcf(unittest.TestCase):
         tsk.add(Late("-s 00:05 -c 01:00"))
         fam.add(tsk,
 
-                (Task("1"), Task("2")), 
-                [Task("11"), Task("12")], 
+                (Task("1"), Task("2")),
+                [Task("11"), Task("12")],
                 Task("111"), Task("211"),
 
                 Task("t2").add(Trigger(tsk == COMPLETE),
@@ -994,7 +994,7 @@ class TestEcf(unittest.TestCase):
                 Event(1),
                 Event("a"),
                 Defcomplete())
-        
+
         tsk.add(Variables({"A": "a", "B": "b"}))
         tsk.add(Variables(D="d", E="e"))
         tsk.add(Variables("C", "c"))

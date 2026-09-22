@@ -57,4 +57,3 @@ Return the month. The range is 0-12, 0 means its wild-carded
    :module: ecflow
 
 Return the year, 0 means its wild-carded
-

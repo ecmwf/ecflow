@@ -9,6 +9,5 @@
 
 %include <trap.h>
 %include <setup.h>
- 
+
 %include <endt.h>
- 

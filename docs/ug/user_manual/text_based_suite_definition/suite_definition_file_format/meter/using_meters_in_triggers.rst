@@ -23,4 +23,3 @@ python API would look something like:
         file = i*10 + 10
         t = f.add_task("t" + str)
         t.add_trigger("model:file ge " + str(file))
-    

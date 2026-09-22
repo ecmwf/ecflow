@@ -88,4 +88,3 @@ Returns the path to the schema used to contact the Aviso server
    :module: ecflow
 
 Returns the URL used to contact the Aviso server
-

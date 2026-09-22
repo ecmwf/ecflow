@@ -25,7 +25,7 @@ the :term:`ECF_JOB_CMD` can be defined as follows:
 
 .. code-block:: shell
 
-    edit ECF_JOB_CMD "ssh %HOST% '%ECF_JOB% > %ECF_JOBOUT% 2>&1 &'"    
+    edit ECF_JOB_CMD "ssh %HOST% '%ECF_JOB% > %ECF_JOBOUT% 2>&1 &'"
 
 ecFlow uses standard UNIX permissions, so ensure that :code:`$HOME/.ssh` contents contain
 the right settings. Access to this location is needed to allow ecFlow to successfully run
@@ -47,8 +47,8 @@ systems and multiple queuing systems, as follows:
 
 .. code-block:: shell
 
-    edit ECF_JOB_CMD "ecf_submit %USER% %SCHOST% %ECF_JOB%             
-    %ECF_JOBOUT%"                                                      
+    edit ECF_JOB_CMD "ecf_submit %USER% %SCHOST% %ECF_JOB%
+    %ECF_JOBOUT%"
 
 Alongside this, the task 'ecf' scripts include a generic script
 header that contains typical queuing commands (such as wall clock time and
@@ -56,12 +56,12 @@ priority), e.g. contents of sample :code:`qsub.h`:
 
 .. code-block:: shell
 
-    # QSUB -q %QUEUE%                                                                                                            
-    # QSUB -u %USER%                                                                                                                     
-    # QSUB -s /bin/ksh                                                                                                                       
-    # QSUB -r %TASK%_%FAMILY1:NOT_DEF%                                                                                                       
-    # QSUB -o %LOGDIR%%ECF_NAME%.%ECF_TRYNO%                                                                                                
-    # QSUB -lh %THREADS:1%                                             
+    # QSUB -q %QUEUE%
+    # QSUB -u %USER%
+    # QSUB -s /bin/ksh
+    # QSUB -r %TASK%_%FAMILY1:NOT_DEF%
+    # QSUB -o %LOGDIR%%ECF_NAME%.%ECF_TRYNO%
+    # QSUB -lh %THREADS:1%
 
 The :code:`ecf_submit` script can replace these generic queuing commands with
 the relevant commands for the host to which the task is submitted and

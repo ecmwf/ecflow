@@ -48,4 +48,3 @@ set -ex
 if [[ $ARCH = sgimips && -f /usr/local/ecfs/prodn/.ecfs_k_env ]] ; then
   . /usr/local/ecfs/prodn/.ecfs_k_env
 fi
-
