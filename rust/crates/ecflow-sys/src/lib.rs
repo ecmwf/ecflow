@@ -6,9 +6,8 @@
 //! This crate builds ecFlow from source and exposes `ClientInvoker` through a
 //! CXX bridge. Use the `ecflow` crate for a safe API.
 //!
-//! The bridge grows slice by slice. The `ignore` list below is the backlog
-//! of `ClientInvoker` methods without a bridge function yet; every command
-//! stays reachable through `invoke` in the meantime.
+//! The `ignore` list holds the `ClientInvoker` methods without a bridge
+//! function; every command is reachable through `invoke`.
 
 use bindman::track_cpp_api;
 
@@ -23,11 +22,11 @@ use bindman::track_cpp_api;
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
         "defs", "get_string", "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args",
         "is_not_retrying", "load_in_memory_defs", "client_env_host_port", "check_child_parameters",
-        // Task commands used by the C++ tests
+        // Task commands taking their arguments from the environment
         "initTask", "abortTask", "eventTask", "meterTask", "labelTask", "waitTask", "queueTask", "completeTask",
         "set_child_host_file", "set_child_denied", "set_child_no_ecf", "set_child_init_add_vars",
         "set_child_complete_del_vars",
-        // User commands: next slices
+        // User commands
         "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
         "wait_for_server_death",
         "restartServer", "haltServer", "shutdownServer", "terminateServer", "server_load", "debug_server_on",
