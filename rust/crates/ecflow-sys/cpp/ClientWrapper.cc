@@ -6,7 +6,6 @@
 #include "ClientWrapper.h"
 #include "ecflow-sys/src/lib.rs.h"
 
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -14,7 +13,6 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace ecflow_bridge {

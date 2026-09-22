@@ -105,7 +105,8 @@ impl Client {
         self.inner.pin_mut().set_password(password);
     }
 
-    /// Use SSL, whatever `ECF_SSL` says.
+    /// Use SSL, whatever `ECF_SSL` says. Fails when built without the `ssl`
+    /// feature.
     pub fn enable_ssl(&mut self) -> Result<()> {
         let result = self.inner.pin_mut().enable_ssl();
         self.check(result)
