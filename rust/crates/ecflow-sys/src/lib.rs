@@ -59,6 +59,7 @@ mod ffi {
 
         // ==================== Client ====================
 
+        /// Wraps a `ClientInvoker`; every request runs in its throw-on-error mode.
         type ClientWrapper;
 
         /// Create a client configured from the environment (`ECF_HOST`, `ECF_PORT`, ...).
@@ -70,26 +71,44 @@ mod ffi {
         fn from_host_port(host: &str, port: &str) -> Result<UniquePtr<ClientWrapper>>;
 
         // Connection configuration
+
+        /// Override the host and port from the environment.
         fn set_host_port(self: Pin<&mut ClientWrapper>, host: &str, port: &str) -> Result<()>;
+        /// The configured host.
         fn host(self: &ClientWrapper) -> String;
+        /// The configured port.
         fn port(self: &ClientWrapper) -> String;
+        /// Override the user name from `ECF_USER`.
         fn set_user_name(self: Pin<&mut ClientWrapper>, user: &str);
+        /// Set the password for the user name.
         fn set_password(self: Pin<&mut ClientWrapper>, password: &str);
+        /// Use SSL, whatever `ECF_SSL` says; fails when built without the `ssl` feature.
         fn enable_ssl(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        /// Do not use SSL, whatever `ECF_SSL` says.
         fn disable_ssl(self: Pin<&mut ClientWrapper>);
+        /// Use the HTTP transport.
         fn enable_http(self: Pin<&mut ClientWrapper>);
+        /// Use the HTTPS transport.
         fn enable_https(self: Pin<&mut ClientWrapper>);
+        /// Time to wait for a server reply before a request fails.
         fn set_connect_timeout(self: Pin<&mut ClientWrapper>, milliseconds: u64);
+        /// Time to wait between connection attempts.
         fn set_retry_connection_period(self: Pin<&mut ClientWrapper>, milliseconds: u64);
+        /// Number of connection attempts per host before giving up.
         fn set_connection_attempts(self: Pin<&mut ClientWrapper>, attempts: u32);
+        /// Print each request and its round trip time to standard output.
         fn debug(self: Pin<&mut ClientWrapper>, enabled: bool);
 
         /// Failure class of the request that last threw, as `ecf::ConnectionFailure`.
         fn last_failure(self: &ClientWrapper) -> i32;
 
         // Server probes
+
+        /// Check that the server answers.
         fn ping_server(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        /// The server's version.
         fn server_version(self: Pin<&mut ClientWrapper>) -> Result<String>;
+        /// The server's statistics, formatted by the server.
         fn stats(self: Pin<&mut ClientWrapper>) -> Result<String>;
 
         /// Run any command given as `ecflow_client` command line arguments.
@@ -99,18 +118,32 @@ mod ffi {
         fn reply_strings(self: &ClientWrapper) -> Vec<String>;
 
         // Child (task) commands
+
+        /// The task path the child commands report for (`ECF_NAME`).
         fn set_child_path(self: Pin<&mut ClientWrapper>, path: &str);
+        /// The job password the child commands carry (`ECF_PASS`).
         fn set_child_password(self: Pin<&mut ClientWrapper>, password: &str);
+        /// The process or remote id the child commands carry (`ECF_RID`).
         fn set_child_pid(self: Pin<&mut ClientWrapper>, pid: &str);
+        /// The try number the child commands carry (`ECF_TRYNO`).
         fn set_child_try_no(self: Pin<&mut ClientWrapper>, try_no: u32);
+        /// How long a child command keeps trying to reach the server (`ECF_TIMEOUT`).
         fn set_child_timeout(self: Pin<&mut ClientWrapper>, seconds: u32);
+        /// How long a child command keeps trying when reported as a zombie (`ECF_ZOMBIE_TIMEOUT`).
         fn set_zombie_child_timeout(self: Pin<&mut ClientWrapper>, seconds: u32);
+        /// Report that the job started.
         fn child_init(self: Pin<&mut ClientWrapper>) -> Result<()>;
+        /// Report that the job failed.
         fn child_abort(self: Pin<&mut ClientWrapper>, reason: &str) -> Result<()>;
+        /// Set or clear an event of the task.
         fn child_event(self: Pin<&mut ClientWrapper>, name: &str, value: bool) -> Result<()>;
+        /// Set a meter of the task.
         fn child_meter(self: Pin<&mut ClientWrapper>, name: &str, value: i32) -> Result<()>;
+        /// Set a label of the task.
         fn child_label(self: Pin<&mut ClientWrapper>, name: &str, value: &str) -> Result<()>;
+        /// Block until the expression holds on the server.
         fn child_wait(self: Pin<&mut ClientWrapper>, expression: &str) -> Result<()>;
+        /// Act on a queue and return the step the server handed out.
         fn child_queue(
             self: Pin<&mut ClientWrapper>,
             queue: &str,
@@ -118,11 +151,16 @@ mod ffi {
             step: &str,
             path: &str,
         ) -> Result<String>;
+        /// Report that the job finished.
         fn child_complete(self: Pin<&mut ClientWrapper>) -> Result<()>;
 
         // Definitions as text
+
+        /// Fetch the server's definitions as text in the given `PrintStyle`.
         fn get_defs_text(self: Pin<&mut ClientWrapper>, style: i32) -> Result<String>;
+        /// Load definitions given as text; with `force`, suites of the same name are replaced.
         fn load_defs_text(self: Pin<&mut ClientWrapper>, defs: &str, force: bool) -> Result<()>;
+        /// Replace the node at `path` with the node of that path in the definitions given as text.
         fn replace_text(
             self: Pin<&mut ClientWrapper>,
             path: &str,
