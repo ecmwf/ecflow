@@ -129,6 +129,46 @@ jobs:
           install-path: ${{ steps.build.outputs.install-path }}
           artifact-name: ${{ matrix._resolved.own-artifact-name }}
 
+      # The Rust bindings in rust/ build ecflow themselves with the resolved
+      # ecbuild and the image's Boost, and run their server round trip against
+      # the ecflow_server built above.
+      - name: Set up Rust
+        if: ${{ matrix.platform == 'ubuntu-24.04' }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Check Rust formatting
+        if: ${{ matrix.platform == 'ubuntu-24.04' }}
+        working-directory: rust
+        run: cargo fmt --all --check
+
+      - name: Build and lint Rust bindings
+        if: ${{ matrix.platform == 'ubuntu-24.04' }}
+        working-directory: rust
+        env:
+          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
+          BOOST_ROOT: /usr
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Build Rust documentation
+        if: ${{ matrix.platform == 'ubuntu-24.04' }}
+        working-directory: rust
+        env:
+          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
+          BOOST_ROOT: /usr
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps
+
+      - name: Test Rust bindings
+        if: ${{ matrix.platform == 'ubuntu-24.04' }}
+        working-directory: rust
+        env:
+          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
+          BOOST_ROOT: /usr
+          ECFLOW_SERVER: ${{ steps.build.outputs.build-dir }}/bin/ecflow_server
+        run: cargo test --workspace
+
       - name: Print dependency table
         if: always()
         uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
