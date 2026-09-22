@@ -8,14 +8,16 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      # Reject files that still carry merge-conflict markers (<<<<<<<, =======, >>>>>>>).
       - id: check-merge-conflict
+      # Parse every YAML file to catch syntax errors before CI does.
       - id: check-yaml
         exclude: '^\.cd/conda/meta\.yaml$'  # conda recipe: Jinja, not YAML
 
-  # Keep `exclude` in sync with clang_format_ignore in old_CI.yml until that retires.
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.7
     hooks:
+      # Format C and C++ sources according to the project .clang-format.
       - id: clang-format
         types_or: [c, c++]
         exclude: '^(docs|tools|releng)/|^libs/(client|node|pyext)/test/data/|^libs/test/overall/data/'
@@ -23,36 +25,35 @@ repos:
   - repo: https://github.com/ecmwf/ci-infrastructure
     rev: dac4b18ffe60c317fbab05246e851b6971f7eabf
     hooks:
+      # Refuse commits to the ECMWF CI configuration that lack the required approval.
       - id: check-ci-approval
 
-  # `reuse lint` checks the whole project, including 3rdparty/: the hook passes
-  # no filenames, so the exclude above does not narrow it. always_run keeps it
-  # honest for a commit that happens to touch only excluded paths.
   - repo: https://github.com/fsfe/reuse-tool
     rev: v6.2.0
     hooks:
+      # Verify that every file carries SPDX copyright and license information (REUSE).
       - id: reuse
         always_run: true
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      # Strip whitespace at the end of lines.
       - id: trailing-whitespace
+      # Make every file end with exactly one newline.
       - id: end-of-file-fixer
+      # Normalise line endings to LF; no CRLF or mixed endings.
       - id: mixed-line-ending
         args: [--fix=lf]
 
-  # Off until the tree is cleaned up; the counts are what each would rewrite today.
-  # ruff-format rewrites 52 of 85 files (7509 lines). ruff-check reports 1440
-  # errors, of which 730 are invalid-syntax from four Python 2 files
-  # (libs/pyext/samples/{emos_example,TestGui}.py,
-  # libs/pyext/test/data/python_includes/head.py, tools/ecflow_fuse.py) that must
-  # be ported or excluded before this can pass.
+  # The following are turned off until the tree is cleaned up.
   #
   # - repo: https://github.com/astral-sh/ruff-pre-commit
   #   rev: v0.15.11
   #   hooks:
+  #     # Lint Python sources with ruff.
   #     - id: ruff-check
   #       exclude: '^docs/'
+  #     # Format Python sources with ruff.
   #     - id: ruff-format
   #       exclude: '^docs/'
