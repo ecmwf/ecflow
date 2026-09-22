@@ -147,6 +147,8 @@ jobs:
         if: ${{ matrix.platform == 'ubuntu-24.04' }}
         working-directory: rust
         env:
+          CC: ${{ matrix.c-compiler }}
+          CXX: ${{ matrix.cxx-compiler }}
           CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
           BOOST_ROOT: /usr
         run: cargo clippy --workspace --all-targets -- -D warnings
@@ -155,6 +157,8 @@ jobs:
         if: ${{ matrix.platform == 'ubuntu-24.04' }}
         working-directory: rust
         env:
+          CC: ${{ matrix.c-compiler }}
+          CXX: ${{ matrix.cxx-compiler }}
           CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
           BOOST_ROOT: /usr
           RUSTDOCFLAGS: -D warnings
@@ -164,6 +168,8 @@ jobs:
         if: ${{ matrix.platform == 'ubuntu-24.04' }}
         working-directory: rust
         env:
+          CC: ${{ matrix.c-compiler }}
+          CXX: ${{ matrix.cxx-compiler }}
           CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
           BOOST_ROOT: /usr
           ECFLOW_SERVER: ${{ steps.build.outputs.build-dir }}/bin/ecflow_server
