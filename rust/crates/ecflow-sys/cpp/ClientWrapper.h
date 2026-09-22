@@ -6,6 +6,7 @@
 
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 #include "rust/cxx.h"
 
@@ -13,6 +14,11 @@
 #include <memory>
 
 namespace ecflow_bridge {
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
+using DefsStyle = ::PrintStyle::Type_t;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -46,8 +52,8 @@ public:
     void set_connection_attempts(uint32_t attempts);
     void debug(bool enabled);
 
-    // Failure class of the request that last threw (ecf::ConnectionFailure)
-    int32_t last_failure() const;
+    // Failure class of the request that last threw
+    ecf::ConnectionFailure last_failure() const;
 
     // Server probes
     void ping_server();
@@ -75,7 +81,7 @@ public:
     void child_complete();
 
     // Definitions as text
-    rust::String get_defs_text(int32_t style);
+    rust::String get_defs_text(DefsStyle style);
     void load_defs_text(rust::Str defs, bool force);
     void replace_text(rust::Str path, rust::Str defs, bool create_parents, bool force);
 

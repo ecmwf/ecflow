@@ -46,8 +46,65 @@ use bindman::track_cpp_api;
 )]
 #[cxx::bridge(namespace = "ecflow_bridge")]
 mod ffi {
+    /// The class of failure observed while communicating with a server.
+    ///
+    /// Declared as the existing `ecf::ConnectionFailure`, so cxx verifies at
+    /// compile time that each discriminant matches the C++ enum.
+    #[namespace = "ecf"]
+    #[repr(i32)]
+    enum ConnectionFailure {
+        /// No failure was observed.
+        None,
+        /// The host name could not be resolved.
+        HostResolution,
+        /// No listener accepted the connection.
+        ConnectionRefused,
+        /// The peer accepted the connection but did not reply in time.
+        Timeout,
+        /// The peer accepted the connection and then closed it without replying.
+        ClosedWithoutReply,
+        /// The TLS handshake did not complete.
+        HandshakeFailed,
+        /// The TLS handshake failed while verifying the peer certificate.
+        CertificateRejected,
+        /// A reply was received that the transport cannot decode.
+        UndecodableReply,
+        /// The peer answered, refusing the request.
+        RejectedRequest,
+        /// A failure that none of the other values describes.
+        Other,
+    }
+
+    /// The print style of definitions written as text.
+    ///
+    /// Declared as the existing `PrintStyle::Type_t` (aliased in the bridge
+    /// header), so cxx verifies at compile time that each discriminant
+    /// matches the C++ enum.
+    #[repr(i32)]
+    enum DefsStyle {
+        /// Nothing is written.
+        #[cxx_name = "NOTHING"]
+        Nothing,
+        /// The definition alone, without node state.
+        #[cxx_name = "DEFS"]
+        Defs,
+        /// The definition with node state and trigger expressions.
+        #[cxx_name = "STATE"]
+        State,
+        /// The definition with node state, as a server loads it.
+        #[cxx_name = "MIGRATE"]
+        Migrate,
+        /// The definition as transferred between client and server, loaded with relaxed checks.
+        #[cxx_name = "NET"]
+        Net,
+    }
+
     unsafe extern "C++" {
         include!("EcflowBridge.h");
+
+        #[namespace = "ecf"]
+        type ConnectionFailure;
+        type DefsStyle;
 
         /// The ecFlow version the library was built from.
         #[must_use]
@@ -99,8 +156,8 @@ mod ffi {
         /// Print each request and its round trip time to standard output.
         fn debug(self: Pin<&mut ClientWrapper>, enabled: bool);
 
-        /// Failure class of the request that last threw, as `ecf::ConnectionFailure`.
-        fn last_failure(self: &ClientWrapper) -> i32;
+        /// Failure class of the request that last threw.
+        fn last_failure(self: &ClientWrapper) -> ConnectionFailure;
 
         // Server probes
 
@@ -156,8 +213,8 @@ mod ffi {
 
         // Definitions as text
 
-        /// Fetch the server's definitions as text in the given `PrintStyle`.
-        fn get_defs_text(self: Pin<&mut ClientWrapper>, style: i32) -> Result<String>;
+        /// Fetch the server's definitions as text in the given style.
+        fn get_defs_text(self: Pin<&mut ClientWrapper>, style: DefsStyle) -> Result<String>;
         /// Load definitions given as text; with `force`, suites of the same name are replaced.
         fn load_defs_text(self: Pin<&mut ClientWrapper>, defs: &str, force: bool) -> Result<()>;
         /// Replace the node at `path` with the node of that path in the definitions given as text.

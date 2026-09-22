@@ -132,8 +132,8 @@ void ClientWrapper::debug(bool enabled) {
     invoker_.debug(enabled);
 }
 
-int32_t ClientWrapper::last_failure() const {
-    return static_cast<int32_t>(failure_);
+ecf::ConnectionFailure ClientWrapper::last_failure() const {
+    return failure_;
 }
 
 // Server probes
@@ -236,14 +236,14 @@ void ClientWrapper::child_complete() {
 
 // Definitions as text
 
-rust::String ClientWrapper::get_defs_text(int32_t style) {
+rust::String ClientWrapper::get_defs_text(DefsStyle style) {
     request([&] { invoker_.getDefs(); });
     defs_ptr defs = invoker_.defs();
     if (!defs) {
         throw std::runtime_error("The server returned no definitions");
     }
     std::string text;
-    defs->write_to_string(text, static_cast<PrintStyle::Type_t>(style));
+    defs->write_to_string(text, style);
     return rust::String(text);
 }
 

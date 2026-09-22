@@ -13,12 +13,22 @@ use crate::error::{Error, Failure, Result};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DefsStyle {
     /// The definition alone, without node state.
-    Defs = 1,
+    Defs,
     /// The definition with node state and trigger expressions.
-    State = 2,
+    State,
     /// The definition with node state, as a server loads it.
     #[default]
-    Migrate = 3,
+    Migrate,
+}
+
+impl From<DefsStyle> for ecflow_sys::DefsStyle {
+    fn from(style: DefsStyle) -> Self {
+        match style {
+            DefsStyle::Defs => Self::Defs,
+            DefsStyle::State => Self::State,
+            DefsStyle::Migrate => Self::Migrate,
+        }
+    }
 }
 
 /// A client for an ecFlow server, wrapping the C++ `ClientInvoker`.
@@ -62,7 +72,7 @@ impl Client {
 
     /// Attach the failure class of the request that just threw.
     fn check<T>(&self, result: std::result::Result<T, ecflow_sys::Exception>) -> Result<T> {
-        result.map_err(|e| Error::new(Failure::from_code(self.inner.last_failure()), e.what()))
+        result.map_err(|e| Error::new(Failure::from(self.inner.last_failure()), e.what()))
     }
 
     // ==================== Connection configuration ====================
@@ -278,7 +288,7 @@ impl Client {
 
     /// Fetch the server's definitions as text.
     pub fn get_defs_text(&mut self, style: DefsStyle) -> Result<String> {
-        let result = self.inner.pin_mut().get_defs_text(style as i32);
+        let result = self.inner.pin_mut().get_defs_text(style.into());
         self.check(result)
     }
 
