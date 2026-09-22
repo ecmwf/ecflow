@@ -33,19 +33,19 @@ pub enum Failure {
     Other,
 }
 
-impl Failure {
-    /// The failure for an `ecf::ConnectionFailure` value.
-    pub(crate) const fn from_code(code: i32) -> Self {
-        match code {
-            0 => Self::None,
-            1 => Self::HostResolution,
-            2 => Self::ConnectionRefused,
-            3 => Self::Timeout,
-            4 => Self::ClosedWithoutReply,
-            5 => Self::HandshakeFailed,
-            6 => Self::CertificateRejected,
-            7 => Self::UndecodableReply,
-            8 => Self::RejectedRequest,
+impl From<ecflow_sys::ConnectionFailure> for Failure {
+    fn from(failure: ecflow_sys::ConnectionFailure) -> Self {
+        use ecflow_sys::ConnectionFailure as Bridge;
+        match failure {
+            Bridge::None => Self::None,
+            Bridge::HostResolution => Self::HostResolution,
+            Bridge::ConnectionRefused => Self::ConnectionRefused,
+            Bridge::Timeout => Self::Timeout,
+            Bridge::ClosedWithoutReply => Self::ClosedWithoutReply,
+            Bridge::HandshakeFailed => Self::HandshakeFailed,
+            Bridge::CertificateRejected => Self::CertificateRejected,
+            Bridge::UndecodableReply => Self::UndecodableReply,
+            Bridge::RejectedRequest => Self::RejectedRequest,
             _ => Self::Other,
         }
     }
