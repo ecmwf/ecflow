@@ -12,21 +12,24 @@ workflow manager, wrapping the C++ `ClientInvoker` through
 ```rust
 use ecflow::Client;
 
-let mut client = Client::with_host_port("localhost", 3141)?;
-client.ping()?;
-println!("server {}", client.server_version()?);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut client = Client::with_host_port("localhost", 3141)?;
+    client.ping()?;
+    println!("server {}", client.server_version()?);
 
-// A job reporting progress
-client.set_child_path("/suite/family/task");
-client.set_child_password(&std::env::var("ECF_PASS")?);
-client.set_child_pid(&std::process::id().to_string());
-client.set_child_try_no(1);
-client.child_init()?;
-client.child_meter("progress", 50)?;
-client.child_complete()?;
+    // A job reporting progress
+    client.set_child_path("/suite/family/task");
+    client.set_child_password(&std::env::var("ECF_PASS")?);
+    client.set_child_pid(&std::process::id().to_string());
+    client.set_child_try_no(1);
+    client.child_init()?;
+    client.child_meter("progress", 50)?;
+    client.child_complete()?;
 
-// Any other command, as ecflow_client arguments
-client.invoke(["--suspend=/suite"])?;
+    // Any other command, as ecflow_client arguments
+    client.invoke(["--suspend=/suite"])?;
+    Ok(())
+}
 ```
 
 ## Cargo build features
