@@ -17,7 +17,7 @@ C++ `ClientInvoker` class. For a safe API, use the higher-level
 The build script configures and builds the ecFlow C++ sources with CMake, with
 ecbuild on `CMAKE_PREFIX_PATH`, compiles the bridge against the public include
 directories and definitions of the `ecflow_all` target, and links that static
-archive with its public libraries.
+archive with the libraries CMake found for it.
 
 When the crate is built from the ecFlow repository, the in-tree sources are
 used; otherwise the release matching the crate version is cloned.
@@ -29,8 +29,9 @@ used; otherwise the release matching the crate version is cloned.
 ## Environment variables
 
 - `ECBUILD_DIR` - Path to an ecbuild checkout, instead of cloning it.
-- `BOOST_ROOT`, `OPENSSL_ROOT_DIR`, `CMAKE_PREFIX_PATH` - Forwarded to CMake.
-  On macOS the Homebrew prefixes are used when these are unset.
+- `BOOST_ROOT` - Boost install prefix; ecFlow's CMake does not search system
+  paths for Boost.
+- `CMAKE_PREFIX_PATH` - Forwarded to CMake.
 - `DOCS_RS` - When set, the build script becomes a no-op (for docs.rs).
 
 ## Copyright and License
