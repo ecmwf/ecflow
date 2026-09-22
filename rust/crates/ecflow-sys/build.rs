@@ -62,11 +62,6 @@ fn main() {
         &ecflow.join("libs/client/src"),
         &crate_dir.join("src/lib.rs"),
     );
-
-    // Export for downstream crates
-    println!("cargo:src={}", ecflow.display());
-    println!("cargo:build_dir={}", build_dir.display());
-    println!("cargo:cpp_dir={}", crate_dir.join("cpp").display());
 }
 
 /// `cmake -B build -S .` as the install documentation describes it.

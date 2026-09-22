@@ -85,10 +85,6 @@ public:
     void load_defs_text(rust::Str defs, bool force);
     void replace_text(rust::Str path, rust::Str defs, bool create_parents, bool force);
 
-    // Access underlying for other C++ bridge code
-    const ClientInvoker& inner() const { return invoker_; }
-    ClientInvoker& inner() { return invoker_; }
-
     // ============== Factories ==============
 
     /// Create a client configured from the environment.
