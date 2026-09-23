@@ -21,6 +21,8 @@ resources:
   - k8s/namespace.yaml
   - k8s/ecflow/deployment.yaml
   - k8s/ecflow/service.yaml
+  - k8s/authotron/deployment.yaml
+  - k8s/authotron/service.yaml
 
 # The static pages served by the reverse proxy. The nginx configuration itself
 # is generated alongside these once the reverse proxy is deployed.
