@@ -200,12 +200,13 @@ In both cases the client must provide one of the following authentication method
 - ECMWF API key (recommended when using the ECMWF API provider in Auth-o-tron)
 - Username and password (when using the plain provider in Auth-o-tron)
 
-The client uses the `.ecflowapirc` configuration file to define the server connection details. The client searches for this file in the following locations (in order):
+The client uses the ``.ecflowapirc`` configuration file to define the server connection details. The client searches for this file in the following locations (in order):
 
-1. The current working directory
-2. The user's home directory (e.g., `~/.ecflowapirc`)
+1. The path given by the ``ECF_AUTHTOKENS`` environment variable, if set
+2. The user's home directory (e.g., ``~/.ecflowapirc``)
+3. The current working directory (e.g., ``./.ecflowapirc``)
 
-The `.ecflowapirc` file should contain the following entries:
+The ``.ecflowapirc`` file should contain the following entries:
 
 .. code-block:: json
 
@@ -213,7 +214,7 @@ The `.ecflowapirc` file should contain the following entries:
     "version": 1,
     "tokens" : [
       {
-        "server": "<server-name-or-pattern>",
+        "server": "<server-url-pattern>",
         "type"  : "bearer",
         "api"   : {
           "url"  : "https://api.ecmwf.int/v1",
@@ -222,7 +223,7 @@ The `.ecflowapirc` file should contain the following entries:
         }
       },
       {
-        "server": "<server-name-or-pattern>",
+        "server": "<server-url-pattern>",
         "type"  : "basic",
         "api"   : {
           "username": "<username>",
@@ -232,11 +233,15 @@ The `.ecflowapirc` file should contain the following entries:
     ]
   }
 
-Replace `<server-name-or-pattern>` with the actual server name or a pattern that matches the server name (e.g., `your_domain.com` or `.*` to match any server).
-The `<user-key>` and `<user-email>` should be replaced with the user's ECMWF API key and email address, respectively, when using the bearer token method.
-Alternatively, `<username>` and `<password>` should be replaced with the user's credentials when using the basic authentication method.
+Replace ``<server-url-pattern>`` with a regular expression that matches the full server URL, formed as
+``<scheme>://<host>:<port>`` (e.g., ``https://your_domain.com:443``, ``https://your_domain\.com:.*``, or ``.*`` to
+match any server). The pattern must match the complete URL, and not merely a part of it: a bare host name such
+as ``your_domain.com`` does not match.
+The ``<user-key>`` and ``<user-email>`` should be replaced with the user's ECMWF API key and email address, respectively, when using the bearer token method.
+Alternatively, ``<username>`` and ``<password>`` should be replaced with the user's credentials when using the basic authentication method.
 
-The client will use the first matching entry based on the server name.
+The client will use the first matching entry, and therefore the entries should be listed from the most
+specific pattern to the least specific one.
 
 ecFlow CLI example
 ------------------
