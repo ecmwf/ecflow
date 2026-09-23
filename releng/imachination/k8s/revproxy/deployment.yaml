@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: revproxy
+  labels:
+    app: revproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: revproxy
+  template:
+    metadata:
+      labels:
+        app: revproxy
+    spec:
+      enableServiceLinks: false
+
+      containers:
+        - name: nginx
+          image: imachination/revproxy:local
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: https
+              containerPort: 443
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+          volumeMounts:
+            # Replaces the directory wholesale, which is safe here: the package
+            # ships nothing else in it that is wanted.
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: static
+              mountPath: /usr/share/nginx/html/server
+              readOnly: true
+
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: revproxy-nginx
+        - name: static
+          configMap:
+            name: revproxy-static
