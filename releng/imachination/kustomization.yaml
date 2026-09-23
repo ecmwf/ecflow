@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Assembles the Kubernetes deployment of the imachination stack.
+#
+# This file lives beside compose.yaml, rather than under k8s/, because kustomize
+# refuses to read files outside the directory holding it, and the configuration
+# below is generated from the very files the Compose stack uses. Keeping a single
+# source for both deployments is worth one file at this level.
+#
+# Apply from this directory:
+#
+#   kubectl apply -k .
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: imachination
+
+resources:
+  - k8s/namespace.yaml
+
+# The static pages served by the reverse proxy. The nginx configuration itself
+# is generated alongside these once the reverse proxy is deployed.
+configMapGenerator:
+  - name: revproxy-static
+    files:
+      - index.html=revproxy/server/index.html
+      - 50x.html=revproxy/server/50x.html
+
+# The authentication configuration holds test credentials and a signing secret,
+# so it is carried as a Secret rather than a ConfigMap. This keeps it out of
+# `kubectl describe` output and establishes the right pattern, though it does not
+# make the committed file any less readable.
+secretGenerator:
+  - name: authotron-config
+    files:
+      - config.yaml=authotron/config.yaml
