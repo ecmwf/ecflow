@@ -3,10 +3,8 @@
 
 name: Build ecflow from source
 description: >
-  Configures, builds and installs the already-checked-out ecflow against the
-  resolved dependency prefixes, and leaves the build tree in place. Caller must
-  have already run actions/checkout@v6 in the same job — the action reads the
-  source from $GITHUB_WORKSPACE.
+  Builds and installs the checked-out ecflow with
+  ecmwf/ci-infrastructure/actions/cmake-build, which documents the common inputs.
 
   ecflow's tests link against the build tree rather than the install tree (and
   use static libraries that never reach the install prefix), so the build tree
@@ -14,20 +12,16 @@ description: >
 
 inputs:
   cmake-prefix-path:
-    description: 'Semicolon-separated prefixes of the resolved deps (ecbuild, stack-deps/pybind11)'
+    description: 'Prefixes of the resolved deps (ecbuild, stack-deps/pybind11)'
     required: true
   c-compiler:
-    description: >
-      C compiler binary including version (e.g. gcc-13). Must be the same
-      toolchain family as cxx-compiler: left unset CMake discovers /usr/bin/cc,
-      which is the image's gcc whatever the C++ compiler is, and a mixed build
-      then gets two sets of flag spellings and ABI expectations.
+    description: 'C compiler, e.g. gcc-13'
     required: true
   cxx-compiler:
-    description: 'C++ compiler binary including version (e.g. g++-13)'
+    description: 'C++ compiler, e.g. g++-13'
     required: true
   build-type:
-    description: 'CMake build type (e.g. Release, Debug, RelWithDebInfo)'
+    description: 'CMake build type'
     required: true
   boost-root:
     description: >
@@ -39,56 +33,18 @@ inputs:
 outputs:
   install-path:
     description: 'Absolute path where ecflow is installed'
-    value: ${{ steps.set-paths.outputs.install-path }}
+    value: ${{ steps.build.outputs.install-path }}
   build-dir:
     description: 'Absolute path of the build tree — ecflow tests run here, not from the install tree'
-    value: ${{ steps.set-paths.outputs.build-dir }}
+    value: ${{ steps.build.outputs.build-dir }}
 
 runs:
   using: composite
   steps:
-    - name: Get install prefix
-      id: prefix
-      uses: ecmwf/ci-infrastructure/actions/install-prefix@main
-
-    - name: Set paths
-      id: set-paths
-      shell: bash
-      run: |
-        set -euo pipefail
-        {
-          echo "install-path=${{ steps.prefix.outputs.base }}/ecflow"
-          echo "build-dir=$RUNNER_TEMP/_ecflow-build"
-        } >> "$GITHUB_OUTPUT"
-
-    - name: Set up sccache
-      if: env.SCCACHE_BUCKET != ''
-      uses: ecmwf/ci-infrastructure/actions/setup-sccache@main
-      with:
-        cache-key-suffix: ${{ inputs.cxx-compiler }}-${{ inputs.build-type }}
-
-    - name: Select compiler launcher
-      id: launcher
-      shell: bash
-      run: |
-        set -euo pipefail
-        if [ -n "${{ env.SCCACHE_BUCKET }}" ]; then
-          echo "flags=-DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache" >> "$GITHUB_OUTPUT"
-        else
-          echo "::notice::SCCACHE_BUCKET unset — compiling without sccache"
-          echo "flags=" >> "$GITHUB_OUTPUT"
-        fi
-
-    - name: Configure ecflow
+    - name: Locate Boost
+      id: boost
       shell: bash
       env:
-        CMAKE_PREFIX_PATH_IN: ${{ inputs.cmake-prefix-path }}
-        C_COMPILER: ${{ inputs.c-compiler }}
-        CXX_COMPILER: ${{ inputs.cxx-compiler }}
-        BUILD_TYPE: ${{ inputs.build-type }}
-        INSTALL_PATH: ${{ steps.set-paths.outputs.install-path }}
-        BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
-        LAUNCHER: ${{ steps.launcher.outputs.flags }}
         BOOST_ROOT_IN: ${{ inputs.boost-root }}
       run: |
         set -euo pipefail
@@ -103,33 +59,24 @@ runs:
           fi
         fi
 
-        # Never empty: bash 3.2 aborts on an empty array expansion under `set -u`.
-        boost_flags=( "-DBOOST_ROOT=$boost_root" )
-        if [ "$(uname)" = Darwin ]; then
-          boost_flags+=(
-            "-DBOOST_INCLUDEDIR=$boost_root/include"
-            "-DBOOST_LIBRARYDIR=$boost_root/lib"
-          )
-        fi
+        {
+          echo "cmake-args<<EOF"
+          echo "-DBOOST_ROOT=$boost_root"
+          if [ "$(uname)" = Darwin ]; then
+            echo "-DBOOST_INCLUDEDIR=$boost_root/include"
+            echo "-DBOOST_LIBRARYDIR=$boost_root/lib"
+          fi
+          echo "-DENABLE_CONFIG_MODE_BOOST=OFF"
+          echo "-DENABLE_STATIC_BOOST_LIBS=OFF"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
 
-        cmake --preset ci \
-              -S "$GITHUB_WORKSPACE" \
-              -B "$BUILD_DIR" \
-              -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-              -DCMAKE_C_COMPILER="$C_COMPILER" \
-              -DCMAKE_CXX_COMPILER="$CXX_COMPILER" \
-              -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" \
-              -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH_IN" \
-              "${boost_flags[@]}" \
-              -DENABLE_CONFIG_MODE_BOOST=OFF \
-              -DENABLE_STATIC_BOOST_LIBS=OFF \
-              $LAUNCHER
-
-    - name: Build and install ecflow
-      shell: bash
-      env:
-        BUILD_DIR: ${{ steps.set-paths.outputs.build-dir }}
-      run: |
-        set -euo pipefail
-        cmake --build "$BUILD_DIR" --parallel "$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
-        cmake --install "$BUILD_DIR"
+    - id: build
+      uses: ecmwf/ci-infrastructure/actions/cmake-build@main
+      with:
+        package: ecflow
+        cmake-prefix-path: ${{ inputs.cmake-prefix-path }}
+        c-compiler: ${{ inputs.c-compiler }}
+        cxx-compiler: ${{ inputs.cxx-compiler }}
+        build-type: ${{ inputs.build-type }}
+        cmake-args: ${{ steps.boost.outputs.cmake-args }}
