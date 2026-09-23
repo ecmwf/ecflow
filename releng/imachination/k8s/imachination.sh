@@ -17,6 +17,7 @@ IMACHINATION_DIR="$(cd "${HERE}/.." && pwd)"
 readonly IMACHINATION_DIR
 
 readonly CLUSTER_NAME="imachination"
+readonly NAMESPACE="imachination"
 readonly GENERATED_DIR="${HERE}/.generated"
 readonly CLUSTER_TEMPLATE="${HERE}/kind-cluster.yaml.in"
 readonly CLUSTER_CONFIG="${GENERATED_DIR}/kind-cluster.yaml"
@@ -110,6 +111,26 @@ do_images() {
     done
 }
 
+# Declares every object of the stack. Re-applying an unchanged tree is a no-op,
+# and an edited configuration file yields a new generated name, which rolls the
+# pods that consume it.
+do_apply() {
+    require kubectl
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist. Run '$(basename "$0") cluster' first."
+
+    info "Applying the stack"
+    kubectl --context "kind-${CLUSTER_NAME}" apply -k "${IMACHINATION_DIR}"
+}
+
+# Removes the stack, leaving the cluster and its loaded images in place.
+do_down() {
+    require kubectl
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist."
+
+    info "Deleting namespace '${NAMESPACE}'"
+    kubectl --context "kind-${CLUSTER_NAME}" delete namespace "${NAMESPACE}" --ignore-not-found
+}
+
 do_status() {
     require kubectl
     if ! cluster_exists; then
@@ -121,6 +142,10 @@ do_status() {
     info "Images loaded into the cluster"
     docker exec "${CLUSTER_NAME}-control-plane" crictl images 2>/dev/null \
         | grep -E 'IMAGE|imachination' || warn "No imachination images loaded yet."
+
+    info "Objects in namespace '${NAMESPACE}'"
+    kubectl --context "kind-${CLUSTER_NAME}" get all,configmap,secret -n "${NAMESPACE}" 2>/dev/null \
+        | grep -v '^configmap/kube-root-ca.crt' || warn "Namespace '${NAMESPACE}' does not exist yet."
 }
 
 do_destroy() {
@@ -141,7 +166,9 @@ Usage: $(basename "$0") <command>
 Commands:
   cluster    Render the cluster definition and create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
-  status     Report the state of the cluster and the images loaded into it
+  apply      Declare the stack in the cluster
+  down       Delete the stack, keeping the cluster and its images
+  status     Report the state of the cluster, its images and the stack
   destroy    Delete the cluster and the rendered definition
 
 Environment:
@@ -157,6 +184,8 @@ main() {
     case "${1:-}" in
         cluster) do_cluster ;;
         images)  do_images ;;
+        apply)   do_apply ;;
+        down)    do_down ;;
         status)  do_status ;;
         destroy) do_destroy ;;
         ""|-h|--help|help) usage ;;

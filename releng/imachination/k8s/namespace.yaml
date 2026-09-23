@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The naming scope for the whole stack. Deleting this namespace removes every
+# object in it, which is the equivalent of `docker compose down`.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: imachination
