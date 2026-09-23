@@ -23,10 +23,13 @@ resources:
   - k8s/ecflow/service.yaml
   - k8s/authotron/deployment.yaml
   - k8s/authotron/service.yaml
+  - k8s/revproxy/deployment.yaml
 
-# The static pages served by the reverse proxy. The nginx configuration itself
-# is generated alongside these once the reverse proxy is deployed.
+# The reverse proxy's configuration and the static pages it serves.
 configMapGenerator:
+  - name: revproxy-nginx
+    files:
+      - default.conf=k8s/revproxy/nginx-default.conf
   - name: revproxy-static
     files:
       - index.html=revproxy/server/index.html
