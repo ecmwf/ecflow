@@ -6,6 +6,12 @@ services:
   revproxy:
     hostname: revproxy
     build: ./revproxy
+    # nginx resolves the upstream host names once, at start-up, and refuses to
+    # start if any of them is unknown. Both upstreams must therefore exist before
+    # the reverse proxy is started.
+    depends_on:
+      - ecflow
+      - authotron
     ports:
       - "80:80"
       - "443:443"
