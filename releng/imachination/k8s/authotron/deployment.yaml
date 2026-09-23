@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authotron
+  labels:
+    app: authotron
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authotron
+  template:
+    metadata:
+      labels:
+        app: authotron
+    spec:
+      # Nothing in this stack reads the legacy link variables, and the ecFlow
+      # server demonstrated the hazard of leaving them defined.
+      enableServiceLinks: false
+
+      containers:
+        - name: authotron
+          image: imachination/authotron:local
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          # The documented health endpoint, which requires no credentials and
+          # reports whether the service is able to serve, rather than merely
+          # whether a socket is open.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+          volumeMounts:
+            # Mounted as a single file. The entrypoint is /app/authotron, so a
+            # volume mounted at /app would replace the directory and hide the
+            # executable.
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+
+      volumes:
+        - name: config
+          secret:
+            secretName: authotron-config
