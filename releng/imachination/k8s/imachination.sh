@@ -233,12 +233,14 @@ do_destroy() {
 
 usage() {
     cat <<USAGE
-Usage: $(basename "$0") <command>
+Usage: $(basename "$0") <command> [argument]
 
 Commands:
   cluster    Render the cluster definition and create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
+  restart    Replace every workload, or the one named, so that it re-reads its
+             configuration; required after editing server_environment.cfg
   down       Delete the stack, keeping the cluster and its images
   status     Report the state of the cluster, its images and the stack
   destroy    Delete the cluster and the rendered definition
@@ -259,6 +261,7 @@ main() {
         cluster) do_cluster ;;
         images)  do_images ;;
         apply)   do_apply ;;
+        restart) do_restart "${2:-}" ;;
         down)    do_down ;;
         status)  do_status ;;
         destroy) do_destroy ;;
