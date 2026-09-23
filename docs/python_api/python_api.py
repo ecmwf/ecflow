@@ -82,8 +82,11 @@ def build_toc():
 
 """
 
+    # End the page with exactly one newline. A trailing blank line is meaningless in
+    # reStructuredText, and is removed by the end-of-file-fixer pre-commit hook, so
+    # emitting one would make every documentation build dirty the generated source.
     with open("python_api.rst", "w") as f:
-        f.write(SPDX_HEADER + t)
+        f.write(SPDX_HEADER + t.rstrip("\n") + "\n")
 
     check_usage(names)
 

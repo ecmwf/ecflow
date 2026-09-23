@@ -426,33 +426,38 @@ Options
     return txt
 
 
+def write_rst(path, content):
+    """Write a generated page, ending it with exactly one newline.
+
+    The page templates append newlines of their own around already-terminated
+    fragments, which leaves a variable number of blank lines at the end of the
+    file. Those blank lines are meaningless in reStructuredText, and are removed
+    by the end-of-file-fixer pre-commit hook, so emitting them would make every
+    documentation build dirty the generated sources.
+    """
+    with open(path, "w") as f:
+        f.write(SPDX_HEADER + content.rstrip("\n") + "\n")
+
+
 if __name__ == "__main__":
 
     manifest = load_manifest()
 
     # Render and store index.rst
-    content = render_index_rst()
-    with open("index.rst", "w") as f:
-        f.write(SPDX_HEADER + content)
+    write_rst("index.rst", render_index_rst())
 
     command_entries = load_commands(manifest)
-    with open("cli_commands.rst", "w") as f:
-        f.write(SPDX_HEADER + render_commands_rst(command_entries))
+    write_rst("cli_commands.rst", render_commands_rst(command_entries))
 
     option_entries = load_options(manifest)
-    with open("cli_options.rst", "w") as f:
-        f.write(SPDX_HEADER + render_options_rst(option_entries))
+    write_rst("cli_options.rst", render_options_rst(option_entries))
 
     # Ensure api sub-folders is present
     pathlib.Path("api").mkdir(parents=True, exist_ok=True)
 
     # Render and store each of the command/option.rst
     for entry in command_entries:
-        content = render_single_page_rst(manifest, entry.name)
-        with open(f"api/{entry.name}.rst", "w") as f:
-            f.write(SPDX_HEADER + content)
+        write_rst(f"api/{entry.name}.rst", render_single_page_rst(manifest, entry.name))
 
     for entry in option_entries:
-        content = render_single_page_rst(manifest, entry.name)
-        with open(f"api/{entry.name}.rst", "w") as f:
-            f.write(SPDX_HEADER + content)
+        write_rst(f"api/{entry.name}.rst", render_single_page_rst(manifest, entry.name))

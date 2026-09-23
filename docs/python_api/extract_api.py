@@ -158,7 +158,12 @@ def generate():
         if not isinstance(cls, type):
             raise SystemExit(f"extract_api.py: unexpected non-class module member: {name}")
         lines = class_lines(name, cls)
-        content = "\n".join(lines) + ("\n" if not lines[-1] else "\n\n")
+        # Strip whitespace at the end of each line, and end the page with exactly one
+        # newline. Neither is significant in reStructuredText, and both are removed by the
+        # trailing-whitespace and end-of-file-fixer pre-commit hooks, so emitting them
+        # would make every documentation build dirty the generated sources. The trailing
+        # whitespace originates in the docstrings of the Python bindings.
+        content = "\n".join(line.rstrip() for line in lines).rstrip("\n") + "\n"
         (OUTPUT_DIR / f"{name}.rst").write_text(SPDX_HEADER + content)
 
 
