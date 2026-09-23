@@ -125,8 +125,10 @@ diagnose() {
         --tail=20 --all-containers 2>&1 | tail -20 || true
 }
 
-# Waits for every declared deployment to become available, so that a workload
-# which fails to start is reported here rather than discovered later.
+# Waits for the named deployments to become available, or for every declared one
+# when none is named, so that a workload which fails to start is reported here
+# rather than discovered later. Only what an action touched is waited for, so
+# that the report names the workloads that actually moved.
 wait_for_workloads() {
     local timeout="${ROLLOUT_TIMEOUT:-300s}"
     local workload
@@ -142,8 +144,12 @@ wait_for_workloads() {
             diagnose "${workload}"
             failed=1
         fi
-    done < <(kubectl --context "kind-${CLUSTER_NAME}" get deployments \
-                 -n "${NAMESPACE}" -o name 2>/dev/null)
+    done < <(if [[ "$#" -gt 0 ]]; then
+                 printf 'deployment.apps/%s\n' "$@"
+             else
+                 kubectl --context "kind-${CLUSTER_NAME}" get deployments \
+                     -n "${NAMESPACE}" -o name 2>/dev/null
+             fi)
 
     [[ "${failed}" -eq 0 ]] || die "One or more workloads did not become available."
 }
@@ -159,6 +165,32 @@ do_apply() {
     kubectl --context "kind-${CLUSTER_NAME}" apply -k "${IMACHINATION_DIR}"
 
     wait_for_workloads
+    info "The stack is available."
+}
+
+# Restarts workloads so that they re-read their configuration. The ecFlow server
+# reads server_environment.cfg only at start-up, and offers no command to reload
+# ECF_PERMISSIONS, so editing that file has no effect until the pod is replaced.
+do_restart() {
+    require kubectl
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist."
+
+    local target="${1:-}"
+    if [[ -n "${target}" ]]; then
+        kubectl --context "kind-${CLUSTER_NAME}" get "deployment/${target}" \
+            -n "${NAMESPACE}" >/dev/null 2>&1 \
+            || die "No such workload: ${target}. Try '$(basename "$0") status'."
+        info "Restarting deployment/${target}"
+        kubectl --context "kind-${CLUSTER_NAME}" rollout restart \
+            "deployment/${target}" -n "${NAMESPACE}"
+    else
+        info "Restarting every workload"
+        kubectl --context "kind-${CLUSTER_NAME}" rollout restart deployment -n "${NAMESPACE}"
+    fi
+
+    # Only the workload that was restarted is waited for, so that the report does
+    # not name workloads that were left running.
+    wait_for_workloads ${target:+"${target}"}
     info "The stack is available."
 }
 
