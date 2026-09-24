@@ -77,9 +77,17 @@ EOF
 
 # Smoke-tests the image of one platform: builds it, loads it into the local Docker, checks its size, and
 # checks server lifecycle and persistence using the installed entrypoint
-function smoke_test() {
+function smoke_test() (
     local platform="$1"
-    local tag="ecflow-smoke:${platform##*/}"
+    local scratch tag
+    scratch=$(mktemp -d "${TMPDIR:-/tmp}/ecflow-smoke.XXXXXXXXXX")
+    tag="ecflow-smoke:${scratch##*/}"
+
+    # Reserve a unique tag for this invocation and clean up only that tag. A subshell keeps
+    # these traps scoped to the smoke test, including failed builds and interrupted tests.
+    trap 'docker image rm "${tag}" >/dev/null 2>&1 || true; rmdir "${scratch}"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
 
     docker buildx build --platform "${platform}" --load -t "${tag}" \
         ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} "${CONTEXT}"
@@ -94,7 +102,7 @@ function smoke_test() {
     fi
 
     bash "${SCRIPT_DIR}/test_ecflow_server_image.sh" "${tag}" "${platform}"
-}
+)
 
 # ---------------------------------------------------------------------------
 # Argument parsing
