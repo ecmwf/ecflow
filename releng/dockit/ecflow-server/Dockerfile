@@ -32,24 +32,28 @@ COPY ${ECFLOW_LAUNCH} /opt/local/bin/${ECFLOW_LAUNCH}
 RUN chmod +x /opt/local/bin/${ECFLOW_LAUNCH}
 
 # Run as an unprivileged user
-# ecFlow identifies users by their passwd entry, so the container must run as this user (not as an arbitrary
-# `docker run --user` UID); ECFLOW_UID/ECFLOW_GID match it to the owner of a bind-mounted workspace. An existing
-# group with ECFLOW_GID (e.g. GID 20, the default group on macOS) is reused.
+# The server runs as the user 'ecflow'. The container starts as root, and launch.sh aligns the UID/GID of
+# 'ecflow' with the owner of the workspace before dropping privileges to it, so that a bind-mounted workspace
+# is writable whatever UID owns it on the host. ECFLOW_UID/ECFLOW_GID only set the initial UID/GID, used
+# when the workspace is not mounted from the host. ecFlow identifies users by their passwd entry, so the
+# container must not run under an arbitrary `docker run --user` UID. The GID may duplicate that of an
+# existing group (e.g. GID 20, the default group on macOS).
 ARG ECFLOW_UID=1000
 ARG ECFLOW_GID=1000
-RUN { getent group "${ECFLOW_GID}" > /dev/null || groupadd --gid "${ECFLOW_GID}" ecflow; } \
+RUN groupadd --non-unique --gid "${ECFLOW_GID}" ecflow \
     && useradd --create-home --uid "${ECFLOW_UID}" --gid "${ECFLOW_GID}" ecflow \
-    && install -d -o ecflow -g "${ECFLOW_GID}" /workspace
-
-USER ecflow
+    && install -d -o ecflow -g ecflow /workspace
 
 # Set the working directory
 WORKDIR /workspace
 
 EXPOSE 8888
 
+# The health check runs as root; the ping is issued as 'ecflow', the user the server runs as, with its own
+# HOME (ecflow_client fails, reporting a connection error, when HOME is not accessible to it)
 HEALTHCHECK --interval=10s --timeout=8s --start-period=10s \
-    CMD ECF_CONNECT_TIMEOUT=5 ecflow_client --http --host localhost --port "${ECFLOW_SERVER_PORT:-8888}" --ping > /dev/null || exit 1
+    CMD HOME=/home/ecflow ECF_CONNECT_TIMEOUT=5 setpriv --reuid=ecflow --regid=ecflow --init-groups \
+        ecflow_client --http --host localhost --port "${ECFLOW_SERVER_PORT:-8888}" --ping > /dev/null || exit 1
 
 # tini runs as PID 1, forwarding signals to launch.sh and reaping the processes started by the server
 ENTRYPOINT ["/usr/bin/tini", "--", "/opt/local/bin/launch.sh"]

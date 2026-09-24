@@ -7,6 +7,43 @@ set -e            # Exit immediately if a command exits with a non-zero status
 set -u            # Treat unset variables as an error when substituting
 set -o pipefail   # Return the exit status of the last command in the pipe that failed
 
+# Run the server as the unprivileged user 'ecflow', with access to the workspace
+#
+# The container starts as root only to align the UID/GID of 'ecflow' with the owner of the (typically
+# bind-mounted) workspace, so that the server can write to it whatever UID owns it on the host. This
+# script is then re-executed as 'ecflow', so that the server, and every client command issued here,
+# runs as that user.
+
+if [ "$(id -u)" = "0" ]; then
+    workspace=${ECFLOW_WORKSPACE_DIR:-/workspace}
+    mkdir -p "${workspace}"
+
+    owner_uid=$(stat -c %u "${workspace}")
+    owner_gid=$(stat -c %g "${workspace}")
+
+    if [ "${owner_uid}" = "0" ]; then
+        # A root-owned workspace (e.g. a bind-mounted host directory that Docker had to create) is handed
+        # over to 'ecflow' when empty; one with contents is left untouched
+        if [ -z "$(ls -A "${workspace}")" ]; then
+            chown ecflow:ecflow "${workspace}"
+        else
+            echo "launch.sh: warning: ${workspace} is owned by root and not empty; it is left as is," \
+                 "and may not be writable by ecflow" >&2
+        fi
+    else
+        # Duplicate IDs are allowed, as the owner may share its UID/GID with a user/group of the image
+        if [ "${owner_gid}" != "$(id -g ecflow)" ]; then
+            groupmod --non-unique --gid "${owner_gid}" ecflow
+        fi
+        if [ "${owner_uid}" != "$(id -u ecflow)" ]; then
+            usermod --non-unique --uid "${owner_uid}" --gid "${owner_gid}" ecflow
+        fi
+    fi
+
+    export HOME=/home/ecflow USER=ecflow LOGNAME=ecflow
+    exec setpriv --reuid=ecflow --regid=ecflow --init-groups "$0" "$@"
+fi
+
 # Source Python virtual environment
 
 source /opt/local/python/bin/activate
@@ -73,5 +110,15 @@ while kill -0 "${server_pid}" 2>/dev/null; do
     wait "${server_pid}"
     status=$?
 done
+
+# A 'wait' interrupted by a trapped signal reports 128+signal, even when the server exits right after;
+# in that case, collect the actual exit status of the server
+if [ "${status}" -gt 128 ]; then
+    wait "${server_pid}" 2>/dev/null
+    final=$?
+    if [ "${final}" -ne 127 ]; then
+        status=${final}
+    fi
+fi
 
 exit "${status}"

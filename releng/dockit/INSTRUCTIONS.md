@@ -116,7 +116,12 @@ Any arguments given to the container are passed on to `ecflow_server` (for examp
 check pings the server with `ecflow_client --ping`. On `docker stop`, the server is asked to terminate cleanly with
 `ecflow_client --terminate`.
 
-The server runs as the unprivileged user `ecflow` (UID and GID 1000, by default), and a workspace bind-mounted at
-`/workspace` must be writable by that user. As ecFlow identifies users by their `/etc/passwd` entry, the container
-cannot run under an arbitrary `docker run --user <uid>`; instead, build the image with a matching user, for example
-by adding `--build-arg ECFLOW_UID=$(id -u) --build-arg ECFLOW_GID=$(id -g)` to the `docker build` command.
+The server runs as the unprivileged user `ecflow`. The container starts as root, gives `ecflow` the UID and GID of
+the owner of `/workspace` (typically a directory bind-mounted from the host), and then drops privileges to `ecflow`,
+so that the server can write to the workspace whatever UID owns it on the host. A root-owned workspace, such as a host
+directory that Docker had to create, is handed over to `ecflow` when empty. Without a mounted workspace, `ecflow` keeps
+UID and GID 1000, which can be changed with `--build-arg ECFLOW_UID=... --build-arg ECFLOW_GID=...`.
+
+As ecFlow identifies users by their `/etc/passwd` entry, the container must not be started with an arbitrary
+`docker run --user <uid>`. To run commands as the server user in a running container, use
+`docker exec -u ecflow <container> ...`.
