@@ -28,7 +28,7 @@ set -o pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 
-DOCKER_IMAGE="marcosbento/lumen:debian-13.5"
+DOCKER_IMAGE="marcosbento/lumen:debian-13.7"
 PRESET="linux.gcc.server.release"
 JOBS=4
 

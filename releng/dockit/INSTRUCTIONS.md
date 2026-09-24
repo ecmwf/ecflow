@@ -25,7 +25,7 @@ The action `.github/workflows/dockit.yml` automates the image build process desc
 on `workflow_dispatch`, as two jobs sharing a build matrix (each leg pairs a preset with the image name and
 Dockerfile directory it belongs to):
 
-1. The `package` job builds the ecFlow Debian package inside `marcosbento/lumen:debian-13.5`, following the
+1. The `package` job builds the ecFlow Debian package inside `marcosbento/lumen:debian-13.7`, following the
    same checkout/configure/build/package steps as `ecflow-server.build.package.sh`, once per architecture
    (`amd64` and `arm64`), each natively on a GitHub-hosted runner of that architecture. Each leg names its
    package `ecflow-<arch>.deb` and uploads it as an `ecflow-debian-package-<image>-<arch>` artefact.
@@ -54,7 +54,7 @@ Run:
 ./ecflow-server.build.package.sh
 ```
 
-This launches the `marcosbento/lumen:debian-13.5` Docker image and, inside it:
+This launches the `marcosbento/lumen:debian-13.7` Docker image and, inside it:
 
 1. Checks out `ecbuild` and `ecflow` (`develop` branch, by default).
 

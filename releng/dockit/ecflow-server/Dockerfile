@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
-FROM debian:13.5-slim
+FROM debian:13.7-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     container:
-      image: marcosbento/lumen:debian-13.5
+      image: marcosbento/lumen:debian-13.7
       options: --user root
 
     timeout-minutes: 60
