@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  # Collect timestamp for docker image labelling
+  # Collect the timestamp and version information shared by all jobs
   bootstrap:
     name: bootstrap
     runs-on: ubuntu-latest
@@ -18,16 +18,33 @@ jobs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
       created: ${{ steps.timestamp.outputs.created }}
       jobs: ${{ steps.timestamp.outputs.jobs }}
+      version: ${{ steps.vars.outputs.version }}
 
     steps:
+      - name: Checkout 'ecflow' (CMakeLists.txt only)
+        uses: actions/checkout@v4
+        with:
+          path: ecflow
+          sparse-checkout: CMakeLists.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Generate ecflow custom version information
+        id: vars
+        run: |
+          cd "${GITHUB_WORKSPACE}/ecflow"
+          version=$(grep -e '^project' CMakeLists.txt | sed 's/project( [a-zA-Z ]*\([0-9.]*\) )/\1/g')_${{ github.sha }}
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
       - name: Collect timestamp
         id: timestamp
         run: |
           # The same instant, compact for image tags and in RFC 3339 for the OCI 'created' label
           now=$(date -u +%s)
-          echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')" >> "${GITHUB_OUTPUT}"
-          echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_OUTPUT}"
-          echo "jobs=4" >> "${GITHUB_OUTPUT}"
+          {
+            echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')"
+            echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "jobs=4"
+          } >> "${GITHUB_OUTPUT}"
 
   #
   # Create the ecflow package, per image variant and architecture
@@ -36,7 +53,6 @@ jobs:
   package:
     name: package (${{ matrix.image }}, ${{ matrix.arch }})
     needs: bootstrap
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
 
     runs-on: ${{ matrix.runner }}
 
@@ -63,33 +79,16 @@ jobs:
           - arch: arm64
             runner: ubuntu-24.04-arm
 
-    outputs:
-      version: ${{ steps.vars.outputs.version }}
-
     steps:
 
       - name: Display build context
         run: |
-          echo "github.sha === ${{ github.sha }}"
-          echo "github.ref === ${{ github.ref }}"
-          echo "github.workspace === ${{ github.workspace }}"
-          echo "GITHUB_WORKSPACE === ${GITHUB_WORKSPACE}"
-          echo "runner.workspace === ${{ runner.workspace }}"
-          echo "RUNNER_WORKSPACE === ${RUNNER_WORKSPACE}"
-          echo "env === ${{ env }}"
-          echo "Container user: $(whoami)"
-          echo "Container working directory: $(pwd)"
-          echo "Environment:"
-          echo "$(env)"
-          echo "OS info:"
-          echo "$(cat /etc/os-release)"
-          echo "CPU info:"
-          echo "$(cat /proc/cpuinfo)"
-          echo "Memory info:"
-          echo "$(cat /proc/meminfo)"
-          echo "Disk info:"
-          echo "$(df -h)"
-
+          echo "Commit: ${GITHUB_SHA} (${GITHUB_REF_NAME})"
+          echo "Runner: ${RUNNER_OS} ${RUNNER_ARCH}; container user: $(whoami)"
+          grep PRETTY_NAME /etc/os-release
+          echo "CPUs: $(nproc)"
+          grep MemTotal /proc/meminfo
+          df -h "${GITHUB_WORKSPACE}"
 
       - name: Checkout 'ecbuild'
         uses: actions/checkout@v4
@@ -104,23 +103,16 @@ jobs:
         with:
           path: ecflow
 
-      - name: Generate ecflow custom version information
-        id: vars
-        run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
-          version=$(cat CMakeLists.txt  | grep -e '^project' | sed 's/project( [a-zA-Z ]*\([0-9.]*\) )/\1/g')_${{ github.sha }}
-          echo "version=${version}" >> $GITHUB_OUTPUT
-
       - name: Configure ecflow
         id: configure-ecflow
         run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
+          cd "${GITHUB_WORKSPACE}/ecflow"
           cmake --preset ${{ matrix.preset }} \
-                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}
+                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ needs.bootstrap.outputs.version }}
 
       - name: Build ecflow
         run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
+          cd "${GITHUB_WORKSPACE}/ecflow"
           cmake --build \
                 --preset ${{ matrix.preset }} \
                 --jobs ${{ needs.bootstrap.outputs.jobs }} \
@@ -128,7 +120,7 @@ jobs:
 
       - name: Package ecflow
         run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
+          cd "${GITHUB_WORKSPACE}/ecflow"
           cmake --build \
                 --preset ${{ matrix.preset }} \
                 --target package
@@ -146,14 +138,6 @@ jobs:
           name: ecflow-debian-package-${{ matrix.image }}-${{ matrix.arch }}
           path: ecflow-${{ matrix.arch }}.deb
           if-no-files-found: error
-
-#      - name: Test ecflow
-#        run: |
-#          cd ${{ github.workspace }}/ecflow
-#          ctest --preset  ${{ matrix.preset }} \
-#                --jobs ${{ needs.bootstrap.outputs.jobs }} \
-#                --output-on-failure \
-#                -L nightly
 
   #
   # Create the ecflow docker image
@@ -252,7 +236,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           SHA: ${{ github.sha }}
           TIMESTAMP: ${{ needs.bootstrap.outputs.timestamp }}
-          VERSION: ${{ needs.package.outputs.version }}
+          VERSION: ${{ needs.bootstrap.outputs.version }}
         run: |
           name="${BRANCH#*/}"
           slug=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9.]+/-/g; s/^[-.]+//; s/-+$//' | cut -c1-60)
@@ -289,6 +273,6 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ needs.package.outputs.version }}
+            org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}
             org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}
             int.ecmwf.ecflow.preset=${{ matrix.preset }}
