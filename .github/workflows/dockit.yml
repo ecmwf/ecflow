@@ -47,14 +47,10 @@ jobs:
       matrix:
         preset:
           - linux.gcc.serveronly.relwithdebinfo
-          - linux.gcc.all.relwithdebinfo
         include:
           - preset: linux.gcc.serveronly.relwithdebinfo
             image: ecflow-serveronly-dev
             context: ecflow-server
-          - preset: linux.gcc.all.relwithdebinfo
-            image: ecflow-all-dev
-            context: ecflow-all
 
     outputs:
       version: ${{ steps.vars.outputs.version }}
@@ -156,14 +152,10 @@ jobs:
       matrix:
         preset:
           - linux.gcc.serveronly.relwithdebinfo
-          - linux.gcc.all.relwithdebinfo
         include:
           - preset: linux.gcc.serveronly.relwithdebinfo
             image: ecflow-serveronly-dev
             context: ecflow-server
-          - preset: linux.gcc.all.relwithdebinfo
-            image: ecflow-all-dev
-            context: ecflow-all
 
     steps:
       - name: Checkout 'ecflow'
