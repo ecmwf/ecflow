@@ -37,7 +37,7 @@ Dockerfile directory it belongs to):
 
 ### Building the `ecflow-server` image
 
-This section describes the process to build a Docker image running an ecFlow server.
+This section describes the process to build the `ecflow-server-dev` Docker image, running an ecFlow server.
 
 As mentioned above, this is automated in the `dockit` workflow, but can also be done manually as follows.
 
@@ -77,7 +77,7 @@ Build the image, passing the package version and filename as build arguments:
 ```bash
 docker build \
     --build-arg ECFLOW_PACKAGE=ecflow-<version>_<sha>-Linux_x86_64.deb \
-    -t ecflow-serveronly-dev:latest \
+    -t ecflow-server-dev:latest \
     ecflow-server/
 ```
 
@@ -85,11 +85,10 @@ Note: provide the `.deb` filename explicitly to match the file produced in Step 
 package,
 rename the package to the default name `ecflow-latest-Linux.deb`.
 
-The ecflow ports are configurable via the `ECFLOW_SERVER_PORT` (default `8888`) and `ECFLOW_REST_PORT` (default `8889`)
-environment variables.
+The ecflow server port is configurable via the `ECFLOW_SERVER_PORT` environment variable (default `8888`).
 
 Run the image with, for example:
 
 ```bash
-docker run --rm -p 8888:8888 -p 8889:8889 ecflow-serveronly-dev:latest
+docker run --rm -p 8888:8888 ecflow-server-dev:latest
 ```

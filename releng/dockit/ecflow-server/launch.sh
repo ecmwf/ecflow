@@ -20,7 +20,6 @@ ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local}
 ECFLOW_WORKSPACE_DIR=${ECFLOW_WORKSPACE_DIR:-/workspace}
 ECFLOW_SERVER_HOST=${ECFLOW_SERVER_HOST:-ecflow-server}
 ECFLOW_SERVER_PORT=${ECFLOW_SERVER_PORT:-8888}
-ECFLOW_REST_PORT=${ECFLOW_REST_PORT:-8889}
 
 # Launch ecFlow 'Main' Server
 
@@ -43,23 +42,6 @@ nohup ${ECFLOW_INSTALL_DIR}/bin/ecflow_server \
       -d \
       --http \
       --port ${ECFLOW_SERVER_PORT} \
-      < /dev/null \
-      &
-
-sleep 1 # Give the server a moment to actually start waiting for connections
-
-# Launch ecFlow REST API server
-
-ECF_REST_OUT=${ECF_HOST}.${ECFLOW_REST_PORT}.rest.out
-export ECF_REST_OUT
-
-nohup /usr/local/bin/ecflow_http \
-      --http \
-      --ecflow_host ${ECFLOW_SERVER_HOST} \
-      --ecflow_port ${ECFLOW_SERVER_PORT} \
-      --port ${ECFLOW_REST_PORT} \
-      --no_ssl \
-      -v \
       < /dev/null \
       &
 

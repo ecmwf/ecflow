@@ -29,7 +29,7 @@ set -o pipefail
 # ---------------------------------------------------------------------------
 
 DOCKER_IMAGE="marcosbento/lumen:debian-13.5"
-PRESET="linux.gcc.serveronly.relwithdebinfo"
+PRESET="linux.gcc.server.release"
 JOBS=4
 
 SANDBOX_DIR="${PWD}/ecflow-server.sandbox"

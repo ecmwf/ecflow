@@ -46,10 +46,10 @@ jobs:
       max-parallel: 1
       matrix:
         preset:
-          - linux.gcc.serveronly.relwithdebinfo
+          - linux.gcc.server.release
         include:
-          - preset: linux.gcc.serveronly.relwithdebinfo
-            image: ecflow-serveronly-dev
+          - preset: linux.gcc.server.release
+            image: ecflow-server-dev
             context: ecflow-server
 
     outputs:
@@ -151,10 +151,10 @@ jobs:
       max-parallel: 1
       matrix:
         preset:
-          - linux.gcc.serveronly.relwithdebinfo
+          - linux.gcc.server.release
         include:
-          - preset: linux.gcc.serveronly.relwithdebinfo
-            image: ecflow-serveronly-dev
+          - preset: linux.gcc.server.release
+            image: ecflow-server-dev
             context: ecflow-server
 
     steps:

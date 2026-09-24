@@ -147,7 +147,7 @@
       "environment"   : {}
     },
     {
-      "name": "linux.gcc.serveronly.relwithdebinfo",
+      "name": "linux.gcc.server.release",
       "description": "Build environment on 'Linux', compiled with 'GNU GCC'",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/.deploy/build/${presetName}",
@@ -158,21 +158,21 @@
         "rhs": "Linux"
       },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_VERBOSE_MAKEFILE": "ON",
         "CMAKE_COLOR_DIAGNOSTICS": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CPACK_PACKAGE_NAME": "ecflow",
-        "ENABLE_TESTS": "ON",
-        "ENABLE_ALL_TESTS": "ON",
+        "ENABLE_TESTS": "OFF",
+        "ENABLE_ALL_TESTS": "OFF",
         "ENABLE_DOCS": "OFF",
         "ENABLE_PYTHON": "ON",
         "ENABLE_SERVER": "ON",
         "ENABLE_SSL": "ON",
-        "ENABLE_UDP": "ON",
-        "ENABLE_HTTP": "ON",
+        "ENABLE_UDP": "OFF",
+        "ENABLE_HTTP": "OFF",
         "ENABLE_UI": "OFF",
         "ENABLE_STATIC_BOOST_LIBS": "OFF",
         "ENABLE_DEBIAN_PACKAGE": "ON",
@@ -205,8 +205,8 @@
       "configurePreset": "linux.clang.all.release"
     },
     {
-      "name": "linux.gcc.serveronly.relwithdebinfo",
-      "configurePreset": "linux.gcc.serveronly.relwithdebinfo"
+      "name": "linux.gcc.server.release",
+      "configurePreset": "linux.gcc.server.release"
     }
   ],
   "testPresets": [
@@ -250,17 +250,6 @@
         "outputOnFailure": true
       },
       "execution"      : {
-        "noTestsAction": "error",
-        "stopOnFailure": true
-      }
-    },
-    {
-      "name": "linux.gcc.serveronly.relwithdebinfo",
-      "configurePreset": "linux.gcc.serveronly.relwithdebinfo",
-      "output": {
-        "outputOnFailure": true
-      },
-      "execution": {
         "noTestsAction": "error",
         "stopOnFailure": true
       }
