@@ -162,3 +162,61 @@ UID and GID 1000, which can be changed with `--build-arg ECFLOW_UID=... --build-
 As ecFlow identifies users by their `/etc/passwd` entry, the container must not be started with an arbitrary
 `docker run --user <uid>`. To run commands as the server user in a running container, use
 `docker exec -u ecflow <container> ...`.
+
+#### Smoke-testing a published image
+
+The following steps check an image published by the `dockit` workflow by hand, for example after a run from a branch.
+They are run from an empty directory, and use the image of the branch `task/improve_dockit` (tag `improve-dockit`) as
+an example; `--platform` selects the architecture to test (by default, that of the Docker host).
+
+1. Pull the image, and check its architecture and labels:
+
+   ```bash
+   IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:improve-dockit
+   docker pull --platform linux/arm64 "${IMAGE}"
+   docker image inspect "${IMAGE}" --format '{{.Architecture}} {{json .Config.Labels}}'
+   ```
+
+2. Start a container, with the server port published on the host (here, as port `18888`) and a workspace
+   bind-mounted from the host, and wait until the health check reports `healthy` (a few seconds):
+
+   ```bash
+   mkdir -p workspace
+   docker run -d --name ecflow-smoke --platform linux/arm64 -p 18888:8888 -v "${PWD}/workspace:/workspace" "${IMAGE}"
+   docker inspect -f '{{.State.Health.Status}}' ecflow-smoke
+   ```
+
+3. Ping the server from inside the container, as the server user `ecflow`, and load a test suite. As the server is
+   started with `--http`, every client command must also use `--http`:
+
+   ```bash
+   docker exec -u ecflow ecflow-smoke ecflow_client --http --host localhost --port 8888 --ping
+   docker exec -u ecflow ecflow-smoke bash -c 'printf "suite smoke\n  task t\nendsuite\n" > /tmp/smoke.def'
+   docker exec -u ecflow ecflow-smoke ecflow_client --http --host localhost --port 8888 --load /tmp/smoke.def
+   docker exec -u ecflow ecflow-smoke ecflow_client --http --host localhost --port 8888 --suites
+   ```
+
+   The ping reports `ping server(localhost:8888) succeeded`, and `--suites` lists `smoke`.
+
+4. Optionally, ping the server from the host, through the published port, with an `ecflow_client` built or installed
+   on the host:
+
+   ```bash
+   ecflow_client --http --host localhost --port 18888 --ping
+   ecflow_client --http --host localhost --port 18888 --server_version
+   ```
+
+5. Stop the container, which asks the server to terminate cleanly, and check the result:
+
+   ```bash
+   docker stop ecflow-smoke
+   docker inspect -f '{{.State.ExitCode}}' ecflow-smoke
+   docker rm ecflow-smoke
+   ls -l workspace
+   ```
+
+   The exit code is `0`, and the workspace holds the server log (`ecflow-server.8888.ecf.log`) and check-point
+   (`ecflow-server.8888.ecf.check`, which contains the `smoke` suite), owned by the host user.
+
+`create_ecflow_docker_image.sh --smoke-test` performs the automated part of these checks (image size, and a healthy
+server) before an image is loaded or pushed.
