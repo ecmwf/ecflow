@@ -38,6 +38,15 @@ Dockerfile directory it belongs to):
    (which catches, for example, a build carrying debug information) and must report a healthy server. The pushed
    image records the preset its package was built with in the `int.ecmwf.ecflow.preset` label.
 
+The image is tagged after the branch the workflow runs from, using a slug of the branch name: the first component
+of the name, if any, is dropped (e.g. `task/`), and the rest is lowercased, with anything other than letters, digits
+and `.` replaced by `-` (e.g. `task/support_acl` becomes `support-acl`). Each run pushes:
+
+- `<branch-slug>_<short-sha>_<timestamp>_<version>`, identifying the build (e.g.
+  `support-acl_5bb07be94b71_20260924T123456_5.19.0`);
+- `<branch-slug>`, pointing at the latest build of the branch;
+- `latest`, only when running from `develop`, pointing at the latest build of `develop`.
+
 ## Building the images
 
 ### Building the `ecflow-server` image

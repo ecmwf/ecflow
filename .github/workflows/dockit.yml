@@ -230,6 +230,48 @@ jobs:
             docker rm ecflow-smoke
           done
 
+      #
+      # Tag the image after the branch it is built from:
+      #   <branch-slug>_<short-sha>_<timestamp>_<version>  (this build)
+      #   <branch-slug>                                    (the latest build of the branch)
+      #   latest                                           (the latest build of develop only)
+      # The slug drops the first component of the branch name, if any (e.g. 'task/'), lowercases it,
+      # and replaces anything other than letters, digits and '.' with '-'; e.g. task/support_acl
+      # becomes support-acl.
+      #
+      - name: Compute Docker image tags
+        id: tags
+        env:
+          IMAGE: eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          TIMESTAMP: ${{ needs.bootstrap.outputs.timestamp }}
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          name="${BRANCH#*/}"
+          slug=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9.]+/-/g; s/^[-.]+//; s/-+$//' | cut -c1-60)
+          slug="${slug%-}"
+          if [ -z "${slug}" ]; then
+            echo "Cannot derive an image tag from branch '${BRANCH}'" >&2
+            exit 1
+          fi
+          # 'latest' is reserved for develop
+          if [ "${slug}" = "latest" ] && [ "${BRANCH}" != "develop" ]; then
+            echo "Branch '${BRANCH}' would be tagged 'latest', which is reserved for develop" >&2
+            exit 1
+          fi
+          # VERSION is <project version>_<sha>; only the project version is used here
+          tags="${IMAGE}:${slug}_${SHA:0:12}_${TIMESTAMP}_${VERSION%%_*}"$'\n'"${IMAGE}:${slug}"
+          if [ "${BRANCH}" = "develop" ]; then
+            tags="${tags}"$'\n'"${IMAGE}:latest"
+          fi
+          echo "${tags}"
+          {
+            echo "tags<<EOF"
+            echo "${tags}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
@@ -237,9 +279,7 @@ jobs:
           context: ecflow/releng/dockit/${{ matrix.context }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:latest
-            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:${{ needs.package.outputs.version }}_${{ needs.bootstrap.outputs.timestamp }}
+          tags: ${{ steps.tags.outputs.tags }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.revision=${{ github.sha }}
