@@ -29,7 +29,8 @@ The stack has three services, defined in `compose.yaml`:
 
 - `ecflow`
 
-    - the ecFlow server image (`eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest`).
+    - the ecFlow server image (`eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest`), published by
+      `dockit` from `develop` for both amd64 and arm64. Compose pulls the latest image when starting the stack.
 
 ## Prerequisites
 
@@ -64,6 +65,13 @@ Run, from this directory:
 docker compose up --build
 ```
 
+The `ecflow` image defaults to the `latest` tag published from `develop`. To run a branch image instead,
+set `ECFLOW_IMAGE` before starting the stack. For example, while the `latest` tag is unavailable:
+
+```bash
+ECFLOW_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:improve-dockit docker compose up --build
+```
+
 The `--build` option is required because `revproxy` has no pre-built image and must be built locally; `authotron` and
 `ecflow` are pulled from the registry.
 
@@ -75,7 +83,6 @@ Once started, by default the following ports are published on the host:
 | 443  | `revproxy`  | HTTPS (self-signed certificate)                        |
 | 8080 | `authotron` | Direct access to the authentication service            |
 | 8888 | `ecflow`    | ecFlow server (native protocol, started with `--http`) |
-| 8889 | `ecflow`    | `ecflow_http` REST API server                          |
 
 ### Starting the stack manually, without Compose
 
@@ -121,16 +128,17 @@ docker run -d \
 Run `ecflow`:
 
 ```bash
+docker pull eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
+
 docker run -d \
     --name ecflow \
     --hostname ecflow-server \
-    --platform linux/amd64 \
     --network inner --ip 172.30.0.4 \
-    -p 8888:8888 -p 8889:8889 \
+    -p 8888:8888 \
     -v "${WORKSPACE_DIR:-$(pwd)/ecflow/workspace}:${WORKSPACE_DIR:-/workspace}" \
     -w "${WORKSPACE_DIR:-/workspace}" \
     -e "ECFLOW_WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}" \
-    eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
+    eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
 ```
 
 To stop and remove the stack:
