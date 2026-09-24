@@ -73,9 +73,9 @@ This launches the `marcosbento/lumen:debian-13.7` Docker image and, inside it:
 
 4. Packages ecflow as a Debian package (`cmake --build --target package`).
 
-With the default preset, `linux.gcc.server.release`, the package declares the runtime libraries its binaries link
-against as dependencies, as derived by `dpkg-shlibdeps`. This requires the `file` utility in the build environment
-image.
+The package declares the runtime libraries its binaries link against as dependencies, as derived by
+`dpkg-shlibdeps`, together with the Python version its Python module is built for. This requires the `file` utility
+in the build environment image.
 
 The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
 `ecflow-arm64.deb` on Apple Silicon), and copied into the output directory, which defaults to `ecflow-server/`
