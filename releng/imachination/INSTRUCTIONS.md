@@ -122,7 +122,7 @@ docker run -d \
     --network inner --ip 172.30.0.3 \
     -p 8080:8080 \
     -v "$(pwd)/authotron/config.yaml:/app/config.yaml" \
-    eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
+    eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7
 ```
 
 Run `ecflow`:

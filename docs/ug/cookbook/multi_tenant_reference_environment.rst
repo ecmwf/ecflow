@@ -104,7 +104,7 @@ The Auth-o-tron: ``authotron`` (172.30.0.3)
 -------------------------------------------
 
 The ``auth-o-tron`` authentication service, using image
-``eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8``.
+``eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7``.
 
 Configured through ``authotron/config.yaml``, with two providers:
 
@@ -229,7 +229,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
        --network inner --ip 172.30.0.3 \
        -p 8080:8080 \
        -v ./authotron/config.yaml:/app/config.yaml \
-       eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
+       eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7
 
 * Run ``ecflow-server``:
 

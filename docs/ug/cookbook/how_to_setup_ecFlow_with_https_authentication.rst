@@ -80,7 +80,7 @@ Then, run the Auth-o-tron Docker container with the following command, which bin
 
 .. code-block:: shell
 
-  docker run -d -p 8080:8080 -v /path/to/your/config.yaml:/app/config.yaml eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
+  docker run -d -p 8080:8080 -v /path/to/your/config.yaml:/app/config.yaml eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7
 
 For further information on how to set up Auth-o-tron, please see the instructions provided in the Auth-o-tron documentation.
 
