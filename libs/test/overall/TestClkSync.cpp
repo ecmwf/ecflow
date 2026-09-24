@@ -113,15 +113,14 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
        << "\n  sync_full: suite time : " << TestFixture::client().defs()->suites()[0]->calendar().toString()
        << " cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
-    for (size_t i = 0; i < 3; i++) {
-        // Occasionally we get a random failure.
-        // It is suspected that BETWEEN the two calls below, one off
-        //    Suite::updateCalendar() or Suite::resolveDependencies() is called in the server:
-        // Unfortunately the data required to confirm this is not available on the client side: i.e.
-        //  - Defs::updateCalendarCount_ not persisted with incremental clk sync
-        //  - Suite::calendar_change_no_
-        // To minimise this, avoid sleep that is same as job submission interval
-
+    // The server may update the suite calendar BETWEEN the clock sync and the full get below, in which case
+    // the full get reports a later suite time. Such an attempt is repeated; a clock sync that reports a stale
+    // suite time is still detected, since it fails every attempt.
+    constexpr size_t required_matches = 3;
+    constexpr size_t max_attempts     = 6;
+    size_t matches                    = 0;
+    for (size_t i = 0; i < max_attempts && matches < required_matches; i++) {
+        // To minimise calendar updates between both requests, avoid a sleep equal to the job submission interval
         sleep(TestFixture::job_submission_interval() + 1); // expect 1 minute increment in suite_time.
 
         ss << "loop:" << i << "\n";
@@ -144,12 +143,23 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
            << TestFixture::client().server_reply().in_sync() << ") cal_count("
            << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
-        BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
+        if (sync_clock_suiteTime == sync_full_suiteTime) {
+            matches++;
+            continue;
+        }
+
+        BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime < sync_full_suiteTime,
                               ss.str() << "\nloop:" << i << " waited for " << TestFixture::job_submission_interval() + 1
                                        << "s for each loop"
                                           "\n"
                                        << TestFixture::client().defs());
+        ss << "   Suite calendar updated between clock sync and full sync, repeating\n";
     }
+
+    BOOST_REQUIRE_MESSAGE(matches == required_matches,
+                          ss.str() << "\nOnly " << matches << " of " << max_attempts
+                                   << " loops found matching suite times\n"
+                                   << TestFixture::client().defs());
 
     std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
               << ")\n";
