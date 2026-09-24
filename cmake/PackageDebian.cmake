@@ -6,6 +6,36 @@ set(CPACK_PACKAGE_NAME "ecflow")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
 
+# The package version identifies development builds: <version>+git<commit time>.<commit>, e.g.
+# 5.19.0+git20260924142851.20d90280f0ab, with the commit time in UTC. Debian orders such versions after the
+# <version> release, and among themselves by commit time. A build of the commit tagged <version>, or of a
+# source tree without git history, keeps the plain <version>.
+set(CPACK_DEBIAN_PACKAGE_VERSION "${PROJECT_VERSION}")
+find_package(Git QUIET)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe --tags --exact-match HEAD
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_VARIABLE _package_git_tag
+    RESULT_VARIABLE _package_git_tag_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET)
+  if(NOT (_package_git_tag_result EQUAL 0 AND _package_git_tag STREQUAL PROJECT_VERSION))
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E env TZ=UTC
+              ${GIT_EXECUTABLE} log -1 --abbrev=12 --date=format-local:%Y%m%d%H%M%S --format=%cd.%h
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      OUTPUT_VARIABLE _package_git_snapshot
+      RESULT_VARIABLE _package_git_snapshot_result
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET)
+    if(_package_git_snapshot_result EQUAL 0 AND _package_git_snapshot)
+      set(CPACK_DEBIAN_PACKAGE_VERSION "${PROJECT_VERSION}+git${_package_git_snapshot}")
+    endif()
+  endif()
+endif()
+ecbuild_info("Debian package version: ${CPACK_DEBIAN_PACKAGE_VERSION}")
+
 if (CUSTOM_DEBIAN_PACKAGE_VERSION)
   set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CUSTOM_DEBIAN_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
   ecbuild_info("Custom Debian package version: ${CPACK_PACKAGE_FILE_NAME}")

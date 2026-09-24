@@ -77,6 +77,10 @@ The package declares the runtime libraries its binaries link against as dependen
 `dpkg-shlibdeps`, together with the Python version its Python module is built for. This requires the `file` utility
 in the build environment image.
 
+The package version identifies the build: `<version>+git<commit time>.<commit>` (e.g.
+`5.19.0+git20260924132851.20d90280fbce`, with the commit time in UTC), which Debian orders after the `<version>`
+release, and among builds by commit time. A build of the commit tagged `<version>` keeps the plain `<version>`.
+
 The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
 `ecflow-arm64.deb` on Apple Silicon), and copied into the output directory, which defaults to `ecflow-server/`
 (`${PWD}/ecflow-server`).
