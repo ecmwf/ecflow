@@ -200,10 +200,20 @@ jobs:
       - name: Smoke test Docker image (per platform)
         env:
           CONTEXT: ecflow/releng/dockit/${{ matrix.context }}
+          # Upper bound on the uncompressed image size, well above the expected ~200 MB, but far below the
+          # size of an image carrying debug information (over 1 GB), so that such a regression fails here
+          MAX_IMAGE_SIZE_MB: 400
         run: |
           for platform in linux/amd64 linux/arm64; do
             tag="ecflow-smoke:${platform##*/}"
             docker buildx build --platform "${platform}" --load -t "${tag}" "${CONTEXT}"
+            size=$(docker image inspect -f '{{.Size}}' "${tag}")
+            size_mb=$(( size / 1000000 ))
+            echo "${platform}: image size ${size_mb} MB (limit ${MAX_IMAGE_SIZE_MB} MB)"
+            if [ "${size_mb}" -gt "${MAX_IMAGE_SIZE_MB}" ]; then
+              echo "${platform}: image exceeds ${MAX_IMAGE_SIZE_MB} MB" >&2
+              exit 1
+            fi
             docker run -d --name ecflow-smoke --platform "${platform}" "${tag}"
             status=""
             for attempt in $(seq 1 30); do
@@ -235,3 +245,4 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ needs.package.outputs.version }}
             org.opencontainers.image.created=${{ needs.bootstrap.outputs.timestamp }}
+            int.ecmwf.ecflow.preset=${{ matrix.preset }}

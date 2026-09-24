@@ -34,7 +34,9 @@ Dockerfile directory it belongs to):
    Dockerfile directory (`ecflow-server/`) and builds the Docker image from that directory's
    `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image under QEMU emulation, which only
    installs the package), then pushes it to `eccr.ecmwf.int/ecflow-dev-environments/<image>` as a single
-   multi-platform image.
+   multi-platform image. Before pushing, the image of each platform is smoke-tested: it must not exceed 400 MB
+   (which catches, for example, a build carrying debug information) and must report a healthy server. The pushed
+   image records the preset its package was built with in the `int.ecmwf.ecflow.preset` label.
 
 ## Building the images
 
