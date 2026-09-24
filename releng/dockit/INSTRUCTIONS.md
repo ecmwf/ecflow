@@ -132,7 +132,11 @@ packages of all the target architectures in the build context:
 ```
 
 With `--smoke-test`, the image of each platform is first built, checked against the size limit (`--max-size-mb`,
-400 MB by default) and started, and must report a healthy server, as in the `dockit` workflow. With `--push`, the
+400 MB by default) and tested with `test_ecflow_server_image.sh`, as in the `dockit` workflow. The tests load a
+suite, assert clean SIGTERM/SIGINT exit, check checkpoint/log ownership, and restart to verify suite recovery.
+They cover remapped and empty root-owned workspaces, startup errors, inaccessible populated workspaces and
+failed termination requests, including SIGTERM before readiness. Each run creates and cleans up its own containers
+and volumes. With `--push`, the
 image is pushed to its registry instead of being loaded into the local Docker. Run
 `./create_ecflow_docker_image.sh --help` for all the options (tags, labels, build arguments, build context).
 
@@ -218,5 +222,9 @@ an example; `--platform` selects the architecture to test (by default, that of t
    The exit code is `0`, and the workspace holds the server log (`ecflow-server.8888.ecf.log`) and check-point
    (`ecflow-server.8888.ecf.check`, which contains the `smoke` suite), owned by the host user.
 
-`create_ecflow_docker_image.sh --smoke-test` performs the automated part of these checks (image size, and a healthy
-server) before an image is loaded or pushed.
+`create_ecflow_docker_image.sh --smoke-test` checks image size and runs the lifecycle tests before an image is
+loaded or pushed. To run the lifecycle tests against an already built image without rebuilding it:
+
+```bash
+bash ./test_ecflow_server_image.sh "${IMAGE}" linux/arm64
+```

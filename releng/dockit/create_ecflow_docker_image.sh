@@ -13,7 +13,7 @@
 # Optionally, each platform image is smoke-tested before the image is loaded
 # into the local Docker or pushed to a registry: it must not exceed a size limit
 # (which catches, for example, a build carrying debug information), and must
-# start a server that reports itself healthy. The 'dockerize' job of
+# pass the server lifecycle, persistence and ownership checks. The 'dockerize' job of
 # ecflow/.github/workflows/dockit.yml runs this script, so that both create the
 # image in exactly the same way.
 #
@@ -63,7 +63,7 @@ Options:
   --label KEY=VALUE        Image label; repeatable
   --build-arg KEY=VALUE    Build argument, e.g. ECFLOW_UID=\$(id -u); repeatable
   --smoke-test             Before loading/pushing, build, start and check the
-                             image of each platform (size and health)
+                             image of each platform (size and server lifecycle)
   --max-size-mb N          Size limit of the smoke test, in MB
                              (default: ${MAX_SIZE_MB})
   --push                   Push the image to its registry, instead of loading it
@@ -76,11 +76,10 @@ EOF
 }
 
 # Smoke-tests the image of one platform: builds it, loads it into the local Docker, checks its size, and
-# starts it, requiring the health check to report a healthy server
+# checks server lifecycle and persistence using the installed entrypoint
 function smoke_test() {
     local platform="$1"
     local tag="ecflow-smoke:${platform##*/}"
-    local container="ecflow-smoke"
 
     docker buildx build --platform "${platform}" --load -t "${tag}" \
         ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} "${CONTEXT}"
@@ -94,22 +93,7 @@ function smoke_test() {
         return 1
     fi
 
-    docker rm -f "${container}" > /dev/null 2>&1 || true
-    docker run -d --name "${container}" --platform "${platform}" "${tag}" > /dev/null
-    local status="" attempt
-    for attempt in $(seq 1 30); do
-        status=$(docker inspect -f '{{.State.Health.Status}}' "${container}")
-        [[ "${status}" == "healthy" ]] && break
-        sleep 3
-    done
-    echo "${platform}: ${status} (after ${attempt} attempts)"
-    if [[ "${status}" != "healthy" ]]; then
-        docker logs "${container}"
-        docker rm -f "${container}" > /dev/null
-        return 1
-    fi
-    docker stop "${container}" > /dev/null
-    docker rm "${container}" > /dev/null
+    bash "${SCRIPT_DIR}/test_ecflow_server_image.sh" "${tag}" "${platform}"
 }
 
 # ---------------------------------------------------------------------------
