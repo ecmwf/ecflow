@@ -26,12 +26,15 @@ on `workflow_dispatch`, as two jobs sharing a build matrix (each leg pairs a pre
 Dockerfile directory it belongs to):
 
 1. The `package` job builds the ecFlow Debian package inside `marcosbento/lumen:debian-13.5`, following the
-   same checkout/configure/build/package steps as `ecflow-server.build.package.sh`, and uploads the resulting
-   `.deb` as an `ecflow-debian-package-<image>` artefact.
+   same checkout/configure/build/package steps as `ecflow-server.build.package.sh`, once per architecture
+   (`amd64` and `arm64`), each natively on a GitHub-hosted runner of that architecture. Each leg names its
+   package `ecflow-<arch>.deb` and uploads it as an `ecflow-debian-package-<image>-<arch>` artefact.
 
-2. The `dockerize` job, using the same matrix, downloads the matching artefact into the matching
+2. The `dockerize` job, using the same matrix, downloads the packages of all architectures into the matching
    Dockerfile directory (`ecflow-server/`) and builds the Docker image from that directory's
-   `Dockerfile`,  then pushes it to `eccr.ecmwf.int/ecflow-dev-environments/<image>`.
+   `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image under QEMU emulation, which only
+   installs the package), then pushes it to `eccr.ecmwf.int/ecflow-dev-environments/<image>` as a single
+   multi-platform image.
 
 ## Building the images
 
@@ -63,7 +66,9 @@ With the default preset, `linux.gcc.server.release`, the package declares the ru
 against as dependencies, as derived by `dpkg-shlibdeps`. This requires the `file` utility in the build environment
 image.
 
-The resulting `.deb` is copied into the output directory, which defaults to `ecflow-server/` (`${PWD}/ecflow-server`).
+The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
+`ecflow-arm64.deb` on Apple Silicon), and copied into the output directory, which defaults to `ecflow-server/`
+(`${PWD}/ecflow-server`).
 This is the same directory used as the Docker build context in Step 2, so no manual copy is needed with default
 settings. Creating the package with a different `--output_dir` means the package must be moved into `ecflow-server/`
 manually before Step 2.
@@ -73,21 +78,27 @@ branch or repository, or change the output directory. Run `./ecflow-server.build
 
 #### Step 2: Build the ecFlow server container image
 
-The `ecflow-server/Dockerfile` installs the `.deb` file that must be present in its build context at build time.
-This is typically the package generated in Step 1.
+The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
+present in its build context at build time. This is typically the package generated in Step 1.
 
-Build the image, passing the package version and filename as build arguments:
+Build the image for the platform of the Docker host with:
 
 ```bash
 docker build \
-    --build-arg ECFLOW_PACKAGE=ecflow-<version>_<sha>-Linux_x86_64.deb \
     -t ecflow-server-dev:latest \
     ecflow-server/
 ```
 
-Note: provide the `.deb` filename explicitly to match the file produced in Step 1. To avoid defining version and
-package,
-rename the package to the default name `ecflow-latest-Linux.deb`.
+The package is selected by the target architecture (the `TARGETARCH` build argument, set by BuildKit), so no package
+name needs to be given. A multi-platform image, as published by the workflow, requires the packages of all the
+target architectures in the build context:
+
+```bash
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t ecflow-server-dev:latest \
+    ecflow-server/
+```
 
 The image installs the package with `apt-get`, together with the runtime libraries the package depends on.
 

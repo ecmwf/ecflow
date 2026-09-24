@@ -174,9 +174,18 @@ function build() {
 function package() {
     pushd "\${ECFLOW_DIR}"
 
+    # Remove packages left by previous runs, so that only the one built now is delivered
+    rm -f \${ECFLOW_DIR}/.deploy/build/${PRESET}/ecflow-*.deb /workspace/output/ecflow-*.deb
+
     cmake --build --preset ${PRESET} --target package
 
-    cp \${ECFLOW_DIR}/.deploy/build/${PRESET}/ecflow-*.deb /workspace/output/
+    # Deliver the package as ecflow-<arch>.deb, named after its Debian architecture (e.g. amd64,
+    # arm64), which is the name the image build selects for its target platform
+    for pkg in \${ECFLOW_DIR}/.deploy/build/${PRESET}/ecflow-*.deb; do
+        arch=\$(dpkg-deb --field "\${pkg}" Architecture)
+        echo "Delivering \$(basename "\${pkg}") as ecflow-\${arch}.deb"
+        cp "\${pkg}" "/workspace/output/ecflow-\${arch}.deb"
+    done
 
     popd
 }

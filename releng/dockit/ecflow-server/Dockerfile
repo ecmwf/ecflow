@@ -15,15 +15,16 @@ RUN python3 -m venv /opt/local/python \
     && /opt/local/python/bin/pip install "troika>=0.2.6"
 
 # Provision ecFlow package
-# This Dockerfile assumes that the ecFlow package is available in the build context (i.e. this directory).
-# If you are using a different version, change the ECFLOW_PACKAGE variable accordingly.
+# This Dockerfile assumes that the ecFlow package for each target platform is available in the build context
+# (i.e. this directory), named after the platform architecture: ecflow-amd64.deb, ecflow-arm64.deb.
+# TARGETARCH, set by BuildKit, selects the package, so that a single multi-platform build installs the
+# matching package on each platform.
 # The package is bind-mounted, rather than copied, so that it is not kept in an image layer, and installed
 # with apt-get, so that the runtime libraries it depends on are installed as well.
-ARG ECFLOW_VERSION="latest"
-ARG ECFLOW_PACKAGE="ecflow-${ECFLOW_VERSION}-Linux.deb"
-RUN --mount=type=bind,source=${ECFLOW_PACKAGE},target=/tmp/${ECFLOW_PACKAGE} \
+ARG TARGETARCH
+RUN --mount=type=bind,source=ecflow-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
     apt-get update \
-    && apt-get install -y --no-install-recommends /tmp/${ECFLOW_PACKAGE} \
+    && apt-get install -y --no-install-recommends /tmp/ecflow.deb \
     && rm -rf /var/lib/apt/lists/*
 
 ARG ECFLOW_LAUNCH="launch.sh"

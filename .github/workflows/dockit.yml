@@ -26,14 +26,15 @@ jobs:
           echo "jobs=4" >> $GITHUB_OUTPUT
 
   #
-  # Create the ecflow package, per image variant
+  # Create the ecflow package, per image variant and architecture
+  # Each architecture is built natively, on a runner of that architecture
   #
   package:
-    name: package (${{ matrix.image }})
+    name: package (${{ matrix.image }}, ${{ matrix.arch }})
     needs: bootstrap
     if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
 
     container:
       image: marcosbento/lumen:debian-13.5
@@ -43,14 +44,20 @@ jobs:
 
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         preset:
           - linux.gcc.server.release
+        arch:
+          - amd64
+          - arm64
         include:
           - preset: linux.gcc.server.release
             image: ecflow-server-dev
             context: ecflow-server
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
 
     outputs:
       version: ${{ steps.vars.outputs.version }}
@@ -120,11 +127,18 @@ jobs:
                 --preset ${{ matrix.preset }} \
                 --target package
 
+      - name: Name ecflow debian package after its architecture
+        run: |
+          cd "${GITHUB_WORKSPACE}/ecflow/.deploy/build/${{ matrix.preset }}"
+          for pkg in ecflow-*.deb; do
+            cp "${pkg}" "${GITHUB_WORKSPACE}/ecflow-$(dpkg-deb --field "${pkg}" Architecture).deb"
+          done
+
       - name: Upload ecflow debian package
         uses: actions/upload-artifact@v7
         with:
-          name: ecflow-debian-package-${{ matrix.image }}
-          path: ecflow/.deploy/build/${{ matrix.preset }}/ecflow-*.deb
+          name: ecflow-debian-package-${{ matrix.image }}-${{ matrix.arch }}
+          path: ecflow-${{ matrix.arch }}.deb
           if-no-files-found: error
 
 #      - name: Test ecflow
@@ -163,10 +177,11 @@ jobs:
         with:
           path: ecflow
 
-      - name: Download ecflow debian package
+      - name: Download ecflow debian packages (all architectures)
         uses: actions/download-artifact@v7
         with:
-          name: ecflow-debian-package-${{ matrix.image }}
+          pattern: ecflow-debian-package-${{ matrix.image }}-*
+          merge-multiple: true
           path: ecflow/releng/dockit/${{ matrix.context }}
 
       - name: Log in to Harbor
@@ -182,15 +197,35 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Smoke test Docker image (per platform)
+        env:
+          CONTEXT: ecflow/releng/dockit/${{ matrix.context }}
+        run: |
+          for platform in linux/amd64 linux/arm64; do
+            tag="ecflow-smoke:${platform##*/}"
+            docker buildx build --platform "${platform}" --load -t "${tag}" "${CONTEXT}"
+            docker run -d --name ecflow-smoke --platform "${platform}" "${tag}"
+            status=""
+            for attempt in $(seq 1 30); do
+              status=$(docker inspect -f '{{.State.Health.Status}}' ecflow-smoke)
+              [ "${status}" = "healthy" ] && break
+              sleep 3
+            done
+            echo "${platform}: ${status} (after ${attempt} attempts)"
+            if [ "${status}" != "healthy" ]; then
+              docker logs ecflow-smoke
+              exit 1
+            fi
+            docker stop ecflow-smoke
+            docker rm ecflow-smoke
+          done
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
           file: ecflow/releng/dockit/${{ matrix.context }}/Dockerfile
           context: ecflow/releng/dockit/${{ matrix.context }}
-          build-args: |
-            ECFLOW_VERSION=${{ needs.package.outputs.version }}
-            ECFLOW_PACKAGE=ecflow-${{ needs.package.outputs.version }}-Linux_x86_64.deb
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:latest
