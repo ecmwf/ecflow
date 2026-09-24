@@ -41,7 +41,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Locate Boost
+    - name: Configure Boost
       id: boost
       shell: bash
       env:
