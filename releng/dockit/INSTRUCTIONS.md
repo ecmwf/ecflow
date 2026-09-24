@@ -25,18 +25,21 @@ The action `.github/workflows/dockit.yml` automates the image build process desc
 on `workflow_dispatch`, as two jobs sharing a build matrix (each leg pairs a preset with the image name and
 Dockerfile directory it belongs to):
 
-1. The `package` job builds the ecFlow Debian package inside `marcosbento/lumen:debian-13.7`, following the
-   same checkout/configure/build/package steps as `ecflow-server.build.package.sh`, once per architecture
-   (`amd64` and `arm64`), each natively on a GitHub-hosted runner of that architecture. Each leg names its
-   package `ecflow-<arch>.deb` and uploads it as an `ecflow-debian-package-<image>-<arch>` artefact.
+1. The `package` job builds the ecFlow Debian package by running `build_ecflow_package_in_container.sh --source` on the
+   checked-out commit, inside the build environment image, once per architecture (`amd64` and `arm64`), each
+   natively on a GitHub-hosted runner of that architecture. This is the same script that
+   `build_ecflow_package.sh` runs in its container (Step 1 below), so both build the package in exactly the
+   same way. Each leg uploads the resulting `ecflow-<arch>.deb` as an `ecflow-debian-package-<image>-<arch>`
+   artefact.
 
 2. The `dockerize` job, using the same matrix, downloads the packages of all architectures into the matching
-   Dockerfile directory (`ecflow-server/`) and builds the Docker image from that directory's
-   `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image under QEMU emulation, which only
-   installs the package), then pushes it to `eccr.ecmwf.int/ecflow-dev-environments/<image>` as a single
-   multi-platform image. Before pushing, the image of each platform is smoke-tested: it must not exceed 400 MB
-   (which catches, for example, a build carrying debug information) and must report a healthy server. The pushed
-   image records the preset its package was built with in the `int.ecmwf.ecflow.preset` label.
+   Dockerfile directory (`ecflow-server/`) and runs `create_ecflow_docker_image.sh` (Step 2 below) to create the
+   Docker image from that directory's `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image
+   under QEMU emulation, which only installs the package), and to push it to
+   `eccr.ecmwf.int/ecflow-dev-environments/<image>` as a single multi-platform image. Before pushing, the image of
+   each platform is smoke-tested: it must not exceed 400 MB (which catches, for example, a build carrying debug
+   information) and must report a healthy server. The pushed image records the preset its package was built with
+   in the `int.ecmwf.ecflow.preset` label.
 
 The image is tagged after the branch the workflow runs from, using a slug of the branch name: the first component
 of the name, if any, is dropped (e.g. `task/`), and the rest is lowercased, with anything other than letters, digits
@@ -60,14 +63,15 @@ As mentioned above, this is automated in the `dockit` workflow, but can also be 
 Run:
 
 ```bash
-./ecflow-server.build.package.sh
+./build_ecflow_package.sh
 ```
 
-This launches the `marcosbento/lumen:debian-13.7` Docker image and, inside it:
+This launches the build environment image (see `--docker-image`) and runs `build_ecflow_package_in_container.sh`
+inside it, which holds the whole package build (and is also what the `dockit` workflow runs):
 
-1. Checks out `ecbuild` (tag `3.16.0`, by default) and `ecflow` (`develop` branch, by default). The workflow pins
-   ecbuild to the same tag, and the image pins `troika` (`0.2.7`), so that a new release of either cannot change or
-   break a build.
+1. Checks out `ecbuild` (tag `3.16.0`, by default) and `ecflow` (`develop` branch, by default), unless the ecflow
+   sources are given with `--source` (see below). The ecbuild tag, like the `troika` version installed by the image
+   (`0.2.7`), is pinned so that a new release of either cannot change or break a build.
 
 2. Configures ecflow with the default preset and `-DCUSTOM_DEBIAN_PACKAGE_VERSION=<project version>_<git sha>`.
 
@@ -90,32 +94,47 @@ This is the same directory used as the Docker build context in Step 2, so no man
 settings. Creating the package with a different `--output_dir` means the package must be moved into `ecflow-server/`
 manually before Step 2.
 
+To build the ecflow sources of a local working tree (including uncommitted changes) instead of a fresh clone, pass
+`--source`, for example from `ecflow/releng/dockit/`:
+
+```bash
+./build_ecflow_package.sh --source ../..
+```
+
+The sources are mounted read-only into the container, and the build tree is kept in the sandbox directory
+(`--build_dir`), so the working tree is left untouched. When the git metadata of the sources is not usable inside the
+container (e.g. in a git submodule), the package keeps the plain `<version>`; the package file name still carries the
+commit, determined on the host.
+
 The script accepts several options, for example to reuse an existing checkout (`--skip-checkout`), point at a different
-branch or repository, or change the output directory. Run `./ecflow-server.build.package.sh --help` for the full list.
+branch or repository, or change the output directory. Run `./build_ecflow_package.sh --help` for the full list;
+the options of the package build itself, and their defaults (e.g. the pinned ecbuild tag), are those of
+`./build_ecflow_package_in_container.sh --help`.
 
 #### Step 2: Build the ecFlow server container image
 
 The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
 present in its build context at build time. This is typically the package generated in Step 1.
 
-Build the image for the platform of the Docker host with:
+Create the image for the platform of the Docker host, as `ecflow-server-dev:local`, with:
 
 ```bash
-docker build \
-    -t ecflow-server-dev:latest \
-    ecflow-server/
+./create_ecflow_docker_image.sh
 ```
 
-The package is selected by the target architecture (the `TARGETARCH` build argument, set by BuildKit), so no package
-name needs to be given. A multi-platform image, as published by the workflow, requires the packages of all the
-target architectures in the build context:
+The script checks that the package of each target platform is present, and builds the image with
+`docker buildx build`. The package is selected by the target architecture (the `TARGETARCH` build argument, set by
+BuildKit), so no package name needs to be given. A multi-platform image, as published by the workflow, requires the
+packages of all the target architectures in the build context:
 
 ```bash
-docker buildx build \
-    --platform linux/amd64,linux/arm64 \
-    -t ecflow-server-dev:latest \
-    ecflow-server/
+./create_ecflow_docker_image.sh --platform linux/amd64,linux/arm64 --tag ecflow-server-dev:latest
 ```
+
+With `--smoke-test`, the image of each platform is first built, checked against the size limit (`--max-size-mb`,
+400 MB by default) and started, and must report a healthy server, as in the `dockit` workflow. With `--push`, the
+image is pushed to its registry instead of being loaded into the local Docker. Run
+`./create_ecflow_docker_image.sh --help` for all the options (tags, labels, build arguments, build context).
 
 The image installs the package with `apt-get`, together with the runtime libraries the package depends on.
 The package installs the `ecflow` Python module under `/usr/local/lib/python3.<minor>/dist-packages`, where Debian's

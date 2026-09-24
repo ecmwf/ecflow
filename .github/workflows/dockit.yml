@@ -17,22 +17,23 @@ jobs:
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
       created: ${{ steps.timestamp.outputs.created }}
-      jobs: ${{ steps.timestamp.outputs.jobs }}
       version: ${{ steps.vars.outputs.version }}
 
     steps:
-      - name: Checkout 'ecflow' (CMakeLists.txt only)
+      - name: Checkout 'ecflow' (CMakeLists.txt and the package script only)
         uses: actions/checkout@v4
         with:
           path: ecflow
-          sparse-checkout: CMakeLists.txt
+          sparse-checkout: |
+            CMakeLists.txt
+            releng/dockit/build_ecflow_package_in_container.sh
           sparse-checkout-cone-mode: false
 
       - name: Generate ecflow custom version information
         id: vars
         run: |
-          cd "${GITHUB_WORKSPACE}/ecflow"
-          version=$(grep -e '^project' CMakeLists.txt | sed 's/project( [a-zA-Z ]*\([0-9.]*\) )/\1/g')_${{ github.sha }}
+          version=$("${GITHUB_WORKSPACE}/ecflow/releng/dockit/build_ecflow_package_in_container.sh" \
+                      --source "${GITHUB_WORKSPACE}/ecflow" --revision "${GITHUB_SHA}" --print-version)
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
       - name: Collect timestamp
@@ -43,12 +44,12 @@ jobs:
           {
             echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')"
             echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')"
-            echo "jobs=4"
           } >> "${GITHUB_OUTPUT}"
 
   #
   # Create the ecflow package, per image variant and architecture
-  # Each architecture is built natively, on a runner of that architecture
+  # Each architecture is built natively, on a runner of that architecture, inside the build environment image, by
+  # releng/dockit/build_ecflow_package_in_container.sh -- the same script build_ecflow_package.sh runs locally
   #
   package:
     name: package (${{ matrix.image }}, ${{ matrix.arch }})
@@ -90,53 +91,23 @@ jobs:
           grep MemTotal /proc/meminfo
           df -h "${GITHUB_WORKSPACE}"
 
-      - name: Checkout 'ecbuild'
-        uses: actions/checkout@v4
-        with:
-          repository: ecmwf/ecbuild
-          # Pinned, so that a change on ecbuild develop cannot change or break the build
-          ref: 3.16.0
-          path: ecbuild
-
       - name: Checkout 'ecflow'
         uses: actions/checkout@v4
         with:
           path: ecflow
 
-      - name: Configure ecflow
-        id: configure-ecflow
+      - name: Build ecflow debian package
         run: |
-          cd "${GITHUB_WORKSPACE}/ecflow"
-          cmake --preset ${{ matrix.preset }} \
-                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ needs.bootstrap.outputs.version }}
-
-      - name: Build ecflow
-        run: |
-          cd "${GITHUB_WORKSPACE}/ecflow"
-          cmake --build \
-                --preset ${{ matrix.preset }} \
-                --jobs ${{ needs.bootstrap.outputs.jobs }} \
-                --target all
-
-      - name: Package ecflow
-        run: |
-          cd "${GITHUB_WORKSPACE}/ecflow"
-          cmake --build \
-                --preset ${{ matrix.preset }} \
-                --target package
-
-      - name: Name ecflow debian package after its architecture
-        run: |
-          cd "${GITHUB_WORKSPACE}/ecflow/.deploy/build/${{ matrix.preset }}"
-          for pkg in ecflow-*.deb; do
-            cp "${pkg}" "${GITHUB_WORKSPACE}/ecflow-$(dpkg-deb --field "${pkg}" Architecture).deb"
-          done
+          "${GITHUB_WORKSPACE}/ecflow/releng/dockit/build_ecflow_package_in_container.sh" \
+            --source "${GITHUB_WORKSPACE}/ecflow" \
+            --preset "${{ matrix.preset }}" \
+            --output-dir "${GITHUB_WORKSPACE}/packages"
 
       - name: Upload ecflow debian package
         uses: actions/upload-artifact@v7
         with:
           name: ecflow-debian-package-${{ matrix.image }}-${{ matrix.arch }}
-          path: ecflow-${{ matrix.arch }}.deb
+          path: packages/ecflow-${{ matrix.arch }}.deb
           if-no-files-found: error
 
   #
@@ -187,39 +158,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Smoke test Docker image (per platform)
-        env:
-          CONTEXT: ecflow/releng/dockit/${{ matrix.context }}
-          # Upper bound on the uncompressed image size, well above the expected ~200 MB, but far below the
-          # size of an image carrying debug information (over 1 GB), so that such a regression fails here
-          MAX_IMAGE_SIZE_MB: 400
-        run: |
-          for platform in linux/amd64 linux/arm64; do
-            tag="ecflow-smoke:${platform##*/}"
-            docker buildx build --platform "${platform}" --load -t "${tag}" "${CONTEXT}"
-            size=$(docker image inspect -f '{{.Size}}' "${tag}")
-            size_mb=$(( size / 1000000 ))
-            echo "${platform}: image size ${size_mb} MB (limit ${MAX_IMAGE_SIZE_MB} MB)"
-            if [ "${size_mb}" -gt "${MAX_IMAGE_SIZE_MB}" ]; then
-              echo "${platform}: image exceeds ${MAX_IMAGE_SIZE_MB} MB" >&2
-              exit 1
-            fi
-            docker run -d --name ecflow-smoke --platform "${platform}" "${tag}"
-            status=""
-            for attempt in $(seq 1 30); do
-              status=$(docker inspect -f '{{.State.Health.Status}}' ecflow-smoke)
-              [ "${status}" = "healthy" ] && break
-              sleep 3
-            done
-            echo "${platform}: ${status} (after ${attempt} attempts)"
-            if [ "${status}" != "healthy" ]; then
-              docker logs ecflow-smoke
-              exit 1
-            fi
-            docker stop ecflow-smoke
-            docker rm ecflow-smoke
-          done
-
       #
       # Tag the image after the branch it is built from:
       #   <branch-slug>_<short-sha>_<timestamp>_<version>  (this build)
@@ -262,17 +200,22 @@ jobs:
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
-        with:
-          file: ecflow/releng/dockit/${{ matrix.context }}/Dockerfile
-          context: ecflow/releng/dockit/${{ matrix.context }}
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.tags.outputs.tags }}
-          labels: |
-            org.opencontainers.image.source=${{ github.repositoryUrl }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}
-            org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}
-            int.ecmwf.ecflow.preset=${{ matrix.preset }}
+      - name: Create, smoke-test and push Docker image
+        env:
+          TAGS: ${{ steps.tags.outputs.tags }}
+        run: |
+          args=()
+          while IFS= read -r tag; do
+            [ -n "${tag}" ] && args+=(--tag "${tag}")
+          done <<< "${TAGS}"
+          "${GITHUB_WORKSPACE}/ecflow/releng/dockit/create_ecflow_docker_image.sh" \
+            --context "${GITHUB_WORKSPACE}/ecflow/releng/dockit/${{ matrix.context }}" \
+            --platform linux/amd64,linux/arm64 \
+            --smoke-test \
+            --push \
+            "${args[@]}" \
+            --label "org.opencontainers.image.source=${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.revision=${{ github.sha }}" \
+            --label "org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}" \
+            --label "org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}" \
+            --label "int.ecmwf.ecflow.preset=${{ matrix.preset }}"
