@@ -38,7 +38,7 @@ OUTPUT_DIR="${PWD}/ecflow-server"
 ECFLOW_REPO="https://github.com/ecmwf/ecflow.git"
 ECBUILD_REPO="https://github.com/ecmwf/ecbuild.git"
 ECFLOW_BRANCH="develop"
-ECBUILD_BRANCH="develop"
+ECBUILD_BRANCH="3.16.0"
 
 SKIP_CHECKOUT="false"
 VERBOSE="false"

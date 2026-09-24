@@ -14,7 +14,7 @@ RUN apt-get update \
 # The virtual environment includes the system site packages, so that the ecflow Python module installed by the
 # package below is available in it, alongside troika
 RUN python3 -m venv --system-site-packages /opt/local/python \
-    && /opt/local/python/bin/pip install "troika>=0.2.6"
+    && /opt/local/python/bin/pip install "troika==0.2.7"
 
 # Provision ecFlow package
 # This Dockerfile assumes that the ecFlow package for each target platform is available in the build context

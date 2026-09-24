@@ -95,6 +95,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ecmwf/ecbuild
+          # Pinned, so that a change on ecbuild develop cannot change or break the build
+          ref: 3.16.0
           path: ecbuild
 
       - name: Checkout 'ecflow'

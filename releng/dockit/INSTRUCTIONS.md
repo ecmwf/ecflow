@@ -65,7 +65,9 @@ Run:
 
 This launches the `marcosbento/lumen:debian-13.7` Docker image and, inside it:
 
-1. Checks out `ecbuild` and `ecflow` (`develop` branch, by default).
+1. Checks out `ecbuild` (tag `3.16.0`, by default) and `ecflow` (`develop` branch, by default). The workflow pins
+   ecbuild to the same tag, and the image pins `troika` (`0.2.7`), so that a new release of either cannot change or
+   break a build.
 
 2. Configures ecflow with the default preset and `-DCUSTOM_DEBIAN_PACKAGE_VERSION=<project version>_<git sha>`.
 
