@@ -16,14 +16,18 @@ jobs:
 
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
+      created: ${{ steps.timestamp.outputs.created }}
       jobs: ${{ steps.timestamp.outputs.jobs }}
 
     steps:
       - name: Collect timestamp
         id: timestamp
         run: |
-          echo "timestamp=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
-          echo "jobs=4" >> $GITHUB_OUTPUT
+          # The same instant, compact for image tags and in RFC 3339 for the OCI 'created' label
+          now=$(date -u +%s)
+          echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')" >> "${GITHUB_OUTPUT}"
+          echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_OUTPUT}"
+          echo "jobs=4" >> "${GITHUB_OUTPUT}"
 
   #
   # Create the ecflow package, per image variant and architecture
@@ -284,5 +288,5 @@ jobs:
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ needs.package.outputs.version }}
-            org.opencontainers.image.created=${{ needs.bootstrap.outputs.timestamp }}
+            org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}
             int.ecmwf.ecflow.preset=${{ matrix.preset }}
