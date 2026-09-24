@@ -11,7 +11,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Provision ecFlow dependencies
-RUN python3 -m venv /opt/local/python \
+# The virtual environment includes the system site packages, so that the ecflow Python module installed by the
+# package below is available in it, alongside troika
+RUN python3 -m venv --system-site-packages /opt/local/python \
     && /opt/local/python/bin/pip install "troika>=0.2.6"
 
 # Provision ecFlow package

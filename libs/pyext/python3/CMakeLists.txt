@@ -181,7 +181,12 @@ endif()
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
 
   if( NOT INSTALL_PYTHON3_DIR )
-    set(PYTHON_SITE "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages" )
+    if( ENABLE_DEBIAN_PACKAGE )
+      # Debian's Python searches dist-packages (e.g. /usr/local/lib/python3.X/dist-packages), not site-packages
+      set(PYTHON_SITE "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/dist-packages" )
+    else()
+      set(PYTHON_SITE "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages" )
+    endif()
   else()
     # Resolve ${VAR} in the value provided
     string(CONFIGURE "${INSTALL_PYTHON3_DIR}" PYTHON_SITE)

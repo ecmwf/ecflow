@@ -103,6 +103,9 @@ docker buildx build \
 ```
 
 The image installs the package with `apt-get`, together with the runtime libraries the package depends on.
+The package installs the `ecflow` Python module under `/usr/local/lib/python3.<minor>/dist-packages`, where Debian's
+`python3` finds it; the virtual environment at `/opt/local/python` (activated for the server, with `troika`) includes
+the system site packages, so the module is available there too.
 
 The ecflow server port is configurable via the `ECFLOW_SERVER_PORT` environment variable (default `8888`).
 
