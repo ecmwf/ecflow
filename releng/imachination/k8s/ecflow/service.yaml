@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Named `ecflow-server` so that the reverse proxy reaches the server by the same
+# name the server uses for itself.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecflow-server
+spec:
+  selector:
+    app: ecflow-server
+  ports:
+    - name: ecflow
+      port: 8888
+      targetPort: ecflow

@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecflow-server
+  labels:
+    app: ecflow-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecflow-server
+  template:
+    metadata:
+      labels:
+        app: ecflow-server
+    spec:
+      # Kubernetes otherwise injects a legacy Docker-link variable for every
+      # service in the namespace. The Service named `ecflow-server` yields
+      # ECFLOW_SERVER_PORT=tcp://<clusterIP>:8888, which is precisely the
+      # variable the image launch script reads to decide the port, so the server
+      # would be started with a URL where an integer is expected and would refuse
+      # to start. None of those variables is used here.
+      enableServiceLinks: false
+
+      # The launch script of the image names the server `ecflow-server`, and the
+      # jobs the server generates run in this same container and address it by
+      # that name. Resolving the name to the pod removes the dependency on the
+      # Service, which has no endpoints until the readiness probe first succeeds.
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - ecflow-server
+
+      # The image stops the server cleanly on SIGTERM, tini forwarding the signal
+      # to the launch script, which asks the server to terminate and kills it if
+      # that request fails. A short grace period is therefore ample, and keeps a
+      # deletion from waiting the full default.
+      terminationGracePeriodSeconds: 10
+
+      containers:
+        - name: ecflow-server
+          image: imachination/ecflow-server:local
+          # The image is loaded into the cluster by `imachination.sh images`, and
+          # is never available from a registry the cluster can reach.
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace
+
+          env:
+            - name: ECFLOW_WORKSPACE_DIR
+              value: /workspace
+            - name: ECFLOW_SERVER_HOST
+              value: ecflow-server
+            # Stated explicitly, so that the port survives even if the service
+            # links above are ever re-enabled.
+            - name: ECFLOW_SERVER_PORT
+              value: "8888"
+            # Separates the suite scripts from the server's own mutable state, so
+            # that the two may later be delivered by different means.
+            - name: ECF_FILES
+              value: /workspace/files
+
+          ports:
+            - name: ecflow
+              containerPort: 8888
+
+          # The native protocol ping, issued by the real client against the
+          # server itself. `--http` is required because the server is started
+          # with `--http`, so the client must carry the native protocol over an
+          # HTTP connection.
+          #
+          # The probe runs as root, while the server runs as `ecflow`; the ping is
+          # issued as that user, with its own HOME, exactly as the health check of
+          # the image does, since ecflow_client reports a connection error when
+          # HOME is not accessible to it.
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - HOME=/home/ecflow ECF_CONNECT_TIMEOUT=5 setpriv --reuid=ecflow
+                  --regid=ecflow --init-groups ecflow_client --http --host localhost
+                  --port 8888 --ping
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 8
+
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+
+      volumes:
+        - name: workspace
+          # Provided to the node by the kind extraMounts entry, and through it
+          # from the host, so that the workspace stays readable and writable
+          # outside the cluster.
+          hostPath:
+            path: /workspace
+            type: Directory

@@ -1,0 +1,9 @@
+
+# State written by the server at run time; only server_environment.cfg is kept.
+*.check
+*.check.b
+*.out
+core
+ecf.lists
+ecf.passwd
+ecf.custom_passwd

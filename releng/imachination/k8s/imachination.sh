@@ -111,6 +111,43 @@ do_images() {
     done
 }
 
+# Reports why a workload has not converged. Called only on failure, when the
+# cause is invariably in the pod's own events or in what it last printed.
+diagnose() {
+    local workload="$1"
+    warn "Diagnosis for ${workload}"
+    kubectl --context "kind-${CLUSTER_NAME}" get pods -n "${NAMESPACE}" 2>&1 || true
+    warn "Recent events"
+    kubectl --context "kind-${CLUSTER_NAME}" get events -n "${NAMESPACE}" \
+        --sort-by=.lastTimestamp 2>&1 | tail -10 || true
+    warn "Last output of ${workload}"
+    kubectl --context "kind-${CLUSTER_NAME}" logs "${workload}" -n "${NAMESPACE}" \
+        --tail=20 --all-containers 2>&1 | tail -20 || true
+}
+
+# Waits for every declared deployment to become available, so that a workload
+# which fails to start is reported here rather than discovered later.
+wait_for_workloads() {
+    local timeout="${ROLLOUT_TIMEOUT:-300s}"
+    local workload
+    local failed=0
+
+    # `kubectl get -o name` rather than an array, as this script must run under
+    # the bash 3.2 that macOS provides, where `mapfile` is unavailable.
+    while IFS= read -r workload; do
+        [[ -n "${workload}" ]] || continue
+        info "Waiting for ${workload} (timeout ${timeout})"
+        if ! kubectl --context "kind-${CLUSTER_NAME}" rollout status "${workload}" \
+                -n "${NAMESPACE}" --timeout="${timeout}"; then
+            diagnose "${workload}"
+            failed=1
+        fi
+    done < <(kubectl --context "kind-${CLUSTER_NAME}" get deployments \
+                 -n "${NAMESPACE}" -o name 2>/dev/null)
+
+    [[ "${failed}" -eq 0 ]] || die "One or more workloads did not become available."
+}
+
 # Declares every object of the stack. Re-applying an unchanged tree is a no-op,
 # and an edited configuration file yields a new generated name, which rolls the
 # pods that consume it.
@@ -120,6 +157,9 @@ do_apply() {
 
     info "Applying the stack"
     kubectl --context "kind-${CLUSTER_NAME}" apply -k "${IMACHINATION_DIR}"
+
+    wait_for_workloads
+    info "The stack is available."
 }
 
 # Removes the stack, leaving the cluster and its loaded images in place.
@@ -166,7 +206,7 @@ Usage: $(basename "$0") <command>
 Commands:
   cluster    Render the cluster definition and create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
-  apply      Declare the stack in the cluster
+  apply      Declare the stack in the cluster and wait for it to become available
   down       Delete the stack, keeping the cluster and its images
   status     Report the state of the cluster, its images and the stack
   destroy    Delete the cluster and the rendered definition
@@ -177,6 +217,8 @@ Environment:
   ECFLOW_SOURCE      Source image for the ecFlow server, the equivalent of the
                      ECFLOW_IMAGE that compose.yaml accepts
   AUTHOTRON_SOURCE   Source image for the authentication service
+  ROLLOUT_TIMEOUT    How long to wait for a workload to become available
+                     (default: 300s; an emulated server starts slowly)
 USAGE
 }
 
