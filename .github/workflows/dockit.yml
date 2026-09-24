@@ -9,135 +9,106 @@ on:
 
 jobs:
 
-  # Collect timestamp for docker image labelling
+  # Collect the timestamp and version information shared by all jobs
   bootstrap:
     name: bootstrap
     runs-on: ubuntu-latest
 
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
-      jobs: ${{ steps.timestamp.outputs.jobs }}
+      created: ${{ steps.timestamp.outputs.created }}
+      version: ${{ steps.vars.outputs.version }}
 
     steps:
+      - name: Checkout 'ecflow' (CMakeLists.txt and the package script only)
+        uses: actions/checkout@v4
+        with:
+          path: ecflow
+          sparse-checkout: |
+            CMakeLists.txt
+            releng/dockit/build_ecflow_package_in_container.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Generate ecflow custom version information
+        id: vars
+        run: |
+          version=$("${GITHUB_WORKSPACE}/ecflow/releng/dockit/build_ecflow_package_in_container.sh" \
+                      --source "${GITHUB_WORKSPACE}/ecflow" --revision "${GITHUB_SHA}" --print-version)
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
       - name: Collect timestamp
         id: timestamp
         run: |
-          echo "timestamp=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
-          echo "jobs=4" >> $GITHUB_OUTPUT
+          # The same instant, compact for image tags and in RFC 3339 for the OCI 'created' label
+          now=$(date -u +%s)
+          {
+            echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')"
+            echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')"
+          } >> "${GITHUB_OUTPUT}"
 
   #
-  # Create the ecflow package, per image variant
+  # Create the ecflow package, per image variant and architecture
+  # Each architecture is built natively, on a runner of that architecture, inside the build environment image, by
+  # releng/dockit/build_ecflow_package_in_container.sh -- the same script build_ecflow_package.sh runs locally
   #
   package:
-    name: package (${{ matrix.image }})
+    name: package (${{ matrix.image }}, ${{ matrix.arch }})
     needs: bootstrap
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
 
     container:
-      image: marcosbento/lumen:debian-13.5
+      image: marcosbento/lumen:debian-13.7
       options: --user root
 
     timeout-minutes: 60
 
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         preset:
-          - linux.gcc.serveronly.relwithdebinfo
-          - linux.gcc.all.relwithdebinfo
+          - linux.gcc.server.release
+        arch:
+          - amd64
+          - arm64
         include:
-          - preset: linux.gcc.serveronly.relwithdebinfo
-            image: ecflow-serveronly-dev
+          - preset: linux.gcc.server.release
+            image: ecflow-server-dev
             context: ecflow-server
-          - preset: linux.gcc.all.relwithdebinfo
-            image: ecflow-all-dev
-            context: ecflow-all
-
-    outputs:
-      version: ${{ steps.vars.outputs.version }}
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
 
     steps:
 
       - name: Display build context
         run: |
-          echo "github.sha === ${{ github.sha }}"
-          echo "github.ref === ${{ github.ref }}"
-          echo "github.workspace === ${{ github.workspace }}"
-          echo "GITHUB_WORKSPACE === ${GITHUB_WORKSPACE}"
-          echo "runner.workspace === ${{ runner.workspace }}"
-          echo "RUNNER_WORKSPACE === ${RUNNER_WORKSPACE}"
-          echo "env === ${{ env }}"
-          echo "Container user: $(whoami)"
-          echo "Container working directory: $(pwd)"
-          echo "Environment:"
-          echo "$(env)"
-          echo "OS info:"
-          echo "$(cat /etc/os-release)"
-          echo "CPU info:"
-          echo "$(cat /proc/cpuinfo)"
-          echo "Memory info:"
-          echo "$(cat /proc/meminfo)"
-          echo "Disk info:"
-          echo "$(df -h)"
-
-
-      - name: Checkout 'ecbuild'
-        uses: actions/checkout@v4
-        with:
-          repository: ecmwf/ecbuild
-          path: ecbuild
+          echo "Commit: ${GITHUB_SHA} (${GITHUB_REF_NAME})"
+          echo "Runner: ${RUNNER_OS} ${RUNNER_ARCH}; container user: $(whoami)"
+          grep PRETTY_NAME /etc/os-release
+          echo "CPUs: $(nproc)"
+          grep MemTotal /proc/meminfo
+          df -h "${GITHUB_WORKSPACE}"
 
       - name: Checkout 'ecflow'
         uses: actions/checkout@v4
         with:
           path: ecflow
 
-      - name: Generate ecflow custom version information
-        id: vars
+      - name: Build ecflow debian package
         run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
-          version=$(cat CMakeLists.txt  | grep -e '^project' | sed 's/project( [a-zA-Z ]*\([0-9.]*\) )/\1/g')_${{ github.sha }}
-          echo "version=${version}" >> $GITHUB_OUTPUT
-
-      - name: Configure ecflow
-        id: configure-ecflow
-        run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
-          cmake --preset ${{ matrix.preset }} \
-                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}
-
-      - name: Build ecflow
-        run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
-          cmake --build \
-                --preset ${{ matrix.preset }} \
-                --jobs ${{ needs.bootstrap.outputs.jobs }} \
-                --target all
-
-      - name: Package ecflow
-        run: |
-          cd ${GITHUB_WORKSPACE}/ecflow
-          cmake --build \
-                --preset ${{ matrix.preset }} \
-                --target package
+          "${GITHUB_WORKSPACE}/ecflow/releng/dockit/build_ecflow_package_in_container.sh" \
+            --source "${GITHUB_WORKSPACE}/ecflow" \
+            --preset "${{ matrix.preset }}" \
+            --output-dir "${GITHUB_WORKSPACE}/packages"
 
       - name: Upload ecflow debian package
         uses: actions/upload-artifact@v7
         with:
-          name: ecflow-debian-package-${{ matrix.image }}
-          path: ecflow/.deploy/build/${{ matrix.preset }}/ecflow-*.deb
+          name: ecflow-debian-package-${{ matrix.image }}-${{ matrix.arch }}
+          path: packages/ecflow-${{ matrix.arch }}.deb
           if-no-files-found: error
-
-#      - name: Test ecflow
-#        run: |
-#          cd ${{ github.workspace }}/ecflow
-#          ctest --preset  ${{ matrix.preset }} \
-#                --jobs ${{ needs.bootstrap.outputs.jobs }} \
-#                --output-on-failure \
-#                -L nightly
 
   #
   # Create the ecflow docker image
@@ -155,15 +126,11 @@ jobs:
       max-parallel: 1
       matrix:
         preset:
-          - linux.gcc.serveronly.relwithdebinfo
-          - linux.gcc.all.relwithdebinfo
+          - linux.gcc.server.release
         include:
-          - preset: linux.gcc.serveronly.relwithdebinfo
-            image: ecflow-serveronly-dev
+          - preset: linux.gcc.server.release
+            image: ecflow-server-dev
             context: ecflow-server
-          - preset: linux.gcc.all.relwithdebinfo
-            image: ecflow-all-dev
-            context: ecflow-all
 
     steps:
       - name: Checkout 'ecflow'
@@ -171,10 +138,11 @@ jobs:
         with:
           path: ecflow
 
-      - name: Download ecflow debian package
+      - name: Download ecflow debian packages (all architectures)
         uses: actions/download-artifact@v7
         with:
-          name: ecflow-debian-package-${{ matrix.image }}
+          pattern: ecflow-debian-package-${{ matrix.image }}-*
+          merge-multiple: true
           path: ecflow/releng/dockit/${{ matrix.context }}
 
       - name: Log in to Harbor
@@ -190,21 +158,64 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
-        with:
-          file: ecflow/releng/dockit/${{ matrix.context }}/Dockerfile
-          context: ecflow/releng/dockit/${{ matrix.context }}
-          build-args: |
-            ECFLOW_VERSION=${{ needs.package.outputs.version }}
-            ECFLOW_PACKAGE=ecflow-${{ needs.package.outputs.version }}-Linux_x86_64.deb
-          platforms: linux/amd64
-          push: true
-          tags: |
-            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:latest
-            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:${{ needs.package.outputs.version }}_${{ needs.bootstrap.outputs.timestamp }}
-          labels: |
-            org.opencontainers.image.source=${{ github.repositoryUrl }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ needs.package.outputs.version }}
-            org.opencontainers.image.created=${{ needs.bootstrap.outputs.timestamp }}
+      #
+      # Tag the image after the branch it is built from:
+      #   <branch-slug>_<short-sha>_<timestamp>_<version>  (this build)
+      #   <branch-slug>                                    (the latest build of the branch)
+      #   latest                                           (the latest build of develop only)
+      # The slug drops the first component of the branch name, if any (e.g. 'task/'), lowercases it,
+      # and replaces anything other than letters, digits and '.' with '-'; e.g. task/support_acl
+      # becomes support-acl.
+      #
+      - name: Compute Docker image tags
+        id: tags
+        env:
+          IMAGE: eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          TIMESTAMP: ${{ needs.bootstrap.outputs.timestamp }}
+          VERSION: ${{ needs.bootstrap.outputs.version }}
+        run: |
+          name="${BRANCH#*/}"
+          slug=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9.]+/-/g; s/^[-.]+//; s/-+$//' | cut -c1-60)
+          slug="${slug%-}"
+          if [ -z "${slug}" ]; then
+            echo "Cannot derive an image tag from branch '${BRANCH}'" >&2
+            exit 1
+          fi
+          # 'latest' is reserved for develop
+          if [ "${slug}" = "latest" ] && [ "${BRANCH}" != "develop" ]; then
+            echo "Branch '${BRANCH}' would be tagged 'latest', which is reserved for develop" >&2
+            exit 1
+          fi
+          # VERSION is <project version>_<sha>; only the project version is used here
+          tags="${IMAGE}:${slug}_${SHA:0:12}_${TIMESTAMP}_${VERSION%%_*}"$'\n'"${IMAGE}:${slug}"
+          if [ "${BRANCH}" = "develop" ]; then
+            tags="${tags}"$'\n'"${IMAGE}:latest"
+          fi
+          echo "${tags}"
+          {
+            echo "tags<<EOF"
+            echo "${tags}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Create, smoke-test and push Docker image
+        env:
+          TAGS: ${{ steps.tags.outputs.tags }}
+        run: |
+          args=()
+          while IFS= read -r tag; do
+            [ -n "${tag}" ] && args+=(--tag "${tag}")
+          done <<< "${TAGS}"
+          "${GITHUB_WORKSPACE}/ecflow/releng/dockit/create_ecflow_docker_image.sh" \
+            --context "${GITHUB_WORKSPACE}/ecflow/releng/dockit/${{ matrix.context }}" \
+            --platform linux/amd64,linux/arm64 \
+            --smoke-test \
+            --push \
+            "${args[@]}" \
+            --label "org.opencontainers.image.source=${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.revision=${{ github.sha }}" \
+            --label "org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}" \
+            --label "org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}" \
+            --label "int.ecmwf.ecflow.preset=${{ matrix.preset }}"
