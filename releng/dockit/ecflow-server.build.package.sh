@@ -4,18 +4,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #
-# build.package.sh
+# ecflow-server.build.package.sh
 #
-# Checks out ecflow and ecbuild, and builds an ecflow Debian package inside a
-# Docker container, reproducing the 'package' step of
-# ecflow/.github/workflows/dockit.yml. The resulting ecflow-*.deb is left in
-# the directory where this script was executed.
+# Checks out ecflow and ecbuild, and builds the ecflow Debian package used by
+# the ecflow-server-dev image, inside a Docker container, reproducing the
+# 'package' job of ecflow/.github/workflows/dockit.yml for the architecture of
+# the Docker host.
 #
-# Unlike build.workflow.sh (which assumes ecflow/ecbuild are already checked
-# out under /workspace/source, e.g. by a CI checkout action, and runs inside
-# the container), this script runs on the host: it launches the Docker
-# container itself, performs the checkout inside it, and copies the packaged
-# .deb back out.
+# The script runs on the host: it launches the build environment container,
+# performs the checkout, configure, build and package steps inside it, and
+# copies the package out as ecflow-<arch>.deb (e.g. ecflow-arm64.deb), the name
+# the image build (ecflow-server/Dockerfile) selects for its target platform.
 #
 # Run with --help to see all available options.
 #
@@ -55,18 +54,20 @@ function make_banner() {
 
 function usage() {
     cat <<EOF
-Usage: build.package.sh [options]
+Usage: ecflow-server.build.package.sh [options]
 
 Checks out ecflow and ecbuild, and builds an ecflow Debian package inside a
-Docker container. Leaves the resulting ecflow-*.deb in the output directory
-(by default, the directory where this script was executed).
+Docker container. Leaves the package, named ecflow-<arch>.deb after its
+architecture (e.g. ecflow-arm64.deb), in the output directory, which by
+default is the build context of the ecflow-server-dev image.
 
 Options:
   --build_dir DIR          Sandbox directory for git clones and build trees,
-                             bind-mounted into the container
-                             (default: \${PWD}/sandbox)
-  --output_dir DIR         Directory the ecflow-*.deb is copied into
-                             (default: \${PWD})
+                             bind-mounted into the container; the sources
+                             are checked out under DIR/source/{ecflow,ecbuild}
+                             (default: \${PWD}/ecflow-server.sandbox)
+  --output_dir DIR         Directory the ecflow-<arch>.deb is copied into
+                             (default: \${PWD}/ecflow-server)
   --docker-image IMAGE     Docker image used as the build environment
                              (default: ${DOCKER_IMAGE})
   --preset NAME            CMake preset used to configure/build/package
@@ -76,7 +77,8 @@ Options:
   --ecbuild-branch REF     ecbuild branch/tag to checkout (default: ${ECBUILD_BRANCH})
   --ecflow-repo URL        ecflow git repository URL (default: ${ECFLOW_REPO})
   --ecbuild-repo URL       ecbuild git repository URL (default: ${ECBUILD_REPO})
-  --skip-checkout          Reuse an existing checkout in build_dir, do not clone/fetch
+  --skip-checkout          Use the sources already under DIR/source, without
+                             cloning or fetching
   --verbose                Print every command executed (set -x)
   -h, --help               Show this help message and exit
 EOF
@@ -124,10 +126,9 @@ mkdir -p "${SANDBOX_DIR}/output"
 # ---------------------------------------------------------------------------
 # In-container script: checkout, configure, build and package ecflow.
 #
-# Mirrors the 'package' job of ecflow/.github/workflows/dockit.yml -- same
-# preset, same CUSTOM_DEBIAN_PACKAGE_VERSION scheme (<project version>_<sha>)
-# -- and the configure/build/package steps of build.workflow.sh, plus the
-# checkout step that build.workflow.sh otherwise assumes has already happened.
+# Mirrors the 'package' job of ecflow/.github/workflows/dockit.yml: same
+# build environment image, preset and CUSTOM_DEBIAN_PACKAGE_VERSION scheme
+# (<project version>_<sha>), and same ecflow-<arch>.deb naming.
 # ---------------------------------------------------------------------------
 
 CONTAINER_SCRIPT=$(cat <<INNER_EOF
