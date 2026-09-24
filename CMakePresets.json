@@ -165,6 +165,7 @@
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CPACK_PACKAGE_NAME": "ecflow",
+        "CPACK_DEBIAN_PACKAGE_SHLIBDEPS": "ON",
         "ENABLE_TESTS": "OFF",
         "ENABLE_ALL_TESTS": "OFF",
         "ENABLE_DOCS": "OFF",

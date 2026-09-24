@@ -59,6 +59,10 @@ This launches the `marcosbento/lumen:debian-13.5` Docker image and, inside it:
 
 4. Packages ecflow as a Debian package (`cmake --build --target package`).
 
+With the default preset, `linux.gcc.server.release`, the package declares the runtime libraries its binaries link
+against as dependencies, as derived by `dpkg-shlibdeps`. This requires the `file` utility in the build environment
+image.
+
 The resulting `.deb` is copied into the output directory, which defaults to `ecflow-server/` (`${PWD}/ecflow-server`).
 This is the same directory used as the Docker build context in Step 2, so no manual copy is needed with default
 settings. Creating the package with a different `--output_dir` means the package must be moved into `ecflow-server/`
@@ -85,6 +89,8 @@ Note: provide the `.deb` filename explicitly to match the file produced in Step 
 package,
 rename the package to the default name `ecflow-latest-Linux.deb`.
 
+The image installs the package with `apt-get`, together with the runtime libraries the package depends on.
+
 The ecflow server port is configurable via the `ECFLOW_SERVER_PORT` environment variable (default `8888`).
 
 Run the image with, for example:
@@ -92,3 +98,12 @@ Run the image with, for example:
 ```bash
 docker run --rm -p 8888:8888 ecflow-server-dev:latest
 ```
+
+Any arguments given to the container are passed on to `ecflow_server` (for example, `-d` for debug output). A health
+check pings the server with `ecflow_client --ping`. On `docker stop`, the server is asked to terminate cleanly with
+`ecflow_client --terminate`.
+
+The server runs as the unprivileged user `ecflow` (UID and GID 1000, by default), and a workspace bind-mounted at
+`/workspace` must be writable by that user. As ecFlow identifies users by their `/etc/passwd` entry, the container
+cannot run under an arbitrary `docker run --user <uid>`; instead, build the image with a matching user, for example
+by adding `--build-arg ECFLOW_UID=$(id -u) --build-arg ECFLOW_GID=$(id -g)` to the `docker build` command.
