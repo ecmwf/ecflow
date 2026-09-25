@@ -90,6 +90,8 @@ fn round_trip() {
     };
     let mut client = server.client();
 
+    let round_trip = client.ping().expect("ping");
+    assert!(round_trip > Duration::ZERO, "{round_trip:?}");
     assert!(
         client
             .server_version()

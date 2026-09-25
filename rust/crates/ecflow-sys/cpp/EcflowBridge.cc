@@ -134,4 +134,8 @@ ecf::ConnectionFailure Client::last_failure() const {
     return connection_diagnosis().failure;
 }
 
+uint64_t Client::round_trip_time() const {
+    return static_cast<uint64_t>(ClientInvoker::round_trip_time().total_microseconds());
+}
+
 } // namespace ecflow_bridge
