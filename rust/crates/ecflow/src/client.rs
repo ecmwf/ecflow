@@ -173,6 +173,12 @@ impl Client {
         Ok(self.inner.get_string().to_string())
     }
 
+    /// The names of the suites in the server.
+    pub fn suites(&mut self) -> Result<Vec<String>> {
+        self.check(self.inner.suites())?;
+        Ok(self.inner.reply_strings())
+    }
+
     // ==================== Any command ====================
 
     /// Run a command given as `ecflow_client` command line arguments, and

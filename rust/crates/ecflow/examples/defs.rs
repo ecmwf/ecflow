@@ -27,7 +27,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.load_defs_text(SUITE, true)?;
     println!("{}", client.get_defs_text(DefsStyle::Defs)?);
 
-    client.invoke(["--suites"])?;
-    println!("suites: {}", client.reply_strings().join(" "));
+    println!("suites: {}", client.suites()?.join(" "));
     Ok(())
 }
