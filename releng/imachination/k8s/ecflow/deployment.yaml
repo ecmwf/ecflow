@@ -48,6 +48,15 @@ spec:
           imagePullPolicy: IfNotPresent
           workingDir: /workspace
 
+          # Lower the open files limit (1073741816 on kind), which the server walks
+          # to close descriptors in every forked job, stalling job submission.
+          command:
+            - /usr/bin/tini
+            - --
+            - /bin/sh
+            - -c
+            - ulimit -n 1048576 && exec /opt/local/bin/launch.sh
+
           env:
             - name: ECFLOW_WORKSPACE_DIR
               value: /workspace
