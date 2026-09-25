@@ -105,8 +105,7 @@ fn round_trip() {
     let defs = client.get_defs_text(DefsStyle::Defs).expect("get defs");
     assert!(defs.contains("suite rust_test"), "{defs}");
 
-    client.invoke(["--suites"]).expect("suites");
-    assert_eq!(client.reply_strings(), vec!["rust_test".to_string()]);
+    assert_eq!(client.suites().expect("suites"), ["rust_test"]);
 
     // A fresh server starts halted and answers child commands with "blocked"
     // until it is restarted. The dummy job password is then accepted for any

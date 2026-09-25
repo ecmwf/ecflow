@@ -30,7 +30,7 @@ use bindman::track_cpp_api;
         "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
         "wait_for_server_death",
         "restartServer", "haltServer", "shutdownServer", "terminateServer", "server_load", "debug_server_on",
-        "debug_server_off", "stats_reset", "stats_server", "suites", "ch_register", "ch_suites", "ch_drop",
+        "debug_server_off", "stats_reset", "stats_server", "ch_register", "ch_suites", "ch_drop",
         "ch_drop_user", "ch_add", "ch_remove", "ch_auto_add", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove",
         "ch1_auto_add", "begin", "begin_all_suites", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
         "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
@@ -177,6 +177,8 @@ mod ffi {
         fn server_version(self: &Client) -> Result<i32>;
         /// Ask for the server's statistics; the reply is in `get_string`.
         fn stats(self: &Client) -> Result<i32>;
+        /// Ask for the suite names; the reply is in `reply_strings`.
+        fn suites(self: &Client) -> Result<i32>;
         /// The string of the most recent reply, for commands that return one.
         fn get_string(self: &Client) -> &CxxString;
 
