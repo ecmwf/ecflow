@@ -15,8 +15,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let port = args.next().map_or(Ok(3141), |port| port.parse())?;
 
     let mut client = Client::with_host_port(&host, port)?;
-    client.ping()?;
-    println!("server {} at {host}:{port}", client.server_version()?);
+    let round_trip = client.ping()?;
+    println!(
+        "server {} at {host}:{port}, ping {round_trip:?}",
+        client.server_version()?
+    );
     println!("{}", client.stats()?);
     Ok(())
 }
