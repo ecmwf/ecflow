@@ -3,8 +3,10 @@
 
 FROM debian:13.7-slim
 
+# procps provides ps (and pgrep), which troika runs to monitor jobs on a direct site (ECF_STATUS_CMD)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        procps \
         python3 \
         python3-venv \
         tini \
