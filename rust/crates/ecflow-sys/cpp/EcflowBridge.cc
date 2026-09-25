@@ -102,6 +102,15 @@ void Client::invoke(rust::Slice<const rust::String> args) const {
     ClientInvoker::invoke(argv);
 }
 
+void Client::delete_nodes(rust::Slice<const rust::String> paths, bool force) const {
+    std::vector<std::string> nodes;
+    nodes.reserve(paths.size());
+    for (const auto& path : paths) {
+        nodes.emplace_back(std::string(path));
+    }
+    ClientInvoker::delete_nodes(nodes, force);
+}
+
 rust::Vec<rust::String> Client::reply_strings() const {
     rust::Vec<rust::String> result;
     const auto& strings = server_reply().get_string_vec();

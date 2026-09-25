@@ -184,6 +184,10 @@ impl Client {
     /// Run a command given as `ecflow_client` command line arguments, and
     /// return the string reply, if the command has one.
     ///
+    /// `--delete`, `--halt`, `--shutdown` and `--terminate` read a
+    /// confirmation from standard input unless followed by `yes`, and end the
+    /// process on any other answer; use the typed methods for those.
+    ///
     /// ```no_run
     /// # let mut client = ecflow::Client::with_host_port("localhost", 3141)?;
     /// client.invoke(["--suspend=/suite/family"])?;
@@ -205,6 +209,54 @@ impl Client {
     #[must_use]
     pub fn reply_strings(&self) -> Vec<String> {
         self.inner.reply_strings()
+    }
+
+    // ==================== Server control ====================
+
+    /// Restart the server: it schedules jobs and accepts child commands again.
+    pub fn restart_server(&mut self) -> Result<()> {
+        self.check(self.inner.restartServer())?;
+        Ok(())
+    }
+
+    /// Halt the server: no jobs are scheduled and child commands are blocked
+    /// until a restart.
+    pub fn halt_server(&mut self) -> Result<()> {
+        self.check(self.inner.haltServer())?;
+        Ok(())
+    }
+
+    /// Shut the server down: no jobs are scheduled, child commands still go
+    /// through.
+    pub fn shutdown_server(&mut self) -> Result<()> {
+        self.check(self.inner.shutdownServer())?;
+        Ok(())
+    }
+
+    /// Terminate the server process.
+    pub fn terminate_server(&mut self) -> Result<()> {
+        self.check(self.inner.terminateServer())?;
+        Ok(())
+    }
+
+    // ==================== Nodes ====================
+
+    /// Delete the nodes at the given paths. With `force`, even when they are
+    /// active or submitted.
+    pub fn delete_nodes<I, S>(&mut self, paths: I, force: bool) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let paths: Vec<String> = paths.into_iter().map(|p| p.as_ref().to_owned()).collect();
+        self.check(self.inner.delete_nodes(&paths, force))
+    }
+
+    /// Delete every suite. With `force`, even when nodes are active or
+    /// submitted.
+    pub fn delete_all(&mut self, force: bool) -> Result<()> {
+        self.check(self.inner.delete_all(force))?;
+        Ok(())
     }
 
     // ==================== Child (task) commands ====================
