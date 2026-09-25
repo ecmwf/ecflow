@@ -155,10 +155,10 @@ impl Client {
 
     // ==================== Server probes ====================
 
-    /// Check that the server answers.
-    pub fn ping(&mut self) -> Result<()> {
+    /// Check that the server answers, and return the round trip time.
+    pub fn ping(&mut self) -> Result<Duration> {
         self.check(self.inner.pingServer())?;
-        Ok(())
+        Ok(Duration::from_micros(self.inner.round_trip_time()))
     }
 
     /// The server's version.

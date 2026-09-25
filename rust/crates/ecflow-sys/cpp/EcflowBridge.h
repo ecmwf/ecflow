@@ -64,6 +64,10 @@ public:
     /// The failure class of the most recent request.
     ecf::ConnectionFailure last_failure() const;
 
+    /// The round trip time of the most recent request, in microseconds; the
+    /// base method returns a Boost duration, which cxx cannot bind.
+    uint64_t round_trip_time() const;
+
 private:
     Client();
     Client(rust::Str host, rust::Str port);
