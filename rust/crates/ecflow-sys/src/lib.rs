@@ -29,15 +29,15 @@ use bindman::track_cpp_api;
         // User commands
         "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
         "wait_for_server_death",
-        "restartServer", "haltServer", "shutdownServer", "terminateServer", "server_load", "debug_server_on",
+        "server_load", "debug_server_on",
         "debug_server_off", "stats_reset", "stats_server", "ch_register", "ch_suites", "ch_drop",
         "ch_drop_user", "ch_add", "ch_remove", "ch_auto_add", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove",
         "ch1_auto_add", "begin", "begin_all_suites", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
         "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
         "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
         "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths", "job_gen",
-        "edit_history", "kill", "status", "suspend", "resume", "check", "delete_nodes", "delete_node",
-        "delete_all", "archive", "restore", "requeue", "run", "order", "checkPtDefs",
+        "edit_history", "kill", "status", "suspend", "resume", "check", "delete_node",
+        "archive", "restore", "requeue", "run", "order", "checkPtDefs",
         "restoreDefsFromCheckPt", "force", "freeDep", "file", "plug", "query", "alter", "alter_sort",
         "reloadwsfile", "reloadpasswdfile", "reloadcustompasswdfile", "group", "logMsg", "new_log", "getLog",
         "clearLog", "flushLog", "get_log_path", "forceDependencyEval", "edit_script", "edit_script_edit",
@@ -188,6 +188,24 @@ mod ffi {
         fn invoke(self: &Client, args: &[String]) -> Result<()>;
         /// The list of strings in the most recent reply, for commands that return one.
         fn reply_strings(self: &Client) -> Vec<String>;
+
+        // Server control
+
+        /// Restart the server: it schedules jobs and accepts child commands again.
+        fn restartServer(self: &Client) -> Result<i32>;
+        /// Halt the server: no jobs are scheduled and child commands are blocked.
+        fn haltServer(self: &Client) -> Result<i32>;
+        /// Shut the server down: no jobs are scheduled, child commands still go through.
+        fn shutdownServer(self: &Client) -> Result<i32>;
+        /// Terminate the server process.
+        fn terminateServer(self: &Client) -> Result<i32>;
+
+        // Nodes
+
+        /// Delete the nodes at the given paths; with `force`, even when active or submitted.
+        fn delete_nodes(self: &Client, paths: &[String], force: bool) -> Result<()>;
+        /// Delete every suite; with `force`, even when nodes are active or submitted.
+        fn delete_all(self: &Client, force: bool) -> Result<i32>;
 
         // Child (task) commands
 

@@ -110,7 +110,7 @@ fn round_trip() {
     // A fresh server starts halted and answers child commands with "blocked"
     // until it is restarted. The dummy job password is then accepted for any
     // task without zombie checks.
-    client.invoke(["--restart"]).expect("restart");
+    client.restart_server().expect("restart");
     client.set_child_timeout(Duration::from_secs(10));
     client.set_child_path("/rust_test/t1");
     client.set_child_password("_DJP_");
@@ -130,6 +130,14 @@ fn round_trip() {
         .expect_err("unknown path");
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");
+
+    client.halt_server().expect("halt");
+    client.restart_server().expect("restart");
+    client
+        .delete_nodes(["/rust_test/t1"], true)
+        .expect("delete node");
+    client.delete_all(true).expect("delete all");
+    assert!(client.suites().expect("suites").is_empty());
 }
 
 #[test]
