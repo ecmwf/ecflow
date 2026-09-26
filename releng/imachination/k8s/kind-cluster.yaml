@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The `imachination` kind cluster definition, which `imachination.sh cluster`
+# creates. To create the cluster by hand, from the `imachination` directory:
+#
+#   kind create cluster --config k8s/kind-cluster.yaml
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+name: imachination
+
+nodes:
+  - role: control-plane
+
+    # Host port to node port. The reverse proxy is published as a NodePort
+    # service on 30443, which this mapping exposes as the familiar 443 on the
+    # host, and the SFTP sidecar of the ecFlow server on 30022, exposed as 2222.
+    # These are the whole external surface of the deployment, so there is
+    # deliberately nothing here for 80, 8080 or 8888. Those ports remain
+    # reachable only from within the cluster.
+    extraPortMappings:
+      - containerPort: 30443
+        hostPort: 443
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30022
+        hostPort: 2222
+        listenAddress: "127.0.0.1"
+        protocol: TCP

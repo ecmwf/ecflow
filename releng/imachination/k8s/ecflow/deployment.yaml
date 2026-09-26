@@ -9,6 +9,11 @@ metadata:
     app: ecflow-server
 spec:
   replicas: 1
+  # The workspace and the checkpoint are on volumes that a single node mounts at
+  # a time; the Pod is therefore replaced, rather than rolled, so that the old
+  # Pod releases the volumes before the new one mounts them.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: ecflow-server
@@ -45,6 +50,13 @@ spec:
       # (troika/mamb/troika.yml as troika__mamb__troika.yml). This container expands them into /admin,
       # which the server then mounts read-only; SFTP users never see it, as the sidecar does not mount it.
       # A change to the Secret takes effect when the Pod is replaced.
+      #
+      # The same container gives the workspace and the checkpoint volumes, when owned by root, as a new
+      # volume is, to the user ecflow of the image (1000:1000, the ECFLOW_UID and ECFLOW_GID build
+      # arguments of the image), before either container starts: the launch script of the server aligns
+      # ecflow with the owner of the workspace, and the SFTP sidecar gives its accounts the group of the
+      # workspace, which it reads once, when it starts. The workspace is made group-writable, so that
+      # what the SFTP users upload the server can use, and conversely.
       initContainers:
         - name: admin
           image: imachination/ecflow-server:local
@@ -66,12 +78,23 @@ spec:
                   esac
                   echo "admin: ${target}"
               done
+              for volume in /workspace /state; do
+                  if [ "$(stat -c %u "${volume}")" = "0" ]; then
+                      chown 1000:1000 "${volume}"
+                      chmod 0775 "${volume}"
+                      echo "admin: ${volume} given to 1000:1000"
+                  fi
+              done
           volumeMounts:
             - name: admin-source
               mountPath: /admin-source
               readOnly: true
             - name: admin
               mountPath: /admin
+            - name: workspace
+              mountPath: /workspace
+            - name: state
+              mountPath: /state
 
       containers:
         - name: ecflow-server
@@ -185,13 +208,11 @@ spec:
               readOnly: true
 
       volumes:
+        # The workspace, reached from outside the cluster through the SFTP
+        # sidecar
         - name: workspace
-          # Provided to the node by the kind extraMounts entry, and through it
-          # from the host, so that the workspace stays readable and writable
-          # outside the cluster.
-          hostPath:
-            path: /workspace
-            type: Directory
+          persistentVolumeClaim:
+            claimName: ecflow-workspace
         # The administrator's files: the Secret as loaded, and its expansion
         - name: admin-source
           secret:

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The workspace of the ecFlow server (ECF_HOME): the suite files, the job files
+# and outputs, and the log of the server, which the users reach through the SFTP
+# sidecar. The claim is served by the default storage class of the cluster, the
+# local-path storage on kind, or a block volume on a managed cluster; its
+# contents are lost with the namespace (`imachination.sh down`) and with the
+# cluster.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ecflow-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

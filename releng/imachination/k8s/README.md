@@ -44,7 +44,7 @@ reach the server.
 | Command | Effect |
 |---------|--------|
 | `up` | Create the cluster, load the images and apply the stack, in one go |
-| `cluster` | Render the cluster definition (into `k8s/.generated/`) and create the cluster, if absent |
+| `cluster` | Create the cluster (`k8s/kind-cluster.yaml`), if absent |
 | `images` | Build the reverse proxy image, pull the other two when not cached, and load all three into the cluster |
 | `apply` | Declare the stack in the cluster and wait for every workload to become available |
 | `admin DIR` | Load the administrator's files (`DIR` merged over `ecflow/admin/`) and the SSH keys (`DIR/sshd/`), then replace the ecFlow server Pod |
@@ -53,15 +53,14 @@ reach the server.
 | `logs [workload]` | Follow the output of every workload, or of the one named |
 | `restart [workload]` | Replace every workload, or the one named, so that it re-reads its configuration |
 | `reload [workload]` | Rebuild and pull the images again, even when cached, load them, and restart onto them |
-| `down` | Delete the stack, keeping the cluster and its images |
-| `destroy` | Delete the cluster and the rendered definition |
+| `down` | Delete the stack, with its workspace and checkpoint, keeping the cluster and its images |
+| `destroy` | Delete the cluster |
 
 The workloads are `ecflow-server`, `authotron` and `revproxy`. The script reads the following environment
 variables:
 
 | Variable | Purpose |
 |----------|---------|
-| `WORKSPACE_DIR` | Workspace mounted into the ecFlow server (default: `../ecflow/workspace`) |
 | `ECFLOW_SOURCE` | Source image of the ecFlow server (default: `ecflow-server-dev:latest`, published from `develop`) |
 | `AUTHOTRON_SOURCE` | Source image of `auth-o-tron` |
 | `ROLLOUT_TIMEOUT` | How long to wait for a workload to become available (default: `300s`) |
@@ -127,23 +126,24 @@ In `ecflow_ui`, add the server `localhost`, port `443`, using HTTPS; it reads th
 
 The ecFlow server starts **halted**, including after a `restart` or a `reload`: no job is submitted until an
 `ecflow_client --https --restart` (or the corresponding action in `ecflow_ui`) is issued. The suites are
-recovered from the checkpoint file, which is kept in the workspace.
+recovered from the checkpoint file, which is kept in `/state` (see "The administrator's files").
 
 ## From a suite on disk to a suite running on the server
 
-The workspace directory (`../ecflow/workspace` by default) is mounted into the ecFlow server, and into its
+The workspace is the PersistentVolumeClaim `ecflow-workspace`, mounted into the ecFlow server, and into its
 SFTP sidecar, as `/workspace`, which is also its `ECF_HOME`: it holds what the users provide and what the
-suites produce, and the log of the server. `ECF_FILES` is set to `/workspace/files`. Files written in the
-workspace on the host are therefore seen by the server immediately, and job outputs written by the server
-appear on the host. What only the administrator manages is kept elsewhere (see "The administrator's
-files").
+suites produce, and the log of the server. `ECF_FILES` is set to `/workspace/files`. The claim is served by the
+default storage class of the cluster, so the same manifests apply to kind and to a managed cluster; the
+workspace is not a directory of the host, and is reached through the SFTP sidecar, `kubectl exec` or
+`kubectl cp`. A new volume is owned by root: an init container gives it to the user `ecflow` of the image
+(1000:1000), group-writable, before the server and the sidecar start. What only the administrator manages is
+kept elsewhere (see "The administrator's files").
 
 To run a suite:
 
 1. Copy the task scripts and include files into the workspace, under the paths that the suite definition
    declares (`ECF_FILES`, `ECF_INCLUDE`), and create the directory tree of `ECF_OUT`, which the server does not
-   create. Without access to the workspace directory, upload them with `sftp` or `scp` (see "Delivering files
-   with sftp or scp"), or with `kubectl cp`:
+   create. Upload them with `sftp` or `scp` (see "Delivering files with sftp or scp"), or with `kubectl cp`:
 
    ```bash
    POD=$(kubectl -n imachination get pod -l app=ecflow-server -o name | cut -d/ -f2)
@@ -188,7 +188,8 @@ What only the administrator manages is kept out of the workspace, and out of rea
 
 The server starts in `/admin`, where it reads `server_environment.cfg`, with `ECF_HOME` set to `/workspace`
 and its checkpoint in `/state`, as the launch script of the image allows (`ECFLOW_CONFIG_DIR`, `ECF_CHECK`,
-`ECF_CHECKOLD`). The checkpoint is lost with the cluster (`destroy`), unlike the workspace.
+`ECF_CHECKOLD`). The checkpoint, like the workspace, is lost with the stack (`down`) and with the cluster
+(`destroy`).
 
 The files are loaded with
 
@@ -263,4 +264,5 @@ k8s/imachination.sh down       # delete the stack, keeping the cluster and its i
 k8s/imachination.sh destroy    # delete the cluster
 ```
 
-The workspace, with the suites, their outputs and the checkpoint of the server, is left on the host.
+Both delete the workspace, with the suites and their outputs, and the checkpoint of the server, which live on
+volumes of the cluster. Copy out anything to keep first, with `sftp` or `kubectl cp`.
