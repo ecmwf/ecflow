@@ -45,7 +45,7 @@ reach the server.
 |---------|--------|
 | `up` | Create the cluster, load the images and apply the stack, in one go |
 | `cluster` | Create the cluster (`k8s/kind-cluster.yaml`), if absent |
-| `images` | Build the reverse proxy image, pull the other two when not cached, and load all three into the cluster |
+| `images` | Pull the images when not cached, and load them into the cluster |
 | `apply` | Declare the stack in the cluster and wait for every workload to become available |
 | `admin DIR` | Load the administrator's files (`DIR` merged over `ecflow/admin/`) and the SSH keys (`DIR/sshd/`), then replace the ecFlow server Pod |
 | `verify` | Exercise the authenticated path with `ecflow_client`, from the host |
@@ -63,6 +63,19 @@ variables:
 |----------|---------|
 | `ECFLOW_SOURCE` | Source image of the ecFlow server (default: `ecflow-server-dev:latest`, published from `develop`) |
 | `AUTHOTRON_SOURCE` | Source image of `auth-o-tron` |
+| `REVPROXY_SOURCE` | Source image of the reverse proxy (default: `ecflow-revproxy-dev:latest`, built by `dockit`) |
+| `SFTP_SOURCE` | Source image of the SFTP sidecar (default: `ecflow-sftp-dev:latest`, built by `dockit`) |
+
+Every image is pulled from `eccr.ecmwf.int`. The images built by `dockit` (the ecFlow server, the reverse proxy and
+the SFTP sidecar) can also be built locally, in `../../dockit` (see its `INSTRUCTIONS.md`), and named through the
+`*_SOURCE` variables; an image already cached is not pulled, and one that cannot be pulled is used as cached by
+`reload`. For example, after `docker compose build ecflow-revproxy ecflow-sftp` in `../../dockit`:
+
+```bash
+REVPROXY_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:local \
+SFTP_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:local \
+    k8s/imachination.sh reload
+```
 | `ROLLOUT_TIMEOUT` | How long to wait for a workload to become available (default: `300s`) |
 | `VERIFY_USER`, `VERIFY_PASSWORD` | Credentials used by `verify` (default: the test user `admin`) |
 
@@ -72,7 +85,7 @@ All objects live in the namespace `imachination`. Only the reverse proxy is reac
 
 | Host port | Service | Purpose |
 |-----------|---------|---------|
-| 443 | `revproxy` | HTTPS, with a self-signed certificate; `/v1/ecflow` is gated by `auth-o-tron` |
+| 443 | `revproxy` | HTTPS, with a self-signed certificate unless one is provided (see below); `/v1/ecflow` is gated by `auth-o-tron` |
 | 2222 | `sftp` | SFTP (and `scp`) into the workspace of the ecFlow server, with per-user keys |
 
 The SFTP endpoint is a sidecar of the ecFlow server (see "Delivering files with sftp or scp"). Unlike the
@@ -115,6 +128,15 @@ provides its credentials through an `ecflowapirc` file. The client looks for the
 Only the first matching entry is used, so a file holds either the Basic or the Bearer entry for a given server.
 The client does not verify the certificate of the server, so the self-signed certificate of the reverse proxy
 needs no arrangement.
+
+The image of the reverse proxy holds no certificate. At every start, it installs the certificate and key of the
+Secret `revproxy-tls` (type `kubernetes.io/tls`), when it exists, or generates a self-signed certificate for
+`localhost` otherwise. To provide one:
+
+```bash
+kubectl -n imachination create secret tls revproxy-tls --cert=<certificate> --key=<key>
+k8s/imachination.sh restart revproxy
+```
 
 ```bash
 export ECF_HOST=localhost ECF_PORT=443 ECF_AUTHTOKENS=$HOME/.ecflowapirc
@@ -210,7 +232,8 @@ Every job runs as the same user in the server container, and can read the files 
 
 ## Delivering files with sftp or scp
 
-The ecFlow server Pod runs an SFTP sidecar, built from [`../sftp/`](../sftp/), which shares the workspace of
+The ecFlow server Pod runs an SFTP sidecar, the image `ecflow-sftp-dev` built by `dockit`
+([`../../dockit/ecflow-sftp/`](../../dockit/ecflow-sftp/)), which shares the workspace of
 the server and is published on the host as port 2222. It offers SFTP only (no shell, no forwarding), and `scp`
 works as well, as it uses the SFTP protocol. `rsync` is not supported.
 
@@ -239,7 +262,7 @@ the delay applies to every client on the host.
 |---------------|-----|
 | The administrator's files: `ecflow/admin/server_environment.cfg`, the troika configurations, the tokens, the SSH keys | `k8s/imachination.sh admin <dir>` |
 | `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.sh apply` |
-| A new image published upstream, `revproxy/` or `sftp/` | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
+| A new image published upstream, or built locally | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
 
 ## Troubleshooting
 
@@ -255,7 +278,7 @@ the delay applies to every client on the host.
 ## Known limitations
 
 - The deployment is not meant for production: the credentials in `config.yaml` are test values, and the
-  certificate of the reverse proxy is self-signed.
+  certificate of the reverse proxy is self-signed, unless one is provided.
 
 ## Removing the deployment
 

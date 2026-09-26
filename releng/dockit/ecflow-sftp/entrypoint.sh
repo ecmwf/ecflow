@@ -8,9 +8,9 @@
 set -euo pipefail
 
 workspace=${ECFLOW_WORKSPACE_DIR:-/workspace}
-# The keys, as loaded into the Secret sftp-keys, readable by root only: <user>.authorized_keys, and the
-# host key; the public keys are installed where sshd's key lookup, which runs as nobody, can read them
-keys_dir=${SFTP_KEYS_DIR:-/etc/ssh/imachination}
+# The keys, possibly readable by root only: <user>.authorized_keys, and the host key; the public keys are
+# installed where sshd's key lookup, which runs as nobody, can read them
+keys_dir=${SFTP_KEYS_DIR:-/etc/ssh/sftp-keys}
 mkdir -p /etc/ssh/authorized_keys
 users=${SFTP_USERS:?SFTP_USERS must list the accounts to create}
 
@@ -37,7 +37,7 @@ for user in ${users}; do
     fi
 done
 
-# The host key is taken from the keys, so that it survives a restart of the Pod; without one, a
+# The host key is taken from the keys, so that it survives a restart of the container; without one, a
 # temporary key is generated, which clients will see change at the next restart.
 host_key=/etc/ssh/keys/ssh_host_ed25519_key
 if [[ -r "${keys_dir}/ssh_host_ed25519_key" ]]; then

@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  # Collect the timestamp and version information shared by all jobs
+  # Collect the timestamp, version and tag information shared by all jobs
   bootstrap:
     name: bootstrap
     runs-on: ubuntu-latest
@@ -18,6 +18,7 @@ jobs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
       created: ${{ steps.timestamp.outputs.created }}
       version: ${{ steps.vars.outputs.version }}
+      tags: ${{ steps.tags.outputs.tags }}
 
     steps:
       - name: Checkout 'ecflow' (CMakeLists.txt and the package script only)
@@ -44,6 +45,47 @@ jobs:
           {
             echo "timestamp=$(date -u -d "@${now}" +'%Y%m%dT%H%M%S')"
             echo "created=$(date -u -d "@${now}" +'%Y-%m-%dT%H:%M:%SZ')"
+          } >> "${GITHUB_OUTPUT}"
+
+      #
+      # Tag every image after the branch it is built from, with the same tags:
+      #   <branch-slug>_<short-sha>_<timestamp>_<version>  (this build)
+      #   <branch-slug>                                    (the latest build of the branch)
+      #   latest                                           (the latest build of develop only)
+      # The slug drops the first component of the branch name, if any (e.g. 'task/'), lowercases it,
+      # and replaces anything other than letters, digits and '.' with '-'; e.g. task/support_acl
+      # becomes support-acl. The tags are given without an image name, one per line.
+      #
+      - name: Compute Docker image tags
+        id: tags
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          TIMESTAMP: ${{ steps.timestamp.outputs.timestamp }}
+          VERSION: ${{ steps.vars.outputs.version }}
+        run: |
+          name="${BRANCH#*/}"
+          slug=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9.]+/-/g; s/^[-.]+//; s/-+$//' | cut -c1-60)
+          slug="${slug%-}"
+          if [ -z "${slug}" ]; then
+            echo "Cannot derive an image tag from branch '${BRANCH}'" >&2
+            exit 1
+          fi
+          # 'latest' is reserved for develop
+          if [ "${slug}" = "latest" ] && [ "${BRANCH}" != "develop" ]; then
+            echo "Branch '${BRANCH}' would be tagged 'latest', which is reserved for develop" >&2
+            exit 1
+          fi
+          # VERSION is <project version>_<sha>; only the project version is used here
+          tags="${slug}_${SHA:0:12}_${TIMESTAMP}_${VERSION%%_*}"$'\n'"${slug}"
+          if [ "${BRANCH}" = "develop" ]; then
+            tags="${tags}"$'\n'"latest"
+          fi
+          echo "${tags}"
+          {
+            echo "tags<<EOF"
+            echo "${tags}"
+            echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
   #
@@ -113,8 +155,8 @@ jobs:
   #
   # Create the ecflow docker image
   #
-  dockerize:
-    name: dockerize (${{ matrix.image }})
+  dockerize-ecflow:
+    name: dockerize-ecflow (${{ matrix.image }})
     needs: [ bootstrap, package ]
 
     runs-on: ubuntu-latest
@@ -158,55 +200,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      #
-      # Tag the image after the branch it is built from:
-      #   <branch-slug>_<short-sha>_<timestamp>_<version>  (this build)
-      #   <branch-slug>                                    (the latest build of the branch)
-      #   latest                                           (the latest build of develop only)
-      # The slug drops the first component of the branch name, if any (e.g. 'task/'), lowercases it,
-      # and replaces anything other than letters, digits and '.' with '-'; e.g. task/support_acl
-      # becomes support-acl.
-      #
-      - name: Compute Docker image tags
-        id: tags
-        env:
-          IMAGE: eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}
-          BRANCH: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
-          TIMESTAMP: ${{ needs.bootstrap.outputs.timestamp }}
-          VERSION: ${{ needs.bootstrap.outputs.version }}
-        run: |
-          name="${BRANCH#*/}"
-          slug=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9.]+/-/g; s/^[-.]+//; s/-+$//' | cut -c1-60)
-          slug="${slug%-}"
-          if [ -z "${slug}" ]; then
-            echo "Cannot derive an image tag from branch '${BRANCH}'" >&2
-            exit 1
-          fi
-          # 'latest' is reserved for develop
-          if [ "${slug}" = "latest" ] && [ "${BRANCH}" != "develop" ]; then
-            echo "Branch '${BRANCH}' would be tagged 'latest', which is reserved for develop" >&2
-            exit 1
-          fi
-          # VERSION is <project version>_<sha>; only the project version is used here
-          tags="${IMAGE}:${slug}_${SHA:0:12}_${TIMESTAMP}_${VERSION%%_*}"$'\n'"${IMAGE}:${slug}"
-          if [ "${BRANCH}" = "develop" ]; then
-            tags="${tags}"$'\n'"${IMAGE}:latest"
-          fi
-          echo "${tags}"
-          {
-            echo "tags<<EOF"
-            echo "${tags}"
-            echo "EOF"
-          } >> "${GITHUB_OUTPUT}"
-
       - name: Create, smoke-test and push Docker image
         env:
-          TAGS: ${{ steps.tags.outputs.tags }}
+          IMAGE: eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}
+          TAGS: ${{ needs.bootstrap.outputs.tags }}
         run: |
           args=()
           while IFS= read -r tag; do
-            [ -n "${tag}" ] && args+=(--tag "${tag}")
+            [ -n "${tag}" ] && args+=(--tag "${IMAGE}:${tag}")
           done <<< "${TAGS}"
           "${GITHUB_WORKSPACE}/ecflow/releng/dockit/create_ecflow_docker_image.sh" \
             --context "${GITHUB_WORKSPACE}/ecflow/releng/dockit/${{ matrix.context }}" \
@@ -219,3 +220,83 @@ jobs:
             --label "org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}" \
             --label "org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}" \
             --label "int.ecmwf.ecflow.preset=${{ matrix.preset }}"
+
+  #
+  # Create the images built directly from their Dockerfile, without an ecflow package: the reverse proxy and the SFTP
+  # server of the ecflow deployments, with the same tags as the ecflow image
+  #
+  dockerize-standalone:
+    name: dockerize-standalone (${{ matrix.image }})
+    needs: bootstrap
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ecflow-revproxy-dev
+            context: ecflow-revproxy
+            # nginx, with the certificate generated at start, as no Secret is provided
+            smoke: 'entrypoint: no certificate'
+          - image: ecflow-sftp-dev
+            context: ecflow-sftp
+            # sshd, with an account and a temporary host key, as no keys are provided
+            smoke: "entrypoint: created account 'dockit'"
+
+    steps:
+      - name: Checkout 'ecflow'
+        uses: actions/checkout@v5
+        with:
+          path: ecflow
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v4
+        with:
+          registry: eccr.ecmwf.int
+          username: ${{ secrets.ECCR_ECMWF_USER }}
+          password: ${{ secrets.ECCR_ECMWF_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # The image of the runner's architecture is built, started and checked before any image is pushed
+      - name: Smoke-test Docker image
+        env:
+          CONTEXT: ${{ github.workspace }}/ecflow/releng/dockit/${{ matrix.context }}
+          SMOKE: ${{ matrix.smoke }}
+        run: |
+          docker buildx build --load --tag smoke "${CONTEXT}"
+          workspace=$(mktemp -d)
+          container=$(docker run -d --env SFTP_USERS=dockit --volume "${workspace}:/workspace" smoke)
+          sleep 5
+          logs=$(docker logs "${container}" 2>&1)
+          echo "${logs}"
+          test "$(docker inspect -f '{{.State.Status}}' "${container}")" = running
+          grep -qF "${SMOKE}" <<< "${logs}"
+          docker rm -f "${container}" >/dev/null
+
+      - name: Create and push Docker image
+        env:
+          CONTEXT: ${{ github.workspace }}/ecflow/releng/dockit/${{ matrix.context }}
+          IMAGE: eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}
+          TAGS: ${{ needs.bootstrap.outputs.tags }}
+        run: |
+          args=()
+          while IFS= read -r tag; do
+            [ -n "${tag}" ] && args+=(--tag "${IMAGE}:${tag}")
+          done <<< "${TAGS}"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --push \
+            "${args[@]}" \
+            --label "org.opencontainers.image.source=${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.revision=${{ github.sha }}" \
+            --label "org.opencontainers.image.version=${{ needs.bootstrap.outputs.version }}" \
+            --label "org.opencontainers.image.created=${{ needs.bootstrap.outputs.created }}" \
+            "${CONTEXT}"

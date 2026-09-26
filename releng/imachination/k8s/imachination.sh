@@ -32,7 +32,9 @@ readonly ECFLOW_SOURCE="${ECFLOW_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/
 readonly ECFLOW_IMAGE="imachination/ecflow-server:local"
 readonly AUTHOTRON_SOURCE="${AUTHOTRON_SOURCE:-eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7}"
 readonly AUTHOTRON_IMAGE="imachination/authotron:local"
+readonly REVPROXY_SOURCE="${REVPROXY_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest}"
 readonly REVPROXY_IMAGE="imachination/revproxy:local"
+readonly SFTP_SOURCE="${SFTP_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest}"
 readonly SFTP_IMAGE="imachination/sftp:local"
 
 info() { printf '\033[1m==> %s\033[0m\n' "$*"; }
@@ -66,37 +68,42 @@ do_cluster() {
 # that a working cluster does not depend on registry availability.
 #
 # With REFRESH_IMAGES=1, as set by `reload`, the image is pulled even when cached,
-# so that a tag republished upstream (such as `latest`) reaches the cluster.
+# so that a tag republished upstream (such as `latest`) reaches the cluster; an
+# image that cannot be pulled, such as one built locally, is used as cached.
 ensure_pulled() {
-    local image="$1"
-    if [[ "${REFRESH_IMAGES:-0}" != 1 ]] && docker image inspect "${image}" >/dev/null 2>&1; then
+    local image="$1" cached=0
+    docker image inspect "${image}" >/dev/null 2>&1 && cached=1
+    if [[ "${REFRESH_IMAGES:-0}" != 1 && "${cached}" == 1 ]]; then
         info "Already cached: ${image}"
         return
     fi
     info "Pulling ${image}"
-    docker pull "${image}" \
-        || die "Failed to pull ${image}. A 'docker login eccr.ecmwf.int' may be required."
+    if ! docker pull "${image}"; then
+        [[ "${cached}" == 1 ]] || die "Failed to pull ${image}. A 'docker login eccr.ecmwf.int' may be required."
+        warn "Failed to pull ${image}; using the cached image."
+    fi
 }
 
 do_images() {
     require kind docker
     cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist. Run '$(basename "$0") cluster' first."
 
-    # The reverse proxy has no published image and is always built locally.
-    info "Building ${REVPROXY_IMAGE}"
-    docker build -t "${REVPROXY_IMAGE}" "${IMACHINATION_DIR}/revproxy"
-
-    # The SFTP sidecar of the ecFlow server is built locally as well.
-    info "Building ${SFTP_IMAGE}"
-    docker build -t "${SFTP_IMAGE}" "${IMACHINATION_DIR}/sftp"
-
-    # The ecFlow image is published for both linux/amd64 and linux/arm64, so the
-    # variant matching the host is pulled and no emulation is involved.
+    # Every image is published, for both linux/amd64 and linux/arm64, so the
+    # variant matching the host is pulled and no emulation is involved. The
+    # images of dockit (the ecFlow server, the reverse proxy and the SFTP
+    # sidecar) can also be built locally, from releng/dockit, and named here
+    # through the *_SOURCE variables; an image already cached is not pulled.
     ensure_pulled "${ECFLOW_SOURCE}"
     docker tag "${ECFLOW_SOURCE}" "${ECFLOW_IMAGE}"
 
     ensure_pulled "${AUTHOTRON_SOURCE}"
     docker tag "${AUTHOTRON_SOURCE}" "${AUTHOTRON_IMAGE}"
+
+    ensure_pulled "${REVPROXY_SOURCE}"
+    docker tag "${REVPROXY_SOURCE}" "${REVPROXY_IMAGE}"
+
+    ensure_pulled "${SFTP_SOURCE}"
+    docker tag "${SFTP_SOURCE}" "${SFTP_IMAGE}"
 
     for image in "${ECFLOW_IMAGE}" "${AUTHOTRON_IMAGE}" "${REVPROXY_IMAGE}" "${SFTP_IMAGE}"; do
         info "Loading ${image} into the cluster"
@@ -269,9 +276,9 @@ do_up() {
     do_apply
 }
 
-# Refreshes the images and replaces the workloads that use them: the reverse
-# proxy is rebuilt, the published images are pulled again even when cached, and
-# every workload, or the one named, is restarted onto the images just loaded.
+# Refreshes the images and replaces the workloads that use them: the images are
+# pulled again even when cached, and every workload, or the one named, is
+# restarted onto the images just loaded.
 do_reload() {
     REFRESH_IMAGES=1 do_images
     do_restart "${1:-}"
@@ -412,7 +419,7 @@ Usage: $(basename "$0") <command> [argument]
 Commands:
   up         Create the cluster, load the images and apply the stack, in one go
   cluster    Create the cluster, if absent
-  images     Build, pull, tag and load the container images into the cluster
+  images     Pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
   admin DIR  Load the administrator's files (DIR merged over ecflow/admin) and the
              SSH keys (DIR/sshd), then replace the ecFlow server Pod
@@ -421,7 +428,7 @@ Commands:
   logs       Follow the output of every workload, or of the one named
   restart    Replace every workload, or the one named, so that it re-reads its
              configuration; required after editing server_environment.cfg
-  reload     Rebuild and pull the images again, even when cached, load them, and
+  reload     Pull the images again, even when cached, load them, and
              restart every workload, or the one named, onto them
   down       Delete the stack, with its workspace and checkpoint, keeping the
              cluster and its images
@@ -431,6 +438,9 @@ Environment:
   ECFLOW_SOURCE      Source image for the ecFlow server, the equivalent of the
                      ECFLOW_IMAGE that compose.yaml accepts
   AUTHOTRON_SOURCE   Source image for the authentication service
+  REVPROXY_SOURCE    Source image for the reverse proxy, the equivalent of the
+                     REVPROXY_IMAGE that compose.yaml accepts
+  SFTP_SOURCE        Source image for the SFTP sidecar of the ecFlow server
   ROLLOUT_TIMEOUT    How long to wait for a workload to become available
                      (default: 300s; an emulated server starts slowly)
   VERIFY_USER        User of the plain provider that verify authenticates as

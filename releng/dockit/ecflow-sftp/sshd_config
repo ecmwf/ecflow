@@ -12,8 +12,8 @@ KbdInteractiveAuthentication no
 PubkeyAuthentication yes
 UsePAM no
 
-# The authorised keys of each user, installed from the Secret sftp-keys when the sidecar starts, are read
-# on every login; a change to the Secret takes effect when the Pod is replaced.
+# The authorised keys of each user, installed from SFTP_KEYS_DIR when the container starts, are read on
+# every login; a change to SFTP_KEYS_DIR takes effect when the container is restarted.
 AuthorizedKeysFile none
 AuthorizedKeysCommand /usr/local/bin/authorized-keys %u
 AuthorizedKeysCommandUser nobody
