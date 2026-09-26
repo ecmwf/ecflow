@@ -10,6 +10,9 @@ reverse proxy that gates access through an authentication service.
 
 It is intended for exercising the authentication path (Basic and Bearer tokens) end to end.
 
+The same stack can also be deployed on a local Kubernetes cluster, created with kind, as described in
+[`k8s/README.md`](k8s/README.md).
+
 The stack has three services, defined in `compose.yaml`:
 
 - `revproxy`
