@@ -35,6 +35,7 @@ readonly ECFLOW_IMAGE="imachination/ecflow-server:local"
 readonly AUTHOTRON_SOURCE="${AUTHOTRON_SOURCE:-eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7}"
 readonly AUTHOTRON_IMAGE="imachination/authotron:local"
 readonly REVPROXY_IMAGE="imachination/revproxy:local"
+readonly SFTP_IMAGE="imachination/sftp:local"
 
 info() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[33m==> %s\033[0m\n' "$*" >&2; }
@@ -100,6 +101,10 @@ do_images() {
     info "Building ${REVPROXY_IMAGE}"
     docker build -t "${REVPROXY_IMAGE}" "${IMACHINATION_DIR}/revproxy"
 
+    # The SFTP sidecar of the ecFlow server is built locally as well.
+    info "Building ${SFTP_IMAGE}"
+    docker build -t "${SFTP_IMAGE}" "${IMACHINATION_DIR}/sftp"
+
     # The ecFlow image is published for both linux/amd64 and linux/arm64, so the
     # variant matching the host is pulled and no emulation is involved.
     ensure_pulled "${ECFLOW_SOURCE}"
@@ -108,7 +113,7 @@ do_images() {
     ensure_pulled "${AUTHOTRON_SOURCE}"
     docker tag "${AUTHOTRON_SOURCE}" "${AUTHOTRON_IMAGE}"
 
-    for image in "${ECFLOW_IMAGE}" "${AUTHOTRON_IMAGE}" "${REVPROXY_IMAGE}"; do
+    for image in "${ECFLOW_IMAGE}" "${AUTHOTRON_IMAGE}" "${REVPROXY_IMAGE}" "${SFTP_IMAGE}"; do
         info "Loading ${image} into the cluster"
         kind load docker-image "${image}" --name "${CLUSTER_NAME}"
     done

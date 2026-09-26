@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# SFTP only, with public keys only: no password, no shell, no forwarding of any kind.
+
+Port 22
+HostKey /etc/ssh/keys/ssh_host_ed25519_key
+
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+UsePAM no
+
+# The authorised keys of each user are read from the workspace on every login, so that adding a key
+# takes effect without restarting the sidecar.
+AuthorizedKeysFile none
+AuthorizedKeysCommand /usr/local/bin/authorized-keys %u
+AuthorizedKeysCommandUser nobody
+
+AllowTcpForwarding no
+AllowAgentForwarding no
+AllowStreamLocalForwarding no
+PermitTunnel no
+X11Forwarding no
+
+# Every session is an SFTP session, starting in the workspace; files are created group-writable, so that
+# the ecFlow server, which shares the group of the workspace, can use them. scp works as well, as it uses
+# the SFTP protocol.
+Subsystem sftp internal-sftp -d /workspace -u 0002
+ForceCommand internal-sftp -d /workspace -u 0002
+
+LogLevel VERBOSE

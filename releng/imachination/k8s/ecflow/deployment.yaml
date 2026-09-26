@@ -100,6 +100,38 @@ spec:
             - name: workspace
               mountPath: /workspace
 
+        # An SFTP endpoint to the same workspace, so that suite files can be
+        # delivered to the server with sftp or scp, as on a conventional host.
+        # Each user listed has an account of their own, and logs in with a key
+        # read from /workspace/secrets/<user>/authorized_keys.
+        - name: sftp
+          image: imachination/sftp:local
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: SFTP_USERS
+              value: "mamb admin"
+
+          ports:
+            - name: ssh
+              containerPort: 22
+
+          # Checks that sshd is running, rather than connecting to it: sshd
+          # penalises a source address that connects without authenticating, and
+          # through the node port every client shares the address of the node.
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - kill -0 "$(cat /run/sshd.pid)"
+            initialDelaySeconds: 2
+            periodSeconds: 10
+
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+
       volumes:
         - name: workspace
           # Provided to the node by the kind extraMounts entry, and through it
