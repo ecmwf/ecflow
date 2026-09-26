@@ -40,6 +40,39 @@ spec:
       # deletion from waiting the full default.
       terminationGracePeriodSeconds: 10
 
+      # The administrator's files (A) reach the Pod as one Secret, ecflow-admin, loaded by
+      # `imachination.sh admin`: a Secret has flat keys, so each path is encoded with "__" in place of "/"
+      # (troika/mamb/troika.yml as troika__mamb__troika.yml). This container expands them into /admin,
+      # which the server then mounts read-only; SFTP users never see it, as the sidecar does not mount it.
+      # A change to the Secret takes effect when the Pod is replaced.
+      initContainers:
+        - name: admin
+          image: imachination/ecflow-server:local
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              for source in /admin-source/*; do
+                  [ -f "${source}" ] || continue
+                  key=$(basename "${source}")
+                  target="/admin/$(printf '%s' "${key}" | sed 's|__|/|g')"
+                  mkdir -p "$(dirname "${target}")"
+                  cp "${source}" "${target}"
+                  case "${key}" in
+                      *troikaw|*.sh) chmod 0755 "${target}" ;;
+                      *) chmod 0444 "${target}" ;;
+                  esac
+                  echo "admin: ${target}"
+              done
+          volumeMounts:
+            - name: admin-source
+              mountPath: /admin-source
+              readOnly: true
+            - name: admin
+              mountPath: /admin
+
       containers:
         - name: ecflow-server
           image: imachination/ecflow-server:local
@@ -70,6 +103,15 @@ spec:
             # that the two may later be delivered by different means.
             - name: ECF_FILES
               value: /workspace/files
+            # The server reads server_environment.cfg from the administrator's files,
+            # and keeps its checkpoint on a volume of its own; ECF_HOME, and with it
+            # the log, stays in the workspace, which the users see
+            - name: ECFLOW_CONFIG_DIR
+              value: /admin
+            - name: ECF_CHECK
+              value: /state/ecflow-server.8888.ecf.check
+            - name: ECF_CHECKOLD
+              value: /state/ecflow-server.8888.ecf.check.b
 
           ports:
             - name: ecflow
@@ -99,11 +141,16 @@ spec:
           volumeMounts:
             - name: workspace
               mountPath: /workspace
+            - name: admin
+              mountPath: /admin
+              readOnly: true
+            - name: state
+              mountPath: /state
 
         # An SFTP endpoint to the same workspace, so that suite files can be
         # delivered to the server with sftp or scp, as on a conventional host.
         # Each user listed has an account of their own, and logs in with a key
-        # read from /workspace/secrets/<user>/authorized_keys.
+        # from the Secret sftp-keys, which only this container mounts.
         - name: sftp
           image: imachination/sftp:local
           imagePullPolicy: IfNotPresent
@@ -111,6 +158,8 @@ spec:
           env:
             - name: SFTP_USERS
               value: "mamb admin"
+            - name: SFTP_KEYS_DIR
+              value: /etc/ssh/imachination
 
           ports:
             - name: ssh
@@ -131,6 +180,9 @@ spec:
           volumeMounts:
             - name: workspace
               mountPath: /workspace
+            - name: sftp-keys
+              mountPath: /etc/ssh/imachination
+              readOnly: true
 
       volumes:
         - name: workspace
@@ -140,3 +192,22 @@ spec:
           hostPath:
             path: /workspace
             type: Directory
+        # The administrator's files: the Secret as loaded, and its expansion
+        - name: admin-source
+          secret:
+            secretName: ecflow-admin
+        - name: admin
+          emptyDir: {}
+        # The checkpoint of the server
+        - name: state
+          persistentVolumeClaim:
+            claimName: ecflow-state
+        # The keys of the SFTP users and the host key of the sidecar, readable by
+        # root only, as the SFTP users could otherwise read the host key; the
+        # sidecar installs them when it starts. Optional, so that the Pod starts
+        # before any key is loaded, no user being able to log in until then
+        - name: sftp-keys
+          secret:
+            secretName: sftp-keys
+            defaultMode: 0400
+            optional: true

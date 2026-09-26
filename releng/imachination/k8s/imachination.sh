@@ -22,6 +22,10 @@ readonly GENERATED_DIR="${HERE}/.generated"
 readonly CLUSTER_TEMPLATE="${HERE}/kind-cluster.yaml.in"
 readonly CLUSTER_CONFIG="${GENERATED_DIR}/kind-cluster.yaml"
 
+# The administrator's files that every deployment starts from (server_environment.cfg); `admin <dir>`
+# merges a directory of per-user files over them.
+readonly ADMIN_BASE_DIR="${IMACHINATION_DIR}/ecflow/admin"
+
 # The workspace mounted into the cluster, overridable in the same way that
 # compose.yaml allows.
 WORKSPACE_DIR="${WORKSPACE_DIR:-${IMACHINATION_DIR}/ecflow/workspace}"
@@ -165,9 +169,82 @@ wait_for_workloads() {
 # Declares every object of the stack. Re-applying an unchanged tree is a no-op,
 # and an edited configuration file yields a new generated name, which rolls the
 # pods that consume it.
+ensure_namespace() {
+    kubectl --context "kind-${CLUSTER_NAME}" create namespace "${NAMESPACE}" --dry-run=client -o yaml \
+        | kubectl --context "kind-${CLUSTER_NAME}" apply -f - >/dev/null
+}
+
+# Writes, to standard output, a Secret named $1 holding every file below the directory $2, each keyed by
+# its path relative to $2, with "__" in place of "/"; files below the directories named in $3 (a
+# space-separated list) are left out.
+secret_from_tree() {
+    local name="$1" dir="$2" skip="${3:-}" file relative key
+    local args=()
+    while IFS= read -r file; do
+        relative="${file#"${dir}"/}"
+        local skipped=0 top
+        for top in ${skip}; do
+            [[ "${relative}" == "${top}/"* ]] && skipped=1
+        done
+        (( skipped )) && continue
+        key="${relative//\//__}"
+        args+=("--from-file=${key}=${file}")
+    done < <(find "${dir}" -type f ! -name '.*' | sort)
+    kubectl --context "kind-${CLUSTER_NAME}" create secret generic "${name}" -n "${NAMESPACE}" \
+        --dry-run=client -o yaml ${args[@]+"${args[@]}"}
+}
+
+# Loads the administrator's files into the cluster: ecflow-admin, which the ecFlow server Pod expands into
+# /admin, holds the base files merged with those of the given directory (server_environment.cfg, troikaw,
+# troika/<user>/, secrets/<user>/, ...); sftp-keys, which only the SFTP sidecar mounts, holds the files of
+# its sshd/ directory (<user>.authorized_keys and the host key). The server Pod is then replaced, so that
+# it expands the new files.
+do_admin() {
+    require kubectl
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist. Run '$(basename "$0") cluster' first."
+    local dir="${1:-}"
+    if [[ -n "${dir}" ]]; then
+        [[ -d "${dir}" ]] || die "No such directory: ${dir}"
+        dir="$(cd "${dir}" && pwd)"
+    fi
+
+    local staging
+    staging="$(mktemp -d)"
+    # shellcheck disable=SC2064 # the directory is known now, and must be removed on any exit
+    trap "rm -rf '${staging}'" EXIT
+    cp -R "${ADMIN_BASE_DIR}/." "${staging}/"
+    if [[ -n "${dir}" ]]; then
+        cp -R "${dir}/." "${staging}/"
+    fi
+
+    ensure_namespace
+    info "Loading the administrator's files${dir:+ from ${dir}} into Secret ecflow-admin"
+    secret_from_tree ecflow-admin "${staging}" "sshd venv" \
+        | kubectl --context "kind-${CLUSTER_NAME}" apply -f -
+    if [[ -d "${staging}/sshd" ]]; then
+        info "Loading the SSH keys into Secret sftp-keys"
+        secret_from_tree sftp-keys "${staging}/sshd" \
+            | kubectl --context "kind-${CLUSTER_NAME}" apply -f -
+    fi
+
+    if kubectl --context "kind-${CLUSTER_NAME}" get deployment/ecflow-server -n "${NAMESPACE}" >/dev/null 2>&1; then
+        do_restart ecflow-server
+        warn "The ecFlow server restarted halted: issue 'ecflow_client --https --restart' as an administrator."
+    fi
+}
+
 do_apply() {
     require kubectl
     cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist. Run '$(basename "$0") cluster' first."
+
+    # The server Pod cannot start without the administrator's files; the base is loaded when none are,
+    # and files already loaded are kept
+    ensure_namespace
+    if ! kubectl --context "kind-${CLUSTER_NAME}" get secret ecflow-admin -n "${NAMESPACE}" >/dev/null 2>&1; then
+        info "Loading the base administrator's files into Secret ecflow-admin"
+        secret_from_tree ecflow-admin "${ADMIN_BASE_DIR}" \
+            | kubectl --context "kind-${CLUSTER_NAME}" apply -f -
+    fi
 
     info "Applying the stack"
     kubectl --context "kind-${CLUSTER_NAME}" apply -k "${IMACHINATION_DIR}"
@@ -352,6 +429,8 @@ Commands:
   cluster    Render the cluster definition and create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
+  admin DIR  Load the administrator's files (DIR merged over ecflow/admin) and the
+             SSH keys (DIR/sshd), then replace the ecFlow server Pod
   verify     Exercise the authenticated path with ecflow_client, from the host
   status     Report the state of the cluster, its images and the stack
   logs       Follow the output of every workload, or of the one named
@@ -382,6 +461,7 @@ main() {
         cluster) do_cluster ;;
         images)  do_images ;;
         apply)   do_apply ;;
+        admin)   do_admin "${2:-}" ;;
         verify)  do_verify ;;
         status)  do_status ;;
         logs)    do_logs "${2:-}" ;;

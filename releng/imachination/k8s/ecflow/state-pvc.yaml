@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The checkpoint of the ecFlow server, kept apart from the workspace that the
+# users see. On kind, the claim is served by the default local-path storage;
+# its contents are lost with the cluster.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ecflow-state
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 64Mi

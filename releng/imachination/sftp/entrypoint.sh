@@ -8,7 +8,10 @@
 set -euo pipefail
 
 workspace=${ECFLOW_WORKSPACE_DIR:-/workspace}
-keys_dir=${SFTP_KEYS_DIR:-${workspace}/secrets}
+# The keys, as loaded into the Secret sftp-keys, readable by root only: <user>.authorized_keys, and the
+# host key; the public keys are installed where sshd's key lookup, which runs as nobody, can read them
+keys_dir=${SFTP_KEYS_DIR:-/etc/ssh/imachination}
+mkdir -p /etc/ssh/authorized_keys
 users=${SFTP_USERS:?SFTP_USERS must list the accounts to create}
 
 # Every account has the group of the workspace as its primary group, as the ecFlow server does, so that
@@ -27,17 +30,20 @@ for user in ${users}; do
         usermod --password '*' "${user}"
         echo "entrypoint: created account '${user}' (group ${group}, gid ${gid})"
     fi
-    [[ -r "${keys_dir}/${user}/authorized_keys" ]] \
-        || echo "entrypoint: warning: no ${keys_dir}/${user}/authorized_keys; '${user}' cannot log in yet" >&2
+    if [[ -r "${keys_dir}/${user}.authorized_keys" ]]; then
+        install -m 0644 "${keys_dir}/${user}.authorized_keys" "/etc/ssh/authorized_keys/${user}"
+    else
+        echo "entrypoint: warning: no ${keys_dir}/${user}.authorized_keys; '${user}' cannot log in" >&2
+    fi
 done
 
-# The host key is taken from the workspace, so that it survives a restart of the Pod; without one, a
+# The host key is taken from the keys, so that it survives a restart of the Pod; without one, a
 # temporary key is generated, which clients will see change at the next restart.
 host_key=/etc/ssh/keys/ssh_host_ed25519_key
-if [[ -r "${keys_dir}/sshd/ssh_host_ed25519_key" ]]; then
-    install -m 0600 "${keys_dir}/sshd/ssh_host_ed25519_key" "${host_key}"
+if [[ -r "${keys_dir}/ssh_host_ed25519_key" ]]; then
+    install -m 0600 "${keys_dir}/ssh_host_ed25519_key" "${host_key}"
 else
-    echo "entrypoint: warning: no ${keys_dir}/sshd/ssh_host_ed25519_key; generating a temporary host key" >&2
+    echo "entrypoint: warning: no ${keys_dir}/ssh_host_ed25519_key; generating a temporary host key" >&2
     ssh-keygen -q -t ed25519 -N '' -f "${host_key}"
 fi
 
