@@ -24,18 +24,19 @@ readonly CLUSTER_CONFIG="${HERE}/kind-cluster.yaml"
 # merges a directory of per-user files over them.
 readonly ADMIN_BASE_DIR="${IMACHINATION_DIR}/ecflow/admin"
 
-# Images are renamed on the way into the cluster. A tag other than `latest` is
-# used deliberately: Kubernetes defaults imagePullPolicy to Always for `latest`,
-# which would send the cluster to a registry it has no credentials for, instead
-# of using the copy loaded here.
-readonly ECFLOW_SOURCE="${ECFLOW_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest}"
-readonly ECFLOW_IMAGE="imachination/ecflow-server:local"
-readonly AUTHOTRON_SOURCE="${AUTHOTRON_SOURCE:-eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7}"
-readonly AUTHOTRON_IMAGE="imachination/authotron:local"
-readonly REVPROXY_SOURCE="${REVPROXY_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest}"
-readonly REVPROXY_IMAGE="imachination/revproxy:local"
-readonly SFTP_SOURCE="${SFTP_SOURCE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest}"
-readonly SFTP_IMAGE="imachination/sftp:local"
+# The images named in the manifests, and those used in their place: the
+# *_SOURCE variables select another image (a branch build, or one built
+# locally), which is loaded into the cluster under its own name, and replaces
+# the image of the manifests when the stack is applied. The node never pulls an
+# image: the manifests use IfNotPresent, and every image is loaded beforehand.
+readonly ECFLOW_DEFAULT="eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest"
+readonly AUTHOTRON_DEFAULT="eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7"
+readonly REVPROXY_DEFAULT="eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest"
+readonly SFTP_DEFAULT="eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest"
+readonly ECFLOW_SOURCE="${ECFLOW_SOURCE:-${ECFLOW_DEFAULT}}"
+readonly AUTHOTRON_SOURCE="${AUTHOTRON_SOURCE:-${AUTHOTRON_DEFAULT}}"
+readonly REVPROXY_SOURCE="${REVPROXY_SOURCE:-${REVPROXY_DEFAULT}}"
+readonly SFTP_SOURCE="${SFTP_SOURCE:-${SFTP_DEFAULT}}"
 
 info() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[33m==> %s\033[0m\n' "$*" >&2; }
@@ -93,22 +94,27 @@ do_images() {
     # images of dockit (the ecFlow server, the reverse proxy and the SFTP
     # sidecar) can also be built locally, from releng/dockit, and named here
     # through the *_SOURCE variables; an image already cached is not pulled.
-    ensure_pulled "${ECFLOW_SOURCE}"
-    docker tag "${ECFLOW_SOURCE}" "${ECFLOW_IMAGE}"
-
-    ensure_pulled "${AUTHOTRON_SOURCE}"
-    docker tag "${AUTHOTRON_SOURCE}" "${AUTHOTRON_IMAGE}"
-
-    ensure_pulled "${REVPROXY_SOURCE}"
-    docker tag "${REVPROXY_SOURCE}" "${REVPROXY_IMAGE}"
-
-    ensure_pulled "${SFTP_SOURCE}"
-    docker tag "${SFTP_SOURCE}" "${SFTP_IMAGE}"
-
-    for image in "${ECFLOW_IMAGE}" "${AUTHOTRON_IMAGE}" "${REVPROXY_IMAGE}" "${SFTP_IMAGE}"; do
+    local image
+    for image in "${ECFLOW_SOURCE}" "${AUTHOTRON_SOURCE}" "${REVPROXY_SOURCE}" "${SFTP_SOURCE}"; do
+        ensure_pulled "${image}"
         info "Loading ${image} into the cluster"
         kind load docker-image "${image}" --name "${CLUSTER_NAME}"
     done
+}
+
+# Writes, to standard output, the objects of the stack, with the images of the
+# manifests replaced by those selected by the *_SOURCE variables. Each image of
+# the manifests is matched exactly, as the whole value of an `image:` field,
+# which may open an item of a list (`- image:`).
+render_stack() {
+    local sed_args=() pair default source
+    for pair in "${ECFLOW_DEFAULT}=${ECFLOW_SOURCE}" "${AUTHOTRON_DEFAULT}=${AUTHOTRON_SOURCE}" \
+                "${REVPROXY_DEFAULT}=${REVPROXY_SOURCE}" "${SFTP_DEFAULT}=${SFTP_SOURCE}"; do
+        default="${pair%%=*}"
+        source="${pair#*=}"
+        sed_args+=(-e "s|^\([ -]*image: \)${default//./\\.}\$|\1${source}|")
+    done
+    kubectl kustomize "${IMACHINATION_DIR}" | sed "${sed_args[@]}"
 }
 
 # Reports why a workload has not converged. Called only on failure, when the
@@ -235,7 +241,7 @@ do_apply() {
     fi
 
     info "Applying the stack"
-    kubectl --context "kind-${CLUSTER_NAME}" apply -k "${IMACHINATION_DIR}"
+    render_stack | kubectl --context "kind-${CLUSTER_NAME}" apply -f -
 
     wait_for_workloads
     info "The stack is available."
@@ -277,10 +283,12 @@ do_up() {
 }
 
 # Refreshes the images and replaces the workloads that use them: the images are
-# pulled again even when cached, and every workload, or the one named, is
-# restarted onto the images just loaded.
+# pulled again even when cached, the stack is applied again, so that the images
+# selected by the *_SOURCE variables replace those in use, and every workload,
+# or the one named, is restarted onto the images just loaded.
 do_reload() {
     REFRESH_IMAGES=1 do_images
+    do_apply
     do_restart "${1:-}"
 }
 
@@ -395,7 +403,7 @@ do_status() {
     kubectl --context "kind-${CLUSTER_NAME}" get nodes
     info "Images loaded into the cluster"
     docker exec "${CLUSTER_NAME}-control-plane" crictl images 2>/dev/null \
-        | grep -E 'IMAGE|imachination' || warn "No imachination images loaded yet."
+        | grep -E 'IMAGE|ecflow-dev-environments|auth-o-tron' || warn "No images of the stack loaded yet."
 
     info "Objects in namespace '${NAMESPACE}'"
     kubectl --context "kind-${CLUSTER_NAME}" get all,configmap,secret -n "${NAMESPACE}" 2>/dev/null \
@@ -428,8 +436,8 @@ Commands:
   logs       Follow the output of every workload, or of the one named
   restart    Replace every workload, or the one named, so that it re-reads its
              configuration; required after editing server_environment.cfg
-  reload     Pull the images again, even when cached, load them, and
-             restart every workload, or the one named, onto them
+  reload     Pull the images again, even when cached, load them, apply the
+             stack, and restart every workload, or the one named, onto them
   down       Delete the stack, with its workspace and checkpoint, keeping the
              cluster and its images
   destroy    Delete the cluster

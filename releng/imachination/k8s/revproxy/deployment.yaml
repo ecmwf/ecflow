@@ -21,7 +21,7 @@ spec:
 
       containers:
         - name: nginx
-          image: imachination/revproxy:local
+          image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest
           imagePullPolicy: IfNotPresent
 
           ports:

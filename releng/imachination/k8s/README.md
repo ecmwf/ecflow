@@ -52,7 +52,7 @@ reach the server.
 | `status` | Report the state of the cluster, its images and the stack |
 | `logs [workload]` | Follow the output of every workload, or of the one named |
 | `restart [workload]` | Replace every workload, or the one named, so that it re-reads its configuration |
-| `reload [workload]` | Rebuild and pull the images again, even when cached, load them, and restart onto them |
+| `reload [workload]` | Pull the images again, even when cached, load them, apply the stack, and restart onto them |
 | `down` | Delete the stack, with its workspace and checkpoint, keeping the cluster and its images |
 | `destroy` | Delete the cluster |
 
@@ -65,19 +65,23 @@ variables:
 | `AUTHOTRON_SOURCE` | Source image of `auth-o-tron` |
 | `REVPROXY_SOURCE` | Source image of the reverse proxy (default: `ecflow-revproxy-dev:latest`, built by `dockit`) |
 | `SFTP_SOURCE` | Source image of the SFTP sidecar (default: `ecflow-sftp-dev:latest`, built by `dockit`) |
+| `ROLLOUT_TIMEOUT` | How long to wait for a workload to become available (default: `300s`) |
+| `VERIFY_USER`, `VERIFY_PASSWORD` | Credentials used by `verify` (default: the test user `admin`) |
 
-Every image is pulled from `eccr.ecmwf.int`. The images built by `dockit` (the ecFlow server, the reverse proxy and
-the SFTP sidecar) can also be built locally, in `../../dockit` (see its `INSTRUCTIONS.md`), and named through the
-`*_SOURCE` variables; an image already cached is not pulled, and one that cannot be pulled is used as cached by
-`reload`. For example, after `docker compose build ecflow-revproxy ecflow-sftp` in `../../dockit`:
+The manifests name the images of `eccr.ecmwf.int` (the `latest` tags, and `auth-o-tron:0.3.7`). `images` pulls each
+image on the host, with the login of `docker login eccr.ecmwf.int`, and loads it into the node of kind, which never
+pulls an image itself, so the cluster needs no credential. A `*_SOURCE` variable selects another image, such as the
+build of a branch (`…:setup-k8s`): it is loaded under its own name, and `apply` (or `reload`) replaces the image of
+the manifests with it. The images built by `dockit` (the ecFlow server, the reverse proxy and the SFTP sidecar) can
+also be built locally, in `../../dockit` (see its `INSTRUCTIONS.md`); an image already cached is not pulled, and one
+that cannot be pulled is used as cached by `reload`. For example, after
+`docker compose build ecflow-revproxy ecflow-sftp` in `../../dockit`:
 
 ```bash
 REVPROXY_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:local \
 SFTP_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:local \
     k8s/imachination.sh reload
 ```
-| `ROLLOUT_TIMEOUT` | How long to wait for a workload to become available (default: `300s`) |
-| `VERIFY_USER`, `VERIFY_PASSWORD` | Credentials used by `verify` (default: the test user `admin`) |
 
 ## What is deployed
 
