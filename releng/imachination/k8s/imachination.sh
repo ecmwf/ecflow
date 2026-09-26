@@ -18,17 +18,11 @@ readonly IMACHINATION_DIR
 
 readonly CLUSTER_NAME="imachination"
 readonly NAMESPACE="imachination"
-readonly GENERATED_DIR="${HERE}/.generated"
-readonly CLUSTER_TEMPLATE="${HERE}/kind-cluster.yaml.in"
-readonly CLUSTER_CONFIG="${GENERATED_DIR}/kind-cluster.yaml"
+readonly CLUSTER_CONFIG="${HERE}/kind-cluster.yaml"
 
 # The administrator's files that every deployment starts from (server_environment.cfg); `admin <dir>`
 # merges a directory of per-user files over them.
 readonly ADMIN_BASE_DIR="${IMACHINATION_DIR}/ecflow/admin"
-
-# The workspace mounted into the cluster, overridable in the same way that
-# compose.yaml allows.
-WORKSPACE_DIR="${WORKSPACE_DIR:-${IMACHINATION_DIR}/ecflow/workspace}"
 
 # Images are renamed on the way into the cluster. A tag other than `latest` is
 # used deliberately: Kubernetes defaults imagePullPolicy to Always for `latest`,
@@ -55,21 +49,8 @@ cluster_exists() {
     kind get clusters 2>/dev/null | grep -qx "${CLUSTER_NAME}"
 }
 
-# Renders the cluster definition, substituting the absolute workspace path that
-# extraMounts requires and a relative path cannot supply.
-render_cluster_config() {
-    [[ -d "${WORKSPACE_DIR}" ]] || die "Workspace directory does not exist: ${WORKSPACE_DIR}"
-    local resolved
-    resolved="$(cd "${WORKSPACE_DIR}" && pwd)"
-
-    mkdir -p "${GENERATED_DIR}"
-    sed "s|__WORKSPACE_DIR__|${resolved}|" "${CLUSTER_TEMPLATE}" > "${CLUSTER_CONFIG}"
-    info "Rendered ${CLUSTER_CONFIG} (workspace: ${resolved})"
-}
-
 do_cluster() {
     require kind kubectl docker
-    render_cluster_config
 
     if cluster_exists; then
         info "Cluster '${CLUSTER_NAME}' already exists; leaving it alone."
@@ -342,9 +323,10 @@ do_verify() {
 
     # The refused requests query a node path unique to this run, so that any of
     # them reaching the server is found in its log whatever other clients (the
-    # readiness probe, ecflow_ui) write there meanwhile.
+    # readiness probe, ecflow_ui) write there meanwhile. The log is in the
+    # workspace, on a volume of the cluster, and is searched within the Pod.
     local marker="/imachination-verify-$$-${RANDOM}"
-    local log="${WORKSPACE_DIR}/ecflow-server.8888.ecf.log"
+    local log="/workspace/ecflow-server.8888.ecf.log"
 
     local failed=0
     client_as() {
@@ -370,20 +352,24 @@ do_verify() {
     expect "a wrong password is refused" "Unauthorized (401)" \
         "$(client_as "${scratch}/wrong" --query state "${marker}")"
     sleep 1
-    if [[ ! -f "${log}" ]]; then
-        warn "SKIP  server log not found in the workspace: ${log}"
-    elif grep -q -- "${marker}" "${log}"; then
-        warn "FAIL  a refused request reached the server: $(grep -c -- "${marker}" "${log}") line(s) in its log"
-        failed=1
-    else
-        info "PASS  refused requests leave the server log untouched"
-    fi
+    # grep exits with 0 when the marker is found, 1 when it is not, and 2 when
+    # the log cannot be read; kubectl exec passes the status on
+    local count status=0
+    count="$(kubectl --context "kind-${CLUSTER_NAME}" exec deployment/ecflow-server -n "${NAMESPACE}" \
+        -c ecflow-server -- grep -c -e "${marker}" "${log}" 2>/dev/null)" || status=$?
+    case "${status}" in
+        0) warn "FAIL  a refused request reached the server: ${count} line(s) in its log"
+           failed=1 ;;
+        1) info "PASS  refused requests leave the server log untouched" ;;
+        *) warn "SKIP  server log not readable in the ecFlow server Pod: ${log}" ;;
+    esac
 
     [[ "${failed}" -eq 0 ]] || die "The authenticated path does not behave as expected."
     info "The authenticated path behaves as expected."
 }
 
-# Removes the stack, leaving the cluster and its loaded images in place.
+# Removes the stack, leaving the cluster and its loaded images in place. The
+# volumes of the stack go with it: the workspace and the checkpoint are lost.
 do_down() {
     require kubectl
     cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist."
@@ -417,7 +403,6 @@ do_destroy() {
     else
         info "Cluster '${CLUSTER_NAME}' does not exist; nothing to delete."
     fi
-    rm -rf "${GENERATED_DIR}"
 }
 
 usage() {
@@ -426,7 +411,7 @@ Usage: $(basename "$0") <command> [argument]
 
 Commands:
   up         Create the cluster, load the images and apply the stack, in one go
-  cluster    Render the cluster definition and create the cluster, if absent
+  cluster    Create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
   admin DIR  Load the administrator's files (DIR merged over ecflow/admin) and the
@@ -438,12 +423,11 @@ Commands:
              configuration; required after editing server_environment.cfg
   reload     Rebuild and pull the images again, even when cached, load them, and
              restart every workload, or the one named, onto them
-  down       Delete the stack, keeping the cluster and its images
-  destroy    Delete the cluster and the rendered definition
+  down       Delete the stack, with its workspace and checkpoint, keeping the
+             cluster and its images
+  destroy    Delete the cluster
 
 Environment:
-  WORKSPACE_DIR      Workspace mounted into the cluster
-                     (default: <imachination>/ecflow/workspace)
   ECFLOW_SOURCE      Source image for the ecFlow server, the equivalent of the
                      ECFLOW_IMAGE that compose.yaml accepts
   AUTHOTRON_SOURCE   Source image for the authentication service

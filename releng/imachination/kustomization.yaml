@@ -23,6 +23,7 @@ resources:
   - k8s/ecflow/service.yaml
   - k8s/ecflow/networkpolicy.yaml
   - k8s/ecflow/state-pvc.yaml
+  - k8s/ecflow/workspace-pvc.yaml
   - k8s/authotron/deployment.yaml
   - k8s/authotron/service.yaml
   - k8s/authotron/networkpolicy.yaml
