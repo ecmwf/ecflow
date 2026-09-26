@@ -32,6 +32,10 @@ build/
 bdir/
 bdir_xcode
 
+# rust
+rust/target/
+rust/Cargo.lock
+
 # ecflow
 Pyext/setup.py
 bin/
