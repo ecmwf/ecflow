@@ -12,6 +12,7 @@ platform=${2:?A platform is required}
 container=""
 volume=""
 config=""
+state=""
 
 cleanup() {
     if [[ -n "${container}" ]]; then
@@ -23,6 +24,10 @@ cleanup() {
     if [[ -n "${config}" ]]; then
         docker volume rm "${config}" >/dev/null
         config=""
+    fi
+    if [[ -n "${state}" ]]; then
+        docker volume rm "${state}" >/dev/null
+        state=""
     fi
 }
 trap cleanup EXIT
@@ -121,22 +126,26 @@ for owner in 501:20 0:0; do
 done
 
 # The configuration and the checkpoint may be kept apart from the workspace: the server must read
-# server_environment.cfg from ECFLOW_CONFIG_DIR, and write its checkpoint where ECF_CHECK points, while its
-# log stays in the workspace (ECF_HOME).
+# server_environment.cfg from ECFLOW_CONFIG_DIR, and write its checkpoint where ECF_CHECK points, on a volume
+# of its own that is empty and owned by root, while its log stays in the workspace (ECF_HOME).
 new_workspace 501 20
 config=$(docker volume create)
+state=$(docker volume create)
 docker run --rm --network none --platform "${platform}" \
     --mount "type=volume,source=${config},target=/admin,volume-nocopy" \
     --entrypoint bash "${image}" -c 'printf "ECF_CHECKINTERVAL = 77\n" > /admin/server_environment.cfg'
 container=$(docker run -d --network none --platform "${platform}" \
     --mount "type=volume,source=${volume},target=/workspace,volume-nocopy" \
     --mount "type=volume,source=${config},target=/admin,readonly,volume-nocopy" \
-    --mount "type=tmpfs,target=/state,tmpfs-mode=1777" \
+    --mount "type=volume,source=${state},target=/state,volume-nocopy" \
     -e ECFLOW_CONFIG_DIR=/admin \
     -e ECF_CHECK=/state/ecflow-server.8888.ecf.check -e ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b \
     "${image}")
 wait_healthy
 client --stats | grep -Eq 'Check pt interval +77 ' || fail "server_environment.cfg was not read from ECFLOW_CONFIG_DIR"
+docker exec -u ecflow "${container}" bash -c \
+    'printf "suite dockit_state\n  task t\nendsuite\n" > /tmp/state.def'
+client --load /tmp/state.def
 client --check_pt
 docker exec "${container}" bash -c '
     test -s /state/ecflow-server.8888.ecf.check &&
@@ -145,10 +154,17 @@ docker exec "${container}" bash -c '
     || fail "checkpoint not kept apart from the workspace, or log not in the workspace"
 docker stop --time 15 "${container}" >/dev/null
 wait_exit 0
+docker start "${container}" >/dev/null
+wait_healthy
+suites=$(client --suites)
+[[ "${suites}" == *dockit_state* ]] || fail "suite was not recovered from the checkpoint kept apart"
+docker stop --time 15 "${container}" >/dev/null
+wait_exit 0
 docker rm -f "${container}" >/dev/null
 container=""
-docker volume rm "${config}" >/dev/null
+docker volume rm "${config}" "${state}" >/dev/null
 config=""
+state=""
 
 # A startup error must propagate through the launcher, rather than leave a running container.
 new_workspace 501 20

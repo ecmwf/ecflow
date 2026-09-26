@@ -40,6 +40,26 @@ if [ "$(id -u)" = "0" ]; then
         fi
     fi
 
+    # The directories of the log and the checkpoint, when kept apart from the workspace (e.g. on a volume of
+    # their own), follow the same rule: created when missing, and handed over to 'ecflow' when owned by root
+    # and empty; one that 'ecflow' can already write to is left as is
+    for file in "${ECF_LOG:-}" "${ECF_CHECK:-}" "${ECF_CHECKOLD:-}"; do
+        case "${file}" in
+            /*) ;;
+            *) continue ;; # a relative path is resolved in the workspace
+        esac
+        directory=$(dirname "${file}")
+        mkdir -p "${directory}"
+        if setpriv --reuid=ecflow --regid=ecflow --init-groups test -w "${directory}"; then
+            continue
+        fi
+        if [ "$(stat -c %u "${directory}")" = "0" ] && [ -z "$(ls -A "${directory}")" ]; then
+            chown ecflow:ecflow "${directory}"
+        else
+            echo "launch.sh: warning: ${directory} is not writable by ecflow; it is left as is" >&2
+        fi
+    done
+
     export HOME=/home/ecflow USER=ecflow LOGNAME=ecflow
     exec setpriv --reuid=ecflow --regid=ecflow --init-groups "$0" "$@"
 fi

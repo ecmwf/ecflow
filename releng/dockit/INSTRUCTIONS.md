@@ -180,7 +180,9 @@ check pings the server with `ecflow_client --ping`. On `docker stop`, the server
 The server runs as the unprivileged user `ecflow`. The container starts as root, gives `ecflow` the UID and GID of
 the owner of `/workspace` (typically a directory bind-mounted from the host), and then drops privileges to `ecflow`,
 so that the server can write to the workspace whatever UID owns it on the host. A root-owned workspace, such as a host
-directory that Docker had to create, is handed over to `ecflow` when empty. Without a mounted workspace, `ecflow` keeps
+directory that Docker had to create, is handed over to `ecflow` when empty. The directories of `ECF_CHECK`,
+`ECF_CHECKOLD` and `ECF_LOG`, when given as absolute paths, follow the same rule, unless `ecflow` can already write to
+them. Without a mounted workspace, `ecflow` keeps
 UID and GID 1000, which can be changed with `--build-arg ECFLOW_UID=... --build-arg ECFLOW_GID=...`.
 
 As ecFlow identifies users by their `/etc/passwd` entry, the container must not be started with an arbitrary
