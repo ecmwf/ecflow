@@ -59,7 +59,7 @@ spec:
       # what the SFTP users upload the server can use, and conversely.
       initContainers:
         - name: admin
-          image: imachination/ecflow-server:local
+          image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
@@ -98,9 +98,12 @@ spec:
 
       containers:
         - name: ecflow-server
-          image: imachination/ecflow-server:local
-          # The image is loaded into the cluster by `imachination.sh images`, and
-          # is never available from a registry the cluster can reach.
+          image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
+          # On kind, every image is loaded into the node by `imachination.sh
+          # images`, which pulls it on the host; the node never pulls it, with
+          # IfNotPresent overriding the Always that a `latest` tag implies.
+          # `imachination.sh apply` replaces these names with those of the
+          # images selected by ECFLOW_SOURCE and the other *_SOURCE variables.
           imagePullPolicy: IfNotPresent
           workingDir: /workspace
 
@@ -175,7 +178,7 @@ spec:
         # Each user listed has an account of their own, and logs in with a key
         # from the Secret sftp-keys, which only this container mounts.
         - name: sftp
-          image: imachination/sftp:local
+          image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest
           imagePullPolicy: IfNotPresent
 
           env:

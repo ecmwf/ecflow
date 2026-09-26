@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: authotron
-          image: imachination/authotron:local
+          image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.3.7
           imagePullPolicy: IfNotPresent
 
           ports:
