@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Admits only the reverse proxy to the ecFlow server.
+#
+# The server serves the native protocol over plain HTTP, and trusts the identity
+# that an unauthenticated request claims, so any Pod able to reach it directly
+# would bypass the reverse proxy and auth-o-tron altogether. Every other source
+# is therefore refused, in any namespace; the reverse proxy remains the only way
+# in, as it is from the host.
+#
+# Neither the readiness probe nor the jobs are affected: the probe runs inside
+# the Pod and pings the server over loopback, and the jobs reach the server
+# through the reverse proxy, like any other client.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ecflow-server
+spec:
+  podSelector:
+    matchLabels:
+      app: ecflow-server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: revproxy
+      ports:
+        - protocol: TCP
+          port: 8888

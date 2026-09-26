@@ -75,7 +75,11 @@ All objects live in the namespace `imachination`. Only the reverse proxy is reac
 | 443 | `revproxy` | HTTPS, with a self-signed certificate; `/v1/ecflow` is gated by `auth-o-tron` |
 
 Unlike the Compose stack, nothing listens on the host on ports 80, 8080 or 8888: the authentication service and
-the ecFlow server are reachable only from within the cluster, so the authenticated path is the only way in.
+the ecFlow server are reachable only from within the cluster, so the authenticated path is the only way in. Within
+the cluster, NetworkPolicies admit only the reverse proxy to the ecFlow server (`k8s/ecflow/networkpolicy.yaml`),
+which trusts the identity that an unauthenticated request claims, and to `auth-o-tron`
+(`k8s/authotron/networkpolicy.yaml`), which would otherwise let credentials be tried from any Pod; the network
+plugin of kind enforces them.
 
 ## Users and credentials
 
@@ -188,8 +192,6 @@ export ECF_AUTHTOKENS=/workspace/secrets/%OWNER%/ecflowapirc
 
 ## Known limitations
 
-- Within the cluster, the ecFlow server Service (`ecflow-server`, port 8888) accepts plain HTTP requests
-  without authentication from any Pod, bypassing the reverse proxy. The host is not exposed to it.
 - The deployment is not meant for production: the credentials in `config.yaml` are test values, and the
   certificate of the reverse proxy is self-signed.
 

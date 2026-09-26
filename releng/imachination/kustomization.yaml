@@ -21,8 +21,10 @@ resources:
   - k8s/namespace.yaml
   - k8s/ecflow/deployment.yaml
   - k8s/ecflow/service.yaml
+  - k8s/ecflow/networkpolicy.yaml
   - k8s/authotron/deployment.yaml
   - k8s/authotron/service.yaml
+  - k8s/authotron/networkpolicy.yaml
   - k8s/revproxy/deployment.yaml
   - k8s/revproxy/service.yaml
 
