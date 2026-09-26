@@ -73,8 +73,10 @@ All objects live in the namespace `imachination`. Only the reverse proxy is reac
 | Host port | Service | Purpose |
 |-----------|---------|---------|
 | 443 | `revproxy` | HTTPS, with a self-signed certificate; `/v1/ecflow` is gated by `auth-o-tron` |
+| 2222 | `sftp` | SFTP (and `scp`) into the workspace of the ecFlow server, with per-user keys |
 
-Unlike the Compose stack, nothing listens on the host on ports 80, 8080 or 8888: the authentication service and
+The SFTP endpoint is a sidecar of the ecFlow server (see "Delivering files with sftp or scp"). Unlike the
+Compose stack, nothing listens on the host on ports 80, 8080 or 8888: the authentication service and
 the ecFlow server are reachable only from within the cluster, so the authenticated path is the only way in. Within
 the cluster, NetworkPolicies admit only the reverse proxy to the ecFlow server (`k8s/ecflow/networkpolicy.yaml`),
 which trusts the identity that an unauthenticated request claims, and to `auth-o-tron`
@@ -128,7 +130,8 @@ recovered from the checkpoint file, which is kept in the workspace.
 
 ## From a suite on disk to a suite running on the server
 
-The workspace directory (`../ecflow/workspace` by default) is mounted into the ecFlow server as `/workspace`,
+The workspace directory (`../ecflow/workspace` by default) is mounted into the ecFlow server, and into its
+SFTP sidecar, as `/workspace`,
 which is also its `ECF_HOME`. The server reads its configuration from `/workspace/server_environment.cfg`, and
 `ECF_FILES` is set to `/workspace/files`. Files written in the workspace on the host are therefore seen by the
 server immediately, and job outputs written by the server appear on the host.
@@ -137,7 +140,8 @@ To run a suite:
 
 1. Copy the task scripts and include files into the workspace, under the paths that the suite definition
    declares (`ECF_FILES`, `ECF_INCLUDE`), and create the directory tree of `ECF_OUT`, which the server does not
-   create. When the workspace is not shared with the host, `kubectl cp` provides the same:
+   create. Without access to the workspace directory, upload them with `sftp` or `scp` (see "Delivering files
+   with sftp or scp"), or with `kubectl cp`:
 
    ```bash
    POD=$(kubectl -n imachination get pod -l app=ecflow-server -o name | cut -d/ -f2)
@@ -171,13 +175,39 @@ export ECF_PORT=%ECFLOW_PROXY_PORT%
 export ECF_AUTHTOKENS=/workspace/secrets/%OWNER%/ecflowapirc
 ```
 
+## Delivering files with sftp or scp
+
+The ecFlow server Pod runs an SFTP sidecar, built from [`../sftp/`](../sftp/), which shares the workspace of
+the server and is published on the host as port 2222. It offers SFTP only (no shell, no forwarding), and `scp`
+works as well, as it uses the SFTP protocol. `rsync` is not supported.
+
+- Each user listed in `SFTP_USERS` (in `k8s/ecflow/deployment.yaml`; `mamb` and `admin` by default) has an
+  account of their own, whose primary group is the group of the workspace, as for the ecFlow server; files are
+  created group-writable, so that the server can use them.
+- A user logs in with a public key read from `/workspace/secrets/<user>/authorized_keys` on every login, so a
+  key added there takes effect at once. Passwords are not accepted.
+- The host key is read from `/workspace/secrets/sshd/ssh_host_ed25519_key` when the sidecar starts; without
+  one, a temporary key is generated, which changes with every restart of the Pod.
+- A session starts in `/workspace`.
+
+```bash
+sftp -P 2222 -i <private key> -o IdentitiesOnly=yes mamb@localhost
+scp -P 2222 -i <private key> -o IdentitiesOnly=yes <file> mamb@localhost:files/<suite>/
+```
+
+`IdentitiesOnly=yes` makes the client offer only the key given with `-i`: otherwise every key of the SSH agent
+is offered first, each counting as a failed attempt. After a failed login, sshd delays new connections from the
+same address for a few seconds; as every connection through the node port comes from the address of the node,
+the delay applies to every client on the host.
+
 ## Changing the configuration
 
 | After editing | Run |
 |---------------|-----|
 | `ecflow/workspace/server_environment.cfg` | `k8s/imachination.sh restart ecflow-server`, as the server reads the file only at start-up |
-| `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest | `k8s/imachination.sh apply` |
-| A new image published upstream, or `revproxy/` | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
+| `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.sh apply` |
+| `/workspace/secrets/<user>/authorized_keys` | Nothing: the keys are read at every login |
+| A new image published upstream, `revproxy/` or `sftp/` | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
 
 ## Troubleshooting
 

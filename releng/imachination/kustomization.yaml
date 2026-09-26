@@ -27,6 +27,7 @@ resources:
   - k8s/authotron/networkpolicy.yaml
   - k8s/revproxy/deployment.yaml
   - k8s/revproxy/service.yaml
+  - k8s/sftp/service.yaml
 
 # The reverse proxy's configuration and the static pages it serves.
 configMapGenerator:

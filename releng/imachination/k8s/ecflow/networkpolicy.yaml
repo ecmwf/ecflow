@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
-# Admits only the reverse proxy to the ecFlow server.
+# Admits only the reverse proxy to the ecFlow server, and anyone to its SFTP
+# sidecar.
 #
 # The server serves the native protocol over plain HTTP, and trusts the identity
 # that an unauthenticated request claims, so any Pod able to reach it directly
@@ -12,6 +13,9 @@
 # Neither the readiness probe nor the jobs are affected: the probe runs inside
 # the Pod and pings the server over loopback, and the jobs reach the server
 # through the reverse proxy, like any other client.
+#
+# The SFTP sidecar shares the Pod, and is admitted from any source: sshd
+# authenticates every connection itself, with the user's key.
 
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -31,3 +35,6 @@ spec:
       ports:
         - protocol: TCP
           port: 8888
+    - ports:
+        - protocol: TCP
+          port: 22

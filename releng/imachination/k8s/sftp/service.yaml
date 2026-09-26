@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Publishes the SFTP sidecar, which gives access to the workspace of the ecFlow
+# server, as a node port, which the cluster definition maps to port 2222 on the
+# host. The sidecar itself runs in the ecFlow server Pod (k8s/ecflow), whose
+# workspace volume it shares, and is built from ../../sftp.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sftp
+spec:
+  type: NodePort
+  selector:
+    app: ecflow-server
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: ssh
+      nodePort: 30022
