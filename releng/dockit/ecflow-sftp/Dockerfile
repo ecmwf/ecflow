@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
-# An SFTP endpoint to the ecFlow workspace, run as a sidecar of the ecFlow server, so that suite files can be
-# delivered to the server with sftp or scp.
+# An SFTP endpoint to an ecFlow workspace, mounted at /workspace, so that suite files can be delivered to an
+# ecFlow server sharing that workspace with sftp or scp.
 
 FROM debian:13.7-slim
 

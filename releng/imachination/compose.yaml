@@ -5,7 +5,7 @@ services:
 
   revproxy:
     hostname: revproxy
-    build: ./revproxy
+    image: ${REVPROXY_IMAGE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest}
     # nginx resolves the upstream host names once, at start-up, and refuses to
     # start if any of them is unknown. Both upstreams must therefore exist before
     # the reverse proxy is started.

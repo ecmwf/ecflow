@@ -17,9 +17,11 @@ The stack has three services, defined in `compose.yaml`:
 
 - `revproxy`
 
-    - an nginx reverse proxy, built locally from `revproxy/Dockerfile`.
+    - an nginx reverse proxy (`eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev`), whose image is built
+      by `dockit` (`../dockit/ecflow-revproxy`), configured with `revproxy/cfgs/nginx/default.conf`.
 
-      Allows HTTPS requests, terminating TLS with a self-signed certificate, and gates the `/v1/ecflow` location behind
+      Allows HTTPS requests, terminating TLS with a self-signed certificate generated when the container starts
+      (or the `tls.crt` and `tls.key` mounted in `/etc/nginx/tls`), and gates the `/v1/ecflow` location behind
       an `auth_request` call to `authotron`.
 
 - `authotron`
@@ -69,18 +71,18 @@ export WORKSPACE_DIR="/var/ecflow/workspace"
 Run, from this directory:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
-The `ecflow` image defaults to the `latest` tag published from `develop`. To run a branch image instead,
-set `ECFLOW_IMAGE` before starting the stack. For example, while the `latest` tag is unavailable:
+Every image is pulled from the registry. The `ecflow` and `revproxy` images default to the `latest` tag published from
+`develop`. To run the images of a branch instead, set `ECFLOW_IMAGE` and `REVPROXY_IMAGE` before starting the stack.
+For example, for the images published by `dockit` from the branch `task/setup_k8s`:
 
 ```bash
-ECFLOW_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:improve-dockit docker compose up --build
+ECFLOW_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:setup-k8s \
+REVPROXY_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:setup-k8s \
+    docker compose up
 ```
-
-The `--build` option is required because `revproxy` has no pre-built image and must be built locally; `authotron` and
-`ecflow` are pulled from the registry.
 
 Once started, by default the following ports are published on the host:
 
@@ -105,11 +107,9 @@ Create the network shared by the three containers:
 docker network create --subnet 172.30.0.0/16 inner
 ```
 
-Build and run `revproxy`:
+Run `revproxy`:
 
 ```bash
-docker build -t imachination-revproxy ./revproxy
-
 docker run -d \
     --name revproxy \
     --hostname revproxy \
@@ -117,7 +117,7 @@ docker run -d \
     -p 80:80 -p 443:443 \
     -v "$(pwd)/revproxy/server:/usr/share/nginx/html/server" \
     -v "$(pwd)/revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf" \
-    imachination-revproxy
+    "${REVPROXY_IMAGE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest}"
 ```
 
 Run `authotron`:

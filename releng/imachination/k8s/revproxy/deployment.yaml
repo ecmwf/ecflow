@@ -45,6 +45,9 @@ spec:
             - name: static
               mountPath: /usr/share/nginx/html/server
               readOnly: true
+            - name: tls
+              mountPath: /etc/nginx/tls
+              readOnly: true
 
       volumes:
         - name: nginx-config
@@ -53,3 +56,10 @@ spec:
         - name: static
           configMap:
             name: revproxy-static
+        # The certificate of the proxy and its key (tls.crt, tls.key), from a
+        # Secret of type kubernetes.io/tls. Optional: without it, the image
+        # generates a self-signed certificate for localhost when it starts
+        - name: tls
+          secret:
+            secretName: revproxy-tls
+            optional: true
