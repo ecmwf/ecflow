@@ -47,6 +47,7 @@ reach the server.
 | `cluster` | Render the cluster definition (into `k8s/.generated/`) and create the cluster, if absent |
 | `images` | Build the reverse proxy image, pull the other two when not cached, and load all three into the cluster |
 | `apply` | Declare the stack in the cluster and wait for every workload to become available |
+| `admin DIR` | Load the administrator's files (`DIR` merged over `ecflow/admin/`) and the SSH keys (`DIR/sshd/`), then replace the ecFlow server Pod |
 | `verify` | Exercise the authenticated path with `ecflow_client`, from the host |
 | `status` | Report the state of the cluster, its images and the stack |
 | `logs [workload]` | Follow the output of every workload, or of the one named |
@@ -131,10 +132,11 @@ recovered from the checkpoint file, which is kept in the workspace.
 ## From a suite on disk to a suite running on the server
 
 The workspace directory (`../ecflow/workspace` by default) is mounted into the ecFlow server, and into its
-SFTP sidecar, as `/workspace`,
-which is also its `ECF_HOME`. The server reads its configuration from `/workspace/server_environment.cfg`, and
-`ECF_FILES` is set to `/workspace/files`. Files written in the workspace on the host are therefore seen by the
-server immediately, and job outputs written by the server appear on the host.
+SFTP sidecar, as `/workspace`, which is also its `ECF_HOME`: it holds what the users provide and what the
+suites produce, and the log of the server. `ECF_FILES` is set to `/workspace/files`. Files written in the
+workspace on the host are therefore seen by the server immediately, and job outputs written by the server
+appear on the host. What only the administrator manages is kept elsewhere (see "The administrator's
+files").
 
 To run a suite:
 
@@ -172,8 +174,38 @@ edit ECFLOW_PROXY_PORT '443'
 ```bash
 export ECF_HOST=%ECFLOW_PROXY_HOST%
 export ECF_PORT=%ECFLOW_PROXY_PORT%
-export ECF_AUTHTOKENS=/workspace/secrets/%OWNER%/ecflowapirc
+export ECF_AUTHTOKENS=/admin/secrets/%OWNER%/ecflowapirc
 ```
+
+## The administrator's files
+
+What only the administrator manages is kept out of the workspace, and out of reach of the SFTP users:
+
+| In the ecFlow server container | Content | Source |
+|--------------------------------|---------|--------|
+| `/admin`, read-only | `server_environment.cfg`, `troikaw`, `troika/<user>/troika.yml` (and the credentials troika uses), `secrets/<user>/ecflowapirc` | the Secret `ecflow-admin` |
+| `/state` | the checkpoint of the server (`ECF_CHECK`, `ECF_CHECKOLD`) | the PersistentVolumeClaim `ecflow-state` |
+
+The server starts in `/admin`, where it reads `server_environment.cfg`, with `ECF_HOME` set to `/workspace`
+and its checkpoint in `/state`, as the launch script of the image allows (`ECFLOW_CONFIG_DIR`, `ECF_CHECK`,
+`ECF_CHECKOLD`). The checkpoint is lost with the cluster (`destroy`), unlike the workspace.
+
+The files are loaded with
+
+```bash
+k8s/imachination.sh admin <dir>
+```
+
+which merges `<dir>` over the base files of `ecflow/admin/` (`server_environment.cfg`), and loads the result as
+the Secret `ecflow-admin`, each path encoded with `__` in place of `/` (a Secret has flat keys). An init
+container of the ecFlow server Pod expands it into `/admin`; `troikaw` and `*.sh` are made executable, the
+other files read-only. The SSH keys of the SFTP sidecar, in `<dir>/sshd/` (`<user>.authorized_keys` and the
+host key `ssh_host_ed25519_key`), are loaded as the Secret `sftp-keys`, which only the sidecar mounts. The Pod
+is then replaced, so that the new files take effect, and the server, restarted, is halted until
+`ecflow_client --https --restart`. `apply` (and `up`) loads the base files alone when no files are loaded yet,
+and keeps those already loaded.
+
+Every job runs as the same user in the server container, and can read the files of every user in `/admin`.
 
 ## Delivering files with sftp or scp
 
@@ -184,10 +216,10 @@ works as well, as it uses the SFTP protocol. `rsync` is not supported.
 - Each user listed in `SFTP_USERS` (in `k8s/ecflow/deployment.yaml`; `mamb` and `admin` by default) has an
   account of their own, whose primary group is the group of the workspace, as for the ecFlow server; files are
   created group-writable, so that the server can use them.
-- A user logs in with a public key read from `/workspace/secrets/<user>/authorized_keys` on every login, so a
-  key added there takes effect at once. Passwords are not accepted.
-- The host key is read from `/workspace/secrets/sshd/ssh_host_ed25519_key` when the sidecar starts; without
-  one, a temporary key is generated, which changes with every restart of the Pod.
+- A user logs in with a public key from the Secret `sftp-keys` (see "The administrator's files"), which the
+  sidecar installs when it starts. Passwords are not accepted.
+- The host key comes from the same Secret, which only root can read in the sidecar; without one, a temporary
+  key is generated, which changes with every restart of the Pod.
 - A session starts in `/workspace`.
 
 ```bash
@@ -204,9 +236,8 @@ the delay applies to every client on the host.
 
 | After editing | Run |
 |---------------|-----|
-| `ecflow/workspace/server_environment.cfg` | `k8s/imachination.sh restart ecflow-server`, as the server reads the file only at start-up |
+| The administrator's files: `ecflow/admin/server_environment.cfg`, the troika configurations, the tokens, the SSH keys | `k8s/imachination.sh admin <dir>` |
 | `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.sh apply` |
-| `/workspace/secrets/<user>/authorized_keys` | Nothing: the keys are read at every login |
 | A new image published upstream, `revproxy/` or `sftp/` | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
 
 ## Troubleshooting

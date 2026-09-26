@@ -41,12 +41,23 @@ services:
       - "8888:8888"
     volumes:
       - ${WORKSPACE_DIR:-./ecflow/workspace}:${WORKSPACE_DIR:-/workspace}
-    working_dir: ${WORKSPACE_DIR:-/workspace}
+      # The administrator's files, apart from the workspace; the server starts
+      # there, and reads server_environment.cfg from it
+      - ./ecflow/admin:/admin:ro
+      # The checkpoint of the server, apart from the workspace as well
+      - ecflow-state:/state
+    working_dir: /admin
     environment:
       - ECFLOW_WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}
+      - ECF_CHECK=/state/ecflow-server.8888.ecf.check
+      - ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b
     networks:
       inner:
         ipv4_address: 172.30.0.4
+
+volumes:
+  ecflow-state:
+    name: ecflow-state
 
 networks:
   inner:

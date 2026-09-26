@@ -49,12 +49,16 @@ The instructions below are written for Docker, but should work with Podman as we
 ## Configuring the ecFlow workspace
 
 The `ecflow` service mounts a workspace directory into the container, at `/workspace`, and uses it as `ECF_HOME`.
-By default, this is `ecflow/workspace` in this directory, which already contains a base `server_environment.cfg`,
-so no configuration is required to get started.
+By default, this is `ecflow/workspace` in this directory.
 
-This directory is controlled by the `WORKSPACE_DIR` environment variable. Setting it to an absolute path overrides
-the default, using that path for the host-side mount, the container-side mount, the working directory, and `ECF_HOME`
-alike, so that the server and any job scripts it generates all agree on the same path, for example:
+The server configuration is kept apart from the workspace: `ecflow/admin` is mounted read-only at `/admin`, where
+the server starts, and reads a base `server_environment.cfg`, so no configuration is required to get started. The
+checkpoint of the server is kept apart as well, in the Docker volume `ecflow-state`, mounted at `/state`; the volume
+survives `docker compose down`, and is removed with `docker compose down -v`.
+
+The workspace directory is controlled by the `WORKSPACE_DIR` environment variable. Setting it to an absolute path
+overrides the default, using that path for the host-side mount, the container-side mount, and `ECF_HOME` alike, so
+that the server and any job scripts it generates all agree on the same path, for example:
 
 ```bash
 export WORKSPACE_DIR="/var/ecflow/workspace"
@@ -139,8 +143,12 @@ docker run -d \
     --network inner --ip 172.30.0.4 \
     -p 8888:8888 \
     -v "${WORKSPACE_DIR:-$(pwd)/ecflow/workspace}:${WORKSPACE_DIR:-/workspace}" \
-    -w "${WORKSPACE_DIR:-/workspace}" \
+    -v "$(pwd)/ecflow/admin:/admin:ro" \
+    -v ecflow-state:/state \
+    -w /admin \
     -e "ECFLOW_WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}" \
+    -e ECF_CHECK=/state/ecflow-server.8888.ecf.check \
+    -e ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b \
     eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
 ```
 
@@ -149,6 +157,7 @@ To stop and remove the stack:
 ```bash
 docker rm -f revproxy authotron ecflow
 docker network rm inner
+docker volume rm ecflow-state     # also discards the checkpoint
 ```
 
 ## Testing authentication through the reverse proxy

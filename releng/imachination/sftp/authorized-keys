@@ -9,6 +9,7 @@ case "$1" in
     ''|*[!a-z0-9_-]*) exit 0 ;;
 esac
 
-keys="${SFTP_KEYS_DIR:-/workspace/secrets}/$1/authorized_keys"
+# Installed by entrypoint.sh from the Secret sftp-keys, which only root can read
+keys="/etc/ssh/authorized_keys/$1"
 [ -r "${keys}" ] && cat "${keys}"
 exit 0
