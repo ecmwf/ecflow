@@ -147,6 +147,26 @@ the system site packages, so the module is available there too.
 
 The ecflow server port is configurable via the `ECFLOW_SERVER_PORT` environment variable (default `8888`).
 
+The server uses `/workspace` as `ECF_HOME` (`ECFLOW_WORKSPACE_DIR`), and keeps its log and checkpoint there by
+default. The following environment variables keep the server's own files apart from the workspace, for example
+where users are given access to the workspace:
+
+| Variable | Effect |
+|----------|--------|
+| `ECFLOW_CONFIG_DIR` | The server starts in this directory, and reads `server_environment.cfg` from it (by default, the working directory of the container) |
+| `ECF_CHECK`, `ECF_CHECKOLD` | The checkpoint and its backup; a relative path is resolved in `ECF_HOME` (default: `ecflow-server.<port>.ecf.check` and `.check.b`) |
+| `ECF_LOG` | The log; a relative path is resolved in `ECF_HOME` (default: `ecflow-server.<port>.ecf.log`) |
+
+For example, with the configuration mounted read-only at `/admin` and the checkpoint on a volume of its own:
+
+```bash
+docker run --rm -p 8888:8888 \
+    -v "$(pwd)/workspace:/workspace" -v "$(pwd)/admin:/admin:ro" -v ecflow-state:/state \
+    -e ECFLOW_CONFIG_DIR=/admin \
+    -e ECF_CHECK=/state/ecflow-server.8888.ecf.check -e ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b \
+    ecflow-server-dev:latest
+```
+
 Run the image with, for example:
 
 ```bash

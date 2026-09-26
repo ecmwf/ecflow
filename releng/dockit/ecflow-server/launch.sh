@@ -64,11 +64,11 @@ ECF_PORT=${ECFLOW_SERVER_PORT}
 export ECF_PORT
 ECF_HOME=${ECFLOW_WORKSPACE_DIR}
 export ECF_HOME
-ECF_LOG=${ECF_HOST}.${ECF_PORT}.ecf.log
+ECF_LOG=${ECF_LOG:-${ECF_HOST}.${ECF_PORT}.ecf.log}
 export ECF_LOG
-ECF_CHECK=${ECF_HOST}.${ECF_PORT}.ecf.check
+ECF_CHECK=${ECF_CHECK:-${ECF_HOST}.${ECF_PORT}.ecf.check}
 export ECF_CHECK
-ECF_CHECKOLD=${ECF_HOST}.${ECF_PORT}.ecf.check.b
+ECF_CHECKOLD=${ECF_CHECKOLD:-${ECF_HOST}.${ECF_PORT}.ecf.check.b}
 export ECF_CHECKOLD
 ECF_OUT=${ECF_HOST}.${ECF_PORT}.ecf.out
 export ECF_OUT
@@ -89,6 +89,13 @@ function terminate() {
 }
 
 trap terminate TERM INT
+
+# The server reads server_environment.cfg from the directory in which it starts: ECFLOW_CONFIG_DIR, when set,
+# keeps the configuration apart from the workspace; ECF_HOME is taken from the environment regardless
+
+if [ -n "${ECFLOW_CONFIG_DIR:-}" ]; then
+    cd "${ECFLOW_CONFIG_DIR}"
+fi
 
 # Any arguments given to the container are passed on to the server (e.g. -d, for debug output)
 

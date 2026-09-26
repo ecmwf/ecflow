@@ -11,6 +11,7 @@ image=${1:?An image is required}
 platform=${2:?A platform is required}
 container=""
 volume=""
+config=""
 
 cleanup() {
     if [[ -n "${container}" ]]; then
@@ -18,6 +19,10 @@ cleanup() {
     fi
     if [[ -n "${volume}" ]]; then
         docker volume rm "${volume}" >/dev/null
+    fi
+    if [[ -n "${config}" ]]; then
+        docker volume rm "${config}" >/dev/null
+        config=""
     fi
 }
 trap cleanup EXIT
@@ -114,6 +119,36 @@ for owner in 501:20 0:0; do
     docker stop --time 15 "${container}" >/dev/null
     wait_exit 0
 done
+
+# The configuration and the checkpoint may be kept apart from the workspace: the server must read
+# server_environment.cfg from ECFLOW_CONFIG_DIR, and write its checkpoint where ECF_CHECK points, while its
+# log stays in the workspace (ECF_HOME).
+new_workspace 501 20
+config=$(docker volume create)
+docker run --rm --network none --platform "${platform}" \
+    --mount "type=volume,source=${config},target=/admin,volume-nocopy" \
+    --entrypoint bash "${image}" -c 'printf "ECF_CHECKINTERVAL = 77\n" > /admin/server_environment.cfg'
+container=$(docker run -d --network none --platform "${platform}" \
+    --mount "type=volume,source=${volume},target=/workspace,volume-nocopy" \
+    --mount "type=volume,source=${config},target=/admin,readonly,volume-nocopy" \
+    --mount "type=tmpfs,target=/state,tmpfs-mode=1777" \
+    -e ECFLOW_CONFIG_DIR=/admin \
+    -e ECF_CHECK=/state/ecflow-server.8888.ecf.check -e ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b \
+    "${image}")
+wait_healthy
+client --stats | grep -Eq 'Check pt interval +77 ' || fail "server_environment.cfg was not read from ECFLOW_CONFIG_DIR"
+client --check_pt
+docker exec "${container}" bash -c '
+    test -s /state/ecflow-server.8888.ecf.check &&
+    test ! -e /workspace/ecflow-server.8888.ecf.check &&
+    test -s /workspace/ecflow-server.8888.ecf.log' \
+    || fail "checkpoint not kept apart from the workspace, or log not in the workspace"
+docker stop --time 15 "${container}" >/dev/null
+wait_exit 0
+docker rm -f "${container}" >/dev/null
+container=""
+docker volume rm "${config}" >/dev/null
+config=""
 
 # A startup error must propagate through the launcher, rather than leave a running container.
 new_workspace 501 20
