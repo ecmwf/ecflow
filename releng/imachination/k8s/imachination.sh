@@ -78,9 +78,12 @@ do_cluster() {
 
 # Ensures an image is in the host Docker cache, pulling it only when absent so
 # that a working cluster does not depend on registry availability.
+#
+# With REFRESH_IMAGES=1, as set by `reload`, the image is pulled even when cached,
+# so that a tag republished upstream (such as `latest`) reaches the cluster.
 ensure_pulled() {
     local image="$1"
-    if docker image inspect "${image}" >/dev/null 2>&1; then
+    if [[ "${REFRESH_IMAGES:-0}" != 1 ]] && docker image inspect "${image}" >/dev/null 2>&1; then
         info "Already cached: ${image}"
         return
     fi
@@ -194,6 +197,110 @@ do_restart() {
     info "The stack is available."
 }
 
+# Brings the whole stack up from nothing: the cluster, the images and the
+# workloads. Each step is idempotent, so running it again on a working stack
+# changes nothing.
+do_up() {
+    do_cluster
+    do_images
+    do_apply
+}
+
+# Refreshes the images and replaces the workloads that use them: the reverse
+# proxy is rebuilt, the published images are pulled again even when cached, and
+# every workload, or the one named, is restarted onto the images just loaded.
+do_reload() {
+    REFRESH_IMAGES=1 do_images
+    do_restart "${1:-}"
+}
+
+# Follows the output of one workload, or of every workload with each line
+# prefixed by the pod it came from.
+do_logs() {
+    require kubectl
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist."
+
+    local target="${1:-}"
+    if [[ -n "${target}" ]]; then
+        kubectl --context "kind-${CLUSTER_NAME}" logs -f "deployment/${target}" \
+            -n "${NAMESPACE}" --all-containers --tail=50
+    else
+        kubectl --context "kind-${CLUSTER_NAME}" logs -f -n "${NAMESPACE}" \
+            -l 'app in (ecflow-server, authotron, revproxy)' \
+            --all-containers --prefix --tail=20 --max-log-requests=6
+    fi
+}
+
+# Exercises the authenticated path end to end with the real client, from the
+# host: valid credentials reach the server, while missing and wrong credentials
+# are refused by the reverse proxy and leave the server log untouched.
+do_verify() {
+    require ecflow_client
+    cluster_exists || die "Cluster '${CLUSTER_NAME}' does not exist."
+
+    local user="${VERIFY_USER:-admin}"
+    local password="${VERIFY_PASSWORD:-somesecret#admin}"
+    local server="https://localhost:443"
+    local scratch
+    scratch="$(mktemp -d)"
+    # shellcheck disable=SC2064 # the directory is known now, and must be removed on any exit
+    trap "rm -rf '${scratch}'" EXIT
+
+    tokens() {
+        printf '{"version": 1, "tokens": [%s]}\n' "$1"
+    }
+    basic() {
+        printf '{"type": "basic", "server": "%s", "api": {"username": "%s", "password": "%s"}}' \
+            "${server}" "$1" "$2"
+    }
+    ( umask 077
+      tokens "$(basic "${user}" "${password}")" > "${scratch}/valid"
+      tokens "$(basic "${user}" "${password}-wrong")" > "${scratch}/wrong"
+      tokens "" > "${scratch}/none" )
+
+    # The refused requests query a node path unique to this run, so that any of
+    # them reaching the server is found in its log whatever other clients (the
+    # readiness probe, ecflow_ui) write there meanwhile.
+    local marker="/imachination-verify-$$-${RANDOM}"
+    local log="${WORKSPACE_DIR}/ecflow-server.8888.ecf.log"
+
+    local failed=0
+    client_as() {
+        local tokens="$1"
+        shift
+        ECF_AUTHTOKENS="${tokens}" ECF_HOST=localhost ECF_PORT=443 \
+            ecflow_client --https "$@" 2>&1
+    }
+    expect() {
+        local what="$1" want="$2" output="$3"
+        if grep -q "${want}" <<<"${output}"; then
+            info "PASS  ${what}"
+        else
+            warn "FAIL  ${what}: $(head -n 2 <<<"${output}" | tr '\n' ' ')"
+            failed=1
+        fi
+    }
+
+    expect "valid credentials (${user}) reach the server" "succeeded" \
+        "$(client_as "${scratch}/valid" --ping)"
+    expect "no credentials are refused" "Unauthorized (401)" \
+        "$(client_as "${scratch}/none" --query state "${marker}")"
+    expect "a wrong password is refused" "Unauthorized (401)" \
+        "$(client_as "${scratch}/wrong" --query state "${marker}")"
+    sleep 1
+    if [[ ! -f "${log}" ]]; then
+        warn "SKIP  server log not found in the workspace: ${log}"
+    elif grep -q -- "${marker}" "${log}"; then
+        warn "FAIL  a refused request reached the server: $(grep -c -- "${marker}" "${log}") line(s) in its log"
+        failed=1
+    else
+        info "PASS  refused requests leave the server log untouched"
+    fi
+
+    [[ "${failed}" -eq 0 ]] || die "The authenticated path does not behave as expected."
+    info "The authenticated path behaves as expected."
+}
+
 # Removes the stack, leaving the cluster and its loaded images in place.
 do_down() {
     require kubectl
@@ -236,13 +343,18 @@ usage() {
 Usage: $(basename "$0") <command> [argument]
 
 Commands:
+  up         Create the cluster, load the images and apply the stack, in one go
   cluster    Render the cluster definition and create the cluster, if absent
   images     Build, pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
+  verify     Exercise the authenticated path with ecflow_client, from the host
+  status     Report the state of the cluster, its images and the stack
+  logs       Follow the output of every workload, or of the one named
   restart    Replace every workload, or the one named, so that it re-reads its
              configuration; required after editing server_environment.cfg
+  reload     Rebuild and pull the images again, even when cached, load them, and
+             restart every workload, or the one named, onto them
   down       Delete the stack, keeping the cluster and its images
-  status     Report the state of the cluster, its images and the stack
   destroy    Delete the cluster and the rendered definition
 
 Environment:
@@ -253,17 +365,24 @@ Environment:
   AUTHOTRON_SOURCE   Source image for the authentication service
   ROLLOUT_TIMEOUT    How long to wait for a workload to become available
                      (default: 300s; an emulated server starts slowly)
+  VERIFY_USER        User of the plain provider that verify authenticates as
+  VERIFY_PASSWORD    Its password (default: the test user admin, as defined in
+                     authotron/config.yaml)
 USAGE
 }
 
 main() {
     case "${1:-}" in
+        up)      do_up ;;
         cluster) do_cluster ;;
         images)  do_images ;;
         apply)   do_apply ;;
-        restart) do_restart "${2:-}" ;;
-        down)    do_down ;;
+        verify)  do_verify ;;
         status)  do_status ;;
+        logs)    do_logs "${2:-}" ;;
+        restart) do_restart "${2:-}" ;;
+        reload)  do_reload "${2:-}" ;;
+        down)    do_down ;;
         destroy) do_destroy ;;
         ""|-h|--help|help) usage ;;
         *) usage; die "Unknown command: $1" ;;
