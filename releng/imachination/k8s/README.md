@@ -47,7 +47,8 @@ reach the server.
 | `cluster` | Create the cluster (`k8s/kind-cluster.yaml`), if absent |
 | `images` | Pull the images when not cached, and load them into the cluster |
 | `apply` | Declare the stack in the cluster and wait for every workload to become available |
-| `admin DIR` | Load the administrator's files (`DIR` merged over `ecflow/admin/`) and the SSH keys (`DIR/sshd/`), then replace the ecFlow server Pod |
+| `provision --role admin --target ecflow-server\|ecflow-sftp --dir DIR` | Load `DIR` as the administrator's files of the ecFlow server, or as the keys of the SFTP sidecar, then replace the ecFlow server Pod (see "The administrator's files") |
+| `provision --role user [--target workspace] --dir DIR [--user NAME] [--host HOST]` | Copy `DIR` into the workspace over SFTP (see "Delivering files with sftp or scp") |
 | `verify` | Exercise the authenticated path with `ecflow_client`, from the host |
 | `status` | Report the state of the cluster, its images and the stack |
 | `logs [workload]` | Follow the output of every workload, or of the one named |
@@ -223,20 +224,25 @@ and its checkpoint in `/state`, as the launch script of the image allows (`ECFLO
 `ECF_CHECKOLD`). The checkpoint, like the workspace, is lost with the stack (`down`) and with the cluster
 (`destroy`).
 
-The files are loaded with
+The administrator loads them through the cluster, one destination at a time, each replacing the content of
+its destination as a whole:
 
 ```bash
-k8s/imachination.sh admin <dir>
+k8s/imachination.sh provision --role admin --target ecflow-server --dir <dir>
+k8s/imachination.sh provision --role admin --target ecflow-sftp --dir <dir>
 ```
 
-which merges `<dir>` over the base files of `ecflow/admin/` (`server_environment.cfg`), and loads the result as
-the Secret `ecflow-admin`, each path encoded with `__` in place of `/` (a Secret has flat keys). An init
-container of the ecFlow server Pod expands it into `/admin`; `troikaw` and `*.sh` are made executable, the
-other files read-only. The SSH keys of the SFTP sidecar, in `<dir>/sshd/` (`<user>.authorized_keys` and the
-host key `ssh_host_ed25519_key`), are loaded as the Secret `sftp-keys`, which only the sidecar mounts. The Pod
-is then replaced, so that the new files take effect, and the server, restarted, is halted until
-`ecflow_client --https --restart`. `apply` (and `up`) loads the base files alone when no files are loaded yet,
-and keeps those already loaded.
+- The target `ecflow-server` loads `<dir>` as the Secret `ecflow-admin`, each path encoded with `__` in place
+  of `/` (a Secret has flat keys). An init container of the ecFlow server Pod expands it into `/admin`;
+  `troikaw` and `*.sh` are made executable, the other files read-only. It includes `server_environment.cfg`:
+  the server reads no other.
+- The target `ecflow-sftp` loads `<dir>`, which holds the SSH keys of the SFTP sidecar
+  (`<user>.authorized_keys` and the host key `ssh_host_ed25519_key`), as the Secret `sftp-keys`, which only
+  the sidecar mounts.
+
+The Pod is then replaced, so that the new files take effect, and the server, restarted, is halted until
+`ecflow_client --https --restart`. `apply` (and `up`) loads the base files of `ecflow/admin/`
+(`server_environment.cfg` alone) when no files are loaded yet, and keeps those already loaded.
 
 Every job runs as the same user in the server container, and can read the files of every user in `/admin`.
 
@@ -256,6 +262,17 @@ works as well, as it uses the SFTP protocol. `rsync` is not supported.
   key is generated, which changes with every restart of the Pod.
 - A session starts in `/workspace`.
 
+A user provisions the workspace through the sidecar alone, with no access to the cluster:
+
+```bash
+k8s/imachination.sh provision --role user --dir <dir> --user mamb
+```
+
+copies the content of `<dir>` into `/workspace`, merging into the directories that exist there, as `mamb`
+(by default, `$USER`), with the private key `<host>/mamb/id_ed25519` and the known host key of the sidecar in
+`<host>/known_hosts`; `<host>` is the directory given with `--host`, by default the directory `host/` beside
+`<dir>`. By hand:
+
 ```bash
 sftp -P 2222 -i <private key> -o IdentitiesOnly=yes mamb@localhost
 scp -P 2222 -i <private key> -o IdentitiesOnly=yes <file> mamb@localhost:files/<suite>/
@@ -270,7 +287,8 @@ the delay applies to every client on the host.
 
 | After editing | Run |
 |---------------|-----|
-| The administrator's files: `ecflow/admin/server_environment.cfg`, the troika configurations, the tokens, the SSH keys | `k8s/imachination.sh admin <dir>` |
+| The administrator's files: `server_environment.cfg`, the troika configurations, the tokens | `k8s/imachination.sh provision --role admin --target ecflow-server --dir <dir>` |
+| The SSH keys of the SFTP sidecar | `k8s/imachination.sh provision --role admin --target ecflow-sftp --dir <dir>` |
 | `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.sh apply` |
 | A new image published upstream, or built locally | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
 

@@ -38,8 +38,8 @@ NAMESPACE = "imachination"
 CONTEXT = f"kind-{CLUSTER_NAME}"
 CLUSTER_CONFIG = HERE / "kind-cluster.yaml"
 
-# The administrator's files that every deployment starts from (server_environment.cfg); `admin <dir>` merges a
-# directory of per-user files over them
+# The administrator's files that a deployment starts from (server_environment.cfg), until
+# `provision --role admin --target ecflow-server` replaces them
 ADMIN_BASE_DIR = IMACHINATION_DIR / "ecflow" / "admin"
 
 # The images named in the manifests, and those used in their place: the *_SOURCE variables select another image
@@ -225,19 +225,16 @@ def ensure_namespace():
     RUN.change(kubectl("apply", "-f", "-"), input=manifest(namespace), quiet=True)
 
 
-def secret_from_tree(name, directory, skip=()):
+def secret_from_tree(name, directory):
     """
     Returns a Secret holding every file below `directory`, each keyed by its path relative to `directory`, with
-    "__" in place of "/" (a Secret has flat keys); hidden files, and the files below the top-level directories
-    named in `skip`, are left out.
+    "__" in place of "/" (a Secret has flat keys); hidden files are left out.
     """
     data = {}
     for path in sorted(pathlib.Path(directory).rglob("*")):
         if not path.is_file() or path.is_symlink() or path.name.startswith("."):
             continue
         relative = path.relative_to(directory)
-        if relative.parts[0] in skip and len(relative.parts) > 1:
-            continue
         data["__".join(relative.parts)] = base64.b64encode(path.read_bytes()).decode()
     return {
         "apiVersion": "v1",
@@ -412,47 +409,79 @@ class ApplyCmd:
 
 
 ##
-# Command: 'admin'
+# Command: 'provision'
 ##
 
 
-class AdminCmd:
+class ProvisionCmd:
     """
-    Loads the administrator's files into the cluster, then replaces the ecFlow server Pod, so that it expands them.
+    Copies a directory of files to one of the destinations of the stack, as the role that owns it.
 
-    The Secret ecflow-admin, which the ecFlow server Pod expands into /admin, holds the base files merged with
-    those of the given directory (server_environment.cfg, troikaw, troika/<user>/, secrets/<user>/, ...); the
-    Secret sftp-keys, which only the SFTP sidecar mounts, holds the files of its sshd/ directory
-    (<user>.authorized_keys and the host key).
+    The administrator (role admin) provisions, through the cluster, the files of the ecFlow server (target
+    ecflow-server), which become the Secret ecflow-admin, expanded into /admin by the ecFlow server Pod
+    (server_environment.cfg, troikaw, troika/<user>/, secrets/<user>/, ...), and the keys of the SFTP sidecar
+    (target ecflow-sftp), which become the Secret sftp-keys (<user>.authorized_keys and the host key). Each
+    replaces the content of its Secret as a whole, and the ecFlow server Pod is then replaced, so that it uses the
+    new files.
+
+    A user (role user) provisions the workspace (target workspace, the default) through the SFTP sidecar only,
+    with no access to the cluster: the directory is copied into /workspace, merging into the directories that
+    exist there. The user logs in with the private key <host>/<user>/id_ed25519, and checks the host key of the
+    sidecar against <host>/known_hosts, where <host> is the directory given with --host, by default the sibling
+    host/ of the provisioned directory.
     """
 
-    def __init__(self, directory):
-        self.directory = directory
+    TARGETS = {
+        "admin": {"ecflow-server": "ecflow-admin", "ecflow-sftp": "sftp-keys"},
+        "user": {"workspace": None},
+    }
+    OPTIONS = ("--role", "--target", "--dir", "--user", "--host")
+
+    def __init__(self, arguments):
+        options = {}
+        remaining = list(arguments)
+        while remaining:
+            argument = remaining.pop(0)
+            name, separator, value = argument.partition("=")
+            if name not in self.OPTIONS:
+                die(f"Unknown option for provision: {argument}. Try '{PROG} help'.")
+            if not separator:
+                if not remaining:
+                    die(f"The option {name} requires a value.")
+                value = remaining.pop(0)
+            options[name.lstrip("-")] = value
+        self.role = options.get("role")
+        self.target = options.get("target")
+        self.directory = options.get("dir")
+        self.user = options.get("user") or os.environ.get("USER", "")
+        self.host = options.get("host")
 
     def execute(self):
+        if self.role not in self.TARGETS:
+            die(f"The provision command requires --role {' or '.join(self.TARGETS)}. Try '{PROG} help'.")
+        targets = self.TARGETS[self.role]
+        if self.target is None and len(targets) == 1:
+            self.target = next(iter(targets))
+        if self.target not in targets:
+            die(f"The role {self.role} provisions --target {' or '.join(targets)}.")
+        if not self.directory:
+            die(f"The provision command requires --dir. Try '{PROG} help'.")
+        directory = pathlib.Path(self.directory).expanduser()
+        if not directory.is_dir():
+            die(f"No such directory: {self.directory}")
+        directory = directory.resolve()
+
+        if self.role == "admin":
+            self._provision_secret(targets[self.target], directory)
+        else:
+            self._provision_workspace(directory)
+
+    def _provision_secret(self, secret, directory):
         require("kubectl")
         require_cluster()
-        directory = None
-        if self.directory:
-            directory = pathlib.Path(self.directory)
-            if not directory.is_dir():
-                die(f"No such directory: {self.directory}")
-            directory = directory.resolve()
-
-        with tempfile.TemporaryDirectory() as staging:
-            shutil.copytree(ADMIN_BASE_DIR, staging, symlinks=True, dirs_exist_ok=True)
-            if directory is not None:
-                shutil.copytree(directory, staging, symlinks=True, dirs_exist_ok=True)
-
-            ensure_namespace()
-            source = f" from {directory}" if directory else ""
-            info(f"Loading the administrator's files{source} into Secret ecflow-admin")
-            admin = secret_from_tree("ecflow-admin", staging, skip=("sshd", "venv"))
-            RUN.change(kubectl("apply", "-f", "-"), input=manifest(admin))
-            sshd = pathlib.Path(staging) / "sshd"
-            if sshd.is_dir():
-                info("Loading the SSH keys into Secret sftp-keys")
-                RUN.change(kubectl("apply", "-f", "-"), input=manifest(secret_from_tree("sftp-keys", sshd)))
+        ensure_namespace()
+        info(f"Loading {directory} into Secret {secret}")
+        RUN.change(kubectl("apply", "-f", "-"), input=manifest(secret_from_tree(secret, directory)))
 
         deployed = RUN.query(
             kubectl("get", "deployment/ecflow-server", "-n", NAMESPACE),
@@ -464,6 +493,36 @@ class AdminCmd:
             RestartCmd("ecflow-server").execute()
             if not RUN.dryrun:
                 warn("The ecFlow server restarted halted: issue 'ecflow_client --https --restart' as an administrator.")
+
+    def _provision_workspace(self, directory):
+        require("sftp")
+        if not self.user:
+            die("The user role requires --user.")
+        host = pathlib.Path(self.host).expanduser() if self.host else directory.parent / "host"
+        key = host / self.user / "id_ed25519"
+        known_hosts = host / "known_hosts"
+        for path in (key, known_hosts):
+            if not path.is_file():
+                die(f"No such file: {path}")
+
+        server = os.environ.get("SFTP_HOST", "localhost")
+        port = os.environ.get("SFTP_PORT", "2222")
+        sftp = [
+            "sftp", "-q", "-P", port, "-i", str(key),
+            "-o", "IdentitiesOnly=yes", "-o", "IdentityAgent=none", "-o", "BatchMode=yes",
+            "-o", f"UserKnownHostsFile={known_hosts}",
+            "-b", "-", f"{self.user}@{server}",
+        ]
+        accepted = RUN.query(sftp, input="pwd\n", quiet=True, stderr=subprocess.DEVNULL, check=False)
+        if accepted.returncode != 0:
+            die(f"The SFTP sidecar at {server}:{port} does not accept the key of '{self.user}' ({key}): the "
+                "administrator provisions it with --role admin --target ecflow-sftp.")
+
+        info(f"Copying {directory} into the workspace, as {self.user}@{server}:{port}")
+        # put -r merges into the directories that already exist in the workspace
+        RUN.change(sftp, input=f"lcd {directory}\nput -pr *\n", quiet=True)
+        if not RUN.dryrun:
+            info("The workspace is provisioned.")
 
 
 ##
@@ -764,7 +823,7 @@ class UsageCmd:
 
     def execute(self):
         print(
-            f"""Usage: {PROG} [--dryrun] [--verbose] <command> [argument]
+            f"""Usage: {PROG} [--dryrun] [--verbose] <command> [arguments]
 
 Options:
   --dryrun   Show the commands that change the cluster, or wait for their
@@ -777,8 +836,14 @@ Commands:
   cluster    Create the cluster, if absent
   images     Pull, tag and load the container images into the cluster
   apply      Declare the stack in the cluster and wait for it to become available
-  admin DIR  Load the administrator's files (DIR merged over ecflow/admin) and the
-             SSH keys (DIR/sshd), then replace the ecFlow server Pod
+  provision --role admin --target ecflow-server|ecflow-sftp --dir DIR
+             Load DIR as the files of the ecFlow server (/admin), or as the keys
+             of the SFTP sidecar, replacing what was loaded before, then replace
+             the ecFlow server Pod
+  provision --role user [--target workspace] --dir DIR [--user NAME] [--host HOST]
+             Copy DIR into the workspace over SFTP, as NAME (default: $USER),
+             with the key HOST/NAME/id_ed25519 and HOST/known_hosts (default
+             HOST: the directory host/ beside DIR)
   verify     Exercise the authenticated path with ecflow_client, from the host
   status     Report the state of the cluster, its images and the stack
   logs       Follow the output of every workload, or of the one named
@@ -797,6 +862,9 @@ Environment:
   REVPROXY_SOURCE    Source image for the reverse proxy, the equivalent of the
                      REVPROXY_IMAGE that compose.yaml accepts
   SFTP_SOURCE        Source image for the SFTP sidecar of the ecFlow server
+  SFTP_HOST, SFTP_PORT
+                     SFTP sidecar, as published on the host, which provision
+                     --role user connects to (default: localhost, 2222)
   ROLLOUT_TIMEOUT    How long to wait for a workload to become available
                      (default: 300s; an emulated server starts slowly)
   VERIFY_USER        User of the plain provider that verify authenticates as
@@ -828,7 +896,7 @@ def main(argv):
         "cluster": lambda: ClusterCmd(),
         "images": lambda: ImagesCmd(),
         "apply": lambda: ApplyCmd(),
-        "admin": lambda: AdminCmd(argument),
+        "provision": lambda: ProvisionCmd(arguments[1:]),
         "verify": lambda: VerifyCmd(),
         "status": lambda: StatusCmd(),
         "logs": lambda: LogsCmd(argument),

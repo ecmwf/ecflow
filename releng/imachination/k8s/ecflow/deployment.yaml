@@ -46,7 +46,7 @@ spec:
       terminationGracePeriodSeconds: 10
 
       # The administrator's files (A) reach the Pod as one Secret, ecflow-admin, loaded by
-      # `imachination.sh admin`: a Secret has flat keys, so each path is encoded with "__" in place of "/"
+      # `imachination.sh provision`: a Secret has flat keys, so each path is encoded with "__" in place of "/"
       # (troika/mamb/troika.yml as troika__mamb__troika.yml). This container expands them into /admin,
       # which the server then mounts read-only; SFTP users never see it, as the sidecar does not mount it.
       # A change to the Secret takes effect when the Pod is replaced.
