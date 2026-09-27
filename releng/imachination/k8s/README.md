@@ -10,13 +10,15 @@ local Kubernetes cluster created with [kind](https://kind.sigs.k8s.io/), instead
 services are the same: an ecFlow server behind an nginx reverse proxy, which authenticates every request with
 `auth-o-tron`. The deployment is intended for development and testing on a single machine.
 
-Everything is driven by one script, `imachination.sh`. It can be run from any directory; the examples below are
+Everything is driven by one script, `imachination.py`. It can be run from any directory; the examples below are
 run from the `imachination` directory, the parent of this one.
 
 ## Prerequisites
 
 - Docker, running, with enough memory for a Kubernetes node (4 GB or more is recommended).
 - [kind](https://kind.sigs.k8s.io/) and `kubectl`.
+- Python 3, which runs `imachination.py` with its standard library only, and `sftp`, for
+  `provision --role user`.
 - Login access to the `eccr.ecmwf.int` registry, from which the ecFlow and `auth-o-tron` images are pulled:
 
   ```bash
@@ -29,9 +31,9 @@ run from the `imachination` directory, the parent of this one.
 ## Quick start
 
 ```bash
-k8s/imachination.sh up        # create the cluster, load the images, and deploy the stack
-k8s/imachination.sh verify    # check the authenticated path with ecflow_client
-k8s/imachination.sh status    # show the cluster, the loaded images and the objects of the stack
+k8s/imachination.py up        # create the cluster, load the images, and deploy the stack
+k8s/imachination.py verify    # check the authenticated path with ecflow_client
+k8s/imachination.py status    # show the cluster, the loaded images and the objects of the stack
 ```
 
 `up` takes about a minute when the images are already cached, and can be run again at any time: every
@@ -57,7 +59,7 @@ reach the server.
 | `down` | Delete the stack, with its workspace and checkpoint, keeping the cluster and its images |
 | `destroy` | Delete the cluster |
 
-With `--dryrun` (for example `k8s/imachination.sh --dryrun up`), the commands that change the cluster, or wait
+With `--dryrun` (for example `k8s/imachination.py --dryrun up`), the commands that change the cluster, or wait
 for their effect, are shown instead of run, each as a shell would need it; the commands that only read the state of
 the cluster, on which the next steps depend, still run. A manifest given as input is named rather than shown, and a
 Secret by the names of its keys only. A dry run of `verify` shows its token files, which exist only while it runs. With
@@ -87,7 +89,7 @@ that cannot be pulled is used as cached by `reload`. For example, after
 ```bash
 REVPROXY_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:local \
 SFTP_SOURCE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:local \
-    k8s/imachination.sh reload
+    k8s/imachination.py reload
 ```
 
 ## What is deployed
@@ -114,7 +116,7 @@ users only, such as `admin` and `mamb`), plus any ECMWF user holding an API key,
 `ecmwf-api-provider` against `https://api.ecmwf.int/v1`. Validating an API key requires the cluster to reach
 that address; without outbound access, only the test users can log in.
 
-After editing `config.yaml`, run `k8s/imachination.sh apply`: the configuration is carried as a generated Secret,
+After editing `config.yaml`, run `k8s/imachination.py apply`: the configuration is carried as a generated Secret,
 whose name changes with its content, so the `auth-o-tron` workload is replaced automatically.
 
 ## Using ecFlow through the reverse proxy
@@ -146,7 +148,7 @@ Secret `revproxy-tls` (type `kubernetes.io/tls`), when it exists, or generates a
 
 ```bash
 kubectl -n imachination create secret tls revproxy-tls --cert=<certificate> --key=<key>
-k8s/imachination.sh restart revproxy
+k8s/imachination.py restart revproxy
 ```
 
 ```bash
@@ -228,8 +230,8 @@ The administrator loads them through the cluster, one destination at a time, eac
 its destination as a whole:
 
 ```bash
-k8s/imachination.sh provision --role admin --target ecflow-server --dir <dir>
-k8s/imachination.sh provision --role admin --target ecflow-sftp --dir <dir>
+k8s/imachination.py provision --role admin --target ecflow-server --dir <dir>
+k8s/imachination.py provision --role admin --target ecflow-sftp --dir <dir>
 ```
 
 - The target `ecflow-server` loads `<dir>` as the Secret `ecflow-admin`, each path encoded with `__` in place
@@ -265,7 +267,7 @@ works as well, as it uses the SFTP protocol. `rsync` is not supported.
 A user provisions the workspace through the sidecar alone, with no access to the cluster:
 
 ```bash
-k8s/imachination.sh provision --role user --dir <dir> --user mamb
+k8s/imachination.py provision --role user --dir <dir> --user mamb
 ```
 
 copies the content of `<dir>` into `/workspace`, merging into the directories that exist there, as `mamb`
@@ -287,14 +289,14 @@ the delay applies to every client on the host.
 
 | After editing | Run |
 |---------------|-----|
-| The administrator's files: `server_environment.cfg`, the troika configurations, the tokens | `k8s/imachination.sh provision --role admin --target ecflow-server --dir <dir>` |
-| The SSH keys of the SFTP sidecar | `k8s/imachination.sh provision --role admin --target ecflow-sftp --dir <dir>` |
-| `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.sh apply` |
-| A new image published upstream, or built locally | `k8s/imachination.sh reload`, then `--restart` the ecFlow server |
+| The administrator's files: `server_environment.cfg`, the troika configurations, the tokens | `k8s/imachination.py provision --role admin --target ecflow-server --dir <dir>` |
+| The SSH keys of the SFTP sidecar | `k8s/imachination.py provision --role admin --target ecflow-sftp --dir <dir>` |
+| `authotron/config.yaml`, `k8s/revproxy/nginx-default.conf`, any manifest, `SFTP_USERS` | `k8s/imachination.py apply` |
+| A new image published upstream, or built locally | `k8s/imachination.py reload`, then `--restart` the ecFlow server |
 
 ## Troubleshooting
 
-- `k8s/imachination.sh logs` follows the output of every workload; `apply`, `restart` and `reload` print the
+- `k8s/imachination.py logs` follows the output of every workload; `apply`, `restart` and `reload` print the
   events and the last output of any workload that fails to become available.
 - A job that stays `submitted` with no output usually points at a missing `ECF_OUT` directory, or at a child
   command that cannot reach the server; the job output shows the error of `ecflow_client`.
@@ -307,8 +309,8 @@ the delay applies to every client on the host.
 ## Removing the deployment
 
 ```bash
-k8s/imachination.sh down       # delete the stack, keeping the cluster and its images
-k8s/imachination.sh destroy    # delete the cluster
+k8s/imachination.py down       # delete the stack, keeping the cluster and its images
+k8s/imachination.py destroy    # delete the cluster
 ```
 
 Both delete the workspace, with the suites and their outputs, and the checkpoint of the server, which live on

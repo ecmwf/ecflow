@@ -5,7 +5,7 @@
 # and outputs, and the log of the server, which the users reach through the SFTP
 # sidecar. The claim is served by the default storage class of the cluster, the
 # local-path storage on kind, or a block volume on a managed cluster; its
-# contents are lost with the namespace (`imachination.sh down`) and with the
+# contents are lost with the namespace (`imachination.py down`) and with the
 # cluster.
 
 apiVersion: v1

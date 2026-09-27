@@ -54,8 +54,8 @@ IMAGES = {
     "eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest": "SFTP_SOURCE",
 }
 
-# The name under which the script is invoked, which the wrapper imachination.sh passes on
-PROG = os.environ.get("IMACHINATION_PROG", pathlib.Path(sys.argv[0]).name)
+# The name under which the script is invoked
+PROG = pathlib.Path(sys.argv[0]).name
 
 ##
 # Log

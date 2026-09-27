@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
-# The `imachination` kind cluster definition, which `imachination.sh cluster`
+# The `imachination` kind cluster definition, which `imachination.py cluster`
 # creates. To create the cluster by hand, from the `imachination` directory:
 #
 #   kind create cluster --config k8s/kind-cluster.yaml

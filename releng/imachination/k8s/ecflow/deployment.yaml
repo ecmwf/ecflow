@@ -46,7 +46,7 @@ spec:
       terminationGracePeriodSeconds: 10
 
       # The administrator's files (A) reach the Pod as one Secret, ecflow-admin, loaded by
-      # `imachination.sh provision`: a Secret has flat keys, so each path is encoded with "__" in place of "/"
+      # `imachination.py provision`: a Secret has flat keys, so each path is encoded with "__" in place of "/"
       # (troika/mamb/troika.yml as troika__mamb__troika.yml). This container expands them into /admin,
       # which the server then mounts read-only; SFTP users never see it, as the sidecar does not mount it.
       # A change to the Secret takes effect when the Pod is replaced.
@@ -99,10 +99,10 @@ spec:
       containers:
         - name: ecflow-server
           image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
-          # On kind, every image is loaded into the node by `imachination.sh
+          # On kind, every image is loaded into the node by `imachination.py
           # images`, which pulls it on the host; the node never pulls it, with
           # IfNotPresent overriding the Always that a `latest` tag implies.
-          # `imachination.sh apply` replaces these names with those of the
+          # `imachination.py apply` replaces these names with those of the
           # images selected by ECFLOW_SOURCE and the other *_SOURCE variables.
           imagePullPolicy: IfNotPresent
           workingDir: /workspace
