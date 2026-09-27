@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Prints the authorised keys of the user named by the only argument, as sshd's AuthorizedKeysCommand.
+
+case "$1" in
+    ''|*[!a-z0-9_-]*) exit 0 ;;
+esac
+
+# Installed by entrypoint.sh from SFTP_KEYS_DIR, which only root may be able to read
+keys="/etc/ssh/authorized_keys/$1"
+[ -r "${keys}" ] && cat "${keys}"
+exit 0

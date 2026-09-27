@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The single point of entry to the deployment.
+#
+# Node port 30443 is matched by the extraPortMappings entry of the cluster
+# definition, which publishes it on the host as 443. The node port number is
+# fixed rather than assigned, because the two must agree; it falls in the
+# 30000-32767 range that Kubernetes reserves for this purpose.
+#
+# No other port appears here. Ports 8080 and 8888 remain reachable only from
+# within the namespace.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: revproxy
+spec:
+  type: NodePort
+  selector:
+    app: revproxy
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      nodePort: 30443

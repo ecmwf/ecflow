@@ -7,10 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 
 This document describes the overall process to build ecFlow Docker images.
 
-Building an image typically follows a two-step pattern:
+Building an ecFlow image follows a two-step pattern:
 
 - build the relevant ecFlow Debian package
 - build a Docker image that installs that package.
+
+The images that hold no ecFlow, a reverse proxy and an SFTP server for deployments of ecFlow, are built directly
+from their Dockerfile (see "Building the standalone images").
 
 All commands below are run from `ecflow/releng/dockit/`, unless otherwise
 stated.
@@ -22,8 +25,8 @@ stated.
 ## Relationship to the `dockit` GitHub Actions workflow
 
 The action `.github/workflows/dockit.yml` automates the image build process described below, end-to-end,
-on `workflow_dispatch`, as two jobs sharing a build matrix (each leg pairs a preset with the image name and
-Dockerfile directory it belongs to):
+on `workflow_dispatch`. Two jobs share a build matrix (each leg pairs a preset with the image name and Dockerfile
+directory it belongs to), and a third builds the standalone images:
 
 1. The `package` job builds the ecFlow Debian package by running `build_ecflow_package_in_container.sh --source` on the
    checked-out commit, inside the build environment image, once per architecture (`amd64` and `arm64`), each
@@ -32,7 +35,7 @@ Dockerfile directory it belongs to):
    same way. Each leg uploads the resulting `ecflow-<arch>.deb` as an `ecflow-debian-package-<image>-<arch>`
    artefact.
 
-2. The `dockerize` job, using the same matrix, downloads the packages of all architectures into the matching
+2. The `dockerize-ecflow` job, using the same matrix, downloads the packages of all architectures into the matching
    Dockerfile directory (`ecflow-server/`) and runs `create_ecflow_docker_image.sh` (Step 2 below) to create the
    Docker image from that directory's `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image
    under QEMU emulation, which only installs the package), and to push it to
@@ -41,7 +44,13 @@ Dockerfile directory it belongs to):
    information) and must report a healthy server. The pushed image records the preset its package was built with
    in the `int.ecmwf.ecflow.preset` label.
 
-The image is tagged after the branch the workflow runs from, using a slug of the branch name: the first component
+3. The `dockerize-standalone` job builds the standalone images, `ecflow-revproxy-dev` and `ecflow-sftp-dev`, from their
+   Dockerfile directories (`ecflow-revproxy/`, `ecflow-sftp/`), independently of the package. Before pushing, the
+   image of the runner's architecture is started and checked: the container must be running, and its entrypoint must
+   report the expected start. Both architectures are then pushed, as for `ecflow-server-dev`.
+
+The `bootstrap` job computes the tags, shared by every image of a run. Each image is tagged after the branch the
+workflow runs from, using a slug of the branch name: the first component
 of the name, if any, is dropped (e.g. `task/`), and the rest is lowercased, with anything other than letters, digits
 and `.` replaced by `-` (e.g. `task/support_acl` becomes `support-acl`). Each run pushes:
 
@@ -250,3 +259,24 @@ loaded or pushed. To run the lifecycle tests against an already built image with
 ```bash
 bash ./test_ecflow_server_image.sh "${IMAGE}" linux/arm64
 ```
+
+### Building the standalone images
+
+The images `ecflow-revproxy-dev` and `ecflow-sftp-dev` hold no ecFlow, and are built directly from their Dockerfile.
+Their configuration is left to the deployment that runs them.
+
+| Image | Directory | Content |
+|-------|-----------|---------|
+| `ecflow-revproxy-dev` | `ecflow-revproxy/` | nginx. The configuration is mounted in `/etc/nginx/conf.d`. The certificate and its key are taken from `tls.crt` and `tls.key` in `/etc/nginx/tls` (`REVPROXY_TLS_DIR`) when provided; otherwise, a self-signed certificate for `localhost` is generated at every start. The image holds no key. |
+| `ecflow-sftp-dev` | `ecflow-sftp/` | sshd, offering SFTP only, into `/workspace`. The accounts are listed in `SFTP_USERS`, with the group of the workspace. Their public keys (`<user>.authorized_keys`) and the host key (`ssh_host_ed25519_key`) are read from `SFTP_KEYS_DIR` (`/etc/ssh/sftp-keys`); without a host key, a temporary one is generated. |
+
+To build both locally, under the names that the `dockit` workflow publishes them with and the tag `local` (or the one
+given by `DOCKIT_TAG`), use the build-only `compose.yaml`:
+
+```bash
+docker compose build ecflow-revproxy ecflow-sftp
+```
+
+The file is meant for building only, never for running the images: its services belong to the profile `build`, so
+`docker compose up` starts none of them. The images built in this way are named, for example,
+`eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:local`.

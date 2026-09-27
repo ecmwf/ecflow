@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Admits only the reverse proxy to the authentication service.
+#
+# The reverse proxy consults auth-o-tron for every request, and nothing else
+# needs to. Reachable from any Pod, the service would let credentials be tried
+# without passing through the proxy and its access log, hand out the identity
+# headers and tokens of a successful authentication, and validate arbitrary
+# keys against the ECMWF API on request. Every other source is therefore
+# refused, in any namespace.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: authotron
+spec:
+  podSelector:
+    matchLabels:
+      app: authotron
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: revproxy
+      ports:
+        - protocol: TCP
+          port: 8080

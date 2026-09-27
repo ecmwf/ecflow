@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Builds, locally, the images of dockit that need no ecFlow package, under the names that the dockit
+# workflow publishes them with; it is meant for building only, never for running the images. From this
+# directory:
+#
+#   docker compose build ecflow-revproxy ecflow-sftp
+#
+# The tag is 'local', unless DOCKIT_TAG gives another. The services belong to the profile 'build', so that
+# 'docker compose up' starts none of them; naming them, as above, is what enables them.
+#
+# The ecflow-server image is built from an ecFlow package instead, with create_ecflow_docker_image.sh.
+
+services:
+
+  ecflow-revproxy:
+    profiles: [ build ]
+    image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:${DOCKIT_TAG:-local}
+    build: ecflow-revproxy
+
+  ecflow-sftp:
+    profiles: [ build ]
+    image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:${DOCKIT_TAG:-local}
+    build: ecflow-sftp

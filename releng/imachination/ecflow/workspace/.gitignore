@@ -1,0 +1,20 @@
+
+# State written by the server at run time; only server_environment.cfg is kept.
+*.check
+*.check.b
+*.out
+core
+ecf.lists
+ecf.passwd
+ecf.custom_passwd
+
+# Files of the suites, as provisioned into the workspace and as produced by running them:
+# suite definitions, includes, task scripts, job scripts (one directory per suite), job outputs, task data,
+# troika configuration and wrapper, and the credentials of the users.
+*.def
+/files/*
+!/files/.gitkeep
+/*/
+!/files/
+/troika.yml
+/troikaw

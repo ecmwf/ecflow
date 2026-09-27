@@ -10,13 +10,18 @@ reverse proxy that gates access through an authentication service.
 
 It is intended for exercising the authentication path (Basic and Bearer tokens) end to end.
 
+The same stack can also be deployed on a local Kubernetes cluster, created with kind, as described in
+[`k8s/README.md`](k8s/README.md).
+
 The stack has three services, defined in `compose.yaml`:
 
 - `revproxy`
 
-    - an nginx reverse proxy, built locally from `revproxy/Dockerfile`.
+    - an nginx reverse proxy (`eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev`), whose image is built
+      by `dockit` (`../dockit/ecflow-revproxy`), configured with `revproxy/cfgs/nginx/default.conf`.
 
-      Allows HTTPS requests, terminating TLS with a self-signed certificate, and gates the `/v1/ecflow` location behind
+      Allows HTTPS requests, terminating TLS with a self-signed certificate generated when the container starts
+      (or the `tls.crt` and `tls.key` mounted in `/etc/nginx/tls`), and gates the `/v1/ecflow` location behind
       an `auth_request` call to `authotron`.
 
 - `authotron`
@@ -46,12 +51,16 @@ The instructions below are written for Docker, but should work with Podman as we
 ## Configuring the ecFlow workspace
 
 The `ecflow` service mounts a workspace directory into the container, at `/workspace`, and uses it as `ECF_HOME`.
-By default, this is `ecflow/workspace` in this directory, which already contains a base `server_environment.cfg`,
-so no configuration is required to get started.
+By default, this is `ecflow/workspace` in this directory.
 
-This directory is controlled by the `WORKSPACE_DIR` environment variable. Setting it to an absolute path overrides
-the default, using that path for the host-side mount, the container-side mount, the working directory, and `ECF_HOME`
-alike, so that the server and any job scripts it generates all agree on the same path, for example:
+The server configuration is kept apart from the workspace: `ecflow/admin` is mounted read-only at `/admin`, where
+the server starts, and reads a base `server_environment.cfg`, so no configuration is required to get started. The
+checkpoint of the server is kept apart as well, in the Docker volume `ecflow-state`, mounted at `/state`; the volume
+survives `docker compose down`, and is removed with `docker compose down -v`.
+
+The workspace directory is controlled by the `WORKSPACE_DIR` environment variable. Setting it to an absolute path
+overrides the default, using that path for the host-side mount, the container-side mount, and `ECF_HOME` alike, so
+that the server and any job scripts it generates all agree on the same path, for example:
 
 ```bash
 export WORKSPACE_DIR="/var/ecflow/workspace"
@@ -62,18 +71,18 @@ export WORKSPACE_DIR="/var/ecflow/workspace"
 Run, from this directory:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
-The `ecflow` image defaults to the `latest` tag published from `develop`. To run a branch image instead,
-set `ECFLOW_IMAGE` before starting the stack. For example, while the `latest` tag is unavailable:
+Every image is pulled from the registry. The `ecflow` and `revproxy` images default to the `latest` tag published from
+`develop`. To run the images of a branch instead, set `ECFLOW_IMAGE` and `REVPROXY_IMAGE` before starting the stack.
+For example, for the images published by `dockit` from the branch `task/setup_k8s`:
 
 ```bash
-ECFLOW_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:improve-dockit docker compose up --build
+ECFLOW_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:setup-k8s \
+REVPROXY_IMAGE=eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:setup-k8s \
+    docker compose up
 ```
-
-The `--build` option is required because `revproxy` has no pre-built image and must be built locally; `authotron` and
-`ecflow` are pulled from the registry.
 
 Once started, by default the following ports are published on the host:
 
@@ -98,11 +107,9 @@ Create the network shared by the three containers:
 docker network create --subnet 172.30.0.0/16 inner
 ```
 
-Build and run `revproxy`:
+Run `revproxy`:
 
 ```bash
-docker build -t imachination-revproxy ./revproxy
-
 docker run -d \
     --name revproxy \
     --hostname revproxy \
@@ -110,7 +117,7 @@ docker run -d \
     -p 80:80 -p 443:443 \
     -v "$(pwd)/revproxy/server:/usr/share/nginx/html/server" \
     -v "$(pwd)/revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf" \
-    imachination-revproxy
+    "${REVPROXY_IMAGE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev:latest}"
 ```
 
 Run `authotron`:
@@ -136,8 +143,12 @@ docker run -d \
     --network inner --ip 172.30.0.4 \
     -p 8888:8888 \
     -v "${WORKSPACE_DIR:-$(pwd)/ecflow/workspace}:${WORKSPACE_DIR:-/workspace}" \
-    -w "${WORKSPACE_DIR:-/workspace}" \
+    -v "$(pwd)/ecflow/admin:/admin:ro" \
+    -v ecflow-state:/state \
+    -w /admin \
     -e "ECFLOW_WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}" \
+    -e ECF_CHECK=/state/ecflow-server.8888.ecf.check \
+    -e ECF_CHECKOLD=/state/ecflow-server.8888.ecf.check.b \
     eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev:latest
 ```
 
@@ -146,6 +157,7 @@ To stop and remove the stack:
 ```bash
 docker rm -f revproxy authotron ecflow
 docker network rm inner
+docker volume rm ecflow-state     # also discards the checkpoint
 ```
 
 ## Testing authentication through the reverse proxy
