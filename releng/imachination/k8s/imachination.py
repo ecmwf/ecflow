@@ -12,7 +12,9 @@ Every action is idempotent: running a command a second time either does nothing 
 The script is organised around commands: each command of the command line is a class whose `execute()` runs
 one, or a sequence of, external commands (kind, kubectl, docker, ecflow_client). Every external command goes
 through the `Runner`, which tells the commands that only read the state of the cluster (queries) from those that
-change it (changes). Only the standard library of Python is used.
+change it (changes), and from those that wait for, or observe, the effect of changes (watches). With `--dryrun`,
+the queries run, and the changes and the watches are shown instead of run. Only the standard library of Python is
+used.
 """
 
 import base64
@@ -21,6 +23,7 @@ import os
 import pathlib
 import random
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -90,29 +93,83 @@ class Runner:
     Runs every external command of the script.
 
     A query only reads the state of the cluster, or of the host, and its outcome decides what the script does
-    next; a change modifies that state. Keeping the two apart lets the script describe what it would change
-    without changing it.
+    next; a change modifies that state; a watch waits for, or observes, the effect of changes (a rollout, the
+    output of a workload, the authenticated path). In a dry run, the queries run, as they change nothing and the
+    script depends on their outcome, while the changes and the watches are shown, quoted as a shell would need
+    them, and not run: a watch means nothing after changes that did not happen.
 
     By default, the output of a command goes to the terminal; `capture` returns its standard output instead, and
     `quiet` discards it. Standard error is kept, unless `stderr` is set to `subprocess.DEVNULL` (or to
     `subprocess.STDOUT`, to merge it into the output). With `check`, a command that fails ends the script with its
     exit status, as a shell running with `set -e` would; without it, the completed process is returned, and its
-    status left to the caller.
+    status left to the caller. `input` is written to the standard input of the command, and `env` holds the
+    variables set for it, on top of the environment of the script. A command shown in a dry run is reported as
+    successful, with no output.
     """
+
+    def __init__(self):
+        self.dryrun = False
+        # In a dry run, whether the creation of the cluster was shown, so that the commands that follow it are
+        # shown as well, as if it existed
+        self.cluster_created = False
 
     def query(self, argv, **options):
         return self._run(argv, **options)
 
     def change(self, argv, **options):
-        return self._run(argv, **options)
+        return self._run_or_show(argv, **options)
+
+    def watch(self, argv, **options):
+        return self._run_or_show(argv, **options)
+
+    def _run_or_show(self, argv, **options):
+        if not self.dryrun:
+            return self._run(argv, **options)
+        self._show(argv, options.get("input"), options.get("env"))
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
 
     @staticmethod
     def _run(argv, *, input=None, capture=False, quiet=False, stderr=None, check=True, env=None):
         stdout = subprocess.PIPE if capture else (subprocess.DEVNULL if quiet else None)
-        process = subprocess.run(argv, input=input, stdout=stdout, stderr=stderr, env=env, text=True)
+        environment = dict(os.environ, **env) if env else None
+        process = subprocess.run(argv, input=input, stdout=stdout, stderr=stderr, env=environment, text=True)
         if check and process.returncode != 0:
             raise Failure(process.returncode)
         return process
+
+    @staticmethod
+    def _show(argv, input, env):
+        variables = [f"{name}={shlex.quote(value)}" for name, value in (env or {}).items()]
+        line = " ".join([*variables, shlex.join(argv)])
+        if input:
+            line += f"  # input: {describe(input)}"
+        print(f"[dryrun] {line}", flush=True)
+
+
+def describe(document):
+    """
+    Names the Kubernetes objects of a manifest given as input to a command, without their content: a Secret built
+    by the script is described by the names of its keys, never by their values.
+    """
+    try:
+        documents = [json.loads(document)]
+    except ValueError:
+        documents = None
+    if documents:
+        described = []
+        for item in documents:
+            name = f"{item.get('kind')}/{item.get('metadata', {}).get('name')}"
+            if item.get("kind") == "Secret":
+                name += f" (keys: {', '.join(item.get('data', {})) or 'none'})"
+            described.append(name)
+        return "; ".join(described)
+    described = []
+    for part in re.split(r"^---$", document, flags=re.M):
+        kind = re.search(r"^kind: (\S+)$", part, flags=re.M)
+        name = re.search(r"^metadata:\n(?:  .*\n)*?  name: (\S+)$", part, flags=re.M)
+        if kind and name:
+            described.append(f"{kind.group(1)}/{name.group(1)}")
+    return f"{len(described)} objects: " + ", ".join(described)
 
 
 RUN = Runner()
@@ -135,6 +192,8 @@ def require(*tools):
 
 
 def cluster_exists():
+    if RUN.dryrun and RUN.cluster_created:
+        return True
     process = RUN.query(["kind", "get", "clusters"], capture=True, stderr=subprocess.DEVNULL, check=False)
     return CLUSTER_NAME in process.stdout.splitlines()
 
@@ -194,6 +253,10 @@ def render_stack():
     return rendered
 
 
+# A Deployment of the rendered stack, and its name
+STACK_DEPLOYMENT = r"^kind: Deployment$\n(?:[^\n]*\n)*?metadata:\n(?:  [^\n]*\n)*?  name: (\S+)$"
+
+
 def diagnose(workload):
     """Reports why a workload has not converged, from the events of its pods and what it last printed."""
 
@@ -218,6 +281,10 @@ def wait_for_workloads(*names):
     timeout = os.environ.get("ROLLOUT_TIMEOUT", "300s")
     if names:
         workloads = [f"deployment.apps/{name}" for name in names]
+    elif RUN.dryrun:
+        # The changes were not made, so that the cluster may not hold the workloads yet: those of the stack are
+        # waited for
+        workloads = [f"deployment.apps/{name}" for name in re.findall(STACK_DEPLOYMENT, render_stack(), flags=re.M)]
     else:
         process = RUN.query(
             kubectl("get", "deployments", "-n", NAMESPACE, "-o", "name"),
@@ -230,7 +297,7 @@ def wait_for_workloads(*names):
     failed = False
     for workload in workloads:
         info(f"Waiting for {workload} (timeout {timeout})")
-        status = RUN.query(
+        status = RUN.watch(
             kubectl("rollout", "status", workload, "-n", NAMESPACE, f"--timeout={timeout}"), check=False
         ).returncode
         if status != 0:
@@ -255,7 +322,8 @@ class ClusterCmd:
         else:
             info(f"Creating cluster '{CLUSTER_NAME}'")
             RUN.change(["kind", "create", "cluster", "--config", str(CLUSTER_CONFIG)])
-        RUN.query(kubectl("wait", "--for=condition=Ready", "nodes", "--all", "--timeout=180s"))
+            RUN.cluster_created = True
+        RUN.watch(kubectl("wait", "--for=condition=Ready", "nodes", "--all", "--timeout=180s"))
 
 
 ##
@@ -332,7 +400,8 @@ class ApplyCmd:
         RUN.change(kubectl("apply", "-f", "-"), input=render_stack())
 
         wait_for_workloads()
-        info("The stack is available.")
+        if not RUN.dryrun:
+            info("The stack is available.")
 
 
 ##
@@ -386,7 +455,8 @@ class AdminCmd:
         )
         if deployed.returncode == 0:
             RestartCmd("ecflow-server").execute()
-            warn("The ecFlow server restarted halted: issue 'ecflow_client --https --restart' as an administrator.")
+            if not RUN.dryrun:
+                warn("The ecFlow server restarted halted: issue 'ecflow_client --https --restart' as an administrator.")
 
 
 ##
@@ -425,7 +495,8 @@ class RestartCmd:
             info("Restarting every workload")
             RUN.change(kubectl("rollout", "restart", "deployment", "-n", NAMESPACE))
             wait_for_workloads()
-        info("The stack is available.")
+        if not RUN.dryrun:
+            info("The stack is available.")
 
 
 ##
@@ -477,11 +548,11 @@ class LogsCmd:
         require("kubectl")
         require_cluster(hint=False)
         if self.target:
-            RUN.query(
+            RUN.watch(
                 kubectl("logs", "-f", f"deployment/{self.target}", "-n", NAMESPACE, "--all-containers", "--tail=50")
             )
         else:
-            RUN.query(
+            RUN.watch(
                 kubectl(
                     "logs",
                     "-f",
@@ -529,18 +600,20 @@ class VerifyCmd:
             wrong = self._tokens(scratch, "wrong", [self._basic(user, f"{password}-wrong")])
             none = self._tokens(scratch, "none", [])
 
-            self._expect(f"valid credentials ({user}) reach the server", "succeeded", self._client(valid, "--ping"))
-            self._expect(
-                "no credentials are refused", "Unauthorized (401)", self._client(none, "--query", "state", marker)
-            )
-            self._expect(
-                "a wrong password is refused", "Unauthorized (401)", self._client(wrong, "--query", "state", marker)
-            )
+            outputs = [
+                self._client(valid, "--ping"),
+                self._client(none, "--query", "state", marker),
+                self._client(wrong, "--query", "state", marker),
+            ]
+        if not RUN.dryrun:
+            self._expect(f"valid credentials ({user}) reach the server", "succeeded", outputs[0])
+            self._expect("no credentials are refused", "Unauthorized (401)", outputs[1])
+            self._expect("a wrong password is refused", "Unauthorized (401)", outputs[2])
+            time.sleep(1)
 
-        time.sleep(1)
         # grep exits with 0 when the marker is found, 1 when it is not, and 2 when the log cannot be read; kubectl
         # exec passes the status on
-        grep = RUN.query(
+        grep = RUN.watch(
             kubectl(
                 "exec", "deployment/ecflow-server", "-n", NAMESPACE, "-c", "ecflow-server", "--",
                 "grep", "-c", "-e", marker, self.LOG,
@@ -549,6 +622,8 @@ class VerifyCmd:
             stderr=subprocess.DEVNULL,
             check=False,
         )
+        if RUN.dryrun:
+            return
         if grep.returncode == 0:
             warn(f"FAIL  a refused request reached the server: {grep.stdout.strip()} line(s) in its log")
             self.failed = True
@@ -575,8 +650,8 @@ class VerifyCmd:
 
     @staticmethod
     def _client(tokens, *arguments):
-        environment = dict(os.environ, ECF_AUTHTOKENS=tokens, ECF_HOST="localhost", ECF_PORT="443")
-        process = RUN.query(
+        environment = {"ECF_AUTHTOKENS": tokens, "ECF_HOST": "localhost", "ECF_PORT": "443"}
+        process = RUN.watch(
             ["ecflow_client", "--https", *arguments],
             capture=True,
             stderr=subprocess.STDOUT,
@@ -682,7 +757,12 @@ class UsageCmd:
 
     def execute(self):
         print(
-            f"""Usage: {PROG} <command> [argument]
+            f"""Usage: {PROG} [--dryrun] <command> [argument]
+
+Options:
+  --dryrun   Show the commands that change the cluster, or wait for their
+             effect, instead of running them; those that only read its state
+             still run
 
 Commands:
   up         Create the cluster, load the images and apply the stack, in one go
@@ -728,8 +808,10 @@ Environment:
 
 
 def main(argv):
-    command = argv[1] if len(argv) > 1 else ""
-    argument = argv[2] if len(argv) > 2 else ""
+    arguments = [value for value in argv[1:] if value != "--dryrun"]
+    RUN.dryrun = len(arguments) != len(argv) - 1
+    command = arguments[0] if arguments else ""
+    argument = arguments[1] if len(arguments) > 1 else ""
 
     prototypes = {
         "up": lambda: UpCmd(),
@@ -751,6 +833,8 @@ def main(argv):
     }
 
     try:
+        if RUN.dryrun and command in prototypes and prototypes[command]().__class__ is not UsageCmd:
+            info("Dry run: the commands that change the cluster, or wait for their effect, are shown, not run")
         if command not in prototypes:
             UsageCmd().execute()
             die(f"Unknown command: {command}")

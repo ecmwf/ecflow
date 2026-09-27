@@ -56,6 +56,11 @@ reach the server.
 | `down` | Delete the stack, with its workspace and checkpoint, keeping the cluster and its images |
 | `destroy` | Delete the cluster |
 
+With `--dryrun` (for example `k8s/imachination.sh --dryrun up`), the commands that change the cluster, or wait
+for their effect, are shown instead of run, each as a shell would need it; the commands that only read the state of
+the cluster, on which the next steps depend, still run. A manifest given as input is named rather than shown, and a
+Secret by the names of its keys only. A dry run of `verify` shows its token files, which exist only while it runs.
+
 The workloads are `ecflow-server`, `authotron` and `revproxy`. The script reads the following environment
 variables:
 
