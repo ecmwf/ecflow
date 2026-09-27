@@ -99,6 +99,7 @@ if (ENABLE_SERVER)
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
     test/TestGroupCmd.cpp
+    test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp
     test/TestLogAndCheckptErrors.cpp
     test/TestPasswdFile.cpp

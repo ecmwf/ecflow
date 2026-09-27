@@ -248,3 +248,28 @@ if (ENABLE_ALL_TESTS)
   )
 
 endif()
+
+# The time taken to close the descriptors inherited by a spawned job, with a large limit on open files
+if (ENABLE_ALL_TESTS)
+  set(test_srcs
+    # Sources
+    test/TestSystemDescriptorsPerformance.cpp
+    test/TestSystemDescriptorsPerformance_main.cpp # test entry point
+  )
+
+  ecflow_add_test(
+    TARGET
+      p_system_descriptors
+    LABELS
+      performance nightly fast
+    SOURCES
+      ${test_srcs}
+    LIBS
+      ecflow_all
+      test_scaffold
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
+  )
+endif()
