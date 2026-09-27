@@ -13,6 +13,7 @@
 #include <string>
 #include <system_error>
 #include <unistd.h>
+#include <utility>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -308,6 +309,72 @@ BOOST_AUTO_TEST_CASE(test_spawned_command_standard_descriptors_are_dev_null) {
     BOOST_CHECK_EQUAL_COLLECTIONS(found.begin(), found.end(), expected.begin(), expected.end());
 
     fs::remove(file);
+}
+
+///
+/// Pins how the child treats the descriptors 0, 1 and 2 when the server lacks one of them, an inconsistency kept
+/// as it is.
+///
+/// The child redirects 2, then 1, then 0, each by closing it and opening /dev/null, and closes what open() returns
+/// when it is not the descriptor being redirected. As open() returns the lowest free descriptor, the result depends
+/// on which descriptors the server holds:
+///  - the server lacks 0: while 2 and then 1 are redirected, open() returns 0, which is closed again, so that the
+///    child holds 0 on /dev/null, and 1 and 2 closed;
+///  - the server lacks 1: while 2 is redirected, open() returns 1, which is closed again, so that the child holds
+///    0 and 1 on /dev/null, and 2 closed;
+///  - the server lacks 2: the child holds 0, 1 and 2 on /dev/null, as when the server lacks none.
+/// A job started by a server that lacks 0 or 1 therefore writes nothing to its own standard output or error, unless
+/// its command redirects them (as the default ECF_JOB_CMD does). This is the behaviour of ecFlow since this code was
+/// written, and it is kept on purpose: this test records it, so that any change to it is deliberate.
+///
+BOOST_AUTO_TEST_CASE(test_spawned_command_standard_descriptors_when_the_server_lacks_one) {
+    ECF_NAME_THIS_TEST();
+
+    // Restores a descriptor of the test process, closed for the duration of a case, even when a check fails
+    struct Closed
+    {
+        explicit Closed(int descriptor)
+            : fd(descriptor),
+              saved(::dup(descriptor)) {
+            if (saved >= 0) {
+                ::close(fd);
+            }
+        }
+        Closed(const Closed&)            = delete;
+        Closed& operator=(const Closed&) = delete;
+        ~Closed() {
+            if (saved >= 0) {
+                ::dup2(saved, fd);
+                ::close(saved);
+            }
+        }
+        int fd;
+        int saved;
+    };
+
+    const std::vector<std::pair<int, std::vector<std::string>>> cases{
+        {0, {"0 null", "1 closed", "2 closed"}},
+        {1, {"0 null", "1 null", "2 closed"}},
+        {2, {"0 null", "1 null", "2 null"}},
+    };
+
+    const std::string file = "test_system_descriptors.lacking";
+    for (const auto& [lacking, expected] : cases) {
+        std::vector<std::string> found;
+        {
+            Closed closed(lacking);
+            if (closed.saved < 0) {
+                BOOST_TEST_MESSAGE("Skipped: the test process lacks descriptor " << lacking << " already");
+                continue;
+            }
+            spawn_and_wait(report_standard_descriptors(file));
+        }
+        found = read_lines(file);
+        BOOST_TEST_CONTEXT("The server lacks descriptor " << lacking) {
+            BOOST_CHECK_EQUAL_COLLECTIONS(found.begin(), found.end(), expected.begin(), expected.end());
+        }
+        fs::remove(file);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_close_descriptors_with_the_loop) {
