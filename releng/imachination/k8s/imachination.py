@@ -13,8 +13,8 @@ The script is organised around commands: each command of the command line is a c
 one, or a sequence of, external commands (kind, kubectl, docker, ecflow_client). Every external command goes
 through the `Runner`, which tells the commands that only read the state of the cluster (queries) from those that
 change it (changes), and from those that wait for, or observe, the effect of changes (watches). With `--dryrun`,
-the queries run, and the changes and the watches are shown instead of run. Only the standard library of Python is
-used.
+the queries run, and the changes and the watches are shown instead of run; with `--verbose`, every command is shown
+as it is about to run. Only the standard library of Python is used.
 """
 
 import base64
@@ -104,17 +104,19 @@ class Runner:
     exit status, as a shell running with `set -e` would; without it, the completed process is returned, and its
     status left to the caller. `input` is written to the standard input of the command, and `env` holds the
     variables set for it, on top of the environment of the script. A command shown in a dry run is reported as
-    successful, with no output.
+    successful, with no output. When verbose, every command is shown as it is about to run, in the same form as in a
+    dry run.
     """
 
     def __init__(self):
         self.dryrun = False
+        self.verbose = False
         # In a dry run, whether the creation of the cluster was shown, so that the commands that follow it are
         # shown as well, as if it existed
         self.cluster_created = False
 
     def query(self, argv, **options):
-        return self._run(argv, **options)
+        return self._execute(argv, **options)
 
     def change(self, argv, **options):
         return self._run_or_show(argv, **options)
@@ -124,9 +126,14 @@ class Runner:
 
     def _run_or_show(self, argv, **options):
         if not self.dryrun:
-            return self._run(argv, **options)
-        self._show(argv, options.get("input"), options.get("env"))
+            return self._execute(argv, **options)
+        self._show("dryrun", argv, options.get("input"), options.get("env"))
         return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    def _execute(self, argv, **options):
+        if self.verbose:
+            self._show("run", argv, options.get("input"), options.get("env"))
+        return self._run(argv, **options)
 
     @staticmethod
     def _run(argv, *, input=None, capture=False, quiet=False, stderr=None, check=True, env=None):
@@ -138,12 +145,12 @@ class Runner:
         return process
 
     @staticmethod
-    def _show(argv, input, env):
+    def _show(label, argv, input, env):
         variables = [f"{name}={shlex.quote(value)}" for name, value in (env or {}).items()]
         line = " ".join([*variables, shlex.join(argv)])
         if input:
             line += f"  # input: {describe(input)}"
-        print(f"[dryrun] {line}", flush=True)
+        print(f"[{label}] {line}", flush=True)
 
 
 def describe(document):
@@ -757,12 +764,13 @@ class UsageCmd:
 
     def execute(self):
         print(
-            f"""Usage: {PROG} [--dryrun] <command> [argument]
+            f"""Usage: {PROG} [--dryrun] [--verbose] <command> [argument]
 
 Options:
   --dryrun   Show the commands that change the cluster, or wait for their
              effect, instead of running them; those that only read its state
              still run
+  --verbose  Show every command as it is about to run
 
 Commands:
   up         Create the cluster, load the images and apply the stack, in one go
@@ -808,8 +816,10 @@ Environment:
 
 
 def main(argv):
-    arguments = [value for value in argv[1:] if value != "--dryrun"]
-    RUN.dryrun = len(arguments) != len(argv) - 1
+    options = {"--dryrun", "--verbose"}
+    arguments = [value for value in argv[1:] if value not in options]
+    RUN.dryrun = "--dryrun" in argv[1:]
+    RUN.verbose = "--verbose" in argv[1:]
     command = arguments[0] if arguments else ""
     argument = arguments[1] if len(arguments) > 1 else ""
 
