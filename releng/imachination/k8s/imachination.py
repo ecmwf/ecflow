@@ -215,6 +215,11 @@ def image_sources():
     return {default: os.environ.get(variable) or default for default, variable in IMAGES.items()}
 
 
+def image_tag(image):
+    """Returns the tag of an image reference, `latest` when none is given."""
+    return image.rpartition("/")[2].partition("@")[0].partition(":")[2] or "latest"
+
+
 def manifest(document):
     """Returns a Kubernetes object as the input of `kubectl apply -f -`."""
     return json.dumps(document)
@@ -365,10 +370,11 @@ class ImagesCmd:
     Pulls the images on the host, and loads them into the cluster.
 
     Every image is published, for both linux/amd64 and linux/arm64, so that the variant of the host is pulled and
-    no emulation is involved. An image already cached is not pulled, so that a working cluster does not depend on
-    the registry; with `refresh`, as `reload` sets, it is pulled even when cached, so that a tag published again
-    (such as `latest`) reaches the cluster, and an image that cannot be pulled, such as one built locally, is used
-    as cached.
+    no emulation is involved. An image tagged `latest` is always pulled, as the tag is published again with every
+    build of develop, so that a copy cached before then is never used in its place; any other image already cached
+    is not pulled, so that a working cluster does not depend on the registry. With `refresh`, as `reload` sets,
+    every image is pulled, even when cached. An image that cannot be pulled, such as one built locally, is used as
+    cached.
     """
 
     def __init__(self, refresh=False):
@@ -387,7 +393,7 @@ class ImagesCmd:
             ["docker", "image", "inspect", image], quiet=True, stderr=subprocess.DEVNULL, check=False
         )
         cached = inspected.returncode == 0
-        if cached and not self.refresh:
+        if cached and not self.refresh and image_tag(image) != "latest":
             info(f"Already cached: {image}")
             return
         info(f"Pulling {image}")

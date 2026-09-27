@@ -47,7 +47,7 @@ reach the server.
 |---------|--------|
 | `up` | Create the cluster, load the images and apply the stack, in one go |
 | `cluster` | Create the cluster (`k8s/kind-cluster.yaml`), if absent |
-| `images` | Pull the images when not cached, and load them into the cluster |
+| `images` | Pull the `latest` images, and the others when not cached, and load them into the cluster |
 | `apply` | Declare the stack in the cluster and wait for every workload to become available |
 | `provision --role admin --target ecflow-server\|ecflow-sftp --dir DIR` | Load `DIR` as the administrator's files of the ecFlow server, or as the keys of the SFTP sidecar, then replace the ecFlow server Pod (see "The administrator's files") |
 | `provision --role user [--target workspace] --dir DIR [--user NAME] [--host HOST]` | Copy `DIR` into the workspace over SFTP (see "Delivering files with sftp or scp") |
@@ -82,8 +82,9 @@ image on the host, with the login of `docker login eccr.ecmwf.int`, and loads it
 pulls an image itself, so the cluster needs no credential. A `*_SOURCE` variable selects another image, such as the
 build of a branch (`…:setup-k8s`): it is loaded under its own name, and `apply` (or `reload`) replaces the image of
 the manifests with it. The images built by `dockit` (the ecFlow server, the reverse proxy and the SFTP sidecar) can
-also be built locally, in `../../dockit` (see its `INSTRUCTIONS.md`); an image already cached is not pulled, and one
-that cannot be pulled is used as cached by `reload`. For example, after
+also be built locally, in `../../dockit` (see its `INSTRUCTIONS.md`). An image tagged `latest` is always pulled, as
+the tag moves with every build of develop; any other image already cached is not pulled (`reload` pulls them all),
+and one that cannot be pulled, such as a local build, is used as cached. For example, after
 `docker compose build ecflow-revproxy ecflow-sftp` in `../../dockit`:
 
 ```bash
