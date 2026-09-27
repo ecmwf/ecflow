@@ -28,6 +28,30 @@
 
 namespace ecf {
 
+///
+/// @brief Identifies how close_descriptors_from() closed the descriptors.
+///
+enum class DescriptorClosing {
+    CloseRange, ///< A single close_range system call closed them
+    Loop        ///< Every descriptor number below the limit on open files was closed in turn
+};
+
+///
+/// @brief Closes every descriptor numbered @p first or above.
+///
+/// @details Meant for the child of fork(), before exec, where only async-signal-safe calls are allowed; it makes no
+/// other. On Linux, where the close_range system call is known at build time, a single call closes the descriptors,
+/// whatever their number. Where it is not, and when the call fails at run time (for example, with ENOSYS on a kernel
+/// older than 5.9), every descriptor number from @p first up to sysconf(_SC_OPEN_MAX) is closed in turn, whose cost
+/// grows with that limit. Either way, no descriptor numbered @p first or above remains open.
+///
+/// @param first The lowest descriptor number to close.
+/// @param allow_close_range When false, every descriptor number is closed in turn, even where close_range is
+/// available; used to test that path.
+/// @return The method that closed the descriptors.
+///
+DescriptorClosing close_descriptors_from(int first, bool allow_close_range = true);
+
 /// Job submission in ECF is a two phase step.
 /// phase 1: Spawn of ECF_JOB_CMD
 /// phase 2: Invocation of ECF_JOB_CMD, this creates the *real* job which communicates with the server

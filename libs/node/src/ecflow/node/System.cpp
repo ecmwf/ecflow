@@ -3,8 +3,13 @@
 
 #include <cerrno>
 #include <csignal>
+#include <unistd.h>
 
 #include <sys/wait.h> // for waitpid
+
+#if defined(__linux__)
+    #include <sys/syscall.h> // for syscall, and __NR_close_range where the kernel headers define it
+#endif
 
 #ifndef O_WRONLY
     #include <fcntl.h>
@@ -144,20 +149,10 @@ int System::sys(System::CmdType cmd_type,
             close(f);
         }
 
-        // ==============================================================================
-        // Ideally we should close all open file descriptors in the child process
-        //    On Linux: sysconf(_SC_OPEN_MAX); returns 1024
-        //    This means making 1024 - 3 system calls
-        // This is especially import for socket descriptors, since if the server goes down
-        // The children/zombies will prevent the server restart on the same port.
-        // i.e the classic Address in use
-        // Its not clear how big a performance issue this, an alternative would be, to only close
-        // open socket file descriptors. But this will require a singleton of some sort
-        // ===============================================================================
-        int fd_limit = sysconf(_SC_OPEN_MAX);
-        for (int i = 3; i < fd_limit; i++) {
-            close(i);
-        }
+        // Close every other descriptor inherited from the server, in particular its sockets: a child, or a job
+        // left running, that holds the listening socket would keep the server from binding its port again after
+        // a restart (i.e. the classic "Address in use")
+        close_descriptors_from(3);
 
         execl("/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char*)nullptr);
         /*
@@ -180,6 +175,22 @@ int System::sys(System::CmdType cmd_type,
     LOG(Log::DBG, "   submit: Path(" << absPath << ") child_pid(" << child_pid << ") cmd(" << cmdToSpawn << ")");
 #endif
     return 0;
+}
+
+DescriptorClosing close_descriptors_from(int first, [[maybe_unused]] bool allow_close_range) {
+#if defined(__linux__) && defined(__NR_close_range)
+    // The glibc wrapper, close_range(), appears only in glibc 2.34, and not in musl, while the number of the system
+    // call is defined by the kernel headers of every supported Linux platform
+    if (allow_close_range &&
+        ::syscall(__NR_close_range, static_cast<unsigned int>(first), ~0U, static_cast<unsigned int>(0)) == 0) {
+        return DescriptorClosing::CloseRange;
+    }
+#endif
+    int fd_limit = sysconf(_SC_OPEN_MAX);
+    for (int i = first; i < fd_limit; i++) {
+        close(i);
+    }
+    return DescriptorClosing::Loop;
 }
 
 static void catch_child(int sig)

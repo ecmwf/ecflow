@@ -18,6 +18,11 @@
 #include <boost/test/unit_test.hpp>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/wait.h>
+
+#if defined(__linux__)
+    #include <sys/syscall.h>
+#endif
 
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Signal.hpp"
@@ -203,6 +208,66 @@ std::string to_string(const std::set<int>& descriptors) {
     return out.str();
 }
 
+///
+/// @brief Tells whether the running kernel offers the close_range system call.
+///
+/// A call with an empty range (the first descriptor above the last) fails with EINVAL where the call exists, and
+/// with ENOSYS where it does not; it closes nothing either way.
+///
+bool close_range_available() {
+#if defined(__linux__) && defined(__NR_close_range)
+    errno = 0;
+    return ::syscall(__NR_close_range, 1U, 0U, 0U) == -1 && errno == EINVAL;
+#else
+    return false;
+#endif
+}
+
+constexpr int leaked_descriptor = 1; ///< A descriptor numbered 3 or above remained open
+constexpr int lost_standard     = 2; ///< One of the descriptors 0, 1 and 2, open before, was closed
+constexpr int closed_by_syscall = 4; ///< The close_range system call closed the descriptors
+
+///
+/// @brief Closes the descriptors from 3 up in a forked child, and returns what the child observed.
+///
+/// The child makes only async-signal-safe calls, and reports through its exit status: the combination of the flags
+/// above.
+///
+int close_in_child(const std::vector<int>& descriptors, bool allow_close_range) {
+    // With System in place, SIGCHLD stays blocked, so that its handler does not reap the child waited for here
+    System::instance();
+
+    bool standard_open[3];
+    for (int fd = 0; fd < 3; ++fd) {
+        standard_open[fd] = ::fcntl(fd, F_GETFD) != -1;
+    }
+
+    pid_t pid = ::fork();
+    if (pid == 0) {
+        int status = 0;
+        if (close_descriptors_from(3, allow_close_range) == DescriptorClosing::CloseRange) {
+            status |= closed_by_syscall;
+        }
+        for (int fd : descriptors) {
+            if (::fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
+                status |= leaked_descriptor;
+            }
+        }
+        for (int fd = 0; fd < 3; ++fd) {
+            if (standard_open[fd] && ::fcntl(fd, F_GETFD) == -1) {
+                status |= lost_standard;
+            }
+        }
+        ::_exit(status);
+    }
+
+    BOOST_REQUIRE_MESSAGE(pid > 0, "fork() failed: " << std::strerror(errno));
+    int status = 0;
+    BOOST_REQUIRE(::waitpid(pid, &status, 0) == pid);
+    BOOST_REQUIRE_MESSAGE(WIFEXITED(status), "The child did not exit normally");
+    return WEXITSTATUS(status);
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -243,6 +308,35 @@ BOOST_AUTO_TEST_CASE(test_spawned_command_standard_descriptors_are_dev_null) {
     BOOST_CHECK_EQUAL_COLLECTIONS(found.begin(), found.end(), expected.begin(), expected.end());
 
     fs::remove(file);
+}
+
+BOOST_AUTO_TEST_CASE(test_close_descriptors_with_the_loop) {
+    ECF_NAME_THIS_TEST();
+
+    InheritableDescriptors descriptors;
+    int observed = close_in_child(descriptors.all(), false);
+
+    BOOST_CHECK_MESSAGE(!(observed & leaked_descriptor), "A descriptor numbered 3 or above remained open");
+    BOOST_CHECK_MESSAGE(!(observed & lost_standard), "One of the descriptors 0, 1 and 2 was closed");
+    BOOST_CHECK_MESSAGE(!(observed & closed_by_syscall), "The close_range system call was used");
+}
+
+BOOST_AUTO_TEST_CASE(test_close_descriptors_by_default) {
+    ECF_NAME_THIS_TEST();
+
+    InheritableDescriptors descriptors;
+    int observed = close_in_child(descriptors.all(), true);
+
+    BOOST_CHECK_MESSAGE(!(observed & leaked_descriptor), "A descriptor numbered 3 or above remained open");
+    BOOST_CHECK_MESSAGE(!(observed & lost_standard), "One of the descriptors 0, 1 and 2 was closed");
+
+    // The system call is used wherever the running kernel offers it, and every descriptor number is closed in turn
+    // elsewhere
+    const bool expected = close_range_available();
+    BOOST_CHECK_MESSAGE(bool(observed & closed_by_syscall) == expected,
+                        "Expected the descriptors to be closed by " << (expected ? "close_range" : "the loop"));
+    BOOST_TEST_MESSAGE("The descriptors were closed by "
+                       << ((observed & closed_by_syscall) ? "the close_range system call" : "the loop"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
