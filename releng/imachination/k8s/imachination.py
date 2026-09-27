@@ -311,6 +311,31 @@ def wait_for_workloads(*names):
         die("One or more workloads did not become available.")
 
 
+def current_pods(workload=None):
+    """Returns the pods of the named workload, or of every workload when none is named, as pod/<name>."""
+    selector = ["-l", f"app={workload}"] if workload else []
+    process = RUN.query(
+        kubectl("get", "pods", *selector, "-n", NAMESPACE, "-o", "name"),
+        capture=True,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return [line for line in process.stdout.splitlines() if line]
+
+
+def wait_for_removal(pods):
+    """
+    Waits for the given pods to be deleted. A rollout is complete as soon as the new pods are ready, while the old
+    ones may still be stopping, and still receive connections through the node ports until the routing catches up;
+    waiting for their removal ensures that every connection that follows reaches the new pods.
+    """
+    if not pods:
+        return
+    timeout = os.environ.get("ROLLOUT_TIMEOUT", "300s")
+    info(f"Waiting for the replaced pods to stop (timeout {timeout})")
+    RUN.watch(kubectl("wait", "--for=delete", *pods, "-n", NAMESPACE, f"--timeout={timeout}"), quiet=True)
+
+
 ##
 # Command: 'cluster'
 ##
@@ -536,7 +561,8 @@ class RestartCmd:
 
     The ecFlow server reads server_environment.cfg only when it starts, and offers no command to reload
     ECF_PERMISSIONS, so that editing that file has no effect until the Pod is replaced. Only the workloads
-    restarted are waited for, so that the report does not name workloads that were left running.
+    restarted are waited for, so that the report does not name workloads that were left running, and the command
+    returns only once the replaced pods are gone.
     """
 
     def __init__(self, target=None):
@@ -554,13 +580,16 @@ class RestartCmd:
             )
             if exists.returncode != 0:
                 die(f"No such workload: {self.target}. Try '{PROG} status'.")
+            replaced = current_pods(self.target)
             info(f"Restarting deployment/{self.target}")
             RUN.change(kubectl("rollout", "restart", f"deployment/{self.target}", "-n", NAMESPACE))
             wait_for_workloads(self.target)
         else:
+            replaced = current_pods()
             info("Restarting every workload")
             RUN.change(kubectl("rollout", "restart", "deployment", "-n", NAMESPACE))
             wait_for_workloads()
+        wait_for_removal(replaced)
         if not RUN.dryrun:
             info("The stack is available.")
 
