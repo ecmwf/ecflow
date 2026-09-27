@@ -46,6 +46,7 @@ set(test_srcs
   test/TestSetState.cpp
   test/TestSpecificIssues.cpp
   test/TestSystem.cpp
+  test/TestSystemDescriptors.cpp
   test/TestTaskScriptGenerator.cpp
   test/TestTimeDependencies.cpp
   test/TestVariableGeneration.cpp
