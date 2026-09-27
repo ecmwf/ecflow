@@ -274,7 +274,8 @@ k8s/imachination.py provision --role user --dir <dir> --user mamb
 copies the content of `<dir>` into `/workspace`, merging into the directories that exist there, as `mamb`
 (by default, `$USER`), with the private key `<host>/mamb/id_ed25519` and the known host key of the sidecar in
 `<host>/known_hosts`; `<host>` is the directory given with `--host`, by default the directory `host/` beside
-`<dir>`. By hand:
+`<dir>`. Just after the ecFlow server Pod is replaced, the sidecar may be unreachable for a moment: `provision` waits
+up to 30 seconds for it to answer, and stops at once if it refuses the key. By hand:
 
 ```bash
 sftp -P 2222 -i <private key> -o IdentitiesOnly=yes mamb@localhost

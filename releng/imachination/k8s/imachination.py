@@ -54,6 +54,9 @@ IMAGES = {
     "eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev:latest": "SFTP_SOURCE",
 }
 
+# How long, in seconds, `provision --role user` waits for the SFTP sidecar to answer
+SFTP_WAIT = 30
+
 # The name under which the script is invoked
 PROG = pathlib.Path(sys.argv[0]).name
 
@@ -544,10 +547,29 @@ class ProvisionCmd:
             "-o", f"UserKnownHostsFile={known_hosts}",
             "-b", "-", f"{self.user}@{server}",
         ]
-        accepted = RUN.query(sftp, input="pwd\n", quiet=True, stderr=subprocess.DEVNULL, check=False)
-        if accepted.returncode != 0:
-            die(f"The SFTP sidecar at {server}:{port} does not accept the key of '{self.user}' ({key}): the "
-                "administrator provisions it with --role admin --target ecflow-sftp.")
+        # Just after the ecFlow server Pod is replaced, the node port may still route to no sidecar for a moment, and
+        # the connection is closed before any authentication: the check is repeated until a sidecar answers. It runs
+        # without -q, which would hide the refusal of the key; a refusal ends it at once, as sshd delays every client
+        # of the host after repeated failed logins
+        deadline = time.monotonic() + SFTP_WAIT
+        while True:
+            accepted = RUN.query(
+                [argument for argument in sftp if argument != "-q"],
+                input="pwd\n",
+                quiet=True,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            if accepted.returncode == 0:
+                break
+            if "Permission denied" in (accepted.stderr or ""):
+                die(f"The SFTP sidecar at {server}:{port} does not accept the key of '{self.user}' ({key}): the "
+                    "administrator provisions it with --role admin --target ecflow-sftp.")
+            if time.monotonic() >= deadline:
+                reason = (accepted.stderr or "").strip().splitlines()
+                die(f"The SFTP sidecar at {server}:{port} cannot be reached"
+                    + (f": {reason[0]}" if reason else "") + f". Try '{PROG} status'.")
+            time.sleep(1)
 
         info(f"Copying {directory} into the workspace, as {self.user}@{server}:{port}")
         # put -r merges into the directories that already exist in the workspace
