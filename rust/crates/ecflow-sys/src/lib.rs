@@ -483,8 +483,8 @@ mod ffi {
             path: &CxxString,
             file_contents: &[String],
         ) -> Result<()>;
-        /// Submit a job for the task from the given lines, or from its script without any, with the
-        /// variables' values; as an alias of the task when `alias`; run when `run`.
+        /// Submit the task with a job made from the given lines and the variables' values; or, with
+        /// `alias`, make an alias of the task from them, run when `run`.
         fn edit_script_submit(
             self: Pin<&mut Client>,
             path: &CxxString,

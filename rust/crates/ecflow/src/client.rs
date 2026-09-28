@@ -829,10 +829,10 @@ impl Client {
         Ok(self.inner.get_string().to_string())
     }
 
-    /// Submit a job for the task from the given lines, or from its script
-    /// when there are none, with these values for the variables it uses. As
-    /// an alias of the task when `alias`, so the task itself is untouched;
-    /// run at once when `run`.
+    /// Submit the task at once with a job made from the given lines and these
+    /// values for the variables it uses. With `alias`, the task is left alone
+    /// and an alias of it is made from the lines instead, run at once only
+    /// when `run`.
     pub fn edit_script_submit<V, N, W, I, S>(
         &mut self,
         path: &str,
