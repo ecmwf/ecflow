@@ -170,12 +170,9 @@ void UserCmd::setup_user_authentification() {
     }
 }
 
-void UserCmd::prompt_for_confirmation(const std::string& prompt) {
-    std::cout << prompt;
-    std::array<char, 256> reply;
-    std::cin.getline(reply.data(), reply.size());
-    if (reply[0] != 'y' && reply[0] != 'Y') {
-        exit(1);
+void UserCmd::require_confirmation(const AbstractClientEnv* ace, const ecf::Confirmation& what) {
+    if (!ace->confirm(what)) {
+        throw std::runtime_error(what.command + ": not confirmed. Add 'yes' to run the command without asking");
     }
 }
 

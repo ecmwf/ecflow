@@ -13,6 +13,7 @@
 #include "ecflow/base/cts/task/QueueCmd.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -999,6 +1000,89 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_check) {
             BOOST_CHECK_EQUAL(command.force(), false);
         });
     }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(T_Confirmation) // --delete, --halt, --shutdown, --terminate without 'yes'
+
+BOOST_AUTO_TEST_CASE(test_is_refused_without_a_handler_when_not_cli) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto& cl : {CommandLine::make_command_line("ecflow_client", "--delete", "/s1"),
+                           CommandLine::make_command_line("ecflow_client", "--delete", "_all_"),
+                           CommandLine::make_command_line("ecflow_client", "--halt"),
+                           CommandLine::make_command_line("ecflow_client", "--shutdown"),
+                           CommandLine::make_command_line("ecflow_client", "--terminate")}) {
+        ClientOptions options;
+        ClientEnvironment environment(false);
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_is_not_asked_when_given_yes) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto& cl : {CommandLine::make_command_line("ecflow_client", "--delete", "yes", "/s1"),
+                           CommandLine::make_command_line("ecflow_client", "--delete", "_all_", "yes"),
+                           CommandLine::make_command_line("ecflow_client", "--halt=yes"),
+                           CommandLine::make_command_line("ecflow_client", "--shutdown=yes"),
+                           CommandLine::make_command_line("ecflow_client", "--terminate=yes")}) {
+        ClientOptions options;
+        ClientEnvironment environment(false);
+        environment.set_confirmation_handler([](const ecf::Confirmation&) {
+            BOOST_FAIL("asked although 'yes' was given");
+            return false;
+        });
+        BOOST_CHECK(options.parse(cl, &environment));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_handler_is_asked_and_decides) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<ecf::Confirmation> asked;
+    ClientOptions options;
+    ClientEnvironment environment(false);
+    environment.set_confirmation_handler([&](const ecf::Confirmation& what) {
+        asked.push_back(what);
+        return what.command == "delete";
+    });
+
+    auto delete_cmd =
+        options.parse(CommandLine::make_command_line("ecflow_client", "--delete", "/s1", "/s2"), &environment);
+    BOOST_REQUIRE(dynamic_cast<DeleteCmd*>(delete_cmd.get()));
+    BOOST_CHECK_THROW(options.parse(CommandLine::make_command_line("ecflow_client", "--halt"), &environment),
+                      std::runtime_error);
+
+    BOOST_REQUIRE_EQUAL(asked.size(), static_cast<size_t>(2));
+    BOOST_CHECK_EQUAL(asked[0].command, "delete");
+    BOOST_REQUIRE_EQUAL(asked[0].paths.size(), static_cast<size_t>(2));
+    BOOST_CHECK_EQUAL(asked[0].paths[0], "/s1");
+    BOOST_CHECK_EQUAL(asked[0].paths[1], "/s2");
+    BOOST_CHECK_EQUAL(asked[0].prompt, "Are you sure want to delete nodes at paths:\n  /s1\n  /s2 ? ");
+    BOOST_CHECK_EQUAL(asked[1].command, "halt");
+    BOOST_CHECK(asked[1].paths.empty());
+    BOOST_CHECK_EQUAL(asked[1].prompt, "Are you sure you want to halt the server ? ");
+}
+
+BOOST_AUTO_TEST_CASE(test_deleting_all_suites_asks_without_paths) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<ecf::Confirmation> asked;
+    ClientOptions options;
+    ClientEnvironment environment(false);
+    environment.set_confirmation_handler([&](const ecf::Confirmation& what) {
+        asked.push_back(what);
+        return true;
+    });
+
+    auto cmd = options.parse(CommandLine::make_command_line("ecflow_client", "--delete", "_all_"), &environment);
+    BOOST_REQUIRE(dynamic_cast<DeleteCmd*>(cmd.get()));
+    BOOST_REQUIRE_EQUAL(asked.size(), static_cast<size_t>(1));
+    BOOST_CHECK_EQUAL(asked[0].command, "delete");
+    BOOST_CHECK(asked[0].paths.empty());
+    BOOST_CHECK_EQUAL(asked[0].prompt, "Are you sure you want to delete all the suites ? ");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

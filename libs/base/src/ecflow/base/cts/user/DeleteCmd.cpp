@@ -194,24 +194,24 @@ void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     }
 
     if (do_prompt) {
-        std::string confirm;
+        std::string prompt;
         if (paths.empty()) {
-            confirm = "Are you sure you want to delete all the suites ? ";
+            prompt = "Are you sure you want to delete all the suites ? ";
         }
         else {
-            confirm          = "Are you sure want to delete nodes at paths:\n";
+            prompt           = "Are you sure want to delete nodes at paths:\n";
             size_t path_size = paths.size();
             for (size_t i = 0; i < path_size; i++) {
-                confirm += "  " + paths[i];
+                prompt += "  " + paths[i];
                 if (i == path_size - 1) {
-                    confirm += " ? ";
+                    prompt += " ? ";
                 }
                 else {
-                    confirm += "\n";
+                    prompt += "\n";
                 }
             }
         }
-        prompt_for_confirmation(confirm);
+        require_confirmation(ac, ecf::Confirmation{theArg(), paths, prompt});
     }
 
     cmd = std::make_shared<DeleteCmd>(paths, force);

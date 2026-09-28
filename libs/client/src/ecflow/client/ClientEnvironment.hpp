@@ -4,6 +4,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
@@ -263,6 +264,17 @@ public:
      */
     void set_cli(bool f) override { cli_ = f; }
     bool get_cli() const override { return cli_; }
+
+    /**
+     * @brief Decides for the commands that ask before running, when given without `yes`.
+     *
+     * Without a handler, the command line interface asks on the terminal and library use refuses the command.
+     */
+    void set_confirmation_handler(std::function<bool(const ecf::Confirmation&)> handler) {
+        confirmation_handler_ = std::move(handler);
+    }
+    bool confirm(const ecf::Confirmation& what) const override;
+
     bool checkTaskPathAndPassword(std::string& errorMsg) const override;
     const std::string& task_path() const override { return task_path_; }
     int task_try_no() const override { return task_try_num_; }
@@ -353,7 +365,8 @@ private:
      */
     int host_vec_index_{0}; // index into host_vec;
 
-    bool cli_{false};    // Command Line Interface
+    bool cli_{false}; // Command Line Interface
+    std::function<bool(const ecf::Confirmation&)> confirmation_handler_;
     bool denied_{false}; // ECF_DENIED.If the server denies the communication, then the child command can be set to fail
                          // immediately
     bool no_ecf_{false}; // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone

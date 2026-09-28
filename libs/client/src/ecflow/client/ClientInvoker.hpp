@@ -106,6 +106,12 @@ public:
     void set_cli(bool f) { clientEnv_.set_cli(f); }
     bool cli() const { return clientEnv_.get_cli(); }
 
+    /// Decide for the commands that ask before running (delete, halt, shutdown, terminate) when given without 'yes'.
+    /// Without a handler, the command line interface asks on the terminal and library use refuses the command.
+    void set_confirmation_handler(std::function<bool(const ecf::Confirmation&)> handler) {
+        clientEnv_.set_confirmation_handler(std::move(handler));
+    }
+
 #ifdef ECF_OPENSSL
     /// Enable SSL if defined in the environment(ECF_SSL)
     void enable_ssl_if_defined() { clientEnv_.enable_ssl_if_defined(); }

@@ -548,15 +548,17 @@ void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
 
         std::string do_prompt = vm[theArg()].as<std::string>();
         if (do_prompt.empty()) {
+            std::string prompt;
             if (api_ == CtsCmd::HALT_SERVER) {
-                prompt_for_confirmation("Are you sure you want to halt the server ? ");
+                prompt = "Are you sure you want to halt the server ? ";
             }
             else if (api_ == CtsCmd::SHUTDOWN_SERVER) {
-                prompt_for_confirmation("Are you sure you want to shut down the server ? ");
+                prompt = "Are you sure you want to shut down the server ? ";
             }
             else {
-                prompt_for_confirmation("Are you sure you want to terminate the server ? ");
+                prompt = "Are you sure you want to terminate the server ? ";
             }
+            require_confirmation(ac, ecf::Confirmation{theArg(), {}, prompt});
         }
         else if (do_prompt != "yes") {
             throw std::runtime_error(

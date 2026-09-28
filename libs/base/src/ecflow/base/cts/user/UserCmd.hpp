@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 
@@ -27,8 +28,8 @@ protected:
     // bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
     // bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
 
-    /// Prompt the user for confirmation: If user responds with no, will exit client
-    static void prompt_for_confirmation(const std::string& prompt);
+    /// Ask the client environment before a command that needs confirmation; throws when refused
+    static void require_confirmation(const AbstractClientEnv* ace, const ecf::Confirmation& what);
 
     /// All user commands will be pre_fixed with "--" and post_fixed with :user@host
     void user_cmd(std::string& os, const std::string& the_cmd) const;

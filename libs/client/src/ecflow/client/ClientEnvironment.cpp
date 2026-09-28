@@ -38,6 +38,19 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     return os;
 }
 
+bool ClientEnvironment::confirm(const ecf::Confirmation& what) const {
+    if (confirmation_handler_) {
+        return confirmation_handler_(what);
+    }
+    if (!cli_) {
+        return false;
+    }
+    std::cout << what.prompt;
+    std::string reply;
+    std::getline(std::cin, reply);
+    return !reply.empty() && (reply[0] == 'y' || reply[0] == 'Y');
+}
+
 ClientEnvironment::ClientEnvironment(bool gui)
     : AbstractClientEnv(),
       timeout_(DEFAULT_TIMEOUT),

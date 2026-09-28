@@ -6,6 +6,22 @@
 #include <string>
 #include <vector>
 
+namespace ecf {
+
+///
+/// \brief What a command asks before it is created, where `ecflow_client` asks on the terminal
+///
+/// The commands are `--delete`, `--halt`, `--shutdown` and `--terminate`, when given without `yes`.
+///
+struct Confirmation
+{
+    std::string command;            // the command's name, e.g. "delete"
+    std::vector<std::string> paths; // the nodes a delete would remove; none means every suite
+    std::string prompt;             // the question `ecflow_client` prints
+};
+
+} // namespace ecf
+
 ///
 /// \brief This class is used to represent the client environment to the Commands
 ///
@@ -34,6 +50,10 @@ public:
 
     virtual void set_cli(bool f) = 0;
     virtual bool get_cli() const = 0;
+
+    /// Whether a command that asks before running may go ahead.
+    /// Called while the command is created, before anything is sent to the server.
+    virtual bool confirm(const ecf::Confirmation& what) const = 0;
 
     /// For all tasks/child based commands we require taskPath and password and optional Remote ID
     /// When the jobs use a queueing system the remote id (ECF_RID) is used to
