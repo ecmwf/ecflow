@@ -48,9 +48,6 @@ public:
     void enable_ssl();
     void disable_ssl();
 
-    /// Run any command given as `ecflow_client` command line arguments.
-    void invoke(rust::Slice<const rust::String> args) const;
-
     /// The base method takes `std::vector<std::string>`, which cxx cannot build from Rust.
     void delete_nodes(rust::Slice<const rust::String> paths, bool force) const;
 

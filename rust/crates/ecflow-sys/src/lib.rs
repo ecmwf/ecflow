@@ -7,7 +7,7 @@
 //! CXX bridge. Use the `ecflow` crate for a safe API.
 //!
 //! The `ignore` list holds the `ClientInvoker` methods without a bridge
-//! function; every command is reachable through `invoke`.
+//! function.
 
 use bindman::track_cpp_api;
 
@@ -17,7 +17,7 @@ use bindman::track_cpp_api;
     ignore = [
         // Environment and diagnosis
         "environment", "effective_protocol", "connection_diagnosis", "probe_protocol", "to_string",
-        "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli",
+        "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli", "invoke",
         "enable_ssl_if_defined", "get_certificate", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
         "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args", "is_not_retrying",
@@ -181,11 +181,6 @@ mod ffi {
         fn suites(self: &Client) -> Result<i32>;
         /// The string of the most recent reply, for commands that return one.
         fn get_string(self: &Client) -> &CxxString;
-
-        // Any command
-
-        /// Run any command given as `ecflow_client` command line arguments.
-        fn invoke(self: &Client, args: &[String]) -> Result<()>;
         /// The list of strings in the most recent reply, for commands that return one.
         fn reply_strings(self: &Client) -> Vec<String>;
 

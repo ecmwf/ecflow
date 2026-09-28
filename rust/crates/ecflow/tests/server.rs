@@ -126,7 +126,7 @@ fn round_trip() {
 
     // The server answered, so no transport failure is recorded.
     let error = client
-        .invoke(["--suspend=/no_such_suite"])
+        .delete_nodes(["/no_such_suite"], false)
         .expect_err("unknown path");
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");

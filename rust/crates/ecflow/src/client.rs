@@ -37,8 +37,6 @@ impl From<DefsStyle> for ecflow_sys::DefsStyle {
 /// retries, sleeping up to ten seconds between attempts by default, so async
 /// callers should run requests on a blocking thread.
 ///
-/// Commands without a typed method go through [`Client::invoke`].
-///
 /// # Example
 ///
 /// ```no_run
@@ -177,38 +175,6 @@ impl Client {
     pub fn suites(&mut self) -> Result<Vec<String>> {
         self.check(self.inner.suites())?;
         Ok(self.inner.reply_strings())
-    }
-
-    // ==================== Any command ====================
-
-    /// Run a command given as `ecflow_client` command line arguments, and
-    /// return the string reply, if the command has one.
-    ///
-    /// `--delete`, `--halt`, `--shutdown` and `--terminate` read a
-    /// confirmation from standard input unless followed by `yes`, and end the
-    /// process on any other answer; use the typed methods for those.
-    ///
-    /// ```no_run
-    /// # let mut client = ecflow::Client::with_host_port("localhost", 3141)?;
-    /// client.invoke(["--suspend=/suite/family"])?;
-    /// let log = client.invoke(["--log=get", "20"])?;
-    /// # Ok::<(), ecflow::Error>(())
-    /// ```
-    pub fn invoke<I, S>(&mut self, args: I) -> Result<String>
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
-    {
-        let args: Vec<String> = args.into_iter().map(|a| a.as_ref().to_owned()).collect();
-        self.check(self.inner.invoke(&args))?;
-        Ok(self.inner.get_string().to_string())
-    }
-
-    /// The list of strings in the most recent reply, for commands such as
-    /// `--suites` that return one.
-    #[must_use]
-    pub fn reply_strings(&self) -> Vec<String> {
-        self.inner.reply_strings()
     }
 
     // ==================== Server control ====================
