@@ -107,6 +107,9 @@ fn round_trip() {
 
     let file = server.home.path().join("rust_test.def");
     std::fs::write(&file, DEFS).expect("write defs file");
+    let script_dir = server.home.path().join("rust_test");
+    std::fs::create_dir_all(&script_dir).expect("script directory");
+    std::fs::write(script_dir.join("t1.ecf"), "echo %ECF_NAME%\n").expect("write script");
     let file = file.to_str().expect("utf-8 path");
     client.load_defs_file(file, true).expect("load defs file");
     client
@@ -151,12 +154,14 @@ fn round_trip() {
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");
 
+    // Suspended, the suite can be begun without the server submitting t1.
     node_commands(&mut client);
+    script_commands(&mut client);
+    client.resume(["/rust_test"]).expect("resume");
     server_commands(&mut client);
 }
 
-/// The node commands, on the suite while it is suspended: begun that way,
-/// the server does not submit t1, which has no script.
+/// The node commands on the suspended suite.
 fn node_commands(client: &mut Client) {
     client.suspend(["/rust_test"]).expect("suspend");
     let state = client.get_defs_text(DefsStyle::State).expect("get state");
@@ -214,11 +219,38 @@ fn node_commands(client: &mut Client) {
         .alter(["/rust_test"], "change", "variable", "FOO", "baz")
         .expect("alter again");
     assert!(client.news_local().expect("news after alter"));
-    let error = client
+    let script = client
         .get_file("/rust_test/t1", "script", 100)
-        .expect_err("no script");
-    assert_eq!(error.failure(), Failure::None, "{error}");
-    client.resume(["/rust_test"]).expect("resume");
+        .expect("script");
+    assert!(script.contains("%ECF_NAME%"), "{script}");
+}
+
+/// The script commands on t1, whose script echoes its own path, and the
+/// zombie listing, which is empty.
+fn script_commands(client: &mut Client) {
+    let editable = client
+        .edit_script_edit("/rust_test/t1")
+        .expect("script to edit");
+    assert!(editable.contains("ECF_NAME"), "{editable}");
+    let none: [&str; 0] = [];
+    let script = client
+        .edit_script_preprocess("/rust_test/t1", none)
+        .expect("preprocess script");
+    assert!(script.contains("echo %ECF_NAME%"), "{script}");
+    let script = client
+        .edit_script_preprocess("/rust_test/t1", ["echo %ECF_NAME% edited"])
+        .expect("preprocess lines");
+    assert!(script.contains("echo /rust_test/t1 edited"), "{script}");
+    client
+        .edit_script_submit(
+            "/rust_test/t1",
+            [("ECF_TRIES", "1")],
+            ["echo %ECF_NAME%"],
+            false,
+            false,
+        )
+        .expect("submit lines without running");
+    assert!(client.zombie_get().expect("zombies").is_empty());
 }
 
 /// The log and server commands, then the deletion of everything.

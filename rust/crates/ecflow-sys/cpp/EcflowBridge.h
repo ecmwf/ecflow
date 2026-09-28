@@ -19,6 +19,8 @@
 namespace ecflow_bridge {
 
 struct HandleSuites;
+struct NameValue;
+struct Zombie;
 
 /// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
 using DefsStyle = ::PrintStyle::Type_t;
@@ -95,6 +97,17 @@ public:
 
     /// The registered handles and their suites, from the most recent `ch_suites` reply.
     rust::Vec<HandleSuites> client_handle_suites() const;
+
+    /// The zombies of the most recent `zombieGet` reply.
+    rust::Vec<Zombie> zombies() const;
+
+    /// The base methods take `NameValueVec` and `std::vector<std::string>`, which cxx cannot build from Rust.
+    void edit_script_preprocess(const std::string& path, rust::Slice<const rust::String> file_contents);
+    void edit_script_submit(const std::string& path,
+                            rust::Slice<const NameValue> used_variables,
+                            rust::Slice<const rust::String> file_contents,
+                            bool alias,
+                            bool run);
 
     /// The list of strings in the most recent reply, for commands that return one.
     rust::Vec<rust::String> reply_strings() const;
