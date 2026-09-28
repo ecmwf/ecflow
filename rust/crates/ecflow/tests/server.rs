@@ -11,7 +11,7 @@ use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use ecflow::{Client, DefsStyle, Failure};
+use ecflow::{Client, Confirmation, DefsStyle, Failure};
 
 struct Server {
     process: Child,
@@ -133,10 +133,25 @@ fn round_trip() {
 
     client.halt_server().expect("halt");
     client.restart_server().expect("restart");
+
+    // Without a terminal the commands that ask are refused, unless confirmed.
+    let error = client.invoke(["--delete=_all_"]).expect_err("would ask");
+    assert!(error.message().contains("not confirmed"), "{error}");
+    let declined = client
+        .confirming(|_| false)
+        .delete_all(true)
+        .expect("declined delete");
+    assert!(declined.is_none());
+    assert_eq!(client.suites().expect("suites"), ["rust_test"]);
+
     client
         .delete_nodes(["/rust_test/t1"], true)
         .expect("delete node");
-    client.delete_all(true).expect("delete all");
+    let done = client
+        .confirming(|what| *what == Confirmation::DeleteAll)
+        .invoke(["--delete=_all_"])
+        .expect("confirmed delete");
+    assert!(done.is_some());
     assert!(client.suites().expect("suites").is_empty());
 }
 

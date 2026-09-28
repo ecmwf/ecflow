@@ -6,7 +6,9 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 
+#include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -14,6 +16,8 @@
 #include "rust/cxx.h"
 
 namespace ecflow_bridge {
+
+struct Question;
 
 /// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
 using DefsStyle = ::PrintStyle::Type_t;
@@ -48,8 +52,21 @@ public:
     void enable_ssl();
     void disable_ssl();
 
-    /// Run any command given as `ecflow_client` command line arguments.
+    /// Run any command given as `ecflow_client` command line arguments. A
+    /// command that asks before running is refused unless its question was
+    /// approved.
     void invoke(rust::Slice<const rust::String> args) const;
+
+    /// The questions the last command asked before running, in order, and
+    /// whether each had been approved; a command stops at the first one that
+    /// had not.
+    rust::Vec<Question> questions() const;
+
+    /// Answer yes when a command asks this question again.
+    void approve(const Question& question);
+
+    /// Forget the approvals.
+    void forget_approvals();
 
     /// The base method takes `std::vector<std::string>`, which cxx cannot build from Rust.
     void delete_nodes(rust::Slice<const rust::String> paths, bool force) const;
@@ -74,6 +91,19 @@ public:
 private:
     Client();
     Client(rust::Str host, rust::Str port);
+
+    /// Record every question a command asks, answering yes to the approved ones.
+    void record_questions();
+
+    /// A question asked, and whether it had been approved.
+    struct Asked
+    {
+        ecf::Confirmation what;
+        bool approved;
+    };
+
+    mutable std::vector<Asked> questions_; // recorded during invoke, which is const as in the base class
+    std::vector<ecf::Confirmation> approved_;
 };
 
 } // namespace ecflow_bridge

@@ -3,6 +3,7 @@
 
 #include "EcflowBridge.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <stdexcept>
@@ -33,11 +34,23 @@ void enable_ssl_from_environment(ClientInvoker& client) {
 Client::Client()
     : ClientInvoker() {
     enable_ssl_from_environment(*this);
+    record_questions();
 }
 
 Client::Client(rust::Str host, rust::Str port)
     : ClientInvoker(std::string(host), std::string(port)) {
     enable_ssl_from_environment(*this);
+    record_questions();
+}
+
+void Client::record_questions() {
+    set_confirmation_handler([this](const ecf::Confirmation& what) {
+        const bool approved = std::any_of(approved_.begin(), approved_.end(), [&what](const ecf::Confirmation& it) {
+            return it.command == what.command && it.paths == what.paths;
+        });
+        questions_.push_back(Asked{what, approved});
+        return approved;
+    });
 }
 
 std::unique_ptr<Client> Client::create() {
@@ -93,6 +106,7 @@ void Client::disable_ssl() {
 }
 
 void Client::invoke(rust::Slice<const rust::String> args) const {
+    questions_.clear();
     std::vector<std::string> argv;
     argv.reserve(args.size() + 1);
     argv.emplace_back("ecflow_client"); // argv[0], as the command line parser expects
@@ -145,6 +159,33 @@ ecf::ConnectionFailure Client::last_failure() const {
 
 uint64_t Client::round_trip_time() const {
     return static_cast<uint64_t>(ClientInvoker::round_trip_time().total_microseconds());
+}
+
+rust::Vec<Question> Client::questions() const {
+    rust::Vec<Question> result;
+    for (const auto& asked : questions_) {
+        Question question;
+        question.command = rust::String(asked.what.command);
+        for (const auto& path : asked.what.paths) {
+            question.paths.push_back(rust::String(path));
+        }
+        question.approved = asked.approved;
+        result.push_back(std::move(question));
+    }
+    return result;
+}
+
+void Client::approve(const Question& question) {
+    ecf::Confirmation what;
+    what.command = std::string(question.command);
+    for (const auto& path : question.paths) {
+        what.paths.emplace_back(std::string(path));
+    }
+    approved_.push_back(std::move(what));
+}
+
+void Client::forget_approvals() {
+    approved_.clear();
 }
 
 } // namespace ecflow_bridge

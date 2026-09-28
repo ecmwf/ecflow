@@ -5,8 +5,9 @@
 
 use std::time::Duration;
 
-use ecflow_sys::{Exception, let_cxx_string};
+use ecflow_sys::{Exception, Question, let_cxx_string};
 
+use crate::confirm::{Confirmation, Confirming};
 use crate::error::{Error, Failure, Result};
 
 /// Print style of a definition returned as text.
@@ -184,9 +185,10 @@ impl Client {
     /// Run a command given as `ecflow_client` command line arguments, and
     /// return the string reply, if the command has one.
     ///
-    /// `--delete`, `--halt`, `--shutdown` and `--terminate` read a
-    /// confirmation from standard input unless followed by `yes`, and end the
-    /// process on any other answer; use the typed methods for those.
+    /// `ecflow_client` asks on the terminal before `--delete`, `--halt`,
+    /// `--shutdown` and `--terminate` unless given `yes`; here those fail
+    /// instead, since there is no terminal. Add the `yes`, use the typed
+    /// methods, or decide through [`Client::confirming`].
     ///
     /// ```no_run
     /// # let mut client = ecflow::Client::with_host_port("localhost", 3141)?;
@@ -200,8 +202,60 @@ impl Client {
         S: AsRef<str>,
     {
         let args: Vec<String> = args.into_iter().map(|a| a.as_ref().to_owned()).collect();
-        self.check(self.inner.invoke(&args))?;
+        self.invoke_words(&args)
+    }
+
+    /// Run command line words as they are.
+    pub(crate) fn invoke_words(&self, args: &[String]) -> Result<String> {
+        self.check(self.inner.invoke(args))?;
         Ok(self.inner.get_string().to_string())
+    }
+
+    /// The question the last command was refused on, if it was.
+    pub(crate) fn refused_question(&self) -> Option<Question> {
+        self.inner
+            .questions()
+            .into_iter()
+            .find(|question| !question.approved)
+    }
+
+    /// Answer yes when a command asks this question again.
+    pub(crate) fn approve(&mut self, question: &Question) {
+        self.inner.pin_mut().approve(question);
+    }
+
+    /// Forget the approvals.
+    pub(crate) fn forget_approvals(&mut self) {
+        self.inner.pin_mut().forget_approvals();
+    }
+
+    /// A view of the client that asks `confirm` before a command
+    /// `ecflow_client` would confirm on the terminal. The answer decides
+    /// whether the command is sent: `Ok(None)` means it was not.
+    ///
+    /// ```no_run
+    /// use std::io::{self, Write};
+    ///
+    /// # let mut client = ecflow::Client::with_host_port("localhost", 3141)?;
+    /// let mut confirming = client.confirming(|what| {
+    ///     print!("{what} [y/N] ");
+    ///     io::stdout().flush().ok();
+    ///     let mut answer = String::new();
+    ///     io::stdin().read_line(&mut answer).ok();
+    ///     answer.trim().eq_ignore_ascii_case("y")
+    /// });
+    /// if confirming.delete_nodes(["/suite/family"], false)?.is_none() {
+    ///     println!("kept");
+    /// }
+    /// confirming.invoke(["--halt"])?;
+    /// # Ok::<(), ecflow::Error>(())
+    /// ```
+    #[must_use]
+    pub const fn confirming<F: FnMut(&Confirmation) -> bool>(
+        &mut self,
+        confirm: F,
+    ) -> Confirming<'_, F> {
+        Confirming::new(self, confirm)
     }
 
     /// The list of strings in the most recent reply, for commands such as
@@ -242,13 +296,20 @@ impl Client {
     // ==================== Nodes ====================
 
     /// Delete the nodes at the given paths. With `force`, even when they are
-    /// active or submitted.
+    /// active or submitted. Fails without paths: [`Client::delete_all`]
+    /// deletes every suite.
     pub fn delete_nodes<I, S>(&mut self, paths: I, force: bool) -> Result<()>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
         let paths: Vec<String> = paths.into_iter().map(|p| p.as_ref().to_owned()).collect();
+        if paths.is_empty() {
+            return Err(Error::new(
+                Failure::None,
+                "No paths given; delete_all deletes every suite.",
+            ));
+        }
         self.check(self.inner.delete_nodes(&paths, force))
     }
 

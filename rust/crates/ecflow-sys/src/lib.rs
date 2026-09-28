@@ -17,7 +17,7 @@ use bindman::track_cpp_api;
     ignore = [
         // Environment and diagnosis
         "environment", "effective_protocol", "connection_diagnosis", "probe_protocol", "to_string",
-        "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli",
+        "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli", "set_confirmation_handler",
         "enable_ssl_if_defined", "get_certificate", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
         "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args", "is_not_retrying",
@@ -100,6 +100,19 @@ mod ffi {
         Net,
     }
 
+    /// A question a command asked before running, where `ecflow_client`
+    /// asks on the terminal.
+    #[namespace = "ecflow_bridge"]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct Question {
+        /// The command's name: `delete`, `halt`, `shutdown` or `terminate`.
+        command: String,
+        /// The nodes a delete would remove; none means every suite.
+        paths: Vec<String>,
+        /// Whether the answer was yes, from an earlier approval.
+        approved: bool,
+    }
+
     unsafe extern "C++" {
         include!("EcflowBridge.h");
 
@@ -166,6 +179,15 @@ mod ffi {
         fn debug(self: Pin<&mut Client>, flag: bool);
         /// The failure class of the most recent request.
         fn last_failure(self: &Client) -> ConnectionFailure;
+        /// The questions the last command asked before running, in order,
+        /// and whether each had been approved; a command stops at the first
+        /// one that had not.
+        #[must_use]
+        fn questions(self: &Client) -> Vec<Question>;
+        /// Answer yes when a command asks this question again.
+        fn approve(self: Pin<&mut Client>, question: &Question);
+        /// Forget the approvals.
+        fn forget_approvals(self: Pin<&mut Client>);
         /// The round trip time of the most recent request, in microseconds.
         fn round_trip_time(self: &Client) -> u64;
 
