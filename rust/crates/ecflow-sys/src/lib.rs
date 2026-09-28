@@ -148,6 +148,34 @@ mod ffi {
         Undefined,
     }
 
+    /// The state of a node.
+    ///
+    /// Declared as the existing `NState::State` (aliased in the bridge
+    /// header), so cxx verifies at compile time that each discriminant
+    /// matches the C++ enum.
+    #[namespace = "ecflow_bridge"]
+    #[repr(i32)]
+    enum NodeState {
+        /// Not yet begun.
+        #[cxx_name = "UNKNOWN"]
+        Unknown,
+        /// Finished.
+        #[cxx_name = "COMPLETE"]
+        Complete,
+        /// Waiting for its dependencies.
+        #[cxx_name = "QUEUED"]
+        Queued,
+        /// Failed.
+        #[cxx_name = "ABORTED"]
+        Aborted,
+        /// Handed to the job submission command.
+        #[cxx_name = "SUBMITTED"]
+        Submitted,
+        /// Running.
+        #[cxx_name = "ACTIVE"]
+        Active,
+    }
+
     unsafe extern "C++" {
         include!("EcflowBridge.h");
 
@@ -163,6 +191,7 @@ mod ffi {
         type DefsStyle;
         type NodeOrder;
         type CheckPtMode;
+        type NodeState;
 
         /// The ecFlow client: a `ClientInvoker`, every request in its
         /// throw-on-error mode.
@@ -290,14 +319,16 @@ mod ffi {
         fn archive(self: &Client, paths: &[String], force: bool) -> Result<()>;
         /// Load archived children back into the definition.
         fn restore(self: &Client, paths: &[String]) -> Result<()>;
-        /// Force the nodes to a state, or set or clear an event.
+        /// Force the nodes to a state.
         fn force(
             self: &Client,
             paths: &[String],
-            state_or_event: &CxxString,
+            state: NodeState,
             recursive: bool,
             set_repeats_to_last_value: bool,
         ) -> Result<()>;
+        /// Set or clear the events given as `path:event`.
+        fn force_event(self: &Client, paths: &[String], set: bool) -> Result<()>;
         /// Free the chosen dependencies of the nodes.
         #[allow(clippy::fn_params_excessive_bools)]
         fn freeDep(
