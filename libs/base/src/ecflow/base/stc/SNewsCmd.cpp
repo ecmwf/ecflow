@@ -26,6 +26,7 @@ NewsOutcome evaluate_news(unsigned int client_handle,
                           unsigned int client_state_change_no,
                           unsigned int client_modify_change_no,
                           const ClientSuiteMgr& client_suite_mgr) {
+    /// This method assumes that all users see the same content !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // =====================================================================================
     // The code to determine changes here must also relate to SSyncCmd
