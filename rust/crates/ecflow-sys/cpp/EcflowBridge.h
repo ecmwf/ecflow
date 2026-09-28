@@ -11,6 +11,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/NOrder.hpp"
+#include "ecflow/core/NState.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "rust/cxx.h"
@@ -25,6 +26,9 @@ using NodeOrder = ::NOrder::Order;
 
 /// When the server writes its check point file; the bridge binds it as an enum of this namespace.
 using CheckPtMode = ::ecf::CheckPt::Mode;
+
+/// The state of a node; the bridge binds it as an enum of this namespace.
+using NodeState = ::NState::State;
 
 /// A `ClientInvoker` with the members cxx cannot bind on the base class:
 /// constructors, `std::chrono` arguments, `ECF_OPENSSL` guards, argument
@@ -67,10 +71,9 @@ public:
     void check(rust::Slice<const rust::String> paths) const;
     void archive(rust::Slice<const rust::String> paths, bool force) const;
     void restore(rust::Slice<const rust::String> paths) const;
-    void force(rust::Slice<const rust::String> paths,
-               const std::string& state_or_event,
-               bool recursive,
-               bool set_repeats_to_last_value) const;
+    void
+    force(rust::Slice<const rust::String> paths, NodeState state, bool recursive, bool set_repeats_to_last_value) const;
+    void force_event(rust::Slice<const rust::String> paths, bool set) const;
     void freeDep(rust::Slice<const rust::String> paths, bool trigger, bool all, bool date, bool time) const;
     void alter(rust::Slice<const rust::String> paths,
                const std::string& alter_type,
