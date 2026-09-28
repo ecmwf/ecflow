@@ -9,7 +9,6 @@ header = """
 
 [package]
 name = "ecflow"
-prefix = "ecflow"
 repo = "ecmwf/ecflow"
 visibility = "public"
 compiler-inputs = ["cxx-compiler"]
