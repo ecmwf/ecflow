@@ -29,10 +29,9 @@ use bindman::track_cpp_api;
         // User commands
         "sync", "news", "wait_for_server_death",
         "server_load", "stats_server", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove", "ch1_auto_add",
-        "zombieGet", "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
+        "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
-        "delete_node", "group", "forceDependencyEval", "edit_script", "edit_script_edit",
-        "edit_script_preprocess", "edit_script_submit",
+        "delete_node", "group", "forceDependencyEval", "edit_script",
     ]
 )]
 #[cxx::bridge]
@@ -180,6 +179,52 @@ mod ffi {
         handle: i32,
         /// The names of its suites.
         suites: Vec<String>,
+    }
+
+    /// A variable name and its value.
+    #[namespace = "ecflow_bridge"]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct NameValue {
+        /// The name.
+        name: String,
+        /// The value.
+        value: String,
+    }
+
+    /// A zombie: a job whose child commands the server does not match to its
+    /// task, because the task was requeued, the password or process differ,
+    /// or the path is gone.
+    #[namespace = "ecflow_bridge"]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct Zombie {
+        /// The path of the task.
+        path: String,
+        /// The kind: `user`, `ecf`, `path`, `ecf_pid`, `ecf_passwd` or `ecf_pid_passwd`.
+        kind: String,
+        /// The process or remote id the job reported.
+        process_or_remote_id: String,
+        /// The job password the job reported.
+        password: String,
+        /// The host the job runs on.
+        host: String,
+        /// The try number the job reported.
+        try_no: i32,
+        /// The last child command the job sent.
+        last_child_cmd: String,
+        /// How many times its child commands have called.
+        calls: i32,
+        /// Seconds since the zombie was first seen.
+        duration: i32,
+        /// Seconds after which the server drops it.
+        allowed_age: i32,
+        /// What the server does with its child commands: `fob`, `fail`, `adopt`, `block`, `remove` or `kill`.
+        user_action: String,
+        /// Whether a user chose that action, rather than the task's zombie attribute.
+        manual_user_action: bool,
+        /// The user command that created it, when one did.
+        user_cmd: String,
+        /// Why the server thinks it is a zombie.
+        explanation: String,
     }
 
     unsafe extern "C++" {
@@ -422,6 +467,32 @@ mod ffi {
         fn zombieRemoveCliPaths(self: &Client, paths: &[String]) -> Result<()>;
         /// Kill the zombie processes at these paths with `ECF_KILL_CMD`.
         fn zombieKillCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Ask for the server's zombies; they are in `zombies`.
+        fn zombieGet(self: &Client) -> Result<i32>;
+        /// The zombies of the most recent `zombieGet` reply.
+        fn zombies(self: &Client) -> Vec<Zombie>;
+
+        // Scripts
+
+        /// Ask for the task's script for editing; it is in `get_string`.
+        fn edit_script_edit(self: Pin<&mut Client>, path: &CxxString) -> Result<i32>;
+        /// Ask for the task's script with includes expanded, or the given lines fully pre-processed; the
+        /// result is in `get_string`.
+        fn edit_script_preprocess(
+            self: Pin<&mut Client>,
+            path: &CxxString,
+            file_contents: &[String],
+        ) -> Result<()>;
+        /// Submit a job for the task from the given lines, or from its script without any, with the
+        /// variables' values; as an alias of the task when `alias`; run when `run`.
+        fn edit_script_submit(
+            self: Pin<&mut Client>,
+            path: &CxxString,
+            used_variables: &[NameValue],
+            file_contents: &[String],
+            alias: bool,
+            run: bool,
+        ) -> Result<()>;
 
         // Client handles
 

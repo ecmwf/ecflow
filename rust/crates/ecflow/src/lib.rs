@@ -21,4 +21,5 @@ pub mod client;
 pub mod error;
 
 pub use client::{CheckPtMode, Client, DefsStyle, NodeOrder, NodeState, ssl_supported, version};
+pub use ecflow_sys::Zombie;
 pub use error::{Error, Failure, Result};

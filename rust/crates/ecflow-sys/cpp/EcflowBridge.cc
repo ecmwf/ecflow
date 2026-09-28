@@ -11,6 +11,8 @@
 
 #include "ecflow-sys/src/lib.rs.h"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/core/Child.hpp"
 #include "ecflow/core/Version.hpp"
 
 namespace ecflow_bridge {
@@ -204,6 +206,54 @@ void Client::ch_add(int client_handle, rust::Slice<const rust::String> suites) c
 
 void Client::ch_remove(int client_handle, rust::Slice<const rust::String> suites) const {
     ClientInvoker::ch_remove(client_handle, strings(suites));
+}
+
+rust::Vec<Zombie> Client::zombies() const {
+    rust::Vec<Zombie> result;
+    for (const auto& zombie : server_reply().zombies()) {
+        Zombie item;
+        item.path                 = rust::String(zombie.path_to_task());
+        item.kind                 = rust::String(zombie.type_str());
+        item.process_or_remote_id = rust::String(zombie.process_or_remote_id());
+        item.password             = rust::String(zombie.jobs_password());
+        item.host                 = rust::String(zombie.host());
+        item.try_no               = zombie.try_no();
+        item.last_child_cmd       = rust::String(ecf::Child::to_string(zombie.last_child_cmd()));
+        item.calls                = zombie.calls();
+        item.duration             = zombie.duration();
+        item.allowed_age          = zombie.allowed_age();
+        item.user_action          = rust::String(zombie.user_action_str());
+        item.manual_user_action   = zombie.manual_user_action();
+        item.user_cmd             = rust::String(zombie.user_cmd());
+        item.explanation          = rust::String(zombie.explanation());
+        result.push_back(std::move(item));
+    }
+    return result;
+}
+
+void Client::edit_script_preprocess(const std::string& path, rust::Slice<const rust::String> file_contents) {
+    if (file_contents.empty()) {
+        ClientInvoker::edit_script_preprocess(path);
+        return;
+    }
+    ClientInvoker::edit_script_preprocess(path, strings(file_contents));
+}
+
+void Client::edit_script_submit(const std::string& path,
+                                rust::Slice<const NameValue> used_variables,
+                                rust::Slice<const rust::String> file_contents,
+                                bool alias,
+                                bool run) {
+    NameValueVec variables;
+    variables.reserve(used_variables.size());
+    for (const auto& variable : used_variables) {
+        variables.emplace_back(std::string(variable.name), std::string(variable.value));
+    }
+    if (file_contents.empty()) {
+        ClientInvoker::edit_script_submit(path, variables);
+        return;
+    }
+    ClientInvoker::edit_script_submit(path, variables, strings(file_contents), alias, run);
 }
 
 rust::Vec<HandleSuites> Client::client_handle_suites() const {
