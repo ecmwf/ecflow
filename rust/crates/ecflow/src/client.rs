@@ -5,7 +5,7 @@
 
 use std::time::Duration;
 
-use ecflow_sys::{Exception, let_cxx_string};
+use ecflow_sys::{Exception, NameValue, Zombie, let_cxx_string};
 
 use crate::error::{Error, Failure, Result};
 
@@ -792,6 +792,78 @@ impl Client {
         S: AsRef<str>,
     {
         self.diagnose(self.inner.zombieKillCliPaths(&strings(paths)))
+    }
+
+    /// The zombies the server knows about.
+    pub fn zombie_get(&mut self) -> Result<Vec<Zombie>> {
+        self.diagnose(self.inner.zombieGet())?;
+        Ok(self.inner.zombies())
+    }
+
+    // ==================== Scripts ====================
+
+    /// The task's script for editing, with the variables it uses listed in
+    /// a leading comment block.
+    pub fn edit_script_edit(&mut self, path: &str) -> Result<String> {
+        let_cxx_string!(path = path);
+        let result = self.inner.pin_mut().edit_script_edit(&path);
+        self.diagnose(result)?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Without lines, the task's script with its `%include`s expanded and
+    /// the variables it uses listed at the top, still unsubstituted. With
+    /// lines, those instead, fully pre-processed: includes expanded,
+    /// variables substituted, comment and manual sections removed.
+    pub fn edit_script_preprocess<I, S>(&mut self, path: &str, file_contents: I) -> Result<String>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(path = path);
+        let result = self
+            .inner
+            .pin_mut()
+            .edit_script_preprocess(&path, &strings(file_contents));
+        self.diagnose(result)?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Submit a job for the task from the given lines, or from its script
+    /// when there are none, with these values for the variables it uses. As
+    /// an alias of the task when `alias`, so the task itself is untouched;
+    /// run at once when `run`.
+    pub fn edit_script_submit<V, N, W, I, S>(
+        &mut self,
+        path: &str,
+        used_variables: V,
+        file_contents: I,
+        alias: bool,
+        run: bool,
+    ) -> Result<()>
+    where
+        V: IntoIterator<Item = (N, W)>,
+        N: AsRef<str>,
+        W: AsRef<str>,
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(path = path);
+        let used_variables: Vec<NameValue> = used_variables
+            .into_iter()
+            .map(|(name, value)| NameValue {
+                name: name.as_ref().to_owned(),
+                value: value.as_ref().to_owned(),
+            })
+            .collect();
+        let result = self.inner.pin_mut().edit_script_submit(
+            &path,
+            &used_variables,
+            &strings(file_contents),
+            alias,
+            run,
+        );
+        self.diagnose(result)
     }
 
     // ==================== Client handles ====================
