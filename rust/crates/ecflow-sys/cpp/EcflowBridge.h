@@ -103,8 +103,11 @@ public:
     rust::String
     child_queue(const std::string& queue, const std::string& action, const std::string& step, const std::string& path);
 
-    /// Fetch the server's definitions and write them as text.
+    /// Write the definition the client holds as text.
     rust::String defs_text(DefsStyle style) const;
+
+    /// The base method returns `std::string` by value, which cxx cannot bind.
+    rust::String get_certificate() const;
 
     /// The failure class of the most recent request.
     ecf::ConnectionFailure last_failure() const;

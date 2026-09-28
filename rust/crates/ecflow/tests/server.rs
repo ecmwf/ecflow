@@ -16,7 +16,7 @@ use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder, NodeState};
 struct Server {
     process: Child,
     port: u16,
-    _home: tempfile::TempDir,
+    home: tempfile::TempDir,
 }
 
 impl Server {
@@ -36,7 +36,7 @@ impl Server {
         Some(Self {
             process,
             port,
-            _home: home,
+            home,
         })
     }
 
@@ -104,6 +104,26 @@ fn round_trip() {
     client.load_defs_text(DEFS, true).expect("load defs");
     let defs = client.get_defs_text(DefsStyle::Defs).expect("get defs");
     assert!(defs.contains("suite rust_test"), "{defs}");
+
+    let file = server.home.path().join("rust_test.def");
+    std::fs::write(&file, DEFS).expect("write defs file");
+    let file = file.to_str().expect("utf-8 path");
+    client.load_defs_file(file, true).expect("load defs file");
+    client
+        .replace_file("/rust_test/t1", file, true, true)
+        .expect("replace from file");
+
+    client.sync_local(false).expect("sync");
+    assert!(client.in_sync());
+    assert!(!client.news_local().expect("news"));
+    let held = client.defs_text(DefsStyle::Defs).expect("held defs");
+    assert!(held.contains("suite rust_test"), "{held}");
+    client.set_auto_sync(true);
+    assert!(client.is_auto_sync_enabled());
+    client.set_auto_sync(false);
+    client.reset();
+    assert!(client.defs_text(DefsStyle::Defs).is_err());
+    assert!(client.wait_for_server_reply(Duration::from_secs(5)));
 
     assert_eq!(client.suites().expect("suites"), ["rust_test"]);
 
@@ -185,6 +205,15 @@ fn node_commands(client: &mut Client) {
     client
         .sort_attributes(["/rust_test"], "variable", true)
         .expect("sort attributes");
+    client.sync_local(false).expect("sync");
+    assert!(client.in_sync());
+    let held = client.defs_text(DefsStyle::Defs).expect("held defs");
+    assert!(held.contains("FOO"), "{held}");
+    assert!(!client.news_local().expect("news after sync"));
+    client
+        .alter(["/rust_test"], "change", "variable", "FOO", "baz")
+        .expect("alter again");
+    assert!(client.news_local().expect("news after alter"));
     let error = client
         .get_file("/rust_test/t1", "script", 100)
         .expect_err("no script");
