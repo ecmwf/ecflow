@@ -17,18 +17,17 @@ use bindman::track_cpp_api;
     ignore = [
         // Environment and diagnosis
         "environment", "effective_protocol", "connection_diagnosis", "probe_protocol", "to_string",
-        "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli", "invoke",
-        "enable_ssl_if_defined", "get_certificate", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
-        "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
-        "in_sync", "get_news", "errorMsg", "get_cmd_from_args", "is_not_retrying",
-        "load_in_memory_defs", "loadDefs", "client_env_host_port", "check_child_parameters",
+        "set_throw_on_error", "set_cli", "cli", "invoke",
+        "enable_ssl_if_defined", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
+        "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "server_reply",
+        "errorMsg", "get_cmd_from_args", "is_not_retrying",
+        "load_in_memory_defs", "client_env_host_port", "check_child_parameters",
         // Task commands taking their arguments from the environment
         "initTask", "abortTask", "eventTask", "meterTask", "labelTask", "waitTask", "queueTask", "completeTask",
         "set_child_host_file", "set_child_denied", "set_child_no_ecf", "set_child_init_add_vars",
         "set_child_complete_del_vars",
         // User commands
-        "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
-        "wait_for_server_death",
+        "sync", "news", "wait_for_server_death",
         "server_load", "stats_server", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove", "ch1_auto_add",
         "zombieGet", "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
@@ -248,6 +247,10 @@ mod ffi {
         fn set_retry_connection_period(self: Pin<&mut Client>, milliseconds: u64);
         /// Number of connection attempts per host before giving up.
         fn set_connection_attempts(self: Pin<&mut Client>, attempts: u32);
+        /// Whether the server answers a ping within the timeout, in seconds.
+        fn wait_for_server_reply(self: &Client, time_out: i32) -> bool;
+        /// The path of the certificate used for SSL; fails when built without the `ssl` feature.
+        fn get_certificate(self: &Client) -> Result<String>;
         /// Print each request and its round trip time to standard output.
         fn debug(self: Pin<&mut Client>, flag: bool);
         /// The failure class of the most recent request.
@@ -493,12 +496,48 @@ mod ffi {
 
         // Definitions
 
-        /// Fetch the server's definitions; they are then in `defs`.
+        /// Fetch the whole definition from the server; it is then in `defs`.
         fn getDefs(self: &Client) -> Result<i32>;
-        /// The definitions of the most recent reply.
+        /// Bring the held definition up to date with the server's changes, or fetch it whole when
+        /// there is none; with `sync_suite_clock`, the suite clocks too.
+        fn sync_local(self: &Client, sync_suite_clock: bool) -> Result<i32>;
+        /// Whether the held definition is in sync with the server, as of the last `sync_local`.
+        fn in_sync(self: &Client) -> bool;
+        /// The paths of the nodes the last `sync_local` changed.
+        fn changed_node_paths(self: &Client) -> &CxxVector<CxxString>;
+        /// Ask whether the server has changes the held definition lacks; the answer is in `get_news`.
+        fn news_local(self: &Client) -> Result<i32>;
+        /// The answer of the last `news_local`.
+        fn get_news(self: &Client) -> bool;
+        /// Drop the held definition and the client handle.
+        fn reset(self: &Client);
+        /// Sync the held definition after every command.
+        fn set_auto_sync(self: Pin<&mut Client>, flag: bool);
+        /// Whether the held definition is synced after every command.
+        fn is_auto_sync_enabled(self: &Client) -> bool;
+        /// The held definition.
         fn defs(self: &Client) -> SharedPtr<Defs>;
-        /// Fetch the server's definitions and write them as text in the given style.
+        /// Write the held definition as text in the given style.
         fn defs_text(self: &Client, style: DefsStyle) -> Result<String>;
+        /// Load a definition file into the server; with `force`, suites of the same name are replaced.
+        /// `check_only` parses without sending; `print` and `stats` write to standard output.
+        #[allow(clippy::fn_params_excessive_bools)]
+        fn loadDefs(
+            self: &Client,
+            file_path: &CxxString,
+            force: bool,
+            check_only: bool,
+            print: bool,
+            stats: bool,
+        ) -> Result<i32>;
+        /// Replace the node at `path` with the node of that path in the definition file.
+        fn replace(
+            self: &Client,
+            path: &CxxString,
+            path_to_client_defs: &CxxString,
+            create_parents_as_required: bool,
+            force: bool,
+        ) -> Result<i32>;
         /// Load definitions into the server; with `force`, suites of the same name are replaced.
         fn load(self: &Client, defs: &SharedPtr<Defs>, force: bool) -> Result<i32>;
         /// Replace the node at `path` with the node of that path in the given definitions.

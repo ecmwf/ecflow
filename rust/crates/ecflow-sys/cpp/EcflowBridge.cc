@@ -237,14 +237,21 @@ rust::String Client::child_queue(const std::string& queue,
 }
 
 rust::String Client::defs_text(DefsStyle style) const {
-    getDefs();
     defs_ptr defs = ClientInvoker::defs();
     if (!defs) {
-        throw std::runtime_error("The server returned no definitions");
+        throw std::runtime_error("The client holds no definition");
     }
     std::string text;
     defs->write_to_string(text, style);
     return rust::String(text);
+}
+
+rust::String Client::get_certificate() const {
+#if defined(ECF_OPENSSL)
+    return rust::String(ClientInvoker::get_certificate());
+#else
+    throw std::runtime_error("ecflow-sys was built without the ssl feature");
+#endif
 }
 
 ecf::ConnectionFailure Client::last_failure() const {
