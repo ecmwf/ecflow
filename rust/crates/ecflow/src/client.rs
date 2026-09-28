@@ -720,6 +720,138 @@ impl Client {
         )
     }
 
+    // ==================== Zombies ====================
+
+    /// Let the child commands of the zombies at these paths succeed, so
+    /// their jobs go on without the server recording anything.
+    pub fn zombie_fob<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieFobCliPaths(&strings(paths)))
+    }
+
+    /// Make the child commands of the zombies at these paths fail, so their
+    /// jobs abort.
+    pub fn zombie_fail<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieFailCliPaths(&strings(paths)))
+    }
+
+    /// Accept the passwords the zombies at these paths carry: the tasks take
+    /// their jobs on.
+    pub fn zombie_adopt<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieAdoptCliPaths(&strings(paths)))
+    }
+
+    /// Make the child commands of the zombies at these paths block until
+    /// their timeout.
+    pub fn zombie_block<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieBlockCliPaths(&strings(paths)))
+    }
+
+    /// Drop the zombies at these paths from the server's list; they come
+    /// back if their child commands call again.
+    pub fn zombie_remove<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieRemoveCliPaths(&strings(paths)))
+    }
+
+    /// Kill the jobs of the zombies at these paths with `ECF_KILL_CMD`.
+    pub fn zombie_kill<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.zombieKillCliPaths(&strings(paths)))
+    }
+
+    // ==================== Client handles ====================
+
+    /// Register interest in the suites, so that the server sends only those
+    /// on a sync, and return the handle. With `auto_add_new_suites`, suites
+    /// added later are included.
+    pub fn ch_register<I, S>(&mut self, auto_add_new_suites: bool, suites: I) -> Result<i32>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(
+            self.inner
+                .ch_register(auto_add_new_suites, &strings(suites)),
+        )?;
+        Ok(self.ch_handle())
+    }
+
+    /// The handle of the most recent registration, 0 without one.
+    #[must_use]
+    pub fn ch_handle(&self) -> i32 {
+        self.inner.client_handle()
+    }
+
+    /// The registered handles, each with the names of its suites.
+    pub fn ch_suites(&mut self) -> Result<Vec<(i32, Vec<String>)>> {
+        self.diagnose(self.inner.ch_suites())?;
+        Ok(self
+            .inner
+            .client_handle_suites()
+            .into_iter()
+            .map(|item| (item.handle, item.suites))
+            .collect())
+    }
+
+    /// Drop the handle.
+    pub fn ch_drop(&mut self, handle: i32) -> Result<()> {
+        self.diagnose(self.inner.ch_drop(handle))?;
+        Ok(())
+    }
+
+    /// Drop every handle of the user, the client's own when empty.
+    pub fn ch_drop_user(&mut self, user: &str) -> Result<()> {
+        let_cxx_string!(user = user);
+        self.diagnose(self.inner.ch_drop_user(&user))?;
+        Ok(())
+    }
+
+    /// Add suites to the handle.
+    pub fn ch_add<I, S>(&mut self, handle: i32, suites: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.ch_add(handle, &strings(suites)))
+    }
+
+    /// Remove suites from the handle.
+    pub fn ch_remove<I, S>(&mut self, handle: i32, suites: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.ch_remove(handle, &strings(suites)))
+    }
+
+    /// Whether suites added later join the handle.
+    pub fn ch_auto_add(&mut self, handle: i32, auto_add_new_suites: bool) -> Result<()> {
+        self.diagnose(self.inner.ch_auto_add(handle, auto_add_new_suites))?;
+        Ok(())
+    }
+
     // ==================== Child (task) commands ====================
 
     /// The task path the child commands report for (`ECF_NAME`).

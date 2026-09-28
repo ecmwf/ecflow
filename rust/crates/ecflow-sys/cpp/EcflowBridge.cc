@@ -170,6 +170,55 @@ void Client::alter_sort(rust::Slice<const rust::String> paths, const std::string
     ClientInvoker::alter_sort(strings(paths), attribute, recursive);
 }
 
+void Client::zombieFobCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieFobCliPaths(strings(paths));
+}
+
+void Client::zombieFailCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieFailCliPaths(strings(paths));
+}
+
+void Client::zombieAdoptCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieAdoptCliPaths(strings(paths));
+}
+
+void Client::zombieBlockCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieBlockCliPaths(strings(paths));
+}
+
+void Client::zombieRemoveCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieRemoveCliPaths(strings(paths));
+}
+
+void Client::zombieKillCliPaths(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::zombieKillCliPaths(strings(paths));
+}
+
+void Client::ch_register(bool auto_add_new_suites, rust::Slice<const rust::String> suites) const {
+    ClientInvoker::ch_register(auto_add_new_suites, strings(suites));
+}
+
+void Client::ch_add(int client_handle, rust::Slice<const rust::String> suites) const {
+    ClientInvoker::ch_add(client_handle, strings(suites));
+}
+
+void Client::ch_remove(int client_handle, rust::Slice<const rust::String> suites) const {
+    ClientInvoker::ch_remove(client_handle, strings(suites));
+}
+
+rust::Vec<HandleSuites> Client::client_handle_suites() const {
+    rust::Vec<HandleSuites> result;
+    for (const auto& [handle, suites] : server_reply().get_client_handle_suites()) {
+        HandleSuites item;
+        item.handle = static_cast<int>(handle);
+        for (const auto& suite : suites) {
+            item.suites.push_back(rust::String(suite));
+        }
+        result.push_back(std::move(item));
+    }
+    return result;
+}
+
 rust::Vec<rust::String> Client::reply_strings() const {
     rust::Vec<rust::String> result;
     const auto& strings = server_reply().get_string_vec();
