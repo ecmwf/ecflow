@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "ecflow-sys/src/lib.rs.h"
+#include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Version.hpp"
 
 namespace ecflow_bridge {
@@ -143,10 +144,14 @@ void Client::restore(rust::Slice<const rust::String> paths) const {
 }
 
 void Client::force(rust::Slice<const rust::String> paths,
-                   const std::string& state_or_event,
+                   NodeState state,
                    bool recursive,
                    bool set_repeats_to_last_value) const {
-    ClientInvoker::force(strings(paths), state_or_event, recursive, set_repeats_to_last_value);
+    ClientInvoker::force(strings(paths), NState::toString(state), recursive, set_repeats_to_last_value);
+}
+
+void Client::force_event(rust::Slice<const rust::String> paths, bool set) const {
+    ClientInvoker::force(strings(paths), set ? Event::SET() : Event::CLEAR());
 }
 
 void Client::freeDep(rust::Slice<const rust::String> paths, bool trigger, bool all, bool date, bool time) const {

@@ -85,6 +85,36 @@ impl From<CheckPtMode> for ecflow_sys::CheckPtMode {
     }
 }
 
+/// The state of a node.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NodeState {
+    /// Not yet begun.
+    Unknown,
+    /// Finished.
+    Complete,
+    /// Waiting for its dependencies.
+    Queued,
+    /// Failed.
+    Aborted,
+    /// Handed to the job submission command.
+    Submitted,
+    /// Running.
+    Active,
+}
+
+impl From<NodeState> for ecflow_sys::NodeState {
+    fn from(state: NodeState) -> Self {
+        match state {
+            NodeState::Unknown => Self::Unknown,
+            NodeState::Complete => Self::Complete,
+            NodeState::Queued => Self::Queued,
+            NodeState::Aborted => Self::Aborted,
+            NodeState::Submitted => Self::Submitted,
+            NodeState::Active => Self::Active,
+        }
+    }
+}
+
 /// A client for an ecFlow server, wrapping the C++ `ClientInvoker`.
 ///
 /// Every request is a blocking round trip. On connection failure the invoker
@@ -377,7 +407,7 @@ impl Client {
 
     /// Delete the nodes at the given paths. With `force`, even when they are
     /// active or submitted.
-    pub fn delete_nodes<I, S>(&mut self, paths: I, force: bool) -> Result<()>
+    pub fn delete<I, S>(&mut self, paths: I, force: bool) -> Result<()>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
@@ -481,15 +511,13 @@ impl Client {
         self.diagnose(self.inner.restore(&strings(paths)))
     }
 
-    /// Force the nodes to a state (`complete`, `aborted`, `queued`, `active`,
-    /// `submitted` or `unknown`), or, for paths of the form `/node:event`,
-    /// `set` or `clear` the event. With `recursive`, the children too. With
-    /// `set_repeats_to_last_value`, repeats move to their last value first, so
-    /// a forced complete does not requeue.
-    pub fn force<I, S>(
+    /// Force the nodes to a state. With `recursive`, the children too. With
+    /// `set_repeats_to_last_value`, repeats move to their last value first,
+    /// so a forced complete does not requeue.
+    pub fn force_state<I, S>(
         &mut self,
         paths: I,
-        state_or_event: &str,
+        state: NodeState,
         recursive: bool,
         set_repeats_to_last_value: bool,
     ) -> Result<()>
@@ -497,13 +525,21 @@ impl Client {
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        let_cxx_string!(state_or_event = state_or_event);
         self.diagnose(self.inner.force(
             &strings(paths),
-            &state_or_event,
+            state.into(),
             recursive,
             set_repeats_to_last_value,
         ))
+    }
+
+    /// Set or clear the events given as `/node:event`.
+    pub fn force_event<I, S>(&mut self, paths: I, set: bool) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.force_event(&strings(paths), set))
     }
 
     /// Free the trigger dependencies of the nodes.
@@ -564,7 +600,7 @@ impl Client {
 
     /// Generate and submit the jobs below the node whose dependencies are
     /// free, without waiting for the server's next poll.
-    pub fn job_gen(&mut self, path: &str) -> Result<()> {
+    pub fn job_generation(&mut self, path: &str) -> Result<()> {
         let_cxx_string!(path = path);
         self.diagnose(self.inner.job_gen(&path))?;
         Ok(())
@@ -572,7 +608,7 @@ impl Client {
 
     /// Begin the suite, so that it is scheduled. With `force`, even when it
     /// has active or submitted jobs, which then become zombies.
-    pub fn begin(&mut self, suite: &str, force: bool) -> Result<()> {
+    pub fn begin_suite(&mut self, suite: &str, force: bool) -> Result<()> {
         let_cxx_string!(suite = suite);
         self.diagnose(self.inner.begin(&suite, force))?;
         Ok(())

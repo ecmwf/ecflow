@@ -11,7 +11,7 @@ use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder};
+use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder, NodeState};
 
 struct Server {
     process: Child,
@@ -126,7 +126,7 @@ fn round_trip() {
 
     // The server answered, so no transport failure is recorded.
     let error = client
-        .delete_nodes(["/no_such_suite"], false)
+        .delete(["/no_such_suite"], false)
         .expect_err("unknown path");
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");
@@ -141,11 +141,20 @@ fn node_commands(client: &mut Client) {
     client.suspend(["/rust_test"]).expect("suspend");
     let state = client.get_defs_text(DefsStyle::State).expect("get state");
     assert!(state.contains("suspended"), "{state}");
-    client.begin("rust_test", false).expect("begin");
+    client.begin_suite("rust_test", false).expect("begin");
     assert_eq!(client.check(["/rust_test"]).expect("check"), "");
     client
-        .force(["/rust_test/t1"], "complete", false, false)
-        .expect("force");
+        .force_state(["/rust_test/t1"], NodeState::Complete, false, false)
+        .expect("force state");
+    client
+        .force_event(["/rust_test/t1:done"], false)
+        .expect("force event");
+    assert_eq!(
+        client
+            .query("event", "/rust_test/t1", "done", false)
+            .expect("query event"),
+        "clear"
+    );
     client.requeue(["/rust_test/t1"], "").expect("requeue");
     client
         .order("/rust_test/t1", NodeOrder::Top)
@@ -205,9 +214,7 @@ fn server_commands(client: &mut Client) {
 
     client.halt_server().expect("halt");
     client.restart_server().expect("restart");
-    client
-        .delete_nodes(["/rust_test/t1"], true)
-        .expect("delete node");
+    client.delete(["/rust_test/t1"], true).expect("delete node");
     client.delete_all(true).expect("delete all");
     assert!(client.suites().expect("suites").is_empty());
 }
