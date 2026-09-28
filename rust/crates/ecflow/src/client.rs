@@ -230,6 +230,19 @@ impl Client {
         self.inner.pin_mut().set_connection_attempts(attempts);
     }
 
+    /// Whether the server answers a ping within the timeout, trying until
+    /// it does.
+    pub fn wait_for_server_reply(&mut self, timeout: Duration) -> bool {
+        let seconds = i32::try_from(timeout.as_secs()).unwrap_or(i32::MAX);
+        self.inner.wait_for_server_reply(seconds)
+    }
+
+    /// The path of the certificate used for SSL. Fails when built without
+    /// the `ssl` feature.
+    pub fn get_certificate(&self) -> Result<String> {
+        self.diagnose(self.inner.get_certificate())
+    }
+
     /// Print each request and its round trip time to standard output.
     pub fn set_debug(&mut self, enabled: bool) {
         self.inner.pin_mut().debug(enabled);
@@ -956,11 +969,72 @@ impl Client {
         self.diagnose(result)
     }
 
-    // ==================== Definitions as text ====================
+    // ==================== Definitions ====================
 
-    /// Fetch the server's definitions as text.
-    pub fn get_defs_text(&mut self, style: DefsStyle) -> Result<String> {
+    /// Fetch the whole definition from the server and hold it in the client;
+    /// [`Client::defs_text`] writes it.
+    pub fn get_server_defs(&mut self) -> Result<()> {
+        self.diagnose(self.inner.getDefs())?;
+        Ok(())
+    }
+
+    /// Bring the held definition up to date with the server's changes since
+    /// the last fetch or sync, or fetch it whole when the client holds none.
+    /// With `sync_suite_clock`, the suite clocks are updated too.
+    pub fn sync_local(&mut self, sync_suite_clock: bool) -> Result<()> {
+        self.diagnose(self.inner.sync_local(sync_suite_clock))?;
+        Ok(())
+    }
+
+    /// Whether the held definition is in sync with the server, as of the
+    /// last [`Client::sync_local`].
+    #[must_use]
+    pub fn in_sync(&self) -> bool {
+        self.inner.in_sync()
+    }
+
+    /// The paths of the nodes the last [`Client::sync_local`] changed.
+    #[must_use]
+    pub fn changed_node_paths(&self) -> Vec<String> {
+        self.inner
+            .changed_node_paths()
+            .iter()
+            .map(ToString::to_string)
+            .collect()
+    }
+
+    /// Whether the server has changes the held definition lacks. Always
+    /// true until the first [`Client::sync_local`].
+    pub fn news_local(&mut self) -> Result<bool> {
+        self.diagnose(self.inner.news_local())?;
+        Ok(self.inner.get_news())
+    }
+
+    /// Drop the held definition and the client handle.
+    pub fn reset(&mut self) {
+        self.inner.reset();
+    }
+
+    /// Sync the held definition after every command.
+    pub fn set_auto_sync(&mut self, enabled: bool) {
+        self.inner.pin_mut().set_auto_sync(enabled);
+    }
+
+    /// Whether the held definition is synced after every command.
+    #[must_use]
+    pub fn is_auto_sync_enabled(&self) -> bool {
+        self.inner.is_auto_sync_enabled()
+    }
+
+    /// The held definition as text, as of the last fetch or sync.
+    pub fn defs_text(&self, style: DefsStyle) -> Result<String> {
         self.diagnose(self.inner.defs_text(style.into()))
+    }
+
+    /// Fetch the whole definition from the server and return it as text.
+    pub fn get_defs_text(&mut self, style: DefsStyle) -> Result<String> {
+        self.get_server_defs()?;
+        self.defs_text(style)
     }
 
     /// Load definitions given as text into the server. With `force`, suites
@@ -968,6 +1042,14 @@ impl Client {
     pub fn load_defs_text(&mut self, defs: &str, force: bool) -> Result<()> {
         let defs = ecflow_sys::Client::parse_defs(defs)?;
         self.diagnose(self.inner.load(&defs, force))?;
+        Ok(())
+    }
+
+    /// Load a definition file into the server. With `force`, suites of the
+    /// same name are replaced.
+    pub fn load_defs_file(&mut self, file: &str, force: bool) -> Result<()> {
+        let_cxx_string!(file = file);
+        self.diagnose(self.inner.loadDefs(&file, force, false, false, false))?;
         Ok(())
     }
 
@@ -983,6 +1065,21 @@ impl Client {
         let defs = ecflow_sys::Client::parse_defs(defs)?;
         let_cxx_string!(path = path);
         self.diagnose(self.inner.replace_1(&path, &defs, create_parents, force))?;
+        Ok(())
+    }
+
+    /// Replace the node at `path` with the node of that path in the
+    /// definition file.
+    pub fn replace_file(
+        &mut self,
+        path: &str,
+        file: &str,
+        create_parents: bool,
+        force: bool,
+    ) -> Result<()> {
+        let_cxx_string!(path = path);
+        let_cxx_string!(file = file);
+        self.diagnose(self.inner.replace(&path, &file, create_parents, force))?;
         Ok(())
     }
 }
