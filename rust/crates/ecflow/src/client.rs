@@ -64,6 +64,27 @@ impl From<NodeOrder> for ecflow_sys::NodeOrder {
     }
 }
 
+/// When the server writes its check point file.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CheckPtMode {
+    /// Never.
+    Never,
+    /// Periodically, at the check point interval.
+    OnTime,
+    /// After every state change.
+    Always,
+}
+
+impl From<CheckPtMode> for ecflow_sys::CheckPtMode {
+    fn from(mode: CheckPtMode) -> Self {
+        match mode {
+            CheckPtMode::Never => Self::Never,
+            CheckPtMode::OnTime => Self::OnTime,
+            CheckPtMode::Always => Self::Always,
+        }
+    }
+}
+
 /// A client for an ecFlow server, wrapping the C++ `ClientInvoker`.
 ///
 /// Every request is a blocking round trip. On connection failure the invoker
@@ -235,6 +256,77 @@ impl Client {
     /// Terminate the server process.
     pub fn terminate_server(&mut self) -> Result<()> {
         self.diagnose(self.inner.terminateServer())?;
+        Ok(())
+    }
+
+    /// Write the check point file now: the definition with node state,
+    /// passwords and the rest, to `ECF_HOME/<host>.<port>.ecf.check` unless
+    /// `ECF_CHECK` names another file.
+    pub fn checkpt(&mut self) -> Result<()> {
+        self.configure_checkpt(None, None, None)
+    }
+
+    /// Change how the server writes its check point file: the mode, the
+    /// interval between periodic writes, and the time a write may take
+    /// before the server raises its late flag. `None` leaves a setting as it
+    /// is; with nothing given this is [`Client::checkpt`].
+    pub fn configure_checkpt(
+        &mut self,
+        mode: Option<CheckPtMode>,
+        interval: Option<Duration>,
+        save_time_alarm: Option<Duration>,
+    ) -> Result<()> {
+        let seconds = |duration: Duration| i32::try_from(duration.as_secs()).unwrap_or(i32::MAX);
+        self.diagnose(self.inner.checkPtDefs(
+            mode.map_or(ecflow_sys::CheckPtMode::Undefined, Into::into),
+            interval.map_or(0, seconds),
+            save_time_alarm.map_or(0, seconds),
+        ))?;
+        Ok(())
+    }
+
+    /// Load the check point file, `ECF_HOME/ECF_CHECK` or else
+    /// `ECF_HOME/ECF_CHECKOLD`. Fails unless the server is halted and holds
+    /// no suites.
+    pub fn restore_from_checkpt(&mut self) -> Result<()> {
+        self.diagnose(self.inner.restoreDefsFromCheckPt())?;
+        Ok(())
+    }
+
+    /// Reset the server's statistics.
+    pub fn stats_reset(&mut self) -> Result<()> {
+        self.diagnose(self.inner.stats_reset())?;
+        Ok(())
+    }
+
+    /// Turn on debug output in the server.
+    pub fn debug_server_on(&mut self) -> Result<()> {
+        self.diagnose(self.inner.debug_server_on())?;
+        Ok(())
+    }
+
+    /// Turn off debug output in the server.
+    pub fn debug_server_off(&mut self) -> Result<()> {
+        self.diagnose(self.inner.debug_server_off())?;
+        Ok(())
+    }
+
+    /// Reload the white list file (`ECF_LISTS`), which controls who may read
+    /// and who may write.
+    pub fn reload_wl_file(&mut self) -> Result<()> {
+        self.diagnose(self.inner.reloadwsfile())?;
+        Ok(())
+    }
+
+    /// Reload the password file (`ECF_PASSWD`).
+    pub fn reload_passwd_file(&mut self) -> Result<()> {
+        self.diagnose(self.inner.reloadpasswdfile())?;
+        Ok(())
+    }
+
+    /// Reload the custom password file (`ECF_CUSTOM_PASSWD`).
+    pub fn reload_custom_passwd_file(&mut self) -> Result<()> {
+        self.diagnose(self.inner.reloadcustompasswdfile())?;
         Ok(())
     }
 
