@@ -13,10 +13,8 @@ workflow manager.
 ecFlow jobs and tools talk to an ecFlow server through the C++ `ClientInvoker`
 class, which the `ecflow_client` command line tool and the Python module both
 wrap. These crates make the same class usable from Rust: the C++ library is
-built from source at build time and exposed through a safe API covering
-connection configuration, server probes, the child (task) commands and
-definitions as text. Every other command is reachable through
-`Client::invoke`, which takes `ecflow_client` command line arguments.
+built from source at build time and exposed through a safe API with a typed
+method per command, as the Python module does.
 
 ## Installation
 

@@ -92,16 +92,6 @@ void Client::disable_ssl() {
 #endif
 }
 
-void Client::invoke(rust::Slice<const rust::String> args) const {
-    std::vector<std::string> argv;
-    argv.reserve(args.size() + 1);
-    argv.emplace_back("ecflow_client"); // argv[0], as the command line parser expects
-    for (const auto& arg : args) {
-        argv.emplace_back(std::string(arg));
-    }
-    ClientInvoker::invoke(argv);
-}
-
 void Client::delete_nodes(rust::Slice<const rust::String> paths, bool force) const {
     std::vector<std::string> nodes;
     nodes.reserve(paths.size());
