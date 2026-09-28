@@ -29,16 +29,14 @@ use bindman::track_cpp_api;
         // User commands
         "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
         "wait_for_server_death",
-        "server_load", "debug_server_on",
-        "debug_server_off", "stats_reset", "stats_server", "ch_register", "ch_suites", "ch_drop",
+        "server_load", "stats_server", "ch_register", "ch_suites", "ch_drop",
         "ch_drop_user", "ch_add", "ch_remove", "ch_auto_add", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove",
         "ch1_auto_add", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
         "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
         "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
         "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths",
-        "delete_node", "checkPtDefs",
-        "restoreDefsFromCheckPt", "file", "plug", "query", "alter", "alter_sort",
-        "reloadwsfile", "reloadpasswdfile", "reloadcustompasswdfile", "group", "logMsg", "new_log", "getLog",
+        "delete_node", "file", "plug", "query", "alter", "alter_sort",
+        "group", "logMsg", "new_log", "getLog",
         "clearLog", "flushLog", "get_log_path", "forceDependencyEval", "edit_script", "edit_script_edit",
         "edit_script_preprocess", "edit_script_submit",
     ]
@@ -130,6 +128,28 @@ mod ffi {
         Runtime,
     }
 
+    /// When the server writes its check point file.
+    ///
+    /// Declared as the existing `ecf::CheckPt::Mode` (aliased in the bridge
+    /// header), so cxx verifies at compile time that each discriminant
+    /// matches the C++ enum.
+    #[namespace = "ecflow_bridge"]
+    #[repr(i32)]
+    enum CheckPtMode {
+        /// Never.
+        #[cxx_name = "NEVER"]
+        Never,
+        /// Periodically, at the check point interval.
+        #[cxx_name = "ON_TIME"]
+        OnTime,
+        /// After every state change.
+        #[cxx_name = "ALWAYS"]
+        Always,
+        /// Leave the mode as it is.
+        #[cxx_name = "UNDEFINED"]
+        Undefined,
+    }
+
     unsafe extern "C++" {
         include!("EcflowBridge.h");
 
@@ -144,6 +164,7 @@ mod ffi {
     unsafe extern "C++" {
         type DefsStyle;
         type NodeOrder;
+        type CheckPtMode;
 
         /// The ecFlow client: a `ClientInvoker`, every request in its
         /// throw-on-error mode.
@@ -225,6 +246,27 @@ mod ffi {
         fn shutdownServer(self: &Client) -> Result<i32>;
         /// Terminate the server process.
         fn terminateServer(self: &Client) -> Result<i32>;
+        /// Set the check point mode, interval and save time alarm, each when given; with none, write a check point now.
+        fn checkPtDefs(
+            self: &Client,
+            mode: CheckPtMode,
+            check_pt_interval: i32,
+            check_pt_save_time_alarm: i32,
+        ) -> Result<i32>;
+        /// Load the check point file; the server must be halted and hold no suites.
+        fn restoreDefsFromCheckPt(self: &Client) -> Result<i32>;
+        /// Reset the server's statistics.
+        fn stats_reset(self: &Client) -> Result<i32>;
+        /// Turn on debug output in the server.
+        fn debug_server_on(self: &Client) -> Result<i32>;
+        /// Turn off debug output in the server.
+        fn debug_server_off(self: &Client) -> Result<i32>;
+        /// Reload the white list file that controls who may read and write.
+        fn reloadwsfile(self: &Client) -> Result<i32>;
+        /// Reload the password file.
+        fn reloadpasswdfile(self: &Client) -> Result<i32>;
+        /// Reload the custom password file.
+        fn reloadcustompasswdfile(self: &Client) -> Result<i32>;
 
         // Nodes
 
