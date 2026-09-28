@@ -35,9 +35,7 @@ use bindman::track_cpp_api;
         "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
         "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
         "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths",
-        "delete_node", "file", "plug", "query", "alter", "alter_sort",
-        "group", "logMsg", "new_log", "getLog",
-        "clearLog", "flushLog", "get_log_path", "forceDependencyEval", "edit_script", "edit_script_edit",
+        "delete_node", "group", "forceDependencyEval", "edit_script", "edit_script_edit",
         "edit_script_preprocess", "edit_script_submit",
     ]
 )]
@@ -320,6 +318,54 @@ mod ffi {
         fn begin_all_suites(self: &Client, force: bool) -> Result<i32>;
         /// Ask for the node's edit history; the lines are in `reply_strings`.
         fn edit_history(self: &Client, path: &CxxString) -> Result<i32>;
+        /// Ask for a file of the node, the last `max_lines` of it; the text is in `get_string`.
+        fn file(
+            self: &Client,
+            path: &CxxString,
+            file_type: &CxxString,
+            max_lines: &CxxString,
+        ) -> Result<i32>;
+        /// Move the node to another parent, possibly on another server.
+        fn plug(self: &Client, source_path: &CxxString, dest_path: &CxxString) -> Result<i32>;
+        /// Query an attribute or evaluate an expression; the answer is in `get_string`.
+        fn query(
+            self: Pin<&mut Client>,
+            query_type: &CxxString,
+            path_to_attribute: &CxxString,
+            attribute: &CxxString,
+            evaluate: bool,
+        ) -> Result<i32>;
+        /// Add, change or delete an attribute of the nodes, or set or clear a flag.
+        fn alter(
+            self: &Client,
+            paths: &[String],
+            alter_type: &CxxString,
+            attr_type: &CxxString,
+            name: &CxxString,
+            value: &CxxString,
+        ) -> Result<()>;
+        /// Sort the attributes of a kind of the nodes by name.
+        fn alter_sort(
+            self: &Client,
+            paths: &[String],
+            attribute: &CxxString,
+            recursive: bool,
+        ) -> Result<()>;
+
+        // Logs
+
+        /// Write a message to the server's log.
+        fn logMsg(self: &Client, msg: &CxxString) -> Result<i32>;
+        /// Switch the server to a new log file; with an empty path, reopen the current one.
+        fn new_log(self: &Client, new_path: &CxxString) -> Result<i32>;
+        /// Ask for the last lines of the server's log, 100 with 0; the text is in `get_string`.
+        fn getLog(self: &Client, last_lines: i32) -> Result<i32>;
+        /// Empty the server's log file.
+        fn clearLog(self: &Client) -> Result<i32>;
+        /// Flush and close the server's log file.
+        fn flushLog(self: &Client) -> Result<i32>;
+        /// Ask for the path of the server's log file; it is in `get_string`.
+        fn get_log_path(self: &Client) -> Result<i32>;
 
         // Child (task) commands
 
