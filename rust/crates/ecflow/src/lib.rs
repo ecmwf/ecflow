@@ -4,9 +4,8 @@
 //! Safe Rust client for ECMWF's ecFlow workflow manager.
 //!
 //! Provides:
-//! - [`Client`] - connection configuration, server probes, child (task)
-//!   commands, definitions as text, and [`Client::invoke`] for every other
-//!   command
+//! - [`Client`] - connection configuration, server probes and control, node
+//!   commands, child (task) commands and definitions as text
 //! - [`Error`] - with the [`Failure`] class ecFlow diagnosed
 //!
 //! ```no_run
