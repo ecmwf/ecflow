@@ -131,8 +131,13 @@ fn round_trip() {
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");
 
-    // Suspended, the suite can be begun without the server submitting t1,
-    // which has no script.
+    node_commands(&mut client);
+    server_commands(&mut client);
+}
+
+/// The node commands, on the suite while it is suspended: begun that way,
+/// the server does not submit t1, which has no script.
+fn node_commands(client: &mut Client) {
     client.suspend(["/rust_test"]).expect("suspend");
     let state = client.get_defs_text(DefsStyle::State).expect("get state");
     assert!(state.contains("suspended"), "{state}");
@@ -153,7 +158,38 @@ fn round_trip() {
         history.iter().any(|line| line.contains("--force")),
         "{history:?}"
     );
+    assert_eq!(
+        client
+            .query("state", "/rust_test/t1", "", false)
+            .expect("query state"),
+        "queued"
+    );
+    client
+        .alter(["/rust_test"], "add", "variable", "FOO", "bar")
+        .expect("alter");
+    assert_eq!(
+        client
+            .query("variable", "/rust_test", "FOO", false)
+            .expect("query variable"),
+        "bar"
+    );
+    client
+        .sort_attributes(["/rust_test"], "variable", true)
+        .expect("sort attributes");
+    let error = client
+        .get_file("/rust_test/t1", "script", 100)
+        .expect_err("no script");
+    assert_eq!(error.failure(), Failure::None, "{error}");
     client.resume(["/rust_test"]).expect("resume");
+}
+
+/// The log and server commands, then the deletion of everything.
+fn server_commands(client: &mut Client) {
+    client.log_msg("hello from rust").expect("log msg");
+    let log = client.get_log(Some(10)).expect("get log");
+    assert!(log.contains("hello from rust"), "{log}");
+    assert!(!client.get_log_path().expect("log path").is_empty());
+    client.flush_log().expect("flush log");
 
     client.checkpt().expect("checkpt");
     client

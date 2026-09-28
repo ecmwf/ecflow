@@ -72,6 +72,12 @@ public:
                bool recursive,
                bool set_repeats_to_last_value) const;
     void freeDep(rust::Slice<const rust::String> paths, bool trigger, bool all, bool date, bool time) const;
+    void alter(rust::Slice<const rust::String> paths,
+               const std::string& alter_type,
+               const std::string& attr_type,
+               const std::string& name,
+               const std::string& value) const;
+    void alter_sort(rust::Slice<const rust::String> paths, const std::string& attribute, bool recursive) const;
 
     /// The list of strings in the most recent reply, for commands that return one.
     rust::Vec<rust::String> reply_strings() const;
