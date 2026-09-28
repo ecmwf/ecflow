@@ -11,6 +11,7 @@
 
 #include "ecflow-sys/src/lib.rs.h"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Version.hpp"
@@ -250,6 +251,20 @@ void Client::edit_script_submit(const std::string& path,
         variables.emplace_back(std::string(variable.name), std::string(variable.value));
     }
     ClientInvoker::edit_script_submit(path, variables, strings(file_contents), alias, run);
+}
+
+void Client::set_child_init_add_vars(rust::Slice<const NameValue> vars) {
+    std::vector<Variable> variables;
+    variables.reserve(vars.size());
+    for (const auto& variable : vars) {
+        variables.emplace_back(std::string(variable.name), std::string(variable.value));
+    }
+    ClientInvoker::set_child_init_add_vars(variables);
+}
+
+void Client::set_child_complete_del_vars(rust::Slice<const rust::String> names) {
+    std::vector<std::string> variables = strings(names);
+    ClientInvoker::set_child_complete_del_vars(variables);
 }
 
 rust::Vec<HandleSuites> Client::client_handle_suites() const {
