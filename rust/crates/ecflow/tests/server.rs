@@ -246,10 +246,16 @@ fn script_commands(client: &mut Client) {
             "/rust_test/t1",
             [("ECF_TRIES", "1")],
             ["echo %ECF_NAME%"],
-            false,
+            true,
             false,
         )
-        .expect("submit lines without running");
+        .expect("make an alias without running it");
+    assert_eq!(
+        client
+            .query("state", "/rust_test/t1/alias0", "", false)
+            .expect("alias state"),
+        "queued"
+    );
     assert!(client.zombie_get().expect("zombies").is_empty());
 }
 
