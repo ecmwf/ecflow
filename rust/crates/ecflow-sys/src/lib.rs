@@ -115,7 +115,7 @@ mod ffi {
         /// One place down.
         #[cxx_name = "DOWN"]
         Down,
-        /// The siblings sorted by the time of their last state change.
+        /// The siblings sorted by how long their last run took, longest first.
         #[cxx_name = "RUNTIME"]
         Runtime,
     }
@@ -441,7 +441,7 @@ mod ffi {
 
         /// Write a message to the server's log.
         fn logMsg(self: &Client, msg: &CxxString) -> Result<i32>;
-        /// Switch the server to a new log file; with an empty path, reopen the current one.
+        /// Switch the server to a new log file; with an empty path, to the one its `ECF_LOG` variable names.
         fn new_log(self: &Client, new_path: &CxxString) -> Result<i32>;
         /// Ask for the last lines of the server's log, 100 with 0; the text is in `get_string`.
         fn getLog(self: &Client, last_lines: i32) -> Result<i32>;
@@ -585,9 +585,9 @@ mod ffi {
         fn get_news(self: &Client) -> bool;
         /// Drop the held definition and the client handle.
         fn reset(self: &Client);
-        /// Sync the held definition after every command.
+        /// Sync the held definition after every command that changes the server's definition.
         fn set_auto_sync(self: Pin<&mut Client>, flag: bool);
-        /// Whether the held definition is synced after every command.
+        /// Whether the held definition is synced after every command that changes the server's definition.
         fn is_auto_sync_enabled(self: &Client) -> bool;
         /// The held definition.
         fn defs(self: &Client) -> SharedPtr<Defs>;

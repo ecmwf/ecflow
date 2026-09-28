@@ -46,7 +46,7 @@ pub enum NodeOrder {
     Up,
     /// One place down.
     Down,
-    /// The siblings sorted by the time of their last state change.
+    /// The siblings sorted by how long their last run took, longest first.
     Runtime,
 }
 
@@ -382,8 +382,8 @@ impl Client {
         Ok(())
     }
 
-    /// Switch the server to a new log file. With an empty path, the current
-    /// one is reopened.
+    /// Switch the server to a new log file. With an empty path, to the one
+    /// the server's `ECF_LOG` variable names.
     pub fn new_log(&mut self, path: &str) -> Result<()> {
         let_cxx_string!(path = path);
         self.diagnose(self.inner.new_log(&path))?;
@@ -662,7 +662,7 @@ impl Client {
         Ok(())
     }
 
-    /// Query the node without blocking. `query_type` is `state`, `dstate`
+    /// Query the node. `query_type` is `state`, `dstate`
     /// (the state with `suspended`), `repeat`, `event`, `meter`, `label`,
     /// `variable`, `limit`, `limit_max`, or `trigger` to evaluate an
     /// expression; `attribute` names the attribute or holds the expression.
@@ -1117,12 +1117,14 @@ impl Client {
         self.inner.reset();
     }
 
-    /// Sync the held definition after every command.
+    /// Sync the held definition after every command that changes the
+    /// server's definition.
     pub fn set_auto_sync(&mut self, enabled: bool) {
         self.inner.pin_mut().set_auto_sync(enabled);
     }
 
-    /// Whether the held definition is synced after every command.
+    /// Whether the held definition is synced after every command that
+    /// changes the server's definition.
     #[must_use]
     pub fn is_auto_sync_enabled(&self) -> bool {
         self.inner.is_auto_sync_enabled()
