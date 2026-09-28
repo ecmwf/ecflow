@@ -200,6 +200,26 @@ fn server_commands(client: &mut Client) {
     assert!(!client.get_log_path().expect("log path").is_empty());
     client.flush_log().expect("flush log");
 
+    let handle = client.ch_register(false, ["rust_test"]).expect("register");
+    assert!(handle > 0);
+    assert_eq!(client.ch_handle(), handle);
+    let handles = client.ch_suites().expect("handles");
+    assert!(
+        handles
+            .iter()
+            .any(|(h, suites)| *h == handle && suites == &["rust_test"]),
+        "{handles:?}"
+    );
+    client.ch_auto_add(handle, true).expect("auto add");
+    client
+        .ch_remove(handle, ["rust_test"])
+        .expect("remove suite");
+    client.ch_add(handle, ["rust_test"]).expect("add suite");
+    client.ch_drop(handle).expect("drop handle");
+    client
+        .zombie_remove(["/rust_test/t1"])
+        .expect("zombie remove");
+
     client.checkpt().expect("checkpt");
     client
         .configure_checkpt(
