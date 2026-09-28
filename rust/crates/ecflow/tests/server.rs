@@ -142,6 +142,22 @@ fn round_trip() {
     client.child_meter("progress", 42).expect("meter");
     client.child_label("info", "hello").expect("label");
     client.child_event("done", true).expect("event");
+    client.set_child_init_add_vars([("RUST_VAR", "1")]);
+    client.set_child_complete_del_vars(["RUST_VAR"]);
+    client.child_init().expect("init");
+    assert_eq!(
+        client
+            .query("variable", "/rust_test/t1", "RUST_VAR", false)
+            .expect("variable added at init"),
+        "1"
+    );
+    client.child_complete().expect("complete");
+    assert!(
+        client
+            .query("variable", "/rust_test/t1", "RUST_VAR", false)
+            .is_err(),
+        "variable removed at complete"
+    );
 
     let state = client.get_defs_text(DefsStyle::State).expect("get state");
     assert!(state.contains("42"), "{state}");

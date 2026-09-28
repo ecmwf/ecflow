@@ -24,8 +24,7 @@ use bindman::track_cpp_api;
         "load_in_memory_defs", "client_env_host_port", "check_child_parameters",
         // Task commands taking their arguments from the environment
         "initTask", "abortTask", "eventTask", "meterTask", "labelTask", "waitTask", "queueTask", "completeTask",
-        "set_child_host_file", "set_child_denied", "set_child_no_ecf", "set_child_init_add_vars",
-        "set_child_complete_del_vars",
+        "set_child_host_file", "set_child_denied", "set_child_no_ecf",
         // User commands
         "sync", "news", "wait_for_server_death",
         "server_load", "stats_server", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove", "ch1_auto_add",
@@ -526,6 +525,10 @@ mod ffi {
         fn set_child_pid(self: Pin<&mut Client>, pid: &CxxString);
         /// The try number the child commands carry (`ECF_TRYNO`).
         fn set_child_try_no(self: Pin<&mut Client>, try_no: u32);
+        /// The variables the child init command adds to the task.
+        fn set_child_init_add_vars(self: Pin<&mut Client>, vars: &[NameValue]);
+        /// The names of the variables the child complete command removes from the task.
+        fn set_child_complete_del_vars(self: Pin<&mut Client>, names: &[String]);
         /// How long a child command keeps trying to reach the server (`ECF_TIMEOUT`).
         fn set_child_timeout(self: Pin<&mut Client>, seconds: u32);
         /// How long a child command keeps trying when reported as a zombie (`ECF_ZOMBIE_TIMEOUT`).
