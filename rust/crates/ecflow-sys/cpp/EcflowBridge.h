@@ -18,6 +18,8 @@
 
 namespace ecflow_bridge {
 
+struct HandleSuites;
+
 /// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
 using DefsStyle = ::PrintStyle::Type_t;
 
@@ -81,6 +83,18 @@ public:
                const std::string& name,
                const std::string& value) const;
     void alter_sort(rust::Slice<const rust::String> paths, const std::string& attribute, bool recursive) const;
+    void zombieFobCliPaths(rust::Slice<const rust::String> paths) const;
+    void zombieFailCliPaths(rust::Slice<const rust::String> paths) const;
+    void zombieAdoptCliPaths(rust::Slice<const rust::String> paths) const;
+    void zombieBlockCliPaths(rust::Slice<const rust::String> paths) const;
+    void zombieRemoveCliPaths(rust::Slice<const rust::String> paths) const;
+    void zombieKillCliPaths(rust::Slice<const rust::String> paths) const;
+    void ch_register(bool auto_add_new_suites, rust::Slice<const rust::String> suites) const;
+    void ch_add(int client_handle, rust::Slice<const rust::String> suites) const;
+    void ch_remove(int client_handle, rust::Slice<const rust::String> suites) const;
+
+    /// The registered handles and their suites, from the most recent `ch_suites` reply.
+    rust::Vec<HandleSuites> client_handle_suites() const;
 
     /// The list of strings in the most recent reply, for commands that return one.
     rust::Vec<rust::String> reply_strings() const;

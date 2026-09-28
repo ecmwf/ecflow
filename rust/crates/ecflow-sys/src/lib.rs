@@ -20,7 +20,7 @@ use bindman::track_cpp_api;
         "set_throw_on_error", "set_auto_sync", "is_auto_sync_enabled", "set_cli", "cli", "invoke",
         "enable_ssl_if_defined", "get_certificate", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "reset", "server_reply",
-        "in_sync", "get_news", "client_handle", "errorMsg", "get_cmd_from_args", "is_not_retrying",
+        "in_sync", "get_news", "errorMsg", "get_cmd_from_args", "is_not_retrying",
         "load_in_memory_defs", "loadDefs", "client_env_host_port", "check_child_parameters",
         // Task commands taking their arguments from the environment
         "initTask", "abortTask", "eventTask", "meterTask", "labelTask", "waitTask", "queueTask", "completeTask",
@@ -29,12 +29,9 @@ use bindman::track_cpp_api;
         // User commands
         "sync", "sync_local", "news", "news_local", "changed_node_paths", "wait_for_server_reply",
         "wait_for_server_death",
-        "server_load", "stats_server", "ch_register", "ch_suites", "ch_drop",
-        "ch_drop_user", "ch_add", "ch_remove", "ch_auto_add", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove",
-        "ch1_auto_add", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
-        "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
-        "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
-        "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths",
+        "server_load", "stats_server", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove", "ch1_auto_add",
+        "zombieGet", "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
+        "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
         "delete_node", "group", "forceDependencyEval", "edit_script", "edit_script_edit",
         "edit_script_preprocess", "edit_script_submit",
     ]
@@ -174,6 +171,16 @@ mod ffi {
         /// Running.
         #[cxx_name = "ACTIVE"]
         Active,
+    }
+
+    /// A registered client handle and the suites it covers.
+    #[namespace = "ecflow_bridge"]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct HandleSuites {
+        /// The handle.
+        handle: i32,
+        /// The names of its suites.
+        suites: Vec<String>,
     }
 
     unsafe extern "C++" {
@@ -397,6 +404,43 @@ mod ffi {
         fn flushLog(self: &Client) -> Result<i32>;
         /// Ask for the path of the server's log file; it is in `get_string`.
         fn get_log_path(self: &Client) -> Result<i32>;
+
+        // Zombies
+
+        /// Let the child commands of the zombies at these paths succeed.
+        fn zombieFobCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Make the child commands of the zombies at these paths fail.
+        fn zombieFailCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Accept the passwords the zombies at these paths carry.
+        fn zombieAdoptCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Make the child commands of the zombies at these paths block.
+        fn zombieBlockCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Drop the zombies at these paths from the server's list.
+        fn zombieRemoveCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+        /// Kill the zombie processes at these paths with `ECF_KILL_CMD`.
+        fn zombieKillCliPaths(self: &Client, paths: &[String]) -> Result<()>;
+
+        // Client handles
+
+        /// Register interest in the suites; the new handle is in `client_handle`.
+        fn ch_register(self: &Client, auto_add_new_suites: bool, suites: &[String]) -> Result<()>;
+        /// The handle of the most recent registration, 0 without one.
+        fn client_handle(self: &Client) -> i32;
+        /// Ask for the registered handles and their suites; they are in `client_handle_suites`.
+        fn ch_suites(self: &Client) -> Result<i32>;
+        /// The handles and their suites from the most recent `ch_suites` reply.
+        fn client_handle_suites(self: &Client) -> Vec<HandleSuites>;
+        /// Drop the handle.
+        fn ch_drop(self: &Client, client_handle: i32) -> Result<i32>;
+        /// Drop every handle of the user, the client's own when empty.
+        fn ch_drop_user(self: &Client, user: &CxxString) -> Result<i32>;
+        /// Add suites to the handle.
+        fn ch_add(self: &Client, client_handle: i32, suites: &[String]) -> Result<()>;
+        /// Remove suites from the handle.
+        fn ch_remove(self: &Client, client_handle: i32, suites: &[String]) -> Result<()>;
+        /// Whether suites added later join the handle.
+        fn ch_auto_add(self: &Client, client_handle: i32, auto_add_new_suites: bool)
+        -> Result<i32>;
 
         // Child (task) commands
 
