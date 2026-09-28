@@ -9,6 +9,7 @@
 
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -21,6 +22,9 @@ using DefsStyle = ::PrintStyle::Type_t;
 
 /// Where a node moves among its siblings, or how they are sorted; the bridge binds it as an enum of this namespace.
 using NodeOrder = ::NOrder::Order;
+
+/// When the server writes its check point file; the bridge binds it as an enum of this namespace.
+using CheckPtMode = ::ecf::CheckPt::Mode;
 
 /// A `ClientInvoker` with the members cxx cannot bind on the base class:
 /// constructors, `std::chrono` arguments, `ECF_OPENSSL` guards, argument

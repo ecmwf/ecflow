@@ -11,7 +11,7 @@ use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use ecflow::{Client, DefsStyle, Failure, NodeOrder};
+use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder};
 
 struct Server {
     process: Child,
@@ -154,6 +154,18 @@ fn round_trip() {
         "{history:?}"
     );
     client.resume(["/rust_test"]).expect("resume");
+
+    client.checkpt().expect("checkpt");
+    client
+        .configure_checkpt(
+            Some(CheckPtMode::Never),
+            Some(Duration::from_secs(300)),
+            None,
+        )
+        .expect("configure checkpt");
+    client.stats_reset().expect("stats reset");
+    client.debug_server_on().expect("debug on");
+    client.debug_server_off().expect("debug off");
 
     client.halt_server().expect("halt");
     client.restart_server().expect("restart");
