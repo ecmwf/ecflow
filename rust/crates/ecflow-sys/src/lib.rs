@@ -32,13 +32,12 @@ use bindman::track_cpp_api;
         "server_load", "debug_server_on",
         "debug_server_off", "stats_reset", "stats_server", "ch_register", "ch_suites", "ch_drop",
         "ch_drop_user", "ch_add", "ch_remove", "ch_auto_add", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove",
-        "ch1_auto_add", "begin", "begin_all_suites", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
+        "ch1_auto_add", "zombieGet", "zombieFob", "zombieFail", "zombieAdopt",
         "zombieBlock", "zombieRemove", "zombieKill", "zombieFobCli", "zombieFailCli", "zombieAdoptCli",
         "zombieBlockCli", "zombieRemoveCli", "zombieKillCli", "zombieFobCliPaths", "zombieFailCliPaths",
-        "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths", "job_gen",
-        "edit_history", "kill", "status", "suspend", "resume", "check", "delete_node",
-        "archive", "restore", "requeue", "run", "order", "checkPtDefs",
-        "restoreDefsFromCheckPt", "force", "freeDep", "file", "plug", "query", "alter", "alter_sort",
+        "zombieAdoptCliPaths", "zombieBlockCliPaths", "zombieRemoveCliPaths", "zombieKillCliPaths",
+        "delete_node", "checkPtDefs",
+        "restoreDefsFromCheckPt", "file", "plug", "query", "alter", "alter_sort",
         "reloadwsfile", "reloadpasswdfile", "reloadcustompasswdfile", "group", "logMsg", "new_log", "getLog",
         "clearLog", "flushLog", "get_log_path", "forceDependencyEval", "edit_script", "edit_script_edit",
         "edit_script_preprocess", "edit_script_submit",
@@ -100,6 +99,37 @@ mod ffi {
         Net,
     }
 
+    /// Where a node moves among its siblings, or how they are sorted.
+    ///
+    /// Declared as the existing `NOrder::Order` (aliased in the bridge
+    /// header), so cxx verifies at compile time that each discriminant
+    /// matches the C++ enum.
+    #[namespace = "ecflow_bridge"]
+    #[repr(i32)]
+    enum NodeOrder {
+        /// First among its siblings.
+        #[cxx_name = "TOP"]
+        Top,
+        /// Last among its siblings.
+        #[cxx_name = "BOTTOM"]
+        Bottom,
+        /// The siblings sorted alphabetically.
+        #[cxx_name = "ALPHA"]
+        Alpha,
+        /// The siblings sorted in reverse alphabetical order.
+        #[cxx_name = "ORDER"]
+        Order,
+        /// One place up.
+        #[cxx_name = "UP"]
+        Up,
+        /// One place down.
+        #[cxx_name = "DOWN"]
+        Down,
+        /// The siblings sorted by the time of their last state change.
+        #[cxx_name = "RUNTIME"]
+        Runtime,
+    }
+
     unsafe extern "C++" {
         include!("EcflowBridge.h");
 
@@ -113,6 +143,7 @@ mod ffi {
     #[namespace = "ecflow_bridge"]
     unsafe extern "C++" {
         type DefsStyle;
+        type NodeOrder;
 
         /// The ecFlow client: a `ClientInvoker`, every request in its
         /// throw-on-error mode.
@@ -201,6 +232,52 @@ mod ffi {
         fn delete_nodes(self: &Client, paths: &[String], force: bool) -> Result<()>;
         /// Delete every suite; with `force`, even when nodes are active or submitted.
         fn delete_all(self: &Client, force: bool) -> Result<i32>;
+        /// Suspend the nodes: no jobs are generated below them.
+        fn suspend(self: &Client, paths: &[String]) -> Result<()>;
+        /// Resume suspended nodes.
+        fn resume(self: &Client, paths: &[String]) -> Result<()>;
+        /// Requeue the nodes and their children; `option` is empty, `abort` or `force`.
+        fn requeue(self: &Client, paths: &[String], option: &CxxString) -> Result<()>;
+        /// Run the nodes now, ignoring their dependencies; with `force`, even when active or submitted.
+        fn run(self: &Client, paths: &[String], force: bool) -> Result<()>;
+        /// Kill the jobs of the nodes.
+        fn kill(self: &Client, paths: &[String]) -> Result<()>;
+        /// Query the status of the jobs of the nodes.
+        fn status(self: &Client, paths: &[String]) -> Result<()>;
+        /// Check the expressions and limits below the nodes; the report is in `get_string`.
+        fn check(self: &Client, paths: &[String]) -> Result<()>;
+        /// Save the nodes' children to disk and drop them from the definition; with `force`, even when active.
+        fn archive(self: &Client, paths: &[String], force: bool) -> Result<()>;
+        /// Load archived children back into the definition.
+        fn restore(self: &Client, paths: &[String]) -> Result<()>;
+        /// Force the nodes to a state, or set or clear an event.
+        fn force(
+            self: &Client,
+            paths: &[String],
+            state_or_event: &CxxString,
+            recursive: bool,
+            set_repeats_to_last_value: bool,
+        ) -> Result<()>;
+        /// Free the chosen dependencies of the nodes.
+        #[allow(clippy::fn_params_excessive_bools)]
+        fn freeDep(
+            self: &Client,
+            paths: &[String],
+            trigger: bool,
+            all: bool,
+            date: bool,
+            time: bool,
+        ) -> Result<()>;
+        /// Move the node among its siblings, or sort them.
+        fn order(self: &Client, path: &CxxString, order: NodeOrder) -> Result<i32>;
+        /// Generate and submit the jobs below the node whose dependencies are free, without waiting for the server poll.
+        fn job_gen(self: &Client, path: &CxxString) -> Result<i32>;
+        /// Begin the suite; with `force`, even when it has active or submitted jobs.
+        fn begin(self: &Client, suite: &CxxString, force: bool) -> Result<i32>;
+        /// Begin every suite; with `force`, even when one has active or submitted jobs.
+        fn begin_all_suites(self: &Client, force: bool) -> Result<i32>;
+        /// Ask for the node's edit history; the lines are in `reply_strings`.
+        fn edit_history(self: &Client, path: &CxxString) -> Result<i32>;
 
         // Child (task) commands
 
