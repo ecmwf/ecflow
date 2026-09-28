@@ -153,6 +153,18 @@ void Client::freeDep(rust::Slice<const rust::String> paths, bool trigger, bool a
     ClientInvoker::freeDep(strings(paths), trigger, all, date, time);
 }
 
+void Client::alter(rust::Slice<const rust::String> paths,
+                   const std::string& alter_type,
+                   const std::string& attr_type,
+                   const std::string& name,
+                   const std::string& value) const {
+    ClientInvoker::alter(strings(paths), alter_type, attr_type, name, value);
+}
+
+void Client::alter_sort(rust::Slice<const rust::String> paths, const std::string& attribute, bool recursive) const {
+    ClientInvoker::alter_sort(strings(paths), attribute, recursive);
+}
+
 rust::Vec<rust::String> Client::reply_strings() const {
     rust::Vec<rust::String> result;
     const auto& strings = server_reply().get_string_vec();

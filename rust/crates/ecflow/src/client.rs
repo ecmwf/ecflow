@@ -330,6 +330,49 @@ impl Client {
         Ok(())
     }
 
+    // ==================== Log ====================
+
+    /// Write a message to the server's log.
+    pub fn log_msg(&mut self, message: &str) -> Result<()> {
+        let_cxx_string!(message = message);
+        self.diagnose(self.inner.logMsg(&message))?;
+        Ok(())
+    }
+
+    /// Switch the server to a new log file. With an empty path, the current
+    /// one is reopened.
+    pub fn new_log(&mut self, path: &str) -> Result<()> {
+        let_cxx_string!(path = path);
+        self.diagnose(self.inner.new_log(&path))?;
+        Ok(())
+    }
+
+    /// The last lines of the server's log, 100 unless a count is given.
+    pub fn get_log(&mut self, last_lines: Option<u32>) -> Result<String> {
+        let last_lines = last_lines.map_or(0, |n| i32::try_from(n).unwrap_or(i32::MAX));
+        self.diagnose(self.inner.getLog(last_lines))?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Empty the server's log file.
+    pub fn clear_log(&mut self) -> Result<()> {
+        self.diagnose(self.inner.clearLog())?;
+        Ok(())
+    }
+
+    /// Flush and close the server's log file; the next command that logs
+    /// reopens it.
+    pub fn flush_log(&mut self) -> Result<()> {
+        self.diagnose(self.inner.flushLog())?;
+        Ok(())
+    }
+
+    /// The path of the server's log file.
+    pub fn get_log_path(&mut self) -> Result<String> {
+        self.diagnose(self.inner.get_log_path())?;
+        Ok(self.inner.get_string().to_string())
+    }
+
     // ==================== Nodes ====================
 
     /// Delete the nodes at the given paths. With `force`, even when they are
@@ -548,6 +591,97 @@ impl Client {
         let_cxx_string!(path = path);
         self.diagnose(self.inner.edit_history(&path))?;
         Ok(self.inner.reply_strings())
+    }
+
+    /// The last `max_lines` lines of a file of the node: its `script`,
+    /// `job`, `jobout` (the job's output), `manual`, or the output of its
+    /// `kill` or `stat` command.
+    pub fn get_file(&mut self, path: &str, file_type: &str, max_lines: u32) -> Result<String> {
+        let_cxx_string!(path = path);
+        let_cxx_string!(file_type = file_type);
+        let_cxx_string!(max_lines = max_lines.to_string());
+        self.diagnose(self.inner.file(&path, &file_type, &max_lines))?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Move the node under another parent, which may be on another server
+    /// when given as `//host:port/path`.
+    pub fn plug(&mut self, source_path: &str, destination_path: &str) -> Result<()> {
+        let_cxx_string!(source_path = source_path);
+        let_cxx_string!(destination_path = destination_path);
+        self.diagnose(self.inner.plug(&source_path, &destination_path))?;
+        Ok(())
+    }
+
+    /// Query the node without blocking. `query_type` is `state`, `dstate`
+    /// (the state with `suspended`), `repeat`, `event`, `meter`, `label`,
+    /// `variable`, `limit`, `limit_max`, or `trigger` to evaluate an
+    /// expression; `attribute` names the attribute or holds the expression.
+    /// With `evaluate`, for `variable` only, references in the value are
+    /// resolved.
+    pub fn query(
+        &mut self,
+        query_type: &str,
+        path: &str,
+        attribute: &str,
+        evaluate: bool,
+    ) -> Result<String> {
+        let_cxx_string!(query_type = query_type);
+        let_cxx_string!(path = path);
+        let_cxx_string!(attribute = attribute);
+        let result = self
+            .inner
+            .pin_mut()
+            .query(&query_type, &path, &attribute, evaluate);
+        self.diagnose(result)?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Alter an attribute of the nodes. `alter_type` is `add`, `change`,
+    /// `delete`, `set_flag` or `clear_flag`; `attr_type` the kind of
+    /// attribute, such as `variable`, `event`, `meter`, `label`, `limit`,
+    /// `trigger`, `repeat` or `defstatus`; `name` and `value` what the kind
+    /// needs, empty otherwise.
+    pub fn alter<I, S>(
+        &mut self,
+        paths: I,
+        alter_type: &str,
+        attr_type: &str,
+        name: &str,
+        value: &str,
+    ) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(alter_type = alter_type);
+        let_cxx_string!(attr_type = attr_type);
+        let_cxx_string!(name = name);
+        let_cxx_string!(value = value);
+        self.diagnose(
+            self.inner
+                .alter(&strings(paths), &alter_type, &attr_type, &name, &value),
+        )
+    }
+
+    /// Sort the attributes of a kind (`event`, `meter`, `label`, `variable`,
+    /// `limit` or `all`) of the nodes by name. With `recursive`, below them
+    /// too.
+    pub fn sort_attributes<I, S>(
+        &mut self,
+        paths: I,
+        attribute: &str,
+        recursive: bool,
+    ) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(attribute = attribute);
+        self.diagnose(
+            self.inner
+                .alter_sort(&strings(paths), &attribute, recursive),
+        )
     }
 
     // ==================== Child (task) commands ====================
