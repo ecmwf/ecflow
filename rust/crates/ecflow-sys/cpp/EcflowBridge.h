@@ -9,6 +9,7 @@
 
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "rust/cxx.h"
@@ -17,6 +18,9 @@ namespace ecflow_bridge {
 
 /// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
 using DefsStyle = ::PrintStyle::Type_t;
+
+/// Where a node moves among its siblings, or how they are sorted; the bridge binds it as an enum of this namespace.
+using NodeOrder = ::NOrder::Order;
 
 /// A `ClientInvoker` with the members cxx cannot bind on the base class:
 /// constructors, `std::chrono` arguments, `ECF_OPENSSL` guards, argument
@@ -48,8 +52,22 @@ public:
     void enable_ssl();
     void disable_ssl();
 
-    /// The base method takes `std::vector<std::string>`, which cxx cannot build from Rust.
+    /// The base methods take `std::vector<std::string>`, which cxx cannot build from Rust.
     void delete_nodes(rust::Slice<const rust::String> paths, bool force) const;
+    void suspend(rust::Slice<const rust::String> paths) const;
+    void resume(rust::Slice<const rust::String> paths) const;
+    void requeue(rust::Slice<const rust::String> paths, const std::string& option) const;
+    void run(rust::Slice<const rust::String> paths, bool force) const;
+    void kill(rust::Slice<const rust::String> paths) const;
+    void status(rust::Slice<const rust::String> paths) const;
+    void check(rust::Slice<const rust::String> paths) const;
+    void archive(rust::Slice<const rust::String> paths, bool force) const;
+    void restore(rust::Slice<const rust::String> paths) const;
+    void force(rust::Slice<const rust::String> paths,
+               const std::string& state_or_event,
+               bool recursive,
+               bool set_repeats_to_last_value) const;
+    void freeDep(rust::Slice<const rust::String> paths, bool trigger, bool all, bool date, bool time) const;
 
     /// The list of strings in the most recent reply, for commands that return one.
     rust::Vec<rust::String> reply_strings() const;

@@ -31,6 +31,39 @@ impl From<DefsStyle> for ecflow_sys::DefsStyle {
     }
 }
 
+/// Where a node moves among its siblings, or how they are sorted.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NodeOrder {
+    /// First among its siblings.
+    Top,
+    /// Last among its siblings.
+    Bottom,
+    /// The siblings sorted alphabetically.
+    Alpha,
+    /// The siblings sorted in reverse alphabetical order.
+    Order,
+    /// One place up.
+    Up,
+    /// One place down.
+    Down,
+    /// The siblings sorted by the time of their last state change.
+    Runtime,
+}
+
+impl From<NodeOrder> for ecflow_sys::NodeOrder {
+    fn from(order: NodeOrder) -> Self {
+        match order {
+            NodeOrder::Top => Self::Top,
+            NodeOrder::Bottom => Self::Bottom,
+            NodeOrder::Alpha => Self::Alpha,
+            NodeOrder::Order => Self::Order,
+            NodeOrder::Up => Self::Up,
+            NodeOrder::Down => Self::Down,
+            NodeOrder::Runtime => Self::Runtime,
+        }
+    }
+}
+
 /// A client for an ecFlow server, wrapping the C++ `ClientInvoker`.
 ///
 /// Every request is a blocking round trip. On connection failure the invoker
@@ -69,7 +102,7 @@ impl Client {
     }
 
     /// Attach the failure class ecFlow diagnosed for the request that just threw.
-    fn check<T>(&self, result: std::result::Result<T, Exception>) -> Result<T> {
+    fn diagnose<T>(&self, result: std::result::Result<T, Exception>) -> Result<T> {
         result.map_err(|e| Error::new(Failure::from(self.inner.last_failure()), e.what()))
     }
 
@@ -80,7 +113,7 @@ impl Client {
         let_cxx_string!(host = host);
         let_cxx_string!(port = port.to_string());
         let result = self.inner.pin_mut().set_host_port(&host, &port);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// The configured host.
@@ -111,7 +144,7 @@ impl Client {
     /// feature.
     pub fn enable_ssl(&mut self) -> Result<()> {
         let result = self.inner.pin_mut().enable_ssl();
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Do not use SSL, whatever `ECF_SSL` says.
@@ -155,25 +188,25 @@ impl Client {
 
     /// Check that the server answers, and return the round trip time.
     pub fn ping(&mut self) -> Result<Duration> {
-        self.check(self.inner.pingServer())?;
+        self.diagnose(self.inner.pingServer())?;
         Ok(Duration::from_micros(self.inner.round_trip_time()))
     }
 
     /// The server's version.
     pub fn server_version(&mut self) -> Result<String> {
-        self.check(self.inner.server_version())?;
+        self.diagnose(self.inner.server_version())?;
         Ok(self.inner.get_string().to_string())
     }
 
     /// The server's statistics, formatted by the server.
     pub fn stats(&mut self) -> Result<String> {
-        self.check(self.inner.stats())?;
+        self.diagnose(self.inner.stats())?;
         Ok(self.inner.get_string().to_string())
     }
 
     /// The names of the suites in the server.
     pub fn suites(&mut self) -> Result<Vec<String>> {
-        self.check(self.inner.suites())?;
+        self.diagnose(self.inner.suites())?;
         Ok(self.inner.reply_strings())
     }
 
@@ -181,27 +214,27 @@ impl Client {
 
     /// Restart the server: it schedules jobs and accepts child commands again.
     pub fn restart_server(&mut self) -> Result<()> {
-        self.check(self.inner.restartServer())?;
+        self.diagnose(self.inner.restartServer())?;
         Ok(())
     }
 
     /// Halt the server: no jobs are scheduled and child commands are blocked
     /// until a restart.
     pub fn halt_server(&mut self) -> Result<()> {
-        self.check(self.inner.haltServer())?;
+        self.diagnose(self.inner.haltServer())?;
         Ok(())
     }
 
     /// Shut the server down: no jobs are scheduled, child commands still go
     /// through.
     pub fn shutdown_server(&mut self) -> Result<()> {
-        self.check(self.inner.shutdownServer())?;
+        self.diagnose(self.inner.shutdownServer())?;
         Ok(())
     }
 
     /// Terminate the server process.
     pub fn terminate_server(&mut self) -> Result<()> {
-        self.check(self.inner.terminateServer())?;
+        self.diagnose(self.inner.terminateServer())?;
         Ok(())
     }
 
@@ -214,15 +247,215 @@ impl Client {
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        let paths: Vec<String> = paths.into_iter().map(|p| p.as_ref().to_owned()).collect();
-        self.check(self.inner.delete_nodes(&paths, force))
+        self.diagnose(self.inner.delete_nodes(&strings(paths), force))
     }
 
     /// Delete every suite. With `force`, even when nodes are active or
     /// submitted.
     pub fn delete_all(&mut self, force: bool) -> Result<()> {
-        self.check(self.inner.delete_all(force))?;
+        self.diagnose(self.inner.delete_all(force))?;
         Ok(())
+    }
+
+    /// Suspend the nodes: no jobs are generated below them until resumed.
+    pub fn suspend<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.suspend(&strings(paths)))
+    }
+
+    /// Resume suspended nodes.
+    pub fn resume<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.resume(&strings(paths)))
+    }
+
+    /// Requeue the nodes and their children, back to the state before their
+    /// last run. `option` is empty, `abort` to requeue only aborted tasks, or
+    /// `force` to requeue even active or submitted ones.
+    pub fn requeue<I, S>(&mut self, paths: I, option: &str) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(option = option);
+        self.diagnose(self.inner.requeue(&strings(paths), &option))
+    }
+
+    /// Run the nodes now, ignoring triggers, limits, suspension and time
+    /// dependencies. With `force`, even when they are active or submitted.
+    pub fn run<I, S>(&mut self, paths: I, force: bool) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.run(&strings(paths), force))
+    }
+
+    /// Kill the jobs of the nodes, with `ECF_KILL_CMD`.
+    pub fn kill<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.kill(&strings(paths)))
+    }
+
+    /// Query the status of the jobs of the nodes, with `ECF_STATUS_CMD`.
+    pub fn status<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.status(&strings(paths)))
+    }
+
+    /// Check the trigger and complete expressions and the limits below the
+    /// nodes, and return the errors and warnings; empty when there are none.
+    pub fn check<I, S>(&mut self, paths: I) -> Result<String>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.check(&strings(paths)))?;
+        Ok(self.inner.get_string().to_string())
+    }
+
+    /// Save the nodes' children to disk and drop them from the definition;
+    /// they come back when the node is requeued, begun or restored. With
+    /// `force`, even when they are active or submitted.
+    pub fn archive<I, S>(&mut self, paths: I, force: bool) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.archive(&strings(paths), force))
+    }
+
+    /// Load archived children back into the definition.
+    pub fn restore<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(self.inner.restore(&strings(paths)))
+    }
+
+    /// Force the nodes to a state (`complete`, `aborted`, `queued`, `active`,
+    /// `submitted` or `unknown`), or, for paths of the form `/node:event`,
+    /// `set` or `clear` the event. With `recursive`, the children too. With
+    /// `set_repeats_to_last_value`, repeats move to their last value first, so
+    /// a forced complete does not requeue.
+    pub fn force<I, S>(
+        &mut self,
+        paths: I,
+        state_or_event: &str,
+        recursive: bool,
+        set_repeats_to_last_value: bool,
+    ) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let_cxx_string!(state_or_event = state_or_event);
+        self.diagnose(self.inner.force(
+            &strings(paths),
+            &state_or_event,
+            recursive,
+            set_repeats_to_last_value,
+        ))
+    }
+
+    /// Free the trigger dependencies of the nodes.
+    pub fn free_trigger_dep<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(
+            self.inner
+                .freeDep(&strings(paths), true, false, false, false),
+        )
+    }
+
+    /// Free the date dependencies of the nodes.
+    pub fn free_date_dep<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(
+            self.inner
+                .freeDep(&strings(paths), false, false, true, false),
+        )
+    }
+
+    /// Free the time dependencies of the nodes.
+    pub fn free_time_dep<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(
+            self.inner
+                .freeDep(&strings(paths), false, false, false, true),
+        )
+    }
+
+    /// Free the trigger, date and time dependencies of the nodes.
+    pub fn free_all_dep<I, S>(&mut self, paths: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.diagnose(
+            self.inner
+                .freeDep(&strings(paths), false, true, false, false),
+        )
+    }
+
+    /// Move the node among its siblings, or sort them. The order decides
+    /// which job is submitted first when nothing else does.
+    pub fn order(&mut self, path: &str, order: NodeOrder) -> Result<()> {
+        let_cxx_string!(path = path);
+        self.diagnose(self.inner.order(&path, order.into()))?;
+        Ok(())
+    }
+
+    /// Generate and submit the jobs below the node whose dependencies are
+    /// free, without waiting for the server's next poll.
+    pub fn job_gen(&mut self, path: &str) -> Result<()> {
+        let_cxx_string!(path = path);
+        self.diagnose(self.inner.job_gen(&path))?;
+        Ok(())
+    }
+
+    /// Begin the suite, so that it is scheduled. With `force`, even when it
+    /// has active or submitted jobs, which then become zombies.
+    pub fn begin(&mut self, suite: &str, force: bool) -> Result<()> {
+        let_cxx_string!(suite = suite);
+        self.diagnose(self.inner.begin(&suite, force))?;
+        Ok(())
+    }
+
+    /// Begin every suite. With `force`, even when one has active or
+    /// submitted jobs, which then become zombies.
+    pub fn begin_all_suites(&mut self, force: bool) -> Result<()> {
+        self.diagnose(self.inner.begin_all_suites(force))?;
+        Ok(())
+    }
+
+    /// The edit history of the node: the user commands applied to it, one
+    /// line each.
+    pub fn edit_history(&mut self, path: &str) -> Result<Vec<String>> {
+        let_cxx_string!(path = path);
+        self.diagnose(self.inner.edit_history(&path))?;
+        Ok(self.inner.reply_strings())
     }
 
     // ==================== Child (task) commands ====================
@@ -264,28 +497,28 @@ impl Client {
     /// Report that the job started.
     pub fn child_init(&mut self) -> Result<()> {
         let result = self.inner.pin_mut().child_init();
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Report that the job failed.
     pub fn child_abort(&mut self, reason: &str) -> Result<()> {
         let_cxx_string!(reason = reason);
         let result = self.inner.pin_mut().child_abort(&reason);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Set or clear an event of the task.
     pub fn child_event(&mut self, name: &str, value: bool) -> Result<()> {
         let_cxx_string!(name = name);
         let result = self.inner.pin_mut().child_event(&name, value);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Set a meter of the task.
     pub fn child_meter(&mut self, name: &str, value: i32) -> Result<()> {
         let_cxx_string!(name = name);
         let result = self.inner.pin_mut().child_meter(&name, value);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Set a label of the task.
@@ -293,14 +526,14 @@ impl Client {
         let_cxx_string!(name = name);
         let_cxx_string!(value = value);
         let result = self.inner.pin_mut().child_label(&name, &value);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Block until the expression holds on the server.
     pub fn child_wait(&mut self, expression: &str) -> Result<()> {
         let_cxx_string!(expression = expression);
         let result = self.inner.pin_mut().child_wait(&expression);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Act on a queue of the task or of an ancestor, and return the step the
@@ -320,27 +553,27 @@ impl Client {
             .inner
             .pin_mut()
             .child_queue(&queue, &action, &step, &path);
-        self.check(result)
+        self.diagnose(result)
     }
 
     /// Report that the job finished.
     pub fn child_complete(&mut self) -> Result<()> {
         let result = self.inner.pin_mut().child_complete();
-        self.check(result)
+        self.diagnose(result)
     }
 
     // ==================== Definitions as text ====================
 
     /// Fetch the server's definitions as text.
     pub fn get_defs_text(&mut self, style: DefsStyle) -> Result<String> {
-        self.check(self.inner.defs_text(style.into()))
+        self.diagnose(self.inner.defs_text(style.into()))
     }
 
     /// Load definitions given as text into the server. With `force`, suites
     /// of the same name are replaced.
     pub fn load_defs_text(&mut self, defs: &str, force: bool) -> Result<()> {
         let defs = ecflow_sys::Client::parse_defs(defs)?;
-        self.check(self.inner.load(&defs, force))?;
+        self.diagnose(self.inner.load(&defs, force))?;
         Ok(())
     }
 
@@ -355,7 +588,7 @@ impl Client {
     ) -> Result<()> {
         let defs = ecflow_sys::Client::parse_defs(defs)?;
         let_cxx_string!(path = path);
-        self.check(self.inner.replace_1(&path, &defs, create_parents, force))?;
+        self.diagnose(self.inner.replace_1(&path, &defs, create_parents, force))?;
         Ok(())
     }
 }
@@ -370,6 +603,15 @@ pub fn version() -> String {
 #[must_use]
 pub fn ssl_supported() -> bool {
     ecflow_sys::Client::ssl_supported()
+}
+
+/// The owned strings the bridge takes for a list of paths.
+fn strings<I, S>(items: I) -> Vec<String>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<str>,
+{
+    items.into_iter().map(|s| s.as_ref().to_owned()).collect()
 }
 
 fn millis(duration: Duration) -> u64 {

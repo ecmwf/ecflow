@@ -28,6 +28,16 @@ void enable_ssl_from_environment(ClientInvoker& client) {
 #endif
 }
 
+/// The `std::vector<std::string>` the base methods take.
+std::vector<std::string> strings(rust::Slice<const rust::String> items) {
+    std::vector<std::string> result;
+    result.reserve(items.size());
+    for (const auto& item : items) {
+        result.emplace_back(std::string(item));
+    }
+    return result;
+}
+
 } // namespace
 
 Client::Client()
@@ -93,12 +103,54 @@ void Client::disable_ssl() {
 }
 
 void Client::delete_nodes(rust::Slice<const rust::String> paths, bool force) const {
-    std::vector<std::string> nodes;
-    nodes.reserve(paths.size());
-    for (const auto& path : paths) {
-        nodes.emplace_back(std::string(path));
-    }
-    ClientInvoker::delete_nodes(nodes, force);
+    ClientInvoker::delete_nodes(strings(paths), force);
+}
+
+void Client::suspend(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::suspend(strings(paths));
+}
+
+void Client::resume(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::resume(strings(paths));
+}
+
+void Client::requeue(rust::Slice<const rust::String> paths, const std::string& option) const {
+    ClientInvoker::requeue(strings(paths), option);
+}
+
+void Client::run(rust::Slice<const rust::String> paths, bool force) const {
+    ClientInvoker::run(strings(paths), force);
+}
+
+void Client::kill(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::kill(strings(paths));
+}
+
+void Client::status(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::status(strings(paths));
+}
+
+void Client::check(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::check(strings(paths));
+}
+
+void Client::archive(rust::Slice<const rust::String> paths, bool force) const {
+    ClientInvoker::archive(strings(paths), force);
+}
+
+void Client::restore(rust::Slice<const rust::String> paths) const {
+    ClientInvoker::restore(strings(paths));
+}
+
+void Client::force(rust::Slice<const rust::String> paths,
+                   const std::string& state_or_event,
+                   bool recursive,
+                   bool set_repeats_to_last_value) const {
+    ClientInvoker::force(strings(paths), state_or_event, recursive, set_repeats_to_last_value);
+}
+
+void Client::freeDep(rust::Slice<const rust::String> paths, bool trigger, bool all, bool date, bool time) const {
+    ClientInvoker::freeDep(strings(paths), trigger, all, date, time);
 }
 
 rust::Vec<rust::String> Client::reply_strings() const {

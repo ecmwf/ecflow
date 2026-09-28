@@ -11,7 +11,7 @@ use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use ecflow::{Client, DefsStyle, Failure};
+use ecflow::{Client, DefsStyle, Failure, NodeOrder};
 
 struct Server {
     process: Child,
@@ -130,6 +130,30 @@ fn round_trip() {
         .expect_err("unknown path");
     assert_eq!(error.failure(), Failure::None, "{error}");
     assert!(error.message().contains("Could not find node"), "{error}");
+
+    // Suspended, the suite can be begun without the server submitting t1,
+    // which has no script.
+    client.suspend(["/rust_test"]).expect("suspend");
+    let state = client.get_defs_text(DefsStyle::State).expect("get state");
+    assert!(state.contains("suspended"), "{state}");
+    client.begin("rust_test", false).expect("begin");
+    assert_eq!(client.check(["/rust_test"]).expect("check"), "");
+    client
+        .force(["/rust_test/t1"], "complete", false, false)
+        .expect("force");
+    client.requeue(["/rust_test/t1"], "").expect("requeue");
+    client
+        .order("/rust_test/t1", NodeOrder::Top)
+        .expect("order");
+    client
+        .free_trigger_dep(["/rust_test/t1"])
+        .expect("free trigger");
+    let history = client.edit_history("/rust_test/t1").expect("history");
+    assert!(
+        history.iter().any(|line| line.contains("--force")),
+        "{history:?}"
+    );
+    client.resume(["/rust_test"]).expect("resume");
 
     client.halt_server().expect("halt");
     client.restart_server().expect("restart");
