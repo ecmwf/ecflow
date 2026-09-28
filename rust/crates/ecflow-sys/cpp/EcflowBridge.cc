@@ -249,10 +249,6 @@ void Client::edit_script_submit(const std::string& path,
     for (const auto& variable : used_variables) {
         variables.emplace_back(std::string(variable.name), std::string(variable.value));
     }
-    if (file_contents.empty()) {
-        ClientInvoker::edit_script_submit(path, variables);
-        return;
-    }
     ClientInvoker::edit_script_submit(path, variables, strings(file_contents), alias, run);
 }
 
