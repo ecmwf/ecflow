@@ -52,3 +52,4 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
 
    multi_tenant_reference_environment
    multi_tenant_environment_suite_setup
+   multi_tenant_environment_on_kubernetes
