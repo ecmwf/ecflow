@@ -108,6 +108,8 @@ public:
                             rust::Slice<const rust::String> file_contents,
                             bool alias,
                             bool run);
+    void set_child_init_add_vars(rust::Slice<const NameValue> vars);
+    void set_child_complete_del_vars(rust::Slice<const rust::String> names);
 
     /// The list of strings in the most recent reply, for commands that return one.
     rust::Vec<rust::String> reply_strings() const;

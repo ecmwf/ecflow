@@ -962,6 +962,36 @@ impl Client {
         self.inner.pin_mut().set_child_try_no(try_no);
     }
 
+    /// The variables the child init command adds to the task, as name and
+    /// value pairs.
+    pub fn set_child_init_add_vars<V, N, W>(&mut self, vars: V)
+    where
+        V: IntoIterator<Item = (N, W)>,
+        N: AsRef<str>,
+        W: AsRef<str>,
+    {
+        let vars: Vec<NameValue> = vars
+            .into_iter()
+            .map(|(name, value)| NameValue {
+                name: name.as_ref().to_owned(),
+                value: value.as_ref().to_owned(),
+            })
+            .collect();
+        self.inner.pin_mut().set_child_init_add_vars(&vars);
+    }
+
+    /// The names of the variables the child complete command removes from
+    /// the task.
+    pub fn set_child_complete_del_vars<I, S>(&mut self, names: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        self.inner
+            .pin_mut()
+            .set_child_complete_del_vars(&strings(names));
+    }
+
     /// How long a child command keeps trying to reach the server (`ECF_TIMEOUT`).
     pub fn set_child_timeout(&mut self, timeout: Duration) {
         self.inner.pin_mut().set_child_timeout(secs(timeout));
