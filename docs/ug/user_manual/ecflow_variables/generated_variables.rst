@@ -261,7 +261,8 @@ variables, it is never overridden by a user variable of the same name: as for ``
 substituted in a job command or a script. A suite may therefore use ``%ECF_OWNER%`` in ``ECF_JOB_CMD``,
 ``ECF_KILL_CMD`` and ``ECF_STATUS_CMD`` to select what belongs to the user responsible for the job, for
 example a submission configuration kept in the home directory of that user, and no definition can point it
-elsewhere.
+elsewhere. A server can go further and run every job as its owner; see
+:ref:`running_jobs_as_their_owner`.
 
 The owner is part of the state of the task: it is kept in the check point file, shown by ``--get_state`` as
 the token ``owner:<user>`` on the task line, and available to the Python API through ``Task.get_owner()``
