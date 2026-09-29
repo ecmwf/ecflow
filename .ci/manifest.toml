@@ -66,7 +66,6 @@ triggers = ["upstream-change", "rebuild-request"]
 action = "./.github/actions/build-ecflow"
 forwarded-inputs = ["c-compiler", "cxx-compiler", "build-type", "boost-root"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
-needs = ["ecbuild/build", "stack-deps/build"]
 ctest = true
 ctest-args = "-L nightly -j 8"
 
@@ -130,4 +129,3 @@ container-credentials = true
 job-script = "./.ci/hpc/build.sh.j2"
 triggers = ["upstream-change", "rebuild-request"]
 forwarded-deps-outputs = ["cmake-prefix-path"]
-needs = ["ecbuild/build-hpc", "stack-deps/build-hpc"]
