@@ -206,7 +206,7 @@ jobs:
         build-type: ${{ steps.m.outputs.build-type }}
         boost-root: ${{ steps.m.outputs.boost-root }}
     - name: Test
-      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -j 8
+      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure ${{ matrix._resolved['ctest-args'] }}
     - name: Publish
       uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
       with:
