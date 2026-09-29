@@ -108,6 +108,26 @@ public:
     /// otherwise returns ECF_HOME/ecf_checkpt_file_
     const std::string& checkPtFilename() const { return ecf_checkpt_file_; }
 
+    ///
+    /// @brief Returns whether jobs are spawned as their owner.
+    ///
+    /// The switch is enabled by the flag "spawn_as_owner" of the server configuration file, and is off
+    /// by default: without the file, or without the flag, jobs run as the server account.
+    ///
+    /// @return true when the server switches to the owner of a task before spawning its commands.
+    ///
+    [[nodiscard]] bool spawn_as_owner() const { return spawn_as_owner_; }
+
+    ///
+    /// @brief Returns the server configuration file in use.
+    ///
+    /// The file is looked for beside the server environment file, first as "<host>.<port>.server.cfg",
+    /// then as "server.cfg"; the first one found is read.
+    ///
+    /// @return The path of the file read, or an empty string when neither exists.
+    ///
+    [[nodiscard]] const std::string& server_config_file() const { return server_config_file_; }
+
     /// returns the path of the old checkPointFile. This has a default name set in server_environment.cfg
     /// but can be overridden by the environment variable ECF_CHECKOLD
     /// if the check point file starts with an absolute path return as is:
@@ -192,6 +212,18 @@ private:
     ///  defaults are read from a config file
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
+    ///
+    /// @brief Reads the server configuration file, a JSON file beside the server environment file.
+    ///
+    /// Looks for "<host>.<port>.server.cfg", then "server.cfg", in the directory of
+    /// @p path_to_config_file. A file that is not valid JSON, a flag of the wrong type, or an unknown
+    /// key is recorded as an error, which valid() then reports; the server does not start on it.
+    ///
+    /// @param[in] path_to_config_file Path of the server environment file, whose directory is searched.
+    /// @param[in] port                The port of the server, as text, part of the per-server file name.
+    ///
+    void read_server_config_file(const std::string& path_to_config_file, const std::string& port);
+
     /// Get the standard environment variables, overwrite any settings from config file
     void read_environment_variables(std::string& log_file_name);
 
@@ -241,6 +273,9 @@ private:
     std::string ecf_cmd_;
     std::string ecf_micro_;
     std::string ecf_white_list_file_;
+    std::string server_config_file_;  // the server configuration file read, empty when none exists
+    std::string server_config_error_; // why the server configuration file is not acceptable, empty when it is
+    bool spawn_as_owner_{false};      // jobs are spawned as their owner, see server_config_file_
     mutable WhiteListFile white_list_file_;
 
     mutable ecf::AuthenticationService authentication_service_;
