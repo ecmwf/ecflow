@@ -124,6 +124,11 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
         ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
 
+        // The user loading the suites owns their jobs, until another user (re)queues them
+        for (const auto& suite : defs->suites()) {
+            suite->set_owner(identity().username().value());
+        }
+
         // After the updateDefs, defs will be left with NO suites.
         // Cannot really used defs after this point
         // *NOTE* Externs are not persisted. Hence calling check() will report

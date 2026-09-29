@@ -204,6 +204,16 @@ public:
     };
     virtual void requeue(Requeue_args&);
 
+    ///
+    /// @brief Records the user on whose behalf the jobs below this node are submitted.
+    ///
+    /// A container forwards the call to each of its children; a submittable records the user as its
+    /// owner, see Submittable::set_owner().
+    ///
+    /// @param[in] user Login name of the user, as authenticated by the server; empty when unknown.
+    ///
+    virtual void set_owner(const std::string& user) = 0;
+
     // force queued allows a job to re-run preserving job output.
     // However, other nodes may reference this node's events/meters/late in trigger expression,
     // and reset events, meters and late flag ECFLOW-1617

@@ -108,7 +108,7 @@ def test_task_generated_variables():
             gen_var
         )
 
-    assert len(list(variable_list)) == 10, "Expected 10 generated variables for tasks"
+    assert len(list(variable_list)) == 11, "Expected 11 generated variables for tasks"
     assert variable_list[0].name() == "TASK", (
         "expected generated variable of name TASK but found " + variable_list[0].name()
     )
@@ -184,4 +184,12 @@ def test_task_generated_variables():
     )
     assert variable_list[9].value() == "", (
         "expected generated variable of value '' but found " + variable_list[9].value()
+    )
+    assert variable_list[10].name() == "ECF_OWNER", (
+        "expected generated variable of name ECF_OWNER but found "
+        + variable_list[10].name()
+    )
+    assert variable_list[10].value() == "", (
+        "expected generated variable of value '' but found "
+        + variable_list[10].value()
     )

@@ -958,11 +958,13 @@ public:
     SubmittableMemento(const std::string& jobsPassword,
                        const std::string& process_or_remote_id,
                        const std::string& abortedReason,
-                       int tryNo)
+                       int tryNo,
+                       const std::string& owner)
         : paswd_(jobsPassword),
           rid_(process_or_remote_id),
           abr_(abortedReason),
-          tryNo_(tryNo) {}
+          tryNo_(tryNo),
+          owner_(owner) {}
     SubmittableMemento() = default;
 
 private:
@@ -977,6 +979,7 @@ private:
     std::string rid_;
     std::string abr_;
     int tryNo_{0};
+    std::string owner_;
     friend class Submittable;
 
     friend class cereal::access;

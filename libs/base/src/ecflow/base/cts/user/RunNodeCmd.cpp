@@ -99,6 +99,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
         // Avoid re-running the task again on the same time slot
         node->miss_next_time_slot();
 
+        node->set_owner(identity().username().value());
         if (!node->run(jobsParam, force_)) {
             LOG(Log::ERR, "RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
         }

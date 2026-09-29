@@ -59,6 +59,26 @@ public:
     const Variable& findGenVariable(const std::string& name) const override;
     void gen_variables(std::vector<Variable>& vec) const override;
 
+    ///
+    /// @brief Records the user on whose behalf the next job of this node is submitted.
+    ///
+    /// The owner is the user whose command put the node in a state from which a job is spawned:
+    /// load, replace, requeue, run, force to queued, and the submission of an edited script. An
+    /// automatic requeue keeps the owner. Job generation exposes the owner as the generated variable
+    /// ECF_OWNER, which no user variable of that name overrides. Setting the same owner again is a
+    /// no-op; otherwise the state change number advances and the generated variables are updated.
+    ///
+    /// @param[in] user Login name of the user, as authenticated by the server; empty when unknown.
+    ///
+    void set_owner(const std::string& user) override;
+
+    ///
+    /// @brief Returns the owner recorded by set_owner().
+    ///
+    /// @return The login name of the owner, or an empty string when no user command has queued the node.
+    ///
+    [[nodiscard]] const std::string& owner() const { return owner_; }
+
     static const std::string& DUMMY_JOBS_PASSWORD();
     static const std::string& FREE_JOBS_PASSWORD();
     static const std::string& DUMMY_PROCESS_OR_REMOTE_ID();
@@ -146,6 +166,7 @@ private:
     std::string paswd_;
     std::string rid_;
     std::string abr_;
+    std::string owner_; // the user whose command queued the node, see set_owner()
     int tryNo_{0};
     unsigned int state_change_no_{0};                     // *not* persisted, only used on server side
     mutable SubGenVariables* sub_gen_variables_{nullptr}; // *not* persisted since they can be generated
@@ -200,4 +221,5 @@ private:
     mutable Variable genvar_ecfscript_;
     mutable Variable genvar_ecfname_;
     mutable Variable genvar_ecfrid_;
+    mutable Variable genvar_ecfowner_;
 };
