@@ -223,6 +223,7 @@ void BaseServer::update_defs_server_state() {
 
     /// System needs defs to handle process that have died, and need to flagged as aborted
     ecf::System::instance()->setDefs(defs_);
+    ecf::System::instance()->set_spawn_as_owner(serverEnv_.spawn_as_owner());
 }
 
 void BaseServer::set_server_state(SState::State ss) {
