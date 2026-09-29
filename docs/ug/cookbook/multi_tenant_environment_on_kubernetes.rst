@@ -503,7 +503,9 @@ Known limitations
 .. note::
 
    Every job runs as the same user in the ecFlow server container, and can read the files of every
-   user in ``/admin``.
+   user in ``/admin``. The server can run each job as its owner instead (see
+   :ref:`running_jobs_as_their_owner`), but the stack does not provide what that needs: accounts
+   for the users in the server container, a home directory per user, and a server started as root.
 
 .. implementation::
 
