@@ -26,7 +26,8 @@ inputs:
   boost-root:
     description: >
       Boost install prefix, set per leg in the manifest (the Homebrew prefix on
-      macOS). Empty leaves it to CMake's search, which finds the images' /usr.
+      macOS); empty means /usr, as in the Linux images. Always passed, since
+      cmake/Dependencies.cmake sets Boost_NO_SYSTEM_PATHS.
     required: false
     default: ''
 
@@ -52,4 +53,4 @@ runs:
         cmake-args: |
           -DENABLE_CONFIG_MODE_BOOST=OFF
           -DENABLE_STATIC_BOOST_LIBS=OFF
-          ${{ inputs.boost-root && format('-DBOOST_ROOT={0}', inputs.boost-root) || '' }}
+          -DBOOST_ROOT=${{ inputs.boost-root || '/usr' }}
