@@ -27,6 +27,7 @@ if (ENABLE_ALL_TESTS)
     TestLate.cpp
     TestLimit.cpp
     TestOrderCmd.cpp
+    TestOwner.cpp
     TestQueueCmd.cpp
     TestRepeat.cpp
     TestRequeueNode.cpp

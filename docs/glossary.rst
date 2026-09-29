@@ -464,6 +464,12 @@ Glossary
          * :ref:`tutorial-checking-job-creation`
          * :py:class:`ecflow.Defs.check_job_creation`
 
+   ECF_OWNER
+      A generated variable of every :term:`task` and alias: the login name of the user whose
+      command queued it (load, replace, requeue, run, force to queued, or the submission of an edited script).
+      It is never overridden by a user variable of the same name during :term:`job creation`. See
+      :ref:`ecf_owner`.
+
    ecf script
       The ecFlow script refers to an ‘.ecf’ file.
 

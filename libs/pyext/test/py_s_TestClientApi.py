@@ -37,6 +37,7 @@ from ecflow import (
     Late,
     Flag,
     FlagType,
+    VariableList,
 )
 
 import re
@@ -709,6 +710,17 @@ class TestClientApi:
         assert (
             suite.get_state() == State.queued
         ), "Expected to find suite with state queued"
+
+        # The user that requeued owns the tasks, as reported by the server and as ECF_OWNER
+        user = pwd.getpwuid(os.getuid()).pw_name
+        for task in self.ci.get_defs().get_all_tasks():
+            assert task.get_owner() == user, (
+                "Expected owner " + user + " on " + task.get_abs_node_path() + ", found " + task.get_owner()
+            )
+            variables = VariableList()
+            task.get_generated_variables(variables)
+            owner = [v.value() for v in variables if v.name() == "ECF_OWNER"]
+            assert owner == [user], "Expected ECF_OWNER " + user + ", found " + str(owner)
 
         dir_to_remove = Test.ecf_home(port) + "/" + "test_client_requeue"
         shutil.rmtree(dir_to_remove, ignore_errors=True)

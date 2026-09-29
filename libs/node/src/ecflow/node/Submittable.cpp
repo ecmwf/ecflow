@@ -209,6 +209,11 @@ void Submittable::write_state(std::string& ret, bool& added_comment_char) const 
         ret += " try:";
         ret += ecf::convert_to<std::string>(tryNo_);
     }
+    if (!owner_.empty()) {
+        add_comment_char(ret, added_comment_char);
+        ret += " owner:";
+        ret += owner_;
+    }
     Node::write_state(ret, added_comment_char);
 }
 
@@ -235,6 +240,11 @@ void Submittable::read_state(const std::string& line, const std::vector<std::str
                 throw std::runtime_error("Submittable::read_state failed for try number : " + name());
             }
             tryNo_ = Extract::value<int>(try_number, "Submittable::read_state failed for try number");
+        }
+        else if (line_token_i.find("owner:") == 0) {
+            if (!Extract::split_get_second(line_token_i, owner_)) {
+                throw std::runtime_error("Submittable::read_state failed for owner : " + name());
+            }
         }
     }
 
@@ -295,6 +305,16 @@ bool Submittable::operator==(const Submittable& rhs) const {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
             std::cout << "Submittable::operator==  abr_(" << abr_ << ") != rhs.abr_(" << rhs.abr_ << ") "
+                      << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+
+    if (owner_ != rhs.owner_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Submittable::operator==  owner_(" << owner_ << ") != rhs.owner_(" << rhs.owner_ << ") "
                       << debugNodePath() << "\n";
         }
 #endif
@@ -551,6 +571,15 @@ void Submittable::increment_try_no() {
     rid_.clear();
     abr_.clear();
     paswd_           = Passwd::generate();
+    state_change_no_ = Ecf::incr_state_change_no();
+    update_generated_variables();
+}
+
+void Submittable::set_owner(const std::string& user) {
+    if (owner_ == user) {
+        return;
+    }
+    owner_           = user;
     state_change_no_ = Ecf::incr_state_change_no();
     update_generated_variables();
 }
@@ -985,7 +1014,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<SubmittableMemento>(paswd_, rid_, abr_, tryNo_));
+        comp->add(std::make_shared<SubmittableMemento>(paswd_, rid_, abr_, tryNo_, owner_));
     }
 
     // ** if compound memento has children base class, will add it to DefsDelta
@@ -1008,6 +1037,7 @@ void Submittable::set_memento(const SubmittableMemento* memento,
     rid_   = memento->rid_;
     abr_   = memento->abr_;
     tryNo_ = memento->tryNo_;
+    owner_ = memento->owner_;
 }
 
 // Generated variables ---------------------------------------------------------------------------------
@@ -1048,7 +1078,7 @@ void Submittable::gen_variables(std::vector<Variable>& vec) const {
         update_generated_variables();
     }
 
-    vec.reserve(vec.size() + 9);
+    vec.reserve(vec.size() + 10);
     sub_gen_variables_->gen_variables(vec);
     Node::gen_variables(vec);
 }
@@ -1095,7 +1125,8 @@ SubGenVariables::SubGenVariables(const Submittable* sub)
       genvar_ecfpass_(Variable(ecf::environment::ECF_PASS, "")),
       genvar_ecfscript_(Variable(ecf::environment::ECF_SCRIPT, "")),
       genvar_ecfname_(Variable(ecf::environment::ECF_NAME, "")),
-      genvar_ecfrid_(Variable(ecf::environment::ECF_RID, "")) {
+      genvar_ecfrid_(Variable(ecf::environment::ECF_RID, "")),
+      genvar_ecfowner_(Variable(ecf::environment::ECF_OWNER, "")) {
 }
 
 void SubGenVariables::update_generated_variables() const {
@@ -1133,9 +1164,10 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
     // cache strings that are used in many variables
     std::string the_try_no = submittable_->tryNo();
 
-    genvar_ecfrid_.set_value(submittable_->rid_);    // does *not* modify Variable::state_change_no
-    genvar_ecftryno_.set_value(the_try_no);          // does *not* modify Variable::state_change_no
-    genvar_ecfpass_.set_value(submittable_->paswd_); // does *not* modify Variable::state_change_no
+    genvar_ecfrid_.set_value(submittable_->rid_);     // does *not* modify Variable::state_change_no
+    genvar_ecftryno_.set_value(the_try_no);           // does *not* modify Variable::state_change_no
+    genvar_ecfpass_.set_value(submittable_->paswd_);  // does *not* modify Variable::state_change_no
+    genvar_ecfowner_.set_value(submittable_->owner_); // does *not* modify Variable::state_change_no
 
     /// The directory associated with ECF_JOB is automatically created if it does not exist.
     /// This is Done during Job generation. See EcfFile::doCreateJobFile()
@@ -1195,6 +1227,9 @@ const Variable& SubGenVariables::findGenVariable(const std::string& name) const 
     if (genvar_basename_.name() == name) {
         return genvar_basename_;
     }
+    if (genvar_ecfowner_.name() == name) {
+        return genvar_ecfowner_;
+    }
     if (genvar_ecfpass_.name() == name) {
         return genvar_ecfpass_;
     }
@@ -1218,6 +1253,7 @@ void SubGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_ecfrid_);
     vec.push_back(genvar_ecfname_);
     vec.push_back(genvar_ecfpass_);
+    vec.push_back(genvar_ecfowner_);
 }
 
 template <class Archive>
@@ -1228,5 +1264,6 @@ void Submittable::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, rid_, [this]() { return !rid_.empty(); });     // conditionally save
     CEREAL_OPTIONAL_NVP(ar, abr_, [this]() { return !abr_.empty(); });     // conditionally save
     CEREAL_OPTIONAL_NVP(ar, tryNo_, [this]() { return tryNo_ != 0; });     // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, owner_, [this]() { return !owner_.empty(); }); // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Submittable);

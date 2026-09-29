@@ -150,6 +150,12 @@ void NodeContainer::requeue(Requeue_args& args) {
     handle_defstatus_propagation();
 }
 
+void NodeContainer::set_owner(const std::string& user) {
+    for (const auto& n : nodes_) {
+        n->set_owner(user);
+    }
+}
+
 void NodeContainer::requeue_time_attrs() {
     Node::requeue_time_attrs();
     for (const auto& n : nodes_) {

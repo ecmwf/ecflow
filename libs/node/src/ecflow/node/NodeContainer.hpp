@@ -28,6 +28,8 @@ public:
     void reset() override;
     void begin() override;
     void requeue(Requeue_args&) override;
+    /// @copydoc Node::set_owner
+    void set_owner(const std::string& user) override;
     void requeue_time_attrs() override;
     void handle_migration(const ecf::Calendar&) override;
     void reset_late_event_meters() override;
