@@ -485,6 +485,7 @@ set(srcs
   node/src/ecflow/node/Signal.cpp
   node/src/ecflow/node/Submittable.cpp
   node/src/ecflow/node/Suite.cpp
+  node/src/ecflow/node/SpawnIdentity.cpp
   node/src/ecflow/node/SuiteChanged.cpp
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp

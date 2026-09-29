@@ -25,6 +25,7 @@
 #include <string>
 
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/node/SpawnIdentity.hpp"
 
 namespace ecf {
 
@@ -94,6 +95,41 @@ public:
     enum CmdType { ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD };
     bool spawn(CmdType, const std::string& cmdToSpawn, const std::string& absPath, std::string& errorMsg);
 
+    ///
+    /// @brief Spawns a command on behalf of a user.
+    ///
+    /// With the switch enabled (see set_spawn_as_owner()), @p user is resolved to a system account
+    /// before the fork, and the child switches to it before executing the command; a name that cannot
+    /// be resolved (empty, unknown, or root) is refused: nothing is spawned, the reason is logged and
+    /// returned in @p errorMsg. Without the switch, @p user is ignored and the command runs as the
+    /// server account.
+    ///
+    /// @param[in]  cmd_type   Which of the job, kill or status commands is spawned.
+    /// @param[in]  cmdToSpawn The command line, handed to /bin/sh -c.
+    /// @param[in]  absPath    Path of the task the command belongs to, used when the process dies.
+    /// @param[in]  user       Login name of the account to spawn as, the owner or the requester.
+    /// @param[out] errorMsg   Why the command was not spawned.
+    /// @return true when the command was spawned, false otherwise.
+    ///
+    bool spawn(CmdType cmd_type,
+               const std::string& cmdToSpawn,
+               const std::string& absPath,
+               const std::string& user,
+               std::string& errorMsg);
+
+    ///
+    /// @brief Enables or disables the switch to the user a command is spawned for.
+    ///
+    /// Set once by the server from its configuration; off by default, in which case every command
+    /// runs as the server account.
+    ///
+    /// @param[in] enabled true to spawn each command as its user.
+    ///
+    void set_spawn_as_owner(bool enabled) { spawn_as_owner_ = enabled; }
+
+    /// @return true when commands are spawned as their user, see set_spawn_as_owner().
+    [[nodiscard]] bool spawn_as_owner() const { return spawn_as_owner_; }
+
     // Handle children that have stopped,aborted or terminated, etc.
     // The signal handler is kept as light as possible, since it is re-entrant.
     // So Signal handles stores the termination state which handled later
@@ -113,13 +149,25 @@ private:
     // Relies on the stored Defs ptr. which was set in the server
     void died(const std::string& absNodePath, CmdType, const std::string& reason);
 
-    /// Does the real work of spawning children
-    int sys(CmdType, const std::string& cmdToSpawn, const std::string& absPath, std::string& errorMsg);
+    /// Spawns with a resolved identity, or as the server when identity is null
+    bool spawn_as(CmdType,
+                  const std::string& cmdToSpawn,
+                  const std::string& absPath,
+                  const SpawnIdentity* identity,
+                  std::string& errorMsg);
+
+    /// Does the real work of spawning children; identity is null when the command runs as the server
+    int sys(CmdType,
+            const std::string& cmdToSpawn,
+            const std::string& absPath,
+            const SpawnIdentity* identity,
+            std::string& errorMsg);
 
     static std::string cmd_type(CmdType);
 
 private:
     weak_defs_ptr defs_; // weak_ptr is an observer of a shared_ptr
+    bool spawn_as_owner_{false};
     static System* instance_;
 };
 

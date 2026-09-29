@@ -635,6 +635,7 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
 }
 
 bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
+    std::string spawn_error; // why the child process was not created, when the spawn refused it
     try {
         // Locate the ecf files corresponding to the task.
         // Assign lifetime of EcfFile to JobsParam.
@@ -651,11 +652,13 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
             //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
             //... and hence must be done before variable substitution in ECF_/JOB file
             //... This is used by client->server authentication
+            size_t errors_before = jobsParam.errorMsg().size();
             if (createChildProcess(jobsParam)) {
                 set_state(NState::SUBMITTED, false, job_size);
                 return true;
             }
             // Fall through job submission failed.
+            spawn_error = jobsParam.errorMsg().substr(errors_before);
         }
         catch (std::exception& e) {
             get_flag().set(ecf::Flag::EDIT_FAILED);
@@ -682,6 +685,10 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
+    if (!spawn_error.empty()) {
+        reason += " ";
+        reason += spawn_error;
+    }
     jobsParam.errorMsg() += reason;
     set_aborted_only(reason);
     return false;
@@ -695,16 +702,23 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
     //     ecflow_client (--meter,--event,--label);
     //  ecflow_client --hcomplete
 
+    std::string spawn_error; // why the child process was not created, when the spawn refused it
+    size_t errors_before = jobsParam.errorMsg().size();
     if (createChildProcess(jobsParam)) {
         set_state(NState::SUBMITTED, false, ecf::string_constants::empty);
         return true;
     }
+    spawn_error = jobsParam.errorMsg().substr(errors_before);
 
     // Fall through job submission failed.
     get_flag().set(ecf::Flag::JOBCMD_FAILED);
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
+    if (!spawn_error.empty()) {
+        reason += " ";
+        reason += spawn_error;
+    }
     jobsParam.errorMsg() += reason;
     set_aborted_only(reason);
     return false;
@@ -811,7 +825,7 @@ bool Submittable::run(JobsParam& jobsParam, bool force) {
     return false;
 }
 
-void Submittable::kill(const std::string& zombie_pid) {
+void Submittable::kill(const std::string& zombie_pid, const std::string& requester) {
     get_flag().clear(ecf::Flag::KILLCMD_FAILED);
     get_flag().clear(ecf::Flag::KILLED);
 
@@ -868,14 +882,15 @@ void Submittable::kill(const std::string& zombie_pid) {
     // Done as two separate steps as kill command is not blocking on the server
     //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), errorMsg)) {
+    if (!System::instance()->spawn(
+            System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), requester.empty() ? owner() : requester, errorMsg)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
     get_flag().set(ecf::Flag::KILLED);
 }
 
-void Submittable::status() {
+void Submittable::status(const std::string& requester) {
     // Jobs::generate will un-block SIGCHLD (by using Signal class)
     // This will allow child process termination to handled by the signal handler in System
     // Note:: Jobs::generate is called every minute *AND* when there is a state change.
@@ -922,7 +937,8 @@ void Submittable::status() {
     // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
     // SPAWN process, attach signal to monitor process. returns true
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), errorMsg)) {
+    if (!System::instance()->spawn(
+            System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), requester.empty() ? owner() : requester, errorMsg)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
@@ -953,7 +969,8 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
     if (jobsParam.spawnJobs()) {
 
         // SPAWN process, attach signal to monitor process. returns true
-        return System::instance()->spawn(System::ECF_JOB_CMD, ecf_job_cmd, absNodePath(), jobsParam.errorMsg());
+        return System::instance()->spawn(
+            System::ECF_JOB_CMD, ecf_job_cmd, absNodePath(), owner(), jobsParam.errorMsg());
     }
 
     // Test path ONLY

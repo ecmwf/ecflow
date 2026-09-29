@@ -193,20 +193,16 @@ bool NodeContainer::run(JobsParam& jobsParam, bool force) {
     return jobsParam.getErrorMsg().empty();
 }
 
-void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single task */) {
+void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single task */,
+                         const std::string& requester) {
     for (const auto& n : nodes_) {
-        n->kill();
+        n->kill("", requester);
     }
 }
 
-void NodeContainer::status() {
+void NodeContainer::status(const std::string& requester) {
     for (const auto& n : nodes_) {
-        // Avoid exception for top-down case, if Task is not active or submitted
-        // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/submitted
-        if (n->isTask() && (n->state() != NState::ACTIVE && n->state() != NState::SUBMITTED)) {
-            continue;
-        }
-        n->status();
+        n->status(requester);
     }
 }
 

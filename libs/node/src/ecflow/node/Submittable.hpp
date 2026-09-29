@@ -52,8 +52,10 @@ public:
     void begin() override;
     void requeue(Requeue_args&) override;
     bool run(JobsParam& jobsParam, bool force) override;
-    void kill(const std::string& zombie_pid = "") override;
-    void status() override;
+    using Node::kill;
+    using Node::status;
+    void kill(const std::string& zombie_pid, const std::string& requester) override;
+    void status(const std::string& requester) override;
 
     void update_generated_variables() const override;
     const Variable& findGenVariable(const std::string& name) const override;
