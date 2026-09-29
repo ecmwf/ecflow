@@ -109,6 +109,7 @@ jobs:
           c-compiler: ${{ matrix.c-compiler }}
           cxx-compiler: ${{ matrix.cxx-compiler }}
           build-type: ${{ matrix.build-type }}
+          boost-root: ${{ matrix.boost-root }}
 
       # Run from the build tree: ecflow's tests link against it (and against
       # static libraries that never reach the install prefix), so they cannot be

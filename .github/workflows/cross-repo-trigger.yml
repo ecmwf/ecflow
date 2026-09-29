@@ -83,11 +83,15 @@ env:
 jobs:
   resolve:
     if: contains(fromJSON(inputs.from-jobs), 'ecbuild/build') || contains(fromJSON(inputs.from-jobs), 'stack-deps/build') || inputs.rebuild-request
-    runs-on: ubuntu-slim
+    runs-on: arc-runner-normal
+    container:
+      image: eccr.ecmwf.int/public-ci-images/ubuntu24.04-base:latest
     outputs:
       ref: ${{ steps.pick.outputs.ref }}
       matrix-build: ${{ steps.r.outputs.matrix-build }}
     steps:
+    - name: Announce image
+      uses: ecmwf/ci-infrastructure/actions/announce-image@main
     - id: mint
       uses: actions/create-github-app-token@v3
       with:
@@ -110,6 +114,7 @@ jobs:
       uses: ecmwf/ci-infrastructure/actions/resolve-deps@main
       with:
         current-branch: ${{ steps.pick.outputs.ref }}
+        pin: ${{ !inputs.rebuild-request && format('{0}@{1}', inputs.from-repo, inputs.from-sha) || '' }}
         matrix: build
         token: ${{ steps.mint.outputs.token }}
         client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
@@ -174,12 +179,14 @@ jobs:
         c_compiler=$(require '."c-compiler"' c-compiler)
         cxx_compiler=$(require '."cxx-compiler"' cxx-compiler)
         build_type=$(require '."build-type"' build-type)
+        boost_root=$(jq -r '."boost-root" // ""' <<<"$leg")
         deps_json=$(require '._resolved.deps | tojson' '_resolved.deps')
         own_artifact_name=$(require '._resolved."own-artifact-name"' '_resolved.own-artifact-name')
         {
           echo "c-compiler=${c_compiler}"
           echo "cxx-compiler=${cxx_compiler}"
           echo "build-type=${build_type}"
+          echo "boost-root=${boost_root}"
           echo "deps-json=${deps_json}"
           echo "own-artifact-name=${own_artifact_name}"
         } >> "$GITHUB_OUTPUT"
@@ -197,6 +204,7 @@ jobs:
         c-compiler: ${{ steps.m.outputs.c-compiler }}
         cxx-compiler: ${{ steps.m.outputs.cxx-compiler }}
         build-type: ${{ steps.m.outputs.build-type }}
+        boost-root: ${{ steps.m.outputs.boost-root }}
     - name: Test
       run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure -L nightly -j 8
     - name: Publish
