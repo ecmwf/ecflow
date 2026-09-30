@@ -25,8 +25,9 @@ inputs:
     required: true
   boost-root:
     description: >
-      Boost install prefix. Empty detects it: /usr in the Linux images, the
-      homebrew prefix on macOS.
+      Boost install prefix, set per leg in the manifest (the Homebrew prefix on
+      macOS); empty means /usr, as in the Linux images. Always passed, since
+      cmake/Dependencies.cmake sets Boost_NO_SYSTEM_PATHS.
     required: false
     default: ''
 
@@ -41,36 +42,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Configure Boost
-      id: boost
-      shell: bash
-      env:
-        BOOST_ROOT_IN: ${{ inputs.boost-root }}
-      run: |
-        set -euo pipefail
-
-        # Linux finds the multiarch libdir itself; homebrew is not on that path.
-        boost_root="$BOOST_ROOT_IN"
-        if [ -z "$boost_root" ]; then
-          if [ "$(uname)" = Darwin ]; then
-            boost_root="$(brew --prefix)"
-          else
-            boost_root=/usr
-          fi
-        fi
-
-        {
-          echo "cmake-args<<EOF"
-          echo "-DBOOST_ROOT=$boost_root"
-          if [ "$(uname)" = Darwin ]; then
-            echo "-DBOOST_INCLUDEDIR=$boost_root/include"
-            echo "-DBOOST_LIBRARYDIR=$boost_root/lib"
-          fi
-          echo "-DENABLE_CONFIG_MODE_BOOST=OFF"
-          echo "-DENABLE_STATIC_BOOST_LIBS=OFF"
-          echo "EOF"
-        } >> "$GITHUB_OUTPUT"
-
     - id: build
       uses: ecmwf/ci-infrastructure/actions/cmake-build@main
       with:
@@ -79,4 +50,7 @@ runs:
         c-compiler: ${{ inputs.c-compiler }}
         cxx-compiler: ${{ inputs.cxx-compiler }}
         build-type: ${{ inputs.build-type }}
-        cmake-args: ${{ steps.boost.outputs.cmake-args }}
+        cmake-args: |
+          -DENABLE_CONFIG_MODE_BOOST=OFF
+          -DENABLE_STATIC_BOOST_LIBS=OFF
+          -DBOOST_ROOT=${{ inputs.boost-root || '/usr' }}
