@@ -27,3 +27,4 @@ ecFlow otherwise ecFlow cannot start.
     ecflow_log_file
     ecflow_check_point_file_and_failure_tolerance
     server_environment.cfg
+    server.cfg

@@ -202,6 +202,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
             // This is required since the try number is *always* incremented *before* job submission,
             // hence the value extracted from the job file will *not* be accurate, hence we exclude it form user
             // variables
+            submittable->set_owner(identity().username().value());
             if (!submittable->submitJob(jobsParam)) {
                 throw std::runtime_error("EditScriptCmd:: failed for submit: " + jobsParam.getErrorMsg());
             }
@@ -232,6 +233,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                 jobsParam.set_user_edit_variables(user_variables_map);
                 jobsParam.set_user_edit_file(user_file_contents_);
 
+                submittable->set_owner(identity().username().value());
                 if (!submittable->submitJob(jobsParam)) {
                     std::vector<std::string>().swap(
                         user_file_contents_); // clear user_file_contents_ and minimise its capacity
@@ -250,6 +252,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                                              "Selected path is a Alias. Please select a Task path");
                 }
                 alias_ptr alias = task->add_alias(user_file_contents_, user_variables_);
+                alias->set_owner(identity().username().value());
 
                 if (run_) {
                     /// This will *NOT* timeout, unlike server Job generation

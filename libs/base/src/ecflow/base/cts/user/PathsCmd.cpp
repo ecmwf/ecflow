@@ -268,7 +268,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
                 SuiteChanged0 changed(theNode);
-                theNode->kill(); // this can throw std::runtime_error
+                theNode->kill("", identity().username().value()); // this can throw std::runtime_error
             }
             break;
         }
@@ -384,7 +384,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                                                                            << " must be 'begun' first\n"));
                 }
                 SuiteChangedPtr changed(theNode.get());
-                theNode->status(); // this can throw std::runtime_error
+                theNode->status(identity().username().value()); // this can throw std::runtime_error
             }
             break;
         }

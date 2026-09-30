@@ -45,6 +45,8 @@ set(test_srcs
   test/TestReplace.cpp
   test/TestSetState.cpp
   test/TestSpecificIssues.cpp
+  test/TestSpawnAsOwner.cpp
+  test/TestSpawnIdentity.cpp
   test/TestSystem.cpp
   test/TestSystemDescriptors.cpp
   test/TestTaskScriptGenerator.cpp

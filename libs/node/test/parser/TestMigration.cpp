@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         t1->set_state(NState::COMPLETE);
 
         // Use memento to modify task state
-        SubmittableMemento memento("Jobs_password", "the_rid", "the abort  reason with spaces", 12);
+        SubmittableMemento memento("Jobs_password", "the_rid", "the abort  reason with spaces", 12, "the_owner");
         std::vector<ecf::Aspect::Type> aspects;
         t1->set_memento(&memento, aspects, false);
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         t1->suspend();
         t1->set_state(NState::COMPLETE);
         // Use memento to modify alias state
-        SubmittableMemento memento("Jobs_password", "the_rid", "the abort  reason with spaces", 12);
+        SubmittableMemento memento("Jobs_password", "the_rid", "the abort  reason with spaces", 12, "the_owner");
         std::vector<ecf::Aspect::Type> aspects;
         t1->set_memento(&memento, aspects, false);
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
