@@ -249,7 +249,7 @@ impl Client {
 
     /// The path of the certificate used for SSL. Fails when built without
     /// the `ssl` feature.
-    pub fn get_certificate(&self) -> Result<String> {
+    pub fn certificate(&self) -> Result<String> {
         self.diagnose(self.inner.get_certificate())
     }
 
