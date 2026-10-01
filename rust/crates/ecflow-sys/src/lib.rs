@@ -30,7 +30,7 @@ use bindman::track_cpp_api;
         "server_load", "stats_server", "ch1_register", "ch1_add", "ch1_remove", "ch1_auto_add",
         "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
-        "delete_node", "group", "forceDependencyEval", "edit_script",
+        "delete_node", "forceDependencyEval", "edit_script",
     ]
 )]
 #[cxx::bridge]
@@ -413,6 +413,8 @@ mod ffi {
         ) -> Result<i32>;
         /// Move the node to another parent, possibly on another server.
         fn plug(self: &Client, source_path: &CxxString, dest_path: &CxxString) -> Result<i32>;
+        /// Run `;` separated commands, in `ecflow_client` syntax, as one request.
+        fn group(self: &Client, request: &CxxString) -> Result<i32>;
         /// Query an attribute or evaluate an expression; the answer is in `get_string`.
         fn query(
             self: Pin<&mut Client>,
