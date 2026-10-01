@@ -277,7 +277,8 @@ mod ffi {
         fn set_user_name(self: Pin<&mut Client>, user: &CxxString);
         /// Set the password for the user name.
         fn set_password(self: Pin<&mut Client>, password: &CxxString);
-        /// Use SSL, whatever `ECF_SSL` says; fails when built without the `ssl` feature.
+        /// Use SSL, with the certificate `ECF_SSL` selects when it is set; fails when built
+        /// without the `ssl` feature.
         fn enable_ssl(self: Pin<&mut Client>) -> Result<()>;
         /// Do not use SSL, whatever `ECF_SSL` says.
         fn disable_ssl(self: Pin<&mut Client>);
