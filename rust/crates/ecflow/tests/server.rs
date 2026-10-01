@@ -335,6 +335,16 @@ fn server_commands(client: &mut Client) {
 
     client.halt_server().expect("halt");
     client.restart_server().expect("restart");
+    client
+        .group("halt=yes; restart; alter add variable GROUP_VAR 1 /rust_test")
+        .expect("group");
+    assert_eq!(
+        client
+            .query("variable", "/rust_test", "GROUP_VAR", false)
+            .expect("group variable"),
+        "1"
+    );
+    assert!(client.group("no_such_command").is_err());
     client.delete(["/rust_test/t1"], true).expect("delete node");
     client.delete_all(true).expect("delete all");
     assert!(client.suites().expect("suites").is_empty());

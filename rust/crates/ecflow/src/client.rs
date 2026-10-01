@@ -674,6 +674,18 @@ impl Client {
         Ok(())
     }
 
+    /// Run several commands as one request. `commands` holds them separated
+    /// by `;`, each written as an `ecflow_client` option without the
+    /// leading `--`, such as `halt=yes; restart`. A command that asks for
+    /// confirmation on the command line (`delete`, `halt`, `shutdown`,
+    /// `terminate`) reads the answer from standard input unless given
+    /// `yes`, and `show` and `why` write to standard output.
+    pub fn group(&mut self, commands: &str) -> Result<()> {
+        let_cxx_string!(commands = commands);
+        self.diagnose(self.inner.group(&commands))?;
+        Ok(())
+    }
+
     /// Query the node. `query_type` is `state`, `dstate`
     /// (the state with `suspended`), `repeat`, `event`, `meter`, `label`,
     /// `variable`, `limit`, `limit_max`, or `trigger` to evaluate an
