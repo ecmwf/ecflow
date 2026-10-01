@@ -27,7 +27,7 @@ use bindman::track_cpp_api;
         "set_child_host_file", "set_child_denied", "set_child_no_ecf",
         // User commands
         "sync", "news", "wait_for_server_death",
-        "server_load", "stats_server", "ch1_register", "ch1_drop", "ch1_add", "ch1_remove", "ch1_auto_add",
+        "server_load", "stats_server", "ch1_register", "ch1_add", "ch1_remove", "ch1_auto_add",
         "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
         "delete_node", "group", "forceDependencyEval", "edit_script",
@@ -505,6 +505,8 @@ mod ffi {
         fn client_handle_suites(self: &Client) -> Vec<HandleSuites>;
         /// Drop the handle.
         fn ch_drop(self: &Client, client_handle: i32) -> Result<i32>;
+        /// Drop the handle of the most recent registration, if there is one.
+        fn ch1_drop(self: &Client) -> Result<i32>;
         /// Drop every handle of the user, the client's own when empty.
         fn ch_drop_user(self: &Client, user: &CxxString) -> Result<i32>;
         /// Add suites to the handle.
