@@ -121,6 +121,10 @@ impl From<NodeState> for ecflow_sys::NodeState {
 /// retries, sleeping up to ten seconds between attempts by default, so async
 /// callers should run requests on a blocking thread.
 ///
+/// Dropping the client drops the handle of its most recent
+/// [`Client::ch_register`], if it still holds one; a failure of that request
+/// is ignored.
+///
 /// # Example
 ///
 /// ```no_run
@@ -137,6 +141,12 @@ pub struct Client {
 // creates its own I/O context. It is not reentrant, hence no `Sync`.
 #[allow(clippy::non_send_fields_in_send_ty)]
 unsafe impl Send for Client {}
+
+impl Drop for Client {
+    fn drop(&mut self) {
+        let _ = self.inner.ch1_drop();
+    }
+}
 
 impl Client {
     /// Create a client configured from the environment
@@ -870,7 +880,9 @@ impl Client {
 
     /// Register interest in the suites, so that the server sends only those
     /// on a sync, and return the handle. With `auto_add_new_suites`, suites
-    /// added later are included.
+    /// added later are included. The server keeps the handle until it is
+    /// dropped; the client drops the most recent one when it goes out of
+    /// scope.
     pub fn ch_register<I, S>(&mut self, auto_add_new_suites: bool, suites: I) -> Result<i32>
     where
         I: IntoIterator<Item = S>,
