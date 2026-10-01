@@ -38,6 +38,7 @@ Welcome to ecFlow's documentation
 
    client_api/index.rst
    python_api/python_api.rst
+   rust_api.rst
    rest_api.rst
    udp_api.rst
 
