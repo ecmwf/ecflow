@@ -17,6 +17,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.ping()?;
     println!("server {}", client.server_version()?);
 
+    // User commands
+    client.suspend(["/suite"])?;
+    let state = client.query("state", "/suite/family/task", "", false)?;
+    println!("task is {state}");
+    client.resume(["/suite"])?;
+
     // A job reporting progress
     client.set_child_path("/suite/family/task");
     client.set_child_password(&std::env::var("ECF_PASS")?);
@@ -25,9 +31,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.child_init()?;
     client.child_meter("progress", 50)?;
     client.child_complete()?;
-
-    // Any other command, as ecflow_client arguments
-    client.invoke(["--suspend=/suite"])?;
     Ok(())
 }
 ```
