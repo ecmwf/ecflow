@@ -11,7 +11,7 @@ use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder, NodeState};
+use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder, NodeState, Zombie};
 
 struct Server {
     process: Child,
@@ -99,7 +99,7 @@ fn round_trip() {
             .starts_with(env!("CARGO_PKG_VERSION")),
         "server version differs from the library version"
     );
-    assert!(!client.stats().expect("stats").is_empty());
+    assert_ne!(client.stats().expect("stats"), "");
 
     client.load_defs_text(DEFS, true).expect("load defs");
     let defs = client.get_defs_text(DefsStyle::Defs).expect("get defs");
@@ -290,7 +290,7 @@ fn script_commands(client: &mut Client) {
             .expect("alias state"),
         "queued"
     );
-    assert!(client.zombie_get().expect("zombies").is_empty());
+    assert_eq!(client.zombie_get().expect("zombies"), Vec::<Zombie>::new());
 }
 
 /// The log and server commands, then the deletion of everything.
@@ -298,7 +298,7 @@ fn server_commands(client: &mut Client) {
     client.log_msg("hello from rust").expect("log msg");
     let log = client.get_log(Some(10)).expect("get log");
     assert!(log.contains("hello from rust"), "{log}");
-    assert!(!client.get_log_path().expect("log path").is_empty());
+    assert_ne!(client.get_log_path().expect("log path"), "");
     client.flush_log().expect("flush log");
 
     let handle = client.ch_register(false, ["rust_test"]).expect("register");
@@ -347,7 +347,7 @@ fn server_commands(client: &mut Client) {
     assert!(client.group("no_such_command").is_err());
     client.delete(["/rust_test/t1"], true).expect("delete node");
     client.delete_all(true).expect("delete all");
-    assert!(client.suites().expect("suites").is_empty());
+    assert_eq!(client.suites().expect("suites"), Vec::<String>::new());
 }
 
 #[test]
