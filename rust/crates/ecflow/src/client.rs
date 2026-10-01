@@ -201,8 +201,10 @@ impl Client {
         self.inner.pin_mut().set_password(&password);
     }
 
-    /// Use SSL, whatever `ECF_SSL` says. Fails when built without the `ssl`
-    /// feature.
+    /// Use SSL. The certificate is `server.crt`, or else
+    /// `<host>.<port>.crt`, in `$HOME/.ecflowrc/ssl`; when `ECF_SSL` is set
+    /// to anything but `1`, only `<host>.<port>.crt`. Fails when no
+    /// certificate is found, or when built without the `ssl` feature.
     pub fn enable_ssl(&mut self) -> Result<()> {
         let result = self.inner.pin_mut().enable_ssl();
         self.diagnose(result)

@@ -94,7 +94,13 @@ void Client::set_retry_connection_period(uint64_t milliseconds) {
 
 void Client::enable_ssl() {
 #if defined(ECF_OPENSSL)
-    ClientInvoker::enable_ssl();
+    // As the Python bindings do: ECF_SSL, when set, selects the certificate.
+    if (std::getenv("ECF_SSL") != nullptr) {
+        ClientInvoker::enable_ssl_if_defined();
+    }
+    else {
+        ClientInvoker::enable_ssl();
+    }
 #else
     throw std::runtime_error("ecflow-sys was built without the ssl feature");
 #endif
