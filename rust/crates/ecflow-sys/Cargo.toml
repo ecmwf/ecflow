@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "ecflow-sys"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+description = "FFI bindings to the ECMWF ecFlow client C++ library"
+links = "ecflow_sys"
+build = "build.rs"
+
+[features]
+default = ["ssl"]
+
+# Build ecFlow with OpenSSL support (CMake `ENABLE_SSL`, defines `ECF_OPENSSL`).
+ssl = []
+
+[dependencies]
+bindman.workspace = true
+cxx.workspace = true
+
+[build-dependencies]
+bindman-build.workspace = true
+bindman-utils.workspace = true
+cxx-build.workspace = true
+
+[package.metadata.docs.rs]

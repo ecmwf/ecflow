@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+[workspace]
+resolver = "2"
+members = ["crates/ecflow-sys", "crates/ecflow"]
+
+[workspace.package]
+version = "5.19.0"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/ecmwf/ecflow"
+rust-version = "1.90"
+readme = "README.md"
+keywords = ["ecmwf", "ecflow", "workflow", "scheduler"]
+categories = ["science"]
+
+[workspace.dependencies]
+# Internal
+ecflow-sys = { version = "5.19", path = "crates/ecflow-sys" }
+ecflow = { version = "5.19", path = "crates/ecflow" }
+
+# Build tools
+bindman = "0.2"
+bindman-build = "0.2"
+bindman-utils = "0.2"
+
+# External
+cxx = "1.0"
+cxx-build = "1.0"
+tempfile = "3"
+thiserror = "2"
