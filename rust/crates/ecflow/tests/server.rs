@@ -174,7 +174,25 @@ fn round_trip() {
     node_commands(&mut client);
     script_commands(&mut client);
     client.resume(["/rust_test"]).expect("resume");
+    handle_dropped_with_client(&server, &mut client);
     server_commands(&mut client);
+}
+
+/// A handle registered by a client is gone from the server once that client
+/// is dropped.
+fn handle_dropped_with_client(server: &Server, client: &mut Client) {
+    let mut other = server.client();
+    let handle = other.ch_register(false, ["rust_test"]).expect("register");
+    let registered = |client: &mut Client| {
+        client
+            .ch_suites()
+            .expect("handles")
+            .iter()
+            .any(|(h, _)| *h == handle)
+    };
+    assert!(registered(client));
+    drop(other);
+    assert!(!registered(client));
 }
 
 /// The node commands on the suspended suite.
