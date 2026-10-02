@@ -103,25 +103,12 @@ jobs:
 
       - name: Build ecflow
         id: build
-        uses: ./.github/actions/build-ecflow
+        uses: ecmwf/ci-infrastructure/actions/run-job-script@main
         with:
+          job-script: ${{ matrix.job-script }}
+          matrix-leg: ${{ toJSON(matrix) }}
+          package: ecflow
           cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
-          c-compiler: ${{ matrix.c-compiler }}
-          cxx-compiler: ${{ matrix.cxx-compiler }}
-          build-type: ${{ matrix.build-type }}
-          boost-root: ${{ matrix.boost-root }}
-
-      # Run from the build tree: ecflow's tests link against it (and against
-      # static libraries that never reach the install prefix), so they cannot be
-      # run against the installed artifact.
-      #
-      # The filters come from .ci/manifest.toml's [matrix.build], which is also
-      # what the generated cross-repo-trigger.yml renders its Test step from —
-      # see the comment there for why this particular set. Spelling them out
-      # again here is how the two invocations drift apart.
-      - name: Test
-        if: ${{ matrix._resolved.ctest }}
-        run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure ${{ matrix._resolved['ctest-args'] }}
 
       - name: Publish ecflow
         uses: ecmwf/ci-infrastructure/actions/publish-artifact@main

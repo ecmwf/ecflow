@@ -176,17 +176,9 @@ jobs:
           fi
           printf '%s' "$val"
         }
-        c_compiler=$(require '."c-compiler"' c-compiler)
-        cxx_compiler=$(require '."cxx-compiler"' cxx-compiler)
-        build_type=$(require '."build-type"' build-type)
-        boost_root=$(jq -r '."boost-root" // ""' <<<"$leg")
         deps_json=$(require '._resolved.deps | tojson' '_resolved.deps')
         own_artifact_name=$(require '._resolved."own-artifact-name"' '_resolved.own-artifact-name')
         {
-          echo "c-compiler=${c_compiler}"
-          echo "cxx-compiler=${cxx_compiler}"
-          echo "build-type=${build_type}"
-          echo "boost-root=${boost_root}"
           echo "deps-json=${deps_json}"
           echo "own-artifact-name=${own_artifact_name}"
         } >> "$GITHUB_OUTPUT"
@@ -198,15 +190,12 @@ jobs:
         token: ${{ steps.mint.outputs.token }}
     - name: Build
       id: build
-      uses: ./.github/actions/build-ecflow
+      uses: ecmwf/ci-infrastructure/actions/run-job-script@main
       with:
+        job-script: ${{ matrix.job-script }}
+        matrix-leg: ${{ toJSON(matrix) }}
+        package: ecflow
         cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
-        c-compiler: ${{ steps.m.outputs.c-compiler }}
-        cxx-compiler: ${{ steps.m.outputs.cxx-compiler }}
-        build-type: ${{ steps.m.outputs.build-type }}
-        boost-root: ${{ steps.m.outputs.boost-root }}
-    - name: Test
-      run: ctest --test-dir "${{ steps.build.outputs.build-dir }}" --output-on-failure ${{ matrix._resolved['ctest-args'] }}
     - name: Publish
       uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
       with:
