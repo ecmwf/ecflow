@@ -26,7 +26,7 @@ ref = "master"
 compiler-inputs = ["cxx-compiler"]
 
 [matrix.build.defaults]
-job-script = "./.ci/build.sh.j2"
+job-script = "./.ci/runner/build.sh.j2"
 build-type = "RelWithDebInfo"
 runs-on = "arc-runner-very-large"
 ctest-args = "-L nightly -j 8"
