@@ -10,7 +10,7 @@ on:
       - ".cd/**"
       - ".github/cd-config.yml"
   pull_request:
-    types: [opened, reopened, synchronize, labeled]
+    types: [opened, reopened, synchronize]
     paths-ignore:
       - ".cd/**"
       - ".github/cd-config.yml"
