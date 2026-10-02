@@ -26,6 +26,7 @@ ref = "master"
 compiler-inputs = ["cxx-compiler"]
 
 [matrix.build.defaults]
+job-script = "./.ci/runner/build.sh.j2"
 build-type = "RelWithDebInfo"
 runs-on = "arc-runner-very-large"
 ctest-args = "-L nightly -j 8"
@@ -64,10 +65,6 @@ boost-root = "/usr/local"
 
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]
-action = "./.github/actions/build-ecflow"
-forwarded-inputs = ["c-compiler", "cxx-compiler", "build-type", "boost-root"]
-forwarded-deps-outputs = ["cmake-prefix-path"]
-ctest = true
 
 [matrix.build-hpc.defaults]
 build-type = "RelWithDebInfo"
@@ -125,7 +122,7 @@ python-root = "/usr/local/apps/python3/3.12.9-01"
 tests = false
 
 [matrix.build-hpc]
-execution = "hpc"
+execution = "hpc-atos"
 container-credentials = true
 triggers = ["upstream-change", "rebuild-request"]
 forwarded-deps-outputs = ["cmake-prefix-path"]

@@ -1,0 +1,10 @@
+{# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+   SPDX-License-Identifier: Apache-2.0 #}
+{% extends "ci-infrastructure/cmake-runner.sh.j2" %}
+{# boost-root is the Homebrew prefix on macOS; cmake/Dependencies.cmake sets
+   Boost_NO_SYSTEM_PATHS, so it is always passed. #}
+{% block cmake_args %}
+  -DENABLE_CONFIG_MODE_BOOST=OFF \
+  -DENABLE_STATIC_BOOST_LIBS=OFF \
+  -DBOOST_ROOT={{ (leg.get("boost-root") or "/usr") | sh }} \
+{% endblock %}
