@@ -3,8 +3,10 @@
 
 #include "ecflow/service/aviso/v2/AvisoV2Backend.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <condition_variable>
+#include <ctime>
 #include <functional>
 #include <map>
 #include <mutex>
@@ -138,6 +140,15 @@ private:
     bool stopping_ = false;
 };
 
+std::string to_rfc3339(std::chrono::system_clock::time_point when) {
+    auto seconds = std::chrono::system_clock::to_time_t(when);
+    std::tm utc{};
+    gmtime_r(&seconds, &utc);
+    char buffer[32];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%SZ", &utc);
+    return buffer;
+}
+
 void wake_server() {
     if (auto* server = TheOneServer::server(); server) {
         // Forces the server to traverse the definitions, so that the attribute is evaluated
@@ -167,6 +178,7 @@ struct AvisoV2Backend::Impl : public std::enable_shared_from_this<AvisoV2Backend
                                        notification.identifier_json(),
                                        notification.payload_json()};
             SLOG(D, "AvisoV2: notification for " << impl_.request_.path() << ": " << received);
+            impl_.delivered(received.sequence());
             impl_.push(std::move(received));
             wake_server();
             return true;
@@ -266,8 +278,16 @@ private:
             if (!listener.filter_json.empty()) {
                 watch_request.filter_json(listener.filter_json);
             }
-            if (request_.revision() > 0) {
-                watch_request.watch_from_sequence(request_.revision());
+            // A re-created watch resumes after the last notification already delivered, so that none is lost
+            // while the watch was down; without any, it resumes from when the first watch was opened
+            if (auto after = std::max(request_.revision(), last_delivered_.load()); after > 0) {
+                watch_request.watch_from_sequence(after);
+            }
+            else if (first_opened_) {
+                watch_request.watch_from_date(to_rfc3339(*first_opened_ - std::chrono::seconds{1}));
+            }
+            else {
+                first_opened_ = std::chrono::system_clock::now();
             }
 
             handler_ = std::make_unique<Handler>(*this);
@@ -297,7 +317,15 @@ public:
     const std::chrono::milliseconds retry_delay_;
     std::atomic<bool> closed_{false};
 
+    void delivered(std::uint64_t sequence) {
+        auto current = last_delivered_.load();
+        while (sequence > current && !last_delivered_.compare_exchange_weak(current, sequence)) {}
+    }
+
 private:
+    std::atomic<std::uint64_t> last_delivered_{0};
+    std::optional<std::chrono::system_clock::time_point> first_opened_; // only used while holding watch_mutex_
+
     std::mutex responses_mutex_;
     std::vector<AvisoResponse> responses_;
 

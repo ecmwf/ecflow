@@ -4,6 +4,8 @@
 # ecflow_services
 # --------------------------------------------------
 
+add_subdirectory(test/harness)
+
 # u_service_executor
 # --------------------------------------------------
 
@@ -103,13 +105,18 @@ ecflow_add_test(
     # Sources
     test/aviso/v2/TestAvisoV2_main.cpp # test entry point
     test/aviso/v2/TestAvisoV2Backend.cpp
+    test/aviso/v2/TestAvisoV2Integration.cpp
   INCLUDES
     test
   LIBS
     ecflow_all
     aviso::ffi
     test_scaffold
+    test_harness.aviso
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  ENVIRONMENT
+    # The local Aviso server listens on a port reserved from this base (see .ai/rules/ecflow-testing.md)
+    ECF_TEST_AVISO_PORT_BASE=18000
   CONDITION
     ENABLE_TESTS AND ENABLE_AVISO
   FORMAT

@@ -138,6 +138,32 @@ ecflow_add_test(
   FORMAT
 )
 
+ecflow_add_test(
+  TARGET
+    s_aviso
+  LABELS
+    integration nightly slow
+  SOURCES
+    test/aviso/TestAvisoAgainstServer_main.cpp # test entry point
+    test/aviso/TestAvisoAgainstServer.cpp
+  LIBS
+    ecflow_all
+    test_scaffold
+    test_harness.base
+    test_harness.client
+    test_harness.aviso
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  DEPENDS
+    ecflow_server # the server is launched to support tests
+  ENVIRONMENT
+    # The local Aviso server listens on a port reserved from this base (see .ai/rules/ecflow-testing.md)
+    ECF_TEST_AVISO_PORT_BASE=18500
+  CONDITION
+    ENABLE_SERVER AND ENABLE_TESTS AND ENABLE_AVISO
+  FORMAT
+)
+
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   # Simple stand alone test
