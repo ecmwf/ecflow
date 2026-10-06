@@ -556,6 +556,7 @@ set(srcs
   service/src/ecflow/service/auth/Credentials.hpp
   service/src/ecflow/service/aviso/Aviso.hpp
   service/src/ecflow/service/aviso/AvisoBackend.hpp
+  service/src/ecflow/service/aviso/v2/AvisoV2.hpp
   service/src/ecflow/service/executor/PeriodicTaskExecutor.hpp
   service/src/ecflow/service/mirror/Mirror.hpp
   service/src/ecflow/service/mirror/MirrorClient.hpp
@@ -567,6 +568,7 @@ set(srcs
   service/src/ecflow/service/auth/Credentials.cpp
   service/src/ecflow/service/aviso/Aviso.cpp
   service/src/ecflow/service/aviso/AvisoBackend.cpp
+  service/src/ecflow/service/aviso/v2/AvisoV2.cpp
   service/src/ecflow/service/mirror/Mirror.cpp
   service/src/ecflow/service/mirror/MirrorClient.cpp
   service/src/ecflow/service/mirror/MirrorService.cpp

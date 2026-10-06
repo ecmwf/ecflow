@@ -3,6 +3,7 @@
 
 #include "ecflow/node/AvisoAttr.hpp"
 
+#include <algorithm>
 #include <sstream>
 
 #include "ecflow/core/Ecf.hpp"
@@ -121,21 +122,21 @@ bool AvisoAttr::isFree() const {
         return false;
     }
 
-    // Only the latest response is relevant
-    const auto& latest = responses.back();
-
-    auto is_free = std::visit(
-        ecf::overload{[this](const ecf::service::aviso::AvisoNotification& notification) {
-                          this->revision_ = notification.sequence();
-                          SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
-                          clear_error();
-                          return true;
-                      },
-                      [this](const ecf::service::aviso::AvisoError& error) {
-                          set_error(error.reason());
-                          return false;
-                      }},
-        latest);
+    // Responses are processed in the order received: any notification frees the task, while errors and (re)started
+    // watches update the error flag and reason
+    bool is_free = false;
+    for (const auto& response : responses) {
+        std::visit(ecf::overload{
+                       [this, &is_free](const ecf::service::aviso::AvisoNotification& notification) {
+                           this->revision_ = std::max(this->revision_, notification.sequence());
+                           SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
+                           clear_error();
+                           is_free = true;
+                       },
+                       [this](const ecf::service::aviso::AvisoError& error) { set_error(error.reason()); },
+                       [this](const ecf::service::aviso::AvisoWatchStarted&) { clear_error(); }},
+                   response);
+    }
 
     SLOG(D,
          "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") "

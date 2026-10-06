@@ -61,9 +61,15 @@ ecflow_add_test(
   LABELS
     unit nightly fast
   SOURCES
+    # Headers -- utilities
+    test/TestContentProvider.hpp
+    # Sources -- utilities
+    test/TestContentProvider.cpp
+    # Sources
     test/aviso/TestAviso_main.cpp # test entry point
     test/aviso/TestAviso.cpp
     test/aviso/TestAvisoBackend.cpp
+    test/aviso/TestAvisoV2.cpp
   INCLUDES
     test
   LIBS
@@ -75,6 +81,37 @@ ecflow_add_test(
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
   CONDITION
     ENABLE_TESTS
+  FORMAT
+)
+
+# u_service_aviso_v2
+# --------------------------------------------------
+
+ecflow_add_test(
+  TARGET
+    u_service_aviso_v2
+  LABELS
+    unit nightly fast
+  SOURCES
+    # Headers -- utilities
+    test/TestContentProvider.hpp
+    # Sources -- utilities
+    test/TestContentProvider.cpp
+    # Sources -- the Aviso v2 backend (only compiled into the server)
+    src/ecflow/service/aviso/v2/AvisoV2Backend.hpp
+    src/ecflow/service/aviso/v2/AvisoV2Backend.cpp
+    # Sources
+    test/aviso/v2/TestAvisoV2_main.cpp # test entry point
+    test/aviso/v2/TestAvisoV2Backend.cpp
+  INCLUDES
+    test
+  LIBS
+    ecflow_all
+    aviso::ffi
+    test_scaffold
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  CONDITION
+    ENABLE_TESTS AND ENABLE_AVISO
   FORMAT
 )
 

@@ -5,8 +5,6 @@
 
 #include <ostream>
 
-#include "ecflow/core/Overload.hpp"
-
 namespace ecf::service::aviso {
 
 std::ostream& operator<<(std::ostream& os, const AvisoSubscribe& request) {
@@ -37,9 +35,13 @@ std::ostream& operator<<(std::ostream& os, const AvisoError& error) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const AvisoWatchStarted&) {
+    os << "AvisoWatchStarted{}";
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const AvisoResponse& response) {
-    std::visit(ecf::overload{[&os](const AvisoNotification& r) { os << r; }, [&os](const AvisoError& r) { os << r; }},
-               response);
+    std::visit([&os](const auto& r) { os << r; }, response);
     return os;
 }
 

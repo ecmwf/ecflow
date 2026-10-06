@@ -121,9 +121,17 @@ private:
 };
 
 ///
-/// @brief Represents one outcome delivered to an Aviso attribute: either a notification or an error.
+/// @brief Signals that the watch of an Aviso attribute was (re)created, clearing any previous error.
 ///
-using AvisoResponse = std::variant<AvisoNotification, AvisoError>;
+class AvisoWatchStarted {
+public:
+    friend std::ostream& operator<<(std::ostream& os, const AvisoWatchStarted& started);
+};
+
+///
+/// @brief Represents one outcome delivered to an Aviso attribute: a notification, an error, or a (re)started watch.
+///
+using AvisoResponse = std::variant<AvisoNotification, AvisoError, AvisoWatchStarted>;
 
 std::ostream& operator<<(std::ostream& os, const AvisoResponse& response);
 
