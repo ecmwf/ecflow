@@ -11,11 +11,13 @@ ecflow_add_executable(
     src/ecflow/server/ServerMain.cpp
   LIBS
     ecflow_all
+    $<$<BOOL:${ENABLE_AVISO}>:aviso::ffi>
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+    $<$<BOOL:${ENABLE_AVISO}>:ECF_AVISO>
   FORMAT
 )
 
@@ -28,6 +30,16 @@ SET_TARGET_PROPERTIES(ecflow_server
   PROPERTIES
     INSTALL_RPATH ""
 )
+
+# The (shared) Aviso client library is not installed with ecFlow, and as an imported target its
+# directory is not added to the install run path automatically; the installed server must
+# therefore find it at run time where it was found at build time
+if (ENABLE_AVISO)
+  SET_TARGET_PROPERTIES(ecflow_server
+    PROPERTIES
+      INSTALL_RPATH "${AVISO_FFI_LIBRARY_DIR}"
+  )
+endif ()
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
