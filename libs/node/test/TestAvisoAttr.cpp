@@ -14,6 +14,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Operations.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
@@ -528,6 +529,32 @@ BOOST_AUTO_TEST_CASE(change_keeps_attribute_attached_to_its_node) {
     BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "dissemination" })");
 
     t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso) {
+    ECF_NAME_THIS_TEST();
+
+    // LD8: the server (re)start traversal must start the Aviso attribute of a queued node, e.g. after loading a
+    // checkpoint, and the halt/shutdown traversal must finish it
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // As after loading a checkpoint: the node is queued, but its attribute is not started
+    t->avisos()[0].finish();
+    backend.state->subscribed.reset();
+
+    ecf::visit_all(*defs, BootstrapDefs{});
+    BOOST_REQUIRE_MESSAGE(backend.state->subscribed.has_value(), "Expected the bootstrap to start the attribute");
+    BOOST_CHECK_EQUAL(t->avisos()[0].active(), R"({ "event": "mars" })");
+
+    ecf::visit_all(*defs, ShutdownDefs{});
+    BOOST_CHECK_MESSAGE(t->avisos()[0].active().empty(), "Expected the shutdown to finish the attribute");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

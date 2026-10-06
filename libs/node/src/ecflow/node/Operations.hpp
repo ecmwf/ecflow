@@ -20,7 +20,7 @@ namespace ecf {
 struct BootstrapDefs
 {
     inline void operator()(AvisoAttr& attr) const {
-        if (attr.parent()->state() == NState::QUEUED) {
+        if (attr.parent() && attr.parent()->state() == NState::QUEUED) {
             attr.start();
         }
     }
@@ -55,19 +55,25 @@ struct ActivateAll
     void operator()(T&& t) const { /* Nothing to do... */ }
 };
 
+template <typename V, typename I>
+void visit_all(I& item, V&& visitor);
+
 namespace detail {
 
+// n.b. The recursive calls below are qualified, so that overload resolution never picks the generic ecf::visit_all
+//      for a vector of nodes (which would apply the visitor to the vector itself, and stop the traversal)
+
 template <typename V, typename I>
-void visit_all(const std::vector<std::shared_ptr<I>>& all, V&& visitor) {
+void visit_each(const std::vector<std::shared_ptr<I>>& all, V&& visitor) {
     for (auto& item : all) {
-        visit_all(*item, std::forward<V>(visitor));
+        ecf::visit_all(*item, visitor);
     }
 }
 
 template <typename V, typename I>
 void visit_attrs(std::vector<I>& all, V&& visitor) {
     for (auto& i : all) {
-        visit_all(i, std::forward<V>(visitor));
+        ecf::visit_all(i, visitor);
     }
 }
 
@@ -88,8 +94,8 @@ struct VisitorAll<Task>
     template <typename V>
     void operator()(V&& v) {
         v(task_);
-        visit_attrs(task_.avisos(), std::forward<V>(v));
-        visit_attrs(task_.mirrors(), std::forward<V>(v));
+        detail::visit_attrs(task_.avisos(), v);
+        detail::visit_attrs(task_.mirrors(), v);
     }
 
     Task& task_;
@@ -101,7 +107,7 @@ struct VisitorAll<Family>
     template <typename V>
     void operator()(V&& v) {
         v(family_);
-        visit_all(family_.children(), std::forward<V>(v));
+        detail::visit_each(family_.children(), v);
     }
 
     Family& family_;
@@ -113,13 +119,13 @@ struct VisitorAll<Node>
     template <typename V>
     void operator()(V&& v) {
         if (auto* family_ptr = dynamic_cast<Family*>(&node_)) {
-            visit_all(*family_ptr, std::forward<V>(v));
+            ecf::visit_all(*family_ptr, v);
         }
         else if (auto* task_ptr = dynamic_cast<Task*>(&node_)) {
-            visit_all(*task_ptr, std::forward<V>(v));
+            ecf::visit_all(*task_ptr, v);
         }
         if (auto* alias_ptr = dynamic_cast<Alias*>(&node_)) {
-            visit_all(*alias_ptr, std::forward<V>(v));
+            ecf::visit_all(*alias_ptr, v);
         }
     }
 
@@ -131,8 +137,8 @@ struct VisitorAll<Suite>
 {
     template <typename V>
     void operator()(V&& v) {
-        v(*this);
-        visit_all(suite_.children(), std::forward<V>(v));
+        v(suite_);
+        detail::visit_each(suite_.children(), v);
     }
 
     Suite& suite_;
@@ -143,9 +149,8 @@ struct VisitorAll<Defs>
 {
     template <typename V>
     void operator()(V&& v) {
-        v(*this);
-
-        visit_all(defs_.suites(), std::forward<V>(v));
+        v(defs_);
+        detail::visit_each(defs_.suites(), v);
     }
 
     Defs& defs_;

@@ -242,6 +242,63 @@ BOOST_AUTO_TEST_CASE(releases_task_once_for_all_notifications_when_collapsing) {
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(continues_releasing_once_per_notification_after_server_restart) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string port = SCPort::next();
+
+    {
+        // The first server is released by notification 1, and checkpoints with notifications 2 and 3 not consumed
+        InvokeServer invokeServer("Client:: ...continues_releasing_once_per_notification_after_server_restart",
+                                  port,
+                                  false /* disable_job_generation */,
+                                  true /* remove_checkpt_file_before_server_start */,
+                                  false /* remove_checkpt_file_after_server_exit */);
+        BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to start on port " << port);
+
+        ClientInvoker client(invokeServer.host(), invokeServer.port());
+        client.set_throw_on_error(false);
+        start(client, make_defs(server.url(), auth, 0));
+
+        BOOST_REQUIRE(server.wait_for_requests(1, 10s));
+        for (int i = 0; i < 3; ++i) {
+            server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
+        }
+
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released), "Expected release by notification 1");
+        BOOST_CHECK_EQUAL(revision_of(client), 1u);
+
+        BOOST_REQUIRE_MESSAGE(client.haltServer() == 0, "halt failed: " << client.errorMsg());
+        BOOST_REQUIRE_MESSAGE(client.requeue("/s/t") == 0, "requeue failed: " << client.errorMsg());
+        BOOST_REQUIRE_MESSAGE(client.checkPtDefs() == 0, "checkpoint failed: " << client.errorMsg());
+    }
+
+    {
+        // The second server loads the checkpoint, and is released by notifications 2 and 3, in turn
+        InvokeServer invokeServer("Client:: ...continues_releasing_once_per_notification_after_server_restart (2)",
+                                  port,
+                                  false /* disable_job_generation */,
+                                  false /* remove_checkpt_file_before_server_start */,
+                                  true /* remove_checkpt_file_after_server_exit */);
+        BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to restart on port " << port);
+
+        ClientInvoker client(invokeServer.host(), invokeServer.port());
+        client.set_throw_on_error(false);
+        BOOST_REQUIRE_MESSAGE(client.restartServer() == 0, "restart failed: " << client.errorMsg());
+
+        BOOST_CHECK_EQUAL(revision_of(client), 1u);
+        for (ecf::AvisoAttr::revision_t expected = 2; expected <= 3; ++expected) {
+            BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released),
+                                  "Expected release by notification " << expected << " after the restart");
+            BOOST_CHECK_EQUAL(revision_of(client), expected);
+            BOOST_REQUIRE_MESSAGE(client.requeue("/s/t") == 0, "requeue failed: " << client.errorMsg());
+        }
+        BOOST_CHECK(!wait_for_task(client, is_released, 1s));
+    }
+
+    System::destroy();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
