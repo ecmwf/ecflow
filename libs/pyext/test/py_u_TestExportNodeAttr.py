@@ -14461,6 +14461,7 @@ class TestAvisoAttr:
                                                             ECF variable defaults
         AvisoAttr(name, listener, url)
         AvisoAttr(name, listener, url, auth=auth)        -- auth is keyword-only
+        AvisoAttr(name, listener, url, auth=auth, collapse=True)  -- collapse is keyword-only
 
         Default values:
             url     = '%ECF_AVISO_URL%'
@@ -14476,9 +14477,10 @@ class TestAvisoAttr:
         listener()  -> str   -- Aviso listener configuration
         url()       -> str   -- URL of the Aviso server
         auth()      -> str   -- path to authentication credentials
+        collapse()  -> bool  -- whether a release consumes all the notifications received
 
     Operators
-        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, revision=0, auth=A, reason='')'
+        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, revision=0, auth=A, reason='', collapse=false)'
         __copy__  -- copy.copy() returns a value-equal, identity-distinct instance
         __eq__    -- value-based equality (all fields compared)
         __ne__    -- implicit complement of __eq__
@@ -14548,6 +14550,18 @@ class TestAvisoAttr:
         assert a.listener() == "'l'"  # listener() wraps the value in single quotes
         assert a.url() == "http://u"
         assert a.auth() == "/a"
+
+    def test_ctor_collapse_defaults_to_false(self):
+        """AvisoAttr consumes exactly one notification per release by default."""
+        assert ecf.AvisoAttr("av", "l").collapse() is False
+
+    def test_ctor_collapse_keyword_stores_collapse(self):
+        """AvisoAttr(name, listener, collapse=True) stores the collapse option."""
+        assert ecf.AvisoAttr("av", "l", collapse=True).collapse() is True
+
+    def test_eq_different_collapse(self):
+        """Different collapse makes attributes not equal."""
+        assert ecf.AvisoAttr("av", "l", collapse=True) != ecf.AvisoAttr("av", "l")
 
     def test_ctor_auth_positional_raises(self):
         """auth cannot be given by position, so that an Aviso v1 schema is never taken as auth."""
@@ -14651,7 +14665,7 @@ class TestAvisoAttr:
         expected = (
             'AvisoAttr(name=av, listener=\'{"event":"x"}\', '
             "url=%ECF_AVISO_URL%, revision=0, "
-            "auth=%ECF_AVISO_AUTH%, reason='')"
+            "auth=%ECF_AVISO_AUTH%, reason='', collapse=false)"
         )
         assert str(a) == expected
 

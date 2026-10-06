@@ -39,7 +39,8 @@ AvisoAttr::AvisoAttr(Node* parent,
                      url_t url,
                      revision_t revision,
                      auth_t auth,
-                     const reason_t& reason)
+                     const reason_t& reason,
+                     bool collapse)
     : parent_{parent},
       parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
@@ -49,6 +50,7 @@ AvisoAttr::AvisoAttr(Node* parent,
       reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision},
       backend_{nullptr} {
+    collapse_ = collapse;
     if (!ecf::algorithm::is_valid_name(name_)) {
         THROW_EXCEPTION(ecf::InvalidArgument, "Invalid AvisoAttr name :" << name_);
     }
@@ -114,42 +116,55 @@ void AvisoAttr::reload() {
 
 bool AvisoAttr::isFree() const {
 
+    // A notification already consumed keeps the node free, until the node is started again
+    if (pending_) {
+        return true;
+    }
+
     if (backend_ == nullptr) {
         return false;
     }
 
-    // Task associated with Attribute is free when any notification is found
-    auto responses = backend_->drain();
+    // Errors and (re)started watches update the error flag and reason; notifications not yet consumed are queued
+    for (const auto& response : backend_->drain()) {
+        std::visit(ecf::overload{[this](const ecf::service::aviso::AvisoNotification& notification) {
+                                     bool is_new = notification.sequence() > revision_ &&
+                                                   std::none_of(queued_.begin(), queued_.end(), [&](const auto& q) {
+                                                       return q.sequence() == notification.sequence();
+                                                   });
+                                     if (is_new) {
+                                         queued_.push_back(notification);
+                                     }
+                                 },
+                                 [this](const ecf::service::aviso::AvisoError& error) { set_error(error.reason()); },
+                                 [this](const ecf::service::aviso::AvisoWatchStarted&) { clear_error(); }},
+                   response);
+    }
 
-    if (responses.empty()) {
-        // No notifications, nothing to do -- task continues to wait
+    if (queued_.empty()) {
         SLOG(D,
              "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_
                                   << "): no notifications found");
         return false;
     }
 
-    // Responses are processed in the order received: any notification frees the task, while errors and (re)started
-    // watches update the error flag and reason
-    bool is_free = false;
-    for (const auto& response : responses) {
-        std::visit(ecf::overload{
-                       [this, &is_free](const ecf::service::aviso::AvisoNotification& notification) {
-                           this->revision_ = std::max(this->revision_, notification.sequence());
-                           SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
-                           clear_error();
-                           is_free = true;
-                       },
-                       [this](const ecf::service::aviso::AvisoError& error) { set_error(error.reason()); },
-                       [this](const ecf::service::aviso::AvisoWatchStarted&) { clear_error(); }},
-                   response);
+    // Consume the oldest notification, or all of them when collapsing
+    std::sort(queued_.begin(), queued_.end(), [](const auto& a, const auto& b) { return a.sequence() < b.sequence(); });
+    if (collapse_) {
+        pending_ = queued_.back();
+        queued_.clear();
+    }
+    else {
+        pending_ = queued_.front();
+        queued_.erase(queued_.begin());
     }
 
+    clear_error();
     SLOG(D,
-         "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") "
-                              << std::string{(is_free ? "" : "no ")} + "notifications found");
+         "AvisoAttr::isFree: " << this->path() << " holds notification " << pending_->sequence() << " ("
+                               << queued_.size() << " queued)");
 
-    return is_free;
+    return true;
 }
 
 namespace {
@@ -162,6 +177,16 @@ bool is_unresolved(std::string_view value, std::string_view default_value) {
 
 void AvisoAttr::start() const {
     LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+
+    // The node is started again. A notification held but not committed (the node was not released) is queued
+    // again, while the backend runs; otherwise, a new backend delivers again every notification after the revision
+    if (pending_ && backend_) {
+        queued_.push_back(*pending_);
+    }
+    pending_.reset();
+    if (!backend_) {
+        queued_.clear();
+    }
 
     if (!parent_) {
         return;
@@ -273,7 +298,22 @@ void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos) {
     }
 }
 
+void AvisoAttr::commit() const {
+    if (pending_) {
+        state_change_no_ = Ecf::incr_state_change_no();
+        revision_        = std::max(revision_, pending_->sequence());
+        pending_.reset();
+        SLOG(D, "AvisoAttr::commit: " << this->path() << " consumed notification " << revision_);
+    }
+}
+
 void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state) {
+    // The node leaves the queued state: the notification that released it is consumed
+    if (state != NState::QUEUED) {
+        for (const auto& aviso : avisos) {
+            aviso.commit();
+        }
+    }
     if (NState::is_any_of<NState::ABORTED, NState::COMPLETE, NState::UNKNOWN>(state)) {
         finish(avisos);
     }
@@ -281,7 +321,8 @@ void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state
 
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
-           lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason();
+           lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason() &&
+           lhs.collapse() == rhs.collapse();
 }
 
 std::string to_python_string(const AvisoAttr& aviso) {
@@ -299,6 +340,8 @@ std::string to_python_string(const AvisoAttr& aviso) {
     s += aviso.auth();
     s += ", reason=";
     s += aviso.reason();
+    s += ", collapse=";
+    s += aviso.collapse() ? "true" : "false";
     s += ")";
     return s;
 }

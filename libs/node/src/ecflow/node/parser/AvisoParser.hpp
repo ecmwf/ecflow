@@ -24,6 +24,8 @@
  *    - string value (path to the credentials file), optional (default: %ECF_AVISO_AUTH%)
  *  --reason <value>
  *    - string value (enclosed in single quotes), optional (default: empty)
+ *  --collapse
+ *    - flag, optional: a release consumes all the notifications received, instead of exactly one
  *
  * The Aviso v1 options --schema and --polling are rejected in a definition, but accepted and ignored when reading a
  * definition that carries state (e.g. a checkpoint written by an earlier version of ecFlow).
@@ -44,6 +46,7 @@ public:
     static constexpr const char* option_revision   = "revision";
     static constexpr const char* option_auth       = "auth";
     static constexpr const char* option_reason     = "reason";
+    static constexpr const char* option_collapse   = "collapse";
 
     static ecf::AvisoAttr parse_aviso_line(const std::string& line);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);

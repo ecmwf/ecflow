@@ -65,6 +65,7 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     description.add_options()(option_revision, po::value<uint64_t>()->default_value(0));
     description.add_options()(option_auth, po::value<std::string>()->default_value(ecf::AvisoAttr::default_auth));
     description.add_options()(option_reason, po::value<std::string>()->default_value(""));
+    description.add_options()(option_collapse, po::bool_switch()->default_value(false));
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
@@ -88,8 +89,9 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     auto revision = get_option_value<ecf::AvisoAttr::revision_t>(vm, option_revision, line);
     auto auth     = get_option_value<ecf::AvisoAttr::auth_t>(vm, option_auth, line);
     auto reason   = get_option_value<ecf::AvisoAttr::reason_t>(vm, option_reason, line);
+    auto collapse = get_option_value<bool>(vm, option_collapse, line);
 
-    return ecf::AvisoAttr{parent, name, listener, url, revision, auth, reason};
+    return ecf::AvisoAttr{parent, name, listener, url, revision, auth, reason, collapse};
 }
 
 bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {

@@ -37,6 +37,7 @@ private:
         AuthIndex     = 5,
         ReasonIndex   = 6,
         ActiveIndex   = 7,
+        CollapseIndex = 8,
     };
 };
 

@@ -6,11 +6,13 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -243,6 +245,79 @@ BOOST_AUTO_TEST_CASE(can_serialise_aviso_readable_by_ecflow_5_19) {
     BOOST_CHECK_EQUAL(restored.auth, "/path/to/auth");
     BOOST_CHECK_EQUAL(restored.reason, "''");
     BOOST_CHECK_EQUAL(restored.revision, 42u);
+}
+
+BOOST_AUTO_TEST_CASE(can_parse_and_print_collapse_option) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          task t1
+            aviso --name A --listener '{ "event": "mars" }' --collapse
+          task t2
+            aviso --name B --listener '{ "event": "mars" }'
+        endsuite
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+
+    std::string errorMsg, warningMsg;
+    BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+
+    BOOST_CHECK(defs.suites()[0]->taskVec()[0]->avisos()[0].collapse());
+    BOOST_CHECK(!defs.suites()[0]->taskVec()[1]->avisos()[0].collapse());
+
+    // The option is printed only when set, and survives a print/parse round trip
+    std::string printed = ecf::as_string(defs, PrintStyle::DEFS);
+    auto first          = printed.find("--collapse");
+    BOOST_REQUIRE(first != std::string::npos);
+    BOOST_CHECK(printed.find("--collapse", first + 1) == std::string::npos);
+
+    Defs reparsed;
+    DefsStructureParser reparser(&reparsed, printed, true);
+    BOOST_REQUIRE_MESSAGE(reparser.doParse(errorMsg, warningMsg), "Failed to re-parse: " << errorMsg);
+    BOOST_CHECK(reparsed.suites()[0]->taskVec()[0]->avisos()[0].collapse());
+    BOOST_CHECK(!reparsed.suites()[0]->taskVec()[1]->avisos()[0].collapse());
+}
+
+BOOST_AUTO_TEST_CASE(can_serialise_collapse_option) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    AvisoAttr original{nullptr, "A", R"({ "event": "mars" })", "http://host:port", 42, "/path/to/auth", "", true};
+
+    std::string data;
+    ecf::save_as_string(data, original);
+
+    AvisoAttr restored;
+    ecf::restore_from_string(data, restored);
+
+    BOOST_CHECK(restored.collapse());
+    BOOST_CHECK(restored == original);
+}
+
+BOOST_AUTO_TEST_CASE(deserialises_aviso_written_by_ecflow_5_19_without_collapse) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    legacy::AvisoAttrV1 legacy;
+    legacy.name     = "A";
+    legacy.listener = R"('{ "event": "mars" }')";
+    legacy.reason   = "''";
+
+    std::string data;
+    ecf::save_as_string(data, legacy);
+
+    AvisoAttr restored;
+    ecf::restore_from_string(data, restored);
+
+    // The archive of ecFlow 5.19.x has no class version (i.e. version 0), and no collapse option
+    BOOST_CHECK(!restored.collapse());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

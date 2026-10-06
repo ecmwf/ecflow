@@ -494,13 +494,15 @@ void CronAttr_set_time_series(ecf::CronAttr* self, const std::string& ts) {
 /// @param listener The Aviso listener configuration string.
 /// @param url The Aviso server URL (defaults to `AvisoAttr::default_url`).
 /// @param auth The path to the credentials file (defaults to `AvisoAttr::default_auth`).
+/// @param collapse Whether a release consumes all the notifications received, instead of exactly one.
 /// @return The newly created AvisoAttr.
 ///
 ecf::AvisoAttr AvisoAttr_make(const std::string& name,
                               const std::string& listener,
                               const std::string& url  = ecf::AvisoAttr::default_url,
-                              const std::string& auth = ecf::AvisoAttr::default_auth) {
-    return ecf::AvisoAttr(nullptr, name, listener, url, 0, auth, "");
+                              const std::string& auth = ecf::AvisoAttr::default_auth,
+                              bool collapse           = false) {
+    return ecf::AvisoAttr(nullptr, name, listener, url, 0, auth, "", collapse);
 }
 
 ///
@@ -1470,7 +1472,8 @@ void export_NodeAttr(py::module& m) {
              py::arg("listener"),
              py::arg("url") = "%ECF_AVISO_URL%",
              py::kw_only(),
-             py::arg("auth") = "%ECF_AVISO_AUTH%")
+             py::arg("auth")     = "%ECF_AVISO_AUTH%",
+             py::arg("collapse") = false)
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("__str__", &AvisoAttr_str)
@@ -1490,7 +1493,10 @@ void export_NodeAttr(py::module& m) {
         .def("auth",
              &ecf::AvisoAttr::auth,
              py::return_value_policy::reference,
-             "Returns the path to Authentication credentials used to contact the Aviso server");
+             "Returns the path to Authentication credentials used to contact the Aviso server")
+        .def("collapse",
+             &ecf::AvisoAttr::collapse,
+             "Returns whether a release consumes all the notifications received, instead of exactly one");
 
     py::class_<ecf::MirrorAttr>(m, "MirrorAttr", py::dynamic_attr(), NodeAttrDoc::mirror_doc())
 

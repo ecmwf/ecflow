@@ -5,10 +5,13 @@
 
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NState.hpp"
+#include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/service/aviso/AvisoBackend.hpp"
 
@@ -63,7 +66,8 @@ public:
               url_t url,
               revision_t revision,
               auth_t auth,
-              const reason_t& reason);
+              const reason_t& reason,
+              bool collapse = false);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
@@ -77,6 +81,11 @@ public:
     [[nodiscard]] inline revision_t revision() const { return revision_; }
     [[nodiscard]] inline const auth_t& auth() const { return auth_; }
     [[nodiscard]] inline const reason_t& reason() const { return reason_; }
+
+    ///
+    /// @brief Returns whether a release consumes all the notifications received (true), or exactly one (false).
+    ///
+    [[nodiscard]] inline bool collapse() const { return collapse_; }
     [[nodiscard]] inline const active_t& active() const { return active_; }
     [[nodiscard]] path_t path() const;
 
@@ -110,6 +119,13 @@ public:
     void start() const;
     void finish() const;
 
+    ///
+    /// @brief Consumes the notification held to release the node, advancing the revision to it.
+    ///
+    /// Called when the node leaves the queued state; does nothing when no notification is held.
+    ///
+    void commit() const;
+
     template <class Archive>
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
@@ -121,7 +137,10 @@ public:
     static void finish(const std::vector<AvisoAttr>& avisos);
 
     /**
-     * \brief When the given state is a Task "terminal" state (i.e. complete, aborted, unknown), finishes all Aviso
+     * \brief Informs the Aviso attributes of a state change of their node.
+     *
+     * When the node leaves the queued state, the notification held by each attribute is consumed (see commit()).
+     * When the given state is a Task "terminal" state (i.e. complete, aborted, unknown), finishes all Aviso
      * attributes, effectively stopping the background notifications.
      *
      * @param avisos the avisos to finish
@@ -177,6 +196,11 @@ private:
      */
     auth_t auth_;
 
+    /**
+     * @brief Whether a release consumes all the notifications received, or exactly one (the default)
+     */
+    bool collapse_{false};
+
     // The following are mutable as they are modified by the const method isFree()
 
     /**
@@ -217,6 +241,23 @@ private:
      *  -- This field is *not* serialized nor persisted; it is only used on the server side.
      **/
     mutable backend_ptr_t backend_;
+
+    /**
+     * @brief The notifications received, and not yet consumed, ordered by sequence
+     *
+     *  -- This field is *not* serialized nor persisted; the server redelivers them after the revision.
+     **/
+    mutable std::vector<ecf::service::aviso::AvisoNotification> queued_;
+
+    /**
+     * @brief The notification consumed to release the node, held until the node is started again
+     *
+     * Holding it makes isFree() repeatable: the node is released by this notification however many times isFree()
+     * is called (e.g. by a query of why the node is held, or while another dependency holds the node).
+     *
+     *  -- This field is *not* serialized nor persisted.
+     **/
+    mutable std::optional<ecf::service::aviso::AvisoNotification> pending_;
 };
 
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs);
@@ -240,6 +281,11 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
     ar & aviso.reason_;
     ar & aviso.revision_;
     ar & aviso.active_;
+    if (version >= 1) {
+        ar & aviso.collapse_;
+    }
 }
 
 } // namespace ecf
+
+CEREAL_CLASS_VERSION(ecf::AvisoAttr, 1)
