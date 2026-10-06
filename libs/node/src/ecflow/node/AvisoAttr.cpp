@@ -80,6 +80,10 @@ std::string AvisoAttr::path() const {
     return path;
 }
 
+bool AvisoAttr::has_error() const {
+    return !reason_.empty() && reason_ != "''";
+}
+
 bool AvisoAttr::why(std::string& theReasonWhy) const {
     if (isFree()) {
         return false;
@@ -98,7 +102,10 @@ void AvisoAttr::reset() {
 }
 
 void AvisoAttr::reload() {
-    if (backend_) {
+    // An attribute is reloaded when it is running, but also when its node is queued without a running attribute
+    // (e.g. after a configuration error), so that a corrected configuration takes effect
+    bool is_queued = parent_ && parent_->state() == NState::QUEUED;
+    if (backend_ || is_queued) {
         state_change_no_ = Ecf::incr_state_change_no();
         finish();
         start();
@@ -147,16 +154,18 @@ bool AvisoAttr::isFree() const {
 
 namespace {
 
-void ensure_resolved_variable(std::string_view value, std::string_view default_value, std::string_view msg) {
-    if (value.find(default_value) != std::string::npos) {
-        THROW_RUNTIME(msg << value);
-    }
+bool is_unresolved(std::string_view value, std::string_view default_value) {
+    return value.find(default_value) != std::string::npos;
 }
 
 } // namespace
 
 void AvisoAttr::start() const {
     LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+
+    if (!parent_) {
+        return;
+    }
 
     // Path -- the unique identifier of the Aviso listener
     std::string aviso_path = path();
@@ -172,15 +181,28 @@ void AvisoAttr::start() const {
     // URL -- the URL for the Aviso server
     std::string aviso_url = url_;
     parent_->variableSubstitution(aviso_url);
-    if (aviso_url.empty()) {
-        THROW_RUNTIME("AvisoAttr: invalid Aviso URL detected for " + aviso_path);
-    }
 
     std::string aviso_auth = auth_;
     parent_->variableSubstitution(aviso_auth);
 
-    ensure_resolved_variable(aviso_url, AvisoAttr::default_url, "AvisoAttr: failed to resolve Aviso URL: ");
-    ensure_resolved_variable(aviso_auth, AvisoAttr::default_auth, "AvisoAttr: failed to resolve Aviso auth: ");
+    // A configuration error is reported on the node, which stays queued; it never fails the command (e.g. begin,
+    // requeue) that started the attribute, so that the other nodes are not affected
+    std::string error;
+    if (aviso_url.empty()) {
+        error = "Aviso URL is empty (see option --url, or variable ECF_AVISO_URL)";
+    }
+    else if (is_unresolved(aviso_url, AvisoAttr::default_url)) {
+        error = "failed to resolve Aviso URL " + aviso_url + " (define variable ECF_AVISO_URL)";
+    }
+    else if (is_unresolved(aviso_auth, AvisoAttr::default_auth)) {
+        error = "failed to resolve Aviso credentials " + aviso_auth + " (define variable ECF_AVISO_AUTH)";
+    }
+
+    if (!error.empty()) {
+        LOG(Log::ERR, Message("AvisoAttr: unable to start ", aviso_path, ": ", error));
+        set_error(error);
+        return;
+    }
 
     start_backend(aviso_path, active_, aviso_url, aviso_auth);
 }
@@ -204,7 +226,8 @@ void AvisoAttr::start_backend(const std::string& aviso_path,
     backend_->subscribe(
         ecf::service::aviso::AvisoSubscribe{aviso_path, aviso_listener, aviso_url, revision_, aviso_auth});
 
-    state_change_no_ = Ecf::incr_state_change_no();
+    // The configuration is complete; any earlier configuration error no longer applies
+    clear_error();
 }
 
 void AvisoAttr::stop_backend() const {

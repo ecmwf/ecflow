@@ -11,6 +11,7 @@
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -76,6 +77,31 @@ std::shared_ptr<Task> load_task(Defs& defs) {
     BOOST_REQUIRE_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
 
     return defs.suites()[0]->familyVec()[0]->taskVec()[0];
+}
+
+///
+/// @brief Loads a suite with an Aviso task `t` and an unrelated task `other`, with the given Aviso variables.
+///
+defs_ptr load_suite_with_aviso(const std::string& aviso_variables) {
+    std::string definition = "suite s\n" + aviso_variables +
+                             "  task other\n"
+                             "  task t\n"
+                             "    aviso --name A --listener '{ \"event\": \"mars\" }'\n"
+                             "endsuite\n";
+
+    defs_ptr defs = Defs::create();
+    DefsStructureParser parser(defs.get(), definition, true);
+
+    std::string errorMsg, warningMsg;
+    bool parsedOK = parser.doParse(errorMsg, warningMsg);
+    BOOST_REQUIRE_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
+    return defs;
+}
+
+node_ptr find(const defs_ptr& defs, const std::string& path) {
+    auto node = defs->findAbsNode(path);
+    BOOST_REQUIRE_MESSAGE(node, "Node not found: " << path);
+    return node;
 }
 
 } // namespace
@@ -188,6 +214,104 @@ BOOST_AUTO_TEST_CASE(reports_error_when_no_backend_is_available) {
 
     aviso.finish();
     BOOST_CHECK_EQUAL(aviso.active(), R"()");
+}
+
+BOOST_AUTO_TEST_CASE(begin_succeeds_when_aviso_url_cannot_be_resolved) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    // ECF_AVISO_URL is not defined
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+
+    // Only the Aviso task is affected: it stays queued, and shows why
+    auto t     = find(defs, "/s/t");
+    auto other = find(defs, "/s/other");
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK(t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_MESSAGE(t->avisos()[0].reason().find("ECF_AVISO_URL") != std::string::npos, t->avisos()[0].reason());
+    BOOST_CHECK(!other->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK(!backend.state->subscribed.has_value());
+}
+
+BOOST_AUTO_TEST_CASE(begin_succeeds_when_aviso_credentials_cannot_be_resolved) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    // ECF_AVISO_AUTH is not defined
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_URL 'http://aviso:8000'\n");
+
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+
+    auto t = find(defs, "/s/t");
+    BOOST_CHECK(t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_MESSAGE(t->avisos()[0].reason().find("ECF_AVISO_AUTH") != std::string::npos, t->avisos()[0].reason());
+}
+
+BOOST_AUTO_TEST_CASE(begin_succeeds_when_aviso_url_is_empty) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_URL ''\n  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+
+    auto t = find(defs, "/s/t");
+    BOOST_CHECK(t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_MESSAGE(t->avisos()[0].reason().find("Aviso URL is empty") != std::string::npos,
+                        t->avisos()[0].reason());
+}
+
+BOOST_AUTO_TEST_CASE(requeue_succeeds_when_aviso_url_cannot_be_resolved) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+
+    BOOST_REQUIRE_NO_THROW(defs->requeue());
+
+    auto t = find(defs, "/s/t");
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK(t->get_flag().is_set(Flag::REMOTE_ERROR));
+}
+
+BOOST_AUTO_TEST_CASE(reload_starts_aviso_once_configuration_is_fixed) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // Once the configuration is fixed, a reload (i.e. `alter change aviso A reload`) starts the attribute
+    find(defs, "/s")->addVariable(Variable("ECF_AVISO_URL", "http://aviso:8000"));
+    t->changeAviso("A", AvisoAttr::reload_option_value);
+
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->url(), "http://aviso:8000");
+    BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(t->avisos()[0].reason(), "''");
+
+    t->avisos()[0].finish();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

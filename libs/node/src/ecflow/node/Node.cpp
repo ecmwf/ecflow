@@ -400,6 +400,12 @@ void Node::requeue(Requeue_args& args) {
     if (archived_set) {
         get_flag().set(ecf::Flag::ARCHIVED);
     }
+    // The Aviso attributes are (re)started before the flags are reset; re-apply the error of any that failed
+    for (const auto& aviso : avisos_) {
+        if (aviso.has_error()) {
+            get_flag().set(ecf::Flag::REMOTE_ERROR);
+        }
+    }
 
     if (late_) {
         late_->reset();

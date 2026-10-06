@@ -80,6 +80,11 @@ public:
     [[nodiscard]] inline const active_t& active() const { return active_; }
     [[nodiscard]] path_t path() const;
 
+    ///
+    /// @brief Returns whether the attribute currently holds an error (i.e. a non-empty reason).
+    ///
+    [[nodiscard]] bool has_error() const;
+
     void set_listener(std::string_view listener);
     void set_revision(revision_t revision);
 
