@@ -61,14 +61,9 @@ ecflow_add_test(
   LABELS
     unit nightly fast
   SOURCES
-    # Headers -- utilities
-    test/TestContentProvider.hpp
-    # Sources -- utilities
-    test/TestContentProvider.cpp
-    # Sources
     test/aviso/TestAviso_main.cpp # test entry point
     test/aviso/TestAviso.cpp
-    test/aviso/TestAvisoService.cpp
+    test/aviso/TestAvisoBackend.cpp
   INCLUDES
     test
   LIBS

@@ -10,7 +10,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/service/aviso/AvisoService.hpp"
+#include "ecflow/service/aviso/AvisoBackend.hpp"
 
 namespace cereal {
 class access;
@@ -36,19 +36,15 @@ public:
     using listener_t = std::string;
     using active_t   = std::string;
     using url_t      = std::string;
-    using schema_t   = std::string;
-    using polling_t  = std::string;
     using revision_t = std::uint64_t;
     using auth_t     = std::string;
     using reason_t   = std::string;
 
-    using controller_t     = ecf::service::aviso::AvisoController;
-    using controller_ptr_t = std::shared_ptr<controller_t>;
+    using backend_t     = ecf::service::aviso::AvisoBackend;
+    using backend_ptr_t = std::shared_ptr<backend_t>;
 
-    static constexpr const char* default_url     = "%ECF_AVISO_URL%";
-    static constexpr const char* default_schema  = "%ECF_AVISO_SCHEMA%";
-    static constexpr const char* default_polling = "%ECF_AVISO_POLLING%";
-    static constexpr const char* default_auth    = "%ECF_AVISO_AUTH%";
+    static constexpr const char* default_url  = "%ECF_AVISO_URL%";
+    static constexpr const char* default_auth = "%ECF_AVISO_AUTH%";
 
     static constexpr const char* reload_option_value = "reload";
 
@@ -65,8 +61,6 @@ public:
               name_t name,
               const listener_t& handle,
               url_t url,
-              schema_t schema,
-              polling_t polling,
               revision_t revision,
               auth_t auth,
               const reason_t& reason);
@@ -80,8 +74,6 @@ public:
     [[nodiscard]] inline const name_t& name() const { return name_; }
     [[nodiscard]] inline const listener_t& listener() const { return listener_; }
     [[nodiscard]] inline const url_t& url() const { return url_; }
-    [[nodiscard]] inline const schema_t& schema() const { return schema_; }
-    [[nodiscard]] inline polling_t polling() const { return polling_; }
     [[nodiscard]] inline revision_t revision() const { return revision_; }
     [[nodiscard]] inline const auth_t& auth() const { return auth_; }
     [[nodiscard]] inline const reason_t& reason() const { return reason_; }
@@ -96,13 +88,13 @@ public:
     bool why(std::string& theReasonWhy) const;
 
     /**
-     * Initialises the Aviso procedure, which effectively starts the background polling mechanism.
+     * Initialises the Aviso procedure, which effectively starts receiving notifications in the background.
      * Typically, called when traversing the tree -- does nothing if Aviso service is already set up.
      */
     void reset();
 
     /**
-     * Restarts the Aviso procedure, which effectively stops before restarting the background polling mechanism.
+     * Restarts the Aviso procedure, which effectively stops before restarting the background notifications.
      * Typicallly, called explicitly via Alter command -- forces the reinitialisation of the Aviso service,
      * guaranteeing that parameters, given as ECF variables, are reevaluated.
      */
@@ -117,7 +109,7 @@ public:
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
     /**
-     * \brief Finishes all the Aviso attributes, effectively stopping the background polling mechanism.
+     * \brief Finishes all the Aviso attributes, effectively stopping the background notifications.
      *
      * @param avisos the avisos to finish
      */
@@ -125,7 +117,7 @@ public:
 
     /**
      * \brief When the given state is a Task "terminal" state (i.e. complete, aborted, unknown), finishes all Aviso
-     * attributes, effectively stopping the background polling mechanism.
+     * attributes, effectively stopping the background notifications.
      *
      * @param avisos the avisos to finish
      * @param state the state to check against
@@ -133,13 +125,14 @@ public:
     static void finish(const std::vector<AvisoAttr>& avisos, NState::State state);
 
 private:
-    void start_controller(const std::string& aviso_path,
-                          const std::string& aviso_listener,
-                          const std::string& aviso_url,
-                          const std::string& aviso_schema,
-                          std::uint32_t polling,
-                          const std::string& aviso_auth) const;
-    void stop_controller(const std::string& aviso_path) const;
+    void start_backend(const std::string& aviso_path,
+                       const std::string& aviso_listener,
+                       const std::string& aviso_url,
+                       const std::string& aviso_auth) const;
+    void stop_backend() const;
+
+    void set_error(const std::string& reason) const;
+    void clear_error() const;
 
     /**
      * @brief The parent Node of this AvisoAttr.
@@ -171,20 +164,6 @@ private:
      * This configuration parameter may contain variable placeholders.
      */
     url_t url_;
-
-    /**
-     * @brief The schema used to launch the Aviso listener
-     *
-     * This configuration parameter may contain variable placeholders.
-     */
-    schema_t schema_;
-
-    /**
-     * @brief The polling interval used to launch the Aviso listener
-     *
-     * This configuration parameter may contain variable placeholders.
-     */
-    polling_t polling_;
 
     /**
      * @brief The authentication token used to launch the Aviso listener
@@ -224,14 +203,15 @@ private:
     mutable active_t active_;
 
     /**
-     * @brief The 'backgroung thread' controller, which is responsible for polling the Aviso service
+     * @brief The backend, which is responsible for receiving the Aviso notifications in the background
      *
-     * The controller is only instanciated between start() and finish() calls.
+     * The backend is only instantiated between start() and finish() calls, and only when a backend is available
+     * (i.e. on the server side, when built with Aviso support).
      * This allows AvisoAttr to have a copy-ctor and assignment operator.
      *
      *  -- This field is *not* serialized nor persisted; it is only used on the server side.
      **/
-    mutable controller_ptr_t controller_;
+    mutable backend_ptr_t backend_;
 };
 
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs);
@@ -240,12 +220,17 @@ std::string to_python_string(const AvisoAttr& aviso);
 
 template <class Archive>
 void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t version) {
+    // The Aviso v1 fields 'schema' and 'polling' are no longer used, but their (empty) placeholders are kept in the
+    // archive, so that the archive remains compatible with ecFlow 5.19.x clients and servers
+    std::string unused_schema;
+    std::string unused_polling;
+
     ar & aviso.parent_path_;
     ar & aviso.name_;
     ar & aviso.listener_;
     ar & aviso.url_;
-    ar & aviso.schema_;
-    ar & aviso.polling_;
+    ar & unused_schema;
+    ar & unused_polling;
     ar & aviso.auth_;
     ar & aviso.reason_;
     ar & aviso.revision_;

@@ -846,21 +846,17 @@ const char* NodeAttrDoc::aviso_doc() {
            "\nConstructors::\n\n"
            "   AvisoAttr(name, listener) (1)\n"
            "   AvisoAttr(name, listener, url)\n"
-           "   AvisoAttr(name, listener, url, schema)\n"
-           "   AvisoAttr(name, listener, url, schema, polling)\n"
-           "   AvisoAttr(name, listener, url, schema, polling, auth)\n"
+           "   AvisoAttr(name, listener, url, auth=auth)\n"
            "    with:\n"
            "      string name: The Aviso attribute name\n"
            "      string listener: The Aviso listener configuration (in JSON format)\n"
            "      string url: The URL used to contact the Aviso server\n"
-           "      string schema: The path to the Aviso schema\n"
-           "      string polling: The polling interval used to contact the Aviso server\n"
-           "      string auth: The path to the Aviso Authentication credentials\n"
+           "      string auth: The path to the Aviso credentials file (keyword only)\n"
            "\n"
-           "Note: Default values, based on %ECF_AVISO_...% variables, will be used for the calls where\n"
-           "the parameters url, schema, polling, and auth are not provided\n"
+           "Note: Default values, based on %ECF_AVISO_...% variables, are used when\n"
+           "the parameters url and auth are not provided\n"
            "\n"
-           "We suggest to specify :code:`%ECF_AVISO_***%` variables once (at suite level), and then create the\n"
+           "Specify the :code:`%ECF_AVISO_***%` variables once (at suite level), and then create the\n"
            "Aviso attributes passing just the name and the listener definition as per call `(1)`.\n"
            "\n"
            ".. note::"
@@ -874,9 +870,9 @@ const char* NodeAttrDoc::aviso_doc() {
            "   t1 = Task('t1', AvisoAttr('name', \"'{...}'\"))\n"
            "\n"
            "   t2 = Task('t2')\n"
-           "   t2.add_aviso('name', \"'{...}'\", 'http://aviso.com', '60', '/path/to/auth')\n"
+           "   t2.add_aviso(AvisoAttr('name', \"'{...}'\", 'http://aviso.com', auth='/path/to/auth'))\n"
            "\n"
-           "The parameters `url`, `schema`, `polling`, and `auth` are optional\n";
+           "The parameters `url` and `auth` are optional\n";
 }
 
 const char* NodeAttrDoc::mirror_doc() {

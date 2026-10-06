@@ -5,7 +5,6 @@
 
 #include <sstream>
 
-#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
@@ -37,8 +36,6 @@ AvisoAttr::AvisoAttr(Node* parent,
                      name_t name,
                      const listener_t& listener,
                      url_t url,
-                     schema_t schema,
-                     polling_t polling,
                      revision_t revision,
                      auth_t auth,
                      const reason_t& reason)
@@ -47,21 +44,19 @@ AvisoAttr::AvisoAttr(Node* parent,
       name_{std::move(name)},
       listener_{implementation::ensure_single_quotes(listener)},
       url_{std::move(url)},
-      schema_{std::move(schema)},
-      polling_{std::move(polling)},
       auth_{std::move(auth)},
       reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision},
-      controller_{nullptr} {
+      backend_{nullptr} {
     if (!ecf::algorithm::is_valid_name(name_)) {
         THROW_EXCEPTION(ecf::InvalidArgument, "Invalid AvisoAttr name :" << name_);
     }
 }
 
 AvisoAttr AvisoAttr::make_detached() const {
-    AvisoAttr detached   = *this;
-    detached.parent_     = nullptr;
-    detached.controller_ = nullptr;
+    AvisoAttr detached = *this;
+    detached.parent_   = nullptr;
+    detached.backend_  = nullptr;
     return detached;
 }
 
@@ -102,7 +97,7 @@ void AvisoAttr::reset() {
 }
 
 void AvisoAttr::reload() {
-    if (controller_) {
+    if (backend_) {
         state_change_no_ = Ecf::incr_state_change_no();
         finish();
         start();
@@ -111,14 +106,14 @@ void AvisoAttr::reload() {
 
 bool AvisoAttr::isFree() const {
 
-    if (controller_ == nullptr) {
+    if (backend_ == nullptr) {
         return false;
     }
 
     // Task associated with Attribute is free when any notification is found
-    auto notifications = controller_->get_notifications(this->path());
+    auto responses = backend_->drain();
 
-    if (notifications.empty()) {
+    if (responses.empty()) {
         // No notifications, nothing to do -- task continues to wait
         SLOG(D,
              "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_
@@ -126,40 +121,21 @@ bool AvisoAttr::isFree() const {
         return false;
     }
 
-    // Notifications found -- task can continue
+    // Only the latest response is relevant
+    const auto& latest = responses.back();
 
-    // (a) get the latest revision
-    auto& back = notifications.back();
-
-    state_change_no_ = Ecf::incr_state_change_no();
-
-    // (b) update the revision, in the listener configuration
     auto is_free = std::visit(
-        ecf::overload{
-            [this](const ecf::service::aviso::NotificationPackage<service::aviso::ConfiguredListener,
-                                                                  service::aviso::AvisoNotification>& response) {
-                SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
-                this->revision_ = response.configuration.revision();
-                parent_->get_flag().clear(Flag::REMOTE_ERROR);
-                parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = implementation::ensure_single_quotes("");
-                return true;
-            },
-            [this](const ecf::service::aviso::AvisoNoMatch& response) {
-                parent_->get_flag().clear(Flag::REMOTE_ERROR);
-                parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = implementation::ensure_single_quotes("");
-                return false;
-            },
-            [this](const ecf::service::aviso::AvisoError& response) {
-                parent_->get_flag().set(Flag::REMOTE_ERROR);
-                parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = implementation::ensure_single_quotes(std::string{response.reason()});
-                return false;
-            }},
-        back);
-
-    ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+        ecf::overload{[this](const ecf::service::aviso::AvisoNotification& notification) {
+                          this->revision_ = notification.sequence();
+                          SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
+                          clear_error();
+                          return true;
+                      },
+                      [this](const ecf::service::aviso::AvisoError& error) {
+                          set_error(error.reason());
+                          return false;
+                      }},
+        latest);
 
     SLOG(D,
          "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") "
@@ -199,78 +175,72 @@ void AvisoAttr::start() const {
         THROW_RUNTIME("AvisoAttr: invalid Aviso URL detected for " + aviso_path);
     }
 
-    // Schema -- the path to the Schema used to interpret the Aviso notifications
-    std::string aviso_schema = schema_;
-    parent_->variableSubstitution(aviso_schema);
-
-    std::string aviso_polling = polling_;
-    parent_->variableSubstitution(aviso_polling);
-    if (aviso_polling.empty()) {
-        THROW_RUNTIME("AvisoAttr: invalid Aviso polling interval detected for " + aviso_path);
-    }
-
     std::string aviso_auth = auth_;
     parent_->variableSubstitution(aviso_auth);
 
     ensure_resolved_variable(aviso_url, AvisoAttr::default_url, "AvisoAttr: failed to resolve Aviso URL: ");
-    ensure_resolved_variable(aviso_schema, AvisoAttr::default_schema, "AvisoAttr: failed to resolve Aviso schema: ");
-    ensure_resolved_variable(aviso_polling, AvisoAttr::default_polling, "AvisoAttr: failed to resolve Aviso polling: ");
     ensure_resolved_variable(aviso_auth, AvisoAttr::default_auth, "AvisoAttr: failed to resolve Aviso auth: ");
 
-    std::uint32_t polling;
-    try {
-        polling = ecf::convert_to<std::uint32_t>(aviso_polling);
-    }
-    catch (ecf::bad_conversion&) {
-        THROW_RUNTIME(
-            Message("AvisoAttr: failed to convert polling; expected an integer, but found: ", aviso_polling).str());
-    }
-
-    start_controller(aviso_path, active_, aviso_url, aviso_schema, polling, aviso_auth);
+    start_backend(aviso_path, active_, aviso_url, aviso_auth);
 }
 
-void AvisoAttr::start_controller(const std::string& aviso_path,
-                                 const std::string& aviso_listener,
-                                 const std::string& aviso_url,
-                                 const std::string& aviso_schema,
-                                 std::uint32_t polling,
-                                 const std::string& aviso_auth) const {
+void AvisoAttr::start_backend(const std::string& aviso_path,
+                              const std::string& aviso_listener,
+                              const std::string& aviso_url,
+                              const std::string& aviso_auth) const {
 
-    if (!controller_) {
-        // Controller -- start up the Aviso controller, and subscribe the Aviso listener
-        controller_ = std::make_shared<controller_t>();
-        controller_->subscribe(ecf::service::aviso::AvisoSubscribe{
-            aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_, aviso_auth});
-        // Controller -- effectively start the Aviso listener
-        // n.b. this must be done after subscribing in the controller, so that the polling interval is set
-        controller_->start();
+    if (backend_) {
+        return;
+    }
+
+    backend_ = ecf::service::aviso::make_backend();
+    if (!backend_) {
+        // No backend available (e.g. a server built without Aviso support) -- the task remains queued
+        set_error(std::string{ecf::service::aviso::no_backend});
+        return;
+    }
+
+    backend_->subscribe(
+        ecf::service::aviso::AvisoSubscribe{aviso_path, aviso_listener, aviso_url, revision_, aviso_auth});
+
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void AvisoAttr::stop_backend() const {
+    if (backend_ != nullptr) {
+        SLOG(D, "AvisoAttr: finishing notifications for Aviso attribute (" << parent_path_ << ":" << name_ << ")");
+
+        backend_ = nullptr;
 
         state_change_no_ = Ecf::incr_state_change_no();
     }
+
+    // Reset the configured listener buffer
+    active_ = "";
 }
 
-void AvisoAttr::stop_controller(const std::string& aviso_path) const {
-    if (controller_ != nullptr) {
-        SLOG(D, "AvisoAttr: finishing polling for Aviso attribute (" << parent_path_ << ":" << name_ << ")");
+void AvisoAttr::set_error(const std::string& reason) const {
+    state_change_no_ = Ecf::incr_state_change_no();
+    reason_          = implementation::ensure_single_quotes(reason);
+    if (parent_) {
+        parent_->get_flag().set(Flag::REMOTE_ERROR);
+        parent_->get_flag().set_state_change_no(state_change_no_);
+        ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+    }
+}
 
-        controller_->subscribe(ecf::service::aviso::AvisoUnsubscribe{aviso_path});
-
-        // Controller -- shutdown up the Aviso controller
-        controller_->stop();
-        controller_ = nullptr;
-
-        // Reset the configured listener buffer
-        active_ = "";
-
-        state_change_no_ = Ecf::incr_state_change_no();
+void AvisoAttr::clear_error() const {
+    state_change_no_ = Ecf::incr_state_change_no();
+    reason_          = implementation::ensure_single_quotes("");
+    if (parent_) {
+        parent_->get_flag().clear(Flag::REMOTE_ERROR);
+        parent_->get_flag().set_state_change_no(state_change_no_);
+        ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
     }
 }
 
 void AvisoAttr::finish() const {
-    using namespace ecf;
-
-    std::string aviso_path = path();
-    stop_controller(aviso_path);
+    stop_backend();
 }
 
 void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos) {
@@ -287,8 +257,7 @@ void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state
 
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
-           lhs.schema() == rhs.schema() && lhs.polling() == rhs.polling() && lhs.revision() == rhs.revision() &&
-           lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason();
+           lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason();
 }
 
 std::string to_python_string(const AvisoAttr& aviso) {
@@ -300,10 +269,6 @@ std::string to_python_string(const AvisoAttr& aviso) {
     s += aviso.listener();
     s += ", url=";
     s += aviso.url();
-    s += ", schema=";
-    s += aviso.schema();
-    s += ", polling=";
-    s += aviso.polling();
     s += ", revision=";
     s += std::to_string(aviso.revision());
     s += ", auth=";

@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <iostream>
+#include <memory>
+#include <optional>
 #include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -12,93 +14,179 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
-#include "ecflow/test/scaffold/Provisioning.hpp"
+
+namespace {
+
+///
+/// @brief Holds what the fake backend received, and what it is to deliver.
+///
+struct FakeBackendState
+{
+    std::optional<ecf::service::aviso::AvisoSubscribe> subscribed;
+    std::vector<ecf::service::aviso::AvisoResponse> pending;
+};
+
+class FakeBackend : public ecf::service::aviso::AvisoBackend {
+public:
+    explicit FakeBackend(std::shared_ptr<FakeBackendState> state)
+        : state_{std::move(state)} {}
+
+    void subscribe(const ecf::service::aviso::AvisoSubscribe& request) override { state_->subscribed = request; }
+
+    std::vector<ecf::service::aviso::AvisoResponse> drain() override {
+        auto drained = std::move(state_->pending);
+        state_->pending.clear();
+        return drained;
+    }
+
+private:
+    std::shared_ptr<FakeBackendState> state_;
+};
+
+///
+/// @brief Registers a fake backend for the duration of a test case.
+///
+struct WithFakeBackend
+{
+    WithFakeBackend() {
+        ecf::service::aviso::register_backend([s = state]() { return std::make_unique<FakeBackend>(s); });
+    }
+    ~WithFakeBackend() { ecf::service::aviso::register_backend({}); }
+
+    std::shared_ptr<FakeBackendState> state = std::make_shared<FakeBackendState>();
+};
+
+const std::string definition = R"(
+    suite s1
+      family f1
+        edit CLASS 'od'
+        edit ECF_AVISO_URL 'https://example.com/aviso'
+        edit ECF_AVISO_AUTH '/path/to/auth'
+        task t1
+          aviso --name A --listener '{ "event": "mars", "request": { "class": "%CLASS%" } }'
+      endfamily
+    endsuite
+)";
+
+std::shared_ptr<Task> load_task(Defs& defs) {
+    DefsStructureParser parser(&defs, definition, true);
+
+    std::string errorMsg, warningMsg;
+    bool parsedOK = parser.doParse(errorMsg, warningMsg);
+    BOOST_REQUIRE_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
+
+    return defs.suites()[0]->familyVec()[0]->taskVec()[0];
+}
+
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_AvisoAttr)
 
-BOOST_AUTO_TEST_CASE(can_run_aviso_attribute_with_variable_substitution) {
+BOOST_AUTO_TEST_CASE(can_start_aviso_attribute_with_variable_substitution) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf;
-    using namespace ecf::test::scaffold;
 
-    WithTestFile schema(NamedTestFile{"schema.aviso.json"}, R"(
-      {
-        "version":0.1,
-        "payload":"location",
-        "mars":{
-          "endpoint":[
-            {
-              "engine":[
-                "etcd_rest",
-                "etcd_grpc"
-              ],
-              "base":"/ec/mars",
-              "stem":"date={date},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}"
-            },
-            {
-              "engine":[
-                "file_based"
-              ],
-              "base":"/tmp/aviso/mars",
-              "stem":"{class}/{expver}/{domain}/{date}/{time}/{stream}/{step}"
-            }
-          ]
-        }
-      })");
-
-    std::string definition = R"(
-        suite s1
-          family f1
-            edit CLASS 'od'
-            edit ECF_AVISO_URL 'https://example.com/aviso'
-            edit ECF_AVISO_SCHEMA 'schema.aviso.json'
-            edit ECF_AVISO_AUTH ''
-            edit ECF_AVISO_POLLING '30'
-            task t1
-              aviso --name A --listener '{ "event": "mars", "request": { "class": "%CLASS%" } }'
-          endfamily
-    )";
+    WithFakeBackend backend;
 
     Defs defs;
-    DefsStructureParser parser(&defs, definition, true);
+    auto task = load_task(defs);
 
-    std::string errorMsg, warningMsg;
-    bool parsedOK = parser.doParse(errorMsg, warningMsg);
-    BOOST_CHECK_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
-
-    const auto& suites = defs.suites();
-    BOOST_CHECK_EQUAL(suites.size(), static_cast<size_t>(1));
-
-    const auto& families = suites[0]->familyVec();
-    BOOST_CHECK_EQUAL(families.size(), static_cast<size_t>(1));
-
-    const auto& tasks = families[0]->taskVec();
-    BOOST_CHECK_EQUAL(tasks.size(), static_cast<size_t>(1));
-
-    const auto& avisos = tasks[0]->avisos();
-    BOOST_CHECK_EQUAL(avisos.size(), static_cast<size_t>(1));
+    const auto& avisos = task->avisos();
+    BOOST_REQUIRE_EQUAL(avisos.size(), static_cast<size_t>(1));
 
     const auto& aviso = avisos[0];
     BOOST_CHECK_EQUAL(aviso.name(), "A");
     BOOST_CHECK_EQUAL(aviso.listener(), R"('{ "event": "mars", "request": { "class": "%CLASS%" } }')");
     BOOST_CHECK_EQUAL(aviso.url(), "%ECF_AVISO_URL%");
-    BOOST_CHECK_EQUAL(aviso.schema(), "%ECF_AVISO_SCHEMA%");
     BOOST_CHECK_EQUAL(aviso.auth(), "%ECF_AVISO_AUTH%");
-    BOOST_CHECK_EQUAL(aviso.polling(), "%ECF_AVISO_POLLING%");
     BOOST_CHECK_EQUAL(aviso.active(), "");
     BOOST_CHECK_EQUAL(aviso.reason(), "''");
 
     aviso.start();
+
     // Ensure that the variable substitution is done correctly
     BOOST_CHECK_EQUAL(aviso.active(), R"({ "event": "mars", "request": { "class": "od" } })");
-
-    // This is the first multithreaded test in ecFlow!
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->path(), "/s1/f1/t1:A");
+    BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "mars", "request": { "class": "od" } })");
+    BOOST_CHECK_EQUAL(backend.state->subscribed->url(), "https://example.com/aviso");
+    BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), 0u);
+    BOOST_CHECK_EQUAL(backend.state->subscribed->auth(), "/path/to/auth");
 
     aviso.finish();
+
     // Ensure that, after finishing, the active listener is cleared
+    BOOST_CHECK_EQUAL(aviso.active(), R"()");
+}
+
+BOOST_AUTO_TEST_CASE(is_free_once_a_notification_is_received) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+    using namespace ecf::service::aviso;
+
+    WithFakeBackend backend;
+
+    Defs defs;
+    auto task         = load_task(defs);
+    const auto& aviso = task->avisos()[0];
+
+    aviso.start();
+    BOOST_CHECK(!aviso.isFree());
+
+    backend.state->pending.emplace_back(AvisoNotification{"mars", 5, R"({"class": "od"})", "null"});
+    backend.state->pending.emplace_back(AvisoNotification{"mars", 9, R"({"class": "od"})", "null"});
+
+    BOOST_CHECK(aviso.isFree());
+    BOOST_CHECK_EQUAL(aviso.revision(), 9u);
+    BOOST_CHECK(!task->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(aviso.reason(), "''");
+
+    aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(is_not_free_when_an_error_is_received) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+    using namespace ecf::service::aviso;
+
+    WithFakeBackend backend;
+
+    Defs defs;
+    auto task         = load_task(defs);
+    const auto& aviso = task->avisos()[0];
+
+    aviso.start();
+
+    backend.state->pending.emplace_back(AvisoError{"connection refused"});
+
+    BOOST_CHECK(!aviso.isFree());
+    BOOST_CHECK(task->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(aviso.reason(), "'connection refused'");
+
+    aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(reports_error_when_no_backend_is_available) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    Defs defs;
+    auto task         = load_task(defs);
+    const auto& aviso = task->avisos()[0];
+
+    aviso.start();
+
+    BOOST_CHECK(!aviso.isFree());
+    BOOST_CHECK(task->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(aviso.reason(), "'" + std::string{ecf::service::aviso::no_backend} + "'");
+
+    aviso.finish();
     BOOST_CHECK_EQUAL(aviso.active(), R"()");
 }
 

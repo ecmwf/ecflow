@@ -33,12 +33,10 @@ private:
         NameIndex     = 1,
         ListenerIndex = 2,
         UrlIndex      = 3,
-        SchemaIndex   = 4,
-        PollingIndex  = 5,
-        RevisionIndex = 6,
-        AuthIndex     = 7,
-        ReasonIndex   = 8,
-        ActiveIndex   = 9,
+        RevisionIndex = 4,
+        AuthIndex     = 5,
+        ReasonIndex   = 6,
+        ActiveIndex   = 7,
     };
 };
 
