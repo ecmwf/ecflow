@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <nlohmann/json.hpp>
+
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
@@ -14,6 +16,53 @@
 #include "ecflow/node/Operations.hpp"
 
 namespace ecf {
+
+AvisoEvent AvisoEvent::from(const ecf::service::aviso::AvisoNotification& notification) {
+    return AvisoEvent{notification.event_type(),
+                      notification.sequence(),
+                      notification.identifier_json(),
+                      notification.payload_json()};
+}
+
+AvisoEvent AvisoEvent::from_option(const std::string& option) {
+    std::string text = option;
+    if (text.size() >= 2 && text.front() == '\'' && text.back() == '\'') {
+        text = text.substr(1, text.size() - 2);
+    }
+    try {
+        auto event = nlohmann::ordered_json::parse(text);
+        return AvisoEvent{event.at("type").get<std::string>(),
+                          event.at("sequence").get<sequence_t>(),
+                          event.at("identifier").get<std::string>(),
+                          event.at("payload").get<std::string>()};
+    }
+    catch (const nlohmann::ordered_json::exception& e) {
+        throw std::runtime_error("AvisoAttr: invalid event " + option + " (" + e.what() + ")");
+    }
+}
+
+std::string AvisoEvent::to_option() const {
+    nlohmann::ordered_json event{
+        {"type", type}, {"sequence", sequence}, {"identifier", identifier}, {"payload", payload}};
+    // Single quotes only occur within JSON strings, where they can be escaped, so that the value can be quoted
+    std::string text = event.dump();
+    std::string escaped;
+    escaped.reserve(text.size());
+    for (char c : text) {
+        if (c == '\'') {
+            escaped += "\\u0027";
+        }
+        else {
+            escaped += c;
+        }
+    }
+    return "'" + escaped + "'";
+}
+
+bool operator==(const AvisoEvent& lhs, const AvisoEvent& rhs) {
+    return lhs.type == rhs.type && lhs.sequence == rhs.sequence && lhs.identifier == rhs.identifier &&
+           lhs.payload == rhs.payload;
+}
 
 namespace implementation {
 
@@ -80,6 +129,43 @@ std::string AvisoAttr::path() const {
     path += ':';
     path += name_;
     return path;
+}
+
+void AvisoAttr::set_event(const AvisoEvent& event) {
+    assign_event(event);
+}
+
+void AvisoAttr::assign_event(const AvisoEvent& event) const {
+    state_change_no_ = Ecf::incr_state_change_no();
+    event_           = event;
+}
+
+void AvisoAttr::update_gen_variables() const {
+    // The job is generated while the node is still queued, before the held notification is committed
+    const AvisoEvent event = pending_ ? AvisoEvent::from(*pending_) : event_;
+    genvar_event_type_.set_value(event.type);
+    genvar_event_sequence_.set_value(std::to_string(event.sequence));
+    genvar_event_data_identifier_.set_value(event.identifier);
+    genvar_event_data_payload_.set_value(event.payload);
+}
+
+void AvisoAttr::gen_variables(std::vector<Variable>& vars) const {
+    update_gen_variables();
+    vars.push_back(genvar_event_type_);
+    vars.push_back(genvar_event_sequence_);
+    vars.push_back(genvar_event_data_identifier_);
+    vars.push_back(genvar_event_data_payload_);
+}
+
+const Variable& AvisoAttr::find_gen_variable(const std::string& name) const {
+    update_gen_variables();
+    for (const auto* var :
+         {&genvar_event_type_, &genvar_event_sequence_, &genvar_event_data_identifier_, &genvar_event_data_payload_}) {
+        if (var->name() == name) {
+            return *var;
+        }
+    }
+    return Variable::EMPTY();
 }
 
 bool AvisoAttr::has_error() const {
@@ -302,6 +388,8 @@ void AvisoAttr::commit() const {
     if (pending_) {
         state_change_no_ = Ecf::incr_state_change_no();
         revision_        = std::max(revision_, pending_->sequence());
+        // The notification that released the node becomes available to the job, as generated variables
+        assign_event(AvisoEvent::from(*pending_));
         pending_.reset();
         SLOG(D, "AvisoAttr::commit: " << this->path() << " consumed notification " << revision_);
     }
@@ -322,7 +410,7 @@ void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
            lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason() &&
-           lhs.collapse() == rhs.collapse();
+           lhs.collapse() == rhs.collapse() && lhs.event() == rhs.event();
 }
 
 std::string to_python_string(const AvisoAttr& aviso) {

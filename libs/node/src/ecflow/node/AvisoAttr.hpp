@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -22,6 +23,58 @@ class access;
 class Node;
 
 namespace ecf {
+
+///
+/// @brief AvisoEvent describes the Aviso notification that released a node.
+///
+/// The event is exposed to the job as generated variables, and is persisted (in checkpoints, as option --event) so
+/// that the variables survive a server restart.
+///
+struct AvisoEvent
+{
+    using sequence_t = std::uint64_t;
+
+    /// The event type of the notification (e.g. mars).
+    std::string type;
+    /// The sequence number of the notification; 0 when no notification has released the node.
+    sequence_t sequence{0};
+    /// The identifier of the notification, as JSON.
+    std::string identifier;
+    /// The payload of the notification, as JSON.
+    std::string payload;
+
+    ///
+    /// @brief Creates the event describing the given notification.
+    ///
+    /// @param[in] notification The notification that released the node.
+    /// @return The event.
+    ///
+    static AvisoEvent from(const ecf::service::aviso::AvisoNotification& notification);
+
+    ///
+    /// @brief Creates the event from the value of option --event.
+    ///
+    /// @param[in] option The value, with or without the surrounding single quotes.
+    /// @return The event.
+    /// @throws std::runtime_error if the value is not a valid event.
+    ///
+    static AvisoEvent from_option(const std::string& option);
+
+    ///
+    /// @brief Returns whether no notification is described (i.e. the sequence is 0).
+    ///
+    [[nodiscard]] bool empty() const { return sequence == 0; }
+
+    ///
+    /// @brief Returns the event as the single-quoted value of option --event.
+    ///
+    /// The value is a JSON object (type, sequence, identifier, payload), in which single quotes are escaped (as
+    /// `\u0027`).
+    ///
+    [[nodiscard]] std::string to_option() const;
+};
+
+bool operator==(const AvisoEvent& lhs, const AvisoEvent& rhs);
 
 ///
 /// \brief AvisoAttr represents an attribute, attached to a \ref Node.
@@ -86,6 +139,37 @@ public:
     /// @brief Returns whether a release consumes all the notifications received (true), or exactly one (false).
     ///
     [[nodiscard]] inline bool collapse() const { return collapse_; }
+
+    static constexpr const char* genvar_event_type            = "ECF_AVISO_EVENT_TYPE";
+    static constexpr const char* genvar_event_sequence        = "ECF_AVISO_EVENT_SEQUENCE";
+    static constexpr const char* genvar_event_data_identifier = "ECF_AVISO_EVENT_DATA_IDENTIFIER";
+    static constexpr const char* genvar_event_data_payload    = "ECF_AVISO_EVENT_DATA_PAYLOAD";
+
+    ///
+    /// @brief Returns the notification that released the node (empty, until a notification releases the node).
+    ///
+    [[nodiscard]] inline const AvisoEvent& event() const { return event_; }
+
+    ///
+    /// @brief Sets the notification that released the node.
+    ///
+    /// @param[in] event The event describing the notification.
+    ///
+    void set_event(const AvisoEvent& event);
+
+    ///
+    /// @brief Appends the variables generated from the notification that released the node.
+    ///
+    /// The variables describe the notification held to release the node, as soon as it is held (so that the job,
+    /// generated while the node is still queued, sees it), or otherwise the last one committed. The variables are
+    /// always defined; they are empty (and the sequence is 0) until a notification releases the node.
+    ///
+    void gen_variables(std::vector<Variable>& vars) const;
+
+    ///
+    /// @brief Returns the generated variable with the given name, or an empty variable when there is none.
+    ///
+    [[nodiscard]] const Variable& find_gen_variable(const std::string& name) const;
     [[nodiscard]] inline const active_t& active() const { return active_; }
     [[nodiscard]] path_t path() const;
 
@@ -201,6 +285,27 @@ private:
      */
     bool collapse_{false};
 
+    /**
+     * @brief The notification that released the node
+     *
+     * Set when the node is released (see commit()); persisted, so that the generated variables survive a restart.
+     */
+    mutable AvisoEvent event_;
+
+    void assign_event(const AvisoEvent& event) const;
+
+    /**
+     * @brief The generated variables, refreshed from the event fields when accessed
+     *
+     *  -- These fields are *not* serialized nor persisted.
+     */
+    mutable Variable genvar_event_type_{genvar_event_type, ""};
+    mutable Variable genvar_event_sequence_{genvar_event_sequence, "0"};
+    mutable Variable genvar_event_data_identifier_{genvar_event_data_identifier, ""};
+    mutable Variable genvar_event_data_payload_{genvar_event_data_payload, ""};
+
+    void update_gen_variables() const;
+
     // The following are mutable as they are modified by the const method isFree()
 
     /**
@@ -283,6 +388,10 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
     ar & aviso.active_;
     if (version >= 1) {
         ar & aviso.collapse_;
+        ar & aviso.event_.type;
+        ar & aviso.event_.sequence;
+        ar & aviso.event_.identifier;
+        ar & aviso.event_.payload;
     }
 }
 

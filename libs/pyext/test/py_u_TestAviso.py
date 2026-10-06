@@ -105,6 +105,17 @@ def test_create_aviso_with_collapse():
     assert content.count("--collapse") == 1
 
 
+def test_aviso_generated_variables_are_defined():
+    task = ecf.Task("t", ecf.AvisoAttr("a", '{ "event": "mars" }'))
+
+    generated = {v.name(): v.value() for v in task.get_generated_variables()}
+
+    assert generated["ECF_AVISO_EVENT_TYPE"] == ""
+    assert generated["ECF_AVISO_EVENT_SEQUENCE"] == "0"
+    assert generated["ECF_AVISO_EVENT_DATA_IDENTIFIER"] == ""
+    assert generated["ECF_AVISO_EVENT_DATA_PAYLOAD"] == ""
+
+
 def test_add_aviso_to_task():
     suite = ecf.Suite("s1")
     family = ecf.Family("f1")

@@ -102,6 +102,11 @@ bool is_released(const Task& task) {
     return task.state() != NState::QUEUED;
 }
 
+std::string genvar_of(ClientInvoker& client, const std::string& name) {
+    client.sync_local();
+    return client.defs()->findAbsNode("/s/t")->findGenVariable(name).value();
+}
+
 ecf::AvisoAttr::revision_t revision_of(ClientInvoker& client) {
     client.sync_local();
     return client.defs()->findAbsNode("/s/t")->avisos().front().revision();
@@ -132,10 +137,17 @@ BOOST_AUTO_TEST_CASE(releases_task_when_notification_is_published) {
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
     BOOST_CHECK(!wait_for_task(client, is_released, 1s));
 
-    server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
+    server.publish("test_event", R"({ "date": "20261006", "time": "1200" })", R"({ "location": "file:///x" })");
 
     BOOST_CHECK_MESSAGE(wait_for_task(client, is_released), "Expected the task to be released by the notification");
     BOOST_CHECK_EQUAL(revision_of(client), 1u);
+
+    // The notification that released the task is available, as generated variables
+    BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_type), "test_event");
+    BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_sequence), "1");
+    BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_data_identifier),
+                      R"({"date":"20261006","time":"1200"})");
+    BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_data_payload), R"({"location":"file:///x"})");
 
     System::destroy();
 }
@@ -287,10 +299,13 @@ BOOST_AUTO_TEST_CASE(continues_releasing_once_per_notification_after_server_rest
         BOOST_REQUIRE_MESSAGE(client.restartServer() == 0, "restart failed: " << client.errorMsg());
 
         BOOST_CHECK_EQUAL(revision_of(client), 1u);
+        // The notification that released the task before the restart is still available
+        BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_sequence), "1");
         for (ecf::AvisoAttr::revision_t expected = 2; expected <= 3; ++expected) {
             BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released),
                                   "Expected release by notification " << expected << " after the restart");
             BOOST_CHECK_EQUAL(revision_of(client), expected);
+            BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_sequence), std::to_string(expected));
             BOOST_REQUIRE_MESSAGE(client.requeue("/s/t") == 0, "requeue failed: " << client.errorMsg());
         }
         BOOST_CHECK(!wait_for_task(client, is_released, 1s));

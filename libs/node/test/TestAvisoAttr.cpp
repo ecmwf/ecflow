@@ -557,6 +557,140 @@ BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso)
     BOOST_CHECK_MESSAGE(t->avisos()[0].active().empty(), "Expected the shutdown to finish the attribute");
 }
 
+BOOST_AUTO_TEST_CASE(generated_variables_are_defined_before_any_release) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    auto t    = find(defs, "/s/t");
+
+    std::vector<Variable> vars;
+    t->gen_variables(vars);
+
+    for (const auto* name : {AvisoAttr::genvar_event_type,
+                             AvisoAttr::genvar_event_sequence,
+                             AvisoAttr::genvar_event_data_identifier,
+                             AvisoAttr::genvar_event_data_payload}) {
+        BOOST_CHECK_MESSAGE(std::any_of(vars.begin(), vars.end(), [name](const auto& v) { return v.name() == name; }),
+                            "Expected generated variable " << name);
+        BOOST_CHECK_MESSAGE(!t->findGenVariable(name).empty(), "Expected to find generated variable " << name);
+    }
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_type).value(), "");
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "0");
+
+    // A node without an Aviso attribute does not define them
+    BOOST_CHECK(find(defs, "/s/other")->findGenVariable(AvisoAttr::genvar_event_type).empty());
+}
+
+BOOST_AUTO_TEST_CASE(generated_variables_describe_the_notification_that_released_the_node) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+    using namespace ecf::service::aviso;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    backend.state->pending = {
+        AvisoNotification{"mars", 7, R"({"class":"od","step":"6"})", R"({"location":"file:///x"})"}};
+
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_type).value(), "mars");
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "7");
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_data_identifier).value(),
+                      R"({"class":"od","step":"6"})");
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_data_payload).value(), R"({"location":"file:///x"})");
+
+    // The variables are available to the job, as any other variable
+    std::string line = "%ECF_AVISO_EVENT_TYPE%@%ECF_AVISO_EVENT_SEQUENCE% %ECF_AVISO_EVENT_DATA_PAYLOAD%";
+    BOOST_REQUIRE(t->variableSubstitution(line));
+    BOOST_CHECK_EQUAL(line, R"(mars@7 {"location":"file:///x"})");
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(generated_variables_describe_the_notification_while_the_job_is_generated) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+    using namespace ecf::service::aviso;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t            = find(defs, "/s/t");
+    const auto& aviso = t->avisos()[0];
+
+    backend.state->pending = {AvisoNotification{"mars", 7, R"({"class":"od"})", R"({"location":"file:///x"})"}};
+
+    // The job is generated while the node is still queued, i.e. once the notification releases the node, but
+    // before the node leaves the queued state (when the notification is committed)
+    BOOST_REQUIRE(aviso.isFree());
+
+    std::string line = "%ECF_AVISO_EVENT_TYPE%@%ECF_AVISO_EVENT_SEQUENCE% %ECF_AVISO_EVENT_DATA_PAYLOAD%";
+    BOOST_REQUIRE(t->variableSubstitution(line));
+    BOOST_CHECK_EQUAL(line, R"(mars@7 {"location":"file:///x"})");
+
+    aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(generated_variables_follow_each_release) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs         = load_suite_with_aviso(aviso_variables);
+    auto t            = find(defs, "/s/t");
+    const auto& aviso = t->avisos()[0];
+    aviso.start();
+
+    backend.state->pending = {notification(1), notification(2)};
+
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "0");
+
+    // Held to release the node: the variables describe the notification, before and after it is consumed
+    BOOST_CHECK(aviso.isFree());
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "1");
+    release_and_requeue(aviso);
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "1");
+
+    BOOST_CHECK(aviso.isFree());
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "2");
+    release_and_requeue(aviso);
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "2");
+
+    aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(generated_variables_describe_the_latest_notification_when_collapsing) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs         = load_suite_with_aviso(aviso_variables, " --collapse");
+    auto t            = find(defs, "/s/t");
+    const auto& aviso = t->avisos()[0];
+    aviso.start();
+
+    backend.state->pending = {notification(1), notification(2), notification(3)};
+
+    BOOST_CHECK(aviso.isFree());
+    release_and_requeue(aviso);
+    BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "3");
+
+    aviso.finish();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

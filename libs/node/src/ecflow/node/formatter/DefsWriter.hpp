@@ -1028,6 +1028,12 @@ struct Writer<AvisoAttr, Stream>
 
         ecf::format_as_defs(item, output);
 
+        // The notification that released the node is state: it is written in checkpoints, not in definitions
+        if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() && !item.event().empty()) {
+            output << " --event ";
+            output << item.event().to_option();
+        }
+
         output << "\n";
     }
 

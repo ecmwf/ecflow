@@ -2604,6 +2604,9 @@ size_t Node::position() const {
 
 void Node::gen_variables(std::vector<Variable>& vec) const {
     repeat_.gen_variables(vec); // if repeat_ is empty vec is unchanged
+    for (const auto& aviso : avisos_) {
+        aviso.gen_variables(vec);
+    }
 }
 
 std::vector<Variable> Node::gen_variables() const {
@@ -2613,7 +2616,15 @@ std::vector<Variable> Node::gen_variables() const {
 }
 
 const Variable& Node::findGenVariable(const std::string& name) const {
-    return repeat_.find_gen_variable(name); // if repeat_ is empty find returns empty variable by ref
+    if (const Variable& var = repeat_.find_gen_variable(name); !var.empty()) {
+        return var; // if repeat_ is empty find returns empty variable by ref
+    }
+    for (const auto& aviso : avisos_) {
+        if (const Variable& var = aviso.find_gen_variable(name); !var.empty()) {
+            return var;
+        }
+    }
+    return Variable::EMPTY();
 }
 
 void Node::update_repeat_genvar() const {

@@ -26,6 +26,8 @@
  *    - string value (enclosed in single quotes), optional (default: empty)
  *  --collapse
  *    - flag, optional: a release consumes all the notifications received, instead of exactly one
+ *  --event '<value>'
+ *    - JSON value (enclosed in single quotes), optional, state only: the notification that released the node
  *
  * The Aviso v1 options --schema and --polling are rejected in a definition, but accepted and ignored when reading a
  * definition that carries state (e.g. a checkpoint written by an earlier version of ecFlow).
@@ -47,6 +49,7 @@ public:
     static constexpr const char* option_auth       = "auth";
     static constexpr const char* option_reason     = "reason";
     static constexpr const char* option_collapse   = "collapse";
+    static constexpr const char* option_event      = "event";
 
     static ecf::AvisoAttr parse_aviso_line(const std::string& line);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);

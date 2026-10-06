@@ -316,8 +316,113 @@ BOOST_AUTO_TEST_CASE(deserialises_aviso_written_by_ecflow_5_19_without_collapse)
     AvisoAttr restored;
     ecf::restore_from_string(data, restored);
 
-    // The archive of ecFlow 5.19.x has no class version (i.e. version 0), and no collapse option
+    // The archive of ecFlow 5.19.x has no class version (i.e. version 0), no collapse option and no event
     BOOST_CHECK(!restored.collapse());
+    BOOST_CHECK(restored.event().empty());
+}
+
+BOOST_AUTO_TEST_CASE(writes_event_in_checkpoints_only) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          task t1
+            aviso --name A --listener '{ "event": "mars" }'
+        endsuite
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+    std::string errorMsg, warningMsg;
+    BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+
+    // A payload holding single quotes and percent signs, which must survive the quoting of the option
+    const std::string payload = R"({"location":"file:///it's/100%/x"})";
+    auto& aviso               = defs.suites()[0]->taskVec()[0]->avisos()[0];
+    const AvisoEvent event{"mars", 7, R"({"class":"od"})", payload};
+    aviso.set_event(event);
+
+    BOOST_CHECK(ecf::as_string(defs, PrintStyle::DEFS).find("--event") == std::string::npos);
+
+    std::string checkpoint = ecf::as_string(defs, PrintStyle::MIGRATE);
+    BOOST_REQUIRE(checkpoint.find("--event") != std::string::npos);
+
+    Defs restored;
+    DefsStructureParser reparser(&restored, checkpoint, true);
+    BOOST_REQUIRE_MESSAGE(reparser.doParse(errorMsg, warningMsg), "Failed to parse checkpoint: " << errorMsg);
+
+    const auto& restored_aviso = restored.suites()[0]->taskVec()[0]->avisos()[0];
+    BOOST_CHECK(restored_aviso.event() == event);
+}
+
+BOOST_AUTO_TEST_CASE(event_option_round_trips) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    const AvisoEvent event{"mars", 7, R"({"class":"od"})", R"({"location":"file:///it's/x"})"};
+
+    const auto option = event.to_option();
+    BOOST_CHECK_EQUAL(option.front(), '\'');
+    BOOST_CHECK_EQUAL(option.back(), '\'');
+    BOOST_CHECK(option.find('\'', 1) == option.size() - 1);
+
+    // The value is accepted with and without the surrounding single quotes
+    BOOST_CHECK(AvisoEvent::from_option(option) == event);
+    BOOST_CHECK(AvisoEvent::from_option(option.substr(1, option.size() - 2)) == event);
+}
+
+BOOST_AUTO_TEST_CASE(event_describes_notification) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    const ecf::service::aviso::AvisoNotification notification{"mars", 7, R"({"class":"od"})", R"({"x":1})"};
+    const auto event = AvisoEvent::from(notification);
+
+    BOOST_CHECK_EQUAL(event.type, "mars");
+    BOOST_CHECK_EQUAL(event.sequence, 7u);
+    BOOST_CHECK_EQUAL(event.identifier, R"({"class":"od"})");
+    BOOST_CHECK_EQUAL(event.payload, R"({"x":1})");
+    BOOST_CHECK(!event.empty());
+    BOOST_CHECK(AvisoEvent{}.empty());
+}
+
+BOOST_AUTO_TEST_CASE(cannot_parse_invalid_event) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    for (const std::string event : {"'not json'", R"('{ "type": "mars" }')", R"('{ "type": 1, "sequence": 1 }')"}) {
+        std::string definition = "defs_state MIGRATE\nsuite s1\n  task t1\n    aviso --name A --listener '{ \"event\": "
+                                 "\"mars\" }' --event " +
+                                 event + "\nendsuite\n";
+
+        Defs defs;
+        DefsStructureParser parser(&defs, definition, true);
+        std::string errorMsg, warningMsg;
+        BOOST_CHECK_MESSAGE(!parser.doParse(errorMsg, warningMsg), "Expected invalid event to be rejected: " << event);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(can_serialise_event) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    AvisoAttr original{nullptr, "A", R"({ "event": "mars" })", "http://host:port", 7, "/path/to/auth", ""};
+    original.set_event(AvisoEvent{"mars", 7, R"({"class":"od"})", R"({"location":"file:///x"})"});
+
+    std::string data;
+    ecf::save_as_string(data, original);
+
+    AvisoAttr restored;
+    ecf::restore_from_string(data, restored);
+
+    BOOST_CHECK(restored == original);
+    BOOST_CHECK_EQUAL(restored.event().payload, R"({"location":"file:///x"})");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
