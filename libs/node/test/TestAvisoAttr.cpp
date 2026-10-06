@@ -498,6 +498,38 @@ BOOST_AUTO_TEST_CASE(notification_is_kept_while_another_dependency_holds_the_tas
     t->avisos()[0].finish();
 }
 
+BOOST_AUTO_TEST_CASE(change_keeps_attribute_attached_to_its_node) {
+    ECF_NAME_THIS_TEST();
+
+    // LD7: `alter change aviso` must keep the attribute attached to its node, and start the new configuration
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+
+    // i.e. `alter change aviso A "--listener '{ "event": "dissemination" }'" /s/t`
+    t->changeAviso("A", R"(--listener '{ "event": "dissemination" }')");
+
+    const auto& aviso = t->avisos()[0];
+    BOOST_CHECK(aviso.parent() == t.get());
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "dissemination" })");
+
+    // Once the task has run (its attribute finished), the changed attribute is started again on requeue
+    t->avisos()[0].finish();
+    backend.state->subscribed.reset();
+    BOOST_REQUIRE_NO_THROW(defs->requeue());
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "dissemination" })");
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

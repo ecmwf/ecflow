@@ -181,7 +181,13 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
         found->reload();
     }
     else {
-        *found = AvisoParser::parse_aviso_line(value, name);
+        // The new attribute belongs to this node; it replaces (and stops) the previous one, and is started when the
+        // node is waiting for it
+        found->finish();
+        *found = AvisoParser::parse_aviso_line(value, name, this);
+        if (state() == NState::QUEUED) {
+            found->start();
+        }
     }
 
     state_change_no_ = Ecf::incr_state_change_no();
@@ -194,12 +200,15 @@ void Node::changeAviso(const std::string& name, const std::string& value, uint64
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
-    auto attr = AvisoParser::parse_aviso_line(value, name);
+    auto attr = AvisoParser::parse_aviso_line(value, name, this);
     attr.set_revision(revision);
 
     // The following delete/add enforces the reconfiguration of the attribute backend thread
     this->deleteAviso(name); // delete the aviso if it exists (to avoid duplicates
     this->addAviso(attr);
+    if (state() == NState::QUEUED) {
+        avisos_.back().start();
+    }
 
     state_change_no_ = Ecf::incr_state_change_no();
 }
