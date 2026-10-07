@@ -167,10 +167,17 @@ docker run --rm \
         --output-dir /workspace/output \
         ${PACKAGE_ARGS[@]+"${PACKAGE_ARGS[@]}"}
 
-rm -f "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz
-cp "${SANDBOX_DIR}"/output/ecflow-*.deb "${OUTPUT_DIR}/"
-# The Aviso client library, delivered when the server is built with Aviso support
-cp "${SANDBOX_DIR}"/output/aviso-ffi-*.tar.gz "${OUTPUT_DIR}/" 2>/dev/null || true
+# Deliver each package built now, with the Aviso client library of its architecture (delivered when the server
+# is built with Aviso support); the files of other architectures, built by earlier runs, are kept
+for pkg in "${SANDBOX_DIR}"/output/ecflow-*.deb; do
+    arch="$(basename "${pkg}" .deb)"
+    arch="${arch#ecflow-}"
+    cp "${pkg}" "${OUTPUT_DIR}/"
+    rm -f "${OUTPUT_DIR}/aviso-ffi-${arch}.tar.gz"
+    if [[ -f "${SANDBOX_DIR}/output/aviso-ffi-${arch}.tar.gz" ]]; then
+        cp "${SANDBOX_DIR}/output/aviso-ffi-${arch}.tar.gz" "${OUTPUT_DIR}/"
+    fi
+done
 
 make_banner "ecflow Debian package(s) available in ${OUTPUT_DIR}"
 ls -la "${OUTPUT_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz 2>/dev/null || true

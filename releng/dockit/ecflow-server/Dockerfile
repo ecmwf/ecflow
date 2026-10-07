@@ -30,7 +30,8 @@ ARG TARGETARCH
 # Provision the Aviso client library, when the package was built with Aviso support
 # The library is not part of the package: the package build delivers it beside the package, as
 # aviso-ffi-<arch>.tar.gz (holding the library under its file name and its soname), built from the aviso-client
-# sources by the build environment. The build context is bind-mounted, so that the archive is optional.
+# sources by the build environment. The build context is bind-mounted, so that the archive is optional; a
+# package that needs the library fails the check below when the archive is missing.
 RUN --mount=type=bind,target=/tmp/context \
     if [ -f "/tmp/context/aviso-ffi-${TARGETARCH}.tar.gz" ]; then \
         tar --no-same-owner -xzf "/tmp/context/aviso-ffi-${TARGETARCH}.tar.gz" -C /usr/local/lib && ldconfig; \
@@ -40,6 +41,16 @@ RUN --mount=type=bind,source=ecflow-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
     apt-get update \
     && apt-get install -y --no-install-recommends /tmp/ecflow.deb \
     && rm -rf /var/lib/apt/lists/*
+
+# Check that the libraries needed by the ecFlow executables are all found (e.g. the Aviso client library)
+RUN for executable in ecflow_server ecflow_client; do \
+        missing="$(ldd "$(command -v "${executable}")" | grep 'not found' || true)"; \
+        if [ -n "${missing}" ]; then \
+            echo "${executable} cannot be run, missing libraries:" >&2; \
+            echo "${missing}" >&2; \
+            exit 1; \
+        fi; \
+    done
 
 ARG ECFLOW_LAUNCH="launch.sh"
 COPY ${ECFLOW_LAUNCH} /opt/local/bin/${ECFLOW_LAUNCH}

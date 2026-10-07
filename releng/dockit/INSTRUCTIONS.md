@@ -132,7 +132,8 @@ the options of the package build itself, and their defaults (e.g. the pinned ecb
 The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
 present in its build context at build time. This is typically the package generated in Step 1. When the Aviso client
 library of the target platform, `aviso-ffi-<arch>.tar.gz`, is also present, it is installed in `/usr/local/lib`
-before the package, so that the server finds it; a package built with Aviso support requires it.
+before the package, so that the server finds it; a package built with Aviso support requires it, and the image build
+fails when a library needed by the ecFlow executables is missing.
 
 Create the image for the platform of the Docker host, as `ecflow-server-dev:local`, with:
 
