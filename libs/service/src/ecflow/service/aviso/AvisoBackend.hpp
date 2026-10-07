@@ -3,66 +3,61 @@
 
 #pragma once
 
-#include <functional>
+#include <chrono>
 #include <memory>
-#include <string_view>
 #include <vector>
 
-#include "ecflow/service/aviso/Aviso.hpp"
+#include "ecflow/service/aviso/BaseAvisoBackend.hpp"
 
 namespace ecf::service::aviso {
 
 ///
-/// @brief Delivers the notifications of an Aviso server to one Aviso attribute.
+/// @brief Delivers the notifications of an Aviso server to one Aviso attribute, using the aviso-client library.
 ///
-/// A backend serves exactly one attribute, between a call to subscribe() and the destruction of the backend.
-/// Notifications and errors are collected in the background, and handed over by drain(), which is called by the
-/// thread that owns the attribute.
+/// The backend holds one client and one watch. Notifications and errors are collected by the library threads and
+/// handed over by drain(). The library reconnects by itself after routine interruptions (e.g. the server closing the
+/// stream at the end of its connection lifetime); when the watch ends nevertheless (i.e. after an error the library
+/// does not recover from), a dedicated timer re-creates it after the retry delay, resuming after the last notification
+/// received (or, for the first watch, after the revision given by subscribe()).
 ///
-/// The concrete backend is provided by the executable that handles Aviso attributes (e.g. the server) through
-/// register_backend(); in any other executable no backend is available.
+/// This backend is only available in executables linked with the aviso-client library (e.g. the server).
 ///
-class AvisoBackend {
+class AvisoBackend : public BaseAvisoBackend {
 public:
-    virtual ~AvisoBackend() = default;
+    ///
+    /// @brief The default delay before re-creating a watch that ended.
+    ///
+    static constexpr std::chrono::milliseconds default_retry_delay{std::chrono::seconds{60}};
 
     ///
-    /// @brief Starts collecting the notifications described by the given request.
+    /// @brief Creates a backend.
     ///
-    /// @param request The fully resolved subscription request.
+    /// @param[in] retry_delay The delay before re-creating a watch that ended.
     ///
-    virtual void subscribe(const AvisoSubscribe& request) = 0;
+    explicit AvisoBackend(std::chrono::milliseconds retry_delay = default_retry_delay);
+
+    AvisoBackend(const AvisoBackend&)            = delete;
+    AvisoBackend& operator=(const AvisoBackend&) = delete;
 
     ///
-    /// @brief Returns, and forgets, the notifications and errors collected since the previous call.
+    /// @brief Stops the watch, waiting for the library to release it.
     ///
-    /// @return The collected responses, in the order in which they were received.
+    ~AvisoBackend() override;
+
+    void subscribe(const AvisoSubscribe& request) override;
+
+    std::vector<AvisoResponse> drain() override;
+
     ///
-    virtual std::vector<AvisoResponse> drain() = 0;
+    /// @brief Registers this backend as the backend of every Aviso attribute.
+    ///
+    static void register_as_default();
+
+private:
+    struct Impl;
+
+    std::chrono::milliseconds retry_delay_;
+    std::shared_ptr<Impl> impl_;
 };
-
-///
-/// @brief Creates a backend, ready to accept a subscription.
-///
-using AvisoBackendFactory = std::function<std::unique_ptr<AvisoBackend>()>;
-
-///
-/// @brief Registers the factory used to create the backend of every Aviso attribute.
-///
-/// @param factory The factory; an empty factory unregisters the current one.
-///
-void register_backend(AvisoBackendFactory factory);
-
-///
-/// @brief Creates a backend, using the registered factory.
-///
-/// @return The new backend, or nullptr when no factory is registered.
-///
-std::unique_ptr<AvisoBackend> make_backend();
-
-///
-/// @brief Describes why an Aviso attribute cannot receive notifications when no backend is available.
-///
-inline constexpr std::string_view no_backend = "Aviso notifications are not supported by this ecFlow build";
 
 } // namespace ecf::service::aviso

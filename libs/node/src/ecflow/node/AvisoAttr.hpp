@@ -14,7 +14,7 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/service/aviso/AvisoBackend.hpp"
+#include "ecflow/service/aviso/BaseAvisoBackend.hpp"
 
 namespace cereal {
 class access;
@@ -96,7 +96,7 @@ public:
     using auth_t     = std::string;
     using reason_t   = std::string;
 
-    using backend_t     = ecf::service::aviso::AvisoBackend;
+    using backend_t     = ecf::service::aviso::BaseAvisoBackend;
     using backend_ptr_t = std::shared_ptr<backend_t>;
 
     static constexpr const char* default_url  = "%ECF_AVISO_URL%";

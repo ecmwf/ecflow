@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "ecflow/service/aviso/Aviso.hpp"
-#include "ecflow/service/aviso/AvisoBackend.hpp"
+#include "ecflow/service/aviso/BaseAvisoBackend.hpp"
 
 namespace ecf::test {
 
@@ -24,7 +24,7 @@ namespace ecf::test {
 ///
 template <typename Predicate>
 std::vector<ecf::service::aviso::AvisoResponse>
-drain_until(ecf::service::aviso::AvisoBackend& backend,
+drain_until(ecf::service::aviso::BaseAvisoBackend& backend,
             Predicate predicate,
             std::chrono::milliseconds timeout = std::chrono::seconds{10}) {
     std::vector<ecf::service::aviso::AvisoResponse> collected;

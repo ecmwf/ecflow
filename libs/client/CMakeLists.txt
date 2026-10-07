@@ -158,7 +158,7 @@ ecflow_add_test(
     ecflow_server # the server is launched to support tests
   ENVIRONMENT
     # The local Aviso server listens on a port reserved from this base
-    # (range 18500-18999; u_service_aviso_v2 uses 18000-18499)
+    # (range 18500-18999; u_service_aviso_backend uses 18000-18499)
     ECF_TEST_AVISO_PORT_BASE=18500
   CONDITION
     ENABLE_TESTS AND ENABLE_AVISO

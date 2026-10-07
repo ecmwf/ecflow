@@ -4,13 +4,13 @@
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-# The Aviso v2 backend is the only part of ecFlow that uses the Aviso client library,
+# The Aviso backend is the only part of ecFlow that uses the Aviso client library,
 # and is therefore compiled into the server only
 set(ECFLOW_SERVER_AVISO_SOURCES "")
 if (ENABLE_AVISO)
   list(APPEND ECFLOW_SERVER_AVISO_SOURCES
-    ../service/src/ecflow/service/aviso/v2/AvisoV2Backend.hpp
-    ../service/src/ecflow/service/aviso/v2/AvisoV2Backend.cpp
+    ../service/src/ecflow/service/aviso/AvisoBackend.hpp
+    ../service/src/ecflow/service/aviso/AvisoBackend.cpp
   )
 endif ()
 

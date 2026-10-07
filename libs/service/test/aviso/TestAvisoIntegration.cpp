@@ -15,7 +15,7 @@
 #include "LocalAvisoServer.hpp"
 #include "TestContentProvider.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
-#include "ecflow/service/aviso/v2/AvisoV2Backend.hpp"
+#include "ecflow/service/aviso/AvisoBackend.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 using ecf::test::drain_until;
@@ -64,15 +64,15 @@ const std::string listener = R"({ "event": "test_event", "request": { "date": "2
 
 } // namespace
 
-BOOST_AUTO_TEST_SUITE(U_AvisoV2)
+BOOST_AUTO_TEST_SUITE(U_AvisoBackend)
 
-BOOST_FIXTURE_TEST_SUITE(T_AvisoV2Integration, WithLocalAvisoServer)
+BOOST_FIXTURE_TEST_SUITE(T_AvisoIntegration, WithLocalAvisoServer)
 
 BOOST_AUTO_TEST_CASE(delivers_live_notification) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "username": "user", "password": "pass" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "username": "user", "password": "pass" })"};
     server.require_basic_auth("user", "pass");
 
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
     BOOST_REQUIRE(server.wait_for_requests(1, 5s));
 
@@ -94,14 +94,14 @@ BOOST_AUTO_TEST_CASE(delivers_live_notification) {
 }
 
 BOOST_AUTO_TEST_CASE(resumes_after_revision) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
 
     for (int i = 0; i < 3; ++i) {
         server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
     }
 
     // The attribute has already consumed notification 1, so only 2 and 3 are delivered
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 1, auth.file()});
 
     auto responses     = drain_until(backend, has_notifications(2));
@@ -112,11 +112,11 @@ BOOST_AUTO_TEST_CASE(resumes_after_revision) {
 }
 
 BOOST_AUTO_TEST_CASE(accepts_matching_bearer_credentials) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.require_bearer_auth("abc");
     server.publish("test_event", R"({ "date": "20261006" })");
 
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
     BOOST_REQUIRE(server.wait_for_requests(1, 5s));
     server.publish("test_event", R"({ "date": "20261006" })");
@@ -127,10 +127,10 @@ BOOST_AUTO_TEST_CASE(accepts_matching_bearer_credentials) {
 }
 
 BOOST_AUTO_TEST_CASE(reports_refused_credentials) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "wrong" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "wrong" })"};
     server.require_bearer_auth("abc");
 
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
 
     auto errors = select<AvisoError>(drain_until(backend, has_error()));
@@ -140,10 +140,10 @@ BOOST_AUTO_TEST_CASE(reports_refused_credentials) {
 }
 
 BOOST_AUTO_TEST_CASE(reports_rejected_filter) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.reject_field("date");
 
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
 
     auto errors = select<AvisoError>(drain_until(backend, has_error()));
@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE(reports_rejected_filter) {
 }
 
 BOOST_AUTO_TEST_CASE(reports_aviso_v1_pointer_for_server_without_aviso_v2) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
 
     // An address that does not serve the Aviso v2 protocol answers with HTTP 404, as an Aviso v1 server does
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url() + "/v1", 0, auth.file()});
 
     auto errors = select<AvisoError>(drain_until(backend, has_error()));
@@ -169,12 +169,12 @@ BOOST_AUTO_TEST_CASE(reports_aviso_v1_pointer_for_server_without_aviso_v2) {
 }
 
 BOOST_AUTO_TEST_CASE(routine_close_is_handled_by_the_client_library) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.close_streams_after(300ms);
 
     // With the default retry delay (60 s), a notification delivered within seconds proves that the watch was not
     // re-created by the backend
-    v2::AvisoV2Backend backend;
+    AvisoBackend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
 
     // The stream is closed by the server, and the client library reconnects at once
@@ -188,10 +188,10 @@ BOOST_AUTO_TEST_CASE(routine_close_is_handled_by_the_client_library) {
 }
 
 BOOST_AUTO_TEST_CASE(recreates_watch_after_stream_error) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.fail_streams_after(300ms);
 
-    v2::AvisoV2Backend backend{100ms};
+    AvisoBackend backend{100ms};
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
 
     // The stream ends with an error, and the watch is re-created after the retry delay
@@ -205,10 +205,10 @@ BOOST_AUTO_TEST_CASE(recreates_watch_after_stream_error) {
 }
 
 BOOST_AUTO_TEST_CASE(delivers_notification_published_while_watch_is_down) {
-    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    TestContentProvider auth{"aviso_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.fail_streams_after(200ms);
 
-    v2::AvisoV2Backend backend{1500ms};
+    AvisoBackend backend{1500ms};
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
     BOOST_REQUIRE(server.wait_for_requests(1, 5s));
 

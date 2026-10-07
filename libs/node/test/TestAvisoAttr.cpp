@@ -33,7 +33,7 @@ struct FakeBackendState
     std::vector<ecf::service::aviso::AvisoResponse> pending;
 };
 
-class FakeBackend : public ecf::service::aviso::AvisoBackend {
+class FakeBackend : public ecf::service::aviso::BaseAvisoBackend {
 public:
     explicit FakeBackend(std::shared_ptr<FakeBackendState> state)
         : state_{std::move(state)} {}
