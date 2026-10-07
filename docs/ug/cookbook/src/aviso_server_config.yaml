@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# A local aviso-server, for the Aviso use case of the ecFlow cookbook: an in-memory backend, no
+# authentication, and a single event type (mars) identified by class, stream and step.
+
+application:
+  host: "0.0.0.0"
+  port: 8000
+  base_url: "http://localhost:8000"
+  static_files_path: "/var/empty"
+
+watch_endpoint:
+  sse_heartbeat_interval_sec: 10
+  connection_max_duration_sec: 120
+  replay_batch_size: 100
+  max_historical_notifications: 1000
+  replay_batch_delay_ms: 50
+  concurrent_notification_processing: 4
+
+notification_backend:
+  kind: in_memory
+  in_memory:
+    max_history_per_topic: 1000
+    max_topics: 1000
+
+auth:
+  enabled: false
+
+metrics:
+  enabled: false
+
+logging:
+  level: info
+  format: json
+
+notification_schema:
+  mars:
+    payload:
+      required: false
+    topic:
+      base: "mars"
+      key_order: ["class", "stream", "step"]
+    identifier:
+      class:
+        type: StringHandler
+        max_length: 2
+        required: true
+      stream:
+        type: StringHandler
+        required: true
+      step:
+        type: IntHandler
+        range: [0, 100000]
+        required: true

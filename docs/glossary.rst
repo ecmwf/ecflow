@@ -50,77 +50,53 @@ Glossary
 
    aviso
       An aviso is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
-      and creates a dependency on an external Aviso server.
+      and creates a dependency on notifications published by an Aviso server.
 
       A :term:`Node<node>` with an aviso attribute is held from executing until a
-      notification matching the configured listener is received. When a
-      matching notification is received, the node then allowed to execute
-      following a behaviour similar to :term:`trigger` or time dependency e.g.
-      :term:`cron`).
+      notification matching the configured listener is received; each notification
+      releases the node once, following a behaviour similar to a :term:`trigger` or a
+      time dependency (e.g. :term:`cron`).
 
       `Only one aviso attribute is allowed per node`, and each attribute is
       defined by the following properties:
 
         - :code:`name`, an identifier
-        - :code:`listener`, the configuration for the Aviso listener
-        - :code:`url`, the base location of the Aviso server
-        - :code:`schema`, the location of the Aviso schema used to evaluate the notifications
-        - :code:`polling`, the value (in seconds) used to periodically contact the Aviso server
-        - :code:`auth`, the location to the Aviso authentication credentials file
+        - :code:`listener`, the selection of notifications (an event type, and the values of its identifiers)
+        - :code:`url`, the address of the Aviso server
+        - :code:`auth`, the location of the credentials file
+        - :code:`collapse`, whether a release consumes all the notifications received, instead of exactly one
 
       .. note::
 
          The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
 
-      The value of the properties :code:`url`, :code:`schema`, :code:`polling`,
-      and :code:`auth` can be composed of :term:`Variables<variable>`. When
-      these properties are not provided, the following default values are used:
+      The value of the properties :code:`url` and :code:`auth` can be composed of
+      :term:`Variables<variable>`. When these properties are not provided, the
+      following default values are used:
 
         - :code:`%ECF_AVISO_URL%`, for :code:`url`
-        - :code:`%ECF_AVISO_SCHEMA%`, for :code:`schema`
-        - :code:`%ECF_AVISO_POLLING%`, for :code:`polling`
         - :code:`%ECF_AVISO_AUTH%`, for :code:`auth`
 
       .. important::
 
          The variables :code:`ECF_AVISO_*` are not automatically provided at
-         server level, and must be defined at :term:`Suite<suite>` level by
-         the user.
+         server level, and must be defined by the user (typically, at :term:`Suite<suite>` level).
 
-      Each aviso attribute implies that a background thread is spawned whenever
-      the associated :term:`node` is (re)queued. This independent background thread,
-      responsible for polling the Aviso server and periodically processing the latest notifications,
-      uses the configuration available when the associated task is queued.
+      The attribute watches the Aviso server while the associated :term:`node` is
+      queued, using the configuration available when the node is queued. The
+      notification that released the node is made available to the job as the
+      generated variables :code:`ECF_AVISO_EVENT_TYPE`, :code:`ECF_AVISO_EVENT_SEQUENCE`,
+      :code:`ECF_AVISO_EVENT_DATA_IDENTIFIER` and :code:`ECF_AVISO_EVENT_DATA_PAYLOAD`.
 
       .. note::
 
         If any variables providing the configuration are updated, the Aviso configuration
-        can be reloaded (without unqueuing the Task) by issuing an Alter change command with
+        can be reloaded (without requeuing the Task) by issuing an Alter change command with
         the value :code:`reload` to the relevant Aviso attribute.
 
-      The authentication credentials file is expected to be in JSON format, following
-      the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_
-      (this is conventionally stored in a file located at `$HOME/.ecmwfapirc`):
-
-        .. code-block:: json
-
-           {
-             "url" : "https://api.ecmwf.int/v1",
-             "key" : "<your-api-key>",
-             "email" : "<your-email>"
-           }
-
-      Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
-
-      .. important::
-
-         If :code:`%ECF_AVISO_AUTH%` provides a path to a nonexistent file, or if the provided file is
-         not a valid JSON, the credentials will be ignored and the Aviso notification retrieval will eventually fail
-         due to "UNAUTHORIZED" access.
-
-      The Aviso schema file is a JSON file that defines the event listener schema. This is used by both Aviso server
-      and client (thus, by ecFlow) to define the valid event types and request parameters used when polling for
-      notifications. The schema file path must be provided to the `schema` option (or via the `ECF_AVISO_SCHEMA` variable).
+      ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
+      The listener, the credentials file, the release of the node and the reported errors are
+      described in :ref:`text_based_def_aviso`.
 
    check point
       The check point file is like the :term:`suite definition`, but includes all the state information.

@@ -48,6 +48,13 @@ Build Environment
 
 - OpenSSL (optional)
 
+- Aviso client library, ``libaviso_ffi`` (optional)
+
+   - aviso-client 2.4.2+, using the prebuilt release archive of the C/C++ library (aviso-ffi), available
+     for Linux (x86_64 and aarch64, glibc 2.28+) and macOS (arm64 and x86_64)
+   - required only by the :term:`aviso` attribute, and linked only by the ecFlow server
+   - located with the CMake option ``AVISO_FFI_ROOT`` (see below); a Rust toolchain is not required
+
 - Sphinx & Doxygen (optional)
 
    - required only when building ecFlow documentation
@@ -187,6 +194,15 @@ The following table shows an overview of useful CMake options.
    * - ENABLE_UDP
      - enable ecFlow UDP API
      - ON
+   * - ENABLE_AVISO
+     - enable the :term:`aviso` attribute notifications in the ecFlow server; the configuration fails when the
+       Aviso client library is not found. When disabled, a node with an aviso attribute remains queued, with the
+       flag ``remote_error`` set
+     - ON
+   * - AVISO_FFI_ROOT
+     - location of the Aviso client library, i.e. the directory of an unpacked aviso-ffi release (containing
+       ``include/aviso_ffi/`` and ``lib/``); can also be given as an environment variable
+     -
    * - CMAKE_PREFIX_PATH
      - use to provide a path to dependent libraries that are installed in non-system locations.For example, if you have installed Qt in a non-system location, you should set the path in this variable.
      -

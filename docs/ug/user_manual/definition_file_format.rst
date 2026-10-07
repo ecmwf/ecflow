@@ -571,8 +571,9 @@ Typically paired with a trigger on the node's ``<flag>archived`` pseudo-attribut
 aviso
 -----
 
-Subscribes to an external Aviso notification as a trigger — the node is queued when a
-matching notification is received.
+Holds the node queued until a notification published by an Aviso server, and matching the
+listener, is received; each notification releases the node once. See :ref:`text_based_def_aviso` for
+the listener, the credentials file and the behaviour of the attribute.
 
 **Attaches to:** Node (Suite, Family, Task, and Alias)
 
@@ -581,8 +582,8 @@ matching notification is received.
 .. code-block:: shell
 
     aviso --name name --listener 'json'
-      [--url url] [--schema schema] [--polling seconds]
-      [--revision n] [--auth auth] [--reason reason]
+      [--url url] [--auth auth] [--collapse]
+      [--revision n] [--reason reason] [--event 'json']
 
 **Parameters**
 
@@ -590,37 +591,45 @@ matching notification is received.
       Identifier, unique among this node's aviso attributes.
 
    --listener
-      Single-quoted opaque JSON payload; the value may embed ``%VARIABLE%`` placeholders.
-      The JSON schema is the Aviso event-listener specification, and is not included here.
+      Single-quoted JSON object, with the event type (``event``) and an optional selection of
+      identifier values (``request``); the value may embed ``%VARIABLE%`` placeholders.
 
    --url
-      Aviso service URL. Default: ``%ECF_AVISO_URL%``.
-
-   --schema
-      Path to the listener JSON schema. Default: ``%ECF_AVISO_SCHEMA%``.
-
-   --polling
-      Polling interval in seconds. Default: ``%ECF_AVISO_POLLING%``.
-
-   --revision
-      Last processed revision marker (unsigned integer). Default: ``0``.
+      Address of the Aviso server. Default: ``%ECF_AVISO_URL%``.
 
    --auth
-      Path to an auth token file. Default: ``%ECF_AVISO_AUTH%``.
+      Path to the credentials file (an email and a key, as in ``$HOME/.ecmwfapirc``, or a user name and a
+      password); a relative path is resolved against the ``ECF_HOME`` of the server.
+      Default: ``%ECF_AVISO_AUTH%``.
+
+   --collapse
+      Flag — a release consumes all the notifications received, instead of exactly one.
+
+   --revision
+      State: sequence number of the last notification that released the node (unsigned integer).
+      Default: ``0``.
 
    --reason
-      Informational; last recorded failure reason.
+      State: informational; last recorded failure reason.
+
+   --event
+      State: single-quoted JSON object describing the notification that released the node (``type``,
+      ``sequence``, ``identifier`` and ``payload``); written in check point files only.
+
+The Aviso v1 options ``--schema`` and ``--polling`` are rejected in a definition, and ignored in a check
+point file written by an earlier release.
 
 **Examples**
 
 .. code-block:: shell
 
-    aviso --name A --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --auth %ECF_AVISO_AUTH% --polling %ECF_AVISO_POLLING%
+    aviso --name A --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --auth %ECF_AVISO_AUTH%
+    aviso --name B --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --collapse
 
 **Notes**
 
-See also :ref:`attr-mirror` for polling a remote ecflow node's status instead of an external
-event feed.
+See also :ref:`attr-mirror` for following the status of a node on a remote ecFlow server instead
+of an external notification feed.
 
 .. _attr-clock:
 
@@ -1671,7 +1680,7 @@ representative cross-section of the grammar above.
         trigger forecast == complete
 
         task publish
-          aviso --name publish_ready --listener '{ "event": "mars", "request": { "class": "od", "stream": "oper", "step": [0,6,12] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
+          aviso --name publish_ready --listener '{ "event": "mars", "request": { "class": "od", "stream": "oper", "step": [0,6,12] } }' --url %ECF_AVISO_URL% --auth %ECF_AVISO_AUTH%
 
       endfamily
 
@@ -1759,8 +1768,8 @@ The formal grammar of a definition file is as follows.
     queue           : "queue" >> identifier >> +string
     generic         : "generic" >> identifier >> *string
     aviso           : "aviso" >> "--name" >> identifier >> "--listener" >> "'" >> jsonstring >> "'"
-                    : >> *( "--url" >> string | "--schema" >> string | "--polling" >> string
-                    :     | "--revision" >> unsigned_int | "--auth" >> string | "--reason" >> string )
+                    : >> *( "--url" >> string | "--auth" >> string | "--collapse"
+                    :     | "--revision" >> unsigned_int | "--reason" >> string | "--event" >> "'" >> jsonstring >> "'" )
     mirror          : "mirror" >> "--name" >> identifier >> "--remote_path" >> string
                     : >> *( "--remote_host" >> string | "--remote_port" >> string | "--polling" >> string
                     :     | "--ssl" | "--remote_auth" >> string | "--reason" >> string | "--propagate" )
