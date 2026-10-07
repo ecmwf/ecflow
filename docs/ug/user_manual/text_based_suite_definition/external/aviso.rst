@@ -83,7 +83,9 @@ fields:
    as configured on the Aviso server;
  - :code:`request`, an optional object selecting the notifications of that event type. Each entry
    constrains one identifier of the notification: a single value requires an exact match, and an array
-   of values requires a match with any of them.
+   of values requires a match with any of them. An array is only accepted for an identifier whose type,
+   in the schema of the Aviso server, supports it (e.g. an integer or an enumeration, but not a free
+   string); otherwise, the Aviso server refuses the request.
 
 .. code-block:: shell
 
