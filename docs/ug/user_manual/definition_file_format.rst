@@ -588,7 +588,7 @@ the listener, the credentials file and the behaviour of the attribute.
 **Parameters**
 
    --name
-      Identifier of the attribute (only one aviso attribute is allowed per node).
+      Identifier of the attribute (only one aviso attribute is allowed per task).
 
    --listener
       Single-quoted JSON object, with the event type (``event``) and an optional selection of

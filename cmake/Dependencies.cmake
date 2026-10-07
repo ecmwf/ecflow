@@ -60,8 +60,8 @@ ecbuild_info( "Found Httplib at ${HTTPLIB_INCLUDE_DIRS}" )
 if (ENABLE_AVISO)
   ecbuild_info( "Locating Aviso client library (libaviso_ffi)" )
 
-  # Keep in step with the minimum version stated in docs/install/build_from_source.rst and
-  # docs/ug/user_manual/text_based_suite_definition/external/aviso.rst
+  # Keep in step with the minimum version stated in docs/install/build_from_source.rst,
+  # docs/ug/user_manual/text_based_suite_definition/external/aviso.rst and releng/dockit/INSTRUCTIONS.md
   set(ECFLOW_AVISO_FFI_MINIMUM_VERSION "2.4.2")
 
   find_package(AvisoFfi ${ECFLOW_AVISO_FFI_MINIMUM_VERSION} REQUIRED)
