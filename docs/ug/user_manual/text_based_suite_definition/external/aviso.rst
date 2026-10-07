@@ -161,10 +161,16 @@ that a server restarted from a check point continues with the notifications not 
 
 .. note::
 
-   The delivery is at least once. The revision reaches the disk only when the next :term:`check point` is
-   written: if the server stops abnormally after a release and before that check point, it restarts with the
-   earlier revision, and the node is released again by the same notification. Tasks released by Aviso
-   notifications should therefore tolerate processing the same notification twice.
+   The delivery is at least once. As any other state of the node (e.g. its :term:`events <event>` and
+   :term:`meters <meter>`), the revision reaches the disk only when the next :term:`check point` is written,
+   by default every 120 seconds (see :code:`ECF_CHECKINTERVAL` and :code:`ECF_CHECKMODE`). If the server stops
+   abnormally (e.g. a crash, or a forced reboot) after a release and before that check point, or if a backup
+   server takes over from an earlier copy of the check point, the server resumes with the earlier revision,
+   and the task is released again by the same notification.
+
+   Tasks released by Aviso notifications should therefore tolerate processing the same notification twice;
+   for example, a task can record the last :code:`ECF_AVISO_EVENT_SEQUENCE` it processed, and skip a
+   notification with the same sequence.
 
 .. _text_based_def_aviso_variables:
 
