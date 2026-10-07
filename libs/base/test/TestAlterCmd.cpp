@@ -1374,6 +1374,27 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_only_on_task) {
     BOOST_CHECK(s->avisos().empty());
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_starts_attribute_of_queued_task) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+    defs.beginAll();
+    BOOST_REQUIRE_EQUAL(t->state(), NState::QUEUED);
+
+    // LD12: the added attribute of a queued task is started (its listener is resolved), without waiting for a requeue
+    TestHelper::invokeRequest(
+        &defs,
+        Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", R"(--listener '{ "event": "mars" }')")));
+    BOOST_REQUIRE_EQUAL(t->avisos().size(), 1u);
+    BOOST_CHECK_EQUAL(t->avisos()[0].active(), R"({ "event": "mars" })");
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

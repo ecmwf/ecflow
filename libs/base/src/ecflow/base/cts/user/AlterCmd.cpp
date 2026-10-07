@@ -537,6 +537,10 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_AVISO: {
                     auto aviso = AvisoParser::parse_aviso_line(value_, name_, node.get());
                     node->addAviso(aviso);
+                    // As with a changed attribute, the new attribute is started when the node is waiting for it
+                    if (node->state() == NState::QUEUED) {
+                        node->avisos().back().start();
+                    }
                     break;
                 }
                 case AlterCmd::ADD_MIRROR: {

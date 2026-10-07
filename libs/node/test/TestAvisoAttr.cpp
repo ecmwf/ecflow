@@ -29,6 +29,7 @@ namespace {
 struct FakeBackendState
 {
     std::optional<ecf::service::aviso::AvisoSubscribe> subscribed;
+    int subscriptions = 0;
     std::vector<ecf::service::aviso::AvisoResponse> pending;
 };
 
@@ -37,7 +38,10 @@ public:
     explicit FakeBackend(std::shared_ptr<FakeBackendState> state)
         : state_{std::move(state)} {}
 
-    void subscribe(const ecf::service::aviso::AvisoSubscribe& request) override { state_->subscribed = request; }
+    void subscribe(const ecf::service::aviso::AvisoSubscribe& request) override {
+        state_->subscribed = request;
+        ++state_->subscriptions;
+    }
 
     std::vector<ecf::service::aviso::AvisoResponse> drain() override {
         auto drained = std::move(state_->pending);
@@ -714,6 +718,57 @@ BOOST_AUTO_TEST_CASE(aviso_is_only_allowed_on_tasks_and_aliases) {
     BOOST_CHECK_THROW(s->addAviso(aviso), std::runtime_error);
     BOOST_CHECK(f->avisos().empty());
     BOOST_CHECK(s->avisos().empty());
+}
+
+BOOST_AUTO_TEST_CASE(starting_a_running_attribute_keeps_its_configuration) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t            = find(defs, "/s/t");
+    const auto& aviso = t->avisos()[0];
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+    const auto active = aviso.active();
+
+    // LD11: the configuration changes while the attribute runs; starting it again (e.g. requeue of the queued node)
+    // keeps the running watch and its configuration, without reporting an error on the unused configuration
+    defs->findAbsNode("/s")->addVariable(Variable("ECF_AVISO_URL", ""));
+    aviso.start();
+
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 1);
+    BOOST_CHECK_EQUAL(aviso.active(), active);
+    BOOST_CHECK(!aviso.has_error());
+    BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // A reload applies the new configuration
+    t->changeAviso("A", AvisoAttr::reload_option_value);
+    BOOST_CHECK(aviso.has_error());
+    BOOST_CHECK(t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(deleting_an_attribute_in_error_clears_the_error_flag) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    // ECF_AVISO_URL is not defined
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // LD12: the deleted attribute no longer holds the node in error
+    t->deleteAviso("A");
+    BOOST_CHECK(t->avisos().empty());
+    BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

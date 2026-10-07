@@ -248,21 +248,25 @@ bool is_unresolved(std::string_view value, std::string_view default_value) {
 } // namespace
 
 void AvisoAttr::start() const {
-    LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
-
     // The node is started again. A notification held but not committed (the node was not released) is queued
-    // again, while the backend runs; otherwise, a new backend delivers again every notification after the revision
-    if (pending_ && backend_) {
-        queued_.push_back(*pending_);
+    // again, while the backend runs; the running watch keeps its configuration (reload() applies a new one)
+    if (backend_) {
+        if (pending_) {
+            queued_.push_back(*pending_);
+        }
+        pending_.reset();
+        return;
     }
+
+    // Otherwise, a new backend delivers again every notification after the revision
     pending_.reset();
-    if (!backend_) {
-        queued_.clear();
-    }
+    queued_.clear();
 
     if (!parent_) {
         return;
     }
+
+    LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     // Path -- the unique identifier of the Aviso listener
     std::string aviso_path = path();

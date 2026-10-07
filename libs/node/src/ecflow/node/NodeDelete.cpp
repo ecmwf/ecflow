@@ -276,7 +276,18 @@ void Node::deleteLabel(const std::string& name) {
 }
 
 void Node::deleteAviso(const std::string& name) {
+    // A deleted attribute stops watching, and no longer holds the node in error
+    auto release = [this](const AvisoAttr& aviso) {
+        aviso.finish();
+        if (aviso.has_error()) {
+            flag_.clear(ecf::Flag::REMOTE_ERROR);
+        }
+    };
+
     if (name.empty()) {
+        for (const auto& aviso : avisos_) {
+            release(aviso);
+        }
         avisos_.clear();
         state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -291,6 +302,7 @@ void Node::deleteAviso(const std::string& name) {
         throw std::runtime_error("Node::deleteAviso: Cannot find aviso: " + name);
     }
 
+    release(*found);
     avisos_.erase(found);
     state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
