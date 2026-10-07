@@ -9,6 +9,7 @@ ecflow_add_library(
     STATIC
   SOURCES
     # Headers
+    AvisoTestSupport.hpp
     LocalAvisoServer.hpp
     # Sources
     LocalAvisoServer.cpp
@@ -17,6 +18,6 @@ ecflow_add_library(
   PUBLIC_LIBS
     ecflow_all
   CONDITION
-    ENABLE_TESTS
+    ENABLE_TESTS AND ENABLE_AVISO
   FORMAT
 )

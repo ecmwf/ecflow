@@ -8,38 +8,20 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "AvisoTestSupport.hpp"
 #include "TestContentProvider.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
 #include "ecflow/service/aviso/v2/AvisoV2Backend.hpp"
 
+using ecf::test::drain_until;
 using ecf::test::TestContentProvider;
 
 namespace {
 
 using namespace std::chrono_literals;
 
-///
-/// @brief Drains the backend repeatedly, until the predicate holds for the collected responses or the timeout expires.
-///
-template <typename Predicate>
-std::vector<ecf::service::aviso::AvisoResponse>
-drain_until(ecf::service::aviso::AvisoBackend& backend, Predicate predicate, std::chrono::milliseconds timeout = 5s) {
-    std::vector<ecf::service::aviso::AvisoResponse> collected;
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (!predicate(collected) && std::chrono::steady_clock::now() < deadline) {
-        auto drained = backend.drain();
-        collected.insert(collected.end(), drained.begin(), drained.end());
-        std::this_thread::sleep_for(10ms);
-    }
-    return collected;
-}
-
 std::size_t count_errors(const std::vector<ecf::service::aviso::AvisoResponse>& responses) {
-    std::size_t count = 0;
-    for (const auto& response : responses) {
-        count += std::holds_alternative<ecf::service::aviso::AvisoError>(response) ? 1 : 0;
-    }
-    return count;
+    return ecf::test::select<ecf::service::aviso::AvisoError>(responses).size();
 }
 
 } // namespace
@@ -101,6 +83,7 @@ BOOST_AUTO_TEST_CASE(can_be_destroyed_while_retrying) {
     }
     // Pending retries of a destroyed backend are discarded
     std::this_thread::sleep_for(100ms);
+    // Reaching this point, without a crash or a hang, is the outcome being tested
     BOOST_CHECK(true);
 }
 

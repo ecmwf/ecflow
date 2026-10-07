@@ -57,46 +57,12 @@ Glossary
       releases the node once, following a behaviour similar to a :term:`trigger` or a
       time dependency (e.g. :term:`cron`).
 
-      `Only one aviso attribute is allowed per node`, and each attribute is
-      defined by the following properties:
-
-        - :code:`name`, an identifier
-        - :code:`listener`, the selection of notifications (an event type, and the values of its identifiers)
-        - :code:`url`, the address of the Aviso server
-        - :code:`auth`, the location of the credentials file
-        - :code:`collapse`, whether a release consumes all the notifications received, instead of exactly one
-
-      .. note::
-
-         The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
-
-      The value of the properties :code:`url` and :code:`auth` can be composed of
-      :term:`Variables<variable>`. When these properties are not provided, the
-      following default values are used:
-
-        - :code:`%ECF_AVISO_URL%`, for :code:`url`
-        - :code:`%ECF_AVISO_AUTH%`, for :code:`auth`
-
-      .. important::
-
-         The variables :code:`ECF_AVISO_*` are not automatically provided at
-         server level, and must be defined by the user (typically, at :term:`Suite<suite>` level).
-
-      The attribute watches the Aviso server while the associated :term:`node` is
-      queued, using the configuration available when the node is queued. The
-      notification that released the node is made available to the job as the
-      generated variables :code:`ECF_AVISO_EVENT_TYPE`, :code:`ECF_AVISO_EVENT_SEQUENCE`,
-      :code:`ECF_AVISO_EVENT_DATA_IDENTIFIER` and :code:`ECF_AVISO_EVENT_DATA_PAYLOAD`.
-
-      .. note::
-
-        If any variables providing the configuration are updated, the Aviso configuration
-        can be reloaded (without requeuing the Task) by issuing an Alter change command with
-        the value :code:`reload` to the relevant Aviso attribute.
+      `Only one aviso attribute is allowed per node`. The notification that released the
+      node is made available to the job as generated variables.
 
       ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
-      The listener, the credentials file, the release of the node and the reported errors are
-      described in :ref:`text_based_def_aviso`.
+      The options, the listener, the credentials file, the release of the node, the generated
+      variables and the reported errors are described in :ref:`text_based_def_aviso`.
 
    check point
       The check point file is like the :term:`suite definition`, but includes all the state information.

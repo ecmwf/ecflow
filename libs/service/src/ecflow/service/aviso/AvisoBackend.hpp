@@ -19,7 +19,7 @@ namespace ecf::service::aviso {
 /// Notifications and errors are collected in the background, and handed over by drain(), which is called by the
 /// thread that owns the attribute.
 ///
-/// The concrete backend is provided by the executable that handles Aviso attributes (i.e. the server) through
+/// The concrete backend is provided by the executable that handles Aviso attributes (e.g. the server) through
 /// register_backend(); in any other executable no backend is available.
 ///
 class AvisoBackend {

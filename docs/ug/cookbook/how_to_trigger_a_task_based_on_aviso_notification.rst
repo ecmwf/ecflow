@@ -22,20 +22,12 @@ The deployment of this feature has the following requirements:
 
    ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
 
-Setup the ecFlow Server
-=======================
+Set up the ecFlow Server
+========================
 
-Deploy the credentials file, so that the file is accessible to the user running the ecFlow server. The
-file holds either an email and a key, in the format of the ECMWF API credentials file
-(:code:`$HOME/.ecmwfapirc`, whose key is used as a bearer token), or a user name and a password:
-
-.. code-block:: json
-
-   {
-     "url": "https://api.ecmwf.int/v1",
-     "key": "<key>",
-     "email": "<email>"
-   }
+Deploy the credentials file, so that the file is accessible to the user running the ecFlow server; an ECMWF
+API credentials file (:code:`$HOME/.ecmwfapirc`) can be used as it is. The formats of the file are
+described in :ref:`text_based_def_aviso_credentials`.
 
 Launch the server, as per the :ref:`regular instructions<starting_the_ecflow_server>`. A server built with
 Aviso support logs the version of the Aviso client library when it starts.
@@ -63,9 +55,8 @@ which provide the default values of the attribute options :code:`--url` and :cod
       endfamily
     endsuite
 
-The task script accesses the notification that released the task through the generated variables
-:code:`ECF_AVISO_EVENT_TYPE`, :code:`ECF_AVISO_EVENT_SEQUENCE`, :code:`ECF_AVISO_EVENT_DATA_IDENTIFIER` and
-:code:`ECF_AVISO_EVENT_DATA_PAYLOAD`:
+The task script accesses the notification that released the task through the generated variables described
+in :ref:`text_based_def_aviso_variables`:
 
   .. code-block:: shell
 

@@ -193,26 +193,6 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void Node::changeAviso(const std::string& name, const std::string& value, uint64_t revision) {
-    auto found = ecf::algorithm::find_by_name(avisos_, name);
-
-    if (found == std::end(avisos_)) {
-        throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
-    }
-
-    auto attr = AvisoParser::parse_aviso_line(value, name, this);
-    attr.set_revision(revision);
-
-    // The following delete/add enforces the reconfiguration of the attribute backend thread
-    this->deleteAviso(name); // delete the aviso if it exists (to avoid duplicates
-    this->addAviso(attr);
-    if (state() == NState::QUEUED) {
-        avisos_.back().start();
-    }
-
-    state_change_no_ = Ecf::incr_state_change_no();
-}
-
 void Node::changeMirror(const std::string& name, const std::string& value) {
     auto found = ecf::algorithm::find_by_name(mirrors_, name);
 

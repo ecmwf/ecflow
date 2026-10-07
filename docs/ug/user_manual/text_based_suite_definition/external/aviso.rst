@@ -98,8 +98,9 @@ Credentials
 ===========
 
 The credentials file, given by option :code:`--auth`, is a JSON file holding either an email and a key, in
-the format of the ECMWF API credentials file (conventionally :code:`$HOME/.ecmwfapirc`), whose key is sent
-as a bearer token while the email (and any other field, such as :code:`url`) is ignored:
+the format of the ECMWF API credentials file (conventionally :code:`$HOME/.ecmwfapirc`), or a user name and
+a password. The key is sent as a bearer token; the email must be present, but its value is not used, and
+any other field (such as :code:`url`) is ignored:
 
 .. code-block:: json
 
@@ -109,7 +110,7 @@ as a bearer token while the email (and any other field, such as :code:`url`) is 
       "email": "<email>"
     }
 
-or a user name and a password (sent as HTTP Basic authentication):
+The user name and the password are sent as HTTP Basic authentication:
 
 .. code-block:: json
 
@@ -138,13 +139,14 @@ Release of the node
 
 When the node is queued (e.g. when the :term:`suite` begins, or the node is requeued), the attribute starts
 watching the Aviso server for notifications matching its listener. The watch stops when the node completes,
-aborts or becomes unknown.
+aborts or becomes unknown, and when the server is halted; it resumes when the server is restarted.
 
 Each notification carries a sequence number, increasing within its event type. The attribute keeps the
 sequence of the last notification that released the node as its revision, and the next watch resumes after
 it: the Aviso server delivers again every matching notification published since, as long as its history
 retains them. Before the first release, the revision is 0, and only the notifications published after the
-first watch started are considered.
+attribute started watching (i.e. since the node was last queued, the server was last restarted, or the
+attribute was last reloaded) are considered.
 
 By default, each notification releases the node once, in order: when several notifications are received
 while the node is queued, the oldest releases the node, and the others release it again on the following
@@ -208,14 +210,17 @@ node remains queued, with the flag :code:`remote_error` set, and the reason is s
  - an error reported by the Aviso server, such as a request rejected by its schema, or credentials
    that are not accepted.
 
-The reason of an error reported by the Aviso server, or caused by the configuration of the watch, has the
-form :code:`Aviso error (<kind>[, HTTP <status>]): <message>`, followed by a reminder that ecFlow 5.19.x
-is the last release that supports Aviso v1, since an Aviso v1 server, or an Aviso v1 configuration, also
-causes an error.
+An empty or unresolved URL or credentials variable is reported with a plain description, naming the variable
+to define. An error raised while creating or running the watch (an invalid listener, a credentials file that
+cannot be read, or an error reported by the Aviso server) is reported as
+:code:`Aviso error (<kind>[, HTTP <status>]): <message>[ [request <id>]]`, followed by a reminder that
+ecFlow 5.19.x is the last release that supports Aviso v1, since an Aviso v1 server, or an Aviso v1
+configuration, also causes an error.
 
-After an error, the watch is created again after a fixed delay of 60 seconds, and the error is cleared when
-the watch is created again. A server that cannot be reached is retried silently by the Aviso client library,
-and is not reported on the node.
+When the watch ends, after an error or because the Aviso server closed it (e.g. at the end of its maximum
+connection duration), the watch is created again after a fixed delay of 60 seconds, resuming after the last
+notification received; any error is cleared when the watch is created again. A server that cannot be reached
+is retried silently by the Aviso client library, and is not reported on the node.
 
 .. note::
 

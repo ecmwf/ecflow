@@ -499,9 +499,9 @@ void CronAttr_set_time_series(ecf::CronAttr* self, const std::string& ts) {
 ///
 ecf::AvisoAttr AvisoAttr_make(const std::string& name,
                               const std::string& listener,
-                              const std::string& url  = ecf::AvisoAttr::default_url,
-                              const std::string& auth = ecf::AvisoAttr::default_auth,
-                              bool collapse           = false) {
+                              const std::string& url,
+                              const std::string& auth,
+                              bool collapse) {
     return ecf::AvisoAttr(nullptr, name, listener, url, 0, auth, "", collapse);
 }
 
@@ -1470,9 +1470,9 @@ void export_NodeAttr(py::module& m) {
         .def(py::init(&AvisoAttr_make),
              py::arg("name"),
              py::arg("listener"),
-             py::arg("url") = "%ECF_AVISO_URL%",
+             py::arg("url") = ecf::AvisoAttr::default_url,
              py::kw_only(),
-             py::arg("auth")     = "%ECF_AVISO_AUTH%",
+             py::arg("auth")     = ecf::AvisoAttr::default_auth,
              py::arg("collapse") = false)
         .def(py::self == py::self)
         .def("__hash__", &py_hash)

@@ -72,18 +72,18 @@ std::string describe(const ::aviso::ErrorInfo& error) {
 ///
 class RetryTimer {
 public:
-    using clock_t = std::chrono::steady_clock;
-    using task_t  = std::function<void()>;
+    using clock_type = std::chrono::steady_clock;
+    using task_type  = std::function<void()>;
 
     static RetryTimer& instance() {
         static RetryTimer timer;
         return timer;
     }
 
-    void schedule(clock_t::duration delay, task_t task) {
+    void schedule(clock_type::duration delay, task_type task) {
         {
             std::scoped_lock lock(mutex_);
-            tasks_.emplace(clock_t::now() + delay, std::move(task));
+            tasks_.emplace(clock_type::now() + delay, std::move(task));
             if (!thread_.joinable()) {
                 thread_ = std::thread([this]() { run(); });
             }
@@ -116,7 +116,7 @@ private:
                 continue;
             }
             auto next = tasks_.begin();
-            if (clock_t::now() < next->first) {
+            if (clock_type::now() < next->first) {
                 cv_.wait_until(lock, next->first);
                 continue;
             }
@@ -135,7 +135,7 @@ private:
 
     std::mutex mutex_;
     std::condition_variable cv_;
-    std::multimap<clock_t::time_point, task_t> tasks_;
+    std::multimap<clock_type::time_point, task_type> tasks_;
     std::thread thread_;
     bool stopping_ = false;
 };
@@ -167,6 +167,32 @@ void wake_server() {
 ///
 struct AvisoV2Backend::Impl : public std::enable_shared_from_this<AvisoV2Backend::Impl>
 {
+    Impl(const AvisoSubscribe& request, std::chrono::milliseconds retry_delay)
+        : request_{request},
+          retry_delay_{retry_delay} {}
+
+    std::vector<AvisoResponse> drain() {
+        std::scoped_lock lock(responses_mutex_);
+        auto drained = std::move(responses_);
+        responses_.clear();
+        return drained;
+    }
+
+    void open() {
+        std::scoped_lock lock(watch_mutex_);
+        open_locked();
+    }
+
+    void close() {
+        std::scoped_lock lock(watch_mutex_);
+        closed_ = true;
+        // Destroying the watch stops it and waits for its callbacks to finish
+        watch_.reset();
+        handler_.reset();
+        client_.reset();
+    }
+
+private:
     struct Handler : public ::aviso::NotificationHandler
     {
         explicit Handler(Impl& impl)
@@ -178,7 +204,7 @@ struct AvisoV2Backend::Impl : public std::enable_shared_from_this<AvisoV2Backend
                                        notification.identifier_json(),
                                        notification.payload_json()};
             SLOG(D, "AvisoV2: notification for " << impl_.request_.path() << ": " << received);
-            impl_.delivered(received.sequence());
+            impl_.received(received.sequence());
             impl_.push(std::move(received));
             wake_server();
             return true;
@@ -203,25 +229,23 @@ struct AvisoV2Backend::Impl : public std::enable_shared_from_this<AvisoV2Backend
         Impl& impl_;
     };
 
-    Impl(const AvisoSubscribe& request, std::chrono::milliseconds retry_delay)
-        : request_{request},
-          retry_delay_{retry_delay} {}
-
     void push(AvisoResponse response) {
         std::scoped_lock lock(responses_mutex_);
         responses_.push_back(std::move(response));
     }
 
-    std::vector<AvisoResponse> drain() {
-        std::scoped_lock lock(responses_mutex_);
-        auto drained = std::move(responses_);
-        responses_.clear();
-        return drained;
+    void received(std::uint64_t sequence) {
+        auto current = last_received_.load();
+        while (sequence > current && !last_received_.compare_exchange_weak(current, sequence)) {}
     }
 
-    void open() {
-        std::scoped_lock lock(watch_mutex_);
-        open_locked();
+    void schedule_retry() {
+        std::weak_ptr<Impl> self = weak_from_this();
+        RetryTimer::instance().schedule(retry_delay_, [self]() {
+            if (auto impl = self.lock(); impl) {
+                impl->reopen();
+            }
+        });
     }
 
     void reopen() {
@@ -237,31 +261,13 @@ struct AvisoV2Backend::Impl : public std::enable_shared_from_this<AvisoV2Backend
         open_locked();
     }
 
-    void close() {
-        std::scoped_lock lock(watch_mutex_);
-        closed_ = true;
-        // Destroying the watch stops it and waits for its callbacks to finish
-        watch_.reset();
-        handler_.reset();
-        client_.reset();
-    }
-
-    void schedule_retry() {
-        std::weak_ptr<Impl> self = weak_from_this();
-        RetryTimer::instance().schedule(retry_delay_, [self]() {
-            if (auto impl = self.lock(); impl) {
-                impl->reopen();
-            }
-        });
-    }
-
-private:
     void open_locked() {
         if (closed_) {
             return;
         }
 
-        // Announce the (re)created watch first, so that any notification or error it produces comes after
+        // Announce the attempt to (re)create the watch first, so that any notification or error it produces comes
+        // after (clearing any previous error)
         push(AvisoWatchStarted{});
 
         try {
@@ -278,9 +284,10 @@ private:
             if (!listener.filter_json.empty()) {
                 watch_request.filter_json(listener.filter_json);
             }
-            // A re-created watch resumes after the last notification already delivered, so that none is lost
-            // while the watch was down; without any, it resumes from when the first watch was opened
-            if (auto after = std::max(request_.revision(), last_delivered_.load()); after > 0) {
+            // A re-created watch resumes after the last notification already received, so that none is lost while
+            // the watch was down; without any, it resumes from when the first watch was opened (one second earlier,
+            // allowing for a clock difference with the Aviso server)
+            if (auto after = std::max(request_.revision(), last_received_.load()); after > 0) {
                 watch_request.watch_from_sequence(after);
             }
             else if (first_opened_) {
@@ -309,21 +316,15 @@ private:
         handler_.reset();
         client_.reset();
         push(AvisoError{reason});
+        // The failure may happen on the retry timer thread, between two traversals of the server
+        wake_server();
         schedule_retry();
     }
 
-public:
     const AvisoSubscribe request_;
     const std::chrono::milliseconds retry_delay_;
     std::atomic<bool> closed_{false};
-
-    void delivered(std::uint64_t sequence) {
-        auto current = last_delivered_.load();
-        while (sequence > current && !last_delivered_.compare_exchange_weak(current, sequence)) {}
-    }
-
-private:
-    std::atomic<std::uint64_t> last_delivered_{0};
+    std::atomic<std::uint64_t> last_received_{0};
     std::optional<std::chrono::system_clock::time_point> first_opened_; // only used while holding watch_mutex_
 
     std::mutex responses_mutex_;

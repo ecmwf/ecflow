@@ -992,7 +992,7 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
         //
         // When the node state becomes `aborted`, `complete` or `unknown`, the Aviso background thread is terminated.
         //
-        AvisoAttr::finish(avisos(), newState);
+        AvisoAttr::state_changed(avisos(), newState);
 
         // Handle any state change specific functionality. This will update any repeats
         // This is a virtual function, since we want different behaviour during state change

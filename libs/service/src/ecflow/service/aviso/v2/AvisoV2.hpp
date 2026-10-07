@@ -37,8 +37,8 @@ Listener parse_listener(const std::string& listener);
 ///
 struct BasicAuth
 {
-    std::string username;
-    std::string password;
+    std::string username; ///< The user name.
+    std::string password; ///< The password.
 };
 
 ///
@@ -46,9 +46,12 @@ struct BasicAuth
 ///
 struct BearerAuth
 {
-    std::string token;
+    std::string token; ///< The token (the key of an ECMWF API credentials file).
 };
 
+///
+/// @brief Holds the credentials used to contact the Aviso server, of either kind.
+///
 using Auth = std::variant<BasicAuth, BearerAuth>;
 
 ///

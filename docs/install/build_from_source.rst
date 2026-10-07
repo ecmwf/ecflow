@@ -48,12 +48,12 @@ Build Environment
 
 - OpenSSL (optional)
 
-- Aviso client library, ``libaviso_ffi`` (optional)
+- Aviso client library, ``libaviso_ffi`` (required by default; disable with ``ENABLE_AVISO=OFF``)
 
    - aviso-client 2.4.2+, using the prebuilt release archive of the C/C++ library (aviso-ffi), available
      for Linux (x86_64 and aarch64, glibc 2.28+) and macOS (arm64 and x86_64)
    - required only by the :term:`aviso` attribute, and linked only by the ecFlow server
-   - located with the CMake option ``AVISO_FFI_ROOT`` (see below); a Rust toolchain is not required
+   - located with the CMake variable ``AVISO_FFI_ROOT`` (see below); a Rust toolchain is not required
 
 - Sphinx & Doxygen (optional)
 

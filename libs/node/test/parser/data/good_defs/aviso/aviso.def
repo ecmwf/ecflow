@@ -1,9 +1,9 @@
 suite aviso
-  edit ECF_HOME '/Users/mamb/w/sandbox.aviso/.'
-  edit ECF_INCLUDE '/Users/mamb/w/sandbox.aviso/core/included'
-  edit ECF_FILES '/Users/mamb/w/sandbox.aviso/scripts'
-  edit ECF_AVISO_URL 'http://localhost:2379'
-  edit ECF_AVISO_AUTH '/Users/mamb/w/sandbox.aviso/aviso.auth'
+  edit ECF_HOME '/path/to/aviso/.'
+  edit ECF_INCLUDE '/path/to/aviso/core/included'
+  edit ECF_FILES '/path/to/aviso/scripts'
+  edit ECF_AVISO_URL 'http://localhost:8000'
+  edit ECF_AVISO_AUTH '/path/to/aviso/aviso.auth'
   family f1
     task t1
       aviso --name A --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --auth %ECF_AVISO_AUTH%
@@ -16,7 +16,7 @@ suite aviso
     task t5
       aviso --name F --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --url %ECF_AVISO_URL%
     task tX
-      edit ECF_AVISO_URL 'http://wrong:2379'
+      edit ECF_AVISO_URL 'http://wrong:8000'
       aviso --name X --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL%
   endfamily
 endsuite

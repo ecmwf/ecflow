@@ -78,9 +78,6 @@ ecflow_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
-  DEFINITIONS
-    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
   CONDITION
     ENABLE_TESTS
   FORMAT
@@ -115,7 +112,7 @@ ecflow_add_test(
     test_harness.aviso
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   ENVIRONMENT
-    # The local Aviso server listens on a port reserved from this base (see .ai/rules/ecflow-testing.md)
+    # The local Aviso server listens on a port reserved from this base (range 18000-18499; s_aviso uses 18500-18999)
     ECF_TEST_AVISO_PORT_BASE=18000
   CONDITION
     ENABLE_TESTS AND ENABLE_AVISO

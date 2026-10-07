@@ -64,20 +64,18 @@ Auth load_auth(const std::string& path) {
 
     auto loaded = ecf::service::auth::Credentials::load(path);
 
-    return std::visit(ecf::overload{[&path](const ecf::service::auth::Credentials& credentials) -> Auth {
-                                        // The key of an ECMWF API credentials file is the bearer token
+    return std::visit(ecf::overload{[](const ecf::service::auth::Credentials& credentials) -> Auth {
+                                        // The key of an ECMWF API credentials file is the bearer token; otherwise,
+                                        // the credentials necessarily hold a user (see Credentials::load)
                                         if (auto key = credentials.key(); key) {
                                             return BearerAuth{key->key};
                                         }
-                                        if (auto user = credentials.user(); user) {
-                                            return BasicAuth{user->username, user->password};
-                                        }
-                                        throw std::runtime_error("Aviso credentials file " + path +
-                                                                 " holds no usable credentials (expected email and "
-                                                                 "key, or username and password)");
+                                        auto user = credentials.user().value();
+                                        return BasicAuth{user.username, user.password};
                                     },
-                                    [](const ecf::service::auth::Credentials::Error& error) -> Auth {
-                                        throw std::runtime_error(error.message);
+                                    [&path](const ecf::service::auth::Credentials::Error& error) -> Auth {
+                                        throw std::runtime_error("Aviso credentials file " + path + ": " +
+                                                                 error.message);
                                     }},
                       loaded);
 }

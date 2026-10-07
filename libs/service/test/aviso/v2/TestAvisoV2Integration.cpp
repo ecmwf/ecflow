@@ -11,13 +11,16 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "AvisoTestSupport.hpp"
 #include "LocalAvisoServer.hpp"
 #include "TestContentProvider.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
 #include "ecflow/service/aviso/v2/AvisoV2Backend.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
+using ecf::test::drain_until;
 using ecf::test::LocalAvisoServer;
+using ecf::test::select;
 using ecf::test::TestContentProvider;
 
 namespace {
@@ -49,30 +52,6 @@ struct WithLocalAvisoServer
     LocalAvisoServer server;
 };
 
-template <typename Predicate>
-std::vector<AvisoResponse>
-drain_until(AvisoBackend& backend, Predicate predicate, std::chrono::milliseconds timeout = 10s) {
-    std::vector<AvisoResponse> collected;
-    auto deadline = std::chrono::steady_clock::now() + timeout;
-    while (!predicate(collected) && std::chrono::steady_clock::now() < deadline) {
-        auto drained = backend.drain();
-        collected.insert(collected.end(), drained.begin(), drained.end());
-        std::this_thread::sleep_for(10ms);
-    }
-    return collected;
-}
-
-template <typename T>
-std::vector<T> select(const std::vector<AvisoResponse>& responses) {
-    std::vector<T> selected;
-    for (const auto& response : responses) {
-        if (std::holds_alternative<T>(response)) {
-            selected.push_back(std::get<T>(response));
-        }
-    }
-    return selected;
-}
-
 auto has_notifications(std::size_t count) {
     return [count](const std::vector<AvisoResponse>& r) { return select<AvisoNotification>(r).size() >= count; };
 }
@@ -91,6 +70,7 @@ BOOST_FIXTURE_TEST_SUITE(T_AvisoV2Integration, WithLocalAvisoServer)
 
 BOOST_AUTO_TEST_CASE(delivers_live_notification) {
     TestContentProvider auth{"aviso_v2_auth", R"({ "username": "user", "password": "pass" })"};
+    server.require_basic_auth("user", "pass");
 
     v2::AvisoV2Backend backend;
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
@@ -107,11 +87,10 @@ BOOST_AUTO_TEST_CASE(delivers_live_notification) {
     BOOST_CHECK(notifications[0].payload_json().find("file:///x") != std::string::npos);
     BOOST_CHECK(select<AvisoError>(responses).empty());
 
-    // The watch request carries the event type, the filter and the credentials
+    // The watch request carries the event type and the filter (the server refuses wrong credentials)
     auto requests = server.requests();
     BOOST_CHECK(requests[0].body.find(R"("event_type":"test_event")") != std::string::npos);
     BOOST_CHECK(requests[0].body.find(R"("date":"20261006")") != std::string::npos);
-    BOOST_CHECK(requests[0].authorization.rfind("Basic ", 0) == 0);
 }
 
 BOOST_AUTO_TEST_CASE(resumes_after_revision) {
@@ -186,8 +165,7 @@ BOOST_AUTO_TEST_CASE(reports_aviso_v1_pointer_for_server_without_aviso_v2) {
     BOOST_REQUIRE(!errors.empty());
     const auto& reason = errors[0].reason();
     BOOST_CHECK_MESSAGE(reason.find("HTTP 404") != std::string::npos, reason);
-    BOOST_CHECK_MESSAGE(reason.find("ecFlow 5.19.x is the last release that supports Aviso v1") != std::string::npos,
-                        reason);
+    BOOST_CHECK_MESSAGE(reason.find(std::string{unsupported_v1}) != std::string::npos, reason);
 }
 
 BOOST_AUTO_TEST_CASE(recreates_watch_after_server_closes_stream) {

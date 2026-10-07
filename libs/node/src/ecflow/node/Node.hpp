@@ -610,7 +610,6 @@ public:
     void changeMeter(const std::string& name, int value);
     void changeLabel(const std::string& name, const std::string& value);
     void changeAviso(const std::string& name, const std::string& value);
-    void changeAviso(const std::string& name, const std::string& value, uint64_t revision);
     void changeMirror(const std::string& name, const std::string& value);
     void changeTrigger(const std::string& expression);
     void changeComplete(const std::string& expression);

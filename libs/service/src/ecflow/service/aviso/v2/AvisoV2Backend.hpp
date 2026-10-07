@@ -16,9 +16,10 @@ namespace ecf::service::aviso::v2 {
 ///
 /// The backend holds one client and one watch. Notifications and errors are collected by the library threads and
 /// handed over by drain(). When the watch ends (with an error, or because the server closed the stream), a dedicated
-/// timer re-creates it after the retry delay, resuming after the last notification consumed by the attribute.
+/// timer re-creates it after the retry delay, resuming after the last notification received (or, for the first
+/// watch, after the revision given by subscribe()).
 ///
-/// This backend is only available in executables linked with the aviso-client library (i.e. the server).
+/// This backend is only available in executables linked with the aviso-client library (e.g. the server).
 ///
 class AvisoV2Backend : public AvisoBackend {
 public:
@@ -30,7 +31,7 @@ public:
     ///
     /// @brief Creates a backend.
     ///
-    /// @param retry_delay The delay before re-creating a watch that ended.
+    /// @param[in] retry_delay The delay before re-creating a watch that ended.
     ///
     explicit AvisoV2Backend(std::chrono::milliseconds retry_delay = default_retry_delay);
 

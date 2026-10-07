@@ -80,7 +80,7 @@ This specification documents both layers of the ecflow definition-file grammar:
    This specification does **not** cover the following aspects:
 
     - ``trigger``/``complete`` AST operator grammar
-    - ``aviso``/``mirror`` JSON listener payload schema
+    - the fields of the ``aviso`` listener, described in :ref:`text_based_def_aviso_listener`
     - cereal-based binary serialisation
 
 .. _ch-lexical:
@@ -588,7 +588,7 @@ the listener, the credentials file and the behaviour of the attribute.
 **Parameters**
 
    --name
-      Identifier, unique among this node's aviso attributes.
+      Identifier of the attribute (only one aviso attribute is allowed per node).
 
    --listener
       Single-quoted JSON object, with the event type (``event``) and an optional selection of
@@ -614,7 +614,8 @@ the listener, the credentials file and the behaviour of the attribute.
 
    --event
       State: single-quoted JSON object describing the notification that released the node (``type``,
-      ``sequence``, ``identifier`` and ``payload``); written in check point files only.
+      ``sequence``, ``identifier`` and ``payload``); written with the state (e.g. in check point files), never in a
+      definition.
 
 The Aviso v1 options ``--schema`` and ``--polling`` are rejected in a definition, and ignored in a check
 point file written by an earlier release.

@@ -96,10 +96,9 @@ AvisoAttr::AvisoAttr(Node* parent,
       listener_{implementation::ensure_single_quotes(listener)},
       url_{std::move(url)},
       auth_{std::move(auth)},
+      collapse_{collapse},
       reason_{implementation::ensure_single_quotes(reason)},
-      revision_{revision},
-      backend_{nullptr} {
-    collapse_ = collapse;
+      revision_{revision} {
     if (!ecf::algorithm::is_valid_name(name_)) {
         THROW_EXCEPTION(ecf::InvalidArgument, "Invalid AvisoAttr name :" << name_);
     }
@@ -109,19 +108,9 @@ AvisoAttr AvisoAttr::make_detached() const {
     AvisoAttr detached = *this;
     detached.parent_   = nullptr;
     detached.backend_  = nullptr;
+    detached.queued_.clear();
+    detached.pending_.reset();
     return detached;
-}
-
-void AvisoAttr::set_listener(std::string_view listener) {
-    state_change_no_ = Ecf::incr_state_change_no();
-
-    listener_ = listener;
-}
-
-void AvisoAttr::set_revision(revision_t revision) {
-    state_change_no_ = Ecf::incr_state_change_no();
-
-    revision_ = revision;
 }
 
 std::string AvisoAttr::path() const {
@@ -132,10 +121,6 @@ std::string AvisoAttr::path() const {
 }
 
 void AvisoAttr::set_event(const AvisoEvent& event) {
-    assign_event(event);
-}
-
-void AvisoAttr::assign_event(const AvisoEvent& event) const {
     state_change_no_ = Ecf::incr_state_change_no();
     event_           = event;
 }
@@ -158,10 +143,11 @@ void AvisoAttr::gen_variables(std::vector<Variable>& vars) const {
 }
 
 const Variable& AvisoAttr::find_gen_variable(const std::string& name) const {
-    update_gen_variables();
     for (const auto* var :
          {&genvar_event_type_, &genvar_event_sequence_, &genvar_event_data_identifier_, &genvar_event_data_payload_}) {
         if (var->name() == name) {
+            // Refreshed only when found, as every variable lookup on the node reaches this function
+            update_gen_variables();
             return *var;
         }
     }
@@ -365,6 +351,9 @@ void AvisoAttr::set_error(const std::string& reason) const {
 }
 
 void AvisoAttr::clear_error() const {
+    if (!has_error()) {
+        return;
+    }
     state_change_no_ = Ecf::incr_state_change_no();
     reason_          = implementation::ensure_single_quotes("");
     if (parent_) {
@@ -388,14 +377,14 @@ void AvisoAttr::commit() const {
     if (pending_) {
         state_change_no_ = Ecf::incr_state_change_no();
         revision_        = std::max(revision_, pending_->sequence());
-        // The notification that released the node becomes available to the job, as generated variables
-        assign_event(AvisoEvent::from(*pending_));
+        // The notification that released the node remains available to the job, as generated variables
+        event_ = AvisoEvent::from(*pending_);
         pending_.reset();
         SLOG(D, "AvisoAttr::commit: " << this->path() << " consumed notification " << revision_);
     }
 }
 
-void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state) {
+void AvisoAttr::state_changed(const std::vector<AvisoAttr>& avisos, NState::State state) {
     // The node leaves the queued state: the notification that released it is consumed
     if (state != NState::QUEUED) {
         for (const auto& aviso : avisos) {

@@ -115,7 +115,7 @@ public:
     AvisoAttr() = default;
     AvisoAttr(Node* parent,
               name_t name,
-              const listener_t& handle,
+              const listener_t& listener,
               url_t url,
               revision_t revision,
               auth_t auth,
@@ -178,24 +178,23 @@ public:
     ///
     [[nodiscard]] bool has_error() const;
 
-    void set_listener(std::string_view listener);
-    void set_revision(revision_t revision);
-
     unsigned int state_change_no() const { return state_change_no_; }
 
     bool why(std::string& theReasonWhy) const;
 
-    /**
-     * Initialises the Aviso procedure, which effectively starts receiving notifications in the background.
-     * Typically, called when traversing the tree -- does nothing if Aviso service is already set up.
-     */
+    ///
+    /// @brief Starts receiving notifications in the background, when the node is queued (see start()).
+    ///
+    /// Called when the node is reset (e.g. on begin or requeue).
+    ///
     void reset();
 
-    /**
-     * Restarts the Aviso procedure, which effectively stops before restarting the background notifications.
-     * Typicallly, called explicitly via Alter command -- forces the reinitialisation of the Aviso service,
-     * guaranteeing that parameters, given as ECF variables, are reevaluated.
-     */
+    ///
+    /// @brief Stops and starts again receiving notifications, so that the configuration is evaluated again.
+    ///
+    /// Called by the Alter command (value `reload`), typically after changing the variables that configure the
+    /// attribute; does nothing unless the attribute is running, or its node is queued.
+    ///
     void reload();
 
     [[nodiscard]] bool isFree() const;
@@ -213,24 +212,24 @@ public:
     template <class Archive>
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
-    /**
-     * \brief Finishes all the Aviso attributes, effectively stopping the background notifications.
-     *
-     * @param avisos the avisos to finish
-     */
+    ///
+    /// @brief Finishes all the given Aviso attributes, stopping the background notifications.
+    ///
+    /// @param[in] avisos The attributes to finish.
+    ///
     static void finish(const std::vector<AvisoAttr>& avisos);
 
-    /**
-     * \brief Informs the Aviso attributes of a state change of their node.
-     *
-     * When the node leaves the queued state, the notification held by each attribute is consumed (see commit()).
-     * When the given state is a Task "terminal" state (i.e. complete, aborted, unknown), finishes all Aviso
-     * attributes, effectively stopping the background notifications.
-     *
-     * @param avisos the avisos to finish
-     * @param state the state to check against
-     */
-    static void finish(const std::vector<AvisoAttr>& avisos, NState::State state);
+    ///
+    /// @brief Informs the Aviso attributes of a state change of their node.
+    ///
+    /// When the node leaves the queued state, the notification held by each attribute is consumed (see commit()).
+    /// When the new state is a Task "terminal" state (i.e. complete, aborted, unknown), the attributes are finished,
+    /// stopping the background notifications.
+    ///
+    /// @param[in] avisos The attributes of the node.
+    /// @param[in] state  The new state of the node.
+    ///
+    static void state_changed(const std::vector<AvisoAttr>& avisos, NState::State state);
 
 private:
     void start_backend(const std::string& aviso_path,
@@ -273,32 +272,30 @@ private:
      */
     url_t url_;
 
-    /**
-     * @brief The authentication token used to launch the Aviso listener
-     *
-     * This configuration parameter may contain variable placeholders.
-     */
+    ///
+    /// @brief The path to the credentials file used to contact the Aviso server.
+    ///
+    /// This configuration parameter may contain variable placeholders.
+    ///
     auth_t auth_;
 
-    /**
-     * @brief Whether a release consumes all the notifications received, or exactly one (the default)
-     */
+    ///
+    /// @brief Whether a release consumes all the notifications received, or exactly one (the default).
+    ///
     bool collapse_{false};
 
-    /**
-     * @brief The notification that released the node
-     *
-     * Set when the node is released (see commit()); persisted, so that the generated variables survive a restart.
-     */
+    ///
+    /// @brief The notification that released the node.
+    ///
+    /// Set when the node is released (see commit()); persisted, so that the generated variables survive a restart.
+    ///
     mutable AvisoEvent event_;
 
-    void assign_event(const AvisoEvent& event) const;
-
-    /**
-     * @brief The generated variables, refreshed from the event fields when accessed
-     *
-     *  -- These fields are *not* serialized nor persisted.
-     */
+    ///
+    /// @brief The generated variables, refreshed from the held or committed notification when accessed.
+    ///
+    /// These fields are not serialised nor persisted.
+    ///
     mutable Variable genvar_event_type_{genvar_event_type, ""};
     mutable Variable genvar_event_sequence_{genvar_event_sequence, "0"};
     mutable Variable genvar_event_data_identifier_{genvar_event_data_identifier, ""};
@@ -306,7 +303,7 @@ private:
 
     void update_gen_variables() const;
 
-    // The following are mutable as they are modified by the const method isFree()
+    // The following are mutable as they are modified by const methods (e.g. isFree(), start(), commit())
 
     /**
      * @brief A message buffer indicating, if any, the reason for the latest failure received from Aviso
@@ -315,12 +312,12 @@ private:
      **/
     mutable reason_t reason_{};
 
-    /**
-     * @brief The latest revision received from Aviso
-     *
-     * This is a 'marker' of the latest revision processed, and is used to avoid receiving repeated notifications.
-     **/
-    mutable revision_t revision_;
+    ///
+    /// @brief The sequence of the last notification committed (i.e. that released the node).
+    ///
+    /// The next watch resumes after it, and notifications up to it are ignored as already consumed.
+    ///
+    mutable revision_t revision_{0};
 
     /**
      * @brief The state change number, used to detect changes in the Aviso attribute
@@ -336,32 +333,31 @@ private:
      */
     mutable active_t active_;
 
-    /**
-     * @brief The backend, which is responsible for receiving the Aviso notifications in the background
-     *
-     * The backend is only instantiated between start() and finish() calls, and only when a backend is available
-     * (i.e. on the server side, when built with Aviso support).
-     * This allows AvisoAttr to have a copy-ctor and assignment operator.
-     *
-     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
-     **/
+    ///
+    /// @brief The backend, which is responsible for receiving the Aviso notifications in the background.
+    ///
+    /// The backend is only instantiated between start() and finish() calls, and only when a backend is available
+    /// (i.e. on the server side, when built with Aviso support). A copy shares the backend (see make_detached()).
+    ///
+    /// This field is not serialised nor persisted; it is only used on the server side.
+    ///
     mutable backend_ptr_t backend_;
 
-    /**
-     * @brief The notifications received, and not yet consumed, ordered by sequence
-     *
-     *  -- This field is *not* serialized nor persisted; the server redelivers them after the revision.
-     **/
+    ///
+    /// @brief The notifications received, and not yet consumed (sorted by sequence when consumed).
+    ///
+    /// This field is not serialised nor persisted; the Aviso server redelivers them after the revision.
+    ///
     mutable std::vector<ecf::service::aviso::AvisoNotification> queued_;
 
-    /**
-     * @brief The notification consumed to release the node, held until the node is started again
-     *
-     * Holding it makes isFree() repeatable: the node is released by this notification however many times isFree()
-     * is called (e.g. by a query of why the node is held, or while another dependency holds the node).
-     *
-     *  -- This field is *not* serialized nor persisted.
-     **/
+    ///
+    /// @brief The notification held to release the node, until the node leaves the queued state (see commit()).
+    ///
+    /// Holding it makes isFree() repeatable: the node is released by this notification however many times isFree()
+    /// is called (e.g. by a query of why the node is held, or while another dependency holds the node).
+    ///
+    /// This field is not serialised nor persisted.
+    ///
     mutable std::optional<ecf::service::aviso::AvisoNotification> pending_;
 };
 

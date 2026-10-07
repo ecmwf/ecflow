@@ -193,7 +193,7 @@ ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
-ecbuild_info( "ENABLE_AVISO               : ${ENABLE_AVISO} *if* enabled, requires libaviso_ffi" )
+ecbuild_info( "ENABLE_AVISO               : ${ENABLE_AVISO}" )
 ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
 
 

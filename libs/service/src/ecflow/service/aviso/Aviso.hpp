@@ -18,7 +18,7 @@ namespace ecf::service::aviso {
 /// ecFlow release to use instead.
 ///
 inline constexpr std::string_view unsupported_v1 =
-    "ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1";
+    "Aviso v1 is no longer supported; ecFlow 5.19.x is the last release that supports Aviso v1";
 
 ///
 /// @brief Requests notifications for one Aviso attribute.
@@ -121,7 +121,9 @@ private:
 };
 
 ///
-/// @brief Signals that the watch of an Aviso attribute was (re)created, clearing any previous error.
+/// @brief Signals an attempt to (re)create the watch of an Aviso attribute, clearing any previous error.
+///
+/// The signal precedes any notification or error caused by the attempt, including the failure of the attempt itself.
 ///
 class AvisoWatchStarted {
 public:

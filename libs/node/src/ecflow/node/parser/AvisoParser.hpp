@@ -59,10 +59,10 @@ public:
     ///
     /// @brief Parses an Aviso attribute line.
     ///
-    /// @param line              The line, starting with the keyword `aviso`.
-    /// @param parent            The node owning the attribute, or nullptr.
-    /// @param accept_v1_options When true, the Aviso v1 options --schema and --polling are accepted and ignored;
-    ///                          otherwise, they are rejected.
+    /// @param[in] line              The line, starting with the keyword `aviso`.
+    /// @param[in] parent            The node owning the attribute, or nullptr.
+    /// @param[in] accept_v1_options When true, the Aviso v1 options --schema and --polling are accepted and ignored;
+    ///                              otherwise, they are rejected.
     /// @return The parsed attribute.
     /// @throws std::runtime_error if the line is invalid, or uses an Aviso v1 option that is not accepted.
     ///

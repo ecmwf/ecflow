@@ -156,6 +156,7 @@ BOOST_AUTO_TEST_CASE(cannot_parse_aviso_attribute_with_aviso_v1_options) {
         std::string errorMsg, warningMsg;
         bool parsedOK = parser.doParse(errorMsg, warningMsg);
         BOOST_CHECK_MESSAGE(!parsedOK, "Expected failure to parse Aviso v1 option: " << option);
+        // The literal text (not the constant) guards the user-facing pointer to the last release supporting Aviso v1
         BOOST_CHECK_MESSAGE(errorMsg.find("ecFlow 5.19.x is the last release that supports Aviso v1") !=
                                 std::string::npos,
                             "Expected the error to name the last release supporting Aviso v1, but got: " << errorMsg);

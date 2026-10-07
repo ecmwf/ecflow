@@ -20,9 +20,9 @@
 #   AVISO_FFI_ROOT           - CMake or environment variable, pointing to the root of an unpacked aviso-ffi release
 #                              (i.e. the directory containing include/aviso_ffi/ and lib/)
 #
-# The library is located without pkg-config, which is not available on every build host. The version is taken from
-# the pkg-config file shipped with the library (lib/pkgconfig/aviso_ffi.pc), or, in its absence, from the file name
-# of the fully versioned shared library (e.g. libaviso_ffi.2.4.2.dylib, libaviso_ffi.so.2.4.2).
+# The pkg-config tool itself is not used, as it is not available on every build host. The version is read directly
+# from the pkg-config file shipped with the library (lib/pkgconfig/aviso_ffi.pc), or, in its absence, from the file
+# name of the fully versioned shared library (e.g. libaviso_ffi.2.4.2.dylib, libaviso_ffi.so.2.4.2).
 #
 # Only the shared library is considered.
 #
