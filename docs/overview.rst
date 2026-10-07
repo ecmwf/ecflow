@@ -19,7 +19,8 @@ is used at ECMWF to run all our operational suites across a range of
 platforms.
 
 ecFlow runs as a :term:`server <ecflow_server>` receiving requests from clients. The :ref:`command line interface <ecflow_cli>`,
-the :ref:`graphical interface <ecflow_ui>`, scripts and the :ref:`Python API (application interface) <python_api>` are the clients.
+the :ref:`graphical interface <ecflow_ui>`, scripts, the :ref:`Python API (application interface) <python_api>` and the
+:ref:`Rust API <rust_api>` are the clients.
 The server is based on C++/boost ASIO and uses TCP/IP for communication. Multiple servers
 can be run on the same hardware.
 
@@ -36,6 +37,7 @@ shared libraries
 -  :term:`ecflow_client`:
    This executable is a command-line program; it is used for all
    communication with the server. This executable implements the :ref:`ecflow_cli`. The bulk of this functionality is also provided by the :ref:`python_api`
+   and the :ref:`rust_api`
 
 -  :ref:`ecflow_ui`:
    This is a specialized GUI client that monitors and visualizes the
@@ -46,6 +48,8 @@ shared libraries
    jobs and responding to ecflow_client requests.
 
 -  :ref:`ecflow.so <python_api>`: Python interface. This shared library provides the :ref:`Python API <python_api>` for creating the suite definition and communication with the server.
+
+-  :ref:`ecflow crate <rust_api>`: Rust interface. This crate provides the :ref:`Rust API <rust_api>` for communication with the server.
 
 **ecFlow** runs as a server receiving requests from clients. CLI, GUI,
 and suite jobs are clients. Communication is based on TCP/IP. Note that
