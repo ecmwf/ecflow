@@ -105,6 +105,7 @@ LocalAvisoServer::LocalAvisoServer(int port)
             "text/event-stream", [this, stream](size_t /*offset*/, httplib::DataSink& sink) {
                 std::string topic = stream->watch.event_type;
                 std::string out;
+                std::size_t notifications_out = 0;
 
                 std::unique_lock lock(mutex_);
 
@@ -129,6 +130,7 @@ LocalAvisoServer::LocalAvisoServer(int port)
                         for (const auto& n : pending()) {
                             out += frame("replay", cloud_event(n, url()));
                             stream->last = std::max(stream->last, n.sequence);
+                            ++notifications_out;
                         }
                         out +=
                             frame("replay-control",
@@ -151,6 +153,7 @@ LocalAvisoServer::LocalAvisoServer(int port)
                     for (const auto& n : found) {
                         out += frame("live-notification", cloud_event(n, url()));
                         stream->last = std::max(stream->last, n.sequence);
+                        ++notifications_out;
                     }
                     if (found.empty()) {
                         out += frame("heartbeat", json{{"timestamp", now_iso8601()}, {"topic", topic}});
@@ -177,6 +180,16 @@ LocalAvisoServer::LocalAvisoServer(int port)
                 }
                 if (expired || stopping_) {
                     sink.done();
+                }
+
+                // Record what was written, for the tests waiting on it
+                if (notifications_out > 0 || expired) {
+                    {
+                        std::scoped_lock written(mutex_);
+                        streamed_ += notifications_out;
+                        ended_streams_ += expired ? 1 : 0;
+                    }
+                    changed_.notify_all();
                 }
                 return true;
             });
@@ -271,6 +284,16 @@ std::vector<LocalAvisoServer::Request> LocalAvisoServer::requests() const {
 bool LocalAvisoServer::wait_for_requests(std::size_t count, std::chrono::milliseconds timeout) const {
     std::unique_lock lock(mutex_);
     return changed_.wait_for(lock, timeout, [this, count]() { return requests_.size() >= count; });
+}
+
+bool LocalAvisoServer::wait_for_streamed(std::size_t count, std::chrono::milliseconds timeout) const {
+    std::unique_lock lock(mutex_);
+    return changed_.wait_for(lock, timeout, [this, count]() { return streamed_ >= count; });
+}
+
+bool LocalAvisoServer::wait_for_ended_streams(std::size_t count, std::chrono::milliseconds timeout) const {
+    std::unique_lock lock(mutex_);
+    return changed_.wait_for(lock, timeout, [this, count]() { return ended_streams_ >= count; });
 }
 
 bool LocalAvisoServer::matches(const Notification& notification, const Watch& watch) const {

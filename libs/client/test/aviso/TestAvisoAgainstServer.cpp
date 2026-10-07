@@ -236,12 +236,12 @@ BOOST_AUTO_TEST_CASE(releases_task_once_for_all_notifications_when_collapsing) {
     start(client, make_defs(server.url(), auth.path(), 0, true));
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
 
-    // The task is suspended while the burst arrives, so that it is evaluated once all three are received
+    // The task is suspended while the burst is streamed, so that it is evaluated once all three are received
     BOOST_REQUIRE_MESSAGE(client.suspend("/s/t") == 0, "suspend failed: " << client.errorMsg());
     for (int i = 0; i < 3; ++i) {
         server.publish("test_event", R"({ "date": "20261006", "time": "1800" })");
     }
-    std::this_thread::sleep_for(1s);
+    BOOST_REQUIRE(server.wait_for_streamed(3, 10s));
     BOOST_REQUIRE_MESSAGE(client.resume("/s/t") == 0, "resume failed: " << client.errorMsg());
 
     BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released), "Expected the task to be released by the burst");

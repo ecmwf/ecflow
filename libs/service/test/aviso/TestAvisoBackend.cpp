@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -100,12 +99,18 @@ BOOST_AUTO_TEST_CASE(can_be_destroyed_while_retrying) {
     {
         AvisoBackend backend{10ms};
         backend.subscribe(AvisoSubscribe{"/s/t:a", R"({ "event": "mars" })", "http://127.0.0.1:1", 0, ""});
-        std::this_thread::sleep_for(100ms);
+
+        // The backend is retrying (a retry has already failed) when it is destroyed
+        auto responses = drain_until(backend, [](const auto& collected) { return count_errors(collected) >= 2; });
+        BOOST_REQUIRE_GE(count_errors(responses), 2u);
     }
-    // Pending retries of a destroyed backend are discarded
-    std::this_thread::sleep_for(100ms);
-    // Reaching this point, without a crash or a hang, is the outcome being tested
-    BOOST_CHECK(true);
+
+    // The retries of a backend created later are scheduled after the pending retry of the destroyed one; once they
+    // run, that retry has been discarded without a crash or a hang
+    AvisoBackend later{10ms};
+    later.subscribe(AvisoSubscribe{"/s/t:b", R"({ "event": "mars" })", "http://127.0.0.1:1", 0, ""});
+    auto responses = drain_until(later, [](const auto& collected) { return count_errors(collected) >= 2; });
+    BOOST_CHECK_GE(count_errors(responses), 2u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

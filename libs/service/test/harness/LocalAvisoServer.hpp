@@ -155,6 +155,26 @@ public:
     ///
     bool wait_for_requests(std::size_t count, std::chrono::milliseconds timeout) const;
 
+    ///
+    /// @brief Waits until at least the given number of notifications has been written to the streams.
+    ///
+    /// @param[in] count   The number of notifications to wait for, counted over all streams since the server started.
+    /// @param[in] timeout The maximum time to wait.
+    /// @return True when the notifications were written before the timeout.
+    ///
+    bool wait_for_streamed(std::size_t count, std::chrono::milliseconds timeout) const;
+
+    ///
+    /// @brief Waits until at least the given number of streams has been ended by the server.
+    ///
+    /// A stream ends after the duration set by close_streams_after() or fail_streams_after().
+    ///
+    /// @param[in] count   The number of streams to wait for, counted since the server started.
+    /// @param[in] timeout The maximum time to wait.
+    /// @return True when the streams were ended before the timeout.
+    ///
+    bool wait_for_ended_streams(std::size_t count, std::chrono::milliseconds timeout) const;
+
 private:
     struct Watch
     {
@@ -182,7 +202,9 @@ private:
     std::vector<std::string> rejected_fields_;
     std::string expected_authorization_;
     std::optional<std::chrono::milliseconds> stream_lifetime_;
-    bool stream_fails_ = false; // whether a stream ends with an error (true) or a routine close (false)
+    bool stream_fails_         = false; // whether a stream ends with an error (true) or a routine close (false)
+    std::size_t streamed_      = 0;     // notifications written to the streams
+    std::size_t ended_streams_ = 0;     // streams ended by the server
     std::atomic<bool> stopping_{false};
 };
 

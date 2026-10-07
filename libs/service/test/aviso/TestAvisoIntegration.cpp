@@ -6,7 +6,6 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -243,7 +242,7 @@ BOOST_AUTO_TEST_CASE(delivers_notification_published_while_watch_is_down) {
     BOOST_REQUIRE(server.wait_for_requests(1, 5s));
 
     // The stream ends with an error after 200 ms, and is only re-created after 1500 ms; publish in between
-    std::this_thread::sleep_for(600ms);
+    BOOST_REQUIRE(server.wait_for_ended_streams(1, 5s));
     BOOST_REQUIRE_EQUAL(server.requests().size(), 1u);
     server.publish("test_event", R"({ "date": "20261006" })");
 
