@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <fstream>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -43,12 +42,12 @@ struct WithLocalAvisoServer
                    .with(ecf::test::scaffold::AutomaticPortValue{base_port()})
                    .create_owned()},
           server{static_cast<int>(port->value())},
-          auth{fs::temp_directory_path() / ("ecflow_aviso_auth_" + std::to_string(port->value()) + ".json")} {
-        std::ofstream{auth} << R"({ "email": "user@host.int", "key": "abc" })";
+          auth{ecf::test::scaffold::MakeTestFile{}
+                   .with(ecf::test::scaffold::AutomaticFileLocation{std::string{"aviso_auth"}})
+                   .with(R"({ "email": "user@host.int", "key": "abc" })")
+                   .create()} {
         server.require_bearer_auth("abc");
     }
-
-    ~WithLocalAvisoServer() { fs::remove(auth); }
 
     static ecf::test::scaffold::Port::port_t base_port() {
         const char* base = std::getenv("ECF_TEST_AVISO_PORT_BASE");
@@ -61,7 +60,7 @@ struct WithLocalAvisoServer
 
     std::unique_ptr<ecf::test::scaffold::Port> port;
     LocalAvisoServer server;
-    fs::path auth;
+    ecf::test::scaffold::File auth;
 };
 
 const std::string listener = R"({ "event": "test_event", "request": { "date": "20261006" } })";
@@ -132,7 +131,7 @@ BOOST_AUTO_TEST_CASE(releases_task_when_notification_is_published) {
 
     ClientInvoker client(invokeServer.host(), invokeServer.port());
     client.set_throw_on_error(false);
-    start(client, make_defs(server.url(), auth, 0));
+    start(client, make_defs(server.url(), auth.path(), 0));
 
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
     BOOST_CHECK(!wait_for_task(client, is_released, 1s));
@@ -160,7 +159,7 @@ BOOST_AUTO_TEST_CASE(waits_for_new_notification_after_requeue) {
 
     ClientInvoker client(invokeServer.host(), invokeServer.port());
     client.set_throw_on_error(false);
-    start(client, make_defs(server.url(), auth, 0));
+    start(client, make_defs(server.url(), auth.path(), 0));
 
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
     server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
@@ -191,7 +190,7 @@ BOOST_AUTO_TEST_CASE(resumes_after_stored_revision) {
 
     ClientInvoker client(invokeServer.host(), invokeServer.port());
     client.set_throw_on_error(false);
-    start(client, make_defs(server.url(), auth, 2));
+    start(client, make_defs(server.url(), auth.path(), 2));
 
     BOOST_CHECK_MESSAGE(wait_for_task(client, is_released), "Expected the task to be released by notification 3");
     BOOST_CHECK_EQUAL(revision_of(client), 3u);
@@ -207,7 +206,7 @@ BOOST_AUTO_TEST_CASE(releases_task_once_per_notification) {
 
     ClientInvoker client(invokeServer.host(), invokeServer.port());
     client.set_throw_on_error(false);
-    start(client, make_defs(server.url(), auth, 0));
+    start(client, make_defs(server.url(), auth.path(), 0));
 
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
     for (int i = 0; i < 3; ++i) {
@@ -234,7 +233,7 @@ BOOST_AUTO_TEST_CASE(releases_task_once_for_all_notifications_when_collapsing) {
     ClientInvoker client(invokeServer.host(), invokeServer.port());
     client.set_throw_on_error(false);
 
-    start(client, make_defs(server.url(), auth, 0, true));
+    start(client, make_defs(server.url(), auth.path(), 0, true));
     BOOST_REQUIRE(server.wait_for_requests(1, 10s));
 
     // The task is suspended while the burst arrives, so that it is evaluated once all three are received
@@ -270,7 +269,7 @@ BOOST_AUTO_TEST_CASE(continues_releasing_once_per_notification_after_server_rest
 
         ClientInvoker client(invokeServer.host(), invokeServer.port());
         client.set_throw_on_error(false);
-        start(client, make_defs(server.url(), auth, 0));
+        start(client, make_defs(server.url(), auth.path(), 0));
 
         BOOST_REQUIRE(server.wait_for_requests(1, 10s));
         for (int i = 0; i < 3; ++i) {

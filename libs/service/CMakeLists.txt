@@ -63,16 +63,9 @@ ecflow_add_test(
   LABELS
     unit nightly fast
   SOURCES
-    # Headers -- utilities
-    test/TestContentProvider.hpp
-    # Sources -- utilities
-    test/TestContentProvider.cpp
-    # Sources
     test/aviso/TestAviso_main.cpp # test entry point
     test/aviso/TestAviso.cpp
     test/aviso/TestBaseAvisoBackend.cpp
-  INCLUDES
-    test
   LIBS
     ecflow_all
     test_scaffold
@@ -89,12 +82,9 @@ ecflow_add_test(
   TARGET
     u_service_aviso_backend
   LABELS
-    unit nightly fast
+    # Also exercises the backend against a local Aviso server
+    integration nightly fast
   SOURCES
-    # Headers -- utilities
-    test/TestContentProvider.hpp
-    # Sources -- utilities
-    test/TestContentProvider.cpp
     # Sources -- the Aviso backend (only compiled into the server)
     src/ecflow/service/aviso/AvisoBackend.hpp
     src/ecflow/service/aviso/AvisoBackend.cpp
@@ -102,8 +92,6 @@ ecflow_add_test(
     test/aviso/TestAvisoBackend_main.cpp # test entry point
     test/aviso/TestAvisoBackend.cpp
     test/aviso/TestAvisoIntegration.cpp
-  INCLUDES
-    test
   LIBS
     ecflow_all
     aviso::ffi

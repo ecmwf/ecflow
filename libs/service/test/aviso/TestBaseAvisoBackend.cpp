@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/service/aviso/BaseAvisoBackend.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 namespace {
 
@@ -33,12 +34,16 @@ BOOST_AUTO_TEST_SUITE(U_Aviso)
 BOOST_AUTO_TEST_SUITE(T_BaseAvisoBackend)
 
 BOOST_AUTO_TEST_CASE(no_backend_is_available_by_default) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
 
     BOOST_CHECK(make_backend() == nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(can_create_backend_from_registered_factory) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
 
     BackendGuard guard;
@@ -56,6 +61,8 @@ BOOST_AUTO_TEST_CASE(can_create_backend_from_registered_factory) {
 }
 
 BOOST_AUTO_TEST_CASE(each_backend_is_a_new_instance) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
 
     BackendGuard guard;
@@ -67,6 +74,8 @@ BOOST_AUTO_TEST_CASE(each_backend_is_a_new_instance) {
 }
 
 BOOST_AUTO_TEST_CASE(can_unregister_factory) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
 
     register_backend([]() { return std::make_unique<FakeBackend>(); });
