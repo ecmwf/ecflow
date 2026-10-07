@@ -51,10 +51,19 @@ echo "Starting the aviso-server ($AVISO_IMAGE) on port $AVISO_PORT"
 docker run --rm -d --name "$container" -p "127.0.0.1:$AVISO_PORT:8000" \
   -v "$here/aviso_server_config.yaml:/app/config.yaml:ro" -e AVISOSERVER_CONFIG_FILE=/app/config.yaml \
   "$AVISO_IMAGE" >/dev/null
+healthy=false
 for _ in $(seq 1 30); do
-  curl -fsS -o /dev/null "http://localhost:$AVISO_PORT/health" 2>/dev/null && break
+  if curl -fsS -o /dev/null "http://localhost:$AVISO_PORT/health" 2>/dev/null; then
+    healthy=true
+    break
+  fi
   sleep 1
 done
+if [ "$healthy" != true ]; then
+  echo "The aviso-server did not become healthy within 30 seconds; its log follows" >&2
+  docker logs "$container" >&2 || true
+  exit 1
+fi
 
 #
 # 2. Prepare the suite: the credentials file, the task script and the definition
@@ -107,8 +116,20 @@ done
 "$client" --load="$work/$suite.def"
 "$client" --begin="$suite"
 
-# The attribute watches for notifications published from now on
-sleep 5
+# The attribute watches for notifications published from the moment its watch is established; the aviso-server
+# logs the event api.watch.stream.established when that happens
+established=false
+for _ in $(seq 1 30); do
+  if docker logs "$container" 2>&1 | grep -q '"event.name":"api.watch.stream.established"'; then
+    established=true
+    break
+  fi
+  sleep 1
+done
+if [ "$established" != true ]; then
+  echo "The Aviso attribute did not establish its watch within 30 seconds; see $work/ecflow_server.out" >&2
+  exit 1
+fi
 
 #
 # 4. Publish notifications, and follow the releases of the task
