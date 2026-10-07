@@ -49,16 +49,17 @@ Glossary
            - :token:`autocancel`
 
    aviso
-      An aviso is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
-      and creates a dependency on notifications published by an Aviso server.
+      An aviso is an attribute of a :term:`Task<task>` (or an alias of a task), and creates a
+      dependency on notifications published by an Aviso server.
 
-      A :term:`Node<node>` with an aviso attribute is held from executing until a
+      A :term:`Task<task>` with an aviso attribute is held from executing until a
       notification matching the configured listener is received; each notification
-      releases the node once, following a behaviour similar to a :term:`trigger` or a
+      releases the task once, following a behaviour similar to a :term:`trigger` or a
       time dependency (e.g. :term:`cron`).
 
-      `Only one aviso attribute is allowed per node`. The notification that released the
-      node is made available to the job as generated variables.
+      `Only one aviso attribute is allowed per task`, and none on a :term:`suite` or a
+      :term:`family`. The notification that released the task is made available to the job as
+      generated variables.
 
       ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
       The options, the listener, the credentials file, the release of the node, the generated

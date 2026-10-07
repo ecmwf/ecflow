@@ -2779,7 +2779,7 @@
     {
       "name": "aviso",
       "kind": "attribute",
-      "attaches_to": "Node (Suite, Family, Task, and Alias)",
+      "attaches_to": "Task and Alias (an aviso attribute on a Suite or a Family is rejected)",
       "summary": "Holds the node queued until a matching Aviso notification is received.",
       "description": [
         "Holds the node queued until a notification published by an Aviso server, and matching the listener, is received; each notification releases the node once.",

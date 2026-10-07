@@ -9,6 +9,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -689,6 +690,30 @@ BOOST_AUTO_TEST_CASE(generated_variables_describe_the_latest_notification_when_c
     BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), "3");
 
     aviso.finish();
+}
+
+BOOST_AUTO_TEST_CASE(aviso_is_only_allowed_on_tasks_and_aliases) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    Defs defs;
+    auto s = defs.add_suite("s");
+    auto f = s->add_family("f");
+    auto t = f->add_task("t");
+    auto a = t->add_alias_only();
+
+    const AvisoAttr aviso{
+        nullptr, "A", R"({ "event": "mars" })", AvisoAttr::default_url, 0, AvisoAttr::default_auth, ""};
+
+    BOOST_CHECK_NO_THROW(t->addAviso(aviso));
+    BOOST_CHECK_NO_THROW(a->addAviso(aviso));
+
+    // Families and suites have no job, so a notification would never be consumed
+    BOOST_CHECK_THROW(f->addAviso(aviso), std::runtime_error);
+    BOOST_CHECK_THROW(s->addAviso(aviso), std::runtime_error);
+    BOOST_CHECK(f->avisos().empty());
+    BOOST_CHECK(s->avisos().empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

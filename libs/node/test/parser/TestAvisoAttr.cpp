@@ -426,6 +426,26 @@ BOOST_AUTO_TEST_CASE(can_serialise_event) {
     BOOST_CHECK_EQUAL(restored.event().payload, R"({"location":"file:///x"})");
 }
 
+BOOST_AUTO_TEST_CASE(cannot_parse_aviso_on_family_or_suite) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    const std::string aviso = "aviso --name A --listener '{ \"event\": \"mars\" }'";
+
+    // Rejected in definitions, and in definitions with state (e.g. check points)
+    for (const std::string header : {"", "defs_state MIGRATE\n"}) {
+        for (const std::string body : {"suite s\n  " + aviso + "\n  task t\nendsuite\n",
+                                       "suite s\n  family f\n    " + aviso + "\n    task t\n  endfamily\nendsuite\n"}) {
+            Defs defs;
+            DefsStructureParser parser(&defs, header + body, true);
+            std::string errorMsg, warningMsg;
+            BOOST_CHECK_MESSAGE(!parser.doParse(errorMsg, warningMsg), "Expected rejection of:\n" << header + body);
+            BOOST_CHECK_MESSAGE(errorMsg.find("only allowed on a task") != std::string::npos, errorMsg);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

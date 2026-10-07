@@ -575,7 +575,7 @@ Holds the node queued until a notification published by an Aviso server, and mat
 listener, is received; each notification releases the node once. See :ref:`text_based_def_aviso` for
 the listener, the credentials file and the behaviour of the attribute.
 
-**Attaches to:** Node (Suite, Family, Task, and Alias)
+**Attaches to:** Task and Alias (an aviso attribute on a Suite or a Family is rejected)
 
 **Syntax**
 

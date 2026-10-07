@@ -532,7 +532,13 @@ public:
     void addDate(const DateAttr&);
     void addDay(const DayAttr&);
     void addCron(const ecf::CronAttr&);
-    void addAviso(const ecf::AvisoAttr&);
+    ///
+    /// @brief Adds an Aviso attribute to this node.
+    ///
+    /// @param[in] aviso The attribute to add.
+    /// @throws std::runtime_error if this node is not a task (or an alias), or already has an Aviso attribute.
+    ///
+    void addAviso(const ecf::AvisoAttr& aviso);
     void addMirror(const ecf::MirrorAttr&);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate

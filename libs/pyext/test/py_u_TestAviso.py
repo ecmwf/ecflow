@@ -116,6 +116,16 @@ def test_aviso_generated_variables_are_defined():
     assert generated["ECF_AVISO_EVENT_DATA_PAYLOAD"] == ""
 
 
+def test_aviso_is_rejected_on_family_and_suite():
+    # An Aviso attribute is only allowed on a task (or an alias)
+    with pytest.raises(RuntimeError):
+        ecf.Family("f").add_aviso(ecf.AvisoAttr("name", "listener"))
+    with pytest.raises(RuntimeError):
+        ecf.Suite("s").add_aviso(ecf.AvisoAttr("name", "listener"))
+    with pytest.raises(RuntimeError):
+        ecf.Family("f", ecf.AvisoAttr("name", "listener"))
+
+
 def test_add_aviso_to_task():
     suite = ecf.Suite("s1")
     family = ecf.Family("f1")

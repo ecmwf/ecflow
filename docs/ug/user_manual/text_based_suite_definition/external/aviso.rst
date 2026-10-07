@@ -6,9 +6,9 @@
 aviso
 /////
 
-This defines an :term:`aviso` attribute, and thus a node dependency on notifications published by an
-`Aviso <https://github.com/ecmwf/aviso-server>`_ server. The node is held queued until a notification
-matching the attribute is received, and each notification releases the node once. The options defining
+This defines an :term:`aviso` attribute, and thus a :term:`task` dependency on notifications published by an
+`Aviso <https://github.com/ecmwf/aviso-server>`_ server. The task is held queued until a notification
+matching the attribute is received, and each notification releases the task once. The options defining
 the attribute can be provided in any order.
 
 .. important::
@@ -64,9 +64,12 @@ The values of :code:`--listener`, :code:`--url` and :code:`--auth` can be compos
 :code:`ECF_AVISO_URL` and :code:`ECF_AVISO_AUTH` are not provided by the server, and are typically defined
 once at :term:`suite` level.
 
-.. note::
+.. important::
 
-   Only one :term:`aviso` attribute is allowed per node.
+   An :term:`aviso` attribute is only allowed on a :term:`task` (or an alias of a task), and only one per
+   task. An :term:`aviso` attribute on a :term:`suite` or a :term:`family` is rejected: a
+   :term:`suite definition` or a :term:`check point` holding one fails to load, and the Alter command and the
+   Python API refuse to add one.
 
 .. _text_based_def_aviso_listener:
 

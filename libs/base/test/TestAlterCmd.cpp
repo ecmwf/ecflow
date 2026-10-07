@@ -1354,6 +1354,26 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_defstatus_validation) {
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_only_on_task) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s  = defs.add_suite("suite");
+    family_ptr f = s->add_family("f");
+    task_ptr t   = f->add_task("t");
+
+    const std::string value = R"(--listener '{ "event": "mars" }')";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    BOOST_CHECK_EQUAL(t->avisos().size(), 1u);
+
+    // An Aviso attribute is only allowed on a task (or an alias)
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(f->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    BOOST_CHECK(f->avisos().empty());
+    BOOST_CHECK(s->avisos().empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -835,13 +835,11 @@ const char* NodeAttrDoc::clock_doc() {
 }
 
 const char* NodeAttrDoc::aviso_doc() {
-    return "An :term:`aviso` attribute, assigned to a :term:`node`, represents an external trigger holding the node "
-           "queued until "
-           "an Aviso notification matching the attribute configuration is detected.\n"
+    return "An :term:`aviso` attribute, assigned to a :term:`task`, represents an external trigger holding the task "
+           "queued until an Aviso notification matching the attribute configuration is detected.\n"
            "\n"
-           "Although :term:`aviso` attributes can be set at any level (Suite, Family, Task), it only makes sense to "
-           "assign "
-           "aviso attributes to tasks, and only one aviso attribute per node is allowed.\n"
+           ":term:`aviso` attributes are only allowed on tasks (or aliases of tasks), and only one aviso attribute "
+           "per task is allowed; adding one to a suite or a family raises a RuntimeError.\n"
            "\n"
            "\nConstructors::\n\n"
            "   AvisoAttr(name, listener) (1)\n"

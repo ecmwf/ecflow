@@ -217,7 +217,11 @@ Usage:
 .. py:method:: Node.add_aviso(self: ecflow.Node, arg0: ecflow.AvisoAttr) -> ecflow.Node
    :module: ecflow
 
-Adds an :term:`aviso` to a :term:`node`. See :py:class:`ecflow.Aviso`
+Adds an :term:`aviso` to a :term:`task`. See :py:class:`ecflow.AvisoAttr`
+
+Exception:
+
+- Throws RuntimeError if the node is not a task (or an alias), or already has an aviso
 
 
 .. py:method:: Node.add_complete(*args, **kwargs)

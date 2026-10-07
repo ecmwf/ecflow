@@ -323,6 +323,15 @@ void Node::addEvent(const Event& e, bool check) {
 }
 
 void Node::addAviso(const AvisoAttr& a) {
+    // A task releases its job once per notification; families and suites have no job, and never consume one
+    if (!isSubmittable()) {
+        throw std::runtime_error(ecf::Message("Unable to add Aviso '",
+                                              a.name(),
+                                              "' to ",
+                                              absNodePath(),
+                                              ". An Aviso attribute is only allowed on a task (or an alias).")
+                                     .str());
+    }
     if (!avisos_.empty()) {
         throw std::runtime_error(
             ecf::Message("Unable to add Aviso '", a.name(), "'. Only 1 Aviso allowed per node.").str());
