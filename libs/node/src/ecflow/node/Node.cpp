@@ -2616,8 +2616,9 @@ std::vector<Variable> Node::gen_variables() const {
 }
 
 const Variable& Node::findGenVariable(const std::string& name) const {
+    // When repeat_ is empty, find_gen_variable returns an empty variable
     if (const Variable& var = repeat_.find_gen_variable(name); !var.empty()) {
-        return var; // if repeat_ is empty find returns empty variable by ref
+        return var;
     }
     for (const auto& aviso : avisos_) {
         if (const Variable& var = aviso.find_gen_variable(name); !var.empty()) {

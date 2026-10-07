@@ -434,9 +434,9 @@ BOOST_AUTO_TEST_CASE(cannot_parse_aviso_on_family_or_suite) {
     const std::string aviso = "aviso --name A --listener '{ \"event\": \"mars\" }'";
 
     // Rejected in definitions, and in definitions with state (e.g. check points)
-    for (const std::string header : {"", "defs_state MIGRATE\n"}) {
-        for (const std::string body : {"suite s\n  " + aviso + "\n  task t\nendsuite\n",
-                                       "suite s\n  family f\n    " + aviso + "\n    task t\n  endfamily\nendsuite\n"}) {
+    for (const auto& header : {std::string{}, std::string{"defs_state MIGRATE\n"}}) {
+        for (const auto& body : {"suite s\n  " + aviso + "\n  task t\nendsuite\n",
+                                 "suite s\n  family f\n    " + aviso + "\n    task t\n  endfamily\nendsuite\n"}) {
             Defs defs;
             DefsStructureParser parser(&defs, header + body, true);
             std::string errorMsg, warningMsg;

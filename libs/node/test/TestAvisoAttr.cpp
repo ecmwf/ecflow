@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(keeps_notification_when_restarted_before_release) {
 BOOST_AUTO_TEST_CASE(why_does_not_consume_the_notification) {
     ECF_NAME_THIS_TEST();
 
-    // LD1: querying why the node is held must not prevent the notification from releasing it
+    // Querying why the node is held must not prevent the notification from releasing it
 
     using namespace ecf;
 
@@ -476,7 +476,7 @@ BOOST_AUTO_TEST_CASE(why_does_not_consume_the_notification) {
 BOOST_AUTO_TEST_CASE(notification_is_kept_while_another_dependency_holds_the_task) {
     ECF_NAME_THIS_TEST();
 
-    // LD2: a notification received while a time dependency holds the task must release it once the time is reached
+    // A notification received while a time dependency holds the task must release it once the time is reached
 
     using namespace ecf;
 
@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(notification_is_kept_while_another_dependency_holds_the_tas
 BOOST_AUTO_TEST_CASE(change_keeps_attribute_attached_to_its_node) {
     ECF_NAME_THIS_TEST();
 
-    // LD7: `alter change aviso` must keep the attribute attached to its node, and start the new configuration
+    // `alter change aviso` must keep the attribute attached to its node, and start the new configuration
 
     using namespace ecf;
 
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(change_clears_error_of_replaced_attribute_when_node_is_not_
 BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso) {
     ECF_NAME_THIS_TEST();
 
-    // LD8: the server (re)start traversal must start the Aviso attribute of a queued node, e.g. after loading a
+    // The server (re)start traversal must start the Aviso attribute of a queued node, e.g. after loading a
     // checkpoint, and the halt/shutdown traversal must finish it
 
     using namespace ecf;
@@ -797,7 +797,7 @@ BOOST_AUTO_TEST_CASE(aviso_is_not_allowed_on_a_node_with_a_mirror) {
     using namespace ecf;
 
     Defs defs;
-    auto s = defs.add_suite("s");
+    auto s  = defs.add_suite("s");
     auto t1 = s->add_task("t1");
     auto t2 = s->add_task("t2");
 
@@ -838,7 +838,7 @@ BOOST_AUTO_TEST_CASE(starting_a_running_attribute_keeps_its_configuration) {
     BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
     const auto active = aviso.active();
 
-    // LD11: the configuration changes while the attribute runs; starting it again (e.g. requeue of the queued node)
+    // The configuration changes while the attribute runs; starting it again (e.g. requeue of the queued node)
     // keeps the running watch and its configuration, without reporting an error on the unused configuration
     defs->findAbsNode("/s")->addVariable(Variable("ECF_AVISO_URL", ""));
     aviso.start();
@@ -869,7 +869,7 @@ BOOST_AUTO_TEST_CASE(deleting_an_attribute_in_error_clears_the_error_flag) {
     auto t = find(defs, "/s/t");
     BOOST_REQUIRE(t->get_flag().is_set(Flag::REMOTE_ERROR));
 
-    // LD12: the deleted attribute no longer holds the node in error
+    // The deleted attribute no longer holds the node in error
     t->deleteAviso("A");
     BOOST_CHECK(t->avisos().empty());
     BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));

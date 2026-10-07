@@ -1392,7 +1392,8 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_and_mirror_not_on_the_same_node) {
     BOOST_CHECK(t1->avisos().empty());
 
     TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_AVISO, "A", aviso)));
-    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
+    TestHelper::invokeFailureRequest(&defs,
+                                     Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
     BOOST_CHECK_EQUAL(t2->avisos().size(), 1u);
     BOOST_CHECK(t2->mirrors().empty());
 }
@@ -1408,7 +1409,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_starts_attribute_of_queued_task) {
     defs.beginAll();
     BOOST_REQUIRE_EQUAL(t->state(), NState::QUEUED);
 
-    // LD12: the added attribute of a queued task is started (its listener is resolved), without waiting for a requeue
+    // The added attribute of a queued task is started (its listener is resolved), without waiting for a requeue
     TestHelper::invokeRequest(
         &defs,
         Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", R"(--listener '{ "event": "mars" }')")));
