@@ -12,7 +12,7 @@ ecflow.AvisoAttr
 
 An :term:`aviso` attribute, assigned to a :term:`task`, represents an external trigger holding the task queued until an Aviso notification matching the attribute configuration is detected.
 
-:term:`aviso` attributes are only allowed on tasks (or aliases of tasks), and only one aviso attribute per task is allowed; adding one to a suite or a family raises a RuntimeError.
+:term:`aviso` attributes are only allowed on tasks (or aliases of tasks), and only one aviso attribute per task is allowed; adding one to a suite or a family, or to a node with a :term:`mirror`, raises a RuntimeError.
 
 
 Constructors::

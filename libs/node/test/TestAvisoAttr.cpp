@@ -16,6 +16,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Operations.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
@@ -788,6 +789,39 @@ BOOST_AUTO_TEST_CASE(aviso_is_only_allowed_on_tasks_and_aliases) {
     BOOST_CHECK_THROW(s->addAviso(aviso), std::runtime_error);
     BOOST_CHECK(f->avisos().empty());
     BOOST_CHECK(s->avisos().empty());
+}
+
+BOOST_AUTO_TEST_CASE(aviso_is_not_allowed_on_a_node_with_a_mirror) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    Defs defs;
+    auto s = defs.add_suite("s");
+    auto t1 = s->add_task("t1");
+    auto t2 = s->add_task("t2");
+
+    const AvisoAttr aviso{
+        nullptr, "A", R"({ "event": "mars" })", AvisoAttr::default_url, 0, AvisoAttr::default_auth, ""};
+    const MirrorAttr mirror{nullptr,
+                            "M",
+                            "/s/t",
+                            MirrorAttr::default_remote_host,
+                            MirrorAttr::default_remote_port,
+                            MirrorAttr::default_polling,
+                            false,
+                            MirrorAttr::default_remote_auth,
+                            "",
+                            false};
+
+    // A mirrored node takes its state from the remote node, which a release by a notification would contradict
+    t1->addMirror(mirror);
+    BOOST_CHECK_THROW(t1->addAviso(aviso), std::runtime_error);
+    BOOST_CHECK(t1->avisos().empty());
+
+    t2->addAviso(aviso);
+    BOOST_CHECK_THROW(t2->addMirror(mirror), std::runtime_error);
+    BOOST_CHECK(t2->mirrors().empty());
 }
 
 BOOST_AUTO_TEST_CASE(starting_a_running_attribute_keeps_its_configuration) {

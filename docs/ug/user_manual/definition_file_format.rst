@@ -575,7 +575,7 @@ Holds the node queued until a notification published by an Aviso server, and mat
 listener, is received; each notification releases the node once. See :ref:`text_based_def_aviso` for
 the listener, the credentials file and the behaviour of the attribute.
 
-**Attaches to:** Task and Alias (an aviso attribute on a Suite or a Family is rejected)
+**Attaches to:** Task and Alias (an aviso attribute on a Suite or a Family, or on a node with a mirror attribute, is rejected)
 
 **Syntax**
 
@@ -1247,7 +1247,7 @@ mirror
 Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally.
 This allows other local nodes to be triggered by a remote node's completion.
 
-**Attaches to:** Node (Suite, Family, Task, and Alias)
+**Attaches to:** Node (Suite, Family, Task, and Alias; a mirror attribute on a node with an aviso attribute is rejected)
 
 **Syntax**
 

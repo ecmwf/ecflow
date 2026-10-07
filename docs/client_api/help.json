@@ -2783,7 +2783,7 @@
     {
       "name": "aviso",
       "kind": "attribute",
-      "attaches_to": "Task and Alias (an aviso attribute on a Suite or a Family is rejected)",
+      "attaches_to": "Task and Alias (an aviso attribute on a Suite or a Family, or on a node with a mirror attribute, is rejected)",
       "summary": "Holds the node queued until a matching Aviso notification is received.",
       "description": [
         "Holds the node queued until a notification published by an Aviso server, and matching the listener, is received; each notification releases the node once.",
@@ -3259,7 +3259,7 @@
     {
       "name": "mirror",
       "kind": "attribute",
-      "attaches_to": "Node (Suite, Family, Task, and Alias)",
+      "attaches_to": "Node (Suite, Family, Task, and Alias; a mirror attribute on a node with an aviso attribute is rejected)",
       "summary": "Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally.",
       "description": [
         "Polls a remote ecflow node's status, via a mirror server connection, and reflects it locally. This allows other local nodes to be triggered by a remote node's completion.",

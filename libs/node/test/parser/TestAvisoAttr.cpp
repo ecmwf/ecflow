@@ -446,6 +446,27 @@ BOOST_AUTO_TEST_CASE(cannot_parse_aviso_on_family_or_suite) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(cannot_parse_aviso_and_mirror_on_the_same_node) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    const std::string aviso  = "aviso --name A --listener '{ \"event\": \"mars\" }'";
+    const std::string mirror = "mirror --name M --remote_path /s/t";
+
+    // Rejected in either order, in definitions, and in definitions with state (e.g. check points)
+    for (const auto& header : {std::string{}, std::string{"defs_state MIGRATE\n"}}) {
+        for (const auto& body : {"suite s\n  task t\n    " + aviso + "\n    " + mirror + "\nendsuite\n",
+                                 "suite s\n  task t\n    " + mirror + "\n    " + aviso + "\nendsuite\n"}) {
+            Defs defs;
+            DefsStructureParser parser(&defs, header + body, true);
+            std::string errorMsg, warningMsg;
+            BOOST_CHECK_MESSAGE(!parser.doParse(errorMsg, warningMsg), "Expected rejection of:\n" << header + body);
+            BOOST_CHECK_MESSAGE(errorMsg.find("not allowed on a node with a") != std::string::npos, errorMsg);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

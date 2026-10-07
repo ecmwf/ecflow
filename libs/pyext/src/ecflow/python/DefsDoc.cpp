@@ -238,11 +238,13 @@ const char* DefsDoc::add_label_doc() {
 const char* DefsDoc::add_aviso_doc() {
     return "Adds an :term:`aviso` to a :term:`task`. See :py:class:`ecflow.AvisoAttr`\n"
            "\nException:\n\n"
-           "- Throws RuntimeError if the node is not a task (or an alias), or already has an aviso\n";
+           "- Throws RuntimeError if the node is not a task (or an alias), or already has an aviso or a mirror\n";
 }
 
 const char* DefsDoc::add_mirror_doc() {
-    return "Adds a :term:`mirror` to a :term:`node`. See :py:class:`ecflow.Mirror`\n";
+    return "Adds a :term:`mirror` to a :term:`node`. See :py:class:`ecflow.Mirror`\n"
+           "\nException:\n\n"
+           "- Throws RuntimeError if the node already has a mirror or an aviso\n";
 }
 
 const char* DefsDoc::add_limit_doc() {

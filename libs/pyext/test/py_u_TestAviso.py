@@ -126,6 +126,21 @@ def test_aviso_is_rejected_on_family_and_suite():
         ecf.Family("f", ecf.AvisoAttr("name", "listener"))
 
 
+def test_aviso_and_mirror_are_rejected_on_the_same_node():
+    # An Aviso attribute is not allowed on a node with a Mirror attribute, and vice versa
+    task = ecf.Task("t1")
+    task.add_mirror(ecf.MirrorAttr("name", "r_path"))
+    with pytest.raises(RuntimeError):
+        task.add_aviso(ecf.AvisoAttr("name", "listener"))
+    assert len(list(task.avisos)) == 0
+
+    task = ecf.Task("t2")
+    task.add_aviso(ecf.AvisoAttr("name", "listener"))
+    with pytest.raises(RuntimeError):
+        task.add_mirror(ecf.MirrorAttr("name", "r_path"))
+    assert len(list(task.mirrors)) == 0
+
+
 def test_add_aviso_to_task():
     suite = ecf.Suite("s1")
     family = ecf.Family("f1")

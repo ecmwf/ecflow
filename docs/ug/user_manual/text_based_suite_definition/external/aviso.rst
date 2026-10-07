@@ -71,6 +71,11 @@ once at :term:`suite` level.
    :term:`suite definition` or a :term:`check point` holding one fails to load, and the Alter command and the
    Python API refuse to add one.
 
+   An :term:`aviso` attribute and a :term:`mirror` attribute cannot coexist: a node with a :term:`mirror`
+   attribute takes its state from the remote node, which a release by an Aviso notification would contradict.
+   A :term:`suite definition` or a :term:`check point` holding both on the same node fails to load, and the
+   Alter command and the Python API refuse to add one to a node that has the other.
+
 .. _text_based_def_aviso_listener:
 
 Listener

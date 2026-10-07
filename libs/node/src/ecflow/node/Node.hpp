@@ -536,10 +536,17 @@ public:
     /// @brief Adds an Aviso attribute to this node.
     ///
     /// @param[in] aviso The attribute to add.
-    /// @throws std::runtime_error if this node is not a task (or an alias), or already has an Aviso attribute.
+    /// @throws std::runtime_error if this node is not a task (or an alias), or already has an Aviso or a Mirror
+    ///         attribute.
     ///
     void addAviso(const ecf::AvisoAttr& aviso);
-    void addMirror(const ecf::MirrorAttr&);
+    ///
+    /// @brief Adds a Mirror attribute to this node.
+    ///
+    /// @param[in] mirror The attribute to add.
+    /// @throws std::runtime_error if this node already has a Mirror or an Aviso attribute.
+    ///
+    void addMirror(const ecf::MirrorAttr& mirror);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate
     void addInLimit(const InLimit& l, bool check = true); // will throw std::runtime_error if duplicate

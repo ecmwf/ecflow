@@ -57,8 +57,8 @@ Glossary
       releases the task once, following a behaviour similar to a :term:`trigger` or a
       time dependency (e.g. :term:`cron`).
 
-      `Only one aviso attribute is allowed per task`, and none on a :term:`suite` or a
-      :term:`family`. The notification that released the task is made available to the job as
+      `Only one aviso attribute is allowed per task`, none on a :term:`suite` or a
+      :term:`family`, and none on a node with a :term:`mirror` attribute. The notification that released the task is made available to the job as
       generated variables.
 
       ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
@@ -1742,7 +1742,8 @@ Glossary
         (e.g. a suite mirrors a task from another suite living in the same server).
         as this may lead to undesired behaviour, including deadlocks.
 
-      `Only one mirror attribute is allowed per node`, and each attribute is
+      `Only one mirror attribute is allowed per node`, and none on a node with an
+      :term:`aviso` attribute. Each attribute is
       defined by the following options:
 
         - :code:`name`, an identifier

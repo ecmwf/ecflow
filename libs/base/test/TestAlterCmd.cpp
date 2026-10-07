@@ -1374,6 +1374,29 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_only_on_task) {
     BOOST_CHECK(s->avisos().empty());
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_and_mirror_not_on_the_same_node) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    task_ptr t1 = s->add_task("t1");
+    task_ptr t2 = s->add_task("t2");
+
+    const std::string aviso  = R"(--listener '{ "event": "mars" }')";
+    const std::string mirror = "--remote_path /s/t";
+
+    // An Aviso attribute is not allowed on a node with a Mirror attribute, and vice versa
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t1->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(t1->absNodePath(), AlterCmd::ADD_AVISO, "A", aviso)));
+    BOOST_CHECK_EQUAL(t1->mirrors().size(), 1u);
+    BOOST_CHECK(t1->avisos().empty());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_AVISO, "A", aviso)));
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
+    BOOST_CHECK_EQUAL(t2->avisos().size(), 1u);
+    BOOST_CHECK(t2->mirrors().empty());
+}
+
 BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_starts_attribute_of_queued_task) {
     ECF_NAME_THIS_TEST();
 
