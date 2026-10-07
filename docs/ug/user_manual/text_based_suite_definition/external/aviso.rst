@@ -245,3 +245,13 @@ is created again.
    .. code-block:: shell
 
       ecflow_client --alter=change aviso <name> reload /path/to/node
+
+   Changing the attribute with a list of options (e.g. a different listener) replaces it, and the new
+   attribute starts from the revision given by :code:`--revision`, or 0 when the option is omitted; in that
+   case, only the notifications published after the change are considered. To continue after the
+   notification that last released the node, give the current revision of the attribute (as shown in the
+   definition, e.g. by :code:`ecflow_client --get`) with :code:`--revision`:
+
+   .. code-block:: shell
+
+      ecflow_client --alter=change aviso <name> "--listener '<json>' --revision <revision>" /path/to/node

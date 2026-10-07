@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -534,6 +535,75 @@ BOOST_AUTO_TEST_CASE(change_keeps_attribute_attached_to_its_node) {
     BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "dissemination" })");
 
     t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(invalid_change_keeps_previous_attribute_running) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // i.e. `alter change aviso A "--polling 60 --listener '{ "event": "dissemination" }'" /s/t`, with a v1 option
+    BOOST_CHECK_THROW(t->changeAviso("A", R"(--polling 60 --listener '{ "event": "dissemination" }')"),
+                      std::runtime_error);
+
+    // The previous attribute keeps watching, and is released by the next notification
+    const auto& aviso = t->avisos()[0];
+    BOOST_CHECK_EQUAL(aviso.active(), R"({ "event": "mars" })");
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 1);
+    backend.state->pending.emplace_back(notification(1));
+    BOOST_CHECK(aviso.isFree());
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(change_clears_error_of_replaced_attribute) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // Once the configuration is fixed, the changed attribute is started, and the node is no longer in error
+    find(defs, "/s")->addVariable(Variable("ECF_AVISO_URL", "http://aviso:8000"));
+    t->changeAviso("A", R"(--listener '{ "event": "dissemination" }')");
+
+    BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->listener(), R"({ "event": "dissemination" })");
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(change_clears_error_of_replaced_attribute_when_node_is_not_queued) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // The changed attribute is not started while the node is not waiting for it, but the node is no longer in error
+    t->setStateOnly(NState::COMPLETE);
+    t->changeAviso("A", R"(--listener '{ "event": "dissemination" }')");
+
+    BOOST_CHECK(!t->get_flag().is_set(Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 0);
 }
 
 BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso) {

@@ -181,10 +181,16 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
         found->reload();
     }
     else {
-        // The new attribute belongs to this node; it replaces (and stops) the previous one, and is started when the
-        // node is waiting for it
+        // The value is parsed first, so that an invalid value leaves the previous attribute untouched
+        auto changed = AvisoParser::parse_aviso_line(value, name, this);
+
+        // The new attribute belongs to this node; it replaces (and stops) the previous one, no longer holding the
+        // node in error, and is started when the node is waiting for it
         found->finish();
-        *found = AvisoParser::parse_aviso_line(value, name, this);
+        if (found->has_error()) {
+            flag_.clear(ecf::Flag::REMOTE_ERROR);
+        }
+        *found = std::move(changed);
         if (state() == NState::QUEUED) {
             found->start();
         }
