@@ -63,6 +63,8 @@ struct AvisoEvent
     ///
     /// @brief Returns whether no notification is described (i.e. the sequence is 0).
     ///
+    /// @return True when no notification is described.
+    ///
     [[nodiscard]] bool empty() const { return sequence == 0; }
 
     ///
@@ -70,6 +72,8 @@ struct AvisoEvent
     ///
     /// The value is a JSON object (type, sequence, identifier, payload), in which single quotes are escaped (as
     /// `\u0027`).
+    ///
+    /// @return The single-quoted value.
     ///
     [[nodiscard]] std::string to_option() const;
 };
@@ -106,12 +110,12 @@ public:
 
     static bool is_valid_name(const std::string& name);
 
-    /**
-     * Creates a(n invalid) Aviso
-     *
-     * Note: this is required by Cereal serialization
-     *       Cereal invokes the default ctor to create the object and only then proceeds to member-wise serialization.
-     */
+    ///
+    /// @brief Creates an invalid Aviso attribute.
+    ///
+    /// @note Required by Cereal serialization, which invokes the default constructor to create the object and only
+    ///       then proceeds to member-wise serialization.
+    ///
     AvisoAttr() = default;
     AvisoAttr(Node* parent,
               name_t name,
@@ -136,7 +140,9 @@ public:
     [[nodiscard]] inline const reason_t& reason() const { return reason_; }
 
     ///
-    /// @brief Returns whether a release consumes all the notifications received (true), or exactly one (false).
+    /// @brief Returns whether a release consumes all the notifications received, or exactly one.
+    ///
+    /// @return True when a release consumes all the notifications received, false when it consumes exactly one.
     ///
     [[nodiscard]] inline bool collapse() const { return collapse_; }
 
@@ -146,7 +152,9 @@ public:
     static constexpr const char* genvar_event_data_payload    = "ECF_AVISO_EVENT_DATA_PAYLOAD";
 
     ///
-    /// @brief Returns the notification that released the node (empty, until a notification releases the node).
+    /// @brief Returns the notification that released the node.
+    ///
+    /// @return The notification, empty until a notification releases the node.
     ///
     [[nodiscard]] inline const AvisoEvent& event() const { return event_; }
 
@@ -164,17 +172,24 @@ public:
     /// generated while the node is still queued, sees it), or otherwise the last one committed. The variables are
     /// always defined; they are empty (and the sequence is 0) until a notification releases the node.
     ///
+    /// @param[out] vars The variables to append to.
+    ///
     void gen_variables(std::vector<Variable>& vars) const;
 
     ///
-    /// @brief Returns the generated variable with the given name, or an empty variable when there is none.
+    /// @brief Returns the generated variable with the given name.
+    ///
+    /// @param[in] name The name of the generated variable (e.g. ECF_AVISO_EVENT_TYPE).
+    /// @return The variable, or an empty variable when there is none with the given name.
     ///
     [[nodiscard]] const Variable& find_gen_variable(const std::string& name) const;
     [[nodiscard]] inline const active_t& active() const { return active_; }
     [[nodiscard]] path_t path() const;
 
     ///
-    /// @brief Returns whether the attribute currently holds an error (i.e. a non-empty reason).
+    /// @brief Returns whether the attribute currently holds an error.
+    ///
+    /// @return True when a failure reason is recorded.
     ///
     [[nodiscard]] bool has_error() const;
 
@@ -241,35 +256,35 @@ private:
     void set_error(const std::string& reason) const;
     void clear_error() const;
 
-    /**
-     * @brief The parent Node of this AvisoAttr.
-     *
-     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
-     */
+    ///
+    /// @brief The parent Node of this AvisoAttr.
+    ///
+    ///  -- This field is *not* serialized nor persisted; it is only used on the server side.
+    ///
     Node* parent_{nullptr}; // only ever used on the server side, to access parent Node variables
 
-    /**
-     * @brief The parent Node path of this AvisoAttr.
-     */
+    ///
+    /// @brief The parent Node path of this AvisoAttr.
+    ///
     path_t parent_path_;
 
-    /**
-     * @brief The name of this AvisoAttr
-     */
+    ///
+    /// @brief The name of this AvisoAttr
+    ///
     name_t name_;
 
-    /**
-     * @brief The listener used to launch the Aviso listener
-     *
-     * This listener is the original configuration, and may contain variable placeholders.
-     */
+    ///
+    /// @brief The listener used to launch the Aviso listener
+    ///
+    /// This listener is the original configuration, and may contain variable placeholders.
+    ///
     listener_t listener_;
 
-    /**
-     * @brief The URL used to launch the Aviso listener
-     *
-     * This configuration parameter may contain variable placeholders.
-     */
+    ///
+    /// @brief The URL used to launch the Aviso listener
+    ///
+    /// This configuration parameter may contain variable placeholders.
+    ///
     url_t url_;
 
     ///
@@ -305,11 +320,11 @@ private:
 
     // The following are mutable as they are modified by const methods (e.g. isFree(), start(), commit())
 
-    /**
-     * @brief A message buffer indicating, if any, the reason for the latest failure received from Aviso
-     *
-     * This field is empty if no error detected; otherwise contains a user facing message describing the error.
-     **/
+    ///
+    /// @brief A message buffer indicating, if any, the reason for the latest failure received from Aviso
+    ///
+    /// This field is empty if no error detected; otherwise contains a user facing message describing the error.
+    ///
     mutable reason_t reason_{};
 
     ///
@@ -319,18 +334,18 @@ private:
     ///
     mutable revision_t revision_{0};
 
-    /**
-     * @brief The state change number, used to detect changes in the Aviso attribute
-     *
-     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
-     */
+    ///
+    /// @brief The state change number, used to detect changes in the Aviso attribute
+    ///
+    ///  -- This field is *not* serialized nor persisted; it is only used on the server side.
+    ///
     mutable unsigned int state_change_no_{0};
 
-    /**
-     * @brief A 'cache' buffer, storing the fully configured (i.e. all variables substituted) Aviso listener
-     *
-     * This is the listener actually used to configure the controller.
-     */
+    ///
+    /// @brief A 'cache' buffer, storing the fully configured (i.e. all variables substituted) Aviso listener
+    ///
+    /// This is the listener actually used to configure the controller.
+    ///
     mutable active_t active_;
 
     ///

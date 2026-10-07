@@ -48,12 +48,25 @@ public:
           revision_{revision},
           auth_{auth} {}
 
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
     [[nodiscard]] const std::string& path() const { return path_; }
     [[nodiscard]] const std::string& listener() const { return listener_; }
     [[nodiscard]] const std::string& url() const { return url_; }
     [[nodiscard]] std::uint64_t revision() const { return revision_; }
     [[nodiscard]] const std::string& auth() const { return auth_; }
+    /// @}
 
+    ///
+    /// @brief Writes a one-line description of the request, for logging.
+    ///
+    /// @param[in,out] os      The stream to write to.
+    /// @param[in]     request The request to describe.
+    /// @return The stream.
+    ///
     friend std::ostream& operator<<(std::ostream& os, const AvisoSubscribe& request);
 
 private:
@@ -86,11 +99,24 @@ public:
           identifier_json_{identifier_json},
           payload_json_{payload_json} {}
 
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
     [[nodiscard]] const std::string& event_type() const { return event_type_; }
     [[nodiscard]] std::uint64_t sequence() const { return sequence_; }
     [[nodiscard]] const std::string& identifier_json() const { return identifier_json_; }
     [[nodiscard]] const std::string& payload_json() const { return payload_json_; }
+    /// @}
 
+    ///
+    /// @brief Writes a one-line description of the notification, for logging.
+    ///
+    /// @param[in,out] os           The stream to write to.
+    /// @param[in]     notification The notification to describe.
+    /// @return The stream.
+    ///
     friend std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification);
 
 private:
@@ -113,8 +139,21 @@ public:
     explicit AvisoError(std::string_view reason)
         : reason_{reason} {}
 
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
     [[nodiscard]] const std::string& reason() const { return reason_; }
+    /// @}
 
+    ///
+    /// @brief Writes a one-line description of the error, for logging.
+    ///
+    /// @param[in,out] os    The stream to write to.
+    /// @param[in]     error The error to describe.
+    /// @return The stream.
+    ///
     friend std::ostream& operator<<(std::ostream& os, const AvisoError& error);
 
 private:
@@ -128,6 +167,13 @@ private:
 ///
 class AvisoWatchStarted {
 public:
+    ///
+    /// @brief Writes a one-line description of the signal, for logging.
+    ///
+    /// @param[in,out] os      The stream to write to.
+    /// @param[in]     started The signal to describe.
+    /// @return The stream.
+    ///
     friend std::ostream& operator<<(std::ostream& os, const AvisoWatchStarted& started);
 };
 
@@ -136,6 +182,13 @@ public:
 ///
 using AvisoResponse = std::variant<AvisoNotification, AvisoError, AvisoWatchStarted>;
 
+///
+/// @brief Writes a one-line description of the response, for logging.
+///
+/// @param[in,out] os       The stream to write to.
+/// @param[in]     response The response to describe.
+/// @return The stream.
+///
 std::ostream& operator<<(std::ostream& os, const AvisoResponse& response);
 
 ///

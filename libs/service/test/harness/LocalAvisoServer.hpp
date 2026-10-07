@@ -66,7 +66,7 @@ public:
     ///
     /// @brief Starts the server, and waits until it accepts connections.
     ///
-    /// @param port The port to listen on.
+    /// @param[in] port The port to listen on.
     /// @throws std::runtime_error if the server does not start.
     ///
     explicit LocalAvisoServer(int port);
@@ -82,14 +82,16 @@ public:
     ///
     /// @brief Returns the base URL of the server.
     ///
+    /// @return The URL, of the form http://127.0.0.1:<port>.
+    ///
     [[nodiscard]] std::string url() const;
 
     ///
     /// @brief Stores a notification, and streams it to every matching open watch.
     ///
-    /// @param event_type      The event type (e.g. test_event).
-    /// @param identifier_json The identifier, as a JSON object; values are stored as strings.
-    /// @param payload_json    The payload, as JSON.
+    /// @param[in] event_type      The event type (e.g. test_event).
+    /// @param[in] identifier_json The identifier, as a JSON object; values are stored as strings.
+    /// @param[in] payload_json    The payload, as JSON.
     /// @return The sequence number given to the notification.
     ///
     std::uint64_t publish(const std::string& event_type,
@@ -99,15 +101,22 @@ public:
     ///
     /// @brief Requires every watch request to carry the given Basic credentials.
     ///
+    /// @param[in] username The user name expected.
+    /// @param[in] password The password expected.
+    ///
     void require_basic_auth(const std::string& username, const std::string& password);
 
     ///
     /// @brief Requires every watch request to carry the given bearer token.
     ///
+    /// @param[in] token The token expected.
+    ///
     void require_bearer_auth(const std::string& token);
 
     ///
     /// @brief Refuses, with HTTP 400, every filter naming the given field.
+    ///
+    /// @param[in] field The name of the identifier field to refuse.
     ///
     void reject_field(const std::string& field);
 
@@ -131,14 +140,18 @@ public:
     void fail_streams_after(std::chrono::milliseconds lifetime);
 
     ///
-    /// @brief Returns the watch requests received so far, in order of arrival.
+    /// @brief Returns the watch requests received so far.
+    ///
+    /// @return The requests, in order of arrival.
     ///
     [[nodiscard]] std::vector<Request> requests() const;
 
     ///
     /// @brief Waits until at least the given number of watch requests has been received.
     ///
-    /// @return true when the requests were received before the timeout.
+    /// @param[in] count   The number of requests to wait for, counted since the server started.
+    /// @param[in] timeout The maximum time to wait.
+    /// @return True when the requests were received before the timeout.
     ///
     bool wait_for_requests(std::size_t count, std::chrono::milliseconds timeout) const;
 

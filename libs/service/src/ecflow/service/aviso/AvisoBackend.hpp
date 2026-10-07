@@ -44,8 +44,10 @@ public:
     ///
     ~AvisoBackend() override;
 
+    /// @copydoc BaseAvisoBackend::subscribe
     void subscribe(const AvisoSubscribe& request) override;
 
+    /// @copydoc BaseAvisoBackend::drain
     std::vector<AvisoResponse> drain() override;
 
     ///
