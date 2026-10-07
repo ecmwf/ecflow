@@ -26,6 +26,16 @@ RUN python3 -m venv --system-site-packages /opt/local/python \
 # The package is bind-mounted, rather than copied, so that it is not kept in an image layer, and installed
 # with apt-get, so that the runtime libraries it depends on are installed as well.
 ARG TARGETARCH
+
+# Provision the Aviso client library, when the package was built with Aviso support
+# The library is not part of the package: the package build delivers it beside the package, as
+# aviso-ffi-<arch>.tar.gz (holding the library under its file name and its soname), built from the aviso-client
+# sources by the build environment. The build context is bind-mounted, so that the archive is optional.
+RUN --mount=type=bind,target=/tmp/context \
+    if [ -f "/tmp/context/aviso-ffi-${TARGETARCH}.tar.gz" ]; then \
+        tar --no-same-owner -xzf "/tmp/context/aviso-ffi-${TARGETARCH}.tar.gz" -C /usr/local/lib && ldconfig; \
+    fi
+
 RUN --mount=type=bind,source=ecflow-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
     apt-get update \
     && apt-get install -y --no-install-recommends /tmp/ecflow.deb \

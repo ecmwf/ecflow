@@ -19,7 +19,10 @@
 # Steps: check out ecbuild beside the ecflow sources (and, with --clone-ecflow,
 # the ecflow sources themselves), then configure, build and package ecflow, and
 # deliver the package as ecflow-<arch>.deb (e.g. ecflow-arm64.deb), the name the
-# image build (ecflow-server/Dockerfile) selects for its target platform.
+# image build (ecflow-server/Dockerfile) selects for its target platform. When the
+# server is built with Aviso support, the Aviso client library it links (provided
+# by the build environment, not by the package) is delivered beside the package,
+# as aviso-ffi-<arch>.tar.gz, for the image build to install.
 #
 # Run with --help to see all available options.
 #
@@ -176,7 +179,7 @@ version=$(package_version)
 cmake --build "${BUILD_DIR}" --parallel "${JOBS}" --target all
 
 # Remove packages left by previous runs, so that only the one built now is delivered
-rm -f "${BUILD_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/ecflow-*.deb
+rm -f "${BUILD_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz
 
 cmake --build "${BUILD_DIR}" --target package
 
@@ -189,3 +192,22 @@ for pkg in "${BUILD_DIR}"/ecflow-*.deb; do
     echo "Delivering $(basename "${pkg}") as ${OUTPUT_DIR}/ecflow-${arch}.deb"
     cp "${pkg}" "${OUTPUT_DIR}/ecflow-${arch}.deb"
 done
+
+# ---------------------------------------------------------------------------
+# Deliver the Aviso client library, when the server is built with Aviso support, as aviso-ffi-<arch>.tar.gz
+# ---------------------------------------------------------------------------
+
+# The archive holds the library under its file name and its soname (e.g. libaviso_ffi.so.2.4.2 and
+# libaviso_ffi.so.2), to be extracted into the library directory of the image
+if grep -q '^ENABLE_AVISO:BOOL=ON$' "${BUILD_DIR}/CMakeCache.txt"; then
+    library=$(sed -n 's/^AVISO_FFI_LIBRARY:FILEPATH=//p' "${BUILD_DIR}/CMakeCache.txt")
+    library=$(readlink -f "${library}")
+    soname=$(readelf -d "${library}" | sed -n 's/.*Library soname: \[\(.*\)\]/\1/p')
+    staging=$(mktemp -d)
+    cp "${library}" "${staging}/"
+    ln -s "$(basename "${library}")" "${staging}/${soname}"
+    echo "Delivering $(basename "${library}") (soname ${soname}) as ${OUTPUT_DIR}/aviso-ffi-${arch}.tar.gz"
+    tar -czf "${OUTPUT_DIR}/aviso-ffi-${arch}.tar.gz" --owner=0 --group=0 \
+        -C "${staging}" "$(basename "${library}")" "${soname}"
+    rm -rf "${staging}"
+fi

@@ -167,7 +167,10 @@ docker run --rm \
         --output-dir /workspace/output \
         ${PACKAGE_ARGS[@]+"${PACKAGE_ARGS[@]}"}
 
+rm -f "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz
 cp "${SANDBOX_DIR}"/output/ecflow-*.deb "${OUTPUT_DIR}/"
+# The Aviso client library, delivered when the server is built with Aviso support
+cp "${SANDBOX_DIR}"/output/aviso-ffi-*.tar.gz "${OUTPUT_DIR}/" 2>/dev/null || true
 
 make_banner "ecflow Debian package(s) available in ${OUTPUT_DIR}"
-ls -la "${OUTPUT_DIR}"/ecflow-*.deb
+ls -la "${OUTPUT_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz 2>/dev/null || true

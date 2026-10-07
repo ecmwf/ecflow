@@ -92,6 +92,9 @@ for owner in 501:20 0:0; do
     new_workspace "${owner%:*}" "${owner#*:}"
     start
     wait_healthy
+    # The server is built with Aviso support, and finds the Aviso client library
+    docker exec "${container}" grep -q 'Using Aviso client library' /workspace/ecflow-server.8888.ecf.log \
+        || fail "server does not use the Aviso client library"
     expected_owner=$(docker exec "${container}" stat -c '%u:%g' /workspace)
     if [[ "${owner}" == 501:20 ]]; then
         [[ "${expected_owner}" == "${owner}" ]] || fail "workspace ownership changed"

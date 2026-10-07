@@ -176,7 +176,7 @@
         "ENABLE_SERVER": "ON",
         "ENABLE_SSL": "ON",
         "ENABLE_UDP": "OFF",
-        "ENABLE_AVISO": "OFF",
+        "ENABLE_AVISO": "ON",
         "ENABLE_HTTP": "OFF",
         "ENABLE_UI": "OFF",
         "ENABLE_STATIC_BOOST_LIBS": "OFF",
