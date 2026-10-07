@@ -168,31 +168,51 @@ BOOST_AUTO_TEST_CASE(reports_aviso_v1_pointer_for_server_without_aviso_v2) {
     BOOST_CHECK_MESSAGE(reason.find(std::string{unsupported_v1}) != std::string::npos, reason);
 }
 
-BOOST_AUTO_TEST_CASE(recreates_watch_after_server_closes_stream) {
+BOOST_AUTO_TEST_CASE(routine_close_is_handled_by_the_client_library) {
     TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
     server.close_streams_after(300ms);
+
+    // With the default retry delay (60 s), a notification delivered within seconds proves that the watch was not
+    // re-created by the backend
+    v2::AvisoV2Backend backend;
+    backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
+
+    // The stream is closed by the server, and the client library reconnects at once
+    BOOST_REQUIRE(server.wait_for_requests(2, 5s));
+    server.publish("test_event", R"({ "date": "20261006" })");
+
+    auto responses = drain_until(backend, has_notifications(1), 5s);
+    BOOST_CHECK_EQUAL(select<AvisoNotification>(responses).size(), 1u);
+    BOOST_CHECK(select<AvisoError>(responses).empty());
+    BOOST_CHECK_EQUAL(select<AvisoWatchStarted>(responses).size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(recreates_watch_after_stream_error) {
+    TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
+    server.fail_streams_after(300ms);
 
     v2::AvisoV2Backend backend{100ms};
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
 
-    // The stream is closed by the server, and the watch is re-created after the retry delay
+    // The stream ends with an error, and the watch is re-created after the retry delay
     BOOST_REQUIRE(server.wait_for_requests(2, 5s));
     server.publish("test_event", R"({ "date": "20261006" })");
 
     auto responses = drain_until(backend, has_notifications(1));
     BOOST_CHECK_EQUAL(select<AvisoNotification>(responses).size(), 1u);
+    BOOST_CHECK_GE(select<AvisoError>(responses).size(), 1u);
     BOOST_CHECK_GE(select<AvisoWatchStarted>(responses).size(), 2u);
 }
 
 BOOST_AUTO_TEST_CASE(delivers_notification_published_while_watch_is_down) {
     TestContentProvider auth{"aviso_v2_auth", R"({ "email": "user@host.int", "key": "abc" })"};
-    server.close_streams_after(200ms);
+    server.fail_streams_after(200ms);
 
     v2::AvisoV2Backend backend{1500ms};
     backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.file()});
     BOOST_REQUIRE(server.wait_for_requests(1, 5s));
 
-    // The stream is closed after 200 ms, and only re-created after 1500 ms; publish in between
+    // The stream ends with an error after 200 ms, and is only re-created after 1500 ms; publish in between
     std::this_thread::sleep_for(600ms);
     BOOST_REQUIRE_EQUAL(server.requests().size(), 1u);
     server.publish("test_event", R"({ "date": "20261006" })");

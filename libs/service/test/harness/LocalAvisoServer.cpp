@@ -159,10 +159,17 @@ LocalAvisoServer::LocalAvisoServer(int port)
 
                 bool expired =
                     stream_lifetime_ && std::chrono::steady_clock::now() - stream->started >= *stream_lifetime_;
+                bool fails = stream_fails_;
                 lock.unlock();
 
-                if (expired) {
-                    out += frame("connection-closing", json{{"reason", "max_duration"}, {"timestamp", now_iso8601()}});
+                if (expired && fails) {
+                    out +=
+                        frame("error",
+                              json{{"error", "stream_processing_failed"}, {"message", "stream failed (test server)"}});
+                }
+                else if (expired) {
+                    out += frame("connection-closing",
+                                 json{{"reason", "max_duration_reached"}, {"timestamp", now_iso8601()}});
                 }
 
                 if (!out.empty() && !sink.write(out.data(), out.size())) {
@@ -247,6 +254,13 @@ void LocalAvisoServer::reject_field(const std::string& field) {
 void LocalAvisoServer::close_streams_after(std::chrono::milliseconds lifetime) {
     std::scoped_lock lock(mutex_);
     stream_lifetime_ = lifetime;
+    stream_fails_    = false;
+}
+
+void LocalAvisoServer::fail_streams_after(std::chrono::milliseconds lifetime) {
+    std::scoped_lock lock(mutex_);
+    stream_lifetime_ = lifetime;
+    stream_fails_    = true;
 }
 
 std::vector<LocalAvisoServer::Request> LocalAvisoServer::requests() const {

@@ -15,9 +15,10 @@ namespace ecf::service::aviso::v2 {
 /// @brief Delivers the notifications of an Aviso v2 server to one Aviso attribute, using the aviso-client library.
 ///
 /// The backend holds one client and one watch. Notifications and errors are collected by the library threads and
-/// handed over by drain(). When the watch ends (with an error, or because the server closed the stream), a dedicated
-/// timer re-creates it after the retry delay, resuming after the last notification received (or, for the first
-/// watch, after the revision given by subscribe()).
+/// handed over by drain(). The library reconnects by itself after routine interruptions (e.g. the server closing the
+/// stream at the end of its connection lifetime); when the watch ends nevertheless (i.e. after an error the library
+/// does not recover from), a dedicated timer re-creates it after the retry delay, resuming after the last notification
+/// received (or, for the first watch, after the revision given by subscribe()).
 ///
 /// This backend is only available in executables linked with the aviso-client library (e.g. the server).
 ///

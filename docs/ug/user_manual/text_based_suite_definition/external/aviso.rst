@@ -220,10 +220,14 @@ cannot be read, or an error reported by the Aviso server) is reported as
 ecFlow 5.19.x is the last release that supports Aviso v1, since an Aviso v1 server, or an Aviso v1
 configuration, also causes an error.
 
-When the watch ends, after an error or because the Aviso server closed it (e.g. at the end of its maximum
-connection duration), the watch is created again after a fixed delay of 60 seconds, resuming after the last
-notification received; any error is cleared when the watch is created again. A server that cannot be reached
-is retried silently by the Aviso client library, and is not reported on the node.
+The Aviso client library keeps the watch running across routine interruptions: when the Aviso server closes
+the stream (e.g. at the end of its maximum connection duration, or when it shuts down), or when the connection
+drops, the library reconnects by itself, resuming after the last notification received. A server that cannot
+be reached is retried silently by the library, and is not reported on the node.
+
+When the watch ends with an error that the library does not recover from, the watch is created again after a
+fixed delay of 60 seconds, resuming after the last notification received; the error is cleared when the watch
+is created again.
 
 .. note::
 

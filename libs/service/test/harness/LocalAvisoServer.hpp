@@ -114,7 +114,21 @@ public:
     ///
     /// @brief Closes every stream after the given duration, as aviso-server does after its connection lifetime.
     ///
+    /// The stream ends with the routine reason `max_duration_reached`, after which the client library reconnects by
+    /// itself, resuming after the last notification received.
+    ///
+    /// @param[in] lifetime The duration of each stream.
+    ///
     void close_streams_after(std::chrono::milliseconds lifetime);
+
+    ///
+    /// @brief Ends every stream with an error event after the given duration.
+    ///
+    /// The client library does not recover from a stream error: the watch ends, and its owner is to re-create it.
+    ///
+    /// @param[in] lifetime The duration of each stream.
+    ///
+    void fail_streams_after(std::chrono::milliseconds lifetime);
 
     ///
     /// @brief Returns the watch requests received so far, in order of arrival.
@@ -155,6 +169,7 @@ private:
     std::vector<std::string> rejected_fields_;
     std::string expected_authorization_;
     std::optional<std::chrono::milliseconds> stream_lifetime_;
+    bool stream_fails_ = false; // whether a stream ends with an error (true) or a routine close (false)
     std::atomic<bool> stopping_{false};
 };
 
