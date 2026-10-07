@@ -10,4 +10,5 @@ Install
     compiler_and_os_requirements
     install_from_homebrew
     install_from_conda-forge
+    install_from_crates-io
     build_from_source

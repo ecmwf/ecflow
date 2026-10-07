@@ -323,3 +323,17 @@ location, use the following commands.
 
       # in the example, use the following
       export PYTHONPATH=$PYTHONPATH:/path/to/ecflow/python/lib/python<version>/site-packages/ecflow
+
+Build the Rust API
+==================
+
+The ecFlow :ref:`rust_api` is not part of the CMake build. It is built by Cargo from the ``rust`` directory of
+the repository, which builds the ecFlow client library itself with the `Build Environment`_ above:
+
+.. code-block:: shell
+
+   cd /path/to/development/ecflow/rust
+
+   BOOST_ROOT=/path/to/boost cargo build
+
+See the :ref:`Rust API <rust_api>` for the build options and how to use the crate from another project.
