@@ -217,6 +217,8 @@ Glossary
            - :ref:`--complete <complete_cli>`
          * - :ref:`python_api`
            - :py:class:`ecflow.Expression`, :py:class:`ecflow.Node.add_complete`
+         * - :ref:`rust_api`
+           - :ref:`Client::child_complete <rust_client_child_complete>`
          * - :ref:`grammar`
            - :token:`complete`
 
@@ -868,7 +870,7 @@ Glossary
 
          ecflow_client --help
 
-      This functionality is also provided by the :ref:`python_api`.
+      This functionality is also provided by the :ref:`python_api` and the :ref:`rust_api`.
 
       The following variables affect the execution of ecflow_client.
 
@@ -1380,6 +1382,8 @@ Glossary
            - :ref:`event_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Event`, :py:class:`ecflow.Node.add_event`
+         * - :ref:`rust_api`
+           - :ref:`Client::child_event <rust_client_child_event>`
          * - :ref:`grammar`
            - :token:`event`
 
@@ -1574,6 +1578,8 @@ Glossary
            - :ref:`label_cli`, :ref:`add_cli`, :ref:`alter_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Label`, :py:class:`ecflow.Node.add_label`
+         * - :ref:`rust_api`
+           - :ref:`Client::child_label <rust_client_child_label>`, :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
            - :token:`label`
 
@@ -1641,6 +1647,8 @@ Glossary
            - :ref:`add_cli`, :ref:`alter_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Late`, :py:class:`ecflow.Node.add_late`
+         * - :ref:`rust_api`
+           - :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
            - :token:`late`
 
@@ -1681,6 +1689,13 @@ Glossary
          except RuntimeError, e:
             print("Failed: " + str(e))
 
+      And in Rust:
+
+      .. code-block:: rust
+
+         let mut client = ecflow::Client::new()?;
+         client.alter(["/suite"], "change", "limit_max", "limit", "2")?;
+
       The limit value, i.e. the number of tokens currently consumed, can be changed in the same way:
 
       .. code-block:: shell
@@ -1709,6 +1724,8 @@ Glossary
            - :ref:`add_cli`, :ref:`alter_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Limit`, :py:class:`ecflow.Node.add_limit`
+         * - :ref:`rust_api`
+           - :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
            - :token:`limit`
 
@@ -1762,6 +1779,8 @@ Glossary
            - :ref:`meter_cli`, :ref:`add_cli`, :ref:`alter_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Meter`, :py:class:`ecflow.Node.add_meter`
+         * - :ref:`rust_api`
+           - :ref:`Client::child_meter <rust_client_child_meter>`, :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
            - :token:`meter`
 
@@ -1934,6 +1953,8 @@ Glossary
            - :ref:`queue_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Queue`, :py:class:`ecflow.Node.add_queue`
+         * - :ref:`rust_api`
+           - :ref:`Client::child_queue <rust_client_child_queue>`
          * - :ref:`grammar`
            - :token:`queue`
 
@@ -2160,6 +2181,9 @@ Glossary
          * - :ref:`ecflow_client --label <label_cli>`
            - Change a :term:`label`
            - fob
+
+      The :ref:`rust_api` provides the task commands as the ``child_*`` methods of :ref:`Client <rust_client>`,
+      from :ref:`Client::child_init <rust_client_child_init>` to :ref:`Client::child_complete <rust_client_child_complete>`.
 
       The following environment variables must be set for the task commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
 
