@@ -31,6 +31,12 @@ spec:
       labels:
         {{- include "ecflow-chart.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: server
+      {{- if not .Values.server.admin.existingSecret }}
+      # A change of the administrator's files changes this annotation, and so
+      # replaces the Pod, which expands the new files at start.
+      annotations:
+        checksum/admin: {{ include (print $.Template.BasePath "/server-admin-secret.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       # Kubernetes otherwise injects a legacy Docker-link variable for every Service
       # of the namespace; a Service named `*-server` would yield a *_SERVER_PORT
@@ -174,7 +180,7 @@ spec:
             claimName: {{ $fullname }}-state
         - name: admin-source
           secret:
-            secretName: {{ .Values.server.admin.existingSecret }}
+            secretName: {{ include "ecflow-chart.adminSecretName" . }}
         - name: admin
           emptyDir: {}
         {{- if .Values.sftp.enabled }}

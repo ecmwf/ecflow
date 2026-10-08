@@ -119,12 +119,41 @@ users: []
 # The ecFlow server.
 server:
   port: 8888
-  # The administrator's files, expanded into /admin by the init container: an existing
-  # Secret whose keys are the file paths relative to /admin, with "__" in place of "/"
-  # (the layout `imachination.py provision --role admin` writes). Rendering the files
-  # from values replaces this in a later step.
+  # The administrator's files, expanded into /admin by the init container. The chart
+  # renders them into a Secret of the release: server_environment.cfg from
+  # `environment` below, and every entry of `files` (a path relative to /admin, and
+  # its content; `troikaw` and `*.sh` are made executable). An existing Secret, whose
+  # keys are the paths with "__" in place of "/", replaces the rendered one when named.
   admin:
-    existingSecret: ecflow-admin
+    existingSecret: ""
+    files: {}
+    #  troikaw: |
+    #    #!/bin/sh
+    #    exec troika "$@"
+  # The settings of server_environment.cfg, which the server reads from /admin at
+  # start: one `NAME = VALUE` line each, without quotes around the value. Settings the
+  # launch script of the image exports (ECF_PORT, ECF_HOME) are not set here. Names
+  # prefixed with <host>.<port>. by the server: ECF_CHECK, ECF_CHECKOLD, ECF_LOG,
+  # ECF_LISTS, ECF_PASSWD, ECF_CUSTOM_PASSWD.
+  environment:
+    ECF_CHECK: ecf.check
+    ECF_CHECKOLD: ecf.check.b
+    ECF_CHECKINTERVAL: 120
+    ECF_CHECKMODE: CHECK_ON_TIME
+    ECF_LOG: ecf.log
+    ECF_INTERVAL: 60
+    ECF_JOB_CMD: "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1"
+    ECF_KILL_CMD: "kill -15 %ECF_RID%"
+    ECF_STATUS_CMD: "ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1"
+    ECF_CHECK_CMD: "ps --pid %ECF_RID% -f"
+    ECF_URL_CMD: "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%"
+    ECF_URL_BASE: https://confluence.ecmwf.int
+    ECF_URL: display/ECFLOW/ecflow+home
+    ECF_MICRODEF: "%"
+    ECF_LISTS: ecf.lists
+    ECF_PASSWD: ecf.passwd
+    ECF_CUSTOM_PASSWD: ecf.custom_passwd
+    ECF_TASK_THRESHOLD: 4000
   # Delay and period of the readiness probe, which pings the server with ecflow_client.
   readinessProbe:
     initialDelaySeconds: 10

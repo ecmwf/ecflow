@@ -94,3 +94,8 @@ when set, the repository, and the digest or the tag. Called with a dict:
 {{- define "ecflow-chart.sftpSecretName" -}}
 {{- .Values.sftp.existingSecret | default (printf "%s-sftp-keys" (include "ecflow-chart.fullname" .)) -}}
 {{- end }}
+
+{{/* The name of the Secret that holds the administrator's files. */}}
+{{- define "ecflow-chart.adminSecretName" -}}
+{{- .Values.server.admin.existingSecret | default (printf "%s-admin" (include "ecflow-chart.fullname" .)) -}}
+{{- end }}
