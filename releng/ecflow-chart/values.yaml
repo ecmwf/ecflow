@@ -202,6 +202,15 @@ sftp:
   service:
     type: ClusterIP
     nodePort: ""
+  # Publication of the SFTP port outside the cluster through the NGINX Inc controller
+  # (global.ingress.controller: nginx-inc only): a TransportServer of the namespace,
+  # passing the TCP listener named below to the SFTP Service. The listener is declared
+  # in the GlobalConfiguration of the controller by the platform team, which also
+  # decides the port it opens; ask them for its name. Reachable on the ECMWF LAN.
+  transportServer:
+    enabled: false
+    listener: ecflow-sftp
+    annotations: {}
 
 # The reverse proxy (nginx) in front of the server: every request to /v1/ecflow is
 # authenticated with auth-o-tron (auth_request) before it is forwarded. HTTPS only.
