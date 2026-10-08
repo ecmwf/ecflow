@@ -237,6 +237,7 @@ public:
     ///
     /// @brief Informs the Aviso attributes of a state change of their node.
     ///
+    /// When the node becomes queued (e.g. forced by the Force command), the attributes are started (see start()).
     /// When the node leaves the queued state, the notification held by each attribute is consumed (see commit()).
     /// When the new state is a Task "terminal" state (i.e. complete, aborted, unknown), the attributes are finished,
     /// stopping the background notifications.

@@ -389,11 +389,16 @@ void AvisoAttr::commit() const {
 }
 
 void AvisoAttr::state_changed(const std::vector<AvisoAttr>& avisos, NState::State state) {
-    // The node leaves the queued state: the notification that released it is consumed
-    if (state != NState::QUEUED) {
+    // The node is queued again (e.g. forced): the attributes watch again
+    if (state == NState::QUEUED) {
         for (const auto& aviso : avisos) {
-            aviso.commit();
+            aviso.start();
         }
+        return;
+    }
+    // The node leaves the queued state: the notification that released it is consumed
+    for (const auto& aviso : avisos) {
+        aviso.commit();
     }
     if (NState::is_any_of<NState::ABORTED, NState::COMPLETE, NState::UNKNOWN>(state)) {
         finish(avisos);

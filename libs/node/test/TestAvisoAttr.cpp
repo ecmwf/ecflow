@@ -607,6 +607,37 @@ BOOST_AUTO_TEST_CASE(change_clears_error_of_replaced_attribute_when_node_is_not_
     BOOST_CHECK_EQUAL(backend.state->subscriptions, 0);
 }
 
+BOOST_AUTO_TEST_CASE(forcing_a_finished_task_queued_starts_the_aviso_again) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // The task completes (e.g. after a release), which finishes the attribute
+    backend.state->pending.emplace_back(notification(1));
+    BOOST_REQUIRE(t->avisos()[0].isFree());
+    t->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 1u);
+
+    // i.e. `ecflow_client --force=queued /s/t`: the attribute watches again, after the consumed notification
+    t->set_state(NState::QUEUED, true);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), 1u);
+
+    BOOST_CHECK(!t->avisos()[0].isFree());
+    backend.state->pending.emplace_back(notification(2));
+    BOOST_CHECK(t->avisos()[0].isFree());
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso) {
     ECF_NAME_THIS_TEST();
 
