@@ -23,6 +23,15 @@ method per command, as the Python module does.
 ecflow = "5.19"
 ```
 
+To track development instead, depend on the repository. The build then uses
+the checked-out ecFlow sources rather than the release matching the crate
+version:
+
+```toml
+[dependencies]
+ecflow = { git = "https://github.com/ecmwf/ecflow", branch = "develop" }
+```
+
 Building requires CMake, a C++17 compiler, Git and Boost 1.66 or newer with its
 development headers. OpenSSL is needed for the default `ssl` feature. ecbuild
 is cloned during the build unless `ECBUILD_DIR` points at a checkout.

@@ -9,6 +9,24 @@ Safe Rust client for ECMWF's [ecFlow](https://github.com/ecmwf/ecflow)
 workflow manager, wrapping the C++ `ClientInvoker` through
 [`ecflow-sys`](https://crates.io/crates/ecflow-sys).
 
+## Installation
+
+```toml
+[dependencies]
+ecflow = "5.19"
+```
+
+To track development instead, depend on the repository. The build then uses
+the checked-out ecFlow sources rather than the release matching the crate
+version:
+
+```toml
+[dependencies]
+ecflow = { git = "https://github.com/ecmwf/ecflow", branch = "develop" }
+```
+
+## Usage
+
 ```rust
 use ecflow::Client;
 
