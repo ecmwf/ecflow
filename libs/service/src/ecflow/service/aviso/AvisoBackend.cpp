@@ -161,9 +161,9 @@ void wake_server() {
 ///
 /// @brief The state of one backend, shared with the library threads and the retry timer.
 ///
-/// Two mutexes are used: `responses_mutex_` protects the collected responses, and is the only one taken by the
-/// library threads; `watch_mutex_` serialises the creation and destruction of the watch, which waits for the library
-/// threads to finish.
+/// Two mutexes are used: `responses_mutex_` protects the collected responses, and is taken by the library threads
+/// (which also take the mutex of the retry timer, to schedule a retry); `watch_mutex_` serialises the creation and
+/// destruction of the watch, which waits for the library threads to finish.
 ///
 struct AvisoBackend::Impl : public std::enable_shared_from_this<AvisoBackend::Impl>
 {

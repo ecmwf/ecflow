@@ -30,7 +30,7 @@ public:
     ///
     /// @brief Starts collecting the notifications described by the given request.
     ///
-    /// @param request The fully resolved subscription request.
+    /// @param[in] request The fully resolved subscription request.
     ///
     virtual void subscribe(const AvisoSubscribe& request) = 0;
 
@@ -50,7 +50,7 @@ using AvisoBackendFactory = std::function<std::unique_ptr<BaseAvisoBackend>()>;
 ///
 /// @brief Registers the factory used to create the backend of every Aviso attribute.
 ///
-/// @param factory The factory; an empty factory unregisters the current one.
+/// @param[in] factory The factory; an empty factory unregisters the current one.
 ///
 void register_backend(AvisoBackendFactory factory);
 

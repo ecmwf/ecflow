@@ -16,9 +16,9 @@ namespace ecf::service::aviso {
 ///
 /// The backend holds one client and one watch. Notifications and errors are collected by the library threads and
 /// handed over by drain(). The library reconnects by itself after routine interruptions (e.g. the server closing the
-/// stream at the end of its connection lifetime); when the watch ends nevertheless (i.e. after an error the library
-/// does not recover from), a dedicated timer re-creates it after the retry delay, resuming after the last notification
-/// received (or, for the first watch, after the revision given by subscribe()).
+/// stream at the end of its connection lifetime); when the watch ends nevertheless, with or without an error, a
+/// dedicated timer re-creates it after the retry delay, resuming after the last notification received, or else
+/// after the revision given by subscribe(), or else from the time the first watch was opened.
 ///
 /// This backend is only available in executables linked with the aviso-client library (e.g. the server).
 ///

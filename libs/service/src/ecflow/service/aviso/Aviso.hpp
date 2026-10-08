@@ -31,11 +31,11 @@ public:
     ///
     /// @brief Creates a subscription request.
     ///
-    /// @param path     Unique identifier of the Aviso attribute (the node path, followed by the attribute name).
-    /// @param listener Listener configuration, as JSON (event and request).
-    /// @param url      Address of the Aviso server.
-    /// @param revision Last notification already processed; 0 means that only new notifications are requested.
-    /// @param auth     Path to the credentials file.
+    /// @param[in] path     Unique identifier of the Aviso attribute (the node path, followed by the attribute name).
+    /// @param[in] listener Listener configuration, as JSON (event and request).
+    /// @param[in] url      Address of the Aviso server.
+    /// @param[in] revision Last notification already processed; 0 means that only new notifications are requested.
+    /// @param[in] auth     Path to the credentials file.
     ///
     AvisoSubscribe(std::string_view path,
                    std::string_view listener,
@@ -85,10 +85,10 @@ public:
     ///
     /// @brief Creates a notification.
     ///
-    /// @param event_type      Event type of the notification (e.g. mars).
-    /// @param sequence        Sequence number of the notification, strictly increasing within its event type.
-    /// @param identifier_json Identifier of the notification, as JSON.
-    /// @param payload_json    Payload of the notification, as JSON.
+    /// @param[in] event_type      Event type of the notification (e.g. mars).
+    /// @param[in] sequence        Sequence number of the notification, strictly increasing within its event type.
+    /// @param[in] identifier_json Identifier of the notification, as JSON.
+    /// @param[in] payload_json    Payload of the notification, as JSON.
     ///
     AvisoNotification(std::string_view event_type,
                       std::uint64_t sequence,
@@ -134,7 +134,7 @@ public:
     ///
     /// @brief Creates an error.
     ///
-    /// @param reason User-facing description of the error.
+    /// @param[in] reason User-facing description of the error.
     ///
     explicit AvisoError(std::string_view reason)
         : reason_{reason} {}
@@ -206,7 +206,7 @@ struct Listener
 /// The listener is a JSON object, with the mandatory string `event` and the optional object `request`. Each entry
 /// of the request becomes a filter constraint: scalars are used as they are, and arrays become `{"in": [...]}`.
 ///
-/// @param listener The listener, as JSON, without the surrounding single quotes.
+/// @param[in] listener The listener, as JSON, without the surrounding single quotes.
 /// @return The watch configuration.
 /// @throws std::runtime_error if the listener is not valid.
 ///
@@ -241,7 +241,7 @@ using Auth = std::variant<BasicAuth, BearerAuth>;
 /// file, `$HOME/.ecmwfapirc`), whose key is used as a bearer token while the email is ignored, or `username` and
 /// `password` (HTTP Basic authentication); the key is preferred when both are present.
 ///
-/// @param path The path to the credentials file, as given by the attribute option --auth.
+/// @param[in] path The path to the credentials file, as given by the attribute option --auth.
 /// @return The credentials.
 /// @throws std::runtime_error if no path is given, the file cannot be loaded, or holds no usable credentials.
 ///
@@ -253,10 +253,10 @@ Auth load_auth(const std::string& path);
 /// The description names the incompatibility with Aviso v1, since an error is also what a v1 server causes. Single
 /// quotes are replaced by back quotes, and line breaks by spaces, as the reason is stored within single quotes.
 ///
-/// @param kind        The kind of error (e.g. transport, http).
-/// @param http_status The HTTP status, or 0 when not applicable.
-/// @param message     The error message.
-/// @param request_id  The identifier of the failed request, when known.
+/// @param[in] kind        The kind of error (e.g. transport, http).
+/// @param[in] http_status The HTTP status, or 0 when not applicable.
+/// @param[in] message     The error message.
+/// @param[in] request_id  The identifier of the failed request, when known.
 /// @return The description.
 ///
 std::string describe_error(std::string_view kind,
