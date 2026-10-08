@@ -102,3 +102,85 @@ sftp -P 2222 -o IdentitiesOnly=yes -i <key> <user>@localhost   # lands in /works
 ```
 
 To remove everything: `kind delete cluster --name ecflow`.
+
+## The test deployment on webapps-test
+
+The profile `examples/values-webapps-test.yaml` deploys the chart in the namespace
+`ecflow-multitenant-test` of the ECMWF cluster webapps-test, published on
+`ecflow-mt-test.ecmwf.int` through the NGINX Inc controller, with a certificate from
+cert-manager and a name visible on the ECMWF LAN only. The cluster is reached through
+Teleport (`tsh`); the images are pulled from `eccr.ecmwf.int` by the cluster itself.
+Run the steps from this directory.
+
+```bash
+# 0. Session and context (the proxy keeps running in a terminal of its own)
+tsh login --proxy=jump-test-18.ecmwf.int --user=$(whoami)
+tsh kube login webapps-test
+tsh proxy kube webapps-test          # prints the KUBECONFIG to export
+export KUBECONFIG=<path printed by tsh proxy kube>
+N=ecflow-multitenant-test
+kubectl get all,secret,configmap,pvc,ingress,networkpolicy -n $N
+
+# 1. The controller of the cluster, for the NetworkPolicy of the reverse proxy: its
+#    namespace and Pod labels must match networkPolicy.ingressController.nginx-inc
+#    (override them with --set below when they differ).
+kubectl get ingressclass
+kubectl get pods -A --show-labels | grep -i 'nginx-ingress\|ingress-nginx'
+
+# 2. The users file (not committed): the SSH public key of each SFTP account
+KEY=~/.ssh/id_ed25519                # the key pair of the deployer
+cat > users.yaml <<EOF
+users:
+  - name: $(whoami)
+    sshAuthorizedKeys:
+      - $(cat $KEY.pub)
+EOF
+
+# 3. Render, dry run, deploy
+helm dependency update
+helm template ecflow . -n $N -f examples/values-webapps-test.yaml -f users.yaml | less
+helm install ecflow . -n $N -f examples/values-webapps-test.yaml -f users.yaml --dry-run
+helm upgrade --install ecflow . -n $N -f examples/values-webapps-test.yaml -f users.yaml
+sleep 30; kubectl -n $N get pods      # not `rollout status`: see the note on watches below
+kubectl -n $N get pods,svc,pvc,ingress,networkpolicy
+kubectl -n $N get certificate                     # Ready once cert-manager issued it
+kubectl -n $N describe ingress ecflow-revproxy    # events of the controller and of the DNS operator
+```
+
+The checks, from the ECMWF LAN. The name resolves there only; the certificate is a
+real one, so no `-k`:
+
+```bash
+dig +short ecflow-mt-test.ecmwf.int
+curl -s -o /dev/null -w '%{http_code}\n' https://ecflow-mt-test.ecmwf.int/               # 200
+curl -s -o /dev/null -w '%{http_code}\n' https://ecflow-mt-test.ecmwf.int/v1/ecflow      # 401
+
+cat > ecflowapirc <<'EOT'
+{ "version": 1, "tokens": [ { "type": "basic", "server": "https://ecflow-mt-test.ecmwf.int:443",
+    "api": { "username": "admin", "password": "somesecret#admin" } } ] }
+EOT
+ECF_AUTHTOKENS=$PWD/ecflowapirc ecflow_client --https --host ecflow-mt-test.ecmwf.int --port 443 --ping
+
+# The four checks of `helm test`, run as a plain Pod (see the note on watches below)
+helm template ecflow . -n $N -f examples/values-webapps-test.yaml -f users.yaml \
+    --show-only templates/tests/auth-test.yaml | kubectl -n $N apply -f -
+sleep 20; kubectl -n $N get pod ecflow-test-auth; kubectl -n $N logs ecflow-test-auth
+kubectl -n $N delete pod ecflow-test-auth
+
+kubectl -n $N port-forward svc/ecflow-sftp 18022:22 &   # SFTP, until the TransportServer is enabled
+sftp -P 18022 -o IdentitiesOnly=yes -i $KEY $(whoami)@localhost
+kill %1
+```
+
+While the DNS record of the name has not reached the local resolver, the `curl` checks
+work with `--resolve ecflow-mt-test.ecmwf.int:443:<address of the Ingress>`, which keeps
+the server name and the `Host` header.
+
+Through `tsh proxy kube`, the watch stream of the API delivers no events, so every
+command that waits on a watch fails after its timeout although the cluster did the work:
+`kubectl rollout status`, `kubectl wait`, `kubectl run -i --rm`, and `helm test`, which
+then deletes its Pod. Use a pause followed by `kubectl get` instead, and run the test
+Pod by hand as above.
+
+To remove the deployment: `helm uninstall ecflow -n $N`; the PVCs of the workspace and
+the state are kept, and deleted with `kubectl -n $N delete pvc ecflow-workspace ecflow-state`.

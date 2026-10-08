@@ -7,3 +7,8 @@ charts/
 # The repository ignores *.lock for the port-lock files of the tests.
 # But Chart.lock pins the dependencies and must be committed!
 !Chart.lock
+
+# Files of a deployment that must not be committed: the users and their keys, and the
+# credentials of the checks.
+users.yaml
+ecflowapirc
