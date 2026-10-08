@@ -296,3 +296,15 @@ ingress:
   proxyReadTimeout: ""
   # Further annotations, added as they are.
   annotations: {}
+
+# The checks of `helm test`: a Pod of the release, run on demand, that reaches the
+# server through the reverse proxy with ecflow_client, as a client does. It verifies
+# that valid credentials are accepted, that missing and wrong ones are refused, and
+# that the refused requests left no trace in the server log. The credentials are
+# those of a user of auth-o-tron (the test users of `auth-o-tron.config` by default).
+tests:
+  enabled: true
+  user: admin
+  password: "somesecret#admin"
+  # A name that no user has; its refused requests must not appear in the log.
+  intruder: intruder

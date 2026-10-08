@@ -89,6 +89,11 @@ spec:
             {{- toYaml $controller.namespaceSelector | nindent 12 }}
           podSelector:
             {{- toYaml $controller.podSelector | nindent 12 }}
+        # The test Pod of the release reaches the reverse proxy as a client.
+        - podSelector:
+            matchLabels:
+              {{- include "ecflow-chart.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: test
       ports:
         - protocol: TCP
           port: 443

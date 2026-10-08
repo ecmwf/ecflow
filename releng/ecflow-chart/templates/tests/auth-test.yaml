@@ -1,0 +1,79 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The test of the authenticated path, run by `helm test <release>`: a Pod that uses
+ecflow_client of the server image against the reverse proxy Service. It is kept
+after a failure (its log holds the reason) and deleted before the next run.
+*/ -}}
+{{- if and .Values.tests.enabled .Values.revproxy.enabled }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $fullname }}-test-auth
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  restartPolicy: Never
+  enableServiceLinks: false
+  {{- with .Values.global.imagePullSecrets }}
+  imagePullSecrets:
+    {{- range . }}
+    - name: {{ . }}
+    {{- end }}
+  {{- end }}
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+  containers:
+    - name: test
+      image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.server) | quote }}
+      imagePullPolicy: {{ .Values.images.server.pullPolicy }}
+      env:
+        # No ~/.ecflowapirc applies: every run names its credentials file explicitly.
+        - name: HOME
+          value: /tmp
+        - name: ECF_CONNECT_TIMEOUT
+          value: "10"
+      command:
+        - /bin/sh
+        - -eu
+        - -c
+        - |
+          host={{ $fullname }}-revproxy
+          port=443
+          client() { ecflow_client --https --host "$host" --port "$port" "$@"; }
+          tokens() {
+              printf '{"version":1,"tokens":[{"type":"basic","server":"https://%s:%s","api":{"username":"%s","password":"%s"}}]}\n' \
+                  "$host" "$port" "$1" "$2" > "$3"
+          }
+          tokens {{ .Values.tests.user | quote }} {{ .Values.tests.password | quote }} /tmp/valid
+          tokens {{ .Values.tests.intruder | quote }} wrong /tmp/wrong
+          status=0
+
+          echo "1. valid credentials are accepted"
+          if ECF_AUTHTOKENS=/tmp/valid client --ping; then echo "   ok"; else echo "   FAILED"; status=1; fi
+
+          echo "2. a request without credentials is refused"
+          if client --ping 2>/tmp/out; then echo "   FAILED: accepted"; status=1
+          elif grep -q 'Unauthorized (401)' /tmp/out; then echo "   ok (401)"
+          else echo "   FAILED: refused for another reason:"; cat /tmp/out; status=1; fi
+
+          echo "3. a request with a wrong password is refused"
+          if ECF_AUTHTOKENS=/tmp/wrong client --ping 2>/tmp/out; then echo "   FAILED: accepted"; status=1
+          elif grep -q 'Unauthorized (401)' /tmp/out; then echo "   ok (401)"
+          else echo "   FAILED: refused for another reason:"; cat /tmp/out; status=1; fi
+
+          echo "4. the refused requests left no trace in the server log"
+          if ECF_AUTHTOKENS=/tmp/valid client --log=get 500 | grep -q {{ .Values.tests.intruder | quote }}; then
+              echo "   FAILED: the log names {{ .Values.tests.intruder }}"; status=1
+          else echo "   ok"; fi
+
+          exit $status
+{{- end }}
