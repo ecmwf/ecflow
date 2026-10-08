@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The test deployment on the ECMWF cluster webapps-test, namespace
+# ecflow-multitenant-test, published through the NGINX Inc controller as agreed with
+# the platform support (SD-130891): a LAN-only name, a certificate from
+# cert-manager, and the SFTP port through a TransportServer once its listener is
+# known. The images are pulled from eccr.ecmwf.int.
+#
+#   helm upgrade --install ecflow . -n ecflow-multitenant-test -f examples/values-webapps-test.yaml
+
+global:
+  ingress:
+    controller: nginx-inc
+
+ingress:
+  enabled: true
+  host: ecflow-mt-test.ecmwf.int
+  certManager:
+    clusterIssuer: letsencrypt-production
+  dns:
+    view: lan
+
+sftp:
+  transportServer:
+    # Enable once the platform team names the listener.
+    enabled: false
+    listener: ecflow-sftp
+
+# The accounts of the deployment: the SFTP users with their public keys.
+users: []

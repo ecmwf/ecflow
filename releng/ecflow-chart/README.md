@@ -45,3 +45,12 @@ Install, or upgrade, a release named `ecflow` in a namespace, with a profile:
 ```bash
 helm upgrade --install ecflow . -n <namespace> --create-namespace -f examples/values-<target>.yaml
 ```
+
+| Profile | Target |
+|---|---|
+| `examples/values-kind.yaml` | A local kind cluster with the community ingress-nginx controller. |
+| `examples/values-webapps-test.yaml` | The ECMWF cluster webapps-test, namespace `ecflow-multitenant-test`, NGINX Inc controller. |
+
+The accounts of a deployment are the `users` list of its profile: each user with SSH
+keys gets an SFTP account. The test users of auth-o-tron in `values.yaml` are for test
+deployments only.
