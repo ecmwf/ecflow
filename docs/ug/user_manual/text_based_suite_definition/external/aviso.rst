@@ -225,6 +225,13 @@ double quotes); in a task script, enclose them in single quotes:
 
     payload='%ECF_AVISO_EVENT_DATA_PAYLOAD%'
 
+.. warning::
+
+   The values are substituted in the job as any other variable, and the result is scanned again for variable
+   references. An identifier or a payload holding two or more percent signs (e.g. a URL-encoded location such as
+   :code:`file:///path/with%20space`) is therefore read as a variable reference, and the job generation fails;
+   such notifications cannot be processed through the generated variables.
+
 .. _text_based_def_aviso_errors:
 
 Errors
