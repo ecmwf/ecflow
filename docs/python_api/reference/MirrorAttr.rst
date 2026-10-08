@@ -12,7 +12,7 @@ ecflow.MirrorAttr
 
 A :term:`mirror` attribute, assigned to a :term:`node`, enables establishing an external link and locally replicate the state of a node executing on a remote ecFlow server.
 
-Although :term:`mirror` attributes can be set at any level (Suite, Family, Task), it only makes sense to assign mirror attributes to Tasks, and only one mirror attribute per node is allowed.
+Although :term:`mirror` attributes can be set at any level (Suite, Family, Task), it only makes sense to assign mirror attributes to Tasks, and only one mirror attribute per node is allowed; adding one to a node with an :term:`aviso` raises a RuntimeError.
 
 
 Constructor::

@@ -1210,9 +1210,7 @@ class TestNode:
             "av1",
             '{"event": "mars"}',
             "https://aviso.example.com",
-            "1",
-            "auth_key",
-            "schema",
+            auth="auth_key",
         )
         ret = t.add_aviso(attr)
         assert ret is t

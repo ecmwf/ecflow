@@ -1,623 +1,237 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/Message.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
+
+namespace {
+
+template <typename T>
+std::string to_string(const T& value) {
+    std::ostringstream os;
+    os << value;
+    return os.str();
+}
+
+///
+/// @brief Creates a credentials file with the given content, removed when the returned file is destroyed.
+///
+/// @param[in] content The content of the credentials file (JSON).
+/// @return The credentials file, at a unique location.
+///
+ecf::test::scaffold::File make_auth_file(const std::string& content) {
+    return ecf::test::scaffold::MakeTestFile{}
+        .with(ecf::test::scaffold::AutomaticFileLocation{std::string{"aviso_auth"}})
+        .with(content)
+        .create();
+}
+
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Aviso)
 
 BOOST_AUTO_TEST_SUITE(T_AvisoSubscribe)
 
-BOOST_AUTO_TEST_CASE(can_create_default_aviso_subscribe) {
+BOOST_AUTO_TEST_CASE(can_create_subscribe_request) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    AvisoSubscribe subscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"};
-    BOOST_CHECK_EQUAL(subscribe.path(), "path");
-    BOOST_CHECK_EQUAL(subscribe.listener_cfg(), "listener_cfg");
-    BOOST_CHECK_EQUAL(subscribe.address(), "address");
-    BOOST_CHECK_EQUAL(subscribe.schema(), "schema");
-    BOOST_CHECK_EQUAL(subscribe.polling(), static_cast<uint32_t>(60));
-    BOOST_CHECK_EQUAL(subscribe.revision(), static_cast<uint64_t>(1));
-    BOOST_CHECK_EQUAL(subscribe.auth(), "auth");
+
+    AvisoSubscribe request{"/s/f/t:a", R"({"event": "mars"})", "http://aviso:8000", 42, "/path/to/auth"};
+
+    BOOST_CHECK_EQUAL(request.path(), "/s/f/t:a");
+    BOOST_CHECK_EQUAL(request.listener(), R"({"event": "mars"})");
+    BOOST_CHECK_EQUAL(request.url(), "http://aviso:8000");
+    BOOST_CHECK_EQUAL(request.revision(), 42u);
+    BOOST_CHECK_EQUAL(request.auth(), "/path/to/auth");
 }
 
-BOOST_AUTO_TEST_CASE(can_print_aviso_subscribe) {
+BOOST_AUTO_TEST_CASE(can_print_subscribe_request) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    AvisoSubscribe subscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"};
 
-    std::ostringstream ss;
-    ss << subscribe;
-    BOOST_CHECK(ss.str().find("AvisoSubscribe") != std::string::npos);
-}
+    AvisoSubscribe request{"/s/f/t:a", R"({"event": "mars"})", "http://aviso:8000", 42, "/path/to/auth"};
 
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(T_AvisoUnsubscribe)
-
-BOOST_AUTO_TEST_CASE(can_create_default_aviso_unsubscribe) {
-    using namespace ecf::service::aviso;
-    AvisoUnsubscribe unsubscribe{"path"};
-    BOOST_CHECK_EQUAL(unsubscribe.path(), "path");
-}
-
-BOOST_AUTO_TEST_CASE(can_print_aviso_unsubscribe) {
-    using namespace ecf::service::aviso;
-    AvisoUnsubscribe unsubscribe{"path"};
-
-    std::ostringstream ss;
-    ss << unsubscribe;
-    BOOST_CHECK(ss.str().find("AvisoUnsubscribe") != std::string::npos);
+    BOOST_CHECK_EQUAL(to_string(request),
+                      R"(AvisoSubscribe{path: /s/f/t:a, listener: {"event": "mars"}, url: http://aviso:8000, )"
+                      R"(revision: 42, auth: /path/to/auth})");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(T_AvisoRequest)
+BOOST_AUTO_TEST_SUITE(T_AvisoResponse)
 
-BOOST_AUTO_TEST_CASE(can_create_aviso_request_to_subscribe) {
+BOOST_AUTO_TEST_CASE(can_create_notification) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    AvisoRequest request{AvisoSubscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"}};
-    std::visit([](auto&& arg) { BOOST_CHECK_EQUAL(arg.path(), "path"); }, request);
+
+    AvisoNotification notification{"mars", 7, R"({"step": "6"})", R"({"location": "file:///x"})"};
+
+    BOOST_CHECK_EQUAL(notification.event_type(), "mars");
+    BOOST_CHECK_EQUAL(notification.sequence(), 7u);
+    BOOST_CHECK_EQUAL(notification.identifier_json(), R"({"step": "6"})");
+    BOOST_CHECK_EQUAL(notification.payload_json(), R"({"location": "file:///x"})");
 }
 
-BOOST_AUTO_TEST_CASE(can_create_aviso_request_to_unsubscribe) {
+BOOST_AUTO_TEST_CASE(can_print_responses) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    AvisoRequest request{AvisoUnsubscribe{"path"}};
-    std::visit([](auto&& arg) { BOOST_CHECK_EQUAL(arg.path(), "path"); }, request);
-}
 
-BOOST_AUTO_TEST_CASE(can_print_aviso_request) {
-    using namespace ecf::service::aviso;
-    AvisoRequest request{AvisoSubscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"}};
+    AvisoResponse notification = AvisoNotification{"mars", 7, R"({"step": "6"})", "null"};
+    AvisoResponse error        = AvisoError{"connection refused"};
 
-    std::ostringstream ss;
-    ss << request;
-    BOOST_CHECK(ss.str().find("AvisoRequest") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(T_AvisoNotification)
-
-BOOST_AUTO_TEST_CASE(can_create_parameterised_aviso_notification) {
-    using namespace ecf::service::aviso;
-    AvisoNotification notification{"key", "value", 1};
-    notification.add_parameter("parameter1", "parameter_value1");
-    notification.add_parameter("parameter2", "parameter_value2");
-
-    BOOST_CHECK_EQUAL(notification.key(), "key");
-    BOOST_CHECK_EQUAL(notification.value(), "value");
-    BOOST_CHECK_EQUAL(notification.revision(), static_cast<uint64_t>(1));
-}
-
-BOOST_AUTO_TEST_CASE(can_print_aviso_notification) {
-    using namespace ecf::service::aviso;
-    AvisoNotification notification{"key", "value", 1};
-
-    std::ostringstream ss;
-    ss << notification;
-    BOOST_CHECK(ss.str().find("AvisoNotification") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(T_AvisoError)
-
-BOOST_AUTO_TEST_CASE(can_create_parameterised_aviso_no_match) {
-    using namespace ecf::service::aviso;
-    [[maybe_unused]] AvisoNoMatch no_match;
-}
-
-BOOST_AUTO_TEST_CASE(can_print_aviso_no_match) {
-    using namespace ecf::service::aviso;
-    AvisoNoMatch no_match;
-
-    BOOST_CHECK(MESSAGE(no_match).find("AvisoNoMatch") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_CASE(can_create_parameterised_aviso_error) {
-    using namespace ecf::service::aviso;
-    AvisoError error{"error"};
-    BOOST_CHECK_EQUAL(error.reason(), "error");
-}
-
-BOOST_AUTO_TEST_CASE(can_print_aviso_error) {
-    using namespace ecf::service::aviso;
-    AvisoError error{"error"};
-
-    BOOST_CHECK(MESSAGE(error).find("AvisoError") != std::string::npos);
+    BOOST_CHECK_EQUAL(to_string(notification),
+                      R"(AvisoNotification{event_type: mars, sequence: 7, identifier: {"step": "6"}, payload: null})");
+    BOOST_CHECK_EQUAL(to_string(error), "AvisoError{reason: connection refused}");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(T_AvisoListener)
 
-BOOST_AUTO_TEST_CASE(can_create_default_listener) {
+BOOST_AUTO_TEST_CASE(can_parse_listener_with_event_only) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    Listener listener;
-    BOOST_CHECK_EQUAL(listener.name(), "");
-    BOOST_CHECK_EQUAL(listener.base(), "");
-    BOOST_CHECK_EQUAL(listener.stem(), "");
-    BOOST_CHECK_EQUAL(listener.full(), "/");
+
+    auto listener = parse_listener(R"({ "event": "mars" })");
+
+    BOOST_CHECK_EQUAL(listener.event, "mars");
+    BOOST_CHECK_EQUAL(listener.filter_json, "");
 }
 
-BOOST_AUTO_TEST_CASE(can_create_parameterised_listener) {
+BOOST_AUTO_TEST_CASE(can_translate_listener_request_into_filter) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    Listener listener("name", "/base", "stem");
-    BOOST_CHECK_EQUAL(listener.name(), "name");
-    BOOST_CHECK_EQUAL(listener.base(), "/base");
-    BOOST_CHECK_EQUAL(listener.stem(), "stem");
-    BOOST_CHECK_EQUAL(listener.full(), "/base/stem");
+
+    auto listener = parse_listener(
+        R"({ "event": "mars", "request": { "class": "od", "expver": "0001", "step": [0, 6, 12], "time": 0 } })");
+
+    BOOST_CHECK_EQUAL(listener.event, "mars");
+    BOOST_CHECK_EQUAL(listener.filter_json, R"({"class":"od","expver":"0001","step":{"in":[0,6,12]},"time":0})");
 }
 
-BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener) {
-    using namespace ecf::service::aviso;
-    ConfiguredListener listener("http://unknown:1234", "path", "name", "/base", "stem", 2, 0);
-    BOOST_CHECK_EQUAL(listener.address(), "http://unknown:1234");
-    BOOST_CHECK_EQUAL(listener.path(), "path");
-    BOOST_CHECK_EQUAL(listener.name(), "name");
-    BOOST_CHECK_EQUAL(listener.base(), "/base");
-    BOOST_CHECK_EQUAL(listener.resolved_base(), "/base");
-    BOOST_CHECK_EQUAL(listener.stem(), "stem");
-    BOOST_CHECK_EQUAL(listener.full(), "/base/stem");
-    BOOST_CHECK_EQUAL(listener.polling(), static_cast<uint32_t>(2));
-    BOOST_CHECK_EQUAL(listener.revision(), static_cast<uint64_t>(0));
-}
+BOOST_AUTO_TEST_CASE(cannot_parse_invalid_listener) {
+    ECF_NAME_THIS_TEST();
 
-BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener_with_placeholders) {
-    using namespace ecf::service::aviso;
-    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
-    listener.with_parameter("a", "aaa");
-    listener.with_parameter("b", "bbb");
-    listener.with_parameter("c", "ccc");
-    BOOST_CHECK_EQUAL(listener.address(), "http://unknown:1234");
-    BOOST_CHECK_EQUAL(listener.path(), "path");
-    BOOST_CHECK_EQUAL(listener.name(), "name");
-    BOOST_CHECK_EQUAL(listener.base(), "/{a}");
-    BOOST_CHECK_EQUAL(listener.resolved_base(), "/aaa");
-    BOOST_CHECK_EQUAL(listener.prefix(), "/aaa/");
-    BOOST_CHECK_EQUAL(listener.stem(), "{b}/{c}");
-    BOOST_CHECK_EQUAL(listener.full(), "/{a}/{b}/{c}");
-    BOOST_CHECK_EQUAL(listener.polling(), static_cast<uint32_t>(2));
-    BOOST_CHECK_EQUAL(listener.revision(), static_cast<uint64_t>(0));
-}
-
-BOOST_AUTO_TEST_CASE(can_detect_non_matching_key) {
-    using namespace ecf::service::aviso;
-    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
-    listener.with_parameter("a", "aaa");
-    listener.with_parameter("b", "bbb");
-    listener.with_parameter("c", 0);
-
-    auto match = listener.accepts("non-matching-key", "value", 0);
-    BOOST_CHECK(!match.has_value());
-}
-
-BOOST_AUTO_TEST_CASE(can_detect_matching_key) {
-    using namespace ecf::service::aviso;
-    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}/{d}/{e}", 2, 0);
-    listener.with_parameter("a", "aaa");
-    listener.with_parameter("b", "bbb");
-    listener.with_parameter("c", 0);
-    listener.with_parameter("e", std::vector<std::string>{"valid1", "valid2"});
-
-    {
-        auto match = listener.accepts("/aaa/bbb/0/dontcare/valid1", "value", 1);
-        BOOST_REQUIRE(match.has_value());
-        if (match.has_value()) {
-            auto value = match.value();
-            BOOST_CHECK_EQUAL(value.key(), "/aaa/bbb/0/dontcare/valid1");
-            BOOST_CHECK_EQUAL(value.value(), "value");
-            BOOST_CHECK_EQUAL(value.revision(), static_cast<uint64_t>(1));
-        }
-    }
-    {
-        auto match = listener.accepts("/aaa/bbb/0/dontcare/valid2", "value", 2);
-        BOOST_REQUIRE(match.has_value());
-        if (match.has_value()) {
-            auto value = match.value();
-            BOOST_CHECK_EQUAL(value.key(), "/aaa/bbb/0/dontcare/valid2");
-            BOOST_CHECK_EQUAL(value.value(), "value");
-            BOOST_CHECK_EQUAL(value.revision(), static_cast<uint64_t>(2));
-        }
-    }
-    {
-        auto match = listener.accepts("/aaa/bbb/0/dontcare/invalid", "value", 3);
-        BOOST_CHECK(!match.has_value());
-    }
-}
-
-BOOST_AUTO_TEST_CASE(can_print_configured_listener) {
-    using namespace ecf::service::aviso;
-    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
-    listener.with_parameter("a", "aaa");
-    listener.with_parameter("b", "bbb");
-    listener.with_parameter("c", "ccc");
-
-    BOOST_CHECK(MESSAGE(listener).find("ConfiguredListener") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_CASE(can_make_configured_listener) {
     using namespace ecf::service::aviso;
 
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "event": "dissemination",
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    ConfiguredListener listener =
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision);
-
-    BOOST_CHECK_EQUAL(listener.path(), path);
-    BOOST_CHECK_EQUAL(listener.name(), "dissemination");
-    BOOST_CHECK_EQUAL(listener.address(), address);
-    BOOST_CHECK_EQUAL(listener.base(), "/ec/diss/{destination}");
-    BOOST_CHECK_EQUAL(listener.stem(),
-                      "date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={"
-                      "stream},step={step}");
-    BOOST_CHECK_EQUAL(listener.polling(), static_cast<uint32_t>(60));
-    BOOST_CHECK_EQUAL(listener.revision(), static_cast<uint64_t>(1));
-}
-
-BOOST_AUTO_TEST_CASE(can_update_revision_in_configured_listener) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "event": "dissemination",
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    ConfiguredListener listener =
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision);
-
-    BOOST_CHECK_EQUAL(listener.revision(), static_cast<uint64_t>(1));
-
-    listener.update_revision(2);
-
-    BOOST_CHECK_EQUAL(listener.revision(), static_cast<uint64_t>(2));
-}
-
-BOOST_AUTO_TEST_CASE(can_handle_invalid_listener_configuration_with_invalid_configuration_content) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                INVALID CONTENT
-                "event": "dissemination",
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    BOOST_CHECK_EXCEPTION(
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision),
-        std::runtime_error,
-        [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Failed to parse listener configuration") != std::string::npos;
-        });
-}
-
-BOOST_AUTO_TEST_CASE(can_handle_invalid_listener_configuration_without_event_specification) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    BOOST_CHECK_EXCEPTION(
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision),
-        std::runtime_error,
-        [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Listener configuration does not specify 'event'") != std::string::npos;
-        });
-}
-
-BOOST_AUTO_TEST_CASE(can_handle_invalid_listener_configuration_without_request_specification) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "event": "dissemination"
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    BOOST_CHECK_EXCEPTION(
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision),
-        std::runtime_error,
-        [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Listener configuration does not specify 'request'") != std::string::npos;
-        });
-}
-
-BOOST_AUTO_TEST_CASE(can_handle_invalid_listener_configuration_with_invalid_schema_content) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "event": "dissemination",
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                INVALID CONTENT
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    BOOST_CHECK_EXCEPTION(
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision),
-        std::runtime_error,
-        [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Failed to load listener schema") != std::string::npos;
-        });
-}
-
-BOOST_AUTO_TEST_CASE(can_handle_invalid_listener_configuration_with_invalid_event_kind) {
-    using namespace ecf::service::aviso;
-
-    std::string path           = "/s1/f1/t1";
-    std::string listener_cfg   = R"(
-            {
-                "event": "invalid_kind_event",
-                "request": {
-                    "destination": "COM",
-                    "date": 20000101,
-                    "class": "od",
-                    "expver": ["0001", "0002"],
-                    "step": [0, 12]
-                }
-            }
-        )";
-    std::string address        = "http://server:1234";
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint": [
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                }
-            }
-        )";
-    uint32_t polling           = 60;
-    uint64_t revision          = 1;
-
-    BOOST_CHECK_EXCEPTION(
-        ConfiguredListener::make_configured_listener(path, listener_cfg, address, schema_content, polling, revision),
-        std::runtime_error,
-        [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Listener could not be found in schema") != std::string::npos;
-        });
+    BOOST_CHECK_THROW(parse_listener("not json"), std::runtime_error);
+    BOOST_CHECK_THROW(parse_listener(R"([ "mars" ])"), std::runtime_error);
+    BOOST_CHECK_THROW(parse_listener(R"({ "request": { "class": "od" } })"), std::runtime_error);
+    BOOST_CHECK_THROW(parse_listener(R"({ "event": "" })"), std::runtime_error);
+    BOOST_CHECK_THROW(parse_listener(R"({ "event": 1 })"), std::runtime_error);
+    BOOST_CHECK_THROW(parse_listener(R"({ "event": "mars", "request": [ 1 ] })"), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(T_AvisoSchema)
+BOOST_AUTO_TEST_SUITE(T_AvisoAuth)
 
-BOOST_AUTO_TEST_CASE(can_load_aviso_schema_from_string) {
+BOOST_AUTO_TEST_CASE(can_load_basic_credentials) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    std::string schema_content = R"(
-            {
-                "dissemination": {
-                    "endpoint":[
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                },
-                "mars": {
-                    "endpoint":[
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/mars",
-                            "stem":"date={date},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}"
-                        }
-                    ]
-                }
-            }
-        )";
 
-    ListenerSchema schema = ListenerSchema::load_from_string(schema_content);
-    BOOST_CHECK(schema.get_listener("dissemination").has_value());
-    BOOST_CHECK(schema.get_listener("mars").has_value());
-    BOOST_CHECK(!schema.get_listener("invalid").has_value());
+    auto file = make_auth_file(R"({ "username": "user", "password": "pass" })");
+
+    auto auth = load_auth(file.path().string());
+
+    BOOST_REQUIRE(std::holds_alternative<BasicAuth>(auth));
+    BOOST_CHECK_EQUAL(std::get<BasicAuth>(auth).username, "user");
+    BOOST_CHECK_EQUAL(std::get<BasicAuth>(auth).password, "pass");
 }
 
-BOOST_AUTO_TEST_CASE(can_handle_invalid_schema_content) {
+BOOST_AUTO_TEST_CASE(can_load_ecmwf_api_credentials_as_bearer_token) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf::service::aviso;
-    std::string schema_content = R"(
-            {
-                INVALID CONTENT
-                "dissemination": {
-                    "endpoint":[
-                        {
-                            "engine":[
-                                "etcd_rest"
-                            ],
-                            "base":"/ec/diss/{destination}",
-                            "stem":"date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}",
-                            "admin":"/ec/admin/{date}/{destination}"
-                        }
-                    ]
-                },
 
-            }
-        )";
+    // The content of an ECMWF API credentials file ($HOME/.ecmwfapirc): the key is the token, the email is ignored
+    auto file = make_auth_file(R"({ "url": "https://api.ecmwf.int/v1", "key": "0123456789abcdef", "email": "a@b.c" })");
 
-    BOOST_CHECK_EXCEPTION(
-        ListenerSchema::load_from_string(schema_content), std::runtime_error, [](const std::exception& e) {
-            auto reason = std::string(e.what());
-            return reason.find("Failed to parse listener schema") != std::string::npos;
-        });
+    auto auth = load_auth(file.path().string());
+
+    BOOST_REQUIRE(std::holds_alternative<BearerAuth>(auth));
+    BOOST_CHECK_EQUAL(std::get<BearerAuth>(auth).token, "0123456789abcdef");
+}
+
+BOOST_AUTO_TEST_CASE(prefers_key_over_basic_credentials) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::service::aviso;
+
+    auto file = make_auth_file(R"({ "username": "user", "password": "pass", "email": "a@b.c", "key": "abc" })");
+
+    auto auth = load_auth(file.path().string());
+
+    BOOST_REQUIRE(std::holds_alternative<BearerAuth>(auth));
+    BOOST_CHECK_EQUAL(std::get<BearerAuth>(auth).token, "abc");
+}
+
+BOOST_AUTO_TEST_CASE(cannot_load_missing_or_unusable_credentials) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::service::aviso;
+
+    // No credentials file given
+    BOOST_CHECK_THROW(load_auth(""), std::runtime_error);
+
+    // Credentials file does not exist
+    BOOST_CHECK_THROW(load_auth("/this/file/does/not/exist.json"), std::runtime_error);
+
+    // Neither email and key, nor username and password
+    auto token = make_auth_file(R"({ "token": "abc" })");
+    try {
+        load_auth(token.path().string());
+        BOOST_FAIL("Expected credentials without email and key, or username and password, to be rejected");
+    }
+    catch (const std::runtime_error& e) {
+        BOOST_CHECK(std::string{e.what()}.find("neither user nor key credentials") != std::string::npos);
+    }
+
+    // A key without email is not a valid credentials file
+    auto key_only = make_auth_file(R"({ "key": "abc" })");
+    BOOST_CHECK_THROW(load_auth(key_only.path().string()), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(T_AvisoError)
+
+BOOST_AUTO_TEST_CASE(can_describe_error_naming_aviso_v1) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::service::aviso;
+
+    auto description = describe_error("http", 404, "Not Found", std::string{"abc-123"});
+
+    BOOST_CHECK_EQUAL(description,
+                      "Aviso error (http, HTTP 404): Not Found [request abc-123]; " +
+                          std::string{ecf::service::aviso::unsupported_v1});
+}
+
+BOOST_AUTO_TEST_CASE(can_describe_error_without_quotes_nor_line_breaks) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::service::aviso;
+
+    auto description = describe_error("http", 400, "Field 'step' is invalid\nsee details");
+
+    BOOST_CHECK(description.find('\'') == std::string::npos);
+    BOOST_CHECK(description.find('\n') == std::string::npos);
+    BOOST_CHECK(description.find("Field `step` is invalid see details") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

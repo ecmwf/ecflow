@@ -4,18 +4,31 @@
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
+# The Aviso backend is the only part of ecFlow that uses the Aviso client library,
+# and is therefore compiled into the server only
+set(ECFLOW_SERVER_AVISO_SOURCES "")
+if (ENABLE_AVISO)
+  list(APPEND ECFLOW_SERVER_AVISO_SOURCES
+    ../service/src/ecflow/service/aviso/AvisoBackend.hpp
+    ../service/src/ecflow/service/aviso/AvisoBackend.cpp
+  )
+endif ()
+
 ecflow_add_executable(
   TARGET
     ecflow_server
   SOURCES
     src/ecflow/server/ServerMain.cpp
+    ${ECFLOW_SERVER_AVISO_SOURCES}
   LIBS
     ecflow_all
+    $<$<BOOL:${ENABLE_AVISO}>:aviso::ffi>
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+    $<$<BOOL:${ENABLE_AVISO}>:ECF_AVISO>
   FORMAT
 )
 
@@ -28,6 +41,16 @@ SET_TARGET_PROPERTIES(ecflow_server
   PROPERTIES
     INSTALL_RPATH ""
 )
+
+# The (shared) Aviso client library is not installed with ecFlow, and as an imported target its
+# directory is not added to the install run path automatically; the installed server must
+# therefore find it at run time where it was found at build time
+if (ENABLE_AVISO)
+  SET_TARGET_PROPERTIES(ecflow_server
+    PROPERTIES
+      INSTALL_RPATH "${AVISO_FFI_LIBRARY_DIR}"
+  )
+endif ()
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)

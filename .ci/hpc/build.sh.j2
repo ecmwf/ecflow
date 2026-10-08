@@ -19,6 +19,7 @@ boost_root="{{ boost_root }}"
 {% endblock %}
 {% block cmake_args %}
   -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DENABLE_AVISO=OFF \
   -DBoost_ROOT="$boost_root" \
   -DBoost_INCLUDE_DIR="$boost_root/include" \
   -DPython3_ROOT_DIR={{ python_root }} \

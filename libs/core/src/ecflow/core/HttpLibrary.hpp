@@ -18,7 +18,7 @@
 #if defined(ECF_OPENSSL)
     #include <openssl/ssl.h>
     #if OPENSSL_VERSION_NUMBER < 0x1010100fL
-        #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
+        #warning OpenSSL versions prior to 1.1.1 detected. The HTTP library will be built without OpenSSL support!
     #else
         #define CPPHTTPLIB_OPENSSL_SUPPORT 1
     #endif

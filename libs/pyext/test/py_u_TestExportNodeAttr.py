@@ -14460,15 +14460,14 @@ class TestAvisoAttr:
         AvisoAttr(name, listener)                        -- required fields; optional fields use
                                                             ECF variable defaults
         AvisoAttr(name, listener, url)
-        AvisoAttr(name, listener, url, schema)
-        AvisoAttr(name, listener, url, schema, polling)
-        AvisoAttr(name, listener, url, schema, polling, auth)
+        AvisoAttr(name, listener, url, auth=auth)        -- auth is keyword-only
+        AvisoAttr(name, listener, url, auth=auth, collapse=True)  -- collapse is keyword-only
 
         Default values:
             url     = '%ECF_AVISO_URL%'
-            schema  = '%ECF_AVISO_SCHEMA%'
-            polling = '%ECF_AVISO_POLLING%'
             auth    = '%ECF_AVISO_AUTH%'
+
+        The Aviso v1 parameters (schema, polling) are rejected with TypeError.
 
         Name constraints: alphanumeric and underscore only (no spaces, no dashes);
                           empty name raises RuntimeError.
@@ -14477,12 +14476,11 @@ class TestAvisoAttr:
         name()      -> str   -- attribute name
         listener()  -> str   -- Aviso listener configuration
         url()       -> str   -- URL of the Aviso server
-        schema()    -> str   -- path to the schema file
-        polling()   -> str   -- polling interval
         auth()      -> str   -- path to authentication credentials
+        collapse()  -> bool  -- whether a release consumes all the notifications received
 
     Operators
-        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, schema=S, polling=P, revision=0, auth=A, reason='')'
+        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, revision=0, auth=A, reason='', collapse=false)'
         __copy__  -- copy.copy() returns a value-equal, identity-distinct instance
         __eq__    -- value-based equality (all fields compared)
         __ne__    -- implicit complement of __eq__
@@ -14518,14 +14516,6 @@ class TestAvisoAttr:
         """AvisoAttr(name, listener) uses %ECF_AVISO_URL% as the default url."""
         assert ecf.AvisoAttr("av", "l").url() == "%ECF_AVISO_URL%"
 
-    def test_ctor_two_args_default_schema(self):
-        """AvisoAttr(name, listener) uses %ECF_AVISO_SCHEMA% as the default schema."""
-        assert ecf.AvisoAttr("av", "l").schema() == "%ECF_AVISO_SCHEMA%"
-
-    def test_ctor_two_args_default_polling(self):
-        """AvisoAttr(name, listener) uses %ECF_AVISO_POLLING% as the default polling."""
-        assert ecf.AvisoAttr("av", "l").polling() == "%ECF_AVISO_POLLING%"
-
     def test_ctor_two_args_default_auth(self):
         """AvisoAttr(name, listener) uses %ECF_AVISO_AUTH% as the default auth."""
         assert ecf.AvisoAttr("av", "l").auth() == "%ECF_AVISO_AUTH%"
@@ -14541,63 +14531,67 @@ class TestAvisoAttr:
             == "http://aviso.example.com"
         )
 
-    def test_ctor_three_args_schema_still_default(self):
-        """Providing url only still leaves schema at its default."""
-        assert ecf.AvisoAttr("av", "l", "http://url").schema() == "%ECF_AVISO_SCHEMA%"
+    def test_ctor_three_args_auth_still_default(self):
+        """Providing url only still leaves auth at its default."""
+        assert ecf.AvisoAttr("av", "l", "http://url").auth() == "%ECF_AVISO_AUTH%"
 
     # ------------------------------------------------------------------
-    # Constructor: AvisoAttr(name, listener, url, schema)
+    # Constructor: AvisoAttr(name, listener, url, auth=auth)
     # ------------------------------------------------------------------
 
-    def test_ctor_four_args_stores_schema(self):
-        """AvisoAttr(name, listener, url, schema) stores the schema."""
-        assert (
-            ecf.AvisoAttr("av", "l", "http://url", "/path/to/schema").schema()
-            == "/path/to/schema"
-        )
+    def test_ctor_auth_keyword_stores_auth(self):
+        """AvisoAttr(name, listener, url, auth=auth) stores the auth path."""
+        assert ecf.AvisoAttr("av", "l", "http://url", auth="/auth").auth() == "/auth"
 
-    def test_ctor_four_args_polling_still_default(self):
-        """Providing schema still leaves polling at its default."""
-        assert (
-            ecf.AvisoAttr("av", "l", "http://url", "/schema").polling()
-            == "%ECF_AVISO_POLLING%"
-        )
-
-    # ------------------------------------------------------------------
-    # Constructor: AvisoAttr(name, listener, url, schema, polling)
-    # ------------------------------------------------------------------
-
-    def test_ctor_five_args_stores_polling(self):
-        """AvisoAttr(name, listener, url, schema, polling) stores the polling."""
-        assert ecf.AvisoAttr("av", "l", "http://url", "/schema", "60").polling() == "60"
-
-    def test_ctor_five_args_auth_still_default(self):
-        """Providing polling still leaves auth at its default."""
-        assert (
-            ecf.AvisoAttr("av", "l", "http://url", "/schema", "60").auth()
-            == "%ECF_AVISO_AUTH%"
-        )
-
-    # ------------------------------------------------------------------
-    # Constructor: AvisoAttr(name, listener, url, schema, polling, auth)
-    # ------------------------------------------------------------------
-
-    def test_ctor_six_args_stores_auth(self):
-        """AvisoAttr with all six args stores the auth path."""
-        assert (
-            ecf.AvisoAttr("av", "l", "http://url", "/schema", "60", "/auth").auth()
-            == "/auth"
-        )
-
-    def test_ctor_six_args_all_fields(self):
-        """AvisoAttr with all six args stores all fields correctly."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/s", "120", "/a")
+    def test_ctor_all_fields(self):
+        """AvisoAttr with all arguments stores all fields correctly."""
+        a = ecf.AvisoAttr("av", "l", "http://u", auth="/a")
         assert a.name() == "av"
         assert a.listener() == "'l'"  # listener() wraps the value in single quotes
         assert a.url() == "http://u"
-        assert a.schema() == "/s"
-        assert a.polling() == "120"
         assert a.auth() == "/a"
+
+    def test_ctor_collapse_defaults_to_false(self):
+        """AvisoAttr consumes exactly one notification per release by default."""
+        assert ecf.AvisoAttr("av", "l").collapse() is False
+
+    def test_ctor_collapse_keyword_stores_collapse(self):
+        """AvisoAttr(name, listener, collapse=True) stores the collapse option."""
+        assert ecf.AvisoAttr("av", "l", collapse=True).collapse() is True
+
+    def test_eq_different_collapse(self):
+        """Different collapse makes attributes not equal."""
+        assert ecf.AvisoAttr("av", "l", collapse=True) != ecf.AvisoAttr("av", "l")
+
+    def test_ctor_auth_positional_raises(self):
+        """auth cannot be given by position, so that an Aviso v1 schema is never taken as auth."""
+        with pytest.raises(TypeError):
+            ecf.AvisoAttr("av", "l", "http://url", "/auth")
+
+    # ------------------------------------------------------------------
+    # Constructor: Aviso v1 parameters
+    # ------------------------------------------------------------------
+
+    def test_ctor_schema_keyword_raises(self):
+        """The Aviso v1 parameter schema is rejected."""
+        with pytest.raises(TypeError):
+            ecf.AvisoAttr("av", "l", "http://url", schema="/schema")
+
+    def test_ctor_polling_keyword_raises(self):
+        """The Aviso v1 parameter polling is rejected."""
+        with pytest.raises(TypeError):
+            ecf.AvisoAttr("av", "l", "http://url", polling="60")
+
+    def test_ctor_six_positional_args_raises(self):
+        """The Aviso v1 positional form (name, listener, url, schema, polling, auth) is rejected."""
+        with pytest.raises(TypeError):
+            ecf.AvisoAttr("av", "l", "http://url", "/schema", "60", "/auth")
+
+    def test_no_schema_nor_polling_accessors(self):
+        """The Aviso v1 accessors schema() and polling() are not available."""
+        a = ecf.AvisoAttr("av", "l")
+        assert not hasattr(a, "schema")
+        assert not hasattr(a, "polling")
 
     # ------------------------------------------------------------------
     # Name validation
@@ -14660,19 +14654,9 @@ class TestAvisoAttr:
         a = ecf.AvisoAttr("av", "l", "http://example.com")
         assert "url=http://example.com" in str(a)
 
-    def test_str_contains_schema(self):
-        """str() includes the schema."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/myschema")
-        assert "schema=/myschema" in str(a)
-
-    def test_str_contains_polling(self):
-        """str() includes the polling interval."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/s", "60")
-        assert "polling=60" in str(a)
-
     def test_str_contains_auth(self):
         """str() includes the auth path."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/s", "60", "/myauth")
+        a = ecf.AvisoAttr("av", "l", "http://u", auth="/myauth")
         assert "auth=/myauth" in str(a)
 
     def test_str_full_format(self):
@@ -14680,9 +14664,8 @@ class TestAvisoAttr:
         a = ecf.AvisoAttr("av", '{"event":"x"}')
         expected = (
             'AvisoAttr(name=av, listener=\'{"event":"x"}\', '
-            "url=%ECF_AVISO_URL%, schema=%ECF_AVISO_SCHEMA%, "
-            "polling=%ECF_AVISO_POLLING%, revision=0, "
-            "auth=%ECF_AVISO_AUTH%, reason='')"
+            "url=%ECF_AVISO_URL%, revision=0, "
+            "auth=%ECF_AVISO_AUTH%, reason='', collapse=false)"
         )
         assert str(a) == expected
 
@@ -14715,23 +14698,11 @@ class TestAvisoAttr:
             "av", "l", "http://url2"
         )
 
-    def test_eq_different_schema(self):
-        """Different schema makes attributes not equal."""
-        assert ecf.AvisoAttr("av", "l", "http://u", "/schema1") != ecf.AvisoAttr(
-            "av", "l", "http://u", "/schema2"
-        )
-
-    def test_eq_different_polling(self):
-        """Different polling makes attributes not equal."""
-        assert ecf.AvisoAttr("av", "l", "http://u", "/s", "60") != ecf.AvisoAttr(
-            "av", "l", "http://u", "/s", "120"
-        )
-
     def test_eq_different_auth(self):
         """Different auth makes attributes not equal."""
-        assert ecf.AvisoAttr(
-            "av", "l", "http://u", "/s", "60", "/auth1"
-        ) != ecf.AvisoAttr("av", "l", "http://u", "/s", "60", "/auth2")
+        assert ecf.AvisoAttr("av", "l", "http://u", auth="/auth1") != ecf.AvisoAttr(
+            "av", "l", "http://u", auth="/auth2"
+        )
 
     def test_ne_different_values(self):
         """__ne__ returns True for different attributes."""
@@ -14800,18 +14771,16 @@ class TestAvisoAttr:
 
     def test_copy_preserves_str(self):
         """copy.copy(AvisoAttr) preserves str()."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/s", "60", "/auth")
+        a = ecf.AvisoAttr("av", "l", "http://u", auth="/auth")
         assert str(copy.copy(a)) == str(a)
 
     def test_copy_preserves_all_fields(self):
         """copy.copy(AvisoAttr) preserves every accessor."""
-        a = ecf.AvisoAttr("av", "l", "http://u", "/s", "60", "/auth")
+        a = ecf.AvisoAttr("av", "l", "http://u", auth="/auth")
         c = copy.copy(a)
         assert c.name() == a.name()
         assert c.listener() == a.listener()
         assert c.url() == a.url()
-        assert c.schema() == a.schema()
-        assert c.polling() == a.polling()
         assert c.auth() == a.auth()
 
 

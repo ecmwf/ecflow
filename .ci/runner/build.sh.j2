@@ -6,5 +6,6 @@
 {% block cmake_args %}
   -DENABLE_CONFIG_MODE_BOOST=OFF \
   -DENABLE_STATIC_BOOST_LIBS=OFF \
+  -DENABLE_AVISO=OFF \
   -DBOOST_ROOT={{ (leg.get("boost-root") or "/usr") | sh }} \
 {% endblock %}

@@ -1930,6 +1930,42 @@ BOOST_AUTO_TEST_CASE(test_autorestore, *boost::unit_test::depends_on("S_Http/T_A
     });
 }
 
+// AVISO
+
+BOOST_AUTO_TEST_CASE(test_aviso, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
+    ECF_NAME_THIS_TEST();
+
+    // An Aviso attribute is only allowed on a task
+    handle_response(request(
+        "put", "/v1/suites/test/definition", R"({"definition": "family aviso\n  task t\nendfamily"})", API_KEY));
+    wait_until([] { return check_for_path("/v1/suites/test/aviso/t/definition"); });
+
+    handle_response(request("post",
+                            "/v1/suites/test/aviso/t/attributes",
+                            R"({"type":"aviso","name":"A","value":"--listener '{ \"event\": \"mars\" }'"})",
+                            API_KEY),
+                    HttpStatusCode::success_created);
+    wait_until([] {
+        return check_for_element(
+            "/v1/suites/test/aviso/t/attributes?filter=avisos", "listener", "A", R"('{ "event": "mars" }')");
+    });
+
+    // The update names the attribute, and replaces its configuration
+    handle_response(request("put",
+                            "/v1/suites/test/aviso/t/attributes",
+                            R"({"type":"aviso","name":"A","value":"--listener '{ \"event\": \"dissemination\" }'"})",
+                            API_KEY));
+    wait_until([] {
+        return check_for_element(
+            "/v1/suites/test/aviso/t/attributes?filter=avisos", "listener", "A", R"('{ "event": "dissemination" }')");
+    });
+
+    handle_response(request("delete", "/v1/suites/test/aviso/t/attributes", R"({"type":"aviso","name":"A"})", API_KEY),
+                    HttpStatusCode::success_no_content);
+    wait_until(
+        [] { return false == check_for_element("/v1/suites/test/aviso/t/attributes?filter=avisos", "name", "", "A"); });
+}
+
 // OUTPUT
 
 BOOST_AUTO_TEST_CASE(test_output, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {

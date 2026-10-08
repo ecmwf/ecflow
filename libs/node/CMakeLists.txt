@@ -38,6 +38,7 @@ set(test_srcs
   test/TestNodePathAlgorithms.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
+  test/TestOperations.cpp
   test/TestOrder.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp

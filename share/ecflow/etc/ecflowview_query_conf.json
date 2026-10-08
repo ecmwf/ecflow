@@ -92,14 +92,6 @@
                 "type" : "string",
                 "label" : "Aviso URL"
             },
-            "aviso_schema" : {
-                "type" : "string",
-                "label" : "Aviso schema"
-            },
-            "aviso_polling" : {
-                "type" : "string",
-                "label" : "Aviso polling"
-            },
             "aviso_auth" : {
                 "type" : "string",
                 "label" : "Aviso authentication"

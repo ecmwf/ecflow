@@ -138,7 +138,7 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string& str, bool& isAttr
             "time_name",          "limit_name",         "limit_value",        "limit_max",   "limiter_name",
             "repeat_name",        "repeat_value",       "trigger_expression", "mirror_name", "mirror_remote_path",
             "mirror_remote_host", "mirror_remote_port", "mirror_polling",     "aviso_name",  "aviso_listener",
-            "aviso_url",          "aviso_schema",       "aviso_polling",      "aviso_auth"};
+            "aviso_url",          "aviso_auth"};
         return std::find(searchable.begin(), searchable.end(), str) != searchable.end();
     };
 

@@ -55,6 +55,28 @@ ecbuild_info( "Found Httplib at ${HTTPLIB_INCLUDE_DIRS}" )
 
 
 # =========================================================================================
+# Aviso client (libaviso_ffi)
+# =========================================================================================
+if (ENABLE_AVISO)
+  ecbuild_info( "Locating Aviso client library (libaviso_ffi)" )
+
+  # Keep in step with the minimum version stated in docs/install/build_from_source.rst,
+  # docs/ug/user_manual/text_based_suite_definition/external/aviso.rst and releng/dockit/INSTRUCTIONS.md
+  set(ECFLOW_AVISO_FFI_MINIMUM_VERSION "2.4.2")
+
+  find_package(AvisoFfi ${ECFLOW_AVISO_FFI_MINIMUM_VERSION} REQUIRED)
+
+  ecbuild_info( "Aviso client library details:" )
+  ecbuild_info( " * AVISO_FFI_FOUND        : ${AVISO_FFI_FOUND}" )
+  ecbuild_info( " * AVISO_FFI_VERSION      : ${AVISO_FFI_VERSION}" )
+  ecbuild_info( " * AVISO_FFI_INCLUDE_DIRS : ${AVISO_FFI_INCLUDE_DIRS}" )
+  ecbuild_info( " * AVISO_FFI_LIBRARIES    : ${AVISO_FFI_LIBRARIES}" )
+
+  ecbuild_info( "Found Aviso client library at ${AVISO_FFI_LIBRARY_DIR}" )
+endif ()
+
+
+# =========================================================================================
 # zlib
 # =========================================================================================
 if (ENABLE_HTTP_COMPRESSION)

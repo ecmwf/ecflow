@@ -366,8 +366,7 @@ void to_json(ojson& j, const ecf::AvisoAttr& a) {
     j["name"]     = a.name();
     j["listener"] = a.listener();
     j["url"]      = a.url();
-    j["schema"]   = a.schema();
-    j["polling"]  = a.polling();
+    j["collapse"] = a.collapse();
 }
 
 void to_json(ojson& j, const ecf::MirrorAttr& a) {

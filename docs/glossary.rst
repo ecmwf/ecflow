@@ -49,78 +49,21 @@ Glossary
            - :token:`autocancel`
 
    aviso
-      An aviso is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
-      and creates a dependency on an external Aviso server.
+      An aviso is an attribute of a :term:`Task<task>` (or an alias of a task), and creates a
+      dependency on notifications published by an Aviso server.
 
-      A :term:`Node<node>` with an aviso attribute is held from executing until a
-      notification matching the configured listener is received. When a
-      matching notification is received, the node then allowed to execute
-      following a behaviour similar to :term:`trigger` or time dependency e.g.
-      :term:`cron`).
+      A :term:`Task<task>` with an aviso attribute is held from executing until a
+      notification matching the configured listener is received; each notification
+      releases the task once, following a behaviour similar to a :term:`trigger` or a
+      time dependency (e.g. :term:`cron`).
 
-      `Only one aviso attribute is allowed per node`, and each attribute is
-      defined by the following properties:
+      The options, the listener, the credentials file, the release of the node, the generated
+      variables, the reported errors and the version requirements are described in
+      :ref:`text_based_def_aviso`.
 
-        - :code:`name`, an identifier
-        - :code:`listener`, the configuration for the Aviso listener
-        - :code:`url`, the base location of the Aviso server
-        - :code:`schema`, the location of the Aviso schema used to evaluate the notifications
-        - :code:`polling`, the value (in seconds) used to periodically contact the Aviso server
-        - :code:`auth`, the location to the Aviso authentication credentials file
-
-      .. note::
-
-         The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
-
-      The value of the properties :code:`url`, :code:`schema`, :code:`polling`,
-      and :code:`auth` can be composed of :term:`Variables<variable>`. When
-      these properties are not provided, the following default values are used:
-
-        - :code:`%ECF_AVISO_URL%`, for :code:`url`
-        - :code:`%ECF_AVISO_SCHEMA%`, for :code:`schema`
-        - :code:`%ECF_AVISO_POLLING%`, for :code:`polling`
-        - :code:`%ECF_AVISO_AUTH%`, for :code:`auth`
-
-      .. important::
-
-         The variables :code:`ECF_AVISO_*` are not automatically provided at
-         server level, and must be defined at :term:`Suite<suite>` level by
-         the user.
-
-      Each aviso attribute implies that a background thread is spawned whenever
-      the associated :term:`node` is (re)queued. This independent background thread,
-      responsible for polling the Aviso server and periodically processing the latest notifications,
-      uses the configuration available when the associated task is queued.
-
-      .. note::
-
-        If any variables providing the configuration are updated, the Aviso configuration
-        can be reloaded (without unqueuing the Task) by issuing an Alter change command with
-        the value :code:`reload` to the relevant Aviso attribute.
-
-      The authentication credentials file is expected to be in JSON format, following
-      the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_
-      (this is conventionally stored in a file located at `$HOME/.ecmwfapirc`):
-
-        .. code-block:: json
-
-           {
-             "url" : "https://api.ecmwf.int/v1",
-             "key" : "<your-api-key>",
-             "email" : "<your-email>"
-           }
-
-      Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
-
-      .. important::
-
-         If :code:`%ECF_AVISO_AUTH%` provides a path to a nonexistent file, or if the provided file is
-         not a valid JSON, the credentials will be ignored and the Aviso notification retrieval will eventually fail
-         due to "UNAUTHORIZED" access.
-
-      The Aviso schema file is a JSON file that defines the event listener schema. This is used by both Aviso server
-      and client (thus, by ecFlow) to define the valid event types and request parameters used when polling for
-      notifications. The schema file path must be provided to the `schema` option (or via the `ECF_AVISO_SCHEMA` variable).
+      `Only one aviso attribute is allowed per task`, none on a :term:`suite` or a
+      :term:`family`, and none on a node with a :term:`mirror` attribute. The notification that released the task is made available to the job as
+      generated variables.
 
    check point
       The check point file is like the :term:`suite definition`, but includes all the state information.
@@ -1799,7 +1742,8 @@ Glossary
         (e.g. a suite mirrors a task from another suite living in the same server).
         as this may lead to undesired behaviour, including deadlocks.
 
-      `Only one mirror attribute is allowed per node`, and each attribute is
+      `Only one mirror attribute is allowed per node`, and none on a node with an
+      :term:`aviso` attribute. Each attribute is
       defined by the following options:
 
         - :code:`name`, an identifier

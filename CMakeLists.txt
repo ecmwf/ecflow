@@ -97,6 +97,7 @@ option( ENABLE_PYTHON_PTR_REGISTER "Enable compilers/Boost shared ptr auto regis
 option( ENABLE_HTTP                "Enable Rest API/HTTP server"                         ON )
 option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server"           ON )
 option( ENABLE_UDP                 "Enable UDP server"                                   ON )
+option( ENABLE_AVISO               "Enable Aviso notifications (requires libaviso_ffi)"  ON )
 option( ENABLE_DOCS                "Enable Documentation"                                OFF )
 option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                               OFF )
 
@@ -118,6 +119,12 @@ option( ENABLE_ASIO_SELECT_REACTOR "Use the Boost.Asio 'select' fallback reactor
 # =========================================================================================
 # Sanity check options
 # =========================================================================================
+
+# Aviso notifications are only handled by the server; the library is not needed otherwise
+if(ENABLE_AVISO AND (NOT ENABLE_SERVER))
+  ecbuild_info("ENABLE_AVISO has no effect when the server is not built")
+  set(ENABLE_AVISO OFF)
+endif()
 
 # cannot set ENABLE_UI_BACKTRACE if ENABLE_UI is OFF
 if(ENABLE_UI_BACKTRACE AND (NOT ENABLE_UI))
@@ -186,6 +193,7 @@ ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
+ecbuild_info( "ENABLE_AVISO               : ${ENABLE_AVISO}" )
 ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
 
 

@@ -323,6 +323,24 @@ void Node::addEvent(const Event& e, bool check) {
 }
 
 void Node::addAviso(const AvisoAttr& a) {
+    // A task releases its job once per notification; families and suites have no job, and never consume one
+    if (!isSubmittable()) {
+        throw std::runtime_error(ecf::Message("Unable to add Aviso '",
+                                              a.name(),
+                                              "' to ",
+                                              absNodePath(),
+                                              ". An Aviso attribute is only allowed on a task (or an alias).")
+                                     .str());
+    }
+    // A mirrored node takes its state from the remote node, which a release by a notification would contradict
+    if (!mirrors_.empty()) {
+        throw std::runtime_error(ecf::Message("Unable to add Aviso '",
+                                              a.name(),
+                                              "' to ",
+                                              absNodePath(),
+                                              ". An Aviso attribute is not allowed on a node with a Mirror attribute.")
+                                     .str());
+    }
     if (!avisos_.empty()) {
         throw std::runtime_error(
             ecf::Message("Unable to add Aviso '", a.name(), "'. Only 1 Aviso allowed per node.").str());
@@ -332,6 +350,14 @@ void Node::addAviso(const AvisoAttr& a) {
 }
 
 void Node::addMirror(const MirrorAttr& m) {
+    if (!avisos_.empty()) {
+        throw std::runtime_error(ecf::Message("Unable to add Mirror '",
+                                              m.name(),
+                                              "' to ",
+                                              absNodePath(),
+                                              ". A Mirror attribute is not allowed on a node with an Aviso attribute.")
+                                     .str());
+    }
     if (!mirrors_.empty()) {
         throw std::runtime_error(
             ecf::Message("Unable to add Mirror '", m.name(), "'. Only 1 Mirror allowed per node.").str());

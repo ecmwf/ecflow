@@ -147,6 +147,38 @@ class DefsTraverser:
             self._writeln(str(day))
         for cron in node.crons:
             self._writeln(str(cron))
+        for aviso in node.avisos:
+            listener = aviso.listener()
+            if not listener.startswith("'"):
+                listener = "'" + listener + "'"
+            self._writeln(
+                "aviso --name "
+                + aviso.name()
+                + " --listener "
+                + listener
+                + " --url "
+                + aviso.url()
+                + " --auth "
+                + aviso.auth()
+                + (" --collapse" if aviso.collapse() else "")
+            )
+        for mirror in node.mirrors:
+            self._writeln(
+                "mirror --name "
+                + mirror.name()
+                + " --remote_path "
+                + mirror.remote_path()
+                + " --remote_host "
+                + mirror.remote_host()
+                + " --remote_port "
+                + mirror.remote_port()
+                + " --polling "
+                + mirror.polling()
+                + " --remote_auth "
+                + mirror.auth()
+                + (" --ssl" if mirror.ssl() else "")
+                + (" --propagate" if mirror.propagate() else "")
+            )
         for verify in node.verifies:
             self._writeln(str(verify))
         for zombie in node.zombies:

@@ -1,0 +1,4 @@
+suite aviso
+  task t1
+    aviso --name A --listener '{ "event": "mars", "request": { "class": "od" } }' --url http://localhost:8000 --schema /path/to/event_listener_schema.json
+endsuite

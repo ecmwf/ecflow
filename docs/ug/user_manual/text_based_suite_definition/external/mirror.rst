@@ -10,6 +10,13 @@ This defines a :term:`mirror` attribute, which synchronizes the status of a
 :term:`node` between a local and a remote ecFlow server. The options defining
 the attribute can be provided in any order.
 
+.. important::
+
+   A :term:`mirror` attribute and an :term:`aviso` attribute cannot coexist: a node with a :term:`mirror`
+   attribute takes its state from the remote node, which a release by an Aviso notification would contradict.
+   A :term:`suite definition` or a :term:`check point` holding both on the same node fails to load, and the
+   Alter command and the Python API refuse to add one to a node that has the other.
+
 The :term:`mirror` attribute is defined by the coordinates to the remote :term:`node` to be mirrored, including the
 remote :term:`node` path, the remote host name, the remote port number; and the polling interval in seconds.
 Furthermore, the option :code:`--ssl` enables the use of a Secure connection and the option :code:`--auth` can be used

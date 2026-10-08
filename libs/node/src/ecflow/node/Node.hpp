@@ -532,8 +532,21 @@ public:
     void addDate(const DateAttr&);
     void addDay(const DayAttr&);
     void addCron(const ecf::CronAttr&);
-    void addAviso(const ecf::AvisoAttr&);
-    void addMirror(const ecf::MirrorAttr&);
+    ///
+    /// @brief Adds an Aviso attribute to this node.
+    ///
+    /// @param[in] aviso The attribute to add.
+    /// @throws std::runtime_error if this node is not a task (or an alias), or already has an Aviso or a Mirror
+    ///         attribute.
+    ///
+    void addAviso(const ecf::AvisoAttr& aviso);
+    ///
+    /// @brief Adds a Mirror attribute to this node.
+    ///
+    /// @param[in] mirror The attribute to add.
+    /// @throws std::runtime_error if this node already has a Mirror or an Aviso attribute.
+    ///
+    void addMirror(const ecf::MirrorAttr& mirror);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate
     void addInLimit(const InLimit& l, bool check = true); // will throw std::runtime_error if duplicate
@@ -610,7 +623,6 @@ public:
     void changeMeter(const std::string& name, int value);
     void changeLabel(const std::string& name, const std::string& value);
     void changeAviso(const std::string& name, const std::string& value);
-    void changeAviso(const std::string& name, const std::string& value, uint64_t revision);
     void changeMirror(const std::string& name, const std::string& value);
     void changeTrigger(const std::string& expression);
     void changeComplete(const std::string& expression);
@@ -1012,6 +1024,13 @@ private: // All mementos access
     friend class CompoundMemento;
     void clear(); /// Clear *ALL* internal attributes
     void delete_attributes();
+
+    ///
+    /// @brief Copies the Aviso and Mirror attributes of the given node, detached from it and attached to this node.
+    ///
+    /// @param[in] rhs The node to copy the attributes from.
+    ///
+    void copy_remote_attrs(const Node& rhs);
 
 private:
     Node* parent_{nullptr}; // *NOT* persisted must be set by the parent class

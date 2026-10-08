@@ -110,6 +110,21 @@ Node::Node(const Node& rhs)
         the_limit->set_node(this);
         limits_.push_back(the_limit);
     }
+
+    copy_remote_attrs(rhs);
+}
+
+void Node::copy_remote_attrs(const Node& rhs) {
+    // The copies keep the configuration and the state, but neither the connection of the original (which stays with
+    // it) nor its parent
+    for (const auto& aviso : rhs.avisos_) {
+        avisos_.push_back(aviso.make_detached());
+        avisos_.back().set_parent(this);
+    }
+    for (const auto& mirror : rhs.mirrors_) {
+        mirrors_.push_back(mirror.make_detached());
+        mirrors_.back().set_parent(this);
+    }
 }
 
 bool Node::check_defaults() const {
@@ -210,6 +225,10 @@ Node& Node::operator=(const Node& rhs) {
         inLimitMgr_ = rhs.inLimitMgr_;
         inLimitMgr_.set_node(this);
         flag_ = rhs.flag_;
+
+        avisos_.clear();
+        mirrors_.clear();
+        copy_remote_attrs(rhs);
 
         state_change_no_     = 0;
         variable_change_no_  = 0;
@@ -399,6 +418,12 @@ void Node::requeue(Requeue_args& args) {
     }
     if (archived_set) {
         get_flag().set(ecf::Flag::ARCHIVED);
+    }
+    // The Aviso attributes are (re)started before the flags are reset; re-apply the error of any that failed
+    for (const auto& aviso : avisos_) {
+        if (aviso.has_error()) {
+            get_flag().set(ecf::Flag::REMOTE_ERROR);
+        }
     }
 
     if (late_) {
@@ -986,7 +1011,7 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
         //
         // When the node state becomes `aborted`, `complete` or `unknown`, the Aviso background thread is terminated.
         //
-        AvisoAttr::finish(avisos(), newState);
+        AvisoAttr::state_changed(avisos(), newState);
 
         // Handle any state change specific functionality. This will update any repeats
         // This is a virtual function, since we want different behaviour during state change
@@ -2036,6 +2061,44 @@ bool Node::operator==(const Node& rhs) const {
         }
     }
 
+    if (avisos_.size() != rhs.avisos_.size()) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  (avisos_.size() != rhs.avisos_.size()) " << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+    for (unsigned i = 0; i < avisos_.size(); ++i) {
+        if (!(avisos_[i] == rhs.avisos_[i])) {
+#ifdef DEBUG
+            if (Ecf::debug_equality()) {
+                std::cout << "Node::operator==  (avisos_[i] != rhs.avisos_[i]) " << debugNodePath() << "\n";
+            }
+#endif
+            return false;
+        }
+    }
+
+    if (mirrors_.size() != rhs.mirrors_.size()) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  (mirrors_.size() != rhs.mirrors_.size()) " << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+    for (unsigned i = 0; i < mirrors_.size(); ++i) {
+        if (!(mirrors_[i] == rhs.mirrors_[i])) {
+#ifdef DEBUG
+            if (Ecf::debug_equality()) {
+                std::cout << "Node::operator==  (mirrors_[i] != rhs.mirrors_[i]) " << debugNodePath() << "\n";
+            }
+#endif
+            return false;
+        }
+    }
+
     if (meters_.size() != rhs.meters_.size()) {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
@@ -2598,6 +2661,9 @@ size_t Node::position() const {
 
 void Node::gen_variables(std::vector<Variable>& vec) const {
     repeat_.gen_variables(vec); // if repeat_ is empty vec is unchanged
+    for (const auto& aviso : avisos_) {
+        aviso.gen_variables(vec);
+    }
 }
 
 std::vector<Variable> Node::gen_variables() const {
@@ -2607,7 +2673,16 @@ std::vector<Variable> Node::gen_variables() const {
 }
 
 const Variable& Node::findGenVariable(const std::string& name) const {
-    return repeat_.find_gen_variable(name); // if repeat_ is empty find returns empty variable by ref
+    // When repeat_ is empty, find_gen_variable returns an empty variable
+    if (const Variable& var = repeat_.find_gen_variable(name); !var.empty()) {
+        return var;
+    }
+    for (const auto& aviso : avisos_) {
+        if (const Variable& var = aviso.find_gen_variable(name); !var.empty()) {
+            return var;
+        }
+    }
+    return Variable::EMPTY();
 }
 
 void Node::update_repeat_genvar() const {

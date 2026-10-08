@@ -1354,6 +1354,71 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_defstatus_validation) {
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_only_on_task) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s  = defs.add_suite("suite");
+    family_ptr f = s->add_family("f");
+    task_ptr t   = f->add_task("t");
+
+    const std::string value = R"(--listener '{ "event": "mars" }')";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    BOOST_CHECK_EQUAL(t->avisos().size(), 1u);
+
+    // An Aviso attribute is only allowed on a task (or an alias)
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(f->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_AVISO, "A", value)));
+    BOOST_CHECK(f->avisos().empty());
+    BOOST_CHECK(s->avisos().empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_and_mirror_not_on_the_same_node) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    task_ptr t1 = s->add_task("t1");
+    task_ptr t2 = s->add_task("t2");
+
+    const std::string aviso  = R"(--listener '{ "event": "mars" }')";
+    const std::string mirror = "--remote_path /s/t";
+
+    // An Aviso attribute is not allowed on a node with a Mirror attribute, and vice versa
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t1->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new AlterCmd(t1->absNodePath(), AlterCmd::ADD_AVISO, "A", aviso)));
+    BOOST_CHECK_EQUAL(t1->mirrors().size(), 1u);
+    BOOST_CHECK(t1->avisos().empty());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_AVISO, "A", aviso)));
+    TestHelper::invokeFailureRequest(&defs,
+                                     Cmd_ptr(new AlterCmd(t2->absNodePath(), AlterCmd::ADD_MIRROR, "M", mirror)));
+    BOOST_CHECK_EQUAL(t2->avisos().size(), 1u);
+    BOOST_CHECK(t2->mirrors().empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_starts_attribute_of_queued_task) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+    defs.beginAll();
+    BOOST_REQUIRE_EQUAL(t->state(), NState::QUEUED);
+
+    // The added attribute of a queued task is started (its listener is resolved), without waiting for a requeue
+    TestHelper::invokeRequest(
+        &defs,
+        Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", R"(--listener '{ "event": "mars" }')")));
+    BOOST_REQUIRE_EQUAL(t->avisos().size(), 1u);
+    BOOST_CHECK_EQUAL(t->avisos()[0].active(), R"({ "event": "mars" })");
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

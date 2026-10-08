@@ -23,14 +23,6 @@ struct Formatter<AvisoAttr, Stream>
             output << " --url ";
             output << item.url();
         }
-        if (const auto& schema = item.schema(); !schema.empty() && schema != AvisoAttr::default_schema) {
-            output << " --schema ";
-            output << item.schema();
-        }
-        if (const auto& polling = item.polling(); !polling.empty() && polling != AvisoAttr::default_polling) {
-            output << " --polling ";
-            output << item.polling();
-        }
         output << " --revision ";
         output << std::to_string(item.revision());
         if (const auto& auth = item.auth(); !auth.empty() && auth != AvisoAttr::default_auth) {
@@ -40,6 +32,9 @@ struct Formatter<AvisoAttr, Stream>
         if (const auto& reason = item.reason(); !reason.empty()) {
             output << " --reason ";
             output << item.reason();
+        }
+        if (item.collapse()) {
+            output << " --collapse";
         }
     }
 };

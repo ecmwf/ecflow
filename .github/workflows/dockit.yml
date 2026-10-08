@@ -149,7 +149,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ecflow-debian-package-${{ matrix.image }}-${{ matrix.arch }}
-          path: packages/ecflow-${{ matrix.arch }}.deb
+          # The Aviso client library is delivered beside the package, when the server is built with Aviso support
+          path: |
+            packages/ecflow-${{ matrix.arch }}.deb
+            packages/aviso-ffi-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
   #

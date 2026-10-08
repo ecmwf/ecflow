@@ -10,30 +10,31 @@ ecflow.AvisoAttr
 
    Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
-An :term:`aviso` attribute, assigned to a :term:`node`, represents an external trigger holding the node queued until an Aviso notification matching the attribute configuration is detected.
+An :term:`aviso` attribute, assigned to a :term:`task`, represents an external trigger holding the task queued until an Aviso notification matching the attribute configuration is detected.
 
-Although :term:`aviso` attributes can be set at any level (Suite, Family, Task), it only makes sense to assign aviso attributes to tasks, and only one aviso attribute per node is allowed.
+:term:`aviso` attributes are only allowed on tasks (or aliases of tasks), and only one aviso attribute per task is allowed; adding one to a suite or a family, or to a node with a :term:`mirror`, raises a RuntimeError.
+
+The attribute supports Aviso v2 only (ecFlow 5.19.x is the last release that supports Aviso v1): the parameters schema and polling, and the methods schema() and polling(), of the ecFlow 5.19 API are not available, and a script using them raises a TypeError or an AttributeError.
 
 
 Constructors::
 
    AvisoAttr(name, listener) (1)
    AvisoAttr(name, listener, url)
-   AvisoAttr(name, listener, url, schema)
-   AvisoAttr(name, listener, url, schema, polling)
-   AvisoAttr(name, listener, url, schema, polling, auth)
+   AvisoAttr(name, listener, url, auth=auth)
+   AvisoAttr(name, listener, url, auth=auth, collapse=True)
     with:
       string name: The Aviso attribute name
       string listener: The Aviso listener configuration (in JSON format)
       string url: The URL used to contact the Aviso server
-      string schema: The path to the Aviso schema
-      string polling: The polling interval used to contact the Aviso server
-      string auth: The path to the Aviso Authentication credentials
+      string auth: The path to the Aviso credentials file (keyword only)
+      bool collapse: Whether a release consumes all the notifications received, instead of exactly
+                     one (keyword only, default False)
 
-Note: Default values, based on %ECF_AVISO_...% variables, will be used for the calls where
-the parameters url, schema, polling, and auth are not provided
+Note: Default values, based on %ECF_AVISO_...% variables, are used when
+the parameters url and auth are not provided
 
-We suggest to specify :code:`%ECF_AVISO_***%` variables once (at suite level), and then create the
+Specify the :code:`%ECF_AVISO_***%` variables once (at suite level), and then create the
 Aviso attributes passing just the name and the listener definition as per call `(1)`.
 
 .. note::   The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
@@ -49,15 +50,21 @@ Usage:
    t1 = Task('t1', AvisoAttr('name', "'{...}'"))
 
    t2 = Task('t2')
-   t2.add_aviso('name', "'{...}'", 'http://aviso.com', '60', '/path/to/auth')
+   t2.add_aviso(AvisoAttr('name', "'{...}'", 'http://aviso.com', auth='/path/to/auth'))
 
-The parameters `url`, `schema`, `polling`, and `auth` are optional
+The parameters `url` and `auth` are optional
 
 
 .. py:method:: AvisoAttr.auth(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the path to Authentication credentials used to contact the Aviso server
+
+
+.. py:method:: AvisoAttr.collapse(self: ecflow.AvisoAttr) -> bool
+   :module: ecflow
+
+Returns whether a release consumes all the notifications received, instead of exactly one
 
 
 .. py:method:: AvisoAttr.listener(self: ecflow.AvisoAttr) -> str
@@ -70,18 +77,6 @@ Returns the Aviso listener configuration
    :module: ecflow
 
 Returns the name of the Aviso attribute
-
-
-.. py:method:: AvisoAttr.polling(self: ecflow.AvisoAttr) -> str
-   :module: ecflow
-
-Returns polling interval used to contact the Aviso server
-
-
-.. py:method:: AvisoAttr.schema(self: ecflow.AvisoAttr) -> str
-   :module: ecflow
-
-Returns the path to the schema used to contact the Aviso server
 
 
 .. py:method:: AvisoAttr.url(self: ecflow.AvisoAttr) -> str

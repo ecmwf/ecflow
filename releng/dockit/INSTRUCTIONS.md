@@ -32,10 +32,11 @@ directory it belongs to), and a third builds the standalone images:
    checked-out commit, inside the build environment image, once per architecture (`amd64` and `arm64`), each
    natively on a GitHub-hosted runner of that architecture. This is the same script that
    `build_ecflow_package.sh` runs in its container (Step 1 below), so both build the package in exactly the
-   same way. Each leg uploads the resulting `ecflow-<arch>.deb` as an `ecflow-debian-package-<image>-<arch>`
-   artefact.
+   same way. Each leg uploads the resulting `ecflow-<arch>.deb`, with the Aviso client library
+   (`aviso-ffi-<arch>.tar.gz`), as an `ecflow-debian-package-<image>-<arch>` artefact.
 
-2. The `dockerize-ecflow` job, using the same matrix, downloads the packages of all architectures into the matching
+2. The `dockerize-ecflow` job, using the same matrix, downloads the packages (and Aviso client libraries) of all
+   architectures into the matching
    Dockerfile directory (`ecflow-server/`) and runs `create_ecflow_docker_image.sh` (Step 2 below) to create the
    Docker image from that directory's `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image
    under QEMU emulation, which only installs the package), and to push it to
@@ -92,16 +93,22 @@ The package declares the runtime libraries its binaries link against as dependen
 `dpkg-shlibdeps`, together with the Python version its Python module is built for. This requires the `file` utility
 in the build environment image.
 
+The server is built with Aviso support (`ENABLE_AVISO=ON` in the default preset), against the Aviso client library
+(`libaviso_ffi`, aviso-client 2.4.2 or later) provided by the build environment image, which builds it from the
+aviso-client sources. The library is not part of the package: the package build delivers it beside the package, as
+`aviso-ffi-<arch>.tar.gz`, holding the library under its file name and its soname (e.g. `libaviso_ffi.so.2.4.2` and
+`libaviso_ffi.so.2`).
+
 The package version identifies the build: `<version>+git<commit time>.<commit>` (e.g.
 `5.19.0+git20260924132851.20d90280fbce`, with the commit time in UTC), which Debian orders after the `<version>`
 release, and among builds by commit time. A build of the commit tagged `<version>` keeps the plain `<version>`.
 
 The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
-`ecflow-arm64.deb` on Apple Silicon), and copied into the output directory, which defaults to `ecflow-server/`
-(`${PWD}/ecflow-server`).
+`ecflow-arm64.deb` on Apple Silicon), and copied, with the Aviso client library (`aviso-ffi-<arch>.tar.gz`), into the
+output directory, which defaults to `ecflow-server/` (`${PWD}/ecflow-server`).
 This is the same directory used as the Docker build context in Step 2, so no manual copy is needed with default
-settings. Creating the package with a different `--output_dir` means the package must be moved into `ecflow-server/`
-manually before Step 2.
+settings. Creating the package with a different `--output_dir` means the package and the Aviso client library must
+be moved into `ecflow-server/` manually before Step 2.
 
 To build the ecflow sources of a local working tree (including uncommitted changes) instead of a fresh clone, pass
 `--source`, for example from `ecflow/releng/dockit/`:
@@ -123,7 +130,10 @@ the options of the package build itself, and their defaults (e.g. the pinned ecb
 #### Step 2: Build the ecFlow server container image
 
 The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
-present in its build context at build time. This is typically the package generated in Step 1.
+present in its build context at build time. This is typically the package generated in Step 1. When the Aviso client
+library of the target platform, `aviso-ffi-<arch>.tar.gz`, is also present, it is installed in `/usr/local/lib`
+before the package, so that the server finds it; a package built with Aviso support requires it, and the image build
+fails when a library needed by the ecFlow executables is missing.
 
 Create the image for the platform of the Docker host, as `ecflow-server-dev:local`, with:
 

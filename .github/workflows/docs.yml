@@ -63,6 +63,7 @@ jobs:
                 -B ./build \
                 -DENABLE_UI=OFF \
                 -DENABLE_DOCS=ON \
+                -DENABLE_AVISO=OFF \
                 -DENABLE_STATIC_BOOST_LIBS=OFF \
                 -DBoost_ROOT=/usr \
                 -DBoost_INCLUDE_DIR=/usr/include

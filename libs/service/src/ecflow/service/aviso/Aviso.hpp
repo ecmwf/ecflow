@@ -4,268 +4,264 @@
 #pragma once
 
 #include <cstdint>
+#include <iosfwd>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <variant>
-#include <vector>
 
 namespace ecf::service::aviso {
 
-/**
- *
- * An AvisoSubscribe is a request to start listening for notifications based a given configuration.
- *
- * This class holds information used to fully configure an Aviso Listener, including:
- *  - the listener configuration,
- *  - the address of the ETCD server,
- *  - the schema used to specify the notifications
- *
- */
+///
+/// @brief Names the incompatibility with Aviso v1, and the last ecFlow release that supports it.
+///
+/// The text is appended to every error caused by an Aviso v1 configuration, so that users of Aviso v1 learn which
+/// ecFlow release to use instead.
+///
+inline constexpr std::string_view unsupported_v1 =
+    "Aviso v1 is no longer supported; ecFlow 5.19.x is the last release that supports Aviso v1";
+
+///
+/// @brief Requests notifications for one Aviso attribute.
+///
+/// All values are fully resolved, i.e. ecFlow variables have already been substituted.
+///
 class AvisoSubscribe {
 public:
-    explicit AvisoSubscribe(std::string_view path,
-                            std::string_view listener_cfg,
-                            std::string_view address,
-                            std::string_view schema,
-                            uint32_t polling,
-                            uint64_t revision,
-                            std::string_view auth)
+    ///
+    /// @brief Creates a subscription request.
+    ///
+    /// @param[in] path     Unique identifier of the Aviso attribute (the node path, followed by the attribute name).
+    /// @param[in] listener Listener configuration, as JSON (event and request).
+    /// @param[in] url      Address of the Aviso server.
+    /// @param[in] revision Last notification already processed; 0 means that only new notifications are requested.
+    /// @param[in] auth     Path to the credentials file.
+    ///
+    AvisoSubscribe(std::string_view path,
+                   std::string_view listener,
+                   std::string_view url,
+                   std::uint64_t revision,
+                   std::string_view auth)
         : path_{path},
-          listener_cfg_{listener_cfg},
-          address_{address},
-          schema_{schema},
-          polling_{polling},
+          listener_{listener},
+          url_{url},
           revision_{revision},
           auth_{auth} {}
 
-    const std::string& path() const { return path_; }
-    const std::string& listener_cfg() const { return listener_cfg_; }
-    const std::string& address() const { return address_; }
-    const std::string& schema() const { return schema_; }
-    uint32_t polling() const { return polling_; }
-    uint64_t revision() const { return revision_; }
-    const std::string& auth() const { return auth_; }
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
+    [[nodiscard]] const std::string& path() const { return path_; }
+    [[nodiscard]] const std::string& listener() const { return listener_; }
+    [[nodiscard]] const std::string& url() const { return url_; }
+    [[nodiscard]] std::uint64_t revision() const { return revision_; }
+    [[nodiscard]] const std::string& auth() const { return auth_; }
+    /// @}
 
-    friend std::ostream& operator<<(std::ostream&, const AvisoSubscribe&);
+    ///
+    /// @brief Writes a one-line description of the request, for logging.
+    ///
+    /// @param[in,out] os      The stream to write to.
+    /// @param[in]     request The request to describe.
+    /// @return The stream.
+    ///
+    friend std::ostream& operator<<(std::ostream& os, const AvisoSubscribe& request);
 
 private:
     std::string path_;
-    std::string listener_cfg_;
-    std::string address_;
-    std::string schema_;
-    uint32_t polling_;
-    uint64_t revision_;
+    std::string listener_;
+    std::string url_;
+    std::uint64_t revision_;
     std::string auth_;
 };
 
-/**
- *
- * An AvisoUnsubscribe is a request to stop listening for notifications.
- *
- */
-class AvisoUnsubscribe {
-public:
-    explicit AvisoUnsubscribe(std::string_view path)
-        : path_{path} {}
-
-    const std::string& path() const { return path_; }
-
-    friend std::ostream& operator<<(std::ostream& os, const AvisoUnsubscribe& request);
-
-private:
-    std::string path_;
-};
-
-/**
- *
- * An AvisoRequest allows to either subscribe or unsubscribe to notifications.
- *
- * n.b. This request is sent from the main thread to the worker thread.
- *
- */
-using AvisoRequest = std::variant<AvisoSubscribe, AvisoUnsubscribe>;
-
-std::ostream& operator<<(std::ostream& os, const AvisoRequest& request);
-
-/**
- *
- * An AvisoNotification represents a notification of a match found related to a key-value pair in ETCD.
- *
- */
+///
+/// @brief Holds one notification received for an Aviso attribute.
+///
 class AvisoNotification {
 public:
-    AvisoNotification() = default;
-    AvisoNotification(std::string_view key, std::string_view value, uint64_t revision)
-        : key_{key},
-          value_{value},
-          revision_{revision},
-          parameters_{} {}
+    ///
+    /// @brief Creates a notification.
+    ///
+    /// @param[in] event_type      Event type of the notification (e.g. mars).
+    /// @param[in] sequence        Sequence number of the notification, strictly increasing within its event type.
+    /// @param[in] identifier_json Identifier of the notification, as JSON.
+    /// @param[in] payload_json    Payload of the notification, as JSON.
+    ///
+    AvisoNotification(std::string_view event_type,
+                      std::uint64_t sequence,
+                      std::string_view identifier_json,
+                      std::string_view payload_json)
+        : event_type_{event_type},
+          sequence_{sequence},
+          identifier_json_{identifier_json},
+          payload_json_{payload_json} {}
 
-    std::string_view key() const { return key_; }
-    std::string_view value() const { return value_; }
-    uint64_t revision() const { return revision_; }
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
+    [[nodiscard]] const std::string& event_type() const { return event_type_; }
+    [[nodiscard]] std::uint64_t sequence() const { return sequence_; }
+    [[nodiscard]] const std::string& identifier_json() const { return identifier_json_; }
+    [[nodiscard]] const std::string& payload_json() const { return payload_json_; }
+    /// @}
 
-    void add_parameter(const std::string& parameter, const std::string& value) {
-        parameters_.emplace_back(parameter, value);
-    }
-
-    friend std::ostream& operator<<(std::ostream&, const AvisoNotification&);
+    ///
+    /// @brief Writes a one-line description of the notification, for logging.
+    ///
+    /// @param[in,out] os           The stream to write to.
+    /// @param[in]     notification The notification to describe.
+    /// @return The stream.
+    ///
+    friend std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification);
 
 private:
-    std::string key_;
-    std::string value_;
-    uint64_t revision_;
-    std::vector<std::pair<std::string, std::string>> parameters_{};
+    std::string event_type_;
+    std::uint64_t sequence_;
+    std::string identifier_json_;
+    std::string payload_json_;
 };
 
-/**
- *
- * An AvisoNoMatch represents a notification of successful polling without any match found.
- *
- */
-class AvisoNoMatch {
-    friend std::ostream& operator<<(std::ostream&, const AvisoNoMatch&);
-};
-
-/**
- *
- * An AvisoError represents a notification of an error found during polling.
- *
- */
+///
+/// @brief Holds an error that prevents an Aviso attribute from receiving notifications.
+///
 class AvisoError {
 public:
+    ///
+    /// @brief Creates an error.
+    ///
+    /// @param[in] reason User-facing description of the error.
+    ///
     explicit AvisoError(std::string_view reason)
         : reason_{reason} {}
 
-    [[nodiscard]] std::string_view reason() const { return reason_; }
+    ///
+    /// @name Accessors
+    /// @brief Return the values given at creation (see the constructor).
+    ///
+    /// @{
+    [[nodiscard]] const std::string& reason() const { return reason_; }
+    /// @}
 
-    friend std::ostream& operator<<(std::ostream&, const AvisoError&);
+    ///
+    /// @brief Writes a one-line description of the error, for logging.
+    ///
+    /// @param[in,out] os    The stream to write to.
+    /// @param[in]     error The error to describe.
+    /// @return The stream.
+    ///
+    friend std::ostream& operator<<(std::ostream& os, const AvisoError& error);
 
 private:
     std::string reason_;
 };
 
-/**
- * A Listener represents an Aviso Listener, loaded from the Schema with placeholders as part of the `base` and
- * `stem`.
- */
-class Listener {
+///
+/// @brief Signals an attempt to (re)create the watch of an Aviso attribute, clearing any previous error.
+///
+/// The signal precedes any notification or error caused by the attempt, including the failure of the attempt itself.
+///
+class AvisoWatchStarted {
 public:
-    Listener() = default;
-    Listener(std::string_view name, std::string_view base, std::string_view stem)
-        : name_{name},
-          base_{base},
-          stem_{stem} {}
-
-    std::string_view name() const { return name_; }
-    std::string_view base() const { return base_; }
-    std::string_view stem() const { return stem_; }
-
-    std::string full() const { return base_ + '/' + stem_; }
-
-private:
-    std::string name_{};
-    std::string base_{};
-    std::string stem_{};
+    ///
+    /// @brief Writes a one-line description of the signal, for logging.
+    ///
+    /// @param[in,out] os      The stream to write to.
+    /// @param[in]     started The signal to describe.
+    /// @return The stream.
+    ///
+    friend std::ostream& operator<<(std::ostream& os, const AvisoWatchStarted& started);
 };
 
-/**
- * A ConfiguredListener is an Aviso Listener with complete configuration, including ETCD server connection data and
- * all placeholders instantiated.
- *
- * A ConfiguredListener object is responsible for connecting to the ETCS server, collect all relevant notifications
- * and check if any notification matches the listener's configuration.
- */
-class ConfiguredListener : private Listener {
-public:
-    /**
-     * Create a ConfiguredListener from an AvisoRequest.
-     *
-     * @param request The AvisoRequest to create the ConfiguredListener from.
-     * @return The ConfiguredListener.
-     */
-    static ConfiguredListener make_configured_listener(const AvisoSubscribe& request);
+///
+/// @brief Represents one outcome delivered to an Aviso attribute: a notification, an error, or a (re)started watch.
+///
+using AvisoResponse = std::variant<AvisoNotification, AvisoError, AvisoWatchStarted>;
 
-    static ConfiguredListener make_configured_listener(const std::string& path,
-                                                       const std::string& listener_cfg,
-                                                       const std::string& address,
-                                                       const std::string& schema_content,
-                                                       uint32_t polling,
-                                                       uint64_t revision);
+///
+/// @brief Writes a one-line description of the response, for logging.
+///
+/// @param[in,out] os       The stream to write to.
+/// @param[in]     response The response to describe.
+/// @return The stream.
+///
+std::ostream& operator<<(std::ostream& os, const AvisoResponse& response);
 
-    static ConfiguredListener make_configured_listener(const std::string& path,
-                                                       const std::string& listener_cfg,
-                                                       const std::string& address,
-                                                       std::istream& schema_stream,
-                                                       uint32_t polling,
-                                                       uint64_t revision);
-
-public:
-    ConfiguredListener(const std::string& address,
-                       const std::string& path,
-                       const std::string& name,
-                       const std::string& base,
-                       const std::string& stem,
-                       uint32_t polling,
-                       uint64_t revision);
-
-    void with_parameter(const std::string& parameter, const std::string& value);
-    void with_parameter(const std::string& parameter, int64_t value);
-    void with_parameter(const std::string& parameter, const std::vector<std::string>& value);
-
-    const std::string& path() const { return path_; }
-    const std::string& address() const { return address_; }
-
-    uint32_t polling() const { return polling_; }
-    uint64_t revision() const { return revision_; }
-    void update_revision(uint64_t revision) { revision_ = std::max(revision, revision_); }
-
-    using Listener::base;
-    using Listener::name;
-    using Listener::stem;
-
-    using Listener::full;
-
-    const std::string& resolved_base() const { return resolved_base_; }
-
-    std::string prefix() const { return resolved_base_ + '/'; }
-
-    std::optional<AvisoNotification> accepts(const std::string& key, const std::string& value, uint64_t revision) const;
-
-    friend std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener);
-
-private:
-    std::string path_;
-    std::string address_;
-    std::string resolved_base_;
-    uint32_t polling_;
-    uint64_t revision_;
-
-    using parameters_t = std::variant<std::string, std::int64_t, std::vector<std::string>>;
-    std::unordered_map<std::string, parameters_t> parameters_ = {};
+///
+/// @brief Holds the watch configuration derived from the listener of an Aviso attribute.
+///
+struct Listener
+{
+    std::string event;       ///< The event type to watch (e.g. mars).
+    std::string filter_json; ///< The filter, as JSON; empty when the listener has no request.
 };
 
-/**
- * A ListenerSchema is the specification of available Listeners.
- *
- * The specification of each Listener, describes the name, the base and the stem (with eventual placeholders).
- * The specification is loaded from a schema file.
- */
-class ListenerSchema {
-public:
-    std::optional<Listener> get_listener(const std::string& name) const;
+///
+/// @brief Derives the watch configuration from the listener of an Aviso attribute.
+///
+/// The listener is a JSON object, with the mandatory string `event` and the optional object `request`. Each entry
+/// of the request becomes a filter constraint: scalars are used as they are, and arrays become `{"in": [...]}`.
+///
+/// @param[in] listener The listener, as JSON, without the surrounding single quotes.
+/// @return The watch configuration.
+/// @throws std::runtime_error if the listener is not valid.
+///
+Listener parse_listener(const std::string& listener);
 
-    static ListenerSchema load_from_string(const std::string& schema_content);
-
-    static ListenerSchema load(const std::string& schema_path);
-    static ListenerSchema load(std::istream& schema_stream);
-
-private:
-    void add_listener(const Listener& listener);
-
-    std::unordered_map<std::string, Listener> listeners_{};
+///
+/// @brief Holds HTTP Basic credentials.
+///
+struct BasicAuth
+{
+    std::string username; ///< The user name.
+    std::string password; ///< The password.
 };
+
+///
+/// @brief Holds a bearer token.
+///
+struct BearerAuth
+{
+    std::string token; ///< The token (the key of an ECMWF API credentials file).
+};
+
+///
+/// @brief Holds the credentials used to contact the Aviso server, of either kind.
+///
+using Auth = std::variant<BasicAuth, BearerAuth>;
+
+///
+/// @brief Loads the credentials used to contact the Aviso server.
+///
+/// The credentials file is a JSON object, holding either `email` and `key` (the format of the ECMWF API credentials
+/// file, `$HOME/.ecmwfapirc`), whose key is used as a bearer token while the email is ignored, or `username` and
+/// `password` (HTTP Basic authentication); the key is preferred when both are present.
+///
+/// @param[in] path The path to the credentials file, as given by the attribute option --auth.
+/// @return The credentials.
+/// @throws std::runtime_error if no path is given, the file cannot be loaded, or holds no usable credentials.
+///
+Auth load_auth(const std::string& path);
+
+///
+/// @brief Describes an error in a single line, suitable for the reason of an Aviso attribute.
+///
+/// The description names the incompatibility with Aviso v1, since an error is also what a v1 server causes. Single
+/// quotes are replaced by back quotes, and line breaks by spaces, as the reason is stored within single quotes.
+///
+/// @param[in] kind        The kind of error (e.g. transport, http).
+/// @param[in] http_status The HTTP status, or 0 when not applicable.
+/// @param[in] message     The error message.
+/// @param[in] request_id  The identifier of the failed request, when known.
+/// @return The description.
+///
+std::string describe_error(std::string_view kind,
+                           std::uint16_t http_status,
+                           std::string_view message,
+                           const std::optional<std::string>& request_id = std::nullopt);
 
 } // namespace ecf::service::aviso
