@@ -718,6 +718,34 @@ BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso)
     BOOST_CHECK_MESSAGE(t->avisos()[0].active().empty(), "Expected the shutdown to finish the attribute");
 }
 
+BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso_of_alias) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // As after loading a checkpoint: the alias is queued, but its attribute is not started
+    auto alias = t->isTask()->add_alias_only();
+    alias->addAviso(AvisoAttr{
+        alias.get(), "B", R"({ "event": "dissemination" })", AvisoAttr::default_url, 0, AvisoAttr::default_auth, ""});
+    BOOST_REQUIRE_EQUAL(alias->state(), NState::QUEUED);
+    BOOST_REQUIRE(alias->avisos()[0].active().empty());
+
+    ecf::visit_all(*defs, BootstrapDefs{});
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+    BOOST_CHECK_EQUAL(alias->avisos()[0].active(), R"({ "event": "dissemination" })");
+
+    ecf::visit_all(*defs, ShutdownDefs{});
+    BOOST_CHECK(alias->avisos()[0].active().empty());
+    BOOST_CHECK(t->avisos()[0].active().empty());
+}
+
 BOOST_AUTO_TEST_CASE(generated_variables_are_defined_before_any_release) {
     ECF_NAME_THIS_TEST();
 

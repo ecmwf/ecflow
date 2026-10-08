@@ -89,6 +89,19 @@ struct VisitorAll
 };
 
 template <>
+struct VisitorAll<Alias>
+{
+    template <typename V>
+    void operator()(V&& v) {
+        v(alias_);
+        detail::visit_attrs(alias_.avisos(), v);
+        detail::visit_attrs(alias_.mirrors(), v);
+    }
+
+    Alias& alias_;
+};
+
+template <>
 struct VisitorAll<Task>
 {
     template <typename V>
@@ -96,6 +109,7 @@ struct VisitorAll<Task>
         v(task_);
         detail::visit_attrs(task_.avisos(), v);
         detail::visit_attrs(task_.mirrors(), v);
+        detail::visit_each(task_.aliases(), v);
     }
 
     Task& task_;

@@ -21,6 +21,7 @@ struct Recorder
     void operator()(Suite& s) { visited.insert("suite:" + s.absNodePath()); }
     void operator()(Family& f) { visited.insert("family:" + f.absNodePath()); }
     void operator()(Task& t) { visited.insert("task:" + t.absNodePath()); }
+    void operator()(Alias& a) { visited.insert("alias:" + a.absNodePath()); }
     void operator()(ecf::AvisoAttr& a) { visited.insert("aviso:" + a.name()); }
     void operator()(ecf::MirrorAttr& m) { visited.insert("mirror:" + m.name()); }
 
@@ -83,6 +84,23 @@ BOOST_AUTO_TEST_CASE(visit_all_from_defs_reaches_every_node_and_attribute) {
                                       "aviso:A",
                                       "mirror:M"};
     BOOST_CHECK_EQUAL_COLLECTIONS(recorder.visited.begin(), recorder.visited.end(), expected.begin(), expected.end());
+}
+
+BOOST_AUTO_TEST_CASE(visit_all_reaches_the_aliases_and_their_attributes) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs  = make_defs();
+    auto t1    = defs->findAbsNode("/s1/f1/t1")->isTask();
+    auto alias = t1->add_alias_only();
+    alias->addAviso(ecf::AvisoAttr{
+        alias.get(), "B", R"({ "event": "mars" })", ecf::AvisoAttr::default_url, 0, ecf::AvisoAttr::default_auth, ""});
+
+    Recorder recorder;
+    ecf::visit_all(*defs, recorder);
+
+    BOOST_CHECK(recorder.visited.count("alias:" + alias->absNodePath()) == 1);
+    BOOST_CHECK(recorder.visited.count("aviso:B") == 1);
+    BOOST_CHECK(recorder.visited.count("aviso:A") == 1);
 }
 
 BOOST_AUTO_TEST_CASE(visit_all_from_suite_reaches_every_node_and_attribute_of_the_suite) {
