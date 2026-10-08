@@ -57,13 +57,13 @@ Glossary
       releases the task once, following a behaviour similar to a :term:`trigger` or a
       time dependency (e.g. :term:`cron`).
 
+      The options, the listener, the credentials file, the release of the node, the generated
+      variables, the reported errors and the version requirements are described in
+      :ref:`text_based_def_aviso`.
+
       `Only one aviso attribute is allowed per task`, none on a :term:`suite` or a
       :term:`family`, and none on a node with a :term:`mirror` attribute. The notification that released the task is made available to the job as
       generated variables.
-
-      ecFlow 5.20.0 supports Aviso v2 only; ecFlow 5.19.x is the last release that supports Aviso v1.
-      The options, the listener, the credentials file, the release of the node, the generated
-      variables and the reported errors are described in :ref:`text_based_def_aviso`.
 
    check point
       The check point file is like the :term:`suite definition`, but includes all the state information.

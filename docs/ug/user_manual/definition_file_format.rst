@@ -618,7 +618,8 @@ the listener, the credentials file and the behaviour of the attribute.
       definition.
 
 The Aviso v1 options ``--schema`` and ``--polling`` are rejected in a definition, and ignored in a check
-point file written by an earlier release.
+point file written by an earlier release. A server of version 5.20 or later holding an aviso attribute must
+be used with clients of version 5.20 or later.
 
 **Examples**
 

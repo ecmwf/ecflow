@@ -23,6 +23,14 @@ the attribute can be provided in any order.
    :code:`--schema` and :code:`--polling` are rejected when a :term:`suite definition` is loaded, and are
    ignored when a :term:`check point` written by an earlier release is loaded.
 
+.. warning::
+
+   A server of version 5.20 or later that holds an :term:`aviso` attribute must be used with clients
+   (:code:`ecflow_client`, :code:`ecflow_ui` and the Python API) of version 5.20 or later. The server
+   reports the state of the attribute with options unknown to earlier clients (e.g. :code:`--collapse`,
+   and :code:`--event` once a notification has released the task), and an earlier client fails to load the
+   definition it receives from the server.
+
 .. code-block:: shell
 
     task t1
