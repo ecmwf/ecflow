@@ -198,9 +198,15 @@ done
 # ---------------------------------------------------------------------------
 
 # The archive holds the library under its file name and its soname (e.g. libaviso_ffi.so.2.4.2 and
-# libaviso_ffi.so.2), to be extracted into the library directory of the image
-if grep -q '^ENABLE_AVISO:BOOL=ON$' "${BUILD_DIR}/CMakeCache.txt"; then
+# libaviso_ffi.so.2), to be extracted into the library directory of the image. The need for the library is read
+# from the server built, rather than from the configuration, so that whatever enabled or disabled Aviso is honoured.
+needed=$(readelf -d "${BUILD_DIR}/bin/ecflow_server" | sed -n '/NEEDED/p')
+if [[ "${needed}" == *libaviso_ffi* ]]; then
     library=$(sed -n 's/^AVISO_FFI_LIBRARY:FILEPATH=//p' "${BUILD_DIR}/CMakeCache.txt")
+    if [[ -z "${library}" || ! -f "${library}" ]]; then
+        echo "ecflow_server needs libaviso_ffi, but AVISO_FFI_LIBRARY is not set in ${BUILD_DIR}/CMakeCache.txt" >&2
+        exit 1
+    fi
     library=$(readlink -f "${library}")
     soname=$(readelf -d "${library}" | sed -n 's/.*Library soname: \[\(.*\)\]/\1/p')
     staging=$(mktemp -d)
