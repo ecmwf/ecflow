@@ -1022,8 +1022,9 @@ ojson update_node_attribute_by_user(const httplib::Request& request) {
         client->alter(path, "add", type, value);
     }
     else if (type == "aviso" || type == "mirror") {
+        const std::string name  = payload.at("name");
         const std::string value = json_type_to_string(payload.at("value"));
-        client->alter(path, "change", type, value);
+        client->alter(path, "change", type, name, value);
     }
     else if (type == "autocancel") {
         const std::string value = json_type_to_string(payload.at("value"));
