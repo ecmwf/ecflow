@@ -39,12 +39,13 @@ fn main() {
     let crate_dir =
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
 
-    let (ecflow, build_dir, cache) =
-        existing_build_dir().map_or_else(build_ecflow, reuse_build_tree);
+    let existing = existing_build_dir();
+    let reused = existing.is_some();
+    let (ecflow, build_dir, cache) = existing.map_or_else(build_ecflow, reuse_build_tree);
 
     // The bridge archive must precede the ecFlow archive on the link line.
     build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
-    link(&build_dir, &cache);
+    link(&build_dir, &cache, reused);
 
     bindman_build::check_cpp_api(
         &ecflow.join("libs/client/src"),
@@ -190,7 +191,9 @@ fn build_bridge(crate_dir: &Path, ecflow: &Path, build_dir: &Path, cache: &CMake
 }
 
 /// Link `ecflow_all` and the libraries `CMake` found for it, in link order.
-fn link(build_dir: &Path, cache: &CMakeCache) {
+/// A reused Linux build tree also gets `stdc++fs`, the separate archive GCC
+/// below 9 keeps `std::filesystem` in.
+fn link(build_dir: &Path, cache: &CMakeCache, reused: bool) {
     println!(
         "cargo:rustc-link-search=native={}",
         build_dir.join("libs").display()
@@ -209,6 +212,10 @@ fn link(build_dir: &Path, cache: &CMakeCache) {
         if let Some(library) = cache.path(var) {
             link_library(&library);
         }
+    }
+
+    if reused && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "linux") {
+        println!("cargo:rustc-link-lib=stdc++fs");
     }
 
     bindman_utils::link_cpp_stdlib();
