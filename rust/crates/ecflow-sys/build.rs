@@ -39,51 +39,8 @@ fn main() {
     let crate_dir =
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
 
-    let (ecflow, build_dir, cache) = match existing_build_dir() {
-        Some(build_dir) => {
-            let cache = CMakeCache::read(&build_dir);
-            let ecflow = cache
-                .path("CMAKE_HOME_DIRECTORY")
-                .expect("CMakeCache.txt records no source directory");
-            eprintln!(
-                "ecflow-sys: using the ecflow build at {} of the sources at {}",
-                build_dir.display(),
-                ecflow.display()
-            );
-            let ssl = cache.flag("ENABLE_SSL");
-            assert_eq!(
-                ssl,
-                Some(cfg!(feature = "ssl")),
-                "ECFLOW_BUILD_DIR was configured with ENABLE_SSL={ssl:?}, which does not match the ssl feature"
-            );
-            (ecflow, build_dir, cache)
-        }
-        None => {
-            let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
-            let src_dir = out_dir.join("src");
-            let build_dir = out_dir.join("build");
-            fs::create_dir_all(&src_dir).expect("Failed to create src directory");
-
-            let ecbuild = resolve_ecbuild(&src_dir);
-            let ecflow = resolve_ecflow_src(&src_dir);
-
-            configure(&ecflow, &build_dir, &ecbuild);
-            bindman_utils::run_command(
-                Command::new("cmake").args([
-                    "--build",
-                    &build_dir.display().to_string(),
-                    "--parallel",
-                    &bindman_utils::build_parallelism(),
-                    "--target",
-                    "ecflow_all",
-                ]),
-                "cmake build ecflow",
-            );
-
-            let cache = CMakeCache::read(&build_dir);
-            (ecflow, build_dir, cache)
-        }
-    };
+    let (ecflow, build_dir, cache) =
+        existing_build_dir().map_or_else(build_ecflow, reuse_build_tree);
 
     // The bridge archive must precede the ecFlow archive on the link line.
     build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
@@ -93,6 +50,54 @@ fn main() {
         &ecflow.join("libs/client/src"),
         &crate_dir.join("src/lib.rs"),
     );
+}
+
+/// The sources, build tree and cache of an ecFlow built under `OUT_DIR`.
+fn build_ecflow() -> (PathBuf, PathBuf, CMakeCache) {
+    let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
+    let src_dir = out_dir.join("src");
+    let build_dir = out_dir.join("build");
+    fs::create_dir_all(&src_dir).expect("Failed to create src directory");
+
+    let ecbuild = resolve_ecbuild(&src_dir);
+    let ecflow = resolve_ecflow_src(&src_dir);
+
+    configure(&ecflow, &build_dir, &ecbuild);
+    bindman_utils::run_command(
+        Command::new("cmake").args([
+            "--build",
+            &build_dir.display().to_string(),
+            "--parallel",
+            &bindman_utils::build_parallelism(),
+            "--target",
+            "ecflow_all",
+        ]),
+        "cmake build ecflow",
+    );
+
+    let cache = CMakeCache::read(&build_dir);
+    (ecflow, build_dir, cache)
+}
+
+/// The sources, build tree and cache of an existing ecFlow build, which must
+/// have been configured with `ENABLE_SSL` matching the `ssl` feature.
+fn reuse_build_tree(build_dir: PathBuf) -> (PathBuf, PathBuf, CMakeCache) {
+    let cache = CMakeCache::read(&build_dir);
+    let ecflow = cache
+        .path("CMAKE_HOME_DIRECTORY")
+        .expect("CMakeCache.txt records no source directory");
+    eprintln!(
+        "ecflow-sys: using the ecflow build at {} of the sources at {}",
+        build_dir.display(),
+        ecflow.display()
+    );
+    let ssl = cache.flag("ENABLE_SSL");
+    assert_eq!(
+        ssl,
+        Some(cfg!(feature = "ssl")),
+        "ECFLOW_BUILD_DIR was configured with ENABLE_SSL={ssl:?}, which does not match the ssl feature"
+    );
+    (ecflow, build_dir, cache)
 }
 
 /// `cmake -B build -S .` as the install documentation describes it.
