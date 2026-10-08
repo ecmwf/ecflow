@@ -217,6 +217,14 @@ public:
 
     unsigned int state_change_no() const { return state_change_no_; }
 
+    ///
+    /// @brief Appends the reason why the attribute holds the node, when it does.
+    ///
+    /// The reason names the error held by the attribute, when there is one, and the missing notification otherwise.
+    ///
+    /// @param[in,out] theReasonWhy The text to append the reason to.
+    /// @return True when the attribute holds the node (i.e. it is not free).
+    ///
     bool why(std::string& theReasonWhy) const;
 
     ///

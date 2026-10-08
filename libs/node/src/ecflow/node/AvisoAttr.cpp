@@ -163,7 +163,12 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
         return false;
     }
 
-    theReasonWhy += ecf::Message(" is Aviso dependent (", listener_, "), but no notification received");
+    if (has_error()) {
+        theReasonWhy += ecf::Message(" is Aviso dependent (", listener_, "), but in error: ", reason_);
+    }
+    else {
+        theReasonWhy += ecf::Message(" is Aviso dependent (", listener_, "), but no notification received");
+    }
     return true;
 }
 

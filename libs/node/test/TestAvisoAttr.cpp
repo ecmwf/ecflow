@@ -314,6 +314,35 @@ BOOST_AUTO_TEST_CASE(begin_succeeds_when_aviso_url_is_empty) {
                         t->avisos()[0].reason());
 }
 
+BOOST_AUTO_TEST_CASE(why_reports_the_error_held_by_the_attribute) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso("  edit ECF_AVISO_URL ''\n  edit ECF_AVISO_AUTH '/path/to/auth'\n");
+    BOOST_REQUIRE_NO_THROW(defs->beginAll());
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->avisos()[0].has_error());
+
+    // The reason names the error, rather than a missing notification
+    std::string why;
+    BOOST_CHECK(t->avisos()[0].why(why));
+    BOOST_CHECK_MESSAGE(why.find("Aviso URL is empty") != std::string::npos, why);
+    BOOST_CHECK_MESSAGE(why.find("no notification received") == std::string::npos, why);
+
+    // Without an error, the reason is the missing notification
+    find(defs, "/s")->addVariable(Variable("ECF_AVISO_URL", "http://aviso:8000"));
+    t->changeAviso("A", AvisoAttr::reload_option_value);
+    BOOST_REQUIRE(!t->avisos()[0].has_error());
+    why.clear();
+    BOOST_CHECK(t->avisos()[0].why(why));
+    BOOST_CHECK_MESSAGE(why.find("no notification received") != std::string::npos, why);
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(requeue_succeeds_when_aviso_url_cannot_be_resolved) {
     ECF_NAME_THIS_TEST();
 
