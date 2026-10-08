@@ -65,4 +65,32 @@ spec:
         - protocol: TCP
           port: 8080
 {{- end }}
+{{- if and .Values.revproxy.enabled .Values.ingress.enabled }}
+{{- $controller := index .Values.networkPolicy.ingressController .Values.global.ingress.controller }}
+---
+# With the Ingress enabled, only the ingress controller reaches the reverse proxy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullname }}-revproxy
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ecflow-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: revproxy
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            {{- toYaml $controller.namespaceSelector | nindent 12 }}
+          podSelector:
+            {{- toYaml $controller.podSelector | nindent 12 }}
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end }}
 {{- end }}

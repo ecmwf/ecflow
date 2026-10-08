@@ -245,6 +245,28 @@ revproxy:
 # anywhere (sshd authenticates every connection itself).
 networkPolicy:
   enabled: true
+  # When the Ingress is enabled, the reverse proxy admits only the Pods of the ingress
+  # controller, selected per controller by the labels of its namespace and Pods. The
+  # community defaults are those of the ingress-nginx manifests; the NGINX Inc ones
+  # are those of its Helm chart and are confirmed on the ECMWF clusters at the first
+  # deployment. Without the Ingress (kind, port forwards), the reverse proxy stays
+  # open: NodePort traffic carries no Pod identity.
+  ingressController:
+    nginx-community:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+          app.kubernetes.io/component: controller
+    nginx-inc:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: nginx-ingress
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nginx-ingress
 
 # The Ingress that publishes the reverse proxy outside the cluster. The host is
 # <hostPrefix>.<domain>, or `host` when set. TLS terminates at the controller, which
