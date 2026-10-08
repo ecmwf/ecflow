@@ -14,6 +14,8 @@ An :term:`aviso` attribute, assigned to a :term:`task`, represents an external t
 
 :term:`aviso` attributes are only allowed on tasks (or aliases of tasks), and only one aviso attribute per task is allowed; adding one to a suite or a family, or to a node with a :term:`mirror`, raises a RuntimeError.
 
+The attribute supports Aviso v2 only (ecFlow 5.19.x is the last release that supports Aviso v1): the parameters schema and polling, and the methods schema() and polling(), of the ecFlow 5.19 API are not available, and a script using them raises a TypeError or an AttributeError.
+
 
 Constructors::
 
