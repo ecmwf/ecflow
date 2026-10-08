@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The packaged dependencies, fetched by `helm dependency update` from Chart.lock.
+charts/
+
+# The repository ignores *.lock for the port-lock files of the tests.
+# But Chart.lock pins the dependencies and must be committed!
+!Chart.lock

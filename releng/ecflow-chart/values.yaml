@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values of ecflow-chart. A deployment is a set of values layered over these
+# (helm upgrade --install <release> <chart> -f <profile>.yaml); the profiles of the
+# known targets are under examples/.
+
+# Settings shared with the subcharts.
+global:
+  # Registry prefix of every image (the subcharts read global.imageRegistry when they
+  # support it). Empty keeps the registry of each image.repository.
+  imageRegistry: ""
+  # Names of existing Secrets of type kubernetes.io/dockerconfigjson used to pull the
+  # images.
+  imagePullSecrets: []
+
+# auth-o-tron, deployed by auth-o-tron-chart (oci://eccr.ecmwf.int/auth-o-tron) as a
+# dependency. The keys below are passed to that chart as they are; its own defaults
+# apply to anything not set here (helm show values oci://eccr.ecmwf.int/auth-o-tron/auth-o-tron-chart).
+auth-o-tron:
+  enabled: true
+  # The reverse proxy addresses the authentication service as `authotron`, whatever
+  # the release name.
+  fullnameOverride: authotron
+  image:
+    repository: eccr.ecmwf.int/auth-o-tron/auth-o-tron
+    tag: 0.3.7
+  # The metrics endpoint stays, but the ServiceMonitor needs the Prometheus Operator
+  # CRDs, absent from a kind cluster.
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  # Secrets that the configuration does not need to hold are passed as environment
+  # variables, from an existing Secret, for example:
+  #   - name: AOT_JWT__SECRET
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: authotron-jwt
+  #         key: secret
+  extraEnv: []
+  # The configuration of auth-o-tron, rendered as it is into config.yaml. Keep the
+  # test users of the `plain` provider for test deployments only; a real deployment
+  # authenticates through the `ecmwf-api` provider alone.
+  config:
+    version: 1.0.0
+    logging:
+      level: debug
+      format: console
+    auth:
+      timeout_in_ms: 3000
+    providers:
+      - name: ecmwf-api-provider
+        type: ecmwf-api
+        uri: https://api.ecmwf.int/v1
+        realm: ecmwf
+      - name: plain-provider
+        type: plain
+        realm: local
+        users:
+          - username: admin
+            password: "somesecret#admin"
+          - username: mamb
+            password: "somesecret#mamb"
+          - username: a
+            password: "somesecret#a"
+          - username: b
+            password: "somesecret#b"
+          - username: c
+            password: "somesecret#c"
+          - username: u1
+            password: "somesecret#1"
+          - username: u2
+            password: "somesecret#2"
+          - username: u3
+            password: "somesecret#3"
+          - username: u4
+            password: "somesecret#4"
+    store:
+      enabled: false
+    services: []
+    jwt:
+      exp: 3600
+      iss: authotron-issuer
+      secret: authotron-secret-key
+      aud: authotron-audience
+    include_legacy_headers: true
+    bind_address: 0.0.0.0:8080
