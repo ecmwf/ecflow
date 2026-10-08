@@ -40,8 +40,9 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
     for (auto& cron : crons_) {
         cron.requeue(calendar, reset_next_time_slot);
     }
+    // The Aviso attributes watch again only when the node is queued (e.g. not with a complete default status)
     for (auto& aviso : avisos_) {
-        aviso.start();
+        aviso.reset();
     }
 
     for (auto& date : dates_) {

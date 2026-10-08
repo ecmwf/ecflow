@@ -641,6 +641,26 @@ BOOST_AUTO_TEST_CASE(aborted_task_released_by_aviso_is_resubmitted_within_ecf_tr
     aviso.finish();
 }
 
+BOOST_AUTO_TEST_CASE(requeue_does_not_start_aviso_of_task_with_complete_default_status) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, "\n    defstatus complete");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE_EQUAL(t->state(), NState::COMPLETE);
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 0);
+
+    // The requeue leaves the task complete, so that there is no notification to wait for
+    BOOST_REQUIRE_NO_THROW(defs->requeue());
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 0);
+    BOOST_CHECK(t->avisos()[0].active().empty());
+}
+
 BOOST_AUTO_TEST_CASE(forcing_a_finished_task_queued_starts_the_aviso_again) {
     ECF_NAME_THIS_TEST();
 
