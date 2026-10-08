@@ -223,3 +223,11 @@ revproxy:
   service:
     type: ClusterIP
     nodePort: ""
+
+# NetworkPolicies, enforced by the network plugin of the cluster when it supports
+# them: the server is reachable on its port from the reverse proxy only (it trusts
+# the identity an unauthenticated request claims), auth-o-tron from the reverse proxy
+# only (credentials could otherwise be tried from any Pod), and the SFTP sidecar from
+# anywhere (sshd authenticates every connection itself).
+networkPolicy:
+  enabled: true
