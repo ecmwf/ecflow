@@ -4,9 +4,10 @@
 //! Build script for ecflow-sys
 //!
 //! Builds ecFlow the documented way (`cmake -B build -S .` with ecbuild on
-//! `CMAKE_PREFIX_PATH`), compiles the CXX bridge with the public include
-//! directories and definitions of the `ecflow_all` target, and links that
-//! archive with the libraries `CMake` found for it, read from `CMakeCache.txt`.
+//! `CMAKE_PREFIX_PATH`), or takes the build tree `ECFLOW_BUILD_DIR` names,
+//! compiles the CXX bridge with the public include directories and
+//! definitions of the `ecflow_all` target, and links that archive with the
+//! libraries `CMake` found for it, read from `CMakeCache.txt`.
 
 use std::env;
 use std::fs;
@@ -21,7 +22,13 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=cpp");
-    for var in ["ECBUILD_DIR", "BOOST_ROOT", "CMAKE_PREFIX_PATH", "DOCS_RS"] {
+    for var in [
+        "ECFLOW_BUILD_DIR",
+        "ECBUILD_DIR",
+        "BOOST_ROOT",
+        "CMAKE_PREFIX_PATH",
+        "DOCS_RS",
+    ] {
         println!("cargo:rerun-if-env-changed={var}");
     }
 
@@ -31,28 +38,52 @@ fn main() {
 
     let crate_dir =
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
-    let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
-    let src_dir = out_dir.join("src");
-    let build_dir = out_dir.join("build");
-    fs::create_dir_all(&src_dir).expect("Failed to create src directory");
 
-    let ecbuild = resolve_ecbuild(&src_dir);
-    let ecflow = resolve_ecflow_src(&src_dir);
+    let (ecflow, build_dir, cache) = match existing_build_dir() {
+        Some(build_dir) => {
+            let cache = CMakeCache::read(&build_dir);
+            let ecflow = cache
+                .path("CMAKE_HOME_DIRECTORY")
+                .expect("CMakeCache.txt records no source directory");
+            eprintln!(
+                "ecflow-sys: using the ecflow build at {} of the sources at {}",
+                build_dir.display(),
+                ecflow.display()
+            );
+            let ssl = cache.flag("ENABLE_SSL");
+            assert_eq!(
+                ssl,
+                Some(cfg!(feature = "ssl")),
+                "ECFLOW_BUILD_DIR was configured with ENABLE_SSL={ssl:?}, which does not match the ssl feature"
+            );
+            (ecflow, build_dir, cache)
+        }
+        None => {
+            let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
+            let src_dir = out_dir.join("src");
+            let build_dir = out_dir.join("build");
+            fs::create_dir_all(&src_dir).expect("Failed to create src directory");
 
-    configure(&ecflow, &build_dir, &ecbuild);
-    bindman_utils::run_command(
-        Command::new("cmake").args([
-            "--build",
-            &build_dir.display().to_string(),
-            "--parallel",
-            &bindman_utils::build_parallelism(),
-            "--target",
-            "ecflow_all",
-        ]),
-        "cmake build ecflow",
-    );
+            let ecbuild = resolve_ecbuild(&src_dir);
+            let ecflow = resolve_ecflow_src(&src_dir);
 
-    let cache = CMakeCache::read(&build_dir);
+            configure(&ecflow, &build_dir, &ecbuild);
+            bindman_utils::run_command(
+                Command::new("cmake").args([
+                    "--build",
+                    &build_dir.display().to_string(),
+                    "--parallel",
+                    &bindman_utils::build_parallelism(),
+                    "--target",
+                    "ecflow_all",
+                ]),
+                "cmake build ecflow",
+            );
+
+            let cache = CMakeCache::read(&build_dir);
+            (ecflow, build_dir, cache)
+        }
+    };
 
     // The bridge archive must precede the ecFlow archive on the link line.
     build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
@@ -220,6 +251,13 @@ impl CMakeCache {
             .collect()
     }
 
+    /// The value of a boolean variable, when set.
+    fn flag(&self, name: &str) -> Option<bool> {
+        self.entries()
+            .find(|(key, _)| *key == name)
+            .map(|(_, value)| matches!(value, "ON" | "TRUE" | "YES" | "1"))
+    }
+
     /// `NAME=value` for every `NAME:TYPE=value` line with a found value.
     fn entries(&self) -> impl Iterator<Item = (&str, &str)> {
         self.0.lines().filter_map(|line| {
@@ -228,6 +266,25 @@ impl CMakeCache {
             (!value.is_empty() && !value.ends_with("-NOTFOUND")).then_some((name, value))
         })
     }
+}
+
+/// An ecFlow build tree to use instead of building: `ECFLOW_BUILD_DIR` when
+/// set, which must hold the `ecflow_all` archive. A rebuild of that archive
+/// retriggers the bridge.
+fn existing_build_dir() -> Option<PathBuf> {
+    let dir = env::var("ECFLOW_BUILD_DIR")
+        .ok()
+        .filter(|dir| !dir.is_empty())?;
+    let build_dir = PathBuf::from(dir);
+    let archive = build_dir.join("libs/libecflow_all.a");
+    assert!(
+        archive.exists(),
+        "ECFLOW_BUILD_DIR {} holds no {}; build the ecflow_all target there first",
+        build_dir.display(),
+        archive.display()
+    );
+    println!("cargo:rerun-if-changed={}", archive.display());
+    Some(build_dir)
 }
 
 /// Locate ecbuild: `ECBUILD_DIR` when set, else a shallow clone of the
