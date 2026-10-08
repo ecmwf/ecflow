@@ -67,6 +67,7 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     description.add_options()(option_reason, po::value<std::string>()->default_value(""));
     description.add_options()(option_collapse, po::bool_switch()->default_value(false));
     description.add_options()(option_event, po::value<std::string>());
+    description.add_options()(option_free, po::bool_switch()->default_value(false));
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
@@ -95,6 +96,9 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     auto aviso = ecf::AvisoAttr{parent, name, listener, url, revision, auth, reason, collapse};
     if (vm.count(option_event)) {
         aviso.set_event(ecf::AvisoEvent::from_option(vm[option_event].as<std::string>()));
+    }
+    if (get_option_value<bool>(vm, option_free, line)) {
+        aviso.setFree();
     }
     return aviso;
 }

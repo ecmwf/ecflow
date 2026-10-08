@@ -159,6 +159,21 @@ public:
     [[nodiscard]] inline const AvisoEvent& event() const { return event_; }
 
     ///
+    /// @brief Returns whether the attribute is free since it released the node (see commit()).
+    ///
+    /// As a time attribute whose slot fired, the attribute stays free until the node is queued again, so that a
+    /// task aborted after a release is resubmitted within ECF_TRIES.
+    ///
+    /// @return True after a release, until the attribute is started again.
+    ///
+    [[nodiscard]] inline bool isSetFree() const { return free_; }
+
+    ///
+    /// @brief Marks the attribute free, as after a release (used when restoring the state, e.g. from a check point).
+    ///
+    inline void setFree() { free_ = true; }
+
+    ///
     /// @brief Sets the notification that released the node.
     ///
     /// @param[in] event The event describing the notification.
@@ -308,6 +323,14 @@ private:
     mutable AvisoEvent event_;
 
     ///
+    /// @brief Whether the attribute released the node, and the node was not queued again since.
+    ///
+    /// Set by commit() and cleared by start(); persisted, as the free state of the time attributes, so that a task
+    /// aborted after a release is resubmitted within ECF_TRIES, also after a server restart.
+    ///
+    mutable bool free_{false};
+
+    ///
     /// @brief The generated variables, refreshed from the held or committed notification when accessed.
     ///
     /// These fields are not serialised nor persisted.
@@ -404,6 +427,7 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
         ar & aviso.event_.sequence;
         ar & aviso.event_.identifier;
         ar & aviso.event_.payload;
+        ar & aviso.free_;
     }
 }
 

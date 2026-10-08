@@ -1033,6 +1033,10 @@ struct Writer<AvisoAttr, Stream>
             output << " --event ";
             output << item.event().to_option();
         }
+        // Whether the attribute is free since it released the node is state too
+        if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() && item.isSetFree()) {
+            output << " --free";
+        }
 
         output << "\n";
     }

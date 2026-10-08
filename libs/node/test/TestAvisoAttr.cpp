@@ -607,6 +607,40 @@ BOOST_AUTO_TEST_CASE(change_clears_error_of_replaced_attribute_when_node_is_not_
     BOOST_CHECK_EQUAL(backend.state->subscriptions, 0);
 }
 
+BOOST_AUTO_TEST_CASE(aborted_task_released_by_aviso_is_resubmitted_within_ecf_tries) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables + "  edit ECF_TRIES 2\n");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // The notification releases the task, which is submitted and then aborts
+    backend.state->pending = {notification(1)};
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ABORTED);
+    BOOST_REQUIRE_EQUAL(t->avisos()[0].revision(), 1u);
+
+    // As a time attribute whose slot fired, the attribute stays free, so that the task is resubmitted (ECF_TRIES)
+    const auto& aviso = t->avisos()[0];
+    BOOST_CHECK(aviso.isSetFree());
+    BOOST_CHECK(aviso.isFree());
+    BOOST_CHECK_MESSAGE(submits(defs, "/s/t"), "Expected the aborted task to be resubmitted");
+
+    // Once the task is queued again, the attribute waits for the next notification
+    BOOST_REQUIRE_NO_THROW(defs->requeue());
+    BOOST_CHECK(!aviso.isSetFree());
+    BOOST_CHECK(!aviso.isFree());
+    backend.state->pending = {notification(2)};
+    BOOST_CHECK(aviso.isFree());
+
+    aviso.finish();
+}
+
 BOOST_AUTO_TEST_CASE(forcing_a_finished_task_queued_starts_the_aviso_again) {
     ECF_NAME_THIS_TEST();
 

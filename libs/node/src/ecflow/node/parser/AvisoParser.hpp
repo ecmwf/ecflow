@@ -50,6 +50,7 @@ public:
     static constexpr const char* option_reason     = "reason";
     static constexpr const char* option_collapse   = "collapse";
     static constexpr const char* option_event      = "event";
+    static constexpr const char* option_free       = "free";
 
     static ecf::AvisoAttr parse_aviso_line(const std::string& line);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);

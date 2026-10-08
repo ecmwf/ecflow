@@ -358,6 +358,56 @@ BOOST_AUTO_TEST_CASE(writes_event_in_checkpoints_only) {
     BOOST_CHECK(restored_aviso.event() == event);
 }
 
+BOOST_AUTO_TEST_CASE(writes_free_in_checkpoints_only) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          task t1
+            aviso --name A --listener '{ "event": "mars" }'
+        endsuite
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+    std::string errorMsg, warningMsg;
+    BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+
+    auto& aviso = defs.suites()[0]->taskVec()[0]->avisos()[0];
+    BOOST_REQUIRE(!aviso.isSetFree());
+    aviso.setFree();
+
+    BOOST_CHECK(ecf::as_string(defs, PrintStyle::DEFS).find("--free") == std::string::npos);
+
+    std::string checkpoint = ecf::as_string(defs, PrintStyle::MIGRATE);
+    BOOST_REQUIRE(checkpoint.find("--free") != std::string::npos);
+
+    Defs restored;
+    DefsStructureParser reparser(&restored, checkpoint, true);
+    BOOST_REQUIRE_MESSAGE(reparser.doParse(errorMsg, warningMsg), "Failed to parse checkpoint: " << errorMsg);
+    BOOST_CHECK(restored.suites()[0]->taskVec()[0]->avisos()[0].isSetFree());
+}
+
+BOOST_AUTO_TEST_CASE(can_serialise_free) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    AvisoAttr original{nullptr, "A", R"({ "event": "mars" })", "http://host:port", 7, "/path/to/auth", ""};
+    original.setFree();
+
+    std::string data;
+    ecf::save_as_string(data, original);
+
+    AvisoAttr restored;
+    ecf::restore_from_string(data, restored);
+
+    BOOST_CHECK(restored == original);
+    BOOST_CHECK(restored.isSetFree());
+}
+
 BOOST_AUTO_TEST_CASE(event_option_round_trips) {
     ECF_NAME_THIS_TEST();
 

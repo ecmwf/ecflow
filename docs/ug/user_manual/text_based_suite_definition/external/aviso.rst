@@ -171,8 +171,13 @@ while the node is queued, the oldest releases the node, and the others release i
 requeues, one at a time. With the option :code:`--collapse`, a release consumes all the notifications
 received, and the node is released once, by the latest one.
 
-The revision, and the notification that released the node, are kept in the :term:`check point` file, so
-that a server restarted from a check point continues with the notifications not yet consumed.
+Once released, the task behaves as a task released by a time dependency: if the job aborts, the task is
+resubmitted according to :code:`ECF_TRIES` without waiting for another notification, and the next
+notification is waited for only once the task is queued again (e.g. requeued).
+
+The revision, the notification that released the node, and whether the task was released and not yet
+queued again, are kept in the :term:`check point` file, so that a server restarted from a check point
+continues with the notifications not yet consumed, and with the resubmissions of an aborted task.
 
 .. note::
 

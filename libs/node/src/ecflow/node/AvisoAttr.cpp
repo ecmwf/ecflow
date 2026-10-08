@@ -168,6 +168,7 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
 }
 
 void AvisoAttr::reset() {
+    free_            = false;
     state_change_no_ = Ecf::incr_state_change_no();
 
     if (parent_ && (parent_->state() == NState::QUEUED)) {
@@ -187,6 +188,12 @@ void AvisoAttr::reload() {
 }
 
 bool AvisoAttr::isFree() const {
+
+    // The attribute released the node and the node was not queued again (e.g. it is retried after an abort): the
+    // attribute stays free, as a time attribute whose slot fired
+    if (free_) {
+        return true;
+    }
 
     // A notification already consumed keeps the node free, until the node is started again
     if (pending_) {
@@ -248,6 +255,7 @@ bool is_unresolved(std::string_view value, std::string_view default_value) {
 } // namespace
 
 void AvisoAttr::start() const {
+    free_ = false;
     // The node is started again. A notification held but not committed (the node was not released) is queued
     // again, while the backend runs; the running watch keeps its configuration (reload() applies a new one)
     if (backend_) {
@@ -381,6 +389,7 @@ void AvisoAttr::commit() const {
     if (pending_) {
         state_change_no_ = Ecf::incr_state_change_no();
         revision_        = std::max(revision_, pending_->sequence());
+        free_            = true;
         // The notification that released the node remains available to the job, as generated variables
         event_ = AvisoEvent::from(*pending_);
         pending_.reset();
@@ -408,7 +417,7 @@ void AvisoAttr::state_changed(const std::vector<AvisoAttr>& avisos, NState::Stat
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
            lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason() &&
-           lhs.collapse() == rhs.collapse() && lhs.event() == rhs.event();
+           lhs.collapse() == rhs.collapse() && lhs.event() == rhs.event() && lhs.isSetFree() == rhs.isSetFree();
 }
 
 std::string to_python_string(const AvisoAttr& aviso) {
