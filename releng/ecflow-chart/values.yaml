@@ -107,6 +107,15 @@ images:
     tag: latest
     digest: ""
     pullPolicy: IfNotPresent
+  revproxy:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+
+# The DNS domain of the cluster, part of the Service names the reverse proxy resolves
+# (<service>.<namespace>.svc.<clusterDomain>).
+clusterDomain: cluster.local
 
 # The users of the deployment, declared once (the deployer supplies the list). Each
 # entry names a user; `sshAuthorizedKeys` lists the public keys with which the user
@@ -185,6 +194,32 @@ sftp:
   # authorized keys of `users` into a Secret of its own, and the sidecar generates a
   # temporary host key at each start.
   existingSecret: ""
+  service:
+    type: ClusterIP
+    nodePort: ""
+
+# The reverse proxy (nginx) in front of the server: every request to /v1/ecflow is
+# authenticated with auth-o-tron (auth_request) before it is forwarded. HTTPS only.
+revproxy:
+  enabled: true
+  replicas: 1
+  # The server_name of the nginx configuration, and the subject of a self-signed
+  # certificate when the chart generates one.
+  serverName: localhost
+  # The cluster DNS service, through which nginx resolves the upstreams per request:
+  #   kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
+  resolver: 10.96.0.10
+  proxyReadTimeout: 500s
+  proxyConnectTimeout: 90s
+  # The certificate and key, in a Secret of type kubernetes.io/tls (tls.crt, tls.key):
+  # an existing Secret, or one the chart generates with a self-signed certificate for
+  # `serverName` (regenerated at every upgrade). When neither is given, the image
+  # generates a self-signed certificate for localhost at each start.
+  tls:
+    existingSecret: ""
+    selfSigned:
+      enabled: false
+      days: 365
   service:
     type: ClusterIP
     nodePort: ""

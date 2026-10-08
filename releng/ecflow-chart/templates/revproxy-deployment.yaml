@@ -1,0 +1,75 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The reverse proxy Pod. At start, the image installs the certificate of the mounted
+TLS Secret when present, or generates a self-signed one for localhost.
+*/ -}}
+{{- if .Values.revproxy.enabled }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-revproxy
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+spec:
+  replicas: {{ .Values.revproxy.replicas }}
+  selector:
+    matchLabels:
+      {{- include "ecflow-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: revproxy
+  template:
+    metadata:
+      labels:
+        {{- include "ecflow-chart.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: revproxy
+      # A change of the nginx configuration or of the static pages replaces the Pod.
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/revproxy-configmap.yaml") . | sha256sum }}
+    spec:
+      enableServiceLinks: false
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: nginx
+          image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.revproxy) | quote }}
+          imagePullPolicy: {{ .Values.images.revproxy.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: 443
+          readinessProbe:
+            httpGet:
+              path: /
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: static
+              mountPath: /usr/share/nginx/html/server
+              readOnly: true
+            - name: tls
+              mountPath: /etc/nginx/tls
+              readOnly: true
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ $fullname }}-revproxy-nginx
+        - name: static
+          configMap:
+            name: {{ $fullname }}-revproxy-static
+        - name: tls
+          secret:
+            secretName: {{ include "ecflow-chart.revproxyTlsSecretName" . }}
+            optional: true
+{{- end }}
