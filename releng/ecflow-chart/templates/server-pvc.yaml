@@ -1,0 +1,28 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The two volumes of the server. A PersistentVolumeClaim is kept across upgrades
+(Helm never deletes a PVC it created unless the release is uninstalled), so the
+suites and the checkpoint survive a new version of the chart.
+*/ -}}
+{{- range $name, $volume := .Values.server.persistence }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ecflow-chart.fullname" $ }}-{{ $name }}
+  labels:
+    {{- include "ecflow-chart.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  accessModes:
+    {{- toYaml $volume.accessModes | nindent 4 }}
+  {{- with $volume.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $volume.size }}
+{{- end }}

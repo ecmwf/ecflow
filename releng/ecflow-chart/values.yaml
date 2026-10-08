@@ -5,6 +5,12 @@
 # (helm upgrade --install <release> <chart> -f <profile>.yaml); the profiles of the
 # known targets are under examples/.
 
+# The name the objects of the release derive from: `<release>-<nameOverride>`, or the
+# release name alone when it already contains this name (a release named `ecflow`
+# gives `ecflow-server`, `ecflow-sftp`, ...). `fullnameOverride` fixes the whole name.
+nameOverride: ecflow
+fullnameOverride: ""
+
 # Settings shared with the subcharts.
 global:
   # Registry prefix of every image (the subcharts read global.imageRegistry when they
@@ -86,3 +92,70 @@ auth-o-tron:
       aud: authotron-audience
     include_legacy_headers: true
     bind_address: 0.0.0.0:8080
+
+# The images of the stack. Each image is <registry>/<repository>:<tag>, where the
+# registry is global.imageRegistry when set, else the one in the repository. A digest
+# (sha256:...) takes precedence over the tag when given.
+images:
+  server:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+  sftp:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+
+# The users of the deployment, declared once (the deployer supplies the list). Each
+# entry names a user; `sshAuthorizedKeys` lists the public keys with which the user
+# reaches the SFTP sidecar, and marks the user as an SFTP account.
+#   - name: mamb
+#     sshAuthorizedKeys:
+#       - ssh-ed25519 AAAA... mamb@host
+users: []
+
+# The ecFlow server.
+server:
+  port: 8888
+  # The administrator's files, expanded into /admin by the init container: an existing
+  # Secret whose keys are the file paths relative to /admin, with "__" in place of "/"
+  # (the layout `imachination.py provision --role admin` writes). Rendering the files
+  # from values replaces this in a later step.
+  admin:
+    existingSecret: ecflow-admin
+  # Delay and period of the readiness probe, which pings the server with ecflow_client.
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 8
+  # The two volumes of the server: the workspace (suites, task scripts, job output)
+  # and the state (checkpoint files). Both are mounted by one node at a time.
+  persistence:
+    workspace:
+      size: 1Gi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+    state:
+      size: 64Mi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+  # The Service in front of the server; NodePort exposes it on a kind cluster.
+  service:
+    type: ClusterIP
+    nodePort: ""
+
+# The SFTP sidecar of the server Pod, which gives the users key-based access to the
+# workspace.
+sftp:
+  enabled: true
+  port: 22
+  # An existing Secret with the keys of the sidecar: `<user>.authorized_keys` per
+  # user, and optionally `ssh_host_ed25519_key`. When empty, the chart renders the
+  # authorized keys of `users` into a Secret of its own, and the sidecar generates a
+  # temporary host key at each start.
+  existingSecret: ""
+  service:
+    type: ClusterIP
+    nodePort: ""

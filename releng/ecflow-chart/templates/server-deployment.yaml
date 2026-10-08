@@ -1,0 +1,186 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The ecFlow server Pod: an init container that expands the administrator's files
+into /admin, the server, and the SFTP sidecar. Ported from the imachination stack;
+the comments explain the settings that are not obvious.
+*/ -}}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-server
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  # The workspace and the checkpoint are on volumes that a single node mounts at a
+  # time; the Pod is therefore replaced, rather than rolled, so that the old Pod
+  # releases the volumes before the new one mounts them.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "ecflow-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        {{- include "ecflow-chart.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: server
+    spec:
+      # Kubernetes otherwise injects a legacy Docker-link variable for every Service
+      # of the namespace; a Service named `*-server` would yield a *_SERVER_PORT
+      # variable of the form tcp://<ip>:<port>, which the launch script of the image
+      # could read where an integer is expected.
+      enableServiceLinks: false
+      # The launch script of the image names the server `ecflow-server`, and the
+      # jobs it generates run in the same container and address it by that name.
+      # Resolving the name to the Pod removes the dependency on the Service, which
+      # has no endpoints until the readiness probe first succeeds.
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - ecflow-server
+      # The image stops the server cleanly on SIGTERM; a short grace period is ample.
+      terminationGracePeriodSeconds: 10
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+        # Expands the Secret of the administrator's files into /admin: a key
+        # `a__b__c` becomes the file /admin/a/b/c. Scripts and the troika wrapper
+        # are made executable, every other file read-only. The volumes are given to
+        # the server's account the first time they are mounted.
+        - name: admin
+          image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.server) | quote }}
+          imagePullPolicy: {{ .Values.images.server.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              for source in /admin-source/*; do
+                  [ -f "${source}" ] || continue
+                  key=$(basename "${source}")
+                  target="/admin/$(printf '%s' "${key}" | sed 's|__|/|g')"
+                  mkdir -p "$(dirname "${target}")"
+                  cp "${source}" "${target}"
+                  case "${key}" in
+                      *troikaw|*.sh) chmod 0755 "${target}" ;;
+                      *) chmod 0444 "${target}" ;;
+                  esac
+                  echo "admin: ${target}"
+              done
+              for volume in /workspace /state; do
+                  if [ "$(stat -c %u "${volume}")" = "0" ]; then
+                      chown 1000:1000 "${volume}"
+                      chmod 0775 "${volume}"
+                      echo "admin: ${volume} given to 1000:1000"
+                  fi
+              done
+          volumeMounts:
+            - name: admin-source
+              mountPath: /admin-source
+              readOnly: true
+            - name: admin
+              mountPath: /admin
+            - name: workspace
+              mountPath: /workspace
+            - name: state
+              mountPath: /state
+      containers:
+        - name: ecflow-server
+          image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.server) | quote }}
+          imagePullPolicy: {{ .Values.images.server.pullPolicy }}
+          workingDir: /workspace
+          env:
+            - name: ECFLOW_WORKSPACE_DIR
+              value: /workspace
+            - name: ECFLOW_SERVER_HOST
+              value: ecflow-server
+            - name: ECFLOW_SERVER_PORT
+              value: {{ .Values.server.port | quote }}
+            - name: ECF_FILES
+              value: /workspace/files
+            - name: ECFLOW_CONFIG_DIR
+              value: /admin
+            - name: ECF_CHECK
+              value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check
+            - name: ECF_CHECKOLD
+              value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check.b
+          ports:
+            - name: ecflow
+              containerPort: {{ .Values.server.port }}
+          # Ready once the server answers a ping, sent as the server's own account.
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - HOME=/home/ecflow ECF_CONNECT_TIMEOUT=5 setpriv --reuid=ecflow
+                  --regid=ecflow --init-groups ecflow_client --http --host localhost
+                  --port {{ .Values.server.port }} --ping
+            initialDelaySeconds: {{ .Values.server.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.server.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.server.readinessProbe.timeoutSeconds }}
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: admin
+              mountPath: /admin
+              readOnly: true
+            - name: state
+              mountPath: /state
+        {{- if .Values.sftp.enabled }}
+        - name: sftp
+          image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.sftp) | quote }}
+          imagePullPolicy: {{ .Values.images.sftp.pullPolicy }}
+          env:
+            - name: SFTP_USERS
+              value: {{ include "ecflow-chart.sftpUsers" . | quote }}
+            - name: SFTP_KEYS_DIR
+              value: /etc/ssh/ecflow-chart
+          ports:
+            - name: ssh
+              containerPort: {{ .Values.sftp.port }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - kill -0 "$(cat /run/sshd.pid)"
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: sftp-keys
+              mountPath: /etc/ssh/ecflow-chart
+              readOnly: true
+        {{- end }}
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: {{ $fullname }}-workspace
+        - name: state
+          persistentVolumeClaim:
+            claimName: {{ $fullname }}-state
+        - name: admin-source
+          secret:
+            secretName: {{ .Values.server.admin.existingSecret }}
+        - name: admin
+          emptyDir: {}
+        {{- if .Values.sftp.enabled }}
+        - name: sftp-keys
+          secret:
+            secretName: {{ include "ecflow-chart.sftpSecretName" . }}
+            defaultMode: 0400
+            optional: true
+        {{- end }}

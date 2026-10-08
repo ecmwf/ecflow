@@ -56,3 +56,41 @@ Deployment exists, so this set never changes between versions of the chart.
 app.kubernetes.io/name: {{ include "ecflow-chart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+The reference of an image, from one entry of `images`: the registry of `global`
+when set, the repository, and the digest or the tag. Called with a dict:
+  include "ecflow-chart.image" (dict "root" . "image" .Values.images.server)
+*/}}
+{{- define "ecflow-chart.image" -}}
+{{- $repository := .image.repository -}}
+{{- if .root.Values.global.imageRegistry -}}
+{{- $parts := splitList "/" $repository -}}
+{{- if contains "." (first $parts) -}}
+{{- $repository = printf "%s/%s" .root.Values.global.imageRegistry (join "/" (rest $parts)) -}}
+{{- else -}}
+{{- $repository = printf "%s/%s" .root.Values.global.imageRegistry $repository -}}
+{{- end -}}
+{{- end -}}
+{{- if .image.digest -}}
+{{- printf "%s@%s" $repository .image.digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repository (.image.tag | default "latest") -}}
+{{- end -}}
+{{- end }}
+
+{{/* The names of the users that have SSH keys, space-separated: the SFTP accounts. */}}
+{{- define "ecflow-chart.sftpUsers" -}}
+{{- $names := list -}}
+{{- range .Values.users -}}
+{{- if .sshAuthorizedKeys -}}
+{{- $names = append $names .name -}}
+{{- end -}}
+{{- end -}}
+{{- join " " $names -}}
+{{- end }}
+
+{{/* The name of the Secret that holds the SFTP keys. */}}
+{{- define "ecflow-chart.sftpSecretName" -}}
+{{- .Values.sftp.existingSecret | default (printf "%s-sftp-keys" (include "ecflow-chart.fullname" .)) -}}
+{{- end }}
