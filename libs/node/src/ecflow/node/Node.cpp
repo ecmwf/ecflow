@@ -110,6 +110,21 @@ Node::Node(const Node& rhs)
         the_limit->set_node(this);
         limits_.push_back(the_limit);
     }
+
+    copy_remote_attrs(rhs);
+}
+
+void Node::copy_remote_attrs(const Node& rhs) {
+    // The copies keep the configuration and the state, but neither the connection of the original (which stays with
+    // it) nor its parent
+    for (const auto& aviso : rhs.avisos_) {
+        avisos_.push_back(aviso.make_detached());
+        avisos_.back().set_parent(this);
+    }
+    for (const auto& mirror : rhs.mirrors_) {
+        mirrors_.push_back(mirror.make_detached());
+        mirrors_.back().set_parent(this);
+    }
 }
 
 bool Node::check_defaults() const {
@@ -210,6 +225,10 @@ Node& Node::operator=(const Node& rhs) {
         inLimitMgr_ = rhs.inLimitMgr_;
         inLimitMgr_.set_node(this);
         flag_ = rhs.flag_;
+
+        avisos_.clear();
+        mirrors_.clear();
+        copy_remote_attrs(rhs);
 
         state_change_no_     = 0;
         variable_change_no_  = 0;

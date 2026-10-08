@@ -132,6 +132,13 @@ public:
     [[nodiscard]] AvisoAttr make_detached() const;
 
     [[nodiscard]] inline Node* parent() const { return parent_; }
+
+    ///
+    /// @brief Attaches the attribute to the given node (e.g. a copy of the node it was detached from).
+    ///
+    /// @param[in] parent The node holding the attribute.
+    ///
+    inline void set_parent(Node* parent) { parent_ = parent; }
     [[nodiscard]] inline const name_t& name() const { return name_; }
     [[nodiscard]] inline const listener_t& listener() const { return listener_; }
     [[nodiscard]] inline const url_t& url() const { return url_; }

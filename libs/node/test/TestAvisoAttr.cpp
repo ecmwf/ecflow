@@ -856,6 +856,30 @@ BOOST_AUTO_TEST_CASE(aviso_is_only_allowed_on_tasks_and_aliases) {
     BOOST_CHECK(s->avisos().empty());
 }
 
+BOOST_AUTO_TEST_CASE(copy_of_a_task_keeps_a_detached_aviso) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // The copy holds the attribute, attached to the copy, without the connection of the original (e.g. an archive)
+    Task copy{*t->isTask()};
+    BOOST_REQUIRE_EQUAL(copy.avisos().size(), 1u);
+    BOOST_CHECK_EQUAL(copy.avisos()[0].listener(), t->avisos()[0].listener());
+    BOOST_CHECK(copy.avisos()[0].parent() == &copy);
+    backend.state->pending.emplace_back(notification(1));
+    BOOST_CHECK(!copy.avisos()[0].isFree());
+    BOOST_CHECK(t->avisos()[0].isFree());
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(aviso_is_not_allowed_on_a_node_with_a_mirror) {
     ECF_NAME_THIS_TEST();
 

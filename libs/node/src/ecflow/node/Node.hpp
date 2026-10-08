@@ -1025,6 +1025,13 @@ private: // All mementos access
     void clear(); /// Clear *ALL* internal attributes
     void delete_attributes();
 
+    ///
+    /// @brief Copies the Aviso and Mirror attributes of the given node, detached from it and attached to this node.
+    ///
+    /// @param[in] rhs The node to copy the attributes from.
+    ///
+    void copy_remote_attrs(const Node& rhs);
+
 private:
     Node* parent_{nullptr}; // *NOT* persisted must be set by the parent class
     std::string n_;

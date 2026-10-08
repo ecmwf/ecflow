@@ -12,11 +12,14 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/TestLog.hpp"
 
@@ -125,6 +128,47 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_family) {
 
     //   PrintStyle::setStyle(PrintStyle::MIGRATE);
     //   cout << theDefs << "\n";
+}
+
+BOOST_AUTO_TEST_CASE(test_archive_and_restore_keep_aviso_and_mirror) {
+    ECF_NAME_THIS_TEST();
+
+    Defs theDefs;
+    std::string ecf_home = File::test_data("libs/base/test", "libs/base");
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_keep_aviso_and_mirror"));
+    family_ptr f1   = suite->add_family("f1");
+    task_ptr t1     = f1->add_task("t1");
+    task_ptr t2     = f1->add_task("t2");
+    t1->addAviso(
+        ecf::AvisoAttr{t1.get(), "A", R"({ "event": "mars" })", "http://aviso:8000", 3, "/path/to/auth", "", true});
+    t2->addMirror(ecf::MirrorAttr{t2.get(), "M", "/s/t", "host", "3141", "60", true, "/path/to/auth", "", false});
+    const std::string p1 = t1->absNodePath();
+    const std::string p2 = t2->absNodePath();
+
+    // The archived family keeps the attributes of its tasks, with their configuration and state
+    TestHelper::invokeRequest(&theDefs, Cmd_ptr(new PathsCmd(PathsCmd::ARCHIVE, f1->absNodePath())));
+    BOOST_REQUIRE_MESSAGE(f1->children().empty(), "Children not removed");
+
+    TestHelper::invokeRequest(&theDefs, Cmd_ptr(new PathsCmd(PathsCmd::RESTORE, f1->absNodePath())));
+    BOOST_REQUIRE_EQUAL(f1->children().size(), 2u);
+
+    const Node* r1 = theDefs.findAbsNode(p1).get();
+    BOOST_REQUIRE(r1 != nullptr);
+    BOOST_REQUIRE_EQUAL(r1->avisos().size(), 1u);
+    const auto& aviso = r1->avisos()[0];
+    BOOST_CHECK_EQUAL(aviso.name(), "A");
+    BOOST_CHECK_EQUAL(aviso.listener(), R"('{ "event": "mars" }')"); // as parsed from the archive
+    BOOST_CHECK_EQUAL(aviso.url(), "http://aviso:8000");
+    BOOST_CHECK_EQUAL(aviso.revision(), 3u);
+    BOOST_CHECK(aviso.collapse());
+    BOOST_CHECK(aviso.parent() == r1);
+
+    const Node* r2 = theDefs.findAbsNode(p2).get();
+    BOOST_REQUIRE(r2 != nullptr);
+    BOOST_REQUIRE_EQUAL(r2->mirrors().size(), 1u);
+    BOOST_CHECK_EQUAL(r2->mirrors()[0].name(), "M");
+    BOOST_CHECK_EQUAL(r2->mirrors()[0].remote_path(), "/s/t");
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
