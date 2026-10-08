@@ -104,3 +104,13 @@ when set, the repository, and the digest or the tag. Called with a dict:
 {{- define "ecflow-chart.revproxyTlsSecretName" -}}
 {{- .Values.revproxy.tls.existingSecret | default (printf "%s-revproxy-tls" (include "ecflow-chart.fullname" .)) -}}
 {{- end }}
+
+{{/* The host published by the Ingress. */}}
+{{- define "ecflow-chart.ingressHost" -}}
+{{- .Values.ingress.host | default (printf "%s.%s" .Values.ingress.hostPrefix .Values.ingress.domain) -}}
+{{- end }}
+
+{{/* The name of the TLS Secret of the Ingress. */}}
+{{- define "ecflow-chart.ingressTlsSecretName" -}}
+{{- .Values.ingress.tls.secretName | default (printf "%s-ingress-tls" (include "ecflow-chart.fullname" .)) -}}
+{{- end }}

@@ -1,0 +1,70 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The Ingress of the reverse proxy. One template, two renderings: the annotations
+depend on the controller of the cluster (global.ingress.controller). The NGINX Inc
+flavour is the manifest agreed with the ECMWF platform support for webapps-test
+(SD-130891); the community flavour is the equivalent for ingress-nginx.
+*/ -}}
+{{- if and .Values.ingress.enabled .Values.revproxy.enabled }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+{{- $host := include "ecflow-chart.ingressHost" . }}
+{{- $controller := .Values.global.ingress.controller }}
+{{- if not (has $controller (list "nginx-inc" "nginx-community")) }}
+{{- fail (printf "global.ingress.controller must be nginx-inc or nginx-community, not %q" $controller) }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}-revproxy
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+  annotations:
+    {{- with .Values.ingress.certManager.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ . | quote }}
+    {{- end }}
+    {{- if eq $controller "nginx-inc" }}
+    # The controller reaches the reverse proxy over HTTPS.
+    nginx.org/ssl-services: {{ $fullname }}-revproxy
+    {{- with .Values.ingress.proxyReadTimeout }}
+    nginx.org/proxy-read-timeout: {{ . | quote }}
+    {{- end }}
+    # The DNS operator of the ECMWF clusters publishes the host on this transport
+    # server, in the public view unless a view is named.
+    dns.operators.ecmwf.int/on-transport-server: {{ .Values.ingress.dns.transportServer | quote }}
+    {{- with .Values.ingress.dns.view }}
+    dns.operators.ecmwf.int/on-view: {{ . | quote }}
+    {{- end }}
+    {{- else }}
+    # The controller reaches the reverse proxy over HTTPS.
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    {{- with .Values.ingress.proxyReadTimeout }}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: {{ . | trimSuffix "s" | quote }}
+    {{- end }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $host }}
+      secretName: {{ include "ecflow-chart.ingressTlsSecretName" . }}
+  {{- end }}
+  rules:
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullname }}-revproxy
+                port:
+                  number: 443
+{{- end }}

@@ -19,6 +19,11 @@ global:
   # Names of existing Secrets of type kubernetes.io/dockerconfigjson used to pull the
   # images.
   imagePullSecrets: []
+  ingress:
+    # The ingress controller of the cluster, which decides the annotations of the
+    # Ingress: `nginx-inc` (NGINX Inc controller, the ECMWF clusters) or
+    # `nginx-community` (ingress-nginx, the DestinE clusters and kind).
+    controller: nginx-community
 
 # auth-o-tron, deployed by auth-o-tron-chart (oci://eccr.ecmwf.int/auth-o-tron) as a
 # dependency. The keys below are passed to that chart as they are; its own defaults
@@ -231,3 +236,32 @@ revproxy:
 # anywhere (sshd authenticates every connection itself).
 networkPolicy:
   enabled: true
+
+# The Ingress that publishes the reverse proxy outside the cluster. The host is
+# <hostPrefix>.<domain>, or `host` when set. TLS terminates at the controller, which
+# then reaches the reverse proxy over HTTPS; the certificate comes from the named
+# Secret, issued by cert-manager when `certManager.clusterIssuer` is set.
+ingress:
+  enabled: false
+  className: nginx
+  hostPrefix: ecflow
+  domain: example.org
+  host: ""
+  tls:
+    enabled: true
+    # Defaults to <fullname>-ingress-tls.
+    secretName: ""
+  certManager:
+    # `letsencrypt-production` on the ECMWF clusters, for public and LAN-only names.
+    clusterIssuer: ""
+  # Settings of the NGINX Inc controller at ECMWF (ignored by nginx-community): the
+  # DNS view of the name (`lan` for an ECMWF-only name; public when empty) and the
+  # transport server of the DNS operator.
+  dns:
+    view: ""
+    transportServer: vs-transport-https
+  # A proxy read timeout of the controller, for long requests; empty keeps the
+  # controller's default.
+  proxyReadTimeout: ""
+  # Further annotations, added as they are.
+  annotations: {}
