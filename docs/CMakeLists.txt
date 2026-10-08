@@ -137,6 +137,32 @@ add_custom_command(
 add_custom_target(ecflow_python_docs DEPENDS generate_ecflow_python_docs)
 
 #
+# (Re-)generate ecFlow Rust documentation
+#
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rust_api)
+add_custom_command(
+  OUTPUT generate_ecflow_rust_docs
+  COMMAND
+    #
+    # Generate the Rust API documentation
+    #
+    #  * The API documentation is based on the documentation comments in the sources of the ecflow crate,
+    #    extracted by the extract_api.py script
+    #  * The API documentation .../rust_api/reference.inc file is created in the binary directory
+    #
+    ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/rust_api/extract_api.py
+  COMMAND
+    #
+    #  Copy the API documentation .../rust_api/reference.inc file to the source directory
+    #
+    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/rust_api/reference.inc ${CMAKE_CURRENT_SOURCE_DIR}/rust_api
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rust_api
+  USES_TERMINAL
+)
+add_custom_target(ecflow_rust_docs DEPENDS generate_ecflow_rust_docs)
+
+#
 # Build ecFlow documentation
 #
 
@@ -152,6 +178,7 @@ add_custom_command(
   DEPENDS
     ecflow_client_docs
     ecflow_python_docs
+    ecflow_rust_docs
     ${CMAKE_CURRENT_SOURCE_DIR}/client_api/command_internals.rst
 )
 add_custom_target(ecflow_docs DEPENDS generate_ecflow_docs)
