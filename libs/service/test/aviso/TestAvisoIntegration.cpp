@@ -71,6 +71,10 @@ auto has_error() {
     return [](const std::vector<AvisoResponse>& r) { return !select<AvisoError>(r).empty(); };
 }
 
+auto has_watch_started(std::size_t count) {
+    return [count](const std::vector<AvisoResponse>& r) { return select<AvisoWatchStarted>(r).size() >= count; };
+}
+
 const std::string listener = R"({ "event": "test_event", "request": { "date": "20261006" } })";
 
 } // namespace
@@ -229,6 +233,85 @@ BOOST_AUTO_TEST_CASE(recreates_watch_after_stream_error) {
     BOOST_CHECK_EQUAL(select<AvisoNotification>(responses).size(), 1u);
     BOOST_CHECK_GE(select<AvisoError>(responses).size(), 1u);
     BOOST_CHECK_GE(select<AvisoWatchStarted>(responses).size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(recreated_watch_resumes_after_the_last_notification_received) {
+    ECF_NAME_THIS_TEST();
+
+    auto auth = make_auth_file(R"({ "email": "user@host.int", "key": "abc" })");
+    server.fail_streams_after(300ms);
+
+    AvisoBackend backend{100ms};
+    backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.path().string()});
+    BOOST_REQUIRE(server.wait_for_requests(1, 5s));
+
+    // A notification is received on the first watch, which then ends with an error
+    server.publish("test_event", R"({ "date": "20261006" })");
+    auto first = drain_until(backend, has_notifications(1));
+    BOOST_REQUIRE_EQUAL(select<AvisoNotification>(first).size(), 1u);
+    BOOST_REQUIRE(server.wait_for_ended_streams(1, 5s));
+
+    // The re-created watch resumes after that notification, which is not delivered again
+    BOOST_REQUIRE(server.wait_for_requests(2, 5s));
+    auto requests = server.requests();
+    BOOST_CHECK_MESSAGE(requests[1].body.find("from_id") != std::string::npos, requests[1].body);
+    BOOST_CHECK_MESSAGE(requests[1].body.find("from_date") == std::string::npos, requests[1].body);
+
+    server.publish("test_event", R"({ "date": "20261006" })");
+    auto second        = drain_until(backend, has_notifications(1));
+    auto notifications = select<AvisoNotification>(second);
+    BOOST_REQUIRE_EQUAL(notifications.size(), 1u);
+    BOOST_CHECK_EQUAL(notifications[0].sequence(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(can_be_destroyed_while_notifications_are_streamed) {
+    ECF_NAME_THIS_TEST();
+
+    auto auth = make_auth_file(R"({ "email": "user@host.int", "key": "abc" })");
+
+    {
+        AvisoBackend backend;
+        backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.path().string()});
+        BOOST_REQUIRE(server.wait_for_requests(1, 5s));
+
+        // Notifications are being streamed, and not drained, when the backend is destroyed
+        for (int i = 0; i < 3; ++i) {
+            server.publish("test_event", R"({ "date": "20261006" })");
+        }
+        BOOST_REQUIRE(server.wait_for_streamed(3, 5s));
+    }
+
+    // The server keeps serving, and no watch is created again by the destroyed backend
+    BOOST_CHECK_EQUAL(server.publish("test_event", R"({ "date": "20261006" })"), 4u);
+    BOOST_CHECK(!server.wait_for_requests(2, 500ms));
+}
+
+BOOST_AUTO_TEST_CASE(subscribing_again_replaces_the_watch) {
+    ECF_NAME_THIS_TEST();
+
+    auto auth = make_auth_file(R"({ "email": "user@host.int", "key": "abc" })");
+
+    AvisoBackend backend;
+    backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 0, auth.path().string()});
+    BOOST_REQUIRE(server.wait_for_requests(1, 5s));
+    BOOST_REQUIRE_EQUAL(select<AvisoWatchStarted>(drain_until(backend, has_watch_started(1))).size(), 1u);
+
+    // The second subscription, with another revision, replaces the first watch
+    backend.subscribe(AvisoSubscribe{"/s/t:a", listener, server.url(), 5, auth.path().string()});
+    BOOST_REQUIRE(server.wait_for_requests(2, 5s));
+    auto requests = server.requests();
+    BOOST_CHECK_MESSAGE(requests[1].body.find("from_id") != std::string::npos, requests[1].body);
+
+    // Only the notifications after the new revision are delivered, once
+    for (int i = 0; i < 6; ++i) {
+        server.publish("test_event", R"({ "date": "20261006" })");
+    }
+    auto responses     = drain_until(backend, has_notifications(1));
+    auto notifications = select<AvisoNotification>(responses);
+    BOOST_REQUIRE_EQUAL(notifications.size(), 1u);
+    BOOST_CHECK_EQUAL(notifications[0].sequence(), 6u);
+    BOOST_CHECK_EQUAL(select<AvisoWatchStarted>(responses).size(), 1u);
+    BOOST_CHECK(select<AvisoError>(responses).empty());
 }
 
 BOOST_AUTO_TEST_CASE(delivers_notification_published_while_watch_is_down) {
