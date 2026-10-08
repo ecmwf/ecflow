@@ -904,6 +904,39 @@ BOOST_AUTO_TEST_CASE(aviso_is_only_allowed_on_tasks_and_aliases) {
     BOOST_CHECK(s->avisos().empty());
 }
 
+BOOST_AUTO_TEST_CASE(node_equality_compares_aviso_and_mirror_attributes) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    const std::string definition = "suite s\n"
+                                   "  task a\n"
+                                   "    aviso --name A --listener '{ \"event\": \"mars\" }'\n"
+                                   "  task m\n"
+                                   "    mirror --name M --remote_path /x\n"
+                                   "endsuite\n";
+    auto parse                   = [&definition]() {
+        defs_ptr defs = Defs::create();
+        DefsStructureParser parser(defs.get(), definition, true);
+        std::string errorMsg, warningMsg;
+        BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+        return defs;
+    };
+    auto lhs = parse();
+    auto rhs = parse();
+    BOOST_CHECK(*lhs == *rhs);
+
+    // A difference in an Aviso attribute makes the nodes differ
+    find(rhs, "/s/a")->avisos()[0].setFree();
+    BOOST_CHECK(!(*lhs == *rhs));
+    find(lhs, "/s/a")->avisos()[0].setFree();
+    BOOST_CHECK(*lhs == *rhs);
+
+    // A difference in a Mirror attribute makes the nodes differ
+    find(rhs, "/s/m")->changeMirror("M", "--remote_path /y");
+    BOOST_CHECK(!(*lhs == *rhs));
+}
+
 BOOST_AUTO_TEST_CASE(copy_of_a_task_keeps_a_detached_aviso) {
     ECF_NAME_THIS_TEST();
 

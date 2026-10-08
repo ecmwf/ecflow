@@ -2061,6 +2061,44 @@ bool Node::operator==(const Node& rhs) const {
         }
     }
 
+    if (avisos_.size() != rhs.avisos_.size()) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  (avisos_.size() != rhs.avisos_.size()) " << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+    for (unsigned i = 0; i < avisos_.size(); ++i) {
+        if (!(avisos_[i] == rhs.avisos_[i])) {
+#ifdef DEBUG
+            if (Ecf::debug_equality()) {
+                std::cout << "Node::operator==  (avisos_[i] != rhs.avisos_[i]) " << debugNodePath() << "\n";
+            }
+#endif
+            return false;
+        }
+    }
+
+    if (mirrors_.size() != rhs.mirrors_.size()) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  (mirrors_.size() != rhs.mirrors_.size()) " << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+    for (unsigned i = 0; i < mirrors_.size(); ++i) {
+        if (!(mirrors_[i] == rhs.mirrors_[i])) {
+#ifdef DEBUG
+            if (Ecf::debug_equality()) {
+                std::cout << "Node::operator==  (mirrors_[i] != rhs.mirrors_[i]) " << debugNodePath() << "\n";
+            }
+#endif
+            return false;
+        }
+    }
+
     if (meters_.size() != rhs.meters_.size()) {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
