@@ -3,6 +3,22 @@
 
 FROM debian:13.7-slim
 
+# Provision placeholders for the Mesa drivers
+# Qt GUI links the vendor-neutral GL dispatch libraries (libglvnd), which Debian makes depend on the Mesa
+# drivers. ecFlowUI does not render with OpenGL over X11, so empty packages stand in for the drivers, which
+# would otherwise bring about 180 MB into the image (LLVM, among others). The epoch of their version satisfies
+# any versioned dependency, and keeps apt from replacing them. Qt is told not to look for a GL integration
+# (QT_XCB_GL_INTEGRATION, below).
+RUN for package in libegl-mesa0 libglx-mesa0 libgbm1; do \
+        mkdir -p "/tmp/placeholders/${package}/DEBIAN" \
+        && printf 'Package: %s\nVersion: 99:0~ecflow\nArchitecture: all\nMaintainer: software@ecmwf.int\nDescription: Placeholder for %s, unused by ecFlowUI\n' \
+            "${package}" "${package}" > "/tmp/placeholders/${package}/DEBIAN/control" \
+        && dpkg-deb --build "/tmp/placeholders/${package}" "/tmp/placeholders/${package}.deb" > /dev/null \
+        && dpkg -i "/tmp/placeholders/${package}.deb" \
+        || exit 1; \
+    done \
+    && rm -rf /tmp/placeholders
+
 # Provision the runtime of ecFlowUI that the package does not declare
 # Qt loads its platform and image format plugins at run time, so dpkg-shlibdeps cannot derive them from the
 # executables: qt6-qpa-plugins provides the platform plugins (including xcb, used to display over X11), and
@@ -19,9 +35,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Provision ecFlow package
-# This Dockerfile assumes that the ecFlow package for each target platform, built with ecFlowUI
-# (ENABLE_UI=ON), is available in the build context (i.e. this directory), named after the platform
-# architecture: ecflow-amd64.deb, ecflow-arm64.deb.
+# This Dockerfile assumes that the ecFlow package for each target platform, built with ecFlowUI only
+# (preset linux.gcc.ui.release), is available in the build context (i.e. this directory), named after the
+# platform architecture: ecflow-amd64.deb, ecflow-arm64.deb.
 # TARGETARCH, set by BuildKit, selects the package, so that a single multi-platform build installs the
 # matching package on each platform.
 # The package is bind-mounted, rather than copied, so that it is not kept in an image layer, and installed
@@ -57,9 +73,11 @@ RUN groupadd --non-unique --gid "${ECFLOW_GID}" ecflow \
     && useradd --create-home --uid "${ECFLOW_UID}" --gid "${ECFLOW_GID}" ecflow \
     && install -d -o ecflow -g ecflow /home/ecflow/.ecflow_ui_v5
 
-# Qt depends on a UTF-8 locale, and the X shared memory extension does not work across the container boundary
+# Qt depends on a UTF-8 locale, the X shared memory extension does not work across the container boundary,
+# and no OpenGL driver is installed (see above)
 ENV LANG=C.UTF-8 \
-    QT_X11_NO_MITSHM=1
+    QT_X11_NO_MITSHM=1 \
+    QT_XCB_GL_INTEGRATION=none
 
 WORKDIR /home/ecflow
 
