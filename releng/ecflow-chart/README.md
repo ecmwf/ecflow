@@ -60,7 +60,8 @@ The accounts of a deployment are its `users` list, kept in a `users.yaml` of the
 deployer, outside git, and passed after the profile on every upgrade; start from
 `examples/users.example.yaml`, which explains each field. An account gives a user a uid,
 an SFTP login with their public keys, and a private home; who may log in is decided by
-the ECMWF API, not by the chart.
+the ECMWF API, not by the chart. The SFTP host key is generated at the first install and
+kept from then on, so a user records it once (`sftp.hostKey` in `values.yaml`).
 
 ## A local deployment on kind
 

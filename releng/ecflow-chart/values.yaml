@@ -204,11 +204,21 @@ server:
 # to start without an account to create.
 sftp:
   port: 22
-  # An existing Secret with the keys of the sidecar: `<user>.authorized_keys` per
-  # user, and optionally `ssh_host_ed25519_key`. When empty, the chart renders the
-  # authorized keys of `users` into a Secret of its own, and the sidecar generates a
-  # temporary host key at each start.
+  # An existing Secret with the authorized keys of the sidecar, `<user>.authorized_keys`
+  # per user (and, if it also holds `ssh_host_ed25519_key`, set hostKey.generate to
+  # false). When empty, the chart renders the authorized keys of `users` into a Secret
+  # of its own.
   existingSecret: ""
+  # The host key of the sidecar, stable across upgrades so that users record it once:
+  # by default the chart generates an ed25519 key at the first install and keeps it
+  # (the Secret is read back at every upgrade and survives an uninstall); or an
+  # existing Secret with the key as `ssh_host_ed25519_key`, made with
+  #   ssh-keygen -t ed25519 -N '' -f ssh_host_ed25519_key
+  #   kubectl -n <namespace> create secret generic ecflow-sftp-host-key --from-file=ssh_host_ed25519_key
+  # With neither, the sidecar generates a temporary key at each start.
+  hostKey:
+    generate: true
+    existingSecret: ""
   service:
     type: ClusterIP
     nodePort: ""

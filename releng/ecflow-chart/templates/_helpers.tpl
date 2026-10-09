@@ -102,6 +102,18 @@ users that have SSH keys, each as `name` or `name:uid` when a uid is given.
 {{- .Values.sftp.existingSecret | default (printf "%s-sftp-keys" (include "ecflow-chart.fullname" .)) -}}
 {{- end }}
 
+{{/*
+The name of the Secret that holds the SFTP host key, or nothing when the sidecar
+generates a temporary key at each start.
+*/}}
+{{- define "ecflow-chart.sftpHostKeySecretName" -}}
+{{- if .Values.sftp.hostKey.existingSecret -}}
+{{- .Values.sftp.hostKey.existingSecret -}}
+{{- else if .Values.sftp.hostKey.generate -}}
+{{- printf "%s-sftp-host-key" (include "ecflow-chart.fullname" .) -}}
+{{- end -}}
+{{- end }}
+
 {{/* The name of the Secret that holds the administrator's files. */}}
 {{- define "ecflow-chart.adminSecretName" -}}
 {{- .Values.server.admin.existingSecret | default (printf "%s-admin" (include "ecflow-chart.fullname" .)) -}}

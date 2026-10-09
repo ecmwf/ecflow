@@ -218,7 +218,15 @@ spec:
             secretName: {{ include "ecflow-chart.adminSecretName" . }}
         - name: admin
           emptyDir: {}
+        # The keys directory of the sidecar: the authorized keys and the host key, from
+        # one or two Secrets, projected into one directory.
         - name: sftp-keys
-          secret:
-            secretName: {{ include "ecflow-chart.sftpSecretName" . }}
+          projected:
             defaultMode: 0400
+            sources:
+              - secret:
+                  name: {{ include "ecflow-chart.sftpSecretName" . }}
+              {{- with (include "ecflow-chart.sftpHostKeySecretName" .) }}
+              - secret:
+                  name: {{ . }}
+              {{- end }}
