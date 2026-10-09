@@ -184,3 +184,44 @@ Pod by hand as above.
 
 To remove the deployment: `helm uninstall ecflow -n $N`; the PVCs of the workspace and
 the state are kept, and deleted with `kubectl -n $N delete pvc ecflow-workspace ecflow-state`.
+
+## Running the proof suite
+
+`examples/suite/make_suite.py` writes a suite that proves a deployment end to end: two
+experiments over two dates, each with a build, daily cycles under limits, meters, events
+and labels, a lagged archive and a cancellation, plus one task that aborts on its first
+try and completes on the second. The jobs run inside the server container and report
+to the server over loopback, so they need no credentials. From this directory, with the
+`ecflowapirc` and the SSH key of the deployment at hand:
+
+```bash
+# 1. Write the definition, the include files and the 34 task scripts
+python3 examples/suite/make_suite.py --out examples/suite
+
+# 2. Upload the include files and the scripts to the workspace, as an SFTP user
+cd examples/suite
+printf 'put -r include\nput -r files\n' | sftp -P <port> -o IdentitiesOnly=yes -i $KEY -b - <user>@<host>
+cd -
+
+# 3. Load the definition through the reverse proxy, start the server, begin the suite
+export ECF_AUTHTOKENS=$PWD/ecflowapirc
+E="ecflow_client --https --host <host> --port 443"
+$E --load=examples/suite/proof.def
+$E --restart                 # a freshly started server is halted
+$E --begin=proof
+
+# 4. Follow the run: in ecflow_ui (ECF_AUTHTOKENS=$PWD/ecflowapirc ecflow_ui), or from the shell
+$E --query state /proof      # active ... complete, after one or two minutes
+$E --get_state /proof        # every node with its state, repeats, meters, labels and events
+$E --log=get 200             # the server log: the planned abort of getini and its requeue
+```
+
+The outcome to expect: the suite `complete`, the repeats of `main` and `lag` past their
+last date, the labels filled, the events set, and `/proof/ifc1/fc/main/getini` complete
+at `try:2`. The job files and their output are in the workspace under `proof/`, the
+data the tasks produce under `data/<expver>/`, both readable over SFTP. To run it
+again: `$E --replace=/proof examples/suite/proof.def` and `$E --begin=proof`; to remove
+it: `$E --delete=force yes /proof`.
+
+On kind, the SFTP port is 2222 on `localhost` and the host `ecflow.localtest.me`; on
+webapps-test, SFTP goes through a port forward and the host is `ecflow-mt-test.ecmwf.int`.
