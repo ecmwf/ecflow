@@ -12,6 +12,10 @@ workspace=${ECFLOW_WORKSPACE_DIR:-/workspace}
 # installed where sshd's key lookup, which runs as nobody, can read them
 keys_dir=${SFTP_KEYS_DIR:-/etc/ssh/sftp-keys}
 mkdir -p /etc/ssh/authorized_keys
+# The accounts to create: a space-separated list of entries `name` or `name:uid`. Without a uid, useradd
+# picks the next free one, which on a fresh container is 1000, the uid of the ecFlow server's own account
+# in the server image; files the two write then look like each other's. A deployment that shares the
+# workspace with the server gives every account a uid of its own.
 users=${SFTP_USERS:?SFTP_USERS must list the accounts to create}
 
 # Every account has the group of the workspace as its primary group, as the ecFlow server does, so that
@@ -23,12 +27,16 @@ if [[ -z "${group}" ]]; then
     groupadd --non-unique --gid "${gid}" "${group}"
 fi
 
-for user in ${users}; do
+for entry in ${users}; do
+    user=${entry%%:*}
+    uid=${entry#"${user}"}
+    uid=${uid#:}
     if ! id "${user}" >/dev/null 2>&1; then
-        useradd --no-create-home --home-dir "${workspace}" --shell /usr/sbin/nologin --gid "${gid}" "${user}"
+        useradd --no-create-home --home-dir "${workspace}" --shell /usr/sbin/nologin --gid "${gid}" \
+            ${uid:+--uid "${uid}"} "${user}"
         # An account without a password is locked, and sshd refuses a locked account even for a public key
         usermod --password '*' "${user}"
-        echo "entrypoint: created account '${user}' (group ${group}, gid ${gid})"
+        echo "entrypoint: created account '${user}' (uid $(id -u "${user}"), group ${group}, gid ${gid})"
     fi
     if [[ -r "${keys_dir}/${user}.authorized_keys" ]]; then
         install -m 0644 "${keys_dir}/${user}.authorized_keys" "/etc/ssh/authorized_keys/${user}"

@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# A local deployment on kind, published through the community ingress-nginx
+# controller (installed in the cluster as the README describes) on the host below,
+# which resolves to 127.0.0.1; SFTP on the node port that the kind cluster maps to the
+# host. The images are loaded into the cluster with `kind load docker-image`.
+#
+#   helm upgrade --install ecflow . -n ecflow --create-namespace -f examples/values-kind.yaml
+
+global:
+  ingress:
+    controller: nginx-community
+
+ingress:
+  enabled: true
+  host: ecflow.localtest.me
+  # No cert-manager on kind: with the Secret absent, the controller serves its own
+  # self-signed certificate.
+  tls:
+    - secretName: ecflow-ingress-tls
+
+sftp:
+  service:
+    type: NodePort
+    nodePort: 30022
+
+# Throwaway users for the tests, accepted by auth-o-tron with HTTP Basic authentication
+# through a `plain` provider, and a throwaway signing key; test fixtures, never part of
+# a real deployment. Helm replaces lists, so the whole `providers` list is restated here.
+auth-o-tron:
+  config:
+    jwt:
+      secret: throwaway-signing-key-for-kind-only-0123456789
+    providers:
+      - name: ecmwf-api-provider
+        type: ecmwf-api
+        uri: https://api.ecmwf.int/v1
+        realm: ecmwf
+      - name: plain-provider
+        type: plain
+        realm: local
+        users:
+          - username: admin
+            password: "somesecret#admin"
+          - username: alice
+            password: "somesecret#alice"
+          - username: bob
+            password: "somesecret#bob"
+          - username: charlie
+            password: "somesecret#charlie"
+
+# The checks of `helm test`, with one of the throwaway users.
+tests:
+  enabled: true
+  user: admin
+  password: "somesecret#admin"
+
+# The accounts: the SFTP users, with the public keys of the developers that use the
+# deployment.
+users: []
+#  - name: alice
+#    uid: 2001
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... alice@host
+#  - name: bob
+#    uid: 2002
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... bob@host
+#  - name: charlie
+#    uid: 2003
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... charlie@host

@@ -1,0 +1,37 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The TransportServer that publishes the SFTP sidecar through the NGINX Inc
+controller (a custom resource of that controller; the community ingress-nginx
+publishes TCP ports through its own ConfigMap instead, outside the chart). The
+listener it names must exist in the GlobalConfiguration of the controller.
+*/ -}}
+{{- if .Values.sftp.transportServer.enabled }}
+{{- if ne .Values.global.ingress.controller "nginx-inc" }}
+{{- fail "sftp.transportServer requires global.ingress.controller: nginx-inc" }}
+{{- end }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+apiVersion: k8s.nginx.org/v1
+kind: TransportServer
+metadata:
+  name: {{ $fullname }}-sftp
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sftp
+  {{- with .Values.sftp.transportServer.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  listener:
+    name: {{ .Values.sftp.transportServer.listener }}
+    protocol: TCP
+  upstreams:
+    - name: sftp
+      service: {{ $fullname }}-sftp
+      port: {{ .Values.sftp.port }}
+  action:
+    pass: sftp
+{{- end }}

@@ -1,0 +1,105 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+Admits only the reverse proxy to the ecFlow server and to auth-o-tron, and anyone
+to the SFTP sidecar. Neither the readiness probe nor the jobs are affected: both
+run inside the server Pod and reach the server over loopback. The policy of
+auth-o-tron selects the Pods of the subchart by the labels it sets, since the
+upstream chart has no NetworkPolicy of its own.
+*/ -}}
+{{- if .Values.networkPolicy.enabled }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullname }}-server
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ecflow-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "ecflow-chart.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: revproxy
+      ports:
+        - protocol: TCP
+          port: {{ .Values.server.port }}
+    - ports:
+        - protocol: TCP
+          port: {{ .Values.sftp.port }}
+{{- if index .Values "auth-o-tron" "enabled" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullname }}-authotron
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: authotron
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-o-tron
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "ecflow-chart.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: revproxy
+      ports:
+        - protocol: TCP
+          port: 8080
+    {{- if (index .Values "auth-o-tron" "metrics" "enabled") }}
+    # The metrics endpoint, scraped from the monitoring namespace of the cluster.
+    - ports:
+        - protocol: TCP
+          port: {{ index .Values "auth-o-tron" "metrics" "port" | default 9090 }}
+    {{- end }}
+{{- end }}
+{{- if and .Values.revproxy.enabled .Values.ingress.enabled }}
+{{- $controller := index .Values.networkPolicy.ingressController .Values.global.ingress.controller }}
+---
+# With the Ingress enabled, only the ingress controller reaches the reverse proxy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullname }}-revproxy
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ecflow-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: revproxy
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            {{- toYaml $controller.namespaceSelector | nindent 12 }}
+          podSelector:
+            {{- toYaml $controller.podSelector | nindent 12 }}
+        # The test Pod of the release reaches the reverse proxy as a client.
+        - podSelector:
+            matchLabels:
+              {{- include "ecflow-chart.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: test
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end }}
+{{- end }}

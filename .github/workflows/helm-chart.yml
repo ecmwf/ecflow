@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Lints and renders the Helm chart of releng/ecflow-chart, with its defaults and with
+# each profile of examples/, whenever the chart changes. Third-party actions are
+# pinned to an immutable commit SHA; the tag beside each is a hint, not what is
+# resolved.
+
+name: Helm chart
+
+on:
+  push:
+    paths:
+      - releng/ecflow-chart/**
+      - .github/workflows/helm-chart.yml
+  pull_request:
+    paths:
+      - releng/ecflow-chart/**
+      - .github/workflows/helm-chart.yml
+  workflow_dispatch: ~
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint and render
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: releng/ecflow-chart
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+
+      - name: Check that the chart carries the version of ecFlow
+        run: |
+          ecflow=$(sed -n 's/^project( *ecflow .*VERSION *\([0-9][0-9.]*\).*/\1/p' ../../CMakeLists.txt)
+          chart=$(sed -n 's/^version: *//p' Chart.yaml)
+          app=$(sed -n 's/^appVersion: *"\{0,1\}\([0-9][0-9.]*\)"\{0,1\}/\1/p' Chart.yaml)
+          echo "ecFlow ${ecflow}, chart ${chart}, appVersion ${app}"
+          test "${ecflow}" = "${chart}" && test "${ecflow}" = "${app}"
+
+      - name: Fetch the dependencies
+        run: helm dependency update
+
+      - name: Lint with the defaults and with each profile
+        run: |
+          # The chart refuses to render without a signing key for auth-o-tron and
+          # without an SFTP account, so the example accounts accompany every lint.
+          helm lint . --set auth-o-tron.config.jwt.secret=lint-only -f examples/users.example.yaml
+          for profile in examples/values-*.yaml; do
+              echo "== ${profile}"
+              helm lint . -f "${profile}" -f examples/users.example.yaml
+          done
+
+      - name: Render with each profile, and with the example accounts
+        run: |
+          for profile in examples/values-*.yaml; do
+              echo "== ${profile}"
+              helm template ecflow . -n ecflow -f "${profile}" -f examples/users.example.yaml > /dev/null
+          done

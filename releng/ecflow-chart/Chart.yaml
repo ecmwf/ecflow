@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: ecflow-chart
+description: >-
+  An ecFlow server on Kubernetes: the server with its SFTP sidecar, behind an nginx
+  reverse proxy that authenticates every request with auth-o-tron.
+type: application
+home: https://github.com/ecmwf/ecflow
+sources:
+  - https://github.com/ecmwf/ecflow
+keywords:
+  - ecflow
+  - workflow
+  - scheduler
+maintainers:
+  - name: ECMWF
+
+# The version of the chart is the version of ecFlow, one to one, as `project()` of the
+# top-level CMakeLists.txt states it; the Helm chart workflow fails when the two
+# differ. A development build appends the build metadata of the Debian package
+# (+git<commit time>.<commit>), which SemVer 2 ignores in ordering.
+version: 5.19.0
+appVersion: "5.19.0"
+
+dependencies:
+  - name: auth-o-tron-chart
+    alias: auth-o-tron
+    version: 0.3.4
+    repository: oci://eccr.ecmwf.int/auth-o-tron
+    condition: auth-o-tron.enabled

@@ -1,0 +1,16 @@
+{{- /*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
+{{ .Chart.Name }} {{ .Chart.Version }} installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+{{- if index .Values "auth-o-tron" "enabled" }}
+auth-o-tron is deployed by auth-o-tron-chart as the Service "{{ index .Values "auth-o-tron" "fullnameOverride" | default "auth-o-tron" }}".
+{{- else }}
+auth-o-tron is not deployed by this release (auth-o-tron.enabled is false).
+{{- end }}
+
+SFTP accounts: {{ include "ecflow-chart.sftpUsers" . }}.
+
+The objects of the release:
+  kubectl get all -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}

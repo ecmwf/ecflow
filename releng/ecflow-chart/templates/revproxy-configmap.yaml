@@ -1,0 +1,119 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The configuration and the static pages of the reverse proxy. The nginx configuration
+is the Kubernetes variant of imachination, with the upstream names and the resolver
+taken from the release: the upstreams are Service names, resolved per request
+through the cluster DNS (nginx exits at start if an upstream name is unknown), the
+access log goes to standard output, and port 443 is the whole surface (no plain
+HTTP).
+*/ -}}
+{{- if .Values.revproxy.enabled }}
+{{- $fullname := include "ecflow-chart.fullname" . }}
+{{- $domain := printf "%s.svc.%s" .Release.Namespace .Values.clusterDomain }}
+{{- $authotron := index .Values "auth-o-tron" "fullnameOverride" | default "auth-o-tron" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-revproxy-nginx
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+data:
+  default.conf: |
+    # Rendered by {{ .Chart.Name }} {{ .Chart.Version }}; edit the values, not this file.
+    server {
+      listen 443 ssl;
+      listen [::]:443 ssl;
+      server_name {{ .Values.revproxy.serverName }};
+
+      ssl_certificate     /etc/ssl/certs/revproxy.crt;
+      ssl_certificate_key /etc/ssl/private/revproxy.key;
+
+      # The cluster DNS service, through which the upstream names are resolved
+      # per request.
+      resolver {{ .Values.revproxy.resolver }} valid=10s ipv6=off;
+
+      access_log /dev/stdout;
+      error_log  /dev/stderr info;
+
+      location / {
+        root /usr/share/nginx/html/server;
+        index index.html index.htm;
+      }
+
+      location /v1/ecflow {
+        proxy_read_timeout {{ .Values.revproxy.proxyReadTimeout }};
+        proxy_connect_timeout {{ .Values.revproxy.proxyConnectTimeout }};
+
+        auth_request /auth;
+
+        # Held in a variable so that the name is resolved per request; nginx then
+        # no longer substitutes the matched location prefix, so the original URI
+        # is appended explicitly.
+        set $ecflow_upstream http://{{ $fullname }}-server.{{ $domain }}:{{ .Values.server.port }};
+        proxy_pass $ecflow_upstream$request_uri;
+
+        # The headers returned by auth-o-tron, forwarded to the server.
+        auth_request_set    $authorization $upstream_http_authorization;
+        proxy_set_header    Authorization $authorization;
+        auth_request_set    $auth_username $upstream_http_x_auth_username;
+        proxy_set_header    X-Auth-Username $auth_username;
+        auth_request_set    $auth_realm $upstream_http_x_auth_realm;
+        proxy_set_header    X-Auth-Realm $auth_realm;
+        auth_request_set    $auth_roles $upstream_http_x_auth_roles;
+        proxy_set_header    X-Auth-Roles $auth_roles;
+
+        proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto $scheme;
+        proxy_set_header    Host $host;
+
+        proxy_redirect      default /;
+      }
+
+      error_page 500 502 503 504 /50x.html;
+      location = /50x.html {
+        root /usr/share/nginx/html/server;
+      }
+
+      location = /auth {
+        internal;
+        set $auth_upstream http://{{ $authotron }}.{{ $domain }}:8080;
+        proxy_pass $auth_upstream/authenticate;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-URI $request_uri;
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-revproxy-static
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+data:
+  index.html: |
+    <html>
+        <head>
+            <title>ecFlow</title>
+        </head>
+        <body>
+            <h1>Welcome to ecFlow server.</h1>
+            <p>Welcome to ecFlow server -- see <a href="https://ecflow.readthedocs.io/" target="_blank">documentation</a>.</p>
+        </body>
+    </html>
+  50x.html: |
+    <html>
+        <head>
+            <title>ecFlow</title>
+        </head>
+        <body>
+            <h1>Error!</h1>
+        </body>
+    </html>
+{{- end }}

@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# A kind cluster for a local deployment of the chart with examples/values-kind.yaml:
+#
+#   kind create cluster --config examples/kind-cluster.yaml
+#
+# The node carries the label that the kind manifest of ingress-nginx schedules the
+# controller on, and maps the controller's ports 80 and 443 to the host, where the
+# Ingress host of the profile (ecflow.localtest.me) resolves to 127.0.0.1. SFTP is
+# published as a NodePort on 30022, mapped to 2222 on the host. Nothing else of the
+# deployment is reachable from the host.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ecflow
+nodes:
+  - role: control-plane
+    # The node image, pinned by digest so that every local cluster runs the same
+    # Kubernetes whatever the kind release; the digest is the one kind's release
+    # notes give for this tag (kind v0.33.0, Kubernetes v1.37.0).
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30022
+        hostPort: 2222
+        listenAddress: "127.0.0.1"
+        protocol: TCP

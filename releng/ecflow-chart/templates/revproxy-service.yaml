@@ -1,0 +1,25 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- if .Values.revproxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ecflow-chart.fullname" . }}-revproxy
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+spec:
+  type: {{ .Values.revproxy.service.type }}
+  selector:
+    {{- include "ecflow-chart.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: revproxy
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      {{- if and (eq .Values.revproxy.service.type "NodePort") .Values.revproxy.service.nodePort }}
+      nodePort: {{ .Values.revproxy.service.nodePort }}
+      {{- end }}
+{{- end }}

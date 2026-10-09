@@ -1,0 +1,333 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values of ecflow-chart. A deployment is a set of values layered over these
+# (helm upgrade --install <release> <chart> -f <profile>.yaml); the profiles of the
+# known targets are under examples/.
+
+# The name the objects of the release derive from: `<release>-<nameOverride>`, or the
+# release name alone when it already contains this name (a release named `ecflow`
+# gives `ecflow-server`, `ecflow-sftp`, ...). `fullnameOverride` fixes the whole name.
+nameOverride: ecflow
+fullnameOverride: ""
+
+# Settings shared with the subcharts.
+global:
+  # Registry prefix of every image (the subcharts read global.imageRegistry when they
+  # support it). Empty keeps the registry of each image.repository.
+  imageRegistry: ""
+  # Names of existing Secrets of type kubernetes.io/dockerconfigjson used to pull the
+  # images.
+  imagePullSecrets: []
+  ingress:
+    # The ingress controller of the cluster, which decides the annotations of the
+    # Ingress: `nginx-inc` (NGINX Inc controller, the ECMWF clusters) or
+    # `nginx-community` (ingress-nginx, the DestinE clusters and kind).
+    controller: nginx-community
+
+# auth-o-tron, deployed by auth-o-tron-chart (oci://eccr.ecmwf.int/auth-o-tron) as a
+# dependency. The keys below are passed to that chart as they are; its own defaults
+# apply to anything not set here (helm show values oci://eccr.ecmwf.int/auth-o-tron/auth-o-tron-chart).
+auth-o-tron:
+  enabled: true
+  # The reverse proxy addresses the authentication service as `authotron`, whatever
+  # the release name.
+  fullnameOverride: authotron
+  image:
+    repository: eccr.ecmwf.int/auth-o-tron/auth-o-tron
+    tag: 0.3.7
+  # The metrics endpoint stays, reachable from any Pod (the NetworkPolicy admits its
+  # port while it is enabled); the ServiceMonitor needs the Prometheus Operator CRDs,
+  # absent from a kind cluster.
+  metrics:
+    enabled: true
+    port: 9090
+    serviceMonitor:
+      enabled: false
+  # The key with which auth-o-tron signs its tokens (jwt.secret, HS256, 32 bytes or
+  # more) must not live in the values: it is given to the container as the variable
+  # AOT_JWT__SECRET from a Secret of the namespace, created by the deployer, e.g.
+  #   kubectl -n <namespace> create secret generic authotron-jwt --from-literal=secret=$(openssl rand -hex 32)
+  # The chart refuses to render when neither this variable nor config.jwt.secret is
+  # set. A test profile may put a throwaway key in config.jwt.secret instead.
+  extraEnv: []
+  #  - name: AOT_JWT__SECRET
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: authotron-jwt
+  #        key: secret
+  # The configuration of auth-o-tron, rendered as it is into config.yaml. auth-o-tron
+  # authenticates only: every user comes through the authentication authority, the
+  # ECMWF API, and holds no list of users here. What an authenticated user may do is
+  # decided by the ecFlow server (ECF_PERMISSIONS), and who gets an account is the
+  # `users` list below. A test profile may add a `plain` provider with throwaway users
+  # (see examples/values-kind.yaml); Helm replaces lists, so such a profile restates
+  # the whole `providers` list.
+  config:
+    version: 1.0.0
+    logging:
+      level: debug
+      format: console
+    auth:
+      timeout_in_ms: 3000
+    providers:
+      - name: ecmwf-api-provider
+        type: ecmwf-api
+        uri: https://api.ecmwf.int/v1
+        realm: ecmwf
+    store:
+      enabled: false
+    services: []
+    jwt:
+      exp: 3600
+      iss: authotron-issuer
+      # Empty: the key comes from AOT_JWT__SECRET (see extraEnv above).
+      secret: ""
+      aud: authotron-audience
+    include_legacy_headers: true
+    bind_address: 0.0.0.0:8080
+
+# The images of the stack. Each image is <registry>/<repository>:<tag>, where the
+# registry is global.imageRegistry when set, else the one in the repository. A digest
+# (sha256:...) takes precedence over the tag when given.
+images:
+  server:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-server-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+  sftp:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-sftp-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+  revproxy:
+    repository: eccr.ecmwf.int/ecflow-dev-environments/ecflow-revproxy-dev
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+
+# The DNS domain of the cluster, part of the Service names the reverse proxy resolves
+# (<service>.<namespace>.svc.<clusterDomain>).
+clusterDomain: cluster.local
+
+# The accounts of the deployment, declared once by the deployer: not who may log in
+# (that is the authentication authority's), but who has an account on the server
+# side. Each entry names a user; `sshAuthorizedKeys` lists the public keys with which
+# the user reaches the SFTP sidecar, and marks the user as an SFTP account; `uid` is
+# the numeric id under which the user owns files on the workspace, the same in the SFTP
+# sidecar and, later, in the server container when the jobs run as their owner. Give
+# every account a uid of its own, 2000 or above: 1000 is the server's own account. The
+# chart refuses to render an account without a uid, or two accounts sharing a name or a
+# uid, since the sidecar would otherwise hand out 1000 again, or fail at start.
+#   - name: alice
+#     uid: 2001
+#     sshAuthorizedKeys:
+#       - ssh-ed25519 AAAA... alice@host
+#   - name: bob
+#     uid: 2002
+#     sshAuthorizedKeys:
+#       - ssh-ed25519 AAAA... bob@host
+users: []
+
+# The ecFlow server.
+server:
+  port: 8888
+  # The administrator's files, expanded into /admin by the init container. The chart
+  # renders them into a Secret of the release: server_environment.cfg from
+  # `environment` below, and every entry of `files` (a path relative to /admin, and
+  # its content; `troikaw` and `*.sh` are made executable). An existing Secret, whose
+  # keys are the paths with "__" in place of "/", replaces the rendered one when named.
+  admin:
+    existingSecret: ""
+    files: {}
+    #  troikaw: |
+    #    #!/bin/sh
+    #    exec troika "$@"
+  # The settings of server_environment.cfg, which the server reads from /admin at
+  # start: one `NAME = VALUE` line each, without quotes around the value. Not set here,
+  # because the Pod sets them as environment variables, which the server prefers:
+  # ECF_PORT and ECF_HOME (the launch script of the image), ECF_CHECK and ECF_CHECKOLD
+  # (the Deployment, on the state volume). Names prefixed with <host>.<port>. by the
+  # server: ECF_LOG, ECF_LISTS, ECF_PASSWD, ECF_CUSTOM_PASSWD.
+  environment:
+    ECF_CHECKINTERVAL: 120
+    ECF_CHECKMODE: CHECK_ON_TIME
+    ECF_LOG: ecf.log
+    ECF_INTERVAL: 60
+    ECF_JOB_CMD: "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1"
+    ECF_KILL_CMD: "kill -15 %ECF_RID%"
+    ECF_STATUS_CMD: "ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1"
+    ECF_CHECK_CMD: "ps --pid %ECF_RID% -f"
+    ECF_URL_CMD: "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%"
+    ECF_URL_BASE: https://confluence.ecmwf.int
+    ECF_URL: display/ECFLOW/ecflow+home
+    ECF_MICRODEF: "%"
+    ECF_LISTS: ecf.lists
+    ECF_PASSWD: ecf.passwd
+    ECF_CUSTOM_PASSWD: ecf.custom_passwd
+    ECF_TASK_THRESHOLD: 4000
+  # Delay and period of the readiness probe, which pings the server with ecflow_client.
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 8
+  # The volumes of the server, each mounted by one node at a time:
+  # - the workspace (suites, task scripts, job output, shared by every account),
+  # - the state (checkpoint files),
+  # - and, the homes -- /home/<user> for every account that has a uid, owned by that uid
+  #       with mode 0700, where a user keeps what no other user may read (the troika
+  #       configuration and the credentials of their jobs). The homes volume can be disabled;
+  #       the server's own /home/ecflow is created on it as well.
+  persistence:
+    workspace:
+      size: 1Gi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+    state:
+      size: 64Mi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+    home:
+      enabled: true
+      size: 1Gi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+  # The Service in front of the server; NodePort exposes it on a kind cluster.
+  service:
+    type: ClusterIP
+    nodePort: ""
+
+# The SFTP sidecar of the server Pod, which gives the users key-based access to the
+# workspace: the one way into a deployment, hence always present. The chart refuses to
+# render unless at least one account of `users` has SSH keys, since the sidecar refuses
+# to start without an account to create.
+sftp:
+  port: 22
+  # An existing Secret with the authorized keys of the sidecar, `<user>.authorized_keys`
+  # per user (and, if it also holds `ssh_host_ed25519_key`, set hostKey.generate to
+  # false). When empty, the chart renders the authorized keys of `users` into a Secret
+  # of its own.
+  existingSecret: ""
+  # The host key of the sidecar, stable across upgrades so that users record it once:
+  # by default the chart generates an ed25519 key at the first install and keeps it
+  # (the Secret is read back at every upgrade and survives an uninstall); or an
+  # existing Secret with the key as `ssh_host_ed25519_key`, made with
+  #   ssh-keygen -t ed25519 -N '' -f ssh_host_ed25519_key
+  #   kubectl -n <namespace> create secret generic ecflow-sftp-host-key --from-file=ssh_host_ed25519_key
+  # With neither, the sidecar generates a temporary key at each start.
+  hostKey:
+    generate: true
+    existingSecret: ""
+  service:
+    type: ClusterIP
+    nodePort: ""
+  # Publication of the SFTP port outside the cluster through the NGINX Inc controller
+  # (global.ingress.controller: nginx-inc only): a TransportServer of the namespace,
+  # passing the TCP listener named below to the SFTP Service. The listener is declared
+  # in the GlobalConfiguration of the controller by the platform team, which also
+  # decides the port it opens; ask them for its name. Reachable on the ECMWF LAN.
+  transportServer:
+    enabled: false
+    listener: ecflow-sftp
+    annotations: {}
+
+# The reverse proxy (nginx) in front of the server: every request to /v1/ecflow is
+# authenticated with auth-o-tron (auth_request) before it is forwarded. HTTPS only.
+revproxy:
+  enabled: true
+  replicas: 1
+  # The server_name of the nginx configuration, and the subject of a self-signed
+  # certificate when the chart generates one.
+  serverName: localhost
+  # The cluster DNS service, through which nginx resolves the upstreams per request:
+  #   kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
+  resolver: 10.96.0.10
+  proxyReadTimeout: 500s
+  proxyConnectTimeout: 90s
+  # The certificate and key, in a Secret of type kubernetes.io/tls (tls.crt, tls.key):
+  # an existing Secret, or one the chart generates with a self-signed certificate for
+  # `serverName` (regenerated at every upgrade). When neither is given, the image
+  # generates a self-signed certificate for localhost at each start.
+  tls:
+    existingSecret: ""
+    selfSigned:
+      enabled: false
+      days: 365
+  service:
+    type: ClusterIP
+    nodePort: ""
+
+# NetworkPolicies, enforced by the network plugin of the cluster when it supports
+# them: the server is reachable on its port from the reverse proxy only (it trusts
+# the identity an unauthenticated request claims), auth-o-tron from the reverse proxy
+# only (credentials could otherwise be tried from any Pod), and the SFTP sidecar from
+# anywhere (sshd authenticates every connection itself).
+networkPolicy:
+  enabled: true
+  # When the Ingress is enabled, the reverse proxy admits only the Pods of the ingress
+  # controller, selected per controller by the labels of its namespace and Pods. The
+  # community defaults are those of the ingress-nginx manifests; the NGINX Inc ones
+  # are those of its Helm chart and are confirmed on the ECMWF clusters at the first
+  # deployment. Without the Ingress (kind, port forwards), the reverse proxy stays
+  # open: NodePort traffic carries no Pod identity.
+  ingressController:
+    nginx-community:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+          app.kubernetes.io/component: controller
+    nginx-inc:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: nginx-ingress
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nginx-ingress
+
+# The Ingress that publishes the reverse proxy outside the cluster. The host is
+# <hostPrefix>.<domain>, or `host` when set. TLS terminates at the controller, which
+# then reaches the reverse proxy over HTTPS; `tls` lists the certificates in the usual
+# form of an Ingress, one entry per Secret, `hosts` defaulting to the host above. The
+# Secret is issued by cert-manager when `certManager.clusterIssuer` is set, and the
+# controller serves its own certificate while the Secret does not exist.
+ingress:
+  enabled: false
+  className: nginx
+  hostPrefix: ecflow
+  domain: example.org
+  host: ""
+  tls: []
+  #  - secretName: ecflow-ingress-tls
+  #    hosts: []                # defaults to the host of the Ingress
+  certManager:
+    # `letsencrypt-production` on the ECMWF clusters, for public and LAN-only names.
+    clusterIssuer: ""
+  # Settings of the NGINX Inc controller at ECMWF (ignored by nginx-community): the
+  # DNS view of the name (`lan` for an ECMWF-only name; public when empty) and the
+  # transport server of the DNS operator.
+  dns:
+    view: ""
+    transportServer: vs-transport-https
+  # A proxy read timeout of the controller, for long requests; empty keeps the
+  # controller's default.
+  proxyReadTimeout: ""
+  # Further annotations, added as they are.
+  annotations: {}
+
+# The checks of `helm test`: a Pod of the release, run on demand, that reaches the
+# server through the reverse proxy with ecflow_client, as a client does. It verifies
+# that valid credentials are accepted, that missing and wrong ones are refused, and
+# that the refused requests left no trace in the server log. The credentials are those
+# of a user that auth-o-tron accepts with HTTP Basic authentication, which only a
+# `plain` provider of a test profile offers; the defaults therefore disable the test,
+# and a test profile enables it with its throwaway user (examples/values-kind.yaml).
+tests:
+  enabled: false
+  user: ""
+  password: ""
+  # A name that no user has; its refused requests must not appear in the log.
+  intruder: intruder

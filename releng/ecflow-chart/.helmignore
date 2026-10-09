@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# Files left out of the packaged chart.
+.DS_Store
+.git/
+.gitignore
+*.swp
+*.tmp
+*~
+# The example profiles are documentation, not part of the package.
+examples/

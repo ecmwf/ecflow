@@ -1,0 +1,47 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+The Service of the ecFlow server, addressed by the reverse proxy, and the Service
+of the SFTP sidecar. Both select the Pods of the server Deployment.
+*/ -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ecflow-chart.fullname" . }}-server
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  type: {{ .Values.server.service.type }}
+  selector:
+    {{- include "ecflow-chart.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+  ports:
+    - name: ecflow
+      port: {{ .Values.server.port }}
+      targetPort: ecflow
+      {{- if and (eq .Values.server.service.type "NodePort") .Values.server.service.nodePort }}
+      nodePort: {{ .Values.server.service.nodePort }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ecflow-chart.fullname" . }}-sftp
+  labels:
+    {{- include "ecflow-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sftp
+spec:
+  type: {{ .Values.sftp.service.type }}
+  selector:
+    {{- include "ecflow-chart.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+  ports:
+    - name: ssh
+      port: {{ .Values.sftp.port }}
+      targetPort: ssh
+      {{- if and (eq .Values.sftp.service.type "NodePort") .Values.sftp.service.nodePort }}
+      nodePort: {{ .Values.sftp.service.nodePort }}
+      {{- end }}
