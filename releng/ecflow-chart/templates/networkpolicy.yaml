@@ -34,11 +34,9 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.server.port }}
-    {{- if .Values.sftp.enabled }}
     - ports:
         - protocol: TCP
           port: {{ .Values.sftp.port }}
-    {{- end }}
 {{- if index .Values "auth-o-tron" "enabled" }}
 ---
 apiVersion: networking.k8s.io/v1

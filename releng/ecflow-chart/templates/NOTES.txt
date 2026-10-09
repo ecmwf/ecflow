@@ -10,5 +10,7 @@ auth-o-tron is deployed by auth-o-tron-chart as the Service "{{ index .Values "a
 auth-o-tron is not deployed by this release (auth-o-tron.enabled is false).
 {{- end }}
 
+SFTP accounts: {{ include "ecflow-chart.sftpUsers" . }}.
+
 The objects of the release:
   kubectl get all -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}

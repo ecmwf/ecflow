@@ -47,11 +47,12 @@ jobs:
 
       - name: Lint with the defaults and with each profile
         run: |
-          # The defaults refuse to render without a signing key for auth-o-tron.
-          helm lint . --set auth-o-tron.config.jwt.secret=lint-only
+          # The chart refuses to render without a signing key for auth-o-tron and
+          # without an SFTP account, so the example accounts accompany every lint.
+          helm lint . --set auth-o-tron.config.jwt.secret=lint-only -f examples/users.example.yaml
           for profile in examples/values-*.yaml; do
               echo "== ${profile}"
-              helm lint . -f "${profile}"
+              helm lint . -f "${profile}" -f examples/users.example.yaml
           done
 
       - name: Render with each profile, and with the example accounts

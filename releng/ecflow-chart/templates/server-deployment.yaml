@@ -172,7 +172,6 @@ spec:
             - name: home
               mountPath: /home
             {{- end }}
-        {{- if .Values.sftp.enabled }}
         - name: sftp
           image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.sftp) | quote }}
           imagePullPolicy: {{ .Values.images.sftp.pullPolicy }}
@@ -202,7 +201,6 @@ spec:
             - name: home
               mountPath: /home
             {{- end }}
-        {{- end }}
       volumes:
         - name: workspace
           persistentVolumeClaim:
@@ -220,10 +218,7 @@ spec:
             secretName: {{ include "ecflow-chart.adminSecretName" . }}
         - name: admin
           emptyDir: {}
-        {{- if .Values.sftp.enabled }}
         - name: sftp-keys
           secret:
             secretName: {{ include "ecflow-chart.sftpSecretName" . }}
             defaultMode: 0400
-            optional: true
-        {{- end }}

@@ -36,13 +36,14 @@ Fetch the dependencies, then check the chart and render it without a cluster:
 ```bash
 cd releng/ecflow-chart
 helm dependency update
-helm lint . -f examples/values-kind.yaml
-helm template ecflow . -f examples/values-kind.yaml > /dev/null
+helm lint . -f examples/values-kind.yaml -f examples/users.example.yaml
+helm template ecflow . -f examples/values-kind.yaml -f examples/users.example.yaml > /dev/null
 ```
 
-The defaults alone do not render: a deployment must give auth-o-tron its signing key
-(`AOT_JWT__SECRET` from a Secret, see `values.yaml`), and the accounts of `users` must
-each carry a uid of their own; the chart stops the render with a message otherwise.
+A profile alone does not render: a deployment must give auth-o-tron its signing key
+(`AOT_JWT__SECRET` from a Secret, see `values.yaml`) and declare its accounts, at least
+one of them with SSH keys for the SFTP sidecar, each with a uid of its own; the chart
+stops the render with a message otherwise.
 
 Install, or upgrade, a release named `ecflow` in a namespace, with a profile:
 

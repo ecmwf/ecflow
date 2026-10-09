@@ -25,7 +25,6 @@ spec:
       {{- if and (eq .Values.server.service.type "NodePort") .Values.server.service.nodePort }}
       nodePort: {{ .Values.server.service.nodePort }}
       {{- end }}
-{{- if .Values.sftp.enabled }}
 ---
 apiVersion: v1
 kind: Service
@@ -46,4 +45,3 @@ spec:
       {{- if and (eq .Values.sftp.service.type "NodePort") .Values.sftp.service.nodePort }}
       nodePort: {{ .Values.sftp.service.nodePort }}
       {{- end }}
-{{- end }}

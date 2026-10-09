@@ -199,9 +199,10 @@ server:
     nodePort: ""
 
 # The SFTP sidecar of the server Pod, which gives the users key-based access to the
-# workspace.
+# workspace: the one way into a deployment, hence always present. The chart refuses to
+# render unless at least one account of `users` has SSH keys, since the sidecar refuses
+# to start without an account to create.
 sftp:
-  enabled: true
   port: 22
   # An existing Secret with the keys of the sidecar: `<user>.authorized_keys` per
   # user, and optionally `ssh_host_ed25519_key`. When empty, the chart renders the
