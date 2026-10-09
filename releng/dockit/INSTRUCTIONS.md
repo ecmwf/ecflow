@@ -36,7 +36,7 @@ directory it belongs to), and a third builds the standalone images:
    checked-out commit, inside the build environment image, once per architecture (`amd64` and `arm64`), each
    natively on a GitHub-hosted runner of that architecture. This is the same script that
    `build_ecflow_package.sh` runs in its container (Step 1 below), so both build the package in exactly the
-   same way. Each leg uploads the resulting `ecflow-<arch>.deb`, with the Aviso client library
+   same way. Each leg uploads the resulting `<package>-<arch>.deb`, with the Aviso client library
    (`aviso-ffi-<arch>.tar.gz`) when the package is built with Aviso support, as an
    `ecflow-debian-package-<image>-<arch>` artefact. The matrix pairs the preset `linux.gcc.server.release` with
    `ecflow-server-dev`, and `linux.gcc.ui.release` with `ecflow-ui-dev`.
@@ -111,9 +111,11 @@ The package version identifies the build: `<version>+git<commit time>.<commit>` 
 `5.19.0+git20260924132851.20d90280fbce`, with the commit time in UTC), which Debian orders after the `<version>`
 release, and among builds by commit time. A build of the commit tagged `<version>` keeps the plain `<version>`.
 
-The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
-`ecflow-arm64.deb` on Apple Silicon), and copied, with the Aviso client library (`aviso-ffi-<arch>.tar.gz`), into the
-output directory, which defaults to `ecflow-server/` (`${PWD}/ecflow-server`).
+The package is named after its content, `ecflow-server`, as set by the preset (`CPACK_PACKAGE_NAME`), so that it is
+told apart from the `ecflow-ui` package of the `ecflow-ui-dev` image. The resulting file is named after the package
+and its architecture, `<package>-<arch>.deb` (e.g. `ecflow-server-amd64.deb`, or `ecflow-server-arm64.deb` on Apple
+Silicon), and copied, with the Aviso client library (`aviso-ffi-<arch>.tar.gz`), into the output directory, which
+defaults to the directory named after the package, `ecflow-server/` (`${PWD}/ecflow-server`).
 This is the same directory used as the Docker build context in Step 2, so no manual copy is needed with default
 settings. Creating the package with a different `--output_dir` means the package and the Aviso client library must
 be moved into `ecflow-server/` manually before Step 2.
@@ -137,7 +139,7 @@ the options of the package build itself, and their defaults (e.g. the pinned ecb
 
 #### Step 2: Build the ecFlow server container image
 
-The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
+The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-server-<arch>.deb`, which must be
 present in its build context at build time. This is typically the package generated in Step 1. When the Aviso client
 library of the target platform, `aviso-ffi-<arch>.tar.gz`, is also present, it is installed in `/usr/local/lib`
 before the package, so that the server finds it; a package built with Aviso support requires it, and the image build
@@ -289,14 +291,15 @@ ecFlowUI on the X server of the host: XQuartz on macOS, or, on Linux, the local 
 Run:
 
 ```bash
-./build_ecflow_package.sh --preset linux.gcc.ui.release --output_dir "${PWD}/ecflow-ui"
+./build_ecflow_package.sh --preset linux.gcc.ui.release
 ```
 
 The preset `linux.gcc.ui.release` builds ecFlowUI only: the server, the Python module, the HTTP and UDP servers and
 Aviso support are left out, so that the package does not depend on Python, and its binaries are stripped. The
-package holds `ecflow_ui` (the launcher script), `ecflow_ui.x`, `ecflow_client` and the configuration of ecFlowUI,
-and is named `ecflow-<arch>.deb`, as for the server. The other options (e.g. `--source`) are those described in
-"Building the `ecflow-server` image".
+package, named `ecflow-ui`, holds `ecflow_ui` (the launcher script), `ecflow_ui.x`, `ecflow_client` and the
+configuration of ecFlowUI. It is delivered as `ecflow-ui-<arch>.deb` (e.g. `ecflow-ui-arm64.deb`) into `ecflow-ui/`,
+the build context of Step 2. The other options (e.g. `--source`) are those described in "Building the `ecflow-server`
+image".
 
 #### Step 2: Build the ecFlow UI container image
 

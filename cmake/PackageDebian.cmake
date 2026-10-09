@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "ecflow")
+# The package is named 'ecflow', unless a preset names it after its content (e.g. ecflow-server, ecflow-ui)
+if(NOT CPACK_PACKAGE_NAME)
+  set(CPACK_PACKAGE_NAME "ecflow")
+endif()
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}")
 

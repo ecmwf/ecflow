@@ -37,14 +37,14 @@ RUN apt-get update \
 # Provision ecFlow package
 # This Dockerfile assumes that the ecFlow package for each target platform, built with ecFlowUI only
 # (preset linux.gcc.ui.release), is available in the build context (i.e. this directory), named after the
-# platform architecture: ecflow-amd64.deb, ecflow-arm64.deb.
+# platform architecture: ecflow-ui-amd64.deb, ecflow-ui-arm64.deb.
 # TARGETARCH, set by BuildKit, selects the package, so that a single multi-platform build installs the
 # matching package on each platform.
 # The package is bind-mounted, rather than copied, so that it is not kept in an image layer, and installed
 # with apt-get, so that the runtime libraries it depends on are installed as well.
 ARG TARGETARCH
 
-RUN --mount=type=bind,source=ecflow-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
+RUN --mount=type=bind,source=ecflow-ui-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
     apt-get update \
     && apt-get install -y --no-install-recommends /tmp/ecflow.deb \
     && rm -rf /var/lib/apt/lists/*

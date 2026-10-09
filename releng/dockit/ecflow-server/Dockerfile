@@ -20,7 +20,7 @@ RUN python3 -m venv --system-site-packages /opt/local/python \
 
 # Provision ecFlow package
 # This Dockerfile assumes that the ecFlow package for each target platform is available in the build context
-# (i.e. this directory), named after the platform architecture: ecflow-amd64.deb, ecflow-arm64.deb.
+# (i.e. this directory), named after the platform architecture: ecflow-server-amd64.deb, ecflow-server-arm64.deb.
 # TARGETARCH, set by BuildKit, selects the package, so that a single multi-platform build installs the
 # matching package on each platform.
 # The package is bind-mounted, rather than copied, so that it is not kept in an image layer, and installed
@@ -37,7 +37,7 @@ RUN --mount=type=bind,target=/tmp/context \
         tar --no-same-owner -xzf "/tmp/context/aviso-ffi-${TARGETARCH}.tar.gz" -C /usr/local/lib && ldconfig; \
     fi
 
-RUN --mount=type=bind,source=ecflow-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
+RUN --mount=type=bind,source=ecflow-server-${TARGETARCH}.deb,target=/tmp/ecflow.deb \
     apt-get update \
     && apt-get install -y --no-install-recommends /tmp/ecflow.deb \
     && rm -rf /var/lib/apt/lists/*

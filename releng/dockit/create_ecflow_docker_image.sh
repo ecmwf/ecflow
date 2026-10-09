@@ -6,9 +6,9 @@
 #
 # create_ecflow_docker_image.sh
 #
-# Creates the ecflow-server-dev Docker image from the ecflow Debian package(s)
-# produced by build_ecflow_package.sh, i.e. ecflow-<arch>.deb in the image build
-# context (ecflow-server/, by default), for one or more platforms.
+# Creates an ecflow Docker image (by default, ecflow-server-dev) from the ecflow
+# Debian package(s) produced by build_ecflow_package.sh, i.e. <package>-<arch>.deb
+# in the image build context (ecflow-server/, by default), for one or more platforms.
 #
 # Optionally, each platform image is smoke-tested before the image is loaded
 # into the local Docker or pushed to a registry: it must not exceed a size limit
@@ -48,13 +48,13 @@ function usage() {
     cat <<EOF
 Usage: create_ecflow_docker_image.sh [options]
 
-Creates the ecflow-server-dev Docker image from the ecflow-<arch>.deb package(s)
+Creates an ecflow Docker image from the <package>-<arch>.deb package(s)
 in the image build context, optionally smoke-tests it, and loads it into the
 local Docker (default) or pushes it to a registry.
 
 Options:
   --context DIR            Image build context, holding the Dockerfile and the
-                             ecflow-<arch>.deb of each platform
+                             <package>-<arch>.deb of each platform
                              (default: ${CONTEXT})
   --platform LIST          Comma-separated target platforms, e.g.
                              linux/amd64,linux/arm64
@@ -157,8 +157,9 @@ IFS=',' read -r -a PLATFORM_LIST <<< "${PLATFORMS}"
 for platform in "${PLATFORM_LIST[@]}"; do
     arch="${platform#*/}"
     arch="${arch%%/*}"
-    if [[ ! -f "${CONTEXT}/ecflow-${arch}.deb" ]]; then
-        echo "No package for ${platform}: ${CONTEXT}/ecflow-${arch}.deb not found (see build_ecflow_package.sh)" >&2
+    packages=("${CONTEXT}"/ecflow-*"-${arch}.deb")
+    if [[ ! -f "${packages[0]}" ]]; then
+        echo "No package for ${platform}: no ${CONTEXT}/<package>-${arch}.deb found (see build_ecflow_package.sh)" >&2
         exit 1
     fi
 done

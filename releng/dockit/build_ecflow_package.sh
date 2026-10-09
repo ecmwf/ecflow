@@ -13,8 +13,9 @@
 # its job container, so that both build the package in exactly the same way.
 #
 # The script runs on the host: it prepares the sandbox, launches the container,
-# and copies the package out as ecflow-<arch>.deb (e.g. ecflow-arm64.deb), the
-# name the image build (ecflow-server/Dockerfile) selects for its target platform.
+# and copies the package out as <package>-<arch>.deb (e.g. ecflow-server-arm64.deb),
+# the name the image build (e.g. ecflow-server/Dockerfile) selects for its target
+# platform.
 #
 # By default, ecflow is cloned; with --source DIR, the ecflow sources in DIR
 # (e.g. a local working tree) are built instead.
@@ -33,7 +34,9 @@ set -o pipefail
 DOCKER_IMAGE="marcosbento/lumen:debian-13.7"
 
 SANDBOX_DIR="${PWD}/build_ecflow_package.sandbox"
-OUTPUT_DIR="${PWD}/ecflow-server"
+# By default, each package is copied into the directory named after it (e.g. ecflow-server/, ecflow-ui/), which
+# is the build context of its image
+OUTPUT_DIR=""
 
 SOURCE=""
 VERBOSE="false"
@@ -59,17 +62,19 @@ function usage() {
 Usage: build_ecflow_package.sh [options]
 
 Builds an ecflow Debian package inside a Docker container, by running
-build_ecflow_package_in_container.sh there. Leaves the package, named ecflow-<arch>.deb
-after its architecture (e.g. ecflow-arm64.deb), in the output directory, which
-by default is the build context of the ecflow-server-dev image.
+build_ecflow_package_in_container.sh there. Leaves the package, named
+<package>-<arch>.deb after the package and its architecture (e.g.
+ecflow-server-arm64.deb, ecflow-ui-arm64.deb), in the output directory, which
+by default is the directory named after the package, the build context of its
+image (e.g. ecflow-server/, for the ecflow-server-dev image).
 
 Options:
   --build_dir DIR          Sandbox directory for git clones and build trees,
                              bind-mounted into the container; the sources
                              are checked out under DIR/source/{ecflow,ecbuild}
                              (default: \${PWD}/build_ecflow_package.sandbox)
-  --output_dir DIR         Directory the ecflow-<arch>.deb is copied into
-                             (default: \${PWD}/ecflow-server)
+  --output_dir DIR         Directory the <package>-<arch>.deb is copied into
+                             (default: \${PWD}/<package>)
   --source DIR             Build the ecflow sources in DIR (mounted read-only)
                              instead of cloning ecflow; ecbuild is still
                              checked out (unless --skip-checkout)
@@ -121,8 +126,10 @@ fi
 mkdir -p "${SANDBOX_DIR}"
 SANDBOX_DIR="$(cd "${SANDBOX_DIR}" && pwd)"
 
-mkdir -p "${OUTPUT_DIR}"
-OUTPUT_DIR="$(cd "${OUTPUT_DIR}" && pwd)"
+if [[ -n "${OUTPUT_DIR}" ]]; then
+    mkdir -p "${OUTPUT_DIR}"
+    OUTPUT_DIR="$(cd "${OUTPUT_DIR}" && pwd)"
+fi
 
 mkdir -p "${SANDBOX_DIR}/output"
 
@@ -169,15 +176,21 @@ docker run --rm \
 
 # Deliver each package built now, with the Aviso client library of its architecture (delivered when the server
 # is built with Aviso support); the files of other architectures, built by earlier runs, are kept
+delivered=()
 for pkg in "${SANDBOX_DIR}"/output/ecflow-*.deb; do
-    arch="$(basename "${pkg}" .deb)"
-    arch="${arch#ecflow-}"
-    cp "${pkg}" "${OUTPUT_DIR}/"
-    rm -f "${OUTPUT_DIR}/aviso-ffi-${arch}.tar.gz"
+    name="$(basename "${pkg}" .deb)"
+    arch="${name##*-}"
+    name="${name%-*}"
+    destination="${OUTPUT_DIR:-${PWD}/${name}}"
+    mkdir -p "${destination}"
+    cp "${pkg}" "${destination}/"
+    rm -f "${destination}/aviso-ffi-${arch}.tar.gz"
+    delivered+=("${destination}/$(basename "${pkg}")")
     if [[ -f "${SANDBOX_DIR}/output/aviso-ffi-${arch}.tar.gz" ]]; then
-        cp "${SANDBOX_DIR}/output/aviso-ffi-${arch}.tar.gz" "${OUTPUT_DIR}/"
+        cp "${SANDBOX_DIR}/output/aviso-ffi-${arch}.tar.gz" "${destination}/"
+        delivered+=("${destination}/aviso-ffi-${arch}.tar.gz")
     fi
 done
 
-make_banner "ecflow Debian package(s) available in ${OUTPUT_DIR}"
-ls -la "${OUTPUT_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/aviso-ffi-*.tar.gz 2>/dev/null || true
+make_banner "ecflow Debian package(s) delivered"
+ls -la "${delivered[@]}"
