@@ -18,8 +18,9 @@
 #
 # Steps: check out ecbuild beside the ecflow sources (and, with --clone-ecflow,
 # the ecflow sources themselves), then configure, build and package ecflow, and
-# deliver the package as ecflow-<arch>.deb (e.g. ecflow-arm64.deb), the name the
-# image build (ecflow-server/Dockerfile) selects for its target platform. When the
+# deliver the package as <package>-<arch>.deb (e.g. ecflow-server-arm64.deb), the
+# name the image build (e.g. ecflow-server/Dockerfile) selects for its target
+# platform. When the
 # server is built with Aviso support, the Aviso client library it links (provided
 # by the build environment, not by the package) is delivered beside the package,
 # as aviso-ffi-<arch>.tar.gz, for the image build to install.
@@ -60,8 +61,9 @@ function usage() {
     cat <<EOF
 Usage: build_ecflow_package_in_container.sh --source DIR [options]
 
-Builds the ecflow Debian package used by the ecflow-server-dev image, inside the
-build environment, and delivers it as ecflow-<arch>.deb in the output directory.
+Builds an ecflow Debian package (e.g. the ecflow-server package, used by the
+ecflow-server-dev image), inside the build environment, and delivers it as
+<package>-<arch>.deb in the output directory.
 ecbuild is expected beside the ecflow sources, in DIR/../ecbuild.
 
 Options:
@@ -71,7 +73,7 @@ Options:
   --jobs N                 Parallel build jobs (default: ${JOBS})
   --build-dir DIR          Build tree, kept out of the sources, which may be
                              read-only (default: DIR/.deploy/build/<preset>)
-  --output-dir DIR         Directory the ecflow-<arch>.deb is delivered to
+  --output-dir DIR         Directory the <package>-<arch>.deb is delivered to
                              (default: the current directory)
   --revision SHA           Commit of the sources, used in the package file name
                              (default: the HEAD commit of the sources)
@@ -184,13 +186,15 @@ rm -f "${BUILD_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/ecflow-*.deb "${OUTPUT_DIR}"/a
 cmake --build "${BUILD_DIR}" --target package
 
 # ---------------------------------------------------------------------------
-# Deliver the package as ecflow-<arch>.deb, named after its Debian architecture (e.g. amd64, arm64)
+# Deliver the package as <package>-<arch>.deb, named after the package (e.g. ecflow-server, ecflow-ui) and its
+# Debian architecture (e.g. amd64, arm64)
 # ---------------------------------------------------------------------------
 
 for pkg in "${BUILD_DIR}"/ecflow-*.deb; do
+    name=$(dpkg-deb --field "${pkg}" Package)
     arch=$(dpkg-deb --field "${pkg}" Architecture)
-    echo "Delivering $(basename "${pkg}") as ${OUTPUT_DIR}/ecflow-${arch}.deb"
-    cp "${pkg}" "${OUTPUT_DIR}/ecflow-${arch}.deb"
+    echo "Delivering $(basename "${pkg}") as ${OUTPUT_DIR}/${name}-${arch}.deb"
+    cp "${pkg}" "${OUTPUT_DIR}/${name}-${arch}.deb"
 done
 
 # ---------------------------------------------------------------------------
@@ -199,8 +203,12 @@ done
 
 # The archive holds the library under its file name and its soname (e.g. libaviso_ffi.so.2.4.2 and
 # libaviso_ffi.so.2), to be extracted into the library directory of the image. The need for the library is read
-# from the server built, rather than from the configuration, so that whatever enabled or disabled Aviso is honoured.
-needed=$(readelf -d "${BUILD_DIR}/bin/ecflow_server" | sed -n '/NEEDED/p')
+# from the server built, rather than from the configuration, so that whatever enabled or disabled Aviso is honoured;
+# a build without the server (e.g. ecFlowUI only) needs no library.
+needed=""
+if [[ -f "${BUILD_DIR}/bin/ecflow_server" ]]; then
+    needed=$(readelf -d "${BUILD_DIR}/bin/ecflow_server" | sed -n '/NEEDED/p')
+fi
 if [[ "${needed}" == *libaviso_ffi* ]]; then
     library=$(sed -n 's/^AVISO_FFI_LIBRARY:FILEPATH=//p' "${BUILD_DIR}/CMakeCache.txt")
     if [[ -z "${library}" || ! -f "${library}" ]]; then

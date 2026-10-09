@@ -6,9 +6,9 @@
 #
 # create_ecflow_docker_image.sh
 #
-# Creates the ecflow-server-dev Docker image from the ecflow Debian package(s)
-# produced by build_ecflow_package.sh, i.e. ecflow-<arch>.deb in the image build
-# context (ecflow-server/, by default), for one or more platforms.
+# Creates an ecflow Docker image (by default, ecflow-server-dev) from the ecflow
+# Debian package(s) produced by build_ecflow_package.sh, i.e. <package>-<arch>.deb
+# in the image build context (ecflow-server/, by default), for one or more platforms.
 #
 # Optionally, each platform image is smoke-tested before the image is loaded
 # into the local Docker or pushed to a registry: it must not exceed a size limit
@@ -36,6 +36,7 @@ TAGS=()
 LABELS=()
 BUILD_ARGS=()
 SMOKE_TEST="false"
+SMOKE_TEST_SCRIPT="${SCRIPT_DIR}/test_ecflow_server_image.sh"
 MAX_SIZE_MB=400
 PUSH="false"
 
@@ -47,13 +48,13 @@ function usage() {
     cat <<EOF
 Usage: create_ecflow_docker_image.sh [options]
 
-Creates the ecflow-server-dev Docker image from the ecflow-<arch>.deb package(s)
+Creates an ecflow Docker image from the <package>-<arch>.deb package(s)
 in the image build context, optionally smoke-tests it, and loads it into the
 local Docker (default) or pushes it to a registry.
 
 Options:
   --context DIR            Image build context, holding the Dockerfile and the
-                             ecflow-<arch>.deb of each platform
+                             <package>-<arch>.deb of each platform
                              (default: ${CONTEXT})
   --platform LIST          Comma-separated target platforms, e.g.
                              linux/amd64,linux/arm64
@@ -63,7 +64,12 @@ Options:
   --label KEY=VALUE        Image label; repeatable
   --build-arg KEY=VALUE    Build argument, e.g. ECFLOW_UID=\$(id -u); repeatable
   --smoke-test             Before loading/pushing, build, start and check the
-                             image of each platform (size and server lifecycle)
+                             image of each platform (size, and the checks of the
+                             smoke test script)
+  --smoke-test-script FILE Script checking the image of a platform, run with
+                             the image and the platform as arguments
+                             (default: test_ecflow_server_image.sh, the server
+                             lifecycle)
   --max-size-mb N          Size limit of the smoke test, in MB
                              (default: ${MAX_SIZE_MB})
   --push                   Push the image to its registry, instead of loading it
@@ -76,7 +82,7 @@ EOF
 }
 
 # Smoke-tests the image of one platform: builds it, loads it into the local Docker, checks its size, and
-# checks server lifecycle and persistence using the installed entrypoint
+# runs the smoke test script (by default, the server lifecycle and persistence checks) on it
 function smoke_test() (
     local platform="$1"
     local scratch tag
@@ -101,7 +107,7 @@ function smoke_test() (
         return 1
     fi
 
-    bash "${SCRIPT_DIR}/test_ecflow_server_image.sh" "${tag}" "${platform}"
+    bash "${SMOKE_TEST_SCRIPT}" "${tag}" "${platform}"
 )
 
 # ---------------------------------------------------------------------------
@@ -116,6 +122,7 @@ while [[ $# -gt 0 ]]; do
         --label) LABELS+=(--label "$2"); shift 2 ;;
         --build-arg) BUILD_ARGS+=(--build-arg "$2"); shift 2 ;;
         --smoke-test) SMOKE_TEST="true"; shift ;;
+        --smoke-test-script) SMOKE_TEST_SCRIPT="$2"; shift 2 ;;
         --max-size-mb) MAX_SIZE_MB="$2"; shift 2 ;;
         --push) PUSH="true"; shift ;;
         -h|--help) usage; exit 0 ;;
@@ -129,6 +136,11 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 CONTEXT="$(cd "${CONTEXT}" && pwd)"
+
+if [[ "${SMOKE_TEST}" == "true" ]] && [[ ! -f "${SMOKE_TEST_SCRIPT}" ]]; then
+    echo "Smoke test script not found: ${SMOKE_TEST_SCRIPT}" >&2
+    exit 1
+fi
 
 if [[ -z "${PLATFORMS}" ]]; then
     PLATFORMS="linux/$(docker version --format '{{.Server.Arch}}')"
@@ -145,8 +157,9 @@ IFS=',' read -r -a PLATFORM_LIST <<< "${PLATFORMS}"
 for platform in "${PLATFORM_LIST[@]}"; do
     arch="${platform#*/}"
     arch="${arch%%/*}"
-    if [[ ! -f "${CONTEXT}/ecflow-${arch}.deb" ]]; then
-        echo "No package for ${platform}: ${CONTEXT}/ecflow-${arch}.deb not found (see build_ecflow_package.sh)" >&2
+    packages=("${CONTEXT}"/ecflow-*"-${arch}.deb")
+    if [[ ! -f "${packages[0]}" ]]; then
+        echo "No package for ${platform}: no ${CONTEXT}/<package>-${arch}.deb found (see build_ecflow_package.sh)" >&2
         exit 1
     fi
 done

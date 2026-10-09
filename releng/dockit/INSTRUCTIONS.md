@@ -12,6 +12,9 @@ Building an ecFlow image follows a two-step pattern:
 - build the relevant ecFlow Debian package
 - build a Docker image that installs that package.
 
+Two images are built in this way: `ecflow-server-dev`, running an ecFlow server (see "Building the `ecflow-server`
+image"), and `ecflow-ui-dev`, running ecFlowUI on the X server of the host (see "Building the `ecflow-ui` image").
+
 The images that hold no ecFlow, a reverse proxy and an SFTP server for deployments of ecFlow, are built directly
 from their Dockerfile (see "Building the standalone images").
 
@@ -21,6 +24,7 @@ stated.
 ## Prerequisites
 
 - Docker, installed and running.
+- To run `ecflow-ui-dev`, an X server: XQuartz on macOS, or, on Linux, a graphical session or `ssh -X`.
 
 ## Relationship to the `dockit` GitHub Actions workflow
 
@@ -32,18 +36,22 @@ directory it belongs to), and a third builds the standalone images:
    checked-out commit, inside the build environment image, once per architecture (`amd64` and `arm64`), each
    natively on a GitHub-hosted runner of that architecture. This is the same script that
    `build_ecflow_package.sh` runs in its container (Step 1 below), so both build the package in exactly the
-   same way. Each leg uploads the resulting `ecflow-<arch>.deb`, with the Aviso client library
-   (`aviso-ffi-<arch>.tar.gz`), as an `ecflow-debian-package-<image>-<arch>` artefact.
+   same way. Each leg uploads the resulting `<package>-<arch>.deb`, with the Aviso client library
+   (`aviso-ffi-<arch>.tar.gz`) when the package is built with Aviso support, as an
+   `ecflow-debian-package-<image>-<arch>` artefact. The matrix pairs the preset `linux.gcc.server.release` with
+   `ecflow-server-dev`, and `linux.gcc.ui.release` with `ecflow-ui-dev`.
 
 2. The `dockerize-ecflow` job, using the same matrix, downloads the packages (and Aviso client libraries) of all
    architectures into the matching
-   Dockerfile directory (`ecflow-server/`) and runs `create_ecflow_docker_image.sh` (Step 2 below) to create the
+   Dockerfile directory (`ecflow-server/` or `ecflow-ui/`) and runs `create_ecflow_docker_image.sh` (Step 2 below)
+   to create the
    Docker image from that directory's `Dockerfile` for `linux/amd64` and `linux/arm64` at once (the `arm64` image
    under QEMU emulation, which only installs the package), and to push it to
    `eccr.ecmwf.int/ecflow-dev-environments/<image>` as a single multi-platform image. Before pushing, the image of
    each platform is smoke-tested: it must not exceed 400 MB (which catches, for example, a build carrying debug
-   information) and must report a healthy server. The pushed image records the preset its package was built with
-   in the `int.ecmwf.ecflow.preset` label.
+   information) and must pass the tests of its image, given in the matrix (`test_ecflow_server_image.sh`, the server
+   lifecycle; `test_ecflow_ui_image.sh`, ecFlowUI shown on an X server). The pushed image records the preset its
+   package was built with in the `int.ecmwf.ecflow.preset` label.
 
 3. The `dockerize-standalone` job builds the standalone images, `ecflow-revproxy-dev` and `ecflow-sftp-dev`, from their
    Dockerfile directories (`ecflow-revproxy/`, `ecflow-sftp/`), independently of the package. Before pushing, the
@@ -103,9 +111,11 @@ The package version identifies the build: `<version>+git<commit time>.<commit>` 
 `5.19.0+git20260924132851.20d90280fbce`, with the commit time in UTC), which Debian orders after the `<version>`
 release, and among builds by commit time. A build of the commit tagged `<version>` keeps the plain `<version>`.
 
-The resulting package is named after its architecture, `ecflow-<arch>.deb` (e.g. `ecflow-amd64.deb`, or
-`ecflow-arm64.deb` on Apple Silicon), and copied, with the Aviso client library (`aviso-ffi-<arch>.tar.gz`), into the
-output directory, which defaults to `ecflow-server/` (`${PWD}/ecflow-server`).
+The package is named after its content, `ecflow-server`, as set by the preset (`CPACK_PACKAGE_NAME`), so that it is
+told apart from the `ecflow-ui` package of the `ecflow-ui-dev` image. The resulting file is named after the package
+and its architecture, `<package>-<arch>.deb` (e.g. `ecflow-server-amd64.deb`, or `ecflow-server-arm64.deb` on Apple
+Silicon), and copied, with the Aviso client library (`aviso-ffi-<arch>.tar.gz`), into the output directory, which
+defaults to the directory named after the package, `ecflow-server/` (`${PWD}/ecflow-server`).
 This is the same directory used as the Docker build context in Step 2, so no manual copy is needed with default
 settings. Creating the package with a different `--output_dir` means the package and the Aviso client library must
 be moved into `ecflow-server/` manually before Step 2.
@@ -129,7 +139,7 @@ the options of the package build itself, and their defaults (e.g. the pinned ecb
 
 #### Step 2: Build the ecFlow server container image
 
-The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-<arch>.deb`, which must be
+The `ecflow-server/Dockerfile` installs the package for the target platform, `ecflow-server-<arch>.deb`, which must be
 present in its build context at build time. This is typically the package generated in Step 1. When the Aviso client
 library of the target platform, `aviso-ffi-<arch>.tar.gz`, is also present, it is installed in `/usr/local/lib`
 before the package, so that the server finds it; a package built with Aviso support requires it, and the image build
@@ -269,6 +279,104 @@ loaded or pushed. To run the lifecycle tests against an already built image with
 ```bash
 bash ./test_ecflow_server_image.sh "${IMAGE}" linux/arm64
 ```
+
+### Building the `ecflow-ui` image
+
+This section describes the process to build the `ecflow-ui-dev` Docker image, running ecFlowUI. The image displays
+ecFlowUI on the X server of the host: XQuartz on macOS, or, on Linux, the local X server or the display forwarded by
+`ssh -X` (e.g. to an ECMWF VDI or login node). The `dockit` workflow automates the process, as for the server image.
+
+#### Step 1: Build the ecFlow UI Debian package
+
+Run:
+
+```bash
+./build_ecflow_package.sh --preset linux.gcc.ui.release
+```
+
+The preset `linux.gcc.ui.release` builds ecFlowUI only: the server, the Python module, the HTTP and UDP servers and
+Aviso support are left out, so that the package does not depend on Python, and its binaries are stripped. The
+package, named `ecflow-ui`, holds `ecflow_ui` (the launcher script), `ecflow_ui.x`, `ecflow_client` and the
+configuration of ecFlowUI. It is delivered as `ecflow-ui-<arch>.deb` (e.g. `ecflow-ui-arm64.deb`) into `ecflow-ui/`,
+the build context of Step 2. The other options (e.g. `--source`) are those described in "Building the `ecflow-server`
+image".
+
+#### Step 2: Build the ecFlow UI container image
+
+Create the image for the platform of the Docker host, as `ecflow-ui-dev:local`, smoke-testing it first, with:
+
+```bash
+./create_ecflow_docker_image.sh --context "${PWD}/ecflow-ui" --tag ecflow-ui-dev:local \
+    --smoke-test --smoke-test-script "${PWD}/test_ecflow_ui_image.sh"
+```
+
+The smoke test, `test_ecflow_ui_image.sh`, runs the image against an X server (Xvfb, in a helper container), and
+checks that the ecFlowUI window is shown, that ecFlowUI runs as the given user with its configuration on a bind mount,
+that the connection to the X server bypasses the SOCKS proxy (see `-pc4` below), and that the container stops on
+request. To run it against an already built image: `bash ./test_ecflow_ui_image.sh <image> linux/arm64`.
+
+The `ecflow-ui/Dockerfile` installs the package with `apt-get`, together with what Qt loads at run time and the
+package therefore does not declare: the Qt platform plugins (including `xcb`, to display over X11), the SVG plugins
+and a font. It also installs `proxychains4`, used by `ecflow_ui -pc4`. Qt depends on the Mesa OpenGL drivers through
+Debian's packaging, but ecFlowUI does not render with OpenGL over X11: empty placeholder packages stand in for the
+drivers, which keeps about 180 MB out of the image, and `QT_XCB_GL_INTEGRATION=none` keeps Qt from looking for them.
+
+ecFlowUI runs as the unprivileged user `ecflow`. The container starts as root, gives `ecflow` the UID and GID given
+by `ECFLOW_UID` and `ECFLOW_GID` or, when these are not set, those of the owner of the configuration directory, and
+then drops privileges to `ecflow`. Any arguments given to the container are passed on to `ecflow_ui` (by default,
+`-log`, which writes the log of ecFlowUI to standard output). The entrypoint takes the following environment
+variables:
+
+| Variable | Effect |
+|----------|--------|
+| `DISPLAY` | The X server to display on |
+| `XAUTHORITY` | The X authority file, holding the cookie of the display |
+| `ECFLOW_UID`, `ECFLOW_GID` | The UID and GID that ecFlowUI runs as (default: those of the owner of the configuration directory) |
+| `ECFLOWUI_CONFIG_DIR` | The configuration directory of ecFlowUI (default: `/home/ecflow/.ecflow_ui_v5`) |
+| `ECFLOWUI_SOCKS_PROXY` | The SOCKS proxy used by `ecflow_ui -pc4`, as `<host>:<port>` |
+| `ECF_AUTHTOKENS` | The credentials file of the ecFlow client (default: `/home/ecflow/.ecflowapirc`) |
+
+With `ECFLOWUI_SOCKS_PROXY`, the entrypoint writes the configuration of proxychains: the host is resolved to its
+address, as proxychains only accepts numeric addresses, and the X server is excluded from the proxy, so that only the
+connections to the ecFlow servers go through it.
+
+#### Running ecFlowUI with `docker_ecflow_ui`
+
+The script `docker_ecflow_ui` composes the `docker run` command that displays ecFlowUI on the X server of the current
+session, and runs it:
+
+```bash
+./docker_ecflow_ui                                  # the image published from develop
+./docker_ecflow_ui --image ecflow-ui-dev:local      # a locally built image
+./docker_ecflow_ui -ts <host> <port>                # a temporary session on the given server
+```
+
+The image is given by `--image` or `ECFLOWUI_DOCKER_IMAGE`, and is by default the image published by the `dockit`
+workflow from `develop`, `eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:latest`; the image published from
+another branch is selected by its tag (e.g. `--image eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:<branch-slug>`).
+The image is downloaded when not available locally (`--pull` changes this). The options of `ecflow_ui` are passed
+on to it, and those with an effect on the container are handled as follows:
+
+- `-confd DIR` mounts the configuration directory `DIR` (an absolute path) at the same path in the container; without
+  it, `~/.ecflow_ui_v5` is mounted, and is therefore shared with an ecFlowUI installed on the host.
+- `-pc4` reaches the ecFlow servers through the SOCKS proxy given by `ECFLOWUI_SOCKS_PROXY` (`<host>:<port>`), by
+  default port 9050 of the host, as opened by `ssh -D 9050 <host>` (see "Using ecFlowUI via the ECMWF Teleport
+  gateway" in the ecFlow documentation).
+
+The script runs ecFlowUI with the UID and GID of the user, and mounts the credentials file read-only:
+`ECF_AUTHTOKENS`, when set, or else `~/.ecflowapirc`, when present. Access to the X server is granted with the cookie
+of the display, handed to the container in a temporary file. `--dry-run` prints the `docker run` command instead of
+running it, and `--help` lists all the options.
+
+The platforms are handled as follows:
+
+- On macOS, XQuartz must accept network clients (*XQuartz > Settings > Security > Allow connections from network
+  clients*, followed by a restart of XQuartz). The container reaches XQuartz, and the SOCKS proxy of `-pc4`, through
+  `host.docker.internal`. When no cookie is found for the display, the script grants access with
+  `xhost +localhost` for the duration of the run, unless `--no-xhost` is given.
+- On Linux, the container shares the network of the host (`--network host`), so that a display forwarded by
+  `ssh -X` (e.g. `localhost:10.0`) and a SOCKS proxy on the host are reachable as on the host. A local display
+  (e.g. `:0`) is reached through `/tmp/.X11-unix`.
 
 ### Building the standalone images
 
