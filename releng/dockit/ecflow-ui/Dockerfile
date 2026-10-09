@@ -81,8 +81,10 @@ ENV LANG=C.UTF-8 \
 
 WORKDIR /home/ecflow
 
-# tini runs as PID 1, forwarding signals to launch.sh and reaping the processes started by ecFlowUI
-ENTRYPOINT ["/usr/bin/tini", "--", "/opt/local/bin/launch.sh"]
+# tini runs as PID 1, reaping the processes started by ecFlowUI, and forwarding signals (e.g. SIGTERM, on
+# `docker stop`) to the whole process group (-g): the ecflow_ui launcher script only acts on a signal once
+# ecflow_ui.x, which it runs in the foreground, has exited
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/local/bin/launch.sh"]
 
 # Any arguments given to the container are passed on to ecflow_ui; -log writes the log to standard output,
 # so that it is available through `docker logs`

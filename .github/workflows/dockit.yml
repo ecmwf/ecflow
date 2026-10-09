@@ -110,6 +110,7 @@ jobs:
       matrix:
         preset:
           - linux.gcc.server.release
+          - linux.gcc.ui.release
         arch:
           - amd64
           - arm64
@@ -117,6 +118,9 @@ jobs:
           - preset: linux.gcc.server.release
             image: ecflow-server-dev
             context: ecflow-server
+          - preset: linux.gcc.ui.release
+            image: ecflow-ui-dev
+            context: ecflow-ui
           - arch: amd64
             runner: ubuntu-24.04
           - arch: arm64
@@ -172,10 +176,18 @@ jobs:
       matrix:
         preset:
           - linux.gcc.server.release
+          - linux.gcc.ui.release
         include:
           - preset: linux.gcc.server.release
             image: ecflow-server-dev
             context: ecflow-server
+            # the server lifecycle, persistence and ownership checks
+            smoke: test_ecflow_server_image.sh
+          - preset: linux.gcc.ui.release
+            image: ecflow-ui-dev
+            context: ecflow-ui
+            # ecFlowUI shown on an X server, as the given user, with and through the SOCKS proxy
+            smoke: test_ecflow_ui_image.sh
 
     steps:
       - name: Checkout 'ecflow'
@@ -216,6 +228,7 @@ jobs:
             --context "${GITHUB_WORKSPACE}/ecflow/releng/dockit/${{ matrix.context }}" \
             --platform linux/amd64,linux/arm64 \
             --smoke-test \
+            --smoke-test-script "${GITHUB_WORKSPACE}/ecflow/releng/dockit/${{ matrix.smoke }}" \
             --push \
             "${args[@]}" \
             --label "org.opencontainers.image.source=${{ github.repositoryUrl }}" \
