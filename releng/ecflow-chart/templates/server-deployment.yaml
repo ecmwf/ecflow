@@ -8,6 +8,7 @@ into /admin, the server, and the SFTP sidecar. Ported from the imachination stac
 the comments explain the settings that are not obvious.
 */ -}}
 {{- $fullname := include "ecflow-chart.fullname" . }}
+{{- $home := eq (include "ecflow-chart.homeEnabled" .) "true" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -63,10 +64,16 @@ spec:
         # Expands the Secret of the administrator's files into /admin: a key
         # `a__b__c` becomes the file /admin/a/b/c. Scripts and the troika wrapper
         # are made executable, every other file read-only. The volumes are given to
-        # the server's account the first time they are mounted.
+        # the server's account the first time they are mounted, and the home of
+        # every account is created, private to its uid.
         - name: admin
           image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.server) | quote }}
           imagePullPolicy: {{ .Values.images.server.pullPolicy }}
+          {{- if $home }}
+          env:
+            - name: ECFLOW_HOMES
+              value: {{ include "ecflow-chart.homeUsers" . | quote }}
+          {{- end }}
           command:
             - /bin/sh
             - -c
@@ -91,6 +98,19 @@ spec:
                       echo "admin: ${volume} given to 1000:1000"
                   fi
               done
+              {{- if $home }}
+              # The homes: /home itself writable by root only (a fresh volume may come
+              # up world-writable), then the server's own home and one per account,
+              # each readable by its owner only; the group is the workspace group, as
+              # in the SFTP sidecar.
+              chmod 0755 /home
+              install -d -m 0700 -o 1000 -g 1000 /home/ecflow
+              for entry in ${ECFLOW_HOMES}; do
+                  user=${entry%%:*}; uid=${entry#*:}
+                  install -d -m 0700 -o "${uid}" -g 1000 "/home/${user}"
+                  echo "admin: /home/${user} owned by ${uid}:1000, mode 0700"
+              done
+              {{- end }}
           volumeMounts:
             - name: admin-source
               mountPath: /admin-source
@@ -101,6 +121,10 @@ spec:
               mountPath: /workspace
             - name: state
               mountPath: /state
+            {{- if $home }}
+            - name: home
+              mountPath: /home
+            {{- end }}
       containers:
         - name: ecflow-server
           image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.server) | quote }}
@@ -144,6 +168,10 @@ spec:
               readOnly: true
             - name: state
               mountPath: /state
+            {{- if $home }}
+            - name: home
+              mountPath: /home
+            {{- end }}
         {{- if .Values.sftp.enabled }}
         - name: sftp
           image: {{ include "ecflow-chart.image" (dict "root" . "image" .Values.images.sftp) | quote }}
@@ -170,6 +198,10 @@ spec:
             - name: sftp-keys
               mountPath: /etc/ssh/ecflow-chart
               readOnly: true
+            {{- if $home }}
+            - name: home
+              mountPath: /home
+            {{- end }}
         {{- end }}
       volumes:
         - name: workspace
@@ -178,6 +210,11 @@ spec:
         - name: state
           persistentVolumeClaim:
             claimName: {{ $fullname }}-state
+        {{- if $home }}
+        - name: home
+          persistentVolumeClaim:
+            claimName: {{ $fullname }}-home
+        {{- end }}
         - name: admin-source
           secret:
             secretName: {{ include "ecflow-chart.adminSecretName" . }}

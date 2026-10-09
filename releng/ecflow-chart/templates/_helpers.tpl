@@ -121,3 +121,20 @@ users that have SSH keys, each as `name` or `name:uid` when a uid is given.
 {{- define "ecflow-chart.ingressTlsSecretName" -}}
 {{- .Values.ingress.tls.secretName | default (printf "%s-ingress-tls" (include "ecflow-chart.fullname" .)) -}}
 {{- end }}
+
+{{/* The accounts that get a home directory: every user with a uid, as `name:uid`. */}}
+{{- define "ecflow-chart.homeUsers" -}}
+{{- $entries := list -}}
+{{- range .Values.users -}}
+{{- if .uid -}}
+{{- $entries = append $entries (printf "%s:%d" .name (int .uid)) -}}
+{{- end -}}
+{{- end -}}
+{{- join " " $entries -}}
+{{- end }}
+
+{{/* Whether the homes volume is enabled. */}}
+{{- define "ecflow-chart.homeEnabled" -}}
+{{- $home := .Values.server.persistence.home -}}
+{{- not (and (hasKey $home "enabled") (not $home.enabled)) -}}
+{{- end }}

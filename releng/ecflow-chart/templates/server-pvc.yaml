@@ -8,6 +8,8 @@ The two volumes of the server. A PersistentVolumeClaim is kept across upgrades
 suites and the checkpoint survive a new version of the chart.
 */ -}}
 {{- range $name, $volume := .Values.server.persistence }}
+{{- /* `default` would turn an explicit false into true, so the key is tested */ -}}
+{{- if not (and (hasKey $volume "enabled") (not $volume.enabled)) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -25,4 +27,5 @@ spec:
   resources:
     requests:
       storage: {{ $volume.size }}
+{{- end }}
 {{- end }}

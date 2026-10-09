@@ -165,8 +165,13 @@ server:
     initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 8
-  # The two volumes of the server: the workspace (suites, task scripts, job output)
-  # and the state (checkpoint files). Both are mounted by one node at a time.
+  # The volumes of the server, each mounted by one node at a time:
+  # - the workspace (suites, task scripts, job output, shared by every account),
+  # - the state (checkpoint files),
+  # - and, the homes -- /home/<user> for every account that has a uid, owned by that uid
+  #       with mode 0700, where a user keeps what no other user may read (the troika
+  #       configuration and the credentials of their jobs). The homes volume can be disabled;
+  #       the server's own /home/ecflow is created on it as well.
   persistence:
     workspace:
       size: 1Gi
@@ -174,6 +179,11 @@ server:
       accessModes: [ReadWriteOnce]
     state:
       size: 64Mi
+      storageClassName: ""
+      accessModes: [ReadWriteOnce]
+    home:
+      enabled: true
+      size: 1Gi
       storageClassName: ""
       accessModes: [ReadWriteOnce]
   # The Service in front of the server; NodePort exposes it on a kind cluster.
