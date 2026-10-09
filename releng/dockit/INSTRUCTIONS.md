@@ -343,15 +343,16 @@ The script `docker_ecflow_ui` composes the `docker run` command that displays ec
 session, and runs it:
 
 ```bash
-./docker_ecflow_ui                                  # the image ecflow-ui-dev:latest
+./docker_ecflow_ui                                  # the image published from develop
 ./docker_ecflow_ui --image ecflow-ui-dev:local      # a locally built image
 ./docker_ecflow_ui -ts <host> <port>                # a temporary session on the given server
 ```
 
-The image is downloaded when not available locally (`--pull` changes this), and is given by `--image` or
-`ECFLOWUI_DOCKER_IMAGE`; the image published by the `dockit` workflow is
-`eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:latest`. The options of `ecflow_ui` are passed on to it, and
-those with an effect on the container are handled as follows:
+The image is given by `--image` or `ECFLOWUI_DOCKER_IMAGE`, and is by default the image published by the `dockit`
+workflow from `develop`, `eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:latest`; the image published from
+another branch is selected by its tag (e.g. `--image eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:<branch-slug>`).
+The image is downloaded when not available locally (`--pull` changes this). The options of `ecflow_ui` are passed
+on to it, and those with an effect on the container are handled as follows:
 
 - `-confd DIR` mounts the configuration directory `DIR` (an absolute path) at the same path in the container; without
   it, `~/.ecflow_ui_v5` is mounted, and is therefore shared with an ecFlowUI installed on the host.

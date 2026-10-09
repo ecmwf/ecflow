@@ -16,7 +16,7 @@ set -o pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 
-IMAGE="${ECFLOWUI_DOCKER_IMAGE:-ecflow-ui-dev:latest}"
+IMAGE="${ECFLOWUI_DOCKER_IMAGE:-eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:latest}"
 PULL="missing"
 DRY_RUN="false"
 USE_XHOST="true"
@@ -42,7 +42,9 @@ forwarded by 'ssh -X'. The image is downloaded when not available locally.
 
 Options:
   -i, --image IMAGE        Docker image to run
-                             (default: \${ECFLOWUI_DOCKER_IMAGE}, or ecflow-ui-dev:latest)
+                             (default: \${ECFLOWUI_DOCKER_IMAGE}, or the image
+                             published from develop,
+                             eccr.ecmwf.int/ecflow-dev-environments/ecflow-ui-dev:latest)
   --pull POLICY            When to download the image: missing, always or never
                              (default: missing)
   --dry-run                Print the docker command, instead of running it
