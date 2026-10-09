@@ -26,9 +26,44 @@ sftp:
     type: NodePort
     nodePort: 30022
 
-# The test users of auth-o-tron (values.yaml) apply; the SFTP accounts are listed
-# here, with the public keys of the developers that use the deployment.
+# Throwaway users for the tests, accepted by auth-o-tron with HTTP Basic authentication
+# through a `plain` provider; a test fixture, never part of a real deployment. Helm
+# replaces lists, so the whole `providers` list is restated here.
+auth-o-tron:
+  config:
+    providers:
+      - name: ecmwf-api-provider
+        type: ecmwf-api
+        uri: https://api.ecmwf.int/v1
+        realm: ecmwf
+      - name: plain-provider
+        type: plain
+        realm: local
+        users:
+          - username: admin
+            password: "somesecret#admin"
+          - username: alice
+            password: "somesecret#alice"
+          - username: bob
+            password: "somesecret#bob"
+          - username: charlie
+            password: "somesecret#charlie"
+
+# The checks of `helm test`, with one of the throwaway users.
+tests:
+  enabled: true
+  user: admin
+  password: "somesecret#admin"
+
+# The accounts: the SFTP users, with the public keys of the developers that use the
+# deployment.
 users: []
-#  - name: mamb
+#  - name: alice
 #    sshAuthorizedKeys:
-#      - ssh-ed25519 AAAA... mamb@host
+#      - ssh-ed25519 AAAA... alice@host
+#  - name: bob
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... bob@host
+#  - name: charlie
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... charlie@host

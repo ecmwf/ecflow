@@ -50,9 +50,13 @@ auth-o-tron:
   #         name: authotron-jwt
   #         key: secret
   extraEnv: []
-  # The configuration of auth-o-tron, rendered as it is into config.yaml. Keep the
-  # test users of the `plain` provider for test deployments only; a real deployment
-  # authenticates through the `ecmwf-api` provider alone.
+  # The configuration of auth-o-tron, rendered as it is into config.yaml. auth-o-tron
+  # authenticates only: every user comes through the authentication authority, the
+  # ECMWF API, and holds no list of users here. What an authenticated user may do is
+  # decided by the ecFlow server (ECF_PERMISSIONS), and who gets an account is the
+  # `users` list below. A test profile may add a `plain` provider with throwaway users
+  # (see examples/values-kind.yaml); Helm replaces lists, so such a profile restates
+  # the whole `providers` list.
   config:
     version: 1.0.0
     logging:
@@ -65,28 +69,6 @@ auth-o-tron:
         type: ecmwf-api
         uri: https://api.ecmwf.int/v1
         realm: ecmwf
-      - name: plain-provider
-        type: plain
-        realm: local
-        users:
-          - username: admin
-            password: "somesecret#admin"
-          - username: mamb
-            password: "somesecret#mamb"
-          - username: a
-            password: "somesecret#a"
-          - username: b
-            password: "somesecret#b"
-          - username: c
-            password: "somesecret#c"
-          - username: u1
-            password: "somesecret#1"
-          - username: u2
-            password: "somesecret#2"
-          - username: u3
-            password: "somesecret#3"
-          - username: u4
-            password: "somesecret#4"
     store:
       enabled: false
     services: []
@@ -122,12 +104,16 @@ images:
 # (<service>.<namespace>.svc.<clusterDomain>).
 clusterDomain: cluster.local
 
-# The users of the deployment, declared once (the deployer supplies the list). Each
-# entry names a user; `sshAuthorizedKeys` lists the public keys with which the user
-# reaches the SFTP sidecar, and marks the user as an SFTP account.
-#   - name: mamb
+# The accounts of the deployment, declared once by the deployer: not who may log in
+# (that is the authentication authority's), but who has an account on the server
+# side. Each entry names a user; `sshAuthorizedKeys` lists the public keys with which
+# the user reaches the SFTP sidecar, and marks the user as an SFTP account.
+#   - name: alice
 #     sshAuthorizedKeys:
-#       - ssh-ed25519 AAAA... mamb@host
+#       - ssh-ed25519 AAAA... alice@host
+#   - name: bob
+#     sshAuthorizedKeys:
+#       - ssh-ed25519 AAAA... bob@host
 users: []
 
 # The ecFlow server.
@@ -300,11 +286,13 @@ ingress:
 # The checks of `helm test`: a Pod of the release, run on demand, that reaches the
 # server through the reverse proxy with ecflow_client, as a client does. It verifies
 # that valid credentials are accepted, that missing and wrong ones are refused, and
-# that the refused requests left no trace in the server log. The credentials are
-# those of a user of auth-o-tron (the test users of `auth-o-tron.config` by default).
+# that the refused requests left no trace in the server log. The credentials are those
+# of a user that auth-o-tron accepts with HTTP Basic authentication, which only a
+# `plain` provider of a test profile offers; the defaults therefore disable the test,
+# and a test profile enables it with its throwaway user (examples/values-kind.yaml).
 tests:
-  enabled: true
-  user: admin
-  password: "somesecret#admin"
+  enabled: false
+  user: ""
+  password: ""
   # A name that no user has; its refused requests must not appear in the log.
   intruder: intruder

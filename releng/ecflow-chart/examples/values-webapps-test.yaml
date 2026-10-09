@@ -27,5 +27,45 @@ sftp:
     enabled: false
     listener: ecflow-sftp
 
-# The accounts of the deployment: the SFTP users with their public keys.
+# auth-o-tron authenticates through the ECMWF API only (the chart defaults): no user
+# list. The checks of `helm test` need a user with HTTP Basic credentials, which only a
+# `plain` test provider offers, so they are off here. For a test period, uncomment the
+# two blocks below, the same throwaway users as examples/values-kind.yaml (Helm replaces
+# lists, so the whole `providers` list is restated).
+tests:
+  enabled: false
+#auth-o-tron:
+#  config:
+#    providers:
+#      - name: ecmwf-api-provider
+#        type: ecmwf-api
+#        uri: https://api.ecmwf.int/v1
+#        realm: ecmwf
+#      - name: plain-provider
+#        type: plain
+#        realm: local
+#        users:
+#          - username: admin
+#            password: "somesecret#admin"
+#          - username: alice
+#            password: "somesecret#alice"
+#          - username: bob
+#            password: "somesecret#bob"
+#          - username: charlie
+#            password: "somesecret#charlie"
+#tests:
+#  enabled: true
+#  user: admin
+#  password: "somesecret#admin"
+
+# The accounts of the deployment: the SFTP users, with their public keys.
 users: []
+#  - name: alice
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... alice@host
+#  - name: bob
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... bob@host
+#  - name: charlie
+#    sshAuthorizedKeys:
+#      - ssh-ed25519 AAAA... charlie@host
