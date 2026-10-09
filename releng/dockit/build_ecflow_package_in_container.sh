@@ -199,8 +199,12 @@ done
 
 # The archive holds the library under its file name and its soname (e.g. libaviso_ffi.so.2.4.2 and
 # libaviso_ffi.so.2), to be extracted into the library directory of the image. The need for the library is read
-# from the server built, rather than from the configuration, so that whatever enabled or disabled Aviso is honoured.
-needed=$(readelf -d "${BUILD_DIR}/bin/ecflow_server" | sed -n '/NEEDED/p')
+# from the server built, rather than from the configuration, so that whatever enabled or disabled Aviso is honoured;
+# a build without the server (e.g. ecFlowUI only) needs no library.
+needed=""
+if [[ -f "${BUILD_DIR}/bin/ecflow_server" ]]; then
+    needed=$(readelf -d "${BUILD_DIR}/bin/ecflow_server" | sed -n '/NEEDED/p')
+fi
 if [[ "${needed}" == *libaviso_ffi* ]]; then
     library=$(sed -n 's/^AVISO_FFI_LIBRARY:FILEPATH=//p' "${BUILD_DIR}/CMakeCache.txt")
     if [[ -z "${library}" || ! -f "${library}" ]]; then
