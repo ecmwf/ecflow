@@ -198,8 +198,9 @@ to the server over loopback, so they need no credentials. From this directory, w
 `ecflowapirc` and the SSH key of the deployment at hand:
 
 ```bash
-# 1. Write the definition, the include files and the 34 task scripts
-python3 examples/suite/make_suite.py --out examples/suite
+# 1. Write the definition, the include files and the 34 task scripts (--teardown
+#    removes them again; --setup, the default, writes them)
+python3 examples/suite/make_suite.py --setup --out examples/suite
 
 # 2. Upload the include files and the scripts to the workspace, as an SFTP user
 cd examples/suite
@@ -224,7 +225,8 @@ last date, the labels filled, the events set, and `/proof/ifc1/fc/main/getini` c
 at `try:2`. The job files and their output are in the workspace under `proof/`, the
 data the tasks produce under `data/<expver>/`, both readable over SFTP. To run it
 again: `$E --replace=/proof examples/suite/proof.def` and `$E --begin=proof`; to remove
-it: `$E --delete=force yes /proof`.
+it: `$E --delete=force yes /proof`, and `python3 examples/suite/make_suite.py --teardown
+--out examples/suite` removes the generated files.
 
 On kind, the SFTP port is 2222 on `localhost` and the host `ecflow.localtest.me`; on
 webapps-test, SFTP goes through a port forward and the host is `ecflow-mt-test.ecmwf.int`.

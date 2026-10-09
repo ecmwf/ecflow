@@ -3,9 +3,10 @@ SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts
 SPDX-License-Identifier: Apache-2.0
 */}}
 {{- /*
-The two volumes of the server. A PersistentVolumeClaim is kept across upgrades
-(Helm never deletes a PVC it created unless the release is uninstalled), so the
-suites and the checkpoint survive a new version of the chart.
+The volumes of the server (the workspace, the state and, unless disabled, the
+homes). A PersistentVolumeClaim is kept across upgrades (Helm never deletes a PVC
+it created unless the release is uninstalled), so the suites, the checkpoint and the
+homes survive a new version of the chart.
 */ -}}
 {{- range $name, $volume := .Values.server.persistence }}
 {{- /* `default` would turn an explicit false into true, so the key is tested */ -}}
