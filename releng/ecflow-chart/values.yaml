@@ -36,10 +36,12 @@ auth-o-tron:
   image:
     repository: eccr.ecmwf.int/auth-o-tron/auth-o-tron
     tag: 0.3.7
-  # The metrics endpoint stays, but the ServiceMonitor needs the Prometheus Operator
-  # CRDs, absent from a kind cluster.
+  # The metrics endpoint stays, reachable from any Pod (the NetworkPolicy admits its
+  # port while it is enabled); the ServiceMonitor needs the Prometheus Operator CRDs,
+  # absent from a kind cluster.
   metrics:
     enabled: true
+    port: 9090
     serviceMonitor:
       enabled: false
   # The key with which auth-o-tron signs its tokens (jwt.secret, HS256, 32 bytes or
@@ -143,13 +145,12 @@ server:
     #    #!/bin/sh
     #    exec troika "$@"
   # The settings of server_environment.cfg, which the server reads from /admin at
-  # start: one `NAME = VALUE` line each, without quotes around the value. Settings the
-  # launch script of the image exports (ECF_PORT, ECF_HOME) are not set here. Names
-  # prefixed with <host>.<port>. by the server: ECF_CHECK, ECF_CHECKOLD, ECF_LOG,
-  # ECF_LISTS, ECF_PASSWD, ECF_CUSTOM_PASSWD.
+  # start: one `NAME = VALUE` line each, without quotes around the value. Not set here,
+  # because the Pod sets them as environment variables, which the server prefers:
+  # ECF_PORT and ECF_HOME (the launch script of the image), ECF_CHECK and ECF_CHECKOLD
+  # (the Deployment, on the state volume). Names prefixed with <host>.<port>. by the
+  # server: ECF_LOG, ECF_LISTS, ECF_PASSWD, ECF_CUSTOM_PASSWD.
   environment:
-    ECF_CHECK: ecf.check
-    ECF_CHECKOLD: ecf.check.b
     ECF_CHECKINTERVAL: 120
     ECF_CHECKMODE: CHECK_ON_TIME
     ECF_LOG: ecf.log

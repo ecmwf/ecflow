@@ -64,6 +64,12 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    {{- if (index .Values "auth-o-tron" "metrics" "enabled") }}
+    # The metrics endpoint, scraped from the monitoring namespace of the cluster.
+    - ports:
+        - protocol: TCP
+          port: {{ index .Values "auth-o-tron" "metrics" "port" | default 9090 }}
+    {{- end }}
 {{- end }}
 {{- if and .Values.revproxy.enabled .Values.ingress.enabled }}
 {{- $controller := index .Values.networkPolicy.ingressController .Values.global.ingress.controller }}

@@ -17,9 +17,10 @@ keywords:
 maintainers:
   - name: ECMWF
 
-# The version of the chart is the version of ecFlow, one to one. A development build
-# appends the build metadata of the Debian package (+git<commit time>.<commit>), which
-# SemVer 2 ignores in ordering.
+# The version of the chart is the version of ecFlow, one to one, as `project()` of the
+# top-level CMakeLists.txt states it; the Helm chart workflow fails when the two
+# differ. A development build appends the build metadata of the Debian package
+# (+git<commit time>.<commit>), which SemVer 2 ignores in ordering.
 version: 5.19.0
 appVersion: "5.19.0"
 
