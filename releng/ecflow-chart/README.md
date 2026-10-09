@@ -51,9 +51,11 @@ helm upgrade --install ecflow . -n <namespace> --create-namespace -f examples/va
 | `examples/values-kind.yaml` | A local kind cluster with the community ingress-nginx controller. |
 | `examples/values-webapps-test.yaml` | The ECMWF cluster webapps-test, namespace `ecflow-multitenant-test`, NGINX Inc controller. |
 
-The accounts of a deployment are the `users` list of its profile: each user with SSH
-keys gets an SFTP account. The test users of auth-o-tron in `values.yaml` are for test
-deployments only.
+The accounts of a deployment are its `users` list, kept in a `users.yaml` of the
+deployer, outside git, and passed after the profile on every upgrade; start from
+`examples/users.example.yaml`, which explains each field. An account gives a user a uid,
+an SFTP login with their public keys, and a private home; who may log in is decided by
+the ECMWF API, not by the chart.
 
 ## A local deployment on kind
 
@@ -127,14 +129,9 @@ kubectl get all,secret,configmap,pvc,ingress,networkpolicy -n $N
 kubectl get ingressclass
 kubectl get pods -A --show-labels | grep -i 'nginx-ingress\|ingress-nginx'
 
-# 2. The users file (not committed): the SSH public key of each SFTP account
-KEY=~/.ssh/id_ed25519                # the key pair of the deployer
-cat > users.yaml <<EOF
-users:
-  - name: $(whoami)
-    sshAuthorizedKeys:
-      - $(cat $KEY.pub)
-EOF
+# 2. The users file (not committed): the accounts, from the example
+cp examples/users.example.yaml users.yaml    # then edit: names, uids, public keys
+KEY=~/.ssh/id_ed25519                        # the key pair of the deployer, for the checks
 
 # 3. Render, dry run, deploy
 helm dependency update
