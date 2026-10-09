@@ -222,6 +222,14 @@ fi
 
 DOCKER_ARGS+=(--env "ECFLOW_UID=$(id -u)" --env "ECFLOW_GID=$(id -g)")
 
+# Rootless Podman (e.g. behind the docker command of an ECMWF VDI) maps only the root of the container to the user,
+# and any other UID of the container to an unrelated UID of the host; keep-id maps the UID of the user to itself,
+# so that ecFlowUI runs as the user on the host. The container still starts as root, to set up the user.
+
+if docker info --format '{{.Host.Security.Rootless}}' 2> /dev/null | grep -qx true; then
+    DOCKER_ARGS+=(--userns=keep-id --user root)
+fi
+
 # Configuration directory
 #
 # The directory is created beforehand (see below), so that it is owned by the user.

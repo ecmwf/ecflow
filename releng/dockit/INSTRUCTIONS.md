@@ -376,7 +376,9 @@ The platforms are handled as follows:
   `xhost +localhost` for the duration of the run, unless `--no-xhost` is given.
 - On Linux, the container shares the network of the host (`--network host`), so that a display forwarded by
   `ssh -X` (e.g. `localhost:10.0`) and a SOCKS proxy on the host are reachable as on the host. A local display
-  (e.g. `:0`) is reached through `/tmp/.X11-unix`.
+  (e.g. `:0`) is reached through `/tmp/.X11-unix`. With rootless Podman (e.g. behind the `docker` command of an
+  ECMWF VDI), the container is run with `--userns=keep-id`, so that ecFlowUI runs as the user on the host, and can
+  read the cookie of the display and write to the configuration directory.
 
 ### Building the standalone images
 
