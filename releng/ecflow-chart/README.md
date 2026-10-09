@@ -36,9 +36,13 @@ Fetch the dependencies, then check the chart and render it without a cluster:
 ```bash
 cd releng/ecflow-chart
 helm dependency update
-helm lint
-helm template ecflow . > /dev/null
+helm lint . -f examples/values-kind.yaml
+helm template ecflow . -f examples/values-kind.yaml > /dev/null
 ```
+
+The defaults alone do not render: a deployment must give auth-o-tron its signing key
+(`AOT_JWT__SECRET` from a Secret, see `values.yaml`), and the accounts of `users` must
+each carry a uid of their own; the chart stops the render with a message otherwise.
 
 Install, or upgrade, a release named `ecflow` in a namespace, with a profile:
 
@@ -129,7 +133,9 @@ kubectl get all,secret,configmap,pvc,ingress,networkpolicy -n $N
 kubectl get ingressclass
 kubectl get pods -A --show-labels | grep -i 'nginx-ingress\|ingress-nginx'
 
-# 2. The users file (not committed): the accounts, from the example
+# 2. The signing key of auth-o-tron, once per namespace, and the users file (not
+#    committed): the accounts, from the example
+kubectl -n $N create secret generic authotron-jwt --from-literal=secret=$(openssl rand -hex 32)
 cp examples/users.example.yaml users.yaml    # then edit: names, uids, public keys
 KEY=~/.ssh/id_ed25519                        # the key pair of the deployer, for the checks
 

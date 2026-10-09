@@ -26,10 +26,12 @@ sftp:
     nodePort: 30022
 
 # Throwaway users for the tests, accepted by auth-o-tron with HTTP Basic authentication
-# through a `plain` provider; a test fixture, never part of a real deployment. Helm
-# replaces lists, so the whole `providers` list is restated here.
+# through a `plain` provider, and a throwaway signing key; test fixtures, never part of
+# a real deployment. Helm replaces lists, so the whole `providers` list is restated here.
 auth-o-tron:
   config:
+    jwt:
+      secret: throwaway-signing-key-for-kind-only-0123456789
     providers:
       - name: ecmwf-api-provider
         type: ecmwf-api

@@ -39,15 +39,16 @@ jobs:
 
       - name: Lint with the defaults and with each profile
         run: |
-          helm lint .
+          # The defaults refuse to render without a signing key for auth-o-tron.
+          helm lint . --set auth-o-tron.config.jwt.secret=lint-only
           for profile in examples/values-*.yaml; do
               echo "== ${profile}"
               helm lint . -f "${profile}"
           done
 
-      - name: Render with each profile
+      - name: Render with each profile, and with the example accounts
         run: |
           for profile in examples/values-*.yaml; do
               echo "== ${profile}"
-              helm template ecflow . -n ecflow -f "${profile}" > /dev/null
+              helm template ecflow . -n ecflow -f "${profile}" -f examples/users.example.yaml > /dev/null
           done

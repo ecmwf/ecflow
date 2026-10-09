@@ -13,6 +13,16 @@ global:
   ingress:
     controller: nginx-inc
 
+# The signing key of auth-o-tron, from a Secret the deployer creates once:
+#   kubectl -n ecflow-multitenant-test create secret generic authotron-jwt --from-literal=secret=$(openssl rand -hex 32)
+auth-o-tron:
+  extraEnv:
+    - name: AOT_JWT__SECRET
+      valueFrom:
+        secretKeyRef:
+          name: authotron-jwt
+          key: secret
+
 ingress:
   enabled: true
   host: ecflow-mt-test.ecmwf.int
@@ -36,7 +46,7 @@ sftp:
 # lists, so the whole `providers` list is restated).
 tests:
   enabled: false
-#auth-o-tron:
+#auth-o-tron:            # merge with the auth-o-tron block above when uncommenting
 #  config:
 #    providers:
 #      - name: ecmwf-api-provider

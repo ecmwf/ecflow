@@ -1,0 +1,44 @@
+{{/*
+SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+SPDX-License-Identifier: Apache-2.0
+*/}}
+{{- /*
+Checks of the values that would otherwise fail at run time, or silently do the wrong
+thing. This template renders nothing; a failed check stops the render with a message.
+*/ -}}
+
+{{- /* The accounts: every one with a uid, no two with the same name or uid. */ -}}
+{{- $names := dict }}
+{{- $uids := dict }}
+{{- range .Values.users }}
+{{- if not .name }}
+{{- fail "users: every account needs a name" }}
+{{- end }}
+{{- if not .uid }}
+{{- fail (printf "users: the account %q has no uid; give every account a uid of its own (2000 or above)" .name) }}
+{{- end }}
+{{- if lt (int .uid) 1001 }}
+{{- fail (printf "users: the uid %d of %q is reserved (1000 is the server's own account); use 2000 or above" (int .uid) .name) }}
+{{- end }}
+{{- if hasKey $names .name }}
+{{- fail (printf "users: the account %q is listed twice" .name) }}
+{{- end }}
+{{- $uid := toString (int .uid) }}
+{{- if hasKey $uids $uid }}
+{{- fail (printf "users: the uid %s is given to both %q and %q" $uid (get $uids $uid) .name) }}
+{{- end }}
+{{- $_ := set $names .name true }}
+{{- $_ := set $uids $uid .name }}
+{{- end }}
+
+{{- /* The JWT signing key of auth-o-tron: from a Secret through AOT_JWT__SECRET, or set explicitly. */ -}}
+{{- $aot := index .Values "auth-o-tron" }}
+{{- if $aot.enabled }}
+{{- $fromEnv := false }}
+{{- range $aot.extraEnv }}
+{{- if eq .name "AOT_JWT__SECRET" }}{{ $fromEnv = true }}{{ end }}
+{{- end }}
+{{- if not (or $fromEnv $aot.config.jwt.secret) }}
+{{- fail "auth-o-tron: no JWT signing key; give it as the variable AOT_JWT__SECRET in auth-o-tron.extraEnv, from a Secret of the namespace (see values.yaml), or set auth-o-tron.config.jwt.secret in a test profile" }}
+{{- end }}
+{{- end }}
