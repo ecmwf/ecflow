@@ -15,11 +15,10 @@ global:
 ingress:
   enabled: true
   host: ecflow.localtest.me
+  # No cert-manager on kind: with the Secret absent, the controller serves its own
+  # self-signed certificate.
   tls:
-    enabled: true
-    # No cert-manager on kind: with the Secret absent, the controller serves its own
-    # self-signed certificate.
-    secretName: ecflow-ingress-tls
+    - secretName: ecflow-ingress-tls
 
 sftp:
   service:

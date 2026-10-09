@@ -272,18 +272,19 @@ networkPolicy:
 
 # The Ingress that publishes the reverse proxy outside the cluster. The host is
 # <hostPrefix>.<domain>, or `host` when set. TLS terminates at the controller, which
-# then reaches the reverse proxy over HTTPS; the certificate comes from the named
-# Secret, issued by cert-manager when `certManager.clusterIssuer` is set.
+# then reaches the reverse proxy over HTTPS; `tls` lists the certificates in the usual
+# form of an Ingress, one entry per Secret, `hosts` defaulting to the host above. The
+# Secret is issued by cert-manager when `certManager.clusterIssuer` is set, and the
+# controller serves its own certificate while the Secret does not exist.
 ingress:
   enabled: false
   className: nginx
   hostPrefix: ecflow
   domain: example.org
   host: ""
-  tls:
-    enabled: true
-    # Defaults to <fullname>-ingress-tls.
-    secretName: ""
+  tls: []
+  #  - secretName: ecflow-ingress-tls
+  #    hosts: []                # defaults to the host of the Ingress
   certManager:
     # `letsencrypt-production` on the ECMWF clusters, for public and LAN-only names.
     clusterIssuer: ""

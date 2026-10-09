@@ -50,11 +50,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- with .Values.ingress.tls }}
   tls:
-    - hosts:
-        - {{ $host }}
-      secretName: {{ include "ecflow-chart.ingressTlsSecretName" . }}
+    {{- range . }}
+    - secretName: {{ .secretName }}
+      hosts:
+        {{- range (.hosts | default (list $host)) }}
+        - {{ . }}
+        {{- end }}
+    {{- end }}
   {{- end }}
   rules:
     - host: {{ $host }}

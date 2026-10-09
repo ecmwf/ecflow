@@ -16,6 +16,8 @@ global:
 ingress:
   enabled: true
   host: ecflow-mt-test.ecmwf.int
+  tls:
+    - secretName: ecflow-ingress-tls
   certManager:
     clusterIssuer: letsencrypt-production
   dns:

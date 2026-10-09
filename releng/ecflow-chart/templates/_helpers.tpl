@@ -117,11 +117,6 @@ users that have SSH keys, each as `name` or `name:uid` when a uid is given.
 {{- .Values.ingress.host | default (printf "%s.%s" .Values.ingress.hostPrefix .Values.ingress.domain) -}}
 {{- end }}
 
-{{/* The name of the TLS Secret of the Ingress. */}}
-{{- define "ecflow-chart.ingressTlsSecretName" -}}
-{{- .Values.ingress.tls.secretName | default (printf "%s-ingress-tls" (include "ecflow-chart.fullname" .)) -}}
-{{- end }}
-
 {{/* The accounts that get a home directory: every user with a uid, as `name:uid`. */}}
 {{- define "ecflow-chart.homeUsers" -}}
 {{- $entries := list -}}
