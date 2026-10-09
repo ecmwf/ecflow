@@ -1,0 +1,275 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+#
+# Runs ecFlowUI from the ecflow-ui-dev Docker image, displaying on the X server of the current session
+# (XQuartz on macOS; the local X server, or the display forwarded by `ssh -X`, on Linux).
+#
+
+set -e
+set -u
+set -o pipefail
+
+# ---------------------------------------------------------------------------
+# Defaults
+# ---------------------------------------------------------------------------
+
+IMAGE="${ECFLOWUI_DOCKER_IMAGE:-ecflow-ui-dev:latest}"
+PULL="missing"
+DRY_RUN="false"
+USE_XHOST="true"
+
+# The configuration directory on the host; given with -confd, it is mounted at the same path in the container
+CONFIG_DIR="${HOME}/.ecflow_ui_v5"
+CONFIG_DIR_IN_CONTAINER="/home/ecflow/.ecflow_ui_v5"
+
+USE_PC4="false"
+UI_ARGS=()
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+function usage() {
+    cat <<EOF
+Usage: docker_ecflow_ui [options] [ecflow_ui options]
+
+Runs ecFlowUI from a Docker image, displaying on the X server of the current
+session: XQuartz on macOS, or, on Linux, the local X server or the display
+forwarded by 'ssh -X'. The image is downloaded when not available locally.
+
+Options:
+  -i, --image IMAGE        Docker image to run
+                             (default: \${ECFLOWUI_DOCKER_IMAGE}, or ecflow-ui-dev:latest)
+  --pull POLICY            When to download the image: missing, always or never
+                             (default: missing)
+  --dry-run                Print the docker command, instead of running it
+  --no-xhost               On macOS, never grant access to XQuartz with xhost
+                             (see below)
+  -h, --help               Show this help message and exit
+
+ecflow_ui options with an effect on the container (all other options, e.g.
+-ts <host> <port>, are passed on to ecflow_ui unchanged):
+  -confd DIR               Use the configuration directory DIR (an absolute
+                             path), mounted at the same path in the container
+                             (default: ~/.ecflow_ui_v5)
+  -pc4                     Reach the servers through the SOCKS proxy given by
+                             \${ECFLOWUI_SOCKS_PROXY} (<host>:<port>), by default
+                             port 9050 of the host (e.g. 'ssh -D 9050 <host>')
+
+The credentials file is mounted read-only: \${ECF_AUTHTOKENS}, when set, or
+else ~/.ecflowapirc, when present.
+
+Access to the X server is granted with the X authority cookie of the display.
+On macOS, when no cookie is found, access is granted with 'xhost +localhost'
+instead, only for the duration of the run, unless --no-xhost is given.
+EOF
+}
+
+function fail() {
+    echo "docker_ecflow_ui: error: $*" >&2
+    exit 1
+}
+
+function require_value() {
+    if [ "$2" -lt 2 ]; then
+        fail "option $1 requires a value"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Parse command line
+# ---------------------------------------------------------------------------
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -i|--image) require_value "$1" $#; IMAGE="$2"; shift 2 ;;
+        --pull) require_value "$1" $#; PULL="$2"; shift 2 ;;
+        --dry-run) DRY_RUN="true"; shift ;;
+        --no-xhost) USE_XHOST="false"; shift ;;
+        -h|--help) usage; exit 0 ;;
+        -confd)
+            require_value "$1" $#
+            case "$2" in
+                /*) ;;
+                *) fail "option -confd requires an absolute path" ;;
+            esac
+            CONFIG_DIR="$2"
+            CONFIG_DIR_IN_CONTAINER="$2"
+            UI_ARGS+=("$1" "$2")
+            shift 2
+            ;;
+        -pc4) USE_PC4="true"; UI_ARGS+=("$1"); shift ;;
+        # ecflow_ui options taking values are passed on with their values, so that a value is never taken as
+        # an option of this script
+        -ts)
+            if [ $# -lt 3 ]; then
+                fail "option -ts requires a host and a port"
+            fi
+            UI_ARGS+=("$1" "$2" "$3")
+            shift 3
+            ;;
+        -title|-fs|-cmd) require_value "$1" $#; UI_ARGS+=("$1" "$2"); shift 2 ;;
+        *) UI_ARGS+=("$1"); shift ;;
+    esac
+done
+
+# ---------------------------------------------------------------------------
+# Compose the docker command
+# ---------------------------------------------------------------------------
+
+DOCKER_ARGS=(run --rm --pull "${PULL}")
+
+if [ -t 0 ]; then
+    DOCKER_ARGS+=(--interactive --tty)
+fi
+
+# Display, and the address of the host as seen from the container
+#
+# On macOS, the X server (XQuartz) is reached over TCP through Docker Desktop's host.docker.internal, on the
+# display number of the session. On Linux, the container shares the network of the host, so that a display
+# forwarded by 'ssh -X' (e.g. localhost:10.0, served by sshd on the loopback interface) is reachable as is.
+
+case "$(uname -s)" in
+    Darwin)
+        display_number=${DISPLAY:-:0}
+        display_number=${display_number##*:}
+        CONTAINER_DISPLAY="host.docker.internal:${display_number}"
+        HOST_ADDRESS="host.docker.internal"
+        AUTH_DISPLAY=":${display_number}"
+        ;;
+    Linux)
+        if [ -z "${DISPLAY:-}" ]; then
+            fail "DISPLAY is not set; connect with 'ssh -X', or run from a graphical session"
+        fi
+        CONTAINER_DISPLAY="${DISPLAY}"
+        HOST_ADDRESS="127.0.0.1"
+        AUTH_DISPLAY="${DISPLAY}"
+        DOCKER_ARGS+=(--network host)
+        # A local display is served through the socket of the X server
+        if [ "${DISPLAY#:}" != "${DISPLAY}" ]; then
+            DOCKER_ARGS+=(--volume /tmp/.X11-unix:/tmp/.X11-unix:ro)
+        fi
+        ;;
+    *)
+        fail "unsupported platform $(uname -s)"
+        ;;
+esac
+
+DOCKER_ARGS+=(--env "DISPLAY=${CONTAINER_DISPLAY}")
+
+# X authority
+#
+# The cookie of the display is handed to the container in a file of its own, with the host part of its entry
+# made a wildcard (family ffff), since the container does not share the host name of the X server.
+
+# The X utilities of XQuartz are looked up in /opt/X11/bin as well, as that directory is not always in PATH
+function find_x_utility() {
+    command -v "$1" 2> /dev/null || { [ -x "/opt/X11/bin/$1" ] && echo "/opt/X11/bin/$1"; } || true
+}
+
+XAUTH=$(find_x_utility xauth)
+XAUTH_FILE=""
+XHOST_ADDED="false"
+
+# shellcheck disable=SC2329 # invoked through the trap below
+function cleanup() {
+    if [ -n "${XAUTH_FILE}" ]; then
+        rm -f "${XAUTH_FILE}"
+    fi
+    if [ "${XHOST_ADDED}" = "true" ]; then
+        "${XHOST}" -localhost > /dev/null 2>&1 || true
+    fi
+}
+
+trap cleanup EXIT
+
+if [ -n "${XAUTH}" ]; then
+    XAUTH_FILE=$(mktemp "${TMPDIR:-/tmp}/docker_ecflow_ui.xauth.XXXXXX")
+    "${XAUTH}" nlist "${AUTH_DISPLAY}" 2> /dev/null | sed -e 's/^..../ffff/' \
+        | "${XAUTH}" -f "${XAUTH_FILE}" nmerge - 2> /dev/null || true
+fi
+
+if [ -n "${XAUTH_FILE}" ] && [ -s "${XAUTH_FILE}" ]; then
+    DOCKER_ARGS+=(--volume "${XAUTH_FILE}:/tmp/.docker_ecflow_ui.xauth:ro")
+    DOCKER_ARGS+=(--env "XAUTHORITY=/tmp/.docker_ecflow_ui.xauth")
+    USE_XHOST="false"
+else
+    echo "docker_ecflow_ui: warning: no X authority cookie found for display ${AUTH_DISPLAY}" >&2
+fi
+
+# Without a cookie, XQuartz only accepts the connections of the container (which reach it from localhost)
+# when localhost is in its access list; it is added for the duration of the run, unless already there
+
+XHOST=""
+if [ "$(uname -s)" = "Darwin" ] && [ "${USE_XHOST}" = "true" ]; then
+    XHOST=$(find_x_utility xhost)
+    if [ -z "${XHOST}" ]; then
+        echo "docker_ecflow_ui: warning: xhost not found; XQuartz may refuse the connection" >&2
+    fi
+fi
+
+# User
+#
+# The container runs ecFlowUI with the UID/GID of the user, so that the files mounted from the host (the
+# configuration directory, the credentials and the X authority) are accessible as on the host. They are given
+# explicitly, as the owner of a bind mount is not always visible in the container (e.g. Docker Desktop on
+# macOS shows it as root).
+
+DOCKER_ARGS+=(--env "ECFLOW_UID=$(id -u)" --env "ECFLOW_GID=$(id -g)")
+
+# Configuration directory
+#
+# The directory is created beforehand (see below), so that it is owned by the user.
+
+DOCKER_ARGS+=(--volume "${CONFIG_DIR}:${CONFIG_DIR_IN_CONTAINER}")
+DOCKER_ARGS+=(--env "ECFLOWUI_CONFIG_DIR=${CONFIG_DIR_IN_CONTAINER}")
+
+# Credentials
+
+if [ -n "${ECF_AUTHTOKENS:-}" ]; then
+    if [ ! -f "${ECF_AUTHTOKENS}" ]; then
+        fail "ECF_AUTHTOKENS names a missing file: ${ECF_AUTHTOKENS}"
+    fi
+    DOCKER_ARGS+=(--volume "${ECF_AUTHTOKENS}:${ECF_AUTHTOKENS}:ro")
+    DOCKER_ARGS+=(--env "ECF_AUTHTOKENS=${ECF_AUTHTOKENS}")
+elif [ -f "${HOME}/.ecflowapirc" ]; then
+    DOCKER_ARGS+=(--volume "${HOME}/.ecflowapirc:/home/ecflow/.ecflowapirc:ro")
+fi
+
+# SOCKS proxy
+
+if [ "${USE_PC4}" = "true" ]; then
+    DOCKER_ARGS+=(--env "ECFLOWUI_SOCKS_PROXY=${ECFLOWUI_SOCKS_PROXY:-${HOST_ADDRESS}:9050}")
+fi
+
+# ecFlowUI writes its log to standard output, so that it shows in the terminal
+DOCKER_ARGS+=("${IMAGE}" -log)
+if [ ${#UI_ARGS[@]} -gt 0 ]; then
+    DOCKER_ARGS+=("${UI_ARGS[@]}")
+fi
+
+# ---------------------------------------------------------------------------
+# Run
+# ---------------------------------------------------------------------------
+
+if [ -n "${XHOST}" ] && ! "${XHOST}" 2> /dev/null | grep -qx 'INET:localhost'; then
+    if [ "${DRY_RUN}" = "true" ]; then
+        echo "docker_ecflow_ui: would run 'xhost +localhost' for the duration of the run" >&2
+    else
+        echo "docker_ecflow_ui: granting access to XQuartz with 'xhost +localhost' for the duration of the run" >&2
+        "${XHOST}" +localhost > /dev/null
+        XHOST_ADDED="true"
+    fi
+fi
+
+if [ "${DRY_RUN}" = "true" ]; then
+    printf '%q ' docker "${DOCKER_ARGS[@]}"
+    printf '\n'
+    exit 0
+fi
+
+mkdir -p "${CONFIG_DIR}"
+docker "${DOCKER_ARGS[@]}"
