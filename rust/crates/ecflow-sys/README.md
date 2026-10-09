@@ -28,6 +28,10 @@ used; otherwise the release matching the crate version is cloned.
 
 ## Environment variables
 
+- `ECFLOW_BUILD_DIR` - An ecFlow CMake build tree with the `ecflow_all` target
+  built, used instead of building ecFlow. The bridge compiles against the
+  sources that tree was configured from, and its `ENABLE_SSL` must match the
+  `ssl` feature.
 - `ECBUILD_DIR` - Path to an ecbuild checkout, instead of cloning it.
 - `BOOST_ROOT` - Boost install prefix; ecFlow's CMake does not search system
   paths for Boost.

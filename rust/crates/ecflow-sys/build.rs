@@ -4,9 +4,10 @@
 //! Build script for ecflow-sys
 //!
 //! Builds ecFlow the documented way (`cmake -B build -S .` with ecbuild on
-//! `CMAKE_PREFIX_PATH`), compiles the CXX bridge with the public include
-//! directories and definitions of the `ecflow_all` target, and links that
-//! archive with the libraries `CMake` found for it, read from `CMakeCache.txt`.
+//! `CMAKE_PREFIX_PATH`), or takes the build tree `ECFLOW_BUILD_DIR` names,
+//! compiles the CXX bridge with the public include directories and
+//! definitions of the `ecflow_all` target, and links that archive with the
+//! libraries `CMake` found for it, read from `CMakeCache.txt`.
 
 use std::env;
 use std::fs;
@@ -21,7 +22,13 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=cpp");
-    for var in ["ECBUILD_DIR", "BOOST_ROOT", "CMAKE_PREFIX_PATH", "DOCS_RS"] {
+    for var in [
+        "ECFLOW_BUILD_DIR",
+        "ECBUILD_DIR",
+        "BOOST_ROOT",
+        "CMAKE_PREFIX_PATH",
+        "DOCS_RS",
+    ] {
         println!("cargo:rerun-if-env-changed={var}");
     }
 
@@ -31,6 +38,23 @@ fn main() {
 
     let crate_dir =
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
+
+    let existing = existing_build_dir();
+    let reused = existing.is_some();
+    let (ecflow, build_dir, cache) = existing.map_or_else(build_ecflow, reuse_build_tree);
+
+    // The bridge archive must precede the ecFlow archive on the link line.
+    build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
+    link(&build_dir, &cache, reused);
+
+    bindman_build::check_cpp_api(
+        &ecflow.join("libs/client/src"),
+        &crate_dir.join("src/lib.rs"),
+    );
+}
+
+/// The sources, build tree and cache of an ecFlow built under `OUT_DIR`.
+fn build_ecflow() -> (PathBuf, PathBuf, CMakeCache) {
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
     let src_dir = out_dir.join("src");
     let build_dir = out_dir.join("build");
@@ -53,15 +77,28 @@ fn main() {
     );
 
     let cache = CMakeCache::read(&build_dir);
+    (ecflow, build_dir, cache)
+}
 
-    // The bridge archive must precede the ecFlow archive on the link line.
-    build_bridge(&crate_dir, &ecflow, &build_dir, &cache);
-    link(&build_dir, &cache);
-
-    bindman_build::check_cpp_api(
-        &ecflow.join("libs/client/src"),
-        &crate_dir.join("src/lib.rs"),
+/// The sources, build tree and cache of an existing ecFlow build, which must
+/// have been configured with `ENABLE_SSL` matching the `ssl` feature.
+fn reuse_build_tree(build_dir: PathBuf) -> (PathBuf, PathBuf, CMakeCache) {
+    let cache = CMakeCache::read(&build_dir);
+    let ecflow = cache
+        .path("CMAKE_HOME_DIRECTORY")
+        .expect("CMakeCache.txt records no source directory");
+    eprintln!(
+        "ecflow-sys: using the ecflow build at {} of the sources at {}",
+        build_dir.display(),
+        ecflow.display()
     );
+    let ssl = cache.flag("ENABLE_SSL");
+    assert_eq!(
+        ssl,
+        Some(cfg!(feature = "ssl")),
+        "ECFLOW_BUILD_DIR was configured with ENABLE_SSL={ssl:?}, which does not match the ssl feature"
+    );
+    (ecflow, build_dir, cache)
 }
 
 /// `cmake -B build -S .` as the install documentation describes it.
@@ -154,7 +191,9 @@ fn build_bridge(crate_dir: &Path, ecflow: &Path, build_dir: &Path, cache: &CMake
 }
 
 /// Link `ecflow_all` and the libraries `CMake` found for it, in link order.
-fn link(build_dir: &Path, cache: &CMakeCache) {
+/// A reused Linux build tree also gets `stdc++fs`, the separate archive GCC
+/// below 9 keeps `std::filesystem` in.
+fn link(build_dir: &Path, cache: &CMakeCache, reused: bool) {
     println!(
         "cargo:rustc-link-search=native={}",
         build_dir.join("libs").display()
@@ -173,6 +212,10 @@ fn link(build_dir: &Path, cache: &CMakeCache) {
         if let Some(library) = cache.path(var) {
             link_library(&library);
         }
+    }
+
+    if reused && env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "linux") {
+        println!("cargo:rustc-link-lib=stdc++fs");
     }
 
     bindman_utils::link_cpp_stdlib();
@@ -220,6 +263,13 @@ impl CMakeCache {
             .collect()
     }
 
+    /// The value of a boolean variable, when set.
+    fn flag(&self, name: &str) -> Option<bool> {
+        self.entries()
+            .find(|(key, _)| *key == name)
+            .map(|(_, value)| matches!(value, "ON" | "TRUE" | "YES" | "1"))
+    }
+
     /// `NAME=value` for every `NAME:TYPE=value` line with a found value.
     fn entries(&self) -> impl Iterator<Item = (&str, &str)> {
         self.0.lines().filter_map(|line| {
@@ -228,6 +278,25 @@ impl CMakeCache {
             (!value.is_empty() && !value.ends_with("-NOTFOUND")).then_some((name, value))
         })
     }
+}
+
+/// An ecFlow build tree to use instead of building: `ECFLOW_BUILD_DIR` when
+/// set, which must hold the `ecflow_all` archive. A rebuild of that archive
+/// retriggers the bridge.
+fn existing_build_dir() -> Option<PathBuf> {
+    let dir = env::var("ECFLOW_BUILD_DIR")
+        .ok()
+        .filter(|dir| !dir.is_empty())?;
+    let build_dir = PathBuf::from(dir);
+    let archive = build_dir.join("libs/libecflow_all.a");
+    assert!(
+        archive.exists(),
+        "ECFLOW_BUILD_DIR {} holds no {}; build the ecflow_all target there first",
+        build_dir.display(),
+        archive.display()
+    );
+    println!("cargo:rerun-if-changed={}", archive.display());
+    Some(build_dir)
 }
 
 /// Locate ecbuild: `ECBUILD_DIR` when set, else a shallow clone of the
