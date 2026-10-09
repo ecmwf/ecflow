@@ -12,7 +12,9 @@ repos:
       - id: check-merge-conflict
       # Parse every YAML file to catch syntax errors before CI does.
       - id: check-yaml
-        exclude: '^\.cd/conda/meta\.yaml$'  # conda recipe: Jinja, not YAML
+        # The conda recipe is Jinja, and the Helm templates are Go templates; neither
+        # is YAML until rendered (helm lint checks the chart in its own workflow).
+        exclude: '^\.cd/conda/meta\.yaml$|^releng/ecflow-chart/templates/'
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.7
