@@ -15,6 +15,10 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: ecflow
 nodes:
   - role: control-plane
+    # The node image, pinned by digest so that every local cluster runs the same
+    # Kubernetes whatever the kind release; the digest is the one kind's release
+    # notes give for this tag (kind v0.33.0, Kubernetes v1.37.0).
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
     kubeadmConfigPatches:
       - |
         kind: InitConfiguration
