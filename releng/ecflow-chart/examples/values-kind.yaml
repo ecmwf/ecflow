@@ -59,11 +59,14 @@ tests:
 # deployment.
 users: []
 #  - name: alice
+#    uid: 2001
 #    sshAuthorizedKeys:
 #      - ssh-ed25519 AAAA... alice@host
 #  - name: bob
+#    uid: 2002
 #    sshAuthorizedKeys:
 #      - ssh-ed25519 AAAA... bob@host
 #  - name: charlie
+#    uid: 2003
 #    sshAuthorizedKeys:
 #      - ssh-ed25519 AAAA... charlie@host

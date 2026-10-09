@@ -107,11 +107,17 @@ clusterDomain: cluster.local
 # The accounts of the deployment, declared once by the deployer: not who may log in
 # (that is the authentication authority's), but who has an account on the server
 # side. Each entry names a user; `sshAuthorizedKeys` lists the public keys with which
-# the user reaches the SFTP sidecar, and marks the user as an SFTP account.
+# the user reaches the SFTP sidecar, and marks the user as an SFTP account; `uid` is
+# the numeric id under which the user owns files on the workspace, the same in the SFTP
+# sidecar and, later, in the server container when the jobs run as their owner. Give
+# every account a uid of its own, 2000 or above: 1000 is the server's own account, and
+# an account without a uid gets the next free one, which on a fresh container is 1000.
 #   - name: alice
+#     uid: 2001
 #     sshAuthorizedKeys:
 #       - ssh-ed25519 AAAA... alice@host
 #   - name: bob
+#     uid: 2002
 #     sshAuthorizedKeys:
 #       - ssh-ed25519 AAAA... bob@host
 users: []

@@ -79,15 +79,22 @@ when set, the repository, and the digest or the tag. Called with a dict:
 {{- end -}}
 {{- end }}
 
-{{/* The names of the users that have SSH keys, space-separated: the SFTP accounts. */}}
+{{/*
+The SFTP accounts, space-separated, as the entrypoint of the sidecar reads them: the
+users that have SSH keys, each as `name` or `name:uid` when a uid is given.
+*/}}
 {{- define "ecflow-chart.sftpUsers" -}}
-{{- $names := list -}}
+{{- $entries := list -}}
 {{- range .Values.users -}}
 {{- if .sshAuthorizedKeys -}}
-{{- $names = append $names .name -}}
+{{- if .uid -}}
+{{- $entries = append $entries (printf "%s:%d" .name (int .uid)) -}}
+{{- else -}}
+{{- $entries = append $entries .name -}}
 {{- end -}}
 {{- end -}}
-{{- join " " $names -}}
+{{- end -}}
+{{- join " " $entries -}}
 {{- end }}
 
 {{/* The name of the Secret that holds the SFTP keys. */}}
