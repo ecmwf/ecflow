@@ -36,6 +36,7 @@ set(test_srcs
   test/TestNodeBeginRequeue.cpp
   test/TestNodeChangeRepeat.cpp
   test/TestNodeGeneratedVariables.cpp
+  test/TestNodeRepeat.cpp
   test/TestNodePathAlgorithms.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
@@ -94,6 +95,7 @@ set(test_srcs
   test/parser/TestMultiStatementParsing.cpp
   test/parser/TestParser.cpp
   test/parser/TestParser_main.cpp # test entry point
+  test/parser/TestRepeatPersistence.cpp
   test/parser/TestVariableParsing.cpp
 )
 ecflow_add_test(

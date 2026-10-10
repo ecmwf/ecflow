@@ -14,6 +14,7 @@ set(test_srcs
   test/TestMigration.cpp
   test/TestRepeat.cpp
   test/TestRepeatChange.cpp
+  test/TestRepeatEdgeCases.cpp
   test/TestRepeatRange.cpp
   test/TestSizeOf.cpp
   test/TestTimeAttr.cpp

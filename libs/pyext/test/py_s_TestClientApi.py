@@ -2172,6 +2172,12 @@ class TestClientApi:
         assert current("integer") == (6, "6")
         assert current("string") == (0, "x")
 
+        # A request on several paths is applied to each path that accepts the value
+        with pytest.raises(RuntimeError, match="Alter \\(change\\) failed for " + path("string")):
+            self.ci.alter([path("integer"), path("string")], "change", "repeat", "3")
+        assert current("integer") == (3, "3")
+        assert current("string") == (0, "x")
+
     def test_client_alter_flag(self):
         print_test(self.ci, "test_client_alter_flag")
         self.ci.delete_all()

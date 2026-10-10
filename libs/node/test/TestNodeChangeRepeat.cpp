@@ -7,8 +7,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/RepeatAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
@@ -89,6 +91,41 @@ BOOST_AUTO_TEST_CASE(change_repeat_leaves_the_node_state_unchanged) {
     BOOST_CHECK_EQUAL(t->repeat().value(), 0);
     BOOST_CHECK(t->repeat().valid());
     BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_is_seen_at_once_by_variables_and_triggers) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s  = defs.add_suite("s");
+    family_ptr f = s->add_family("f");
+    f->addRepeat(RepeatDate("YMD", 20260101, 20261231, 1));
+    task_ptr t  = f->add_task("t");
+    task_ptr t2 = s->add_task("t2");
+    t2->add_trigger("f:YMD eq 20260315 and f:YMD_DD eq 15");
+    t->addRepeat(RepeatInteger("N", 0, 10, 1));
+    defs.beginAll();
+
+    BOOST_REQUIRE(!t2->triggerAst()->evaluate());
+    // the generated variables of a task are created on first use
+    BOOST_REQUIRE_EQUAL(t->findGenVariable("N").value(), "0");
+
+    f->changeRepeat("20260315");
+    t->changeRepeat("4");
+
+    // Once created, the generated variable named after the Repeat is refreshed only on requeue or job submission
+    BOOST_CHECK_EQUAL(f->findGenVariable("YMD").value(), "20260101");
+    BOOST_CHECK_EQUAL(f->findGenVariable("YMD_DD").value(), "15");
+    BOOST_CHECK_EQUAL(t->findGenVariable("N").value(), "0");
+
+    // Variable lookup, substitution and triggers read the Repeat itself
+    std::string value;
+    BOOST_REQUIRE(t->findParentVariableValue("YMD", value));
+    BOOST_CHECK_EQUAL(value, "20260315");
+    std::string cmd = "%YMD% %YMD_DD% %YMD_JULIAN% %N%";
+    BOOST_REQUIRE(t->variableSubstitution(cmd));
+    BOOST_CHECK_EQUAL(cmd, "20260315 15 " + std::to_string(ecf::CalendarDate(20260315).as_julian_day().value()) + " 4");
+    BOOST_CHECK(t2->triggerAst()->evaluate());
 }
 
 BOOST_AUTO_TEST_CASE(change_repeat_without_repeat_is_refused) {
