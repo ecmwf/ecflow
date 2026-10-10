@@ -34,6 +34,7 @@ set(test_srcs
   test/TestMovePeer.cpp
   test/TestNodeAlgorithms.cpp
   test/TestNodeBeginRequeue.cpp
+  test/TestNodeChangeRepeat.cpp
   test/TestNodeGeneratedVariables.cpp
   test/TestNodePathAlgorithms.cpp
   test/TestNodeState.cpp

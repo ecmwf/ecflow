@@ -159,6 +159,37 @@ BOOST_AUTO_TEST_CASE(delete_label_selector_does_not_interfere) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(ChangeRepeat)
+
+BOOST_AUTO_TEST_CASE(change_repeat_collects_value_and_paths) {
+    ECF_NAME_THIS_TEST();
+
+    const auto values = parse_alter({"--alter", "change", "repeat", "20260101", "/s/f/t1", "/s/f/t2"});
+
+    const std::vector<std::string> expected = {"change", "repeat", "20260101", "/s/f/t1", "/s/f/t2"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), expected.begin(), expected.end());
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_keeps_a_quoted_option_string_as_one_value) {
+    ECF_NAME_THIS_TEST();
+
+    const auto values = parse_alter({"--alter", "change", "repeat", "--begin 20260101 --end 20261231", "/s/f/t"});
+
+    const std::vector<std::string> expected = {"change", "repeat", "--begin 20260101 --end 20261231", "/s/f/t"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), expected.begin(), expected.end());
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_takes_a_value_starting_with_slash_as_a_path) {
+    ECF_NAME_THIS_TEST();
+
+    const auto values = parse_alter({"--alter", "change", "repeat", "/20260101", "/s/f/t"});
+
+    const std::vector<std::string> expected = {"change", "repeat", "/20260101", "/s/f/t"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), expected.begin(), expected.end());
+}
+
+BOOST_AUTO_TEST_SUITE_END() // ChangeRepeat
+
 BOOST_AUTO_TEST_SUITE_END() // T_ClientOptionsParser
 
 BOOST_AUTO_TEST_SUITE_END() // U_Base

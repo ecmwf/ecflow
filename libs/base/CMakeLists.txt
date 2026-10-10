@@ -6,6 +6,7 @@ add_subdirectory(test/harness)
 set(test_srcs
   # Sources
   test/TestAlterCmd.cpp
+  test/TestAlterCmdRepeat.cpp
   test/TestArchiveAndRestoreCmd.cpp
   test/TestBase_main.cpp # test entry point
   test/TestClientHandleCmd.cpp
