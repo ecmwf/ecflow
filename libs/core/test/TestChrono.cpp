@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <string> // also defines _LIBCPP_VERSION, when built with libc++
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Chrono.hpp"
@@ -149,6 +151,74 @@ BOOST_AUTO_TEST_CASE(is_able_to_cast_instant_to_duration) {
         BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into<std::chrono::nanoseconds>(instant), 1685577600000000000);
     }
 }
+
+BOOST_AUTO_TEST_CASE(is_able_to_parse_and_format_duration) {
+    ECF_NAME_THIS_TEST();
+
+    auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
+
+    BOOST_CHECK_EQUAL(seconds("12"), 43200);
+    BOOST_CHECK_EQUAL(seconds("12:00"), 43200);
+    BOOST_CHECK_EQUAL(seconds("12:00:00"), 43200);
+    BOOST_CHECK_EQUAL(seconds("01:02:03"), 3723);
+    BOOST_CHECK_EQUAL(seconds("+01:00:00"), 3600);
+    BOOST_CHECK_EQUAL(seconds("-06:00:00"), -21600);
+    BOOST_CHECK_EQUAL(seconds("-01:30:00"), -5400);
+    BOOST_CHECK_EQUAL(seconds("00:-30:00"), -1800);
+    BOOST_CHECK_EQUAL(seconds(""), 0);
+    BOOST_CHECK_THROW(seconds("1.5"), std::runtime_error);
+    BOOST_CHECK_THROW(seconds("abc"), std::runtime_error);
+
+    BOOST_CHECK_EQUAL(Duration::format(Duration{std::chrono::seconds{43200}}), "12:00:00");
+    BOOST_CHECK_EQUAL(Duration::format(Duration{std::chrono::seconds{-5400}}), "-1:30:00");
+    BOOST_CHECK_EQUAL(Duration::format(Duration{std::chrono::seconds{-1800}}), "00:-30:00");
+
+    // The formatted durations parse back to the same value
+    for (long value : {43200L, 3723L, -5400L, -1800L, -30L}) {
+        auto duration = Duration{std::chrono::seconds{value}};
+        BOOST_CHECK_EQUAL(seconds(Duration::format(duration)), value);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_is_lenient) {
+    ECF_NAME_THIS_TEST();
+
+    auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
+
+    // The sign is taken from the hours only, so a negative duration under one hour must be written 00:-MM:SS
+    BOOST_CHECK_EQUAL(seconds("-00:30:00"), 1800);
+    BOOST_CHECK_EQUAL(seconds("-0:0:30"), 30);
+    // Fields after the seconds are ignored, and minutes and seconds are not limited to 59
+    BOOST_CHECK_EQUAL(seconds("01:02:03:04"), 3723);
+    BOOST_CHECK_EQUAL(seconds("00:90:00"), 5400);
+}
+
+BOOST_AUTO_TEST_CASE(instant_beyond_2038_does_not_round_trip) {
+    ECF_NAME_THIS_TEST();
+
+    // The last instant representable in 32-bit seconds since the epoch
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20380119T031407")), "20380119T031407");
+
+    // Later instants overflow while being parsed
+    BOOST_CHECK_NE(Instant::format(Instant::parse("20380119T031408")), "20380119T031408");
+    BOOST_CHECK_NE(Instant::format(Instant::parse("21000101T000000")), "21000101T000000");
+}
+
+#if defined(_LIBCPP_VERSION)
+BOOST_AUTO_TEST_CASE(instant_parsing_is_lenient_with_libcxx) {
+    ECF_NAME_THIS_TEST();
+
+    // No check is made for the end of the input, and libc++ stops at the end of the input after any complete field
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20240101T000000Z")), "20240101T000000");
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse(" 20240101T000000")), "20240101T000000");
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20240101")), "20240101T000000");
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20240101T1")), "20240101T010000");
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20240101t000000")), "20240101T000000");
+    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20240101T235960")), "20240102T000000");
+    BOOST_CHECK_THROW(Instant::parse("20240101T"), std::runtime_error);
+    BOOST_CHECK_THROW(Instant::parse("202401"), std::runtime_error);
+}
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

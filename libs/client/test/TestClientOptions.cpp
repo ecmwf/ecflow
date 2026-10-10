@@ -538,7 +538,8 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change_repeat) {
 
     std::vector<std::vector<std::string>> paths_set = {{"/node1"}, {"/node1", "/node2"}};
 
-    std::vector<std::string> values = {"20260101", "a", "--begin 20260101 --end 20261231"};
+    // includes a negative value, as used by a descending integer Repeat
+    std::vector<std::string> values = {"20260101", "a", "-5", "--begin 20260101 --end 20261231"};
 
     for (const auto& paths : paths_set) {
         for (const auto& value : values) {
