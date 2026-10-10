@@ -243,7 +243,7 @@ void RepeatDate::update_repeat_genvar() const {
     dom_.set_name(name_ + "_DD");
     dom_.set_value("<invalid>");
     dow_.set_name(name_ + "_DOW");
-    dom_.set_value("<invalid>");
+    dow_.set_value("<invalid>");
     julian_.set_name(name_ + "_JULIAN");
     julian_.set_value("<invalid>");
 
@@ -878,7 +878,7 @@ void RepeatDateList::update_repeat_genvar() const {
     dom_.set_name(name_ + "_DD");
     dom_.set_value("<invalid>");
     dow_.set_name(name_ + "_DOW");
-    dom_.set_value("<invalid>");
+    dow_.set_value("<invalid>");
     julian_.set_name(name_ + "_JULIAN");
     julian_.set_value("<invalid>");
 

@@ -176,6 +176,24 @@ BOOST_AUTO_TEST_CASE(set_to_last_value_is_the_end_even_when_off_the_step_grid) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(generated_variables_of_an_expired_date_repeat_are_invalid) {
+    ECF_NAME_THIS_TEST();
+
+    for (Repeat rep : {Repeat(RepeatDate("YMD", 20260101, 20260101, 1)), Repeat(RepeatDateList("YMD", {20260101}))}) {
+        rep.update_repeat_genvar();
+        BOOST_REQUIRE_EQUAL(rep.find_gen_variable("YMD_DOW").value(), "4"); // Thursday
+
+        rep.increment();
+        BOOST_REQUIRE(!rep.valid());
+        rep.update_repeat_genvar();
+
+        for (const std::string name : {"YMD_YYYY", "YMD_MM", "YMD_DD", "YMD_DOW", "YMD_JULIAN"}) {
+            BOOST_CHECK_MESSAGE(rep.find_gen_variable(name).value() == "<invalid>",
+                                name << " of " << rep.toString() << " is " << rep.find_gen_variable(name).value());
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // expiry
 
 /*
