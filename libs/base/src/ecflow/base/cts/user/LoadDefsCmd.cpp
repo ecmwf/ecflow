@@ -61,6 +61,15 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
     }
 
     if (load_ok) {
+        // A definition file holding state (defs_state) skips the checks of the parser, except for the Repeats
+        for (const auto& node : ecf::get_all_nodes(*defs)) {
+            if (!node->check_repeat(errMsg)) {
+                load_ok = false;
+            }
+        }
+    }
+
+    if (load_ok) {
         defs->handle_migration();
         defs->server_state().add_or_update_user_variables(client_env); // use in test environment
 

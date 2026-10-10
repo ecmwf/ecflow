@@ -8,6 +8,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/RepeatAttr.hpp"
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -15,6 +16,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 ///
 /// \brief Pins how Repeats are written to, and read from, definitions and checkpoints
@@ -326,6 +328,94 @@ BOOST_AUTO_TEST_CASE(datelist_data_files) {
     BOOST_CHECK(parse("good_defs", "repeat_date_list.ecf"));
     BOOST_CHECK(!parse("bad_defs", "repeat_date_list.ecf"));  // invalid months
     BOOST_CHECK(!parse("bad_defs", "repeat_date_list1.ecf")); // empty list
+}
+
+BOOST_AUTO_TEST_CASE(inconsistent_integer_in_a_definition_file_is_refused) {
+    ECF_NAME_THIS_TEST();
+
+    struct Case
+    {
+        std::string line;
+        std::string fragment;
+    };
+    const std::vector<Case> refused{
+        {"repeat integer N 0 10 0", "the step cannot be zero"},
+        {"repeat integer N 0 10 -1", "the start cannot be less than the end, when the step is negative"},
+        {"repeat integer N 10 0", "the end cannot be less than the start, when the step is positive"},
+    };
+    for (const auto& c : refused) {
+        auto loaded = load(suite_with(c.line));
+        BOOST_CHECK_MESSAGE(!loaded.ok, c.line << ": expected to be refused");
+        BOOST_CHECK_MESSAGE(loaded.error.find(c.fragment) != std::string::npos, c.line << ": " << loaded.error);
+        BOOST_CHECK_MESSAGE(loaded.error.find("/s") != std::string::npos, c.line << ": " << loaded.error);
+    }
+
+    for (const std::string line : {"repeat integer N 5 5", "repeat integer N 5 5 -1", "repeat integer N 10 0 -2"}) {
+        auto loaded = load(suite_with(line));
+        BOOST_CHECK_MESSAGE(loaded.ok, line << ": " << loaded.error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(inconsistent_integer_in_a_checkpoint_is_loaded) {
+    ECF_NAME_THIS_TEST();
+
+    // A checkpoint (MIGRATE) or a synchronisation (NET) is never checked, so that a server always restarts from it
+    for (const std::string style : {"MIGRATE", "NET"}) {
+        auto loaded = load(suite_with("repeat integer N 0 10 0 # 4", style));
+        BOOST_CHECK_MESSAGE(loaded.ok, style << ": " << loaded.error);
+    }
+
+    // A STATE file is checked as a definition file
+    auto loaded = load(suite_with("repeat integer N 0 10 0 # 4", "STATE"));
+    BOOST_CHECK(!loaded.ok);
+    BOOST_CHECK_MESSAGE(loaded.error.find("the step cannot be zero") != std::string::npos, loaded.error);
+}
+
+BOOST_AUTO_TEST_CASE(inconsistent_integer_is_refused_by_the_check_of_definitions) {
+    ECF_NAME_THIS_TEST();
+
+    // The check run when definitions are loaded, replaced or added (client, Python, REST)
+    Defs defs;
+    defs.add_suite("s")->add_family("f")->addRepeat(RepeatInteger("N", 10, 0, 1));
+
+    std::string error, warning;
+    BOOST_CHECK(!defs.check(error, warning));
+    BOOST_CHECK_MESSAGE(error.find("/s/f") != std::string::npos, error);
+    BOOST_CHECK_MESSAGE(error.find("the end cannot be less than the start") != std::string::npos, error);
+}
+
+BOOST_AUTO_TEST_CASE(inconsistent_integer_in_a_loaded_file_with_state_is_refused) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    // A file given to --load is checked even when it declares a state, unlike a checkpoint
+    auto refused = MakeTestFile()
+                       .with(AutomaticFileLocation{std::string{"repeat_load"}})
+                       .with(suite_with("repeat integer N 0 10 0", "MIGRATE"))
+                       .create();
+    std::string error;
+    try {
+        LoadDefsCmd cmd(refused.path().string(), false, true /* check only */, false, false, {});
+    }
+    catch (const std::runtime_error& e) {
+        error = e.what();
+    }
+    BOOST_CHECK_MESSAGE(error.find("the step cannot be zero") != std::string::npos, error);
+
+    auto accepted = MakeTestFile()
+                        .with(AutomaticFileLocation{std::string{"repeat_load"}})
+                        .with(suite_with("repeat integer N 0 10 2 # 4", "MIGRATE"))
+                        .create();
+    BOOST_CHECK_NO_THROW(LoadDefsCmd(accepted.path().string(), false, true /* check only */, false, false, {}));
+
+    // A file that does not parse is refused before its Repeats are checked
+    auto malformed = MakeTestFile()
+                         .with(AutomaticFileLocation{std::string{"repeat_load"}})
+                         .with(suite_with("repeat integer N", "MIGRATE"))
+                         .create();
+    BOOST_CHECK_THROW(LoadDefsCmd(malformed.path().string(), false, true /* check only */, false, false, {}),
+                      std::runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_RepeatPersistence

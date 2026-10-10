@@ -1474,6 +1474,23 @@ RepeatInteger::RepeatInteger(const std::string& variable, int start, int end, in
 }
 RepeatInteger::RepeatInteger() = default;
 
+void RepeatInteger::validate(const std::string& variable, int start, int end, int delta) {
+    if (delta == 0) {
+        throw std::runtime_error(MESSAGE("Invalid Repeat integer: the step cannot be zero: repeat integer "
+                                         << variable << " " << start << " " << end << " " << delta));
+    }
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta > 0) {
+            throw std::runtime_error(
+                MESSAGE("Invalid Repeat integer: the end cannot be less than the start, when the step is positive: "
+                        << "repeat integer " << variable << " " << start << " " << end << " " << delta));
+        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat integer: the start cannot be less than the end, when the step is negative: "
+                    << "repeat integer " << variable << " " << start << " " << end << " " << delta));
+    }
+}
+
 bool RepeatInteger::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatInteger*>(rb);
     if (!rhs) {
@@ -1517,6 +1534,13 @@ void RepeatInteger::changeValue(long the_new_value) {
         throw std::runtime_error(
             MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_
                                                   << "-" << end_ << "] but found " << the_new_value));
+    }
+
+    // A zero step (possible in a Repeat restored from a checkpoint) defines no step grid
+    if (delta_ != 0 && !is_on_step_grid<long>(the_new_value - start_, delta_)) {
+        throw std::runtime_error(MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value "
+                                                                       << the_new_value
+                                                                       << " is not in line with the delta/step"));
     }
     set_value(the_new_value);
 }

@@ -21,12 +21,17 @@ def test_value_past_the_end_is_reported_as_the_last_valid_value():
     assert str(repeat.current_value()) == "3"  # the value held, past the end
 
 
-def test_inconsistent_integer_reports_a_value_it_never_had():
-    # the sign of the step disagrees with the order of start and end
-    task = ecflow.Task("t")
-    task.add_repeat(ecflow.RepeatInteger("N", 0, 10, -1))
+def test_inconsistent_integer_from_a_checkpoint_reports_a_value_it_never_had(tmp_path):
+    # the sign of the step disagrees with the order of start and end: refused when constructed,
+    # but still loaded from a checkpoint
+    with pytest.raises(RuntimeError):
+        ecflow.RepeatInteger("N", 0, 10, -1)
 
-    repeat = task.get_repeat()
+    checkpoint = tmp_path / "checkpoint.def"
+    checkpoint.write_text("defs_state MIGRATE\nsuite s\n  repeat integer N 0 10 -1\nendsuite\n")
+    defs = ecflow.Defs(str(checkpoint))  # keeps the Repeat returned below alive
+    repeat = defs.find_suite("s").get_repeat()
+
     assert repeat.value() == 10
     assert str(repeat.current_value()) == "0"
 

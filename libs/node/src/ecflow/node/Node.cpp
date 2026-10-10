@@ -1727,7 +1727,20 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const {
         auto_restore_->check(errorMsg);
     }
 
+    check_repeat(errorMsg);
+
     return errorMsg.empty();
+}
+
+bool Node::check_repeat(std::string& errorMsg) const {
+    try {
+        repeat_.validate();
+    }
+    catch (const std::exception& e) {
+        errorMsg += MESSAGE("Error: " << debugNodePath() << ": " << e.what() << "\n");
+        return false;
+    }
+    return true;
 }
 
 void Node::add_comment_char(std::string& ret, bool& added_comment_char) const {
