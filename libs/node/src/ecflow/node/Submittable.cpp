@@ -209,6 +209,11 @@ void Submittable::write_state(std::string& ret, bool& added_comment_char) const 
         ret += " try:";
         ret += ecf::convert_to<std::string>(tryNo_);
     }
+    if (!owner_.empty()) {
+        add_comment_char(ret, added_comment_char);
+        ret += " owner:";
+        ret += owner_;
+    }
     Node::write_state(ret, added_comment_char);
 }
 
@@ -235,6 +240,11 @@ void Submittable::read_state(const std::string& line, const std::vector<std::str
                 throw std::runtime_error("Submittable::read_state failed for try number : " + name());
             }
             tryNo_ = Extract::value<int>(try_number, "Submittable::read_state failed for try number");
+        }
+        else if (line_token_i.find("owner:") == 0) {
+            if (!Extract::split_get_second(line_token_i, owner_)) {
+                throw std::runtime_error("Submittable::read_state failed for owner : " + name());
+            }
         }
     }
 
@@ -295,6 +305,16 @@ bool Submittable::operator==(const Submittable& rhs) const {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
             std::cout << "Submittable::operator==  abr_(" << abr_ << ") != rhs.abr_(" << rhs.abr_ << ") "
+                      << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+
+    if (owner_ != rhs.owner_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Submittable::operator==  owner_(" << owner_ << ") != rhs.owner_(" << rhs.owner_ << ") "
                       << debugNodePath() << "\n";
         }
 #endif
@@ -555,6 +575,15 @@ void Submittable::increment_try_no() {
     update_generated_variables();
 }
 
+void Submittable::set_owner(const std::string& user) {
+    if (owner_ == user) {
+        return;
+    }
+    owner_           = user;
+    state_change_no_ = Ecf::incr_state_change_no();
+    update_generated_variables();
+}
+
 void Submittable::clear() {
     abr_.clear();   // reset reason aborted
     paswd_.clear(); // reset password, it will be regenerated before submission
@@ -606,6 +635,7 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
 }
 
 bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
+    std::string spawn_error; // why the child process was not created, when the spawn refused it
     try {
         // Locate the ecf files corresponding to the task.
         // Assign lifetime of EcfFile to JobsParam.
@@ -622,11 +652,13 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
             //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
             //... and hence must be done before variable substitution in ECF_/JOB file
             //... This is used by client->server authentication
+            size_t errors_before = jobsParam.errorMsg().size();
             if (createChildProcess(jobsParam)) {
                 set_state(NState::SUBMITTED, false, job_size);
                 return true;
             }
             // Fall through job submission failed.
+            spawn_error = jobsParam.errorMsg().substr(errors_before);
         }
         catch (std::exception& e) {
             get_flag().set(ecf::Flag::EDIT_FAILED);
@@ -653,6 +685,10 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
+    if (!spawn_error.empty()) {
+        reason += " ";
+        reason += spawn_error;
+    }
     jobsParam.errorMsg() += reason;
     set_aborted_only(reason);
     return false;
@@ -666,16 +702,23 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
     //     ecflow_client (--meter,--event,--label);
     //  ecflow_client --hcomplete
 
+    std::string spawn_error; // why the child process was not created, when the spawn refused it
+    size_t errors_before = jobsParam.errorMsg().size();
     if (createChildProcess(jobsParam)) {
         set_state(NState::SUBMITTED, false, ecf::string_constants::empty);
         return true;
     }
+    spawn_error = jobsParam.errorMsg().substr(errors_before);
 
     // Fall through job submission failed.
     get_flag().set(ecf::Flag::JOBCMD_FAILED);
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
+    if (!spawn_error.empty()) {
+        reason += " ";
+        reason += spawn_error;
+    }
     jobsParam.errorMsg() += reason;
     set_aborted_only(reason);
     return false;
@@ -782,7 +825,7 @@ bool Submittable::run(JobsParam& jobsParam, bool force) {
     return false;
 }
 
-void Submittable::kill(const std::string& zombie_pid) {
+void Submittable::kill(const std::string& zombie_pid, const std::string& requester) {
     get_flag().clear(ecf::Flag::KILLCMD_FAILED);
     get_flag().clear(ecf::Flag::KILLED);
 
@@ -839,14 +882,15 @@ void Submittable::kill(const std::string& zombie_pid) {
     // Done as two separate steps as kill command is not blocking on the server
     //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), errorMsg)) {
+    if (!System::instance()->spawn(
+            System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), requester.empty() ? owner() : requester, errorMsg)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
     get_flag().set(ecf::Flag::KILLED);
 }
 
-void Submittable::status() {
+void Submittable::status(const std::string& requester) {
     // Jobs::generate will un-block SIGCHLD (by using Signal class)
     // This will allow child process termination to handled by the signal handler in System
     // Note:: Jobs::generate is called every minute *AND* when there is a state change.
@@ -893,7 +937,8 @@ void Submittable::status() {
     // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
     // SPAWN process, attach signal to monitor process. returns true
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), errorMsg)) {
+    if (!System::instance()->spawn(
+            System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), requester.empty() ? owner() : requester, errorMsg)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
@@ -924,7 +969,8 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
     if (jobsParam.spawnJobs()) {
 
         // SPAWN process, attach signal to monitor process. returns true
-        return System::instance()->spawn(System::ECF_JOB_CMD, ecf_job_cmd, absNodePath(), jobsParam.errorMsg());
+        return System::instance()->spawn(
+            System::ECF_JOB_CMD, ecf_job_cmd, absNodePath(), owner(), jobsParam.errorMsg());
     }
 
     // Test path ONLY
@@ -985,7 +1031,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<SubmittableMemento>(paswd_, rid_, abr_, tryNo_));
+        comp->add(std::make_shared<SubmittableMemento>(paswd_, rid_, abr_, tryNo_, owner_));
     }
 
     // ** if compound memento has children base class, will add it to DefsDelta
@@ -1008,6 +1054,7 @@ void Submittable::set_memento(const SubmittableMemento* memento,
     rid_   = memento->rid_;
     abr_   = memento->abr_;
     tryNo_ = memento->tryNo_;
+    owner_ = memento->owner_;
 }
 
 // Generated variables ---------------------------------------------------------------------------------
@@ -1048,7 +1095,7 @@ void Submittable::gen_variables(std::vector<Variable>& vec) const {
         update_generated_variables();
     }
 
-    vec.reserve(vec.size() + 9);
+    vec.reserve(vec.size() + 10);
     sub_gen_variables_->gen_variables(vec);
     Node::gen_variables(vec);
 }
@@ -1095,7 +1142,8 @@ SubGenVariables::SubGenVariables(const Submittable* sub)
       genvar_ecfpass_(Variable(ecf::environment::ECF_PASS, "")),
       genvar_ecfscript_(Variable(ecf::environment::ECF_SCRIPT, "")),
       genvar_ecfname_(Variable(ecf::environment::ECF_NAME, "")),
-      genvar_ecfrid_(Variable(ecf::environment::ECF_RID, "")) {
+      genvar_ecfrid_(Variable(ecf::environment::ECF_RID, "")),
+      genvar_ecfowner_(Variable(ecf::environment::ECF_OWNER, "")) {
 }
 
 void SubGenVariables::update_generated_variables() const {
@@ -1133,9 +1181,10 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
     // cache strings that are used in many variables
     std::string the_try_no = submittable_->tryNo();
 
-    genvar_ecfrid_.set_value(submittable_->rid_);    // does *not* modify Variable::state_change_no
-    genvar_ecftryno_.set_value(the_try_no);          // does *not* modify Variable::state_change_no
-    genvar_ecfpass_.set_value(submittable_->paswd_); // does *not* modify Variable::state_change_no
+    genvar_ecfrid_.set_value(submittable_->rid_);     // does *not* modify Variable::state_change_no
+    genvar_ecftryno_.set_value(the_try_no);           // does *not* modify Variable::state_change_no
+    genvar_ecfpass_.set_value(submittable_->paswd_);  // does *not* modify Variable::state_change_no
+    genvar_ecfowner_.set_value(submittable_->owner_); // does *not* modify Variable::state_change_no
 
     /// The directory associated with ECF_JOB is automatically created if it does not exist.
     /// This is Done during Job generation. See EcfFile::doCreateJobFile()
@@ -1195,6 +1244,9 @@ const Variable& SubGenVariables::findGenVariable(const std::string& name) const 
     if (genvar_basename_.name() == name) {
         return genvar_basename_;
     }
+    if (genvar_ecfowner_.name() == name) {
+        return genvar_ecfowner_;
+    }
     if (genvar_ecfpass_.name() == name) {
         return genvar_ecfpass_;
     }
@@ -1218,6 +1270,7 @@ void SubGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_ecfrid_);
     vec.push_back(genvar_ecfname_);
     vec.push_back(genvar_ecfpass_);
+    vec.push_back(genvar_ecfowner_);
 }
 
 template <class Archive>
@@ -1228,5 +1281,6 @@ void Submittable::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, rid_, [this]() { return !rid_.empty(); });     // conditionally save
     CEREAL_OPTIONAL_NVP(ar, abr_, [this]() { return !abr_.empty(); });     // conditionally save
     CEREAL_OPTIONAL_NVP(ar, tryNo_, [this]() { return tryNo_ != 0; });     // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, owner_, [this]() { return !owner_.empty(); }); // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Submittable);

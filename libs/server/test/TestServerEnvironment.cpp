@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <unistd.h>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -293,6 +294,216 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     // tear down remove the log file created by ServerEnvironment
     Host host;
     fs::remove(host.ecf_log_file(serverEnv.the_port()));
+}
+
+namespace {
+
+///
+/// @brief Provides a copy of the default server environment file in the current directory.
+///
+/// The server configuration file is looked for beside the server environment file; a copy in the
+/// current directory lets each test place its own server.cfg next to it, without touching the sources.
+///
+struct WithServerEnvironmentFile
+{
+    WithServerEnvironmentFile()
+        : file(NamedTestFile{"server_environment.cfg"}, default_content()) {}
+    static std::string default_content() {
+        std::string content;
+        File::open(File::test_data("Server/server_environment.cfg", "Server"), content);
+        return content;
+    }
+    WithTestFile file;
+    std::string path() const { return "server_environment.cfg"; }
+};
+
+///
+/// @brief Constructs a server environment and returns the outcome of its validation.
+///
+/// @param[in] env_file The server environment file to read
+/// @param[out] error   The reason the environment is not valid, empty when it is
+/// @return A pair of the spawn-as-owner switch and the file that set it
+///
+std::pair<bool, std::string> read_server_config(const WithServerEnvironmentFile& env_file, std::string& error) {
+    std::vector<std::string> args = {"ServerEnvironment"};
+    ServerEnvironment serverEnv(args, env_file.path());
+    error.clear();
+    serverEnv.valid(error);
+    std::pair<bool, std::string> result{serverEnv.spawn_as_owner(), serverEnv.server_config_file()};
+    remove_log_file(serverEnv);
+    return result;
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_absent_means_no_switch) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    std::string error;
+    auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+    BOOST_CHECK_MESSAGE(!spawn_as_owner, "Expected no switch without a server configuration file");
+    BOOST_CHECK_MESSAGE(config_file.empty(), "Expected no server configuration file, found " << config_file);
+    BOOST_CHECK_MESSAGE(error.empty(), "Expected a valid environment, got: " << error);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_flag_off_or_missing_means_no_switch) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    for (const std::string content : {"{}", "{\"spawn_as_owner\": false}"}) {
+        WithTestFile config(NamedTestFile{"server.cfg"}, content);
+        std::string error;
+        auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+        BOOST_CHECK_MESSAGE(!spawn_as_owner, "Expected no switch for " << content);
+        BOOST_CHECK_MESSAGE(ecf::algorithm::ends_with(config_file, "server.cfg"),
+                            "Expected the file to be read, found " << config_file);
+        BOOST_CHECK_MESSAGE(error.empty(), "Expected a valid environment for " << content << ", got: " << error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_flag_on_needs_root) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    WithTestFile config(NamedTestFile{"server.cfg"}, "{\"spawn_as_owner\": true}");
+    std::string error;
+    auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+    BOOST_CHECK_MESSAGE(spawn_as_owner, "Expected the switch to be enabled");
+    if (geteuid() == 0) {
+        BOOST_CHECK_MESSAGE(error.empty(), "Expected a valid environment as root, got: " << error);
+    }
+    else {
+        BOOST_CHECK_MESSAGE(error.find("spawn_as_owner") != std::string::npos &&
+                                error.find("root") != std::string::npos,
+                            "Expected the refusal to name the flag and root, got: " << error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_faults_prevent_the_start) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    struct Fault
+    {
+        std::string content;
+        std::string expected;
+    };
+    for (const Fault& fault : {Fault{"", "not valid JSON"},
+                               Fault{"{ not json", "not valid JSON"},
+                               Fault{"[true]", "JSON object"},
+                               Fault{"{\"spawn_as_owner\": \"yes\"}", "true or false"},
+                               Fault{"{\"spawn_as_ownr\": true}", "unknown setting 'spawn_as_ownr'"}}) {
+        WithTestFile config(NamedTestFile{"server.cfg"}, fault.content);
+        std::string error;
+        auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+        BOOST_CHECK_MESSAGE(!spawn_as_owner, "Expected no switch for " << fault.content);
+        BOOST_CHECK_MESSAGE(
+            error.find(fault.expected) != std::string::npos && error.find("server.cfg") != std::string::npos,
+            "Expected '" << fault.expected << "' naming the file for " << fault.content << ", got: " << error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_is_reported_at_start_up) {
+    ECF_NAME_THIS_TEST();
+
+    // The log records which file was read and whether jobs are spawned as their owner
+    WithServerEnvironmentFile env_file;
+    auto log_of = [&](const std::string& content) {
+        WithTestFile config(NamedTestFile{"server.cfg"}, content);
+        std::vector<std::string> args = {"ServerEnvironment"};
+        ServerEnvironment serverEnv(args, env_file.path());
+        Log::instance()->flush();
+        std::string log;
+        File::open(Log::instance()->path(), log);
+        remove_log_file(serverEnv);
+        std::string dump = serverEnv.dump();
+        return std::make_pair(log, dump);
+    };
+
+    auto [log_off, dump_off] = log_of("{}");
+    BOOST_CHECK_MESSAGE(log_off.find("Server configuration ") != std::string::npos &&
+                            log_off.find("server.cfg") != std::string::npos,
+                        "Expected the log to name the configuration file:\n"
+                            << log_off);
+    BOOST_CHECK_MESSAGE(log_off.find("Jobs are spawned as the server account") != std::string::npos,
+                        "Expected the log to report the server account:\n"
+                            << log_off);
+    BOOST_CHECK_MESSAGE(dump_off.find("spawn_as_owner = 'false'") != std::string::npos,
+                        "Unexpected dump:\n"
+                            << dump_off);
+
+    auto [log_on, dump_on] = log_of("{\"spawn_as_owner\": true}");
+    BOOST_CHECK_MESSAGE(log_on.find("Jobs are spawned as their owner") != std::string::npos,
+                        "Expected the log to report the switch:\n"
+                            << log_on);
+    BOOST_CHECK_MESSAGE(dump_on.find("spawn_as_owner = 'true'") != std::string::npos, "Unexpected dump:\n" << dump_on);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_is_looked_for_beside_the_environment_file) {
+    ECF_NAME_THIS_TEST();
+
+    // The environment file lives in a sub-directory: the server.cfg beside it is read, the one in the
+    // current directory is not
+    fs::create_directories("cfgdir");
+    WithTestFile env(NamedTestFile{"cfgdir/server_environment.cfg"}, WithServerEnvironmentFile::default_content());
+    WithTestFile beside(NamedTestFile{"cfgdir/server.cfg"}, "{\"spawn_as_owner\": true}");
+    WithTestFile elsewhere(NamedTestFile{"server.cfg"}, "{\"spawn_as_owner\": false}");
+    {
+        std::vector<std::string> args = {"ServerEnvironment"};
+        ServerEnvironment serverEnv(args, "cfgdir/server_environment.cfg");
+        BOOST_CHECK_MESSAGE(serverEnv.spawn_as_owner(), "Expected the file beside the environment file to be read");
+        BOOST_CHECK_MESSAGE(ecf::algorithm::ends_with(serverEnv.server_config_file(), "cfgdir/server.cfg"),
+                            "Unexpected file: " << serverEnv.server_config_file());
+        remove_log_file(serverEnv);
+    }
+    fs::remove_all("cfgdir");
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_per_server_faults_are_reported_even_when_the_shared_file_is_valid) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    std::string per_server_name;
+    {
+        std::vector<std::string> args = {"ServerEnvironment"};
+        ServerEnvironment serverEnv(args, env_file.path());
+        Host host;
+        per_server_name = host.prefix_host_and_port(serverEnv.the_port(), "server.cfg");
+        remove_log_file(serverEnv);
+    }
+
+    WithTestFile shared(NamedTestFile{"server.cfg"}, "{}");
+    WithTestFile per_server(NamedTestFile{per_server_name}, "{ broken");
+    std::string error;
+    auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+    BOOST_CHECK_MESSAGE(!spawn_as_owner, "Expected no switch");
+    BOOST_CHECK_MESSAGE(error.find(per_server_name) != std::string::npos &&
+                            error.find("not valid JSON") != std::string::npos,
+                        "Expected the per-server file to be the one reported, got: " << error);
+}
+
+BOOST_AUTO_TEST_CASE(test_server_config_file_per_server_takes_precedence) {
+    ECF_NAME_THIS_TEST();
+
+    WithServerEnvironmentFile env_file;
+    std::string per_server_name;
+    {
+        std::vector<std::string> args = {"ServerEnvironment"};
+        ServerEnvironment serverEnv(args, env_file.path());
+        Host host;
+        per_server_name = host.prefix_host_and_port(serverEnv.the_port(), "server.cfg");
+        remove_log_file(serverEnv);
+    }
+
+    WithTestFile shared(NamedTestFile{"server.cfg"}, "{\"spawn_as_owner\": true}");
+    WithTestFile per_server(NamedTestFile{per_server_name}, "{\"spawn_as_owner\": false}");
+    std::string error;
+    auto [spawn_as_owner, config_file] = read_server_config(env_file, error);
+    BOOST_CHECK_MESSAGE(!spawn_as_owner, "Expected the per-server file to win");
+    BOOST_CHECK_MESSAGE(ecf::algorithm::ends_with(config_file, per_server_name),
+                        "Expected " << per_server_name << " to be read, found " << config_file);
+    BOOST_CHECK_MESSAGE(error.empty(), "Expected a valid environment, got: " << error);
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {

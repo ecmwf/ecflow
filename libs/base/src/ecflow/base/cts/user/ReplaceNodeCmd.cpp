@@ -141,6 +141,9 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
         throw std::runtime_error(errorMsg);
     }
 
+    // The user replacing the node owns its jobs, until another user (re)queues them
+    client_node_to_add->set_owner(identity().username().value());
+
     // ECFLOW-835, flag node as changed, before check for trigger expressions.
     add_node_for_edit_history(defs, pathToNode_);
 

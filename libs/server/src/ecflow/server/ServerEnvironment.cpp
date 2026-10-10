@@ -3,9 +3,12 @@
 
 #include "ecflow/server/ServerEnvironment.hpp"
 
+#include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include <boost/program_options.hpp>
+#include <nlohmann/json.hpp>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -146,6 +149,10 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
 
     authentication_service_.init(host_name_, port);
 
+    // The server configuration file lives beside the server environment file, hence read before the
+    // change of directory to ECF_HOME
+    read_server_config_file(path_to_config_file, port);
+
     // Change directory to ECF_HOME and check that it is accessible
     change_dir_to_ecf_home_and_check_accesibility();
 
@@ -171,6 +178,59 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     LOG(Log::MSG, "ECF_HOME " << ecf_home());
     LOG(Log::MSG, "Job scheduling interval: " << submitJobsInterval_);
+    if (!server_config_file_.empty()) {
+        LOG(Log::MSG, "Server configuration " << server_config_file_);
+    }
+    if (spawn_as_owner_) {
+        LOG(Log::MSG, "Jobs are spawned as their owner (spawn_as_owner)");
+    }
+    else {
+        LOG(Log::MSG, "Jobs are spawned as the server account");
+    }
+}
+
+void ServerEnvironment::read_server_config_file(const std::string& path_to_config_file, const std::string& port) {
+    // Candidates, in order of precedence: the per-server file, then the shared one
+    fs::path directory = fs::path(path_to_config_file).parent_path();
+    std::vector<fs::path> candidates{directory / host_name_.prefix_host_and_port(port, "server.cfg"),
+                                     directory / "server.cfg"};
+    for (const auto& candidate : candidates) {
+        if (!fs::exists(candidate)) {
+            continue;
+        }
+        server_config_file_ = candidate.string();
+
+        nlohmann::json config;
+        try {
+            std::ifstream in(candidate);
+            config = nlohmann::json::parse(in);
+        }
+        catch (const std::exception& e) {
+            server_config_error_ =
+                "Server configuration file " + server_config_file_ + " is not valid JSON: " + e.what();
+            return;
+        }
+        if (!config.is_object()) {
+            server_config_error_ = "Server configuration file " + server_config_file_ + " must hold a JSON object";
+            return;
+        }
+        for (const auto& [key, value] : config.items()) {
+            if (key == "spawn_as_owner") {
+                if (!value.is_boolean()) {
+                    server_config_error_ = "Server configuration file " + server_config_file_ +
+                                           ": spawn_as_owner must be true or false, found " + value.dump();
+                    return;
+                }
+                spawn_as_owner_ = value.get<bool>();
+            }
+            else {
+                server_config_error_ =
+                    "Server configuration file " + server_config_file_ + ": unknown setting '" + key + "'";
+                return;
+            }
+        }
+        return;
+    }
 }
 
 ServerEnvironment::~ServerEnvironment() {
@@ -199,6 +259,17 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         ss << "   o Dynamic and/or Private Ports.                    49151 -65535\n\n";
         ss << "Please set in the range 1024-49151 via argument or \n";
         ss << "Server/src/environment.cfg.h or set the environment variable ECF_PORT. \n";
+        errorMsg = ss.str();
+        return false;
+    }
+    if (!server_config_error_.empty()) {
+        ss << server_config_error_ << "\n";
+        errorMsg = ss.str();
+        return false;
+    }
+    if (spawn_as_owner_ && geteuid() != 0) {
+        ss << "Server configuration file " << server_config_file_ << " enables spawn_as_owner, but the server\n";
+        ss << "runs as uid " << geteuid() << " and only a server running as root can switch to the owner of a job\n";
         errorMsg = ss.str();
         return false;
     }
@@ -602,6 +673,8 @@ std::string ServerEnvironment::dump() const {
     ss << "ECF_STATUS_CMD = '" << statusCmd_ << "'\n";
     ss << "ECF_CHECK_CMD = '" << checkCmd_ << "'\n";
     ss << "ECF_URL_CMD = '" << urlCmd_ << "'\n";
+    ss << "server.cfg = '" << server_config_file_ << "'\n";
+    ss << "spawn_as_owner = '" << (spawn_as_owner_ ? "true" : "false") << "'\n";
     ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
     ss << "ECF_URL = '" << url_ << "'\n";
     ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";

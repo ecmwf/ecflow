@@ -1387,6 +1387,9 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos) {
                 generated_variable = true;
             }
+            else if (percentVar.find(ecf::environment::ECF_OWNER) != std::string::npos) {
+                generated_variable = true;
+            }
         }
 
         size_t firstColon = percentVar.find(':');

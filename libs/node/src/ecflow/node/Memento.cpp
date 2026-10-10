@@ -319,6 +319,7 @@ void NodeVerifyMemento::serialize(Archive& ar, std::uint32_t const version) {
 template <class Archive>
 void SubmittableMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(paswd_), CEREAL_NVP(rid_), CEREAL_NVP(abr_), CEREAL_NVP(tryNo_));
+    CEREAL_OPTIONAL_NVP(ar, owner_, [this]() { return !owner_.empty(); }); // conditionally save
 }
 
 template <class Archive>

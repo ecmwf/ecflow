@@ -26,6 +26,7 @@ set(test_srcs
   test/TestQueryCmd.cpp
   test/TestQueueCmd.cpp
   test/TestRequest.cpp
+  test/TestOwnerCmd.cpp
   test/TestRequeueNodeCmd.cpp
   test/TestResolveDependencies.cpp
   test/TestSpecificIssues.cpp
