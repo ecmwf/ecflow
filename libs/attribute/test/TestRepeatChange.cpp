@@ -397,15 +397,18 @@ BOOST_AUTO_TEST_CASE(change_within_range_is_accepted) {
     check_changed(descending, "6", 6, "6");
 }
 
-BOOST_AUTO_TEST_CASE(change_off_the_step_grid_is_accepted) {
+BOOST_AUTO_TEST_CASE(change_off_the_step_grid_is_refused) {
     ECF_NAME_THIS_TEST();
 
-    // Unlike date and datetime, an integer Repeat does not check the step grid
+    // As for date and datetime, the value must lie on the step grid anchored at the start
     Repeat rep(RepeatInteger("N", 0, 10, 3));
-    check_changed(rep, "4", 4, "4");
+    check_refused(rep, "4", "is not in line with the delta/step");
+    check_refused(rep, "10", "is not in line with the delta/step"); // the end, off the grid
+    check_changed(rep, "9", 9, "9");
 
     Repeat descending(RepeatInteger("N", 10, 0, -2));
-    check_changed(descending, "5", 5, "5");
+    check_refused(descending, "5", "is not in line with the delta/step");
+    check_changed(descending, "4", 4, "4");
 }
 
 BOOST_AUTO_TEST_CASE(change_with_start_equal_to_end) {
@@ -495,6 +498,49 @@ BOOST_AUTO_TEST_CASE(zero_step_is_accepted_at_construction) {
         }
         BOOST_CHECK_EQUAL(rep.value(), 10);
     }
+}
+
+BOOST_AUTO_TEST_CASE(zero_step_defines_no_step_grid) {
+    ECF_NAME_THIS_TEST();
+
+    // A Repeat with a zero step (only possible when restored from a checkpoint) accepts any value in its range
+    Repeat rep(RepeatInteger("N", 10, 0, 0));
+    check_changed(rep, "5", 5, "5");
+    check_refused(rep, "11", "should be in the range");
+}
+
+BOOST_AUTO_TEST_CASE(validate_refuses_zero_step_and_inconsistent_ordering) {
+    ECF_NAME_THIS_TEST();
+
+    auto error_of = [](int start, int end, int delta) -> std::string {
+        try {
+            RepeatInteger::validate("N", start, end, delta);
+        }
+        catch (const std::runtime_error& e) {
+            return e.what();
+        }
+        return std::string{};
+    };
+
+    BOOST_CHECK_EQUAL(error_of(0, 10, 0), "Invalid Repeat integer: the step cannot be zero: repeat integer N 0 10 0");
+    BOOST_CHECK_EQUAL(error_of(5, 5, 0), "Invalid Repeat integer: the step cannot be zero: repeat integer N 5 5 0");
+    BOOST_CHECK_EQUAL(error_of(10, 0, 1),
+                      "Invalid Repeat integer: the end cannot be less than the start, when the step is positive: "
+                      "repeat integer N 10 0 1");
+    BOOST_CHECK_EQUAL(error_of(0, 10, -1),
+                      "Invalid Repeat integer: the start cannot be less than the end, when the step is negative: "
+                      "repeat integer N 0 10 -1");
+
+    BOOST_CHECK_EQUAL(error_of(0, 10, 2), "");
+    BOOST_CHECK_EQUAL(error_of(10, 0, -2), "");
+    BOOST_CHECK_EQUAL(error_of(5, 5, 1), "");
+    BOOST_CHECK_EQUAL(error_of(5, 5, -1), "");
+
+    // The Repeat checks itself the same way; the other kinds, always consistent, have nothing to check
+    BOOST_CHECK_THROW(Repeat(RepeatInteger("N", 10, 0, 1)).validate(), std::runtime_error);
+    BOOST_CHECK_NO_THROW(Repeat(RepeatInteger("N", 0, 10, 1)).validate());
+    BOOST_CHECK_NO_THROW(Repeat(RepeatDate("YMD", 20260101, 20261231, 1)).validate());
+    BOOST_CHECK_NO_THROW(Repeat().validate());
 }
 
 BOOST_AUTO_TEST_CASE(set_value_bypasses_validation) {

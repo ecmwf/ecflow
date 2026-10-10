@@ -1257,7 +1257,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<RepeatInteger>(m, "RepeatInteger", py::dynamic_attr(), NodeAttrDoc::repeat_integer_doc())
 
-        .def(py::init<std::string, int, int, int>(),
+        .def(py::init([](const std::string& name, int start, int end, int delta) {
+                 RepeatInteger::validate(name, start, end, delta);
+                 return RepeatInteger(name, start, end, delta);
+             }),
              py::arg("name"),
              py::arg("start"),
              py::arg("end"),

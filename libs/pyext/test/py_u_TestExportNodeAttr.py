@@ -11724,13 +11724,12 @@ class TestRepeatInteger:
     # Constructor: start > end edge cases
     # ------------------------------------------------------------------
 
-    def test_ctor_start_gt_end_positive_step_accepted(self):
-        """start > end with a positive step is accepted without error;
-        the values are stored as-is (no ordering validation at construction)."""
-        ri = ecf.RepeatInteger("VAR", 10, 0, 1)
-        assert ri.start() == 10
-        assert ri.end() == 0
-        assert ri.step() == 1
+    def test_ctor_start_gt_end_positive_step_refused(self):
+        """start > end with a positive step is refused at construction."""
+        with pytest.raises(
+            RuntimeError, match="the end cannot be less than the start, when the step is positive"
+        ):
+            ecf.RepeatInteger("VAR", 10, 0, 1)
 
     def test_ctor_start_gt_end_negative_step_accepted(self):
         """start > end with a negative step is accepted without error;
@@ -11740,22 +11739,22 @@ class TestRepeatInteger:
         assert ri.end() == 0
         assert ri.step() == -1
 
-    def test_ctor_start_gt_end_positive_step_str(self):
-        """str() for start > end with a positive step reflects the stored values."""
-        ri = ecf.RepeatInteger("VAR", 10, 0, 1)
-        assert str(ri) == "  repeat integer VAR 10 0\n"
+    def test_ctor_zero_step_refused(self):
+        """A zero step is refused at construction."""
+        with pytest.raises(RuntimeError, match="the step cannot be zero"):
+            ecf.RepeatInteger("VAR", 0, 10, 0)
 
     def test_ctor_start_gt_end_negative_step_str(self):
         """str() for start > end with a negative step includes the step."""
         ri = ecf.RepeatInteger("VAR", 10, 0, -1)
         assert str(ri) == "  repeat integer VAR 10 0 -1\n"
 
-    def test_ctor_start_lt_end_negative_step_accepted(self):
-        """start < end with a negative step is accepted without error."""
-        ri = ecf.RepeatInteger("VAR", 0, 10, -1)
-        assert ri.start() == 0
-        assert ri.end() == 10
-        assert ri.step() == -1
+    def test_ctor_start_lt_end_negative_step_refused(self):
+        """start < end with a negative step is refused at construction."""
+        with pytest.raises(
+            RuntimeError, match="the start cannot be less than the end, when the step is negative"
+        ):
+            ecf.RepeatInteger("VAR", 0, 10, -1)
 
     def test_ctor_start_eq_end_positive_step_accepted(self):
         """start == end with a positive step is accepted; the repeat has one value."""

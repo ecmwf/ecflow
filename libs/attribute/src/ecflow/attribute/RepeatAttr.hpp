@@ -104,6 +104,16 @@ public:
     virtual void change(const std::string& newValue)     = 0; // can throw std::runtime_error
     virtual void changeValue(long newValue)              = 0; // can throw std::runtime_error
     virtual void set_value(long new_value_or_index)      = 0; // will NOT throw, allows any value
+
+    ///
+    /// @brief Checks that the Repeat is consistent, as required of the definitions given by users.
+    ///
+    /// The Repeats restored from a checkpoint, or received by a synchronisation, are never checked.
+    ///
+    /// @throws std::runtime_error describing the inconsistency
+    ///
+    virtual void validate() const {}
+
     std::string toString() const;
     virtual std::string dump() const = 0;
 
@@ -527,6 +537,20 @@ public:
     RepeatInteger(const std::string& variable, int start, int end, int delta = 1);
     RepeatInteger();
 
+    ///
+    /// @brief Checks that an integer Repeat is consistent: its step is not zero, and its end lies in the direction
+    ///        of the step from its start, or equals it.
+    ///
+    /// @param[in] variable the name of the Repeat
+    /// @param[in] start the first value
+    /// @param[in] end the last value
+    /// @param[in] delta the step
+    /// @throws std::runtime_error describing the inconsistency
+    ///
+    static void validate(const std::string& variable, int start, int end, int delta);
+
+    void validate() const override { validate(name_, start_, end_, delta_); }
+
     bool operator==(const RepeatInteger& rhs) const;
     bool operator<(const RepeatInteger& rhs) const { return name() < rhs.name(); }
 
@@ -933,6 +957,17 @@ public:
         }
     }
     std::string toString() const { return (type_) ? type_->toString() : std::string{}; }
+
+    ///
+    /// @brief Checks that the Repeat is consistent, as required of the definitions given by users.
+    ///
+    /// @throws std::runtime_error describing the inconsistency
+    ///
+    void validate() const {
+        if (type_) {
+            type_->validate();
+        }
+    }
     std::string dump() const { return (type_) ? type_->dump() : std::string{}; } // additional state
     unsigned int state_change_no() const { return (type_) ? type_->state_change_no() : 0; }
 
