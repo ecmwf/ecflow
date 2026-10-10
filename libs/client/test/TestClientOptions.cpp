@@ -529,6 +529,67 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change) {
     } // paths
 }
 
+BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * --alter change repeat <value> <path> [<path>...]
+     * ************************************************************************************************************** */
+
+    std::vector<std::vector<std::string>> paths_set = {{"/node1"}, {"/node1", "/node2"}};
+
+    // includes a negative value, as used by a descending integer Repeat
+    std::vector<std::string> values = {"20260101", "a", "-5", "--begin 20260101 --end 20261231"};
+
+    for (const auto& paths : paths_set) {
+        for (const auto& value : values) {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "change", "repeat", value, paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                // A Repeat is unique to a node, so the value takes the place of the attribute name
+                BOOST_REQUIRE_EQUAL(command.name(), value);
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), AlterCmd::REPEAT);
+                BOOST_REQUIRE(command.paths() == paths);
+            });
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_refuse_alter_change_repeat_with_wrong_arguments) {
+    ECF_NAME_THIS_TEST();
+
+    auto error_of = [](const CommandLine& cl) -> std::string {
+        ClientOptions options;
+        ClientEnvironment environment(false);
+        try {
+            options.parse(cl, &environment);
+        }
+        catch (const std::exception& e) {
+            return e.what();
+        }
+        return std::string{};
+    };
+
+    {
+        // no value
+        auto error = error_of(CommandLine::make_command_line("ecflow_client", "--alter", "change", "repeat", "/s/t"));
+        BOOST_CHECK_MESSAGE(error.find("change repeat: expected four arg's") != std::string::npos, error);
+    }
+    {
+        // a value starting with '/' is taken as a path
+        auto error = error_of(
+            CommandLine::make_command_line("ecflow_client", "--alter", "change", "repeat", "/20260101", "/s/t"));
+        BOOST_CHECK_MESSAGE(error.find("change repeat: expected four arg's") != std::string::npos, error);
+    }
+    {
+        // the options of the value are not quoted
+        auto error = error_of(CommandLine::make_command_line(
+            "ecflow_client", "--alter", "change", "repeat", "--begin", "20260101", "--end", "20261231", "/s/t"));
+        // only four tokens are collected before the paths, so the remaining "20261231" is not taken as a path
+        BOOST_CHECK_MESSAGE(error.find("AlterCmd: No paths specified") != std::string::npos, error);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
     ECF_NAME_THIS_TEST();
 

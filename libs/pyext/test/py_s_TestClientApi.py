@@ -28,6 +28,11 @@ from ecflow import (
     State,
     RepeatDate,
     RepeatDateTime,
+    RepeatDateList,
+    RepeatDateTimeList,
+    RepeatInteger,
+    RepeatEnumerated,
+    RepeatString,
     PrintStyle,
     File,
     Client,
@@ -2109,6 +2114,69 @@ class TestClientApi:
         assert res == "20100113T000000", (
             "Expected alter of repeat to be 20100113T000000 but found " + res
         )
+
+    def test_client_alter_change_repeat(self):
+        print_test(self.ci, "test_client_alter_change_repeat")
+        self.ci.delete_all()
+        defs = create_defs(
+            "test_client_alter_change_repeat", self.ci.get_port(), self.protocol
+        )
+        f1 = defs.find_abs_node("/test_client_alter_change_repeat/f1")
+        f1.add_task("integer").add_repeat(RepeatInteger("integer", 0, 10, 2))
+        f1.add_task("enumerated").add_repeat(
+            RepeatEnumerated("enumerated", ["a", "b", "c"])
+        )
+        f1.add_task("string").add_repeat(RepeatString("string", ["x", "y", "z"]))
+        f1.add_task("datelist").add_repeat(
+            RepeatDateList("datelist", [20100111, 20100115, 20100120])
+        )
+        f1.add_task("datetimelist").add_repeat(
+            RepeatDateTimeList(
+                "datetimelist", ["20100111T000000", "20100115T120000"]
+            )
+        )
+        self.ci.load(defs)
+
+        def path(name):
+            return "/test_client_alter_change_repeat/f1/" + name
+
+        def current(name):
+            sync_local(self.ci)
+            repeat = self.ci.get_defs().find_abs_node(path(name)).get_repeat()
+            return repeat.value(), self.ci.query("variable", path(name), name)
+
+        self.ci.alter(path("integer"), "change", "repeat", "6")
+        assert current("integer") == (6, "6")
+
+        self.ci.alter(path("enumerated"), "change", "repeat", "c")  # by name
+        assert current("enumerated") == (2, "c")
+        self.ci.alter(path("enumerated"), "change", "repeat", "1")  # by index
+        assert current("enumerated") == (1, "b")
+
+        self.ci.alter(path("string"), "change", "repeat", "z")  # by name
+        assert current("string") == (2, "z")
+        self.ci.alter(path("string"), "change", "repeat", "0")  # by index
+        assert current("string") == (0, "x")
+
+        self.ci.alter(path("datelist"), "change", "repeat", "20100120")
+        assert current("datelist") == (20100120, "20100120")
+
+        self.ci.alter(path("datetimelist"), "change", "repeat", "20100115T120000")
+        assert current("datetimelist")[1] == "20100115T120000"
+
+        # A refused value raises an error naming the node, and leaves the Repeat unchanged
+        with pytest.raises(RuntimeError, match="should be in the range"):
+            self.ci.alter(path("integer"), "change", "repeat", "12")
+        with pytest.raises(RuntimeError, match="Alter \\(change\\) failed for " + path("string")):
+            self.ci.alter(path("string"), "change", "repeat", "w")
+        assert current("integer") == (6, "6")
+        assert current("string") == (0, "x")
+
+        # A request on several paths is applied to each path that accepts the value
+        with pytest.raises(RuntimeError, match="Alter \\(change\\) failed for " + path("string")):
+            self.ci.alter([path("integer"), path("string")], "change", "repeat", "3")
+        assert current("integer") == (3, "3")
+        assert current("string") == (0, "x")
 
     def test_client_alter_flag(self):
         print_test(self.ci, "test_client_alter_flag")
