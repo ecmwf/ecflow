@@ -38,6 +38,86 @@ std::string as_4_digits(T value) {
     return as_n_digits<4>(value);
 }
 
+///
+/// @brief The values covered by a Repeat with a step, from its start towards its end.
+///
+/// A positive step runs upwards from the start to the end; any other step runs downwards.
+///
+/// @tparam T the type of the values (an integral type, or ecf::Instant)
+///
+template <typename T>
+class StepRange {
+public:
+    ///
+    /// @param[in] start the first value
+    /// @param[in] end the last value
+    /// @param[in] ascending true when the step is positive
+    ///
+    StepRange(const T& start, const T& end, bool ascending)
+        : start_(start),
+          end_(end),
+          ascending_(ascending) {}
+
+    ///
+    /// @return true when the end lies in the direction of the step from the start, or equals the start
+    ///
+    [[nodiscard]] bool is_ordered() const { return ascending_ ? end_ >= start_ : start_ >= end_; }
+
+    ///
+    /// @return true when the value lies between the start and the end, both included
+    ///
+    [[nodiscard]] bool contains(const T& value) const {
+        return ascending_ ? !(value < start_ || value > end_) : !(value > start_ || value < end_);
+    }
+
+    ///
+    /// @return the value, or the nearest of the start and the end when the value lies outside the range
+    ///
+    [[nodiscard]] T clamp(const T& value) const {
+        if (ascending_) {
+            if (value < start_) {
+                return start_;
+            }
+            if (value > end_) {
+                return end_;
+            }
+            return value;
+        }
+        if (value > start_) {
+            return start_;
+        }
+        if (value < end_) {
+            return end_;
+        }
+        return value;
+    }
+
+private:
+    T start_;
+    T end_;
+    bool ascending_;
+};
+
+///
+/// @brief Checks that a value lies on the step grid anchored at the start of a Repeat.
+///
+/// @param[in] offset the distance from the start to the value, in units of the step
+/// @param[in] step the step of the Repeat (not zero)
+/// @return true when the offset is a whole number of steps
+///
+template <typename T>
+bool is_on_step_grid(T offset, T step) {
+    return offset % step == 0;
+}
+
+StepRange<long> step_range(long start, long end, long delta) {
+    return StepRange<long>(start, end, delta > 0);
+}
+
+StepRange<ecf::Instant> step_range(const ecf::Instant& start, const ecf::Instant& end, const ecf::Duration& delta) {
+    return StepRange<ecf::Instant>(start, end, delta > ecf::Duration{std::chrono::seconds{0}});
+}
+
 } // namespace
 
 using namespace ecf;
@@ -174,21 +254,15 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
                                          << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
-    if (delta_ > 0) {
-        // assert end => start
-        if (!(end >= start)) {
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta_ > 0) {
             throw std::runtime_error(
                 MESSAGE("Invalid Repeat date: The end must be greater than the start date, when delta is positive "
                         << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
-    }
-    else {
-        // assert start >= end
-        if (!(start >= end)) {
-            throw std::runtime_error(
-                MESSAGE("Invalid Repeat date: The start must be greater than the end date, when delta is negative "
-                        << "repeat " << variable << " " << start << " " << end << " " << delta));
-        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat date: The start must be greater than the end date, when delta is negative "
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     // Use date lib to check YMD
@@ -318,22 +392,7 @@ long RepeatDate::last_valid_value() const {
 }
 
 long RepeatDate::valid_value(long value) const {
-    if (delta_ > 0) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 long RepeatDate::last_valid_value_minus(int val) const {
@@ -453,26 +512,17 @@ void RepeatDate::change(const std::string& newdate) {
 }
 
 void RepeatDate::changeValue(long the_new_date) {
-    if (delta_ > 0) {
-        if (the_new_date < start_ || the_new_date > end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-                                                    << " : " << end_ << "] but found " << the_new_date));
-        }
-    }
-    else {
-        if (the_new_date > start_ || the_new_date < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-                                                    << " : " << end_ << "] but found " << the_new_date));
-        }
+    if (!step_range(start_, end_, delta_).contains(the_new_date)) {
+        throw std::runtime_error(
+            MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                << " : " << end_ << "] but found " << the_new_date));
     }
 
     // Check new value is in step. ECFLOW-325 repeat date 7
     long julian_new_date = ecf::CalendarDate(the_new_date).as_julian_day().value();
     long julian_start    = ecf::CalendarDate(start_).as_julian_day().value();
     long diff            = julian_new_date - julian_start;
-    if (diff % delta_ != 0) {
+    if (!is_on_step_grid<long>(diff, delta_)) {
         throw std::runtime_error(MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date " << the_new_date
                                                                      << " is not in line with the delta/step"));
     }
@@ -528,21 +578,15 @@ RepeatDateTime::RepeatDateTime(const std::string& variable, Instant start, Insta
                     << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        // assert end => start
-        if (!(end >= start)) {
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta_ > Duration{std::chrono::seconds{0}}) {
             throw std::runtime_error(MESSAGE(
                 "Invalid Repeat datetime: The end must be greater than the start date+time, when delta is positive "
                 << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
-    }
-    else {
-        // assert start >= end
-        if (!(start >= end)) {
-            throw std::runtime_error(MESSAGE(
-                "Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative "
-                << "repeat " << variable << " " << start << " " << end << " " << delta));
-        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative "
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 }
 
@@ -646,22 +690,7 @@ long RepeatDateTime::last_valid_value() const {
 }
 
 Instant RepeatDateTime::valid_value(const Instant& value) const {
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 long RepeatDateTime::last_valid_value_minus(int val) const {
@@ -769,24 +798,21 @@ void RepeatDateTime::change(const std::string& newdate) {
 void RepeatDateTime::changeValue(long the_new_date) {
 
     auto new_date = ecf::coerce_from_seconds_into_instant(the_new_date);
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        if (new_date < start_ || new_date > end_) {
+    if (!step_range(start_, end_, delta_).contains(new_date)) {
+        // n.b. the value is reported as an instant for a positive step, and in seconds for a negative step
+        if (delta_ > Duration{std::chrono::seconds{0}}) {
             throw std::runtime_error(
                 MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
                                                         << start_ << " : " << end_ << "] but found " << new_date));
         }
-    }
-    else {
-        if (new_date > start_ || new_date < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
-                                                        << start_ << " : " << end_ << "] but found " << the_new_date));
-        }
+        throw std::runtime_error(
+            MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                    << " : " << end_ << "] but found " << the_new_date));
     }
 
     // Ensure that new value is in step
     auto diff = new_date - start_;
-    if (diff.as_seconds().count() % delta_.as_seconds().count() != 0) {
+    if (!is_on_step_grid(diff.as_seconds().count(), delta_.as_seconds().count())) {
         throw std::runtime_error(MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date "
                                                                          << the_new_date
                                                                          << " is not in line with the delta/step"));
@@ -1466,22 +1492,7 @@ long RepeatInteger::last_valid_value() const {
 }
 
 long RepeatInteger::valid_value(long value) const {
-    if (delta_ > 0) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 void RepeatInteger::increment() {
@@ -1502,19 +1513,10 @@ void RepeatInteger::change(const std::string& newValue) {
 }
 
 void RepeatInteger::changeValue(long the_new_value) {
-    if (delta_ > 0) {
-        if (the_new_value < start_ || the_new_value > end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
-                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
-        }
-    }
-    else {
-        if (the_new_value > start_ || the_new_value < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
-                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
-        }
+    if (!step_range(start_, end_, delta_).contains(the_new_value)) {
+        throw std::runtime_error(
+            MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_
+                                                  << "-" << end_ << "] but found " << the_new_value));
     }
     set_value(the_new_value);
 }
