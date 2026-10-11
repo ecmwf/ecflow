@@ -1601,7 +1601,13 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
         }
 
         case AlterCmd::REPEAT: {
-            // *NOTE* a Node can only have *ONE* repeat, hence no need to provide name
+            // *NOTE* a Node can only have *ONE* repeat, hence no need to provide name: the value is given as the name
+            if (!value.empty()) {
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change repeat: expected a single value, holding the new value or all the "
+                            "options (e.g. \"--begin 20260101 --end 20261231\"), but also found '"
+                            << value << "'"));
+            }
             break;
         }
 

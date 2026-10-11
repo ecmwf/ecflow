@@ -132,6 +132,37 @@ BOOST_AUTO_TEST_CASE(written_lines_carry_the_value_after_the_attributes) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(checkpoint_keeps_a_changed_range) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("s");
+    s->add_family("date")->addRepeat(RepeatDate("YMD", 20260101, 20261231, 1));
+    s->add_family("datetime")->addRepeat(RepeatDateTime("T", "20260101T000000", "20260102T000000", "06:00:00"));
+    s->add_family("integer")->addRepeat(RepeatInteger("N", 0, 10, 1));
+    s->add_family("day")->addRepeat(RepeatDay(1));
+
+    s->find_by_name("date")->changeRepeat("--begin 20260201 --end 20260630 --step 7 --current 20260215");
+    s->find_by_name("datetime")->changeRepeat("--step 12:00:00 --current 20260101T120000");
+    s->find_by_name("integer")->changeRepeat("--begin 2 --end 20 --step 3 --current 8");
+    s->find_by_name("day")->changeRepeat("--step 3");
+
+    BOOST_CHECK_EQUAL(repeat_line_of(defs, PrintStyle::MIGRATE, "date"),
+                      "repeat date YMD 20260201 20260630 7 # 20260215");
+    BOOST_CHECK_EQUAL(repeat_line_of(defs, PrintStyle::MIGRATE, "datetime"),
+                      "repeat datetime T 20260101T000000 20260102T000000 12:00:00 # 20260101T120000");
+    BOOST_CHECK_EQUAL(repeat_line_of(defs, PrintStyle::MIGRATE, "integer"), "repeat integer N 2 20 3 # 8");
+    BOOST_CHECK_EQUAL(repeat_line_of(defs, PrintStyle::MIGRATE, "day"), "repeat day 3");
+
+    auto loaded = load(ecf::as_string(defs, PrintStyle::MIGRATE));
+    BOOST_REQUIRE_MESSAGE(loaded.ok, loaded.error);
+    for (const std::string node : {"date", "datetime", "integer", "day"}) {
+        BOOST_CHECK_MESSAGE(loaded.repeat("/s/" + node) == s->find_by_name(node)->repeat(),
+                            node << ": expected " << s->find_by_name(node)->repeat().dump() << " but found "
+                                 << loaded.repeat("/s/" + node).dump());
+    }
+}
+
 BOOST_AUTO_TEST_CASE(every_checkpoint_style_reloads_the_same_repeat) {
     ECF_NAME_THIS_TEST();
 

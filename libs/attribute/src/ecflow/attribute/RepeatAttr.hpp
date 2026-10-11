@@ -101,9 +101,38 @@ public:
     virtual std::string next_value_as_string() const     = 0;
     virtual std::string prev_value_as_string() const     = 0;
     virtual void reset()                                 = 0;
-    virtual void change(const std::string& newValue)     = 0; // can throw std::runtime_error
-    virtual void changeValue(long newValue)              = 0; // can throw std::runtime_error
-    virtual void set_value(long new_value_or_index)      = 0; // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// The value is either a plain value, which becomes the current value, or one or more options, each followed by
+    /// its argument and applied together: `--begin <v>`, `--end <v>`, `--step <v>` and `--current <v>`. The values
+    /// and options accepted depend on the kind of Repeat, as described by each override. A refused change leaves the
+    /// Repeat unchanged.
+    ///
+    /// @param value the plain value or the options, e.g. "20260115" or "--begin 20260101 --end 20261231"
+    /// @throws std::runtime_error when the value is refused
+    ///
+    virtual void change(const std::string& value) = 0;
+
+    ///
+    /// @brief Changes the current value, checking it against the Repeat.
+    ///
+    /// @param value the new current value as a number (a date as yyyymmdd, an instant as seconds since the epoch, an
+    ///        integer) or, for a Repeat over a list, the index of the new current member
+    /// @throws std::runtime_error when the value lies outside the range or off the step grid, or the index is invalid
+    ///
+    virtual void changeValue(long value) = 0;
+
+    ///
+    /// @brief Sets the current value, given as for changeValue(), without any check.
+    ///
+    /// The value can lie past the last value, as after the increment() that completes the Repeat, and is restored as
+    /// is from checkpoints and synchronisations.
+    ///
+    /// @param value the new current value, or index
+    ///
+    virtual void set_value(long value) = 0;
 
     ///
     /// @brief Checks that the Repeat is consistent, as required of the definitions given by users.
@@ -196,9 +225,22 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Without `--current`, the current value is moved into the new range and onto its step grid, towards the begin;
+    /// a completed Repeat stays completed, unless the new range continues it.
+    ///
+    /// @param value either a plain date (yyyymmdd), which becomes the current value, or one or more of the options
+    ///        `--begin <yyyymmdd>`, `--end <yyyymmdd>`, `--step <days>` and `--current <yyyymmdd>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is a date, as yyyymmdd.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is a date, as yyyymmdd.
+    void set_value(long value) override;
 
     std::string dump() const override;
     bool isDate() const override { return true; }
@@ -293,9 +335,23 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Without `--current`, the current value is moved into the new range and onto its step grid, towards the begin;
+    /// a completed Repeat stays completed, unless the new range continues it.
+    ///
+    /// @param value either a plain instant (yyyymmddTHHMMSS), which becomes the current value, or one or more of
+    ///        the options `--begin <yyyymmddTHHMMSS>`, `--end <yyyymmddTHHMMSS>`, `--step <H[:MM[:SS]]>` and
+    ///        `--current <yyyymmddTHHMMSS>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is an instant, as seconds since the epoch.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is an instant, as seconds since the epoch.
+    void set_value(long value) override;
 
     std::string dump() const override;
     bool isDateTime() const override { return true; }
@@ -405,9 +461,21 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Only the current value can change: the options `--begin`, `--end` and `--step` do not apply to a list, and
+    /// are refused.
+    ///
+    /// @param value either a date of the list (yyyymmdd), or the option `--current <yyyymmdd>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is the index of a date of the list.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is the index of a date of the list.
+    void set_value(long value) override;
     std::string dump() const override;
     bool isDateList() const override { return true; }
     int indexNum() const { return static_cast<int>(list_.size()); }
@@ -490,9 +558,21 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Only the current value can change: the options `--begin`, `--end` and `--step` do not apply to a list, and
+    /// are refused.
+    ///
+    /// @param value either an instant of the list (yyyymmddTHHMMSS), or the option `--current <yyyymmddTHHMMSS>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is the index of an instant of the list.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is the index of an instant of the list.
+    void set_value(long value) override;
     std::string dump() const override;
     bool isDateTimeList() const override { return true; }
     int indexNum() const { return static_cast<int>(list_.size()); }
@@ -586,9 +666,22 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Without `--current`, the current value is moved into the new range and onto its step grid, towards the begin;
+    /// a completed Repeat stays completed, unless the new range continues it.
+    ///
+    /// @param value either a plain integer, which becomes the current value, or one or more of the options
+    ///        `--begin <integer>`, `--end <integer>`, `--step <integer>` and `--current <integer>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is an integer.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is an integer.
+    void set_value(long value) override;
     std::string dump() const override;
     bool isInteger() const override { return true; }
 
@@ -663,9 +756,21 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Only the current value can change: the options `--begin`, `--end` and `--step` do not apply to a list, and
+    /// are refused. A value equal to a member selects that member, even when it reads as an option or an index.
+    ///
+    /// @param value either a member or the index of a member, or the option `--current <member or index>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is the index of a member.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is the index of a member.
+    void set_value(long value) override;
     std::string dump() const override;
     bool isEnumerated() const override { return true; }
     int indexNum() const { return static_cast<int>(theEnums_.size()); }
@@ -733,9 +838,21 @@ public:
     void setToLastValue() override;
     void reset() override;
     void increment() override;
-    void change(const std::string& newValue) override; // can throw std::runtime_error
-    void changeValue(long newValue) override;          // can throw std::runtime_error
-    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Only the current value can change: the options `--begin`, `--end` and `--step` do not apply to a list, and
+    /// are refused. A value equal to a member selects that member, even when it reads as an option or an index.
+    ///
+    /// @param value either a member or the index of a member, or the option `--current <member or index>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    /// @brief See RepeatBase::changeValue(); the value is the index of a member.
+    void changeValue(long value) override;
+    /// @brief See RepeatBase::set_value(); the value is the index of a member.
+    void set_value(long value) override;
     std::string dump() const override;
     bool isString() const override { return true; }
     int indexNum() const { return static_cast<int>(theStrings_.size()); }
@@ -828,9 +945,19 @@ public:
 
     void setToLastValue() override { /* do nothing  ?? */ }
     void reset() override { valid_ = true; }
-    void change(const std::string& /*newValue*/) override { /* do nothing */ }
-    void changeValue(long /*newValue*/) override { /* do nothing */ }
-    void set_value(long /*newValue*/) override { /* do nothing */ }
+
+    ///
+    /// @brief Changes the Repeat, as requested by `--alter change repeat`.
+    ///
+    /// Only the step can change, with the option `--step <days>`; the options `--begin`, `--end` and `--current` do
+    /// not apply, and are refused. A plain value is ignored, since a repeat day has no current value.
+    ///
+    /// @param value the option `--step <days>`
+    /// @throws std::runtime_error when the value is refused, leaving the Repeat unchanged
+    ///
+    void change(const std::string& value) override;
+    void changeValue(long /*value*/) override { /* do nothing: no current value */ }
+    void set_value(long /*value*/) override { /* do nothing: no current value */ }
     std::string dump() const override;
     bool isDay() const override { return true; }
 
@@ -941,19 +1068,22 @@ public:
             type_->increment();
         }
     }
-    void change(const std::string& newValue) {
+    /// @brief See RepeatBase::change(); the value can hold several options.
+    void change(const std::string& value) {
         if (type_) {
-            type_->change(newValue);
+            type_->change(value);
         }
     }
-    void changeValue(long newValue) {
+    /// @brief See RepeatBase::changeValue().
+    void changeValue(long value) {
         if (type_) {
-            type_->changeValue(newValue);
+            type_->changeValue(value);
         }
     }
-    void set_value(long newValue) {
+    /// @brief See RepeatBase::set_value().
+    void set_value(long value) {
         if (type_) {
-            type_->set_value(newValue);
+            type_->set_value(value);
         }
     }
     std::string toString() const { return (type_) ? type_->toString() : std::string{}; }

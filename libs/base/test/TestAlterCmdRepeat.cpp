@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -14,11 +16,17 @@
 #include "ecflow/base/ServerReply.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/node/AbstractObserver.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -689,6 +697,365 @@ BOOST_AUTO_TEST_CASE(add_repeat_is_not_supported) {
 }
 
 BOOST_AUTO_TEST_SUITE_END() // other_operations
+
+/*
+ * Test Suite: ::options
+ * ************************************************************ */
+
+BOOST_AUTO_TEST_SUITE(options)
+
+BOOST_AUTO_TEST_CASE(change_repeat_with_options_of_each_kind) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s       = defs.add_suite("s");
+    task_ptr date     = s->add_task("date");
+    task_ptr datetime = s->add_task("datetime");
+    task_ptr integer  = s->add_task("integer");
+    task_ptr day      = s->add_task("day");
+    task_ptr string   = s->add_task("string");
+    date->addRepeat(RepeatDate("YMD", 20250101, 20251231, 1));
+    datetime->addRepeat(RepeatDateTime("DT", "20260101T000000", "20260102T000000", "06:00:00"));
+    integer->addRepeat(RepeatInteger("N", 0, 10, 1));
+    day->addRepeat(RepeatDay(1));
+    string->addRepeat(RepeatString("S", {"a", "b"}));
+
+    TestHelper::invokeRequest(&defs,
+                              change_repeat(date->absNodePath(), "--begin 20260101 --end 20261231 --current 20261012"));
+    BOOST_CHECK_EQUAL(date->repeat().start(), 20260101);
+    BOOST_CHECK_EQUAL(date->repeat().end(), 20261231);
+    BOOST_CHECK_EQUAL(date->repeat().value(), 20261012);
+
+    TestHelper::invokeRequest(&defs, change_repeat(datetime->absNodePath(), "--step 12:00:00"));
+    BOOST_CHECK_EQUAL(datetime->repeat().step(), 12 * 3600);
+
+    TestHelper::invokeRequest(&defs, change_repeat(integer->absNodePath(), "--end 20 --step 2 --current 8"));
+    BOOST_CHECK_EQUAL(integer->repeat().end(), 20);
+    BOOST_CHECK_EQUAL(integer->repeat().value(), 8);
+
+    TestHelper::invokeRequest(&defs, change_repeat(day->absNodePath(), "--step 2"));
+    BOOST_CHECK_EQUAL(day->repeat().step(), 2);
+
+    TestHelper::invokeRequest(&defs, change_repeat(string->absNodePath(), "--current b"));
+    BOOST_CHECK_EQUAL(string->repeat().index_or_value(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_with_options_is_refused_as_a_whole) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    task_ptr t = defs.add_suite("s")->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 11, 1));
+
+    auto error = error_of(defs, change_repeat(t->absNodePath(), "--begin 10 --current 12"));
+    check_error(error, "Alter (change) failed for /s/t");
+    check_error(error, "should be in the range");
+    BOOST_CHECK_EQUAL(t->repeat().start(), 0);
+    BOOST_CHECK_EQUAL(t->repeat().value(), 0);
+
+    check_error(error_of(defs, change_repeat(t->absNodePath(), "--foo 1")), "unknown option '--foo'");
+    check_error(error_of(defs, change_repeat(t->absNodePath(), "--step 0")), "the step cannot be zero");
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_with_options_on_several_paths_is_applied_per_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("s");
+    task_ptr t1 = s->add_task("t1");
+    task_ptr t2 = s->add_task("t2");
+    task_ptr t3 = s->add_task("t3");
+    t1->addRepeat(RepeatInteger("N", 0, 10, 1));
+    t2->addRepeat(RepeatString("S", {"a", "b"}));
+    t3->addRepeat(RepeatInteger("N", 0, 30, 1));
+
+    auto error = error_of(
+        defs,
+        change_repeat(std::vector<std::string>{t1->absNodePath(), t2->absNodePath(), t3->absNodePath()}, "--end 20"));
+    check_error(error, "Alter (change) failed for /s/t2");
+    check_error(error, "the option --end does not apply to repeat string");
+    BOOST_CHECK_EQUAL(t1->repeat().end(), 20);
+    BOOST_CHECK_EQUAL(t2->repeat().index_or_value(), 0);
+    BOOST_CHECK_EQUAL(t3->repeat().end(), 20);
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_with_a_second_value_is_refused) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::string> paths{"/s/t"};
+    std::string error;
+    try {
+        AlterCmd(paths, "change", "repeat", "--begin 20260101", "--end 20261231");
+    }
+    catch (const std::runtime_error& e) {
+        error = e.what();
+    }
+    check_error(error, "change repeat: expected a single value");
+    check_error(error, "but also found '--end 20261231'");
+
+    BOOST_CHECK_NO_THROW(AlterCmd(paths, "change", "repeat", "--begin 20260101 --end 20261231", ""));
+}
+
+BOOST_AUTO_TEST_CASE(change_repeat_is_logged) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    task_ptr t = defs.add_suite("s")->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 10, 2));
+
+    TestHelper::invokeRequest(&defs, change_repeat(t->absNodePath(), "--end 20 --current 4"));
+    TestHelper::invokeRequest(&defs, change_repeat(t->absNodePath(), "6"));
+
+    std::ifstream file("test_alter_cmd_repeat.log");
+    std::stringstream log;
+    log << file.rdbuf();
+    const auto text = log.str();
+    for (const std::string expected :
+         {"Repeat at /s/t updating from 'repeat integer N 0 10 2 (current 0)' to 'repeat integer N 0 20 2 (current 4)'",
+          "Repeat N at /s/t updating value from '4' to '6'",
+          "--alter change repeat --end 20 --current 4 /s/t"}) {
+        BOOST_CHECK_MESSAGE(text.find(expected) != std::string::npos, "expected '" << expected << "' in\n" << text);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(requeue_restarts_at_the_new_begin) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    task_ptr t = defs.add_suite("s")->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 10, 1));
+    defs.beginAll();
+    defs.server_state().set_state(SState::HALTED); // no job submission, so that the task stays queued
+
+    TestHelper::invokeRequest(&defs, change_repeat(t->absNodePath(), "--begin 3 --current 6"));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new RequeueNodeCmd(t->absNodePath())));
+    BOOST_CHECK_EQUAL(t->repeat().value(), 3);
+}
+
+BOOST_AUTO_TEST_CASE(triggers_follow_a_change_of_the_range) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s  = defs.add_suite("s");
+    family_ptr f = s->add_family("f");
+    f->addRepeat(RepeatDate("YMD", 20260101, 20261231, 1));
+    task_ptr t1 = s->add_task("t1");
+    t1->add_trigger("f:YMD eq 20260201 and f:YMD_DD eq 1 and f:YMD_MM eq 2");
+    task_ptr t2 = s->add_task("t2");
+    t2->add_trigger("f:YMD gt 20261130");
+    defs.beginAll();
+    BOOST_REQUIRE(!t1->triggerAst()->evaluate());
+    BOOST_REQUIRE(!t2->triggerAst()->evaluate());
+
+    TestHelper::invokeRequest(&defs, change_repeat(f->absNodePath(), "--begin 20260201"));
+    BOOST_CHECK(t1->triggerAst()->evaluate());
+    BOOST_CHECK(!t2->triggerAst()->evaluate());
+
+    TestHelper::invokeRequest(&defs, change_repeat(f->absNodePath(), "--begin 20261201"));
+    BOOST_CHECK(!t1->triggerAst()->evaluate());
+    BOOST_CHECK(t2->triggerAst()->evaluate());
+}
+
+BOOST_AUTO_TEST_CASE(change_of_the_range_reaches_client_through_incremental_sync) {
+    ECF_NAME_THIS_TEST();
+
+    auto make_defs = []() {
+        auto defs    = Defs::create();
+        family_ptr f = defs->add_suite("s")->add_family("f");
+        f->addRepeat(RepeatDate("YMD", 20260101, 20261231, 1));
+        f->addEvent(Event("e"));
+        f->addMeter(Meter("m", 0, 100));
+        f->add_task("t")->addRepeat(RepeatInteger("N", 0, 10, 1));
+        defs->beginAll();
+        return defs;
+    };
+
+    auto synced = sync_after(make_defs, [](Defs& defs) {
+        TestHelper::invokeRequest(&defs, change_repeat("/s/f", "--begin 20260201 --end 20260331 --step 7"));
+        TestHelper::invokeRequest(&defs, change_repeat("/s/f/t", "--current 5"));
+    });
+    BOOST_CHECK(synced.in_sync);
+    BOOST_CHECK(!synced.full_sync);
+
+    const auto& client_f = *synced.client->findAbsNode("/s/f");
+    BOOST_CHECK_EQUAL(client_f.repeat().start(), 20260201);
+    BOOST_CHECK_EQUAL(client_f.repeat().end(), 20260331);
+    BOOST_CHECK_EQUAL(client_f.repeat().step(), 7);
+    BOOST_CHECK_EQUAL(client_f.repeat().value(), 20260201);
+    BOOST_CHECK_EQUAL(client_f.findGenVariable("YMD_MM").value(), "02");
+    BOOST_CHECK_EQUAL(client_f.events().size(), 1u);
+    BOOST_CHECK_EQUAL(client_f.meters().size(), 1u);
+    BOOST_CHECK_EQUAL(synced.client->findAbsNode("/s/f/t")->repeat().value(), 5);
+
+    DebugEquality debug_equality; // only has effect in DEBUG build
+    BOOST_CHECK_MESSAGE(*synced.server == *synced.client, "expected client and server to be the same after sync");
+}
+
+namespace {
+
+///
+/// @brief Records the aspects notified for a node, as ecFlowUI does.
+///
+struct AspectRecorder : public AbstractObserver
+{
+    std::vector<ecf::Aspect::Type> aspects;
+
+    void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) override {}
+    void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) override {}
+    void update(const Node*, const std::vector<ecf::Aspect::Type>& a) override {
+        aspects.insert(aspects.end(), a.begin(), a.end());
+    }
+    void update(const Defs*, const std::vector<ecf::Aspect::Type>&) override {}
+
+    [[nodiscard]] bool has(ecf::Aspect::Type a) const {
+        return std::find(aspects.begin(), aspects.end(), a) != aspects.end();
+    }
+};
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(clients_are_notified_of_the_changed_aspects) {
+    ECF_NAME_THIS_TEST();
+
+    auto make_defs = []() {
+        auto defs    = Defs::create();
+        family_ptr f = defs->add_suite("s")->add_family("f");
+        f->addRepeat(RepeatInteger("N", 0, 10, 1));
+        f->add_task("t")->addRepeat(RepeatInteger("N", 0, 10, 1));
+        defs->beginAll();
+        return defs;
+    };
+
+    defs_ptr server = make_defs();
+    defs_ptr client = make_defs();
+    server->server_state().set_state(SState::HALTED);
+    client->server_state().set_state(SState::HALTED);
+
+    AspectRecorder on_f, on_t;
+    client->findAbsNode("/s/f")->attach(&on_f);
+    client->findAbsNode("/s/f/t")->attach(&on_t);
+
+    ServerReply reply;
+    reply.set_client_defs(client);
+    unsigned int state_change_no  = Ecf::state_change_no();
+    unsigned int modify_change_no = Ecf::modify_change_no();
+
+    TestHelper::invokeRequest(server.get(), change_repeat("/s/f", "--end 20"));      // a range
+    TestHelper::invokeRequest(server.get(), change_repeat("/s/f/t", "--current 5")); // a value
+
+    MockServer mock_server(server);
+    SSyncCmd cmd(0, state_change_no, modify_change_no, &mock_server);
+    cmd.do_sync(reply);
+
+    // a range: all the attributes of the node are replaced, the Repeat included
+    BOOST_CHECK(on_f.has(ecf::Aspect::ADD_REMOVE_ATTR));
+    BOOST_CHECK(on_f.has(ecf::Aspect::REPEAT));
+    // a value: the index of the Repeat only
+    BOOST_CHECK(on_t.has(ecf::Aspect::REPEAT_INDEX));
+    BOOST_CHECK(!on_t.has(ecf::Aspect::ADD_REMOVE_ATTR));
+
+    client->findAbsNode("/s/f")->detach(&on_f);
+    client->findAbsNode("/s/f/t")->detach(&on_t);
+    BOOST_CHECK_EQUAL(client->findAbsNode("/s/f")->repeat().end(), 20);
+    BOOST_CHECK_EQUAL(client->findAbsNode("/s/f/t")->repeat().value(), 5);
+}
+
+BOOST_AUTO_TEST_CASE(range_then_value_between_two_syncs) {
+    ECF_NAME_THIS_TEST();
+
+    auto make_defs = []() {
+        auto defs = Defs::create();
+        defs->add_suite("s")->add_task("t")->addRepeat(RepeatInteger("N", 0, 10, 1));
+        defs->beginAll();
+        return defs;
+    };
+    auto synced = sync_after(make_defs, [](Defs& defs) {
+        TestHelper::invokeRequest(&defs, change_repeat("/s/t", "--end 20 --step 2"));
+        TestHelper::invokeRequest(&defs, change_repeat("/s/t", "14"));
+    });
+    BOOST_CHECK(!synced.full_sync);
+    const auto& rep = synced.client->findAbsNode("/s/t")->repeat();
+    BOOST_CHECK_EQUAL(rep.end(), 20);
+    BOOST_CHECK_EQUAL(rep.step(), 2);
+    BOOST_CHECK_EQUAL(rep.value(), 14);
+    BOOST_CHECK(*synced.server == *synced.client);
+}
+
+BOOST_AUTO_TEST_CASE(family_repeat_changed_while_a_child_runs) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    family_ptr f = defs.add_suite("s")->add_family("f");
+    f->addRepeat(RepeatDate("YMD", 20260101, 20260131, 1));
+    task_ptr t = f->add_task("t");
+    defs.beginAll();
+    defs.server_state().set_state(SState::HALTED); // no job submission, so that the states only change as forced
+
+    TestHelper::invokeRequest(&defs, change_repeat(f->absNodePath(), "20260105"));
+    t->set_state(NState::ACTIVE);
+
+    // the value 5 lies off the new grid: moved towards the begin, while the child keeps running
+    TestHelper::invokeRequest(&defs, change_repeat(f->absNodePath(), "--step 7"));
+    BOOST_CHECK_EQUAL(f->repeat().value(), 20260101);
+    BOOST_CHECK_EQUAL(t->state(), NState::ACTIVE);
+
+    // the completion of the child completes the family, which moves to its next value and runs again
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new ForceCmd(t->absNodePath(), "complete", false, false)));
+    BOOST_CHECK_EQUAL(f->repeat().value(), 20260108);
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+}
+
+BOOST_AUTO_TEST_CASE(repeat_day_step_moves_the_hybrid_clock_on_requeue) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("s");
+    ClockAttr clock(true); // hybrid
+    clock.date(1, 1, 2026);
+    s->addClock(clock);
+    s->addRepeat(RepeatDay(1));
+    s->add_task("t");
+    defs.beginAll();
+    defs.server_state().set_state(SState::HALTED);
+    BOOST_REQUIRE_EQUAL(s->calendar().day_of_month(), 1);
+
+    // the suite date moves by the new step on each requeue
+    TestHelper::invokeRequest(&defs, change_repeat(s->absNodePath(), "--step 3"));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new RequeueNodeCmd(s->absNodePath())));
+    BOOST_CHECK_EQUAL(s->calendar().day_of_month(), 4);
+
+    // a clock date set before a change of the step is offset by the old step (subtracted when the date is set)
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::CLOCK_DATE, "10.1.2026", "")));
+    TestHelper::invokeRequest(&defs, change_repeat(s->absNodePath(), "--step 1"));
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new RequeueNodeCmd(s->absNodePath())));
+    BOOST_CHECK_EQUAL(s->calendar().day_of_month(), 8); // 10 - 3 (old step) + 1 (new step)
+}
+
+BOOST_AUTO_TEST_CASE(changed_repeat_survives_archive_and_restore) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    std::string ecf_home = ecf::File::test_data("libs/base/test", "libs/base");
+    defs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    suite_ptr s  = defs.add_suite(Pid::unique_name("test_changed_repeat_survives_archive_and_restore"));
+    family_ptr f = s->add_family("f");
+    task_ptr t   = f->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 10, 1));
+    TestHelper::invokeRequest(&defs, change_repeat(t->absNodePath(), "--end 20 --step 2 --current 4"));
+    const auto task_path = t->absNodePath();
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new PathsCmd(PathsCmd::ARCHIVE, f->absNodePath())));
+    BOOST_REQUIRE(f->children().empty());
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new PathsCmd(PathsCmd::RESTORE, f->absNodePath())));
+
+    auto restored = defs.findAbsNode(task_path);
+    BOOST_REQUIRE(restored);
+    BOOST_CHECK_EQUAL(restored->repeat().end(), 20);
+    BOOST_CHECK_EQUAL(restored->repeat().step(), 2);
+    BOOST_CHECK_EQUAL(restored->repeat().value(), 4);
+}
+
+BOOST_AUTO_TEST_SUITE_END() // options
 
 BOOST_AUTO_TEST_SUITE_END() // T_AlterCmdRepeat
 

@@ -2178,6 +2178,28 @@ class TestClientApi:
         assert current("integer") == (4, "4")
         assert current("string") == (0, "x")
 
+        # Options change the begin, end, step and current value together; the client receives the new range
+        self.ci.alter(path("integer"), "change", "repeat", "--end 20 --step 4 --current 8")
+        sync_local(self.ci)
+        repeat = self.ci.get_defs().find_abs_node(path("integer")).get_repeat()
+        assert (repeat.start(), repeat.end(), repeat.step()) == (0, 20, 4)
+        assert current("integer") == (8, "8")
+
+        # The current value left outside the new range is clamped
+        self.ci.alter(path("integer"), "change", "repeat", "--end 4")
+        assert current("integer") == (4, "4")
+
+        # A list-based Repeat only accepts --current
+        self.ci.alter(path("string"), "change", "repeat", "--current z")
+        assert current("string") == (2, "z")
+        with pytest.raises(RuntimeError, match="the option --begin does not apply to repeat string"):
+            self.ci.alter(path("string"), "change", "repeat", "--begin 1")
+
+        # The options are given as a single value
+        with pytest.raises(RuntimeError, match="expected a single value"):
+            self.ci.alter(path("integer"), "change", "repeat", "--begin 2", "--end 30")
+        assert current("integer") == (4, "4")
+
     def test_client_alter_flag(self):
         print_test(self.ci, "test_client_alter_flag")
         self.ci.delete_all()

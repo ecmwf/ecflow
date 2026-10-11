@@ -126,6 +126,7 @@ set(u_tests
   u_TestPrint
   u_TestPythonBindings
   u_TestRemove
+  u_TestRepeatAlter
   u_TestRepeatArithmetic
   u_TestRepeatDateTimeList
   u_TestRepeatEdgeCases

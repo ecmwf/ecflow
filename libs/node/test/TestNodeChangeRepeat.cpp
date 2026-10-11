@@ -128,6 +128,96 @@ BOOST_AUTO_TEST_CASE(change_repeat_is_seen_at_once_by_variables_and_triggers) {
     BOOST_CHECK(t2->triggerAst()->evaluate());
 }
 
+BOOST_AUTO_TEST_CASE(change_of_the_range_marks_the_node_changed) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    family_ptr f = defs.add_suite("s")->add_family("f");
+    f->addRepeat(RepeatDate("YMD", 20260101, 20261231, 1));
+    BOOST_REQUIRE_EQUAL(f->findGenVariable("YMD").value(), "20260101");
+
+    ServerScope server;
+    {
+        // a change of the current value only, as an option: the node change number stays
+        auto node_change_no = f->state_change_no();
+        f->changeRepeat("--current 20260110");
+        BOOST_CHECK_EQUAL(f->repeat().value(), 20260110);
+        BOOST_CHECK_EQUAL(f->state_change_no(), node_change_no);
+    }
+    {
+        // a change of the range: the node change number moves, so that clients receive the whole Repeat, and the
+        // generated variables, the one named after the Repeat included, are refreshed
+        auto node_change_no = f->state_change_no();
+        f->changeRepeat("--begin 20260201 --end 20260228");
+        BOOST_CHECK_EQUAL(f->repeat().start(), 20260201);
+        BOOST_CHECK_EQUAL(f->repeat().end(), 20260228);
+        BOOST_CHECK_EQUAL(f->repeat().value(), 20260201);
+        BOOST_CHECK_GT(f->state_change_no(), node_change_no);
+        BOOST_CHECK_EQUAL(f->findGenVariable("YMD").value(), "20260201");
+        BOOST_CHECK_EQUAL(f->findGenVariable("YMD_MM").value(), "02");
+    }
+    {
+        // a change of the step of a repeat day is a change of the range too
+        task_ptr t = defs.findAbsNode("/s")->suite()->add_task("t");
+        t->addRepeat(RepeatDay(1));
+        auto node_change_no = t->state_change_no();
+        t->changeRepeat("--step 2");
+        BOOST_CHECK_EQUAL(t->repeat().step(), 2);
+        BOOST_CHECK_GT(t->state_change_no(), node_change_no);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(refused_change_of_the_range_leaves_the_node_unchanged) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    task_ptr t = defs.add_suite("s")->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 10, 2));
+
+    ServerScope server;
+    auto node_change_no   = t->state_change_no();
+    auto repeat_change_no = t->repeat().state_change_no();
+    BOOST_CHECK_THROW(t->changeRepeat("--end 20 --step 0"), std::runtime_error);
+    BOOST_CHECK_EQUAL(t->repeat().end(), 10);
+    BOOST_CHECK_EQUAL(t->repeat().step(), 2);
+    BOOST_CHECK_EQUAL(t->state_change_no(), node_change_no);
+    BOOST_CHECK_EQUAL(t->repeat().state_change_no(), repeat_change_no);
+}
+
+BOOST_AUTO_TEST_CASE(change_of_the_range_leaves_the_node_state_unchanged) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("s");
+    task_ptr t  = s->add_task("t");
+    t->addRepeat(RepeatInteger("N", 0, 10, 1));
+
+    ServerScope server;
+    defs.beginAll();
+
+    // a running task, whose value is clamped by a new begin
+    t->changeRepeat("3");
+    t->set_state(NState::ACTIVE);
+    t->changeRepeat("--begin 5");
+    BOOST_CHECK_EQUAL(t->repeat().value(), 5);
+    BOOST_CHECK_EQUAL(t->state(), NState::ACTIVE);
+
+    // its completion increments the clamped value: 5 is not run
+    t->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(t->repeat().value(), 6);
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+
+    // a completed task stays complete when its range is extended
+    t->changeRepeat("--end 6");
+    t->set_state(NState::COMPLETE); // 6 -> 7, past the end
+    BOOST_REQUIRE_EQUAL(t->state(), NState::COMPLETE);
+    BOOST_REQUIRE(!t->repeat().valid());
+    t->changeRepeat("--end 10");
+    BOOST_CHECK(t->repeat().valid());
+    BOOST_CHECK_EQUAL(t->repeat().value(), 7);
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+}
+
 BOOST_AUTO_TEST_CASE(change_repeat_without_repeat_is_refused) {
     ECF_NAME_THIS_TEST();
 

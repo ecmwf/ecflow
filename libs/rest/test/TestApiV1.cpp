@@ -1498,6 +1498,49 @@ BOOST_AUTO_TEST_CASE(test_family_add, *boost::unit_test::depends_on("S_Http/T_Ap
     wait_until([] { return check_for_path("/v1/suites/test/dynamic/definition"); });
 }
 
+// REPEAT
+
+BOOST_AUTO_TEST_CASE(test_repeat, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_suite")) {
+    ECF_NAME_THIS_TEST();
+
+    handle_response(request("put",
+                            "/v1/suites/test/definition",
+                            R"({"definition": "family repeating\n  repeat integer N 0 10\nendfamily"})",
+                            API_KEY));
+    wait_until([] { return check_for_path("/v1/suites/test/repeating/definition"); });
+
+    auto repeat_is = [](int end, int step, int value) {
+        try {
+            auto r = handle_response(
+                request("get", "/v1/suites/test/repeating/attributes"), HttpStatusCode::success_ok, true);
+            auto repeat = ojson::parse(r.body)["repeat"];
+            return repeat["end"] == end && repeat["step"] == step && repeat["value"] == value;
+        }
+        catch (...) {
+            return false;
+        }
+    };
+
+    // The value of the attribute holds the options, as given to --alter change repeat
+    handle_response(request("put",
+                            "/v1/suites/test/repeating/attributes",
+                            R"({"type":"repeat","value":"--end 20 --step 2 --current 4"})",
+                            API_KEY));
+    BOOST_CHECK(wait_until([&] { return repeat_is(20, 2, 4); }));
+
+    // ... or a plain value
+    handle_response(
+        request("put", "/v1/suites/test/repeating/attributes", R"({"type":"repeat","value":"6"})", API_KEY));
+    BOOST_CHECK(wait_until([&] { return repeat_is(20, 2, 6); }));
+
+    // A refused change leaves the Repeat unchanged
+    auto refused =
+        request("put", "/v1/suites/test/repeating/attributes", R"({"type":"repeat","value":"--step 0"})", API_KEY);
+    BOOST_REQUIRE(refused);
+    BOOST_CHECK_GE(refused->status, 400);
+    BOOST_CHECK(repeat_is(20, 2, 6));
+}
+
 // STATUS
 
 BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
