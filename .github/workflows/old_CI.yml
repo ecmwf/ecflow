@@ -15,15 +15,8 @@ on:
       - ".cd/**"
       - ".github/cd-config.yml"
 
-  # Trigger the workflow on pull request
-  pull_request: ~
-
   # Trigger the workflow manually
   workflow_dispatch: ~
-
-  # Trigger after public PR approved for CI
-  pull_request_target:
-    types: [labeled]
 
 jobs:
   # Run CI including downstream packages on self-hosted runners
