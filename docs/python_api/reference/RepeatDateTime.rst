@@ -51,6 +51,12 @@ Accessor methods::
       The current instant as a string in yyyymmddTHHMMSS format.
 
 
+.. py:method:: RepeatDateTime.change(self: ecflow.RepeatDateTime, value: str) -> None
+   :module: ecflow
+
+Change the Repeat as --alter change repeat does: a plain value changes the current value; options (--begin, --end, --step, --current) change the given attributes together.
+
+
 .. py:method:: RepeatDateTime.current_index(self: ecflow.RepeatDateTime) -> int
    :module: ecflow
 

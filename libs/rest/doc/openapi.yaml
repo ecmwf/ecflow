@@ -868,6 +868,10 @@ components:
           type: string
         value:
           type: string
+          description: >-
+            The new value of the attribute. For a repeat, either a plain value, which becomes the current
+            value, or options applied together, as for ecflow_client --alter change repeat
+            (e.g. "--begin 20260101 --end 20261231 --current 20260115").
         old_value:
           type: string
         min:

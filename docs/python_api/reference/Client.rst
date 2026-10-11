@@ -266,12 +266,34 @@ The following describes the parameters in more detail:
    # limit with the nodes that are currently consuming it.
 
  change repeat value
-   # For date repeats, the value must be an yyyymmdd formtted integer, defined in
-   # the [begin, end] dates range.
-   # For integer repeats, the value must be an integer, defined in the [begin, end]
-   # values range.
-   # For string or enum repeats, the value must either be a valid integer (to be used
-   # as index) or a string matching a valid enum or strings list value.
+   # A node has at most one repeat, so no name is given.
+   #
+   # The value is either:
+   #   - a plain value, which becomes the current value; or
+   #   - one or more options, applied together:
+   #
+   #       --begin <v>     the first value
+   #       --end <v>       the last value
+   #       --step <v>      the increment
+   #       --current <v>   the current value
+   #
+   # The options accepted depend on the kind of repeat:
+   #
+   #   - date:           --begin, --end, --current as yyyymmdd; --step in days
+   #   - datetime:       --begin, --end, --current as yyyymmddTHHMMSS; --step as H[:MM[:SS]]
+   #   - integer:        all options as integers
+   #   - datelist,
+   #     datetimelist:   only --current, with a member of the list
+   #   - enumerated,
+   #     string:         only --current, with a member of the list, or its index
+   #   - day:            only --step, in days
+   #
+   # Notes:
+   #
+   #   - An invalid change is refused, and the repeat is left unchanged.
+   #   - Without --current, the current value is kept within the new range,
+   #     and on the new step grid.
+   #   - The options require a server of version 5.20 or later.
 
 
 Usage:
@@ -281,6 +303,7 @@ Usage:
   try:
      ci = Client()     # uses default host(ECF_HOST) & port(ECF_PORT)
      ci.alter('/suite/task','change','trigger','b2 == complete')
+     ci.alter('/suite/family','change','repeat','--begin 20260101 --end 20261231')
   except RuntimeError, e:
      print(str(e))
 
