@@ -55,6 +55,7 @@ helm upgrade --install ecflow . -n <namespace> --create-namespace -f examples/va
 |---|---|
 | `examples/values-kind.yaml` | A local kind cluster with the community ingress-nginx controller. |
 | `examples/values-webapps-test.yaml` | The ECMWF cluster webapps-test, namespace `ecflow-multitenant-test`, NGINX Inc controller. |
+| `examples/values-demo.yaml` | Layered over the webapps-test profile: a second release, `demo`, running the images of `spike/multitenant_demo` with jobs run as their owner, on `ecflow-demo.ecmwf.int`. |
 
 The accounts of a deployment are its `users` list, kept in a `users.yaml` of the
 deployer, outside git, and passed after the profile on every upgrade; start from
@@ -62,6 +63,10 @@ deployer, outside git, and passed after the profile on every upgrade; start from
 an SFTP login with their public keys, and a private home; who may log in is decided by
 the ECMWF API, not by the chart. The SFTP host key is generated at the first install and
 kept from then on, so a user records it once (`sftp.hostKey` in `values.yaml`).
+An account with `admin: true` is a designated administrator: the chart then renders a
+server-level `ECF_PERMISSIONS` (administrators `rwxos`, the others `server.accountPermissions`
+or their own `permissions`) and probes readiness over TCP, since a ping as the server's own
+account would be refused; only a server with node access control accepts that setting.
 
 ## A local deployment on kind
 

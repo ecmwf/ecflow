@@ -13,9 +13,13 @@
 # public keys, and a private home, /home/<user>, that no other user and not the server
 # can read. Use a uid of 2000 or above (1000 is the server's own account), never two
 # the same; keep an account's uid for its lifetime, since the files it owns carry it.
+# `admin: true` names a designated administrator (server-level rights rwxos), on a server
+# with node access control; `permissions` gives another account other rights than the
+# default (server.accountPermissions, rwx).
 users:
   - name: alice
     uid: 2001
+    admin: true
     sshAuthorizedKeys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleKeyOfAliceReplaceMe alice@laptop
   - name: bob
@@ -23,6 +27,7 @@ users:
     sshAuthorizedKeys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQExampleKeyOfBobReplaceMe bob@desktop
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleSecondKeyOfBob bob@laptop
-  # An account without keys gets a uid and a home, but no SFTP login.
+  # An account without keys gets a uid and a home, but no SFTP login; this one may only read.
   - name: charlie
     uid: 2003
+    permissions: r

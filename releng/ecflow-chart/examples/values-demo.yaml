@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# The multi-tenant demonstration on webapps-test: a second release, next to the one of
+# develop, in the same namespace, running the images of spike/multitenant_demo (a server
+# with node access control and jobs run as their owner). Layered over the webapps-test
+# profile, with the accounts file of the demo, which names the administrator:
+#
+#   helm upgrade --install demo . -n ecflow-multitenant-test \
+#       -f examples/values-webapps-test.yaml -f examples/values-demo.yaml -f users.yaml
+
+# Every object of the release is prefixed with its name; auth-o-tron follows.
+auth-o-tron:
+  fullnameOverride: demo-authotron
+
+ingress:
+  host: ecflow-demo.ecmwf.int
+  tls:
+    - secretName: demo-ingress-tls
+
+# The images of the spike, under its moving tag; pulled at every Pod start.
+images:
+  server:
+    tag: multitenant-demo
+    pullPolicy: Always
+  sftp:
+    tag: multitenant-demo
+    pullPolicy: Always
+  revproxy:
+    tag: multitenant-demo
+    pullPolicy: Always
+
+server:
+  # Jobs run as their owner (spawn_as_owner); the server runs as root in its container.
+  # With an administrator in users.yaml the server-level ECF_PERMISSIONS is rendered and
+  # the readiness probe becomes a TCP check (auto).
+  spawnAsOwner: true
+
+# No throwaway logins: every user authenticates with an ECMWF API key.
+tests:
+  enabled: false

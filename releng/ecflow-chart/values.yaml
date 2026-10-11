@@ -120,12 +120,19 @@ clusterDomain: cluster.local
 # every account a uid of its own, 2000 or above: 1000 is the server's own account. The
 # chart refuses to render an account without a uid, or two accounts sharing a name or a
 # uid, since the sidecar would otherwise hand out 1000 again, or fail at start.
+# `admin: true` makes the account a designated administrator of the server (rights
+# `rwxos` in the server-level ECF_PERMISSIONS); `permissions` gives any other rights
+# (default `server.accountPermissions`). A server-level ECF_PERMISSIONS is rendered only
+# when at least one account is an administrator, and only a server with node access
+# control (feature/node_acl) accepts it.
 #   - name: alice
 #     uid: 2001
+#     admin: true
 #     sshAuthorizedKeys:
 #       - ssh-ed25519 AAAA... alice@host
 #   - name: bob
 #     uid: 2002
+#     permissions: r
 #     sshAuthorizedKeys:
 #       - ssh-ed25519 AAAA... bob@host
 users: []
@@ -138,6 +145,10 @@ server:
   # account of `users` exists there under its uid, and a job reads only its owner's home
   # and the shared workspace. Off, the server runs as its own account and the jobs as it.
   spawnAsOwner: false
+  # The server-level rights of an account that is not an administrator (r read, w write,
+  # x execute, o override), when `users` has an administrator and the server has node
+  # access control; an account's own `permissions` overrides it.
+  accountPermissions: rwx
   # The administrator's files, expanded into /admin by the init container. The chart
   # renders them into a Secret of the release: server_environment.cfg from
   # `environment` below, and every entry of `files` (a path relative to /admin, and
@@ -172,8 +183,12 @@ server:
     ECF_PASSWD: ecf.passwd
     ECF_CUSTOM_PASSWD: ecf.custom_passwd
     ECF_TASK_THRESHOLD: 4000
-  # Delay and period of the readiness probe, which pings the server with ecflow_client.
+  # The readiness probe: `ping` sends ecflow_client --ping as the server's own account,
+  # `tcp` only checks that the port accepts a connection, `auto` (the default) pings
+  # unless a server-level ECF_PERMISSIONS is rendered, which would refuse the ping of an
+  # account it does not name.
   readinessProbe:
+    mode: auto
     initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 8

@@ -145,3 +145,38 @@ generates a temporary key at each start.
 {{- $home := .Values.server.persistence.home -}}
 {{- not (and (hasKey $home "enabled") (not $home.enabled)) -}}
 {{- end }}
+
+{{/*
+The server-level ECF_PERMISSIONS rendered from the accounts: every administrator with
+`rwxos`, every other account with its `permissions` or the default; empty when no
+account is an administrator (the server then runs without server-level permissions).
+An explicit server.environment.ECF_PERMISSIONS takes precedence.
+*/}}
+{{- define "ecflow-chart.serverPermissions" -}}
+{{- if hasKey .Values.server.environment "ECF_PERMISSIONS" -}}
+{{- index .Values.server.environment "ECF_PERMISSIONS" -}}
+{{- else -}}
+{{- $admins := list -}}
+{{- $entries := list -}}
+{{- range .Values.users -}}
+{{- if .admin -}}
+{{- $admins = append $admins (printf "%s:rwxos" .name) -}}
+{{- else -}}
+{{- $entries = append $entries (printf "%s:%s" .name (.permissions | default $.Values.server.accountPermissions)) -}}
+{{- end -}}
+{{- end -}}
+{{- if $admins -}}
+{{- join "," (concat $admins $entries) -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/* The readiness probe to use: ping or tcp, resolving auto. */}}
+{{- define "ecflow-chart.readinessMode" -}}
+{{- $mode := .Values.server.readinessProbe.mode | default "auto" -}}
+{{- if eq $mode "auto" -}}
+{{- if include "ecflow-chart.serverPermissions" . }}tcp{{ else }}ping{{ end -}}
+{{- else -}}
+{{- $mode -}}
+{{- end -}}
+{{- end }}
