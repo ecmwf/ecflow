@@ -157,6 +157,21 @@ BOOST_AUTO_TEST_CASE(test_command_help_for_user_command_omits_task_env_banner) {
     BOOST_CHECK(!contains(out, task_env_banner));
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_help_explains_the_change_of_a_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("alter");
+    // why no name is given for a Repeat, a Trigger or a Complete
+    BOOST_CHECK(contains(out, "since a node holds at most one attribute of each of these kinds"));
+    // the options, and the examples (run against a server by s_client, TestAlterRepeat.cpp)
+    BOOST_CHECK(contains(out, "--begin <v>     the first value"));
+    BOOST_CHECK(contains(out, "--alter=change repeat \"20260115\" /path/to/node"));
+    BOOST_CHECK(contains(out, "--alter=change repeat \"--begin 20260101 --end 20261231\" /path/to/node"));
+    BOOST_CHECK(
+        contains(out, "--alter=change repeat \"--begin 20260101 --end 20261231 --current 20260115\" /path/to/node"));
+    BOOST_CHECK(contains(out, "--alter=change repeat \"--step 7\" /path/to/node"));
+}
+
 BOOST_AUTO_TEST_CASE(test_command_help_for_option_omits_env_banner) {
     ECF_NAME_THIS_TEST();
 
