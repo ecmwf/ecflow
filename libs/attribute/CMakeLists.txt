@@ -13,6 +13,7 @@ set(test_srcs
   test/TestLateAttr.cpp
   test/TestMigration.cpp
   test/TestRepeat.cpp
+  test/TestRepeatAlter.cpp
   test/TestRepeatChange.cpp
   test/TestRepeatEdgeCases.cpp
   test/TestRepeatRange.cpp

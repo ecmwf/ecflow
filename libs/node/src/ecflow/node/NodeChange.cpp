@@ -242,11 +242,53 @@ void Node::changeComplete(const std::string& expression) {
     add_complete(expression);
 }
 
+namespace {
+
+///
+/// @brief Describes the definition of a Repeat, for the log: without indentation nor line break.
+///
+std::string definition_of(const Repeat& repeat) {
+    std::string text = repeat.toString(); // never blank: only called for a node holding a Repeat
+    auto first       = text.find_first_not_of(' ');
+    auto last        = text.find_last_not_of(" \n");
+    return text.substr(first, last - first + 1);
+}
+
+///
+/// @brief Describes a Repeat and its current value, for the log.
+///
+std::string describe(const Repeat& repeat) {
+    if (repeat.is_repeat_day()) {
+        return definition_of(repeat); // no current value
+    }
+    return definition_of(repeat) + " (current " + repeat.valueAsString() + ")";
+}
+
+} // namespace
+
 void Node::changeRepeat(const std::string& value) {
     if (repeat_.empty()) {
         throw std::runtime_error("Node::changeRepeat: Could not find repeat on " + absNodePath());
     }
-    repeat_.change(value); // this can throw std::runtime_error
+
+    const std::string definition_before = definition_of(repeat_);
+    const std::string before            = describe(repeat_);
+    const std::string value_before      = repeat_.valueAsString();
+
+    repeat_.change(value); // this can throw std::runtime_error, leaving the Repeat unchanged
+
+    if (definition_of(repeat_) != definition_before) {
+        // The begin, end or step changed: the node attributes are sent again to the clients by the next incremental
+        // synchronisation, since the memento of the Repeat value carries the value only
+        state_change_no_ = Ecf::incr_state_change_no();
+        repeat_.update_repeat_genvar();
+        LOG(Log::MSG, "Repeat at " + absNodePath() + " updating from '" + before + "' to '" + describe(repeat_) + "'");
+    }
+    else {
+        LOG(Log::MSG,
+            "Repeat " + repeat_.name() + " at " + absNodePath() + " updating value from '" + value_before + "' to '" +
+                repeat_.valueAsString() + "'");
+    }
 }
 
 void Node::increment_repeat() {
