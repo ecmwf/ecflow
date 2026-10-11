@@ -96,6 +96,7 @@ class TestSubmittable:
         get_process_or_remote_id()   -> str  -- process/remote id of running job; empty on fresh node
         get_try_no()                 -> str  -- current try number as string; '0' on fresh node
         get_int_try_no()             -> int  -- current try number as integer; 0 on fresh node
+        get_owner()                  -> str  -- user whose command queued the node (ECF_OWNER); empty on fresh node
         get_aborted_reason()         -> str  -- abort reason if node was aborted; empty on fresh node
     """
 
@@ -144,6 +145,31 @@ class TestSubmittable:
     def test_get_try_no_returns_str(self):
         """get_try_no() returns a str, not an int."""
         assert isinstance(ecf.Task("t1").get_try_no(), str)
+
+    # ------------------------------------------------------------------
+    # get_owner()
+    # ------------------------------------------------------------------
+
+    def test_get_owner_returns_empty_string_on_fresh_task(self):
+        """A freshly created Task has no owner: no user command has queued it."""
+        assert ecf.Task("t1").get_owner() == ""
+
+    def test_get_owner_returns_str(self):
+        """get_owner() always returns a str."""
+        assert isinstance(ecf.Task("t1").get_owner(), str)
+
+    def test_ecf_owner_is_a_generated_variable_of_tasks_only(self):
+        """ECF_OWNER is generated for a task, with the owner as value, and not for a family."""
+        defs = ecf.Defs()
+        suite = defs.add_suite("s")
+        family = suite.add_family("f")
+        task = family.add_task("t")
+        task.update_generated_variables()
+        family.update_generated_variables()
+        task_vars = {v.name(): v.value() for v in task.get_generated_variables()}
+        family_vars = {v.name() for v in family.get_generated_variables()}
+        assert task_vars["ECF_OWNER"] == ""
+        assert "ECF_OWNER" not in family_vars
 
     # ------------------------------------------------------------------
     # get_int_try_no()

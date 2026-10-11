@@ -28,12 +28,16 @@ public:
     void reset() override;
     void begin() override;
     void requeue(Requeue_args&) override;
+    /// @copydoc Node::set_owner
+    void set_owner(const std::string& user) override;
     void requeue_time_attrs() override;
     void handle_migration(const ecf::Calendar&) override;
     void reset_late_event_meters() override;
     bool run(JobsParam& jobsParam, bool force) override;
-    void kill(const std::string& zombie_pid = "") override;
-    void status() override;
+    using Node::kill;
+    using Node::status;
+    void kill(const std::string& zombie_pid, const std::string& requester) override;
+    void status(const std::string& requester) override;
     bool top_down_why(std::vector<std::string>& theReasonWhy, bool html_tags = false) const override;
     void collateChanges(DefsDelta&) const override;
     void set_memento(const OrderMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);

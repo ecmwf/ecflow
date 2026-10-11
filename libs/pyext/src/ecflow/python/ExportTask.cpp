@@ -102,6 +102,11 @@ void export_Task(py::module& m) {
              "The process or remote id of the running job")
         .def("get_try_no", &Submittable::tryNo, "The current try number as a string.")
         .def("get_int_try_no", &Submittable::try_no, "The current try number as integer.")
+        .def("get_owner",
+             &Submittable::owner,
+             py::return_value_policy::reference,
+             "The user whose command queued the node, exposed to jobs as ECF_OWNER. Set by the server; empty until "
+             "then.")
         .def("get_aborted_reason",
              &Submittable::abortedReason,
              py::return_value_policy::reference,

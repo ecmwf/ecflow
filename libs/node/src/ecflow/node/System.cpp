@@ -3,7 +3,12 @@
 
 #include <cerrno>
 #include <csignal>
+#include <cstring>
+#include <grp.h>
+#include <optional>
+#include <string>
 #include <unistd.h>
+#include <vector>
 
 #include <sys/wait.h> // for waitpid
 
@@ -30,6 +35,8 @@
 #ifdef DEBUG_FORK
     #include <iostream>
 #endif
+
+extern char** environ;
 
 namespace ecf {
 
@@ -94,14 +101,44 @@ System::~System() = default;
 bool System::spawn(System::CmdType cmd_type,
                    const std::string& cmdToSpawn,
                    const std::string& absPath,
+                   const std::string& user,
                    std::string& errorMsg) {
+    if (!spawn_as_owner_) {
+        return spawn(cmd_type, cmdToSpawn, absPath, errorMsg);
+    }
+
+    // Resolve the account in the server process: nothing but async-signal-safe calls are made in the
+    // child between the fork and the exec
+    std::string reason;
+    std::optional<SpawnIdentity> identity = resolve_spawn_identity(user, reason);
+    if (!identity) {
+        errorMsg =
+            "Refused to spawn " + System::cmd_type(cmd_type) + " for " + absPath + " as user '" + user + "': " + reason;
+        LOG(Log::ERR, errorMsg);
+        return false;
+    }
+    return spawn_as(cmd_type, cmdToSpawn, absPath, &*identity, errorMsg);
+}
+
+bool System::spawn(System::CmdType cmd_type,
+                   const std::string& cmdToSpawn,
+                   const std::string& absPath,
+                   std::string& errorMsg) {
+    return spawn_as(cmd_type, cmdToSpawn, absPath, nullptr, errorMsg);
+}
+
+bool System::spawn_as(System::CmdType cmd_type,
+                      const std::string& cmdToSpawn,
+                      const std::string& absPath,
+                      const SpawnIdentity* identity,
+                      std::string& errorMsg) {
 #ifdef DEBUG_FORK
     LogToCout logToCoutAsWell;
     LOG(Log::DBG, "  System::spawn path(" << absPath << ") cmd(" << cmdToSpawn << ") cmd_type(" << cmd_type << ")\n");
 #endif
 
     std::string msg;
-    if (sys(cmd_type, cmdToSpawn, absPath, msg)) {
+    if (sys(cmd_type, cmdToSpawn, absPath, identity, msg)) {
         std::ostringstream ss;
         ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
         if (!absPath.empty()) {
@@ -119,7 +156,30 @@ bool System::spawn(System::CmdType cmd_type,
 int System::sys(System::CmdType cmd_type,
                 const std::string& cmdToSpawn,
                 const std::string& absPath,
+                const SpawnIdentity* identity,
                 std::string& errorMsg) {
+    // The environment of the child is assembled here, in the parent: the account variables replace
+    // those of the server, everything else is inherited as before
+    std::vector<std::string> environment;
+    std::vector<char*> envp;
+    if (identity) {
+        for (char** e = environ; e && *e; ++e) {
+            std::string entry(*e);
+            if (entry.rfind("HOME=", 0) == 0 || entry.rfind("USER=", 0) == 0 || entry.rfind("LOGNAME=", 0) == 0 ||
+                entry.rfind("SHELL=", 0) == 0) {
+                continue;
+            }
+            environment.push_back(entry);
+        }
+        environment.push_back("HOME=" + identity->home);
+        environment.push_back("USER=" + identity->name);
+        environment.push_back("LOGNAME=" + identity->name);
+        environment.push_back("SHELL=" + identity->shell);
+        for (auto& entry : environment) {
+            envp.push_back(entry.data());
+        }
+        envp.push_back(nullptr);
+    }
 #ifdef DEBUG_FORK
     LogToCout logToCoutAsWell;
     LOG(Log::DBG, "  System::sys path(" << absPath << ")  cmd(" << cmdToSpawn << ")  cmd_type(" << cmd_type << ")\n");
@@ -153,6 +213,20 @@ int System::sys(System::CmdType cmd_type,
         // left running, that holds the listening socket would keep the server from binding its port again after
         // a restart (i.e. the classic "Address in use")
         close_descriptors_from(3);
+
+        if (identity) {
+            // Switch to the account, and make sure there is no way back to the server account. The
+            // supplementary groups can only be set by root; a server that is not root only ever reaches
+            // this point for its own account (the start-up check refuses the switch otherwise).
+            if ((geteuid() == 0 && initgroups(identity->name.c_str(), identity->gid) != 0) ||
+                setgid(identity->gid) != 0 || setuid(identity->uid) != 0 || setuid(0) == 0) {
+                _exit(126);
+            }
+            char* const argv[] = {
+                const_cast<char*>("sh"), const_cast<char*>("-c"), const_cast<char*>(cmdToSpawn.c_str()), nullptr};
+            execve("/bin/sh", argv, envp.data());
+            _exit(127);
+        }
 
         execl("/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char*)nullptr);
         /*

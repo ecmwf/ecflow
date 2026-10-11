@@ -26,6 +26,7 @@ constexpr const char* ECF_ZOMBIE_TIMEOUT  = "ECF_ZOMBIE_TIMEOUT";
 constexpr const char* ECF_CONNECT_TIMEOUT = "ECF_CONNECT_TIMEOUT";
 constexpr const char* ECF_DENIED          = "ECF_DENIED";
 constexpr const char* ECF_PASS            = "ECF_PASS";
+constexpr const char* ECF_OWNER           = "ECF_OWNER";
 constexpr const char* NO_ECF              = "NO_ECF";
 constexpr const char* ECF_JOB             = "ECF_JOB";
 constexpr const char* ECF_JOBOUT          = "ECF_JOBOUT";

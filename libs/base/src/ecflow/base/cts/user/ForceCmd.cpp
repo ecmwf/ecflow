@@ -158,6 +158,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
             // reset events,meters and late flag ECFLOW-1617
             if (new_state == NState::QUEUED) {
                 node->reset_late_event_meters();
+                node->set_owner(identity().username().value());
             }
         }
         else {
