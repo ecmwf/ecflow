@@ -133,6 +133,11 @@ users: []
 # The ecFlow server.
 server:
   port: 8888
+  # Run each job as the owner of its task (spawn_as_owner of server.cfg, a server of the
+  # restrict_owner work or later): the server then runs as root in its container, every
+  # account of `users` exists there under its uid, and a job reads only its owner's home
+  # and the shared workspace. Off, the server runs as its own account and the jobs as it.
+  spawnAsOwner: false
   # The administrator's files, expanded into /admin by the init container. The chart
   # renders them into a Secret of the release: server_environment.cfg from
   # `environment` below, and every entry of `files` (a path relative to /admin, and

@@ -31,6 +31,11 @@ thing. This template renders nothing; a failed check stops the render with a mes
 {{- $_ := set $uids $uid .name }}
 {{- end }}
 
+{{- /* Jobs as their owner need the homes volume, where each owner's HOME lives. */ -}}
+{{- if and .Values.server.spawnAsOwner (ne (include "ecflow-chart.homeEnabled" .) "true") }}
+{{- fail "server.spawnAsOwner needs the homes volume (server.persistence.home.enabled), which holds the home of every owner" }}
+{{- end }}
+
 {{- /* The SFTP sidecar needs an account to create. */ -}}
 {{- if not (include "ecflow-chart.sftpUsers" .) }}
 {{- fail "users: no account has SSH keys, so the SFTP sidecar would have nothing to serve; give at least one account its sshAuthorizedKeys (see examples/users.example.yaml)" }}

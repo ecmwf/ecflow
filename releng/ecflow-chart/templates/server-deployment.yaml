@@ -145,6 +145,13 @@ spec:
               value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check
             - name: ECF_CHECKOLD
               value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check.b
+            # The accounts the server may spawn jobs as, created at start under their uid.
+            - name: ECFLOW_USERS
+              value: {{ include "ecflow-chart.homeUsers" . | quote }}
+            {{- if .Values.server.spawnAsOwner }}
+            - name: ECFLOW_SPAWN_AS_OWNER
+              value: "true"
+            {{- end }}
           ports:
             - name: ecflow
               containerPort: {{ .Values.server.port }}
