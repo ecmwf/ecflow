@@ -34,6 +34,12 @@ Accessor methods::
       The step value as an integer.
 
 
+.. py:method:: RepeatDay.change(self: ecflow.RepeatDay, value: str) -> None
+   :module: ecflow
+
+Change the step as --alter change repeat does, with the option --step (e.g. "--step 2"); a plain value is ignored, a repeat day having no current value.
+
+
 .. py:method:: RepeatDay.current_index(self: ecflow.RepeatDay) -> int
    :module: ecflow
 

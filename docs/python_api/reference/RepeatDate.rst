@@ -53,6 +53,12 @@ Accessor methods::
       The current instant as an integer in yyyymmdd format.
 
 
+.. py:method:: RepeatDate.change(self: ecflow.RepeatDate, value: str) -> None
+   :module: ecflow
+
+Change the Repeat as --alter change repeat does: a plain value changes the current value; options (--begin, --end, --step, --current) change the given attributes together.
+
+
 .. py:method:: RepeatDate.current_index(self: ecflow.RepeatDate) -> int
    :module: ecflow
 

@@ -715,6 +715,11 @@ impl Client {
     /// attribute, such as `variable`, `event`, `meter`, `label`, `limit`,
     /// `trigger`, `repeat` or `defstatus`; `name` and `value` what the kind
     /// needs, empty otherwise.
+    ///
+    /// To change a `repeat`, give the new value as `name`, and an empty
+    /// `value`: either a plain value, which becomes the current value, or
+    /// options applied together, as for `ecflow_client --alter change repeat`,
+    /// such as `"--begin 20260101 --end 20261231 --current 20260115"`.
     pub fn alter<I, S>(
         &mut self,
         paths: I,

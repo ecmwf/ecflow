@@ -264,6 +264,14 @@ public:
     /// Resolve inlimit references to limits, and check trigger and complete expression
     virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
 
+    ///
+    /// @brief Checks that the Repeat of the node, if any, is consistent (see Repeat::validate).
+    ///
+    /// @param[in,out] errorMsg the message to which the inconsistency is appended
+    /// @return true when the Repeat is consistent, or the node has none
+    ///
+    bool check_repeat(std::string& errorMsg) const;
+
     /// Generated variables. Suites can have thousands of tasks. If the generated variables associated with
     /// tasks are sent to the client, it can amount to a very large network traffic.
     /// To minimise this bandwidth the generated variables for tasks/families are not persisted.

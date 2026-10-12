@@ -39,6 +39,12 @@ Accessor methods::
       The current integer value.
 
 
+.. py:method:: RepeatInteger.change(self: ecflow.RepeatInteger, value: str) -> None
+   :module: ecflow
+
+Change the Repeat as --alter change repeat does: a plain value changes the current value; options (--begin, --end, --step, --current) change the given attributes together.
+
+
 .. py:method:: RepeatInteger.current_index(self: ecflow.RepeatInteger) -> int
    :module: ecflow
 
