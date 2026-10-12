@@ -125,3 +125,30 @@ tests = false
 execution = "hpc-atos"
 container-credentials = true
 triggers = ["upstream-change", "rebuild-request"]
+
+# The bindings build ecflow from source themselves, so they need ecbuild, not
+# the ecflow artifact; without an ecflow_server, the server round trip skips.
+[packages.ecflow-rust]
+compiler-inputs = ["cxx-compiler"]
+
+[[packages.ecflow-rust.deps]]
+repo = "ecmwf/ecbuild"
+package = "ecbuild"
+ref = "develop"
+compiler-inputs = []
+
+[matrix.rust]
+packages = ["ecflow-rust"]
+publishes = false
+
+[matrix.rust.defaults]
+job-script = "./.ci/runner/rust.sh.j2"
+build-type = "RelWithDebInfo"
+runs-on = "arc-runner-normal"
+cxx-compiler = "g++-13"
+c-compiler = "gcc-13"
+container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gcc13-gfortran13-boost-qt6-rust1.90"
+platform = "ubuntu-24.04"
+
+[[matrix.rust.include]]
+rust-compiler = "rust-1.90"
