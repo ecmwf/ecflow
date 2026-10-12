@@ -121,7 +121,8 @@ public:
     /// @brief Prepares the HTTP request to the given endpoint.
     ///
     /// @param[in] cmd_ptr   The request to send; must not be null
-    /// @param[in] scheme    Either "http" or "https"
+    /// @param[in] scheme    Either "http" or "https"; with "https", the server certificate must be trusted
+    ///                      by the default trust store of OpenSSL and must name @p host
     /// @param[in] host      The server host name
     /// @param[in] port      The server port
     /// @param[in] timeout   The connect, read and write timeout, in seconds

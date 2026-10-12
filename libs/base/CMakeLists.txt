@@ -17,6 +17,7 @@ set(test_srcs
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
   test/TestHelpCatalog.cpp
+  test/TestHttpsCertificateVerification.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp
