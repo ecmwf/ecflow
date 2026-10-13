@@ -143,7 +143,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
 
     MockServer mock_server(server_defs);
     SNewsCmd news_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
-    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, Identity::make_none(), &mock_server);
 
     if (expected_change) {
         BOOST_CHECK_MESSAGE(news_cmd.get_news(), test_name << " : get_news : Expected server to change");
@@ -178,6 +178,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
         /* server side */ SSyncCmd cmd1(client_handle,
                                         server_reply.client_defs()->state_change_no(),
                                         server_reply.client_defs()->modify_change_no(),
+                                        Identity::make_none(),
                                         &mock_server);
         Ecf::set_server(false);
         /* client side */ BOOST_CHECK_MESSAGE(!news_cmd1.get_news(),
@@ -654,6 +655,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     /* server side */ SSyncCmd cmd(client_handle,
                                    server_reply.client_defs()->state_change_no(),
                                    server_reply.client_defs()->modify_change_no(),
+                                   Identity::make_none(),
                                    &mock_server);
     Ecf::set_server(false);
 
@@ -692,6 +694,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     /* server side */ SSyncCmd cmd1(client_handle,
                                     server_reply.client_defs()->state_change_no(),
                                     server_reply.client_defs()->modify_change_no(),
+                                    Identity::make_none(),
                                     &mock_server);
     Ecf::set_server(false);
     /* client side */ BOOST_CHECK_MESSAGE(!news_cmd1.get_news(), "Expected no changes to client, we should be in sync");

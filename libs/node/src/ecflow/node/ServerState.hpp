@@ -4,11 +4,12 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
-#include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/permissions/Permissions.hpp"
 
 /// This class stores the server state, so that it is accessible by the node tree
 ///
@@ -41,7 +42,18 @@ public:
     /// This does compare server variables. Used in testing
     bool compare(const ServerState& rhs) const;
 
-    ecf::Permissions permissions() const { return ecf::Permissions::find_in(user_variables_); }
+    /**
+     * Returns the permissions, as defined at server level.
+     *
+     * The permissions can be either defined in the server configuration file (server variables), or
+     * explicitly set by the user (user variables). The permissions set by the user override the
+     * ones defined in the server configuration file.
+     *
+     * If permissions are not defined, an empty Permissions object is returned.
+     *
+     * @return the server level permissions
+     */
+    ecf::Permissions permissions() const;
 
     void sort_variables();
 
