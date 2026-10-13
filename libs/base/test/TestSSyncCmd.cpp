@@ -421,6 +421,13 @@ void set_defs_state(defs_ptr defs) {
     defs->set_state(NState::ABORTED);
 }
 
+void set_owner_of_a_task(defs_ptr defs) {
+    auto tasks = ecf::get_all_tasks(*defs);
+    BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected tasks");
+    SuiteChanged1 changed(tasks[0]->suite());
+    tasks[0]->set_owner("xyza");
+}
+
 BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
     // To DEBUG: enable the defines in Memento.hpp
     ECF_NAME_THIS_TEST();
@@ -450,6 +457,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
 
     // Test Changes in Defs
     // The default server state is HALTED, hence setting to halted will not show a change
+    test_sync_scaffold(set_owner_of_a_task, "set_owner_of_a_task");
     test_sync_scaffold(set_server_state_shutdown, "set_server_state_shutdown");
     test_sync_scaffold(set_server_state_running, "set_server_state_running");
 

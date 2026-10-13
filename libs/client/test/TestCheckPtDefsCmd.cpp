@@ -12,6 +12,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/User.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -284,6 +285,10 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     // update server state to match server, and update flag, caused by restoreDefsFromCheckPt
     defs_to_be_check_pointed->server_state().set_state(SState::HALTED);
     defs_to_be_check_pointed->flag().set(ecf::Flag::MESSAGE);
+    // the load recorded the user as the owner of every task, which the check point restored
+    for (const auto& suite : defs_to_be_check_pointed->suites()) {
+        suite->set_owner(get_login_name());
+    }
 
     // Specifically, ignore server variables, as the port numbers are different( and therefore checkpt,log, etc will not
     // match)

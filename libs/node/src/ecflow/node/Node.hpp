@@ -137,11 +137,30 @@ public:
 
     /// Kill the task if it is active. For NodeContainers do it hierarchically
     /// will throw std::runtime_error for any errors
-    virtual void kill(const std::string& zombie_pid = "") = 0;
+    ///
+    /// @brief Spawns the kill command of the jobs below this node.
+    ///
+    /// @param[in] zombie_pid Process id of a zombie to kill instead of the current job; empty otherwise.
+    /// @param[in] requester  Login name of the user that requested the kill; empty for an automatic
+    ///                       kill, in which case the owner of each task is used when spawning as a user.
+    ///
+    virtual void kill(const std::string& zombie_pid, const std::string& requester) = 0;
+
+    /// @copydoc kill(const std::string&, const std::string&)
+    void kill(const std::string& zombie_pid = "") { kill(zombie_pid, ""); }
 
     /// Show status of a node. For NodeContainers do it hierarchically
     /// will throw std::runtime_error for any errors
-    virtual void status() = 0;
+    ///
+    /// @brief Spawns the status command of the jobs below this node.
+    ///
+    /// @param[in] requester Login name of the user that requested the status; empty for an automatic
+    ///                      request, in which case the owner of each task is used when spawning as a user.
+    ///
+    virtual void status(const std::string& requester) = 0;
+
+    /// @copydoc status(const std::string&)
+    void status() { status(""); }
 
     /// Order the node using the second parameter
     virtual void order(Node* /*immediateChild*/, NOrder::Order) {}
@@ -203,6 +222,16 @@ public:
         const bool log_state_changes_{true};
     };
     virtual void requeue(Requeue_args&);
+
+    ///
+    /// @brief Records the user on whose behalf the jobs below this node are submitted.
+    ///
+    /// A container forwards the call to each of its children; a submittable records the user as its
+    /// owner, see Submittable::set_owner().
+    ///
+    /// @param[in] user Login name of the user, as authenticated by the server; empty when unknown.
+    ///
+    virtual void set_owner(const std::string& user) = 0;
 
     // force queued allows a job to re-run preserving job output.
     // However, other nodes may reference this node's events/meters/late in trigger expression,

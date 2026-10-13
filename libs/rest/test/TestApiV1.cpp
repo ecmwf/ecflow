@@ -764,7 +764,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         BOOST_REQUIRE(content["f"]["children"].contains("t"));
         // Check task attributes
         BOOST_REQUIRE(content["f"]["children"]["t"].contains("attributes"));
-        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 13);
+        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 14);
         {
             size_t count = 0;
             for (const auto& attr : content["f"]["children"]["t"]["attributes"]) {

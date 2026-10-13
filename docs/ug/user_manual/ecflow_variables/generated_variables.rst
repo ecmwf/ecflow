@@ -189,6 +189,10 @@ The table below shows a list of generated variables.
      - Full name of the task
      - /backarc/get/getobs/getobs
    * - task
+     - ECF_OWNER
+     - The user whose command queued the task (see :ref:`ecf_owner`). Empty until a user command queues the task. It is never overridden by an ``edit``: during job generation the generated value is always used.
+     - xyza
+   * - task
      - ECF_PASS
      - Password for the task to enable login to ECF
      - xyZ12Abx
@@ -219,3 +223,48 @@ The table below shows a list of generated variables.
   - **suite**: There are many variables derived from the **clock** of the suite.
   - **family**: For the variable **FAMILY** the value is generated from each family name by adding a slash, '/', in between.
   - **task**: The password exists only at submission time. During job execution, only the encrypted password is available in ECF. If a task does not have a variable **ECF_PASS**, ecFlow generates one. This is the only variable that is **not** searched in the normal way.
+
+.. _ecf_owner:
+
+The owner of a task: ECF_OWNER
+==============================
+
+Every task and alias records its *owner*: the login name of the user whose command put it in a state from
+which a job is spawned. The owner is set by the commands below, on every task below the node they act on,
+and is otherwise left unchanged.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Command
+     - Owner of the tasks concerned
+   * - ``--load``
+     - The user loading the suites
+   * - ``--replace``
+     - The user replacing the node
+   * - ``--requeue`` (all options)
+     - The user requeueing the nodes
+   * - ``--run``
+     - The user running the nodes
+   * - ``--force`` to ``queued``
+     - The user forcing the nodes; a force to any other state leaves the owner unchanged
+   * - ``--edit_script submit`` and ``submit_file``
+     - The user submitting the edited script
+   * - ``--edit_script`` creating an alias
+     - The user creating the alias, for that alias
+   * - ``--begin``, automatic requeues (``repeat``, ``cron``, ``time``, ``date``, ``day``)
+     - Unchanged: no user acts
+
+The owner is exposed to job generation as the generated variable ``ECF_OWNER``. Unlike most generated
+variables, it is never overridden by a user variable of the same name: as for ``ECF_HOST``, ``ECF_PORT``,
+``ECF_TRYNO``, ``ECF_NAME`` and ``ECF_PASS``, the generated value is used when ``%ECF_OWNER%`` is
+substituted in a job command or a script. A suite may therefore use ``%ECF_OWNER%`` in ``ECF_JOB_CMD``,
+``ECF_KILL_CMD`` and ``ECF_STATUS_CMD`` to select what belongs to the user responsible for the job, for
+example a submission configuration kept in the home directory of that user, and no definition can point it
+elsewhere. A server can go further and run every job as its owner; see
+:ref:`running_jobs_as_their_owner`.
+
+The owner is part of the state of the task: it is kept in the check point file, shown by ``--get_state`` as
+the token ``owner:<user>`` on the task line, and available to the Python API through ``Task.get_owner()``
+and ``Alias.get_owner()``. It is not part of the suite definition. The value is the user name as the server
+authenticated it; over a plain TCP connection this is the name declared by the client.
