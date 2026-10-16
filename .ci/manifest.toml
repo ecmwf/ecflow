@@ -21,7 +21,7 @@ compiler-inputs = []
 
 [[deps]]
 repo = "ecmwf/stack-dependencies"
-package = "stack-deps"
+package = "pybind11"
 ref = "master"
 compiler-inputs = ["cxx-compiler"]
 
