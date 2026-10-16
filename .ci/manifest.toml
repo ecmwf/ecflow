@@ -92,7 +92,7 @@ python-root = "/usr/local/apps/python3/3.11.8-01"
 tests = true
 
 [[matrix.build-hpc.include]]
-cxx-compiler = "icpx"
+cxx-compiler = "icpx-2025.3.1"
 platform = "hpc-atos-intel"
 modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.3.1", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
 c-compiler-binary = "icx"
