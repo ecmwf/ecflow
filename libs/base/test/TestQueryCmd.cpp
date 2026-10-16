@@ -154,6 +154,51 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_QueryCmd)
 
+BOOST_AUTO_TEST_SUITE(T_Owner)
+
+//
+// Scope: --query variable on ECF_OWNER
+//
+
+BOOST_AUTO_TEST_CASE(test_query_variable_returns_the_generated_owner) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: without a user variable of that name, the query returns the generated ECF_OWNER.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->isTask()->set_owner("xyza");
+    std::string res = invoke_query(defs, "variable", "/suite/f/t1", "ECF_OWNER");
+    BOOST_CHECK_MESSAGE(res == "xyza", "expected the generated owner but found: " << res);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_variable_returns_a_user_variable_named_ecf_owner) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: a user variable named ECF_OWNER set on the task itself is returned by the query, as any
+    //       user variable of a node shadows its generated variables in a lookup; one set on an ancestor
+    //       is not, since the generated variable of the task is found first. Only job generation
+    //       ignores both.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->isTask()->set_owner("xyza");
+
+    defs.findAbsNode("/suite")->addVariable(Variable("ECF_OWNER", "xyzb"));
+    std::string res = invoke_query(defs, "variable", "/suite/f/t1", "ECF_OWNER");
+    BOOST_CHECK_MESSAGE(res == "xyza", "expected the generated owner but found: " << res);
+
+    defs.findAbsNode("/suite/f/t1")->addVariable(Variable("ECF_OWNER", "xyzc"));
+    res = invoke_query(defs, "variable", "/suite/f/t1", "ECF_OWNER");
+    BOOST_CHECK_MESSAGE(res == "xyzc", "expected the user variable of the task but found: " << res);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE(T_State)
 
 //

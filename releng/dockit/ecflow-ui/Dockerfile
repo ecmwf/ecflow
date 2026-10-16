@@ -24,8 +24,10 @@ RUN for package in libegl-mesa0 libglx-mesa0 libgbm1; do \
 # executables: qt6-qpa-plugins provides the platform plugins (including xcb, used to display over X11), and
 # qt6-svg-plugins the SVG icons. Without a font, Qt shows no text. procps provides pkill, which the ecflow_ui
 # launcher script runs on exit. proxychains4 lets ecFlowUI reach the servers through a SOCKS proxy (ecflow_ui -pc4).
+# ca-certificates provides the trust store with which ecFlowUI verifies an HTTPS server.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        ca-certificates \
         fonts-dejavu-core \
         procps \
         proxychains4 \

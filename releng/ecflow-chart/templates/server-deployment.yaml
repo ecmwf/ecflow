@@ -145,11 +145,23 @@ spec:
               value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check
             - name: ECF_CHECKOLD
               value: /state/ecflow-server.{{ .Values.server.port }}.ecf.check.b
+            # The accounts the server may spawn jobs as, created at start under their uid.
+            - name: ECFLOW_USERS
+              value: {{ include "ecflow-chart.homeUsers" . | quote }}
+            {{- if .Values.server.spawnAsOwner }}
+            - name: ECFLOW_SPAWN_AS_OWNER
+              value: "true"
+            {{- end }}
           ports:
             - name: ecflow
               containerPort: {{ .Values.server.port }}
-          # Ready once the server answers a ping, sent as the server's own account.
+          # Ready once the server answers: a ping sent as the server's own account, or, when a
+          # server-level ECF_PERMISSIONS would refuse that account, an accepted connection.
           readinessProbe:
+            {{- if eq (include "ecflow-chart.readinessMode" .) "tcp" }}
+            tcpSocket:
+              port: ecflow
+            {{- else }}
             exec:
               command:
                 - /bin/sh
@@ -157,6 +169,7 @@ spec:
                 - HOME=/home/ecflow ECF_CONNECT_TIMEOUT=5 setpriv --reuid=ecflow
                   --regid=ecflow --init-groups ecflow_client --http --host localhost
                   --port {{ .Values.server.port }} --ping
+            {{- end }}
             initialDelaySeconds: {{ .Values.server.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.server.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.server.readinessProbe.timeoutSeconds }}

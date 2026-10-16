@@ -29,3 +29,4 @@ password-based authentication.
     ecflow_white_list_file
     black_list_file
     open_ssl
+    running_jobs_as_their_owner

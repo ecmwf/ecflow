@@ -32,6 +32,7 @@
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AuthorisationContext.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
@@ -39,7 +40,7 @@
 #include "ecflow/node/InLimitMgr.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
-#include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/permissions/Permissions.hpp"
 
 namespace ecf {
 class Simulator;
@@ -137,11 +138,30 @@ public:
 
     /// Kill the task if it is active. For NodeContainers do it hierarchically
     /// will throw std::runtime_error for any errors
-    virtual void kill(const std::string& zombie_pid = "") = 0;
+    ///
+    /// @brief Spawns the kill command of the jobs below this node.
+    ///
+    /// @param[in] zombie_pid Process id of a zombie to kill instead of the current job; empty otherwise.
+    /// @param[in] requester  Login name of the user that requested the kill; empty for an automatic
+    ///                       kill, in which case the owner of each task is used when spawning as a user.
+    ///
+    virtual void kill(const std::string& zombie_pid, const std::string& requester) = 0;
+
+    /// @copydoc kill(const std::string&, const std::string&)
+    void kill(const std::string& zombie_pid = "") { kill(zombie_pid, ""); }
 
     /// Show status of a node. For NodeContainers do it hierarchically
     /// will throw std::runtime_error for any errors
-    virtual void status() = 0;
+    ///
+    /// @brief Spawns the status command of the jobs below this node.
+    ///
+    /// @param[in] requester Login name of the user that requested the status; empty for an automatic
+    ///                      request, in which case the owner of each task is used when spawning as a user.
+    ///
+    virtual void status(const std::string& requester) = 0;
+
+    /// @copydoc status(const std::string&)
+    void status() { status(""); }
 
     /// Order the node using the second parameter
     virtual void order(Node* /*immediateChild*/, NOrder::Order) {}
@@ -202,7 +222,18 @@ public:
         const bool reset_relative_duration_{true};
         const bool log_state_changes_{true};
     };
-    virtual void requeue(Requeue_args&);
+    virtual void requeue(Requeue_args& args);
+    virtual void requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation);
+
+    ///
+    /// @brief Records the user on whose behalf the jobs below this node are submitted.
+    ///
+    /// A container forwards the call to each of its children; a submittable records the user as its
+    /// owner, see Submittable::set_owner().
+    ///
+    /// @param[in] user Login name of the user, as authenticated by the server; empty when unknown.
+    ///
+    virtual void set_owner(const std::string& user) = 0;
 
     // force queued allows a job to re-run preserving job output.
     // However, other nodes may reference this node's events/meters/late in trigger expression,
@@ -322,6 +353,12 @@ public:
     /// 	** meaningless, since it will always be the computed state.
     void set_state(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
     virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s, force); }
+    virtual void set_state_hierarchically(NState::State s, const ecf::AuthorisationContext& ctx, bool force) {
+        if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+            return;
+        }
+        set_state(s, force);
+    }
 
     /// Set state only, has no side effects
     void setStateOnly(NState::State s,
@@ -329,6 +366,12 @@ public:
                       const std::string& additional_info_to_log = "",
                       bool log_state_changes                    = true);
     virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s, force); }
+    virtual void setStateOnlyHierarchically(NState::State s, const ecf::AuthorisationContext& ctx, bool force = false) {
+        if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+            return;
+        }
+        setStateOnly(s, force);
+    }
 
     /// This returns the time of state change: (relative to real time when the suite calendar was begun)
     /// The returned time is *real time/computer UTC time* and *not* suite real time.
@@ -658,7 +701,7 @@ public:
 
     // mementos functions:
     /// Collect all the state changes, so that only small subset is returned to client
-    virtual void collateChanges(DefsDelta&) const = 0;
+    virtual void collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const = 0;
     void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
     void set_memento(const NodeStateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);

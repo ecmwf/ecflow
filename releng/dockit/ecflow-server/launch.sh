@@ -60,8 +60,36 @@ if [ "$(id -u)" = "0" ]; then
         fi
     done
 
-    export HOME=/home/ecflow USER=ecflow LOGNAME=ecflow
-    exec setpriv --reuid=ecflow --regid=ecflow --init-groups "$0" "$@"
+    # The accounts of the users whose jobs the server may run (ECFLOW_USERS, a space-separated list of
+    # `name` or `name:uid` entries): the server resolves the owner of a task to an account of the host
+    # before spawning its job, so every owner must exist here, under the uid that owns the user's files on
+    # the shared volumes. Each account has the group of 'ecflow' (the workspace group), the home
+    # /home/<name>, which the deployment provides, and /bin/sh, which the jobs run with.
+    for entry in ${ECFLOW_USERS:-}; do
+        user=${entry%%:*}
+        uid=${entry#"${user}"}
+        uid=${uid#:}
+        if id "${user}" >/dev/null 2>&1; then
+            continue
+        fi
+        useradd --no-create-home --home-dir "/home/${user}" --shell /bin/sh --gid "$(id -g ecflow)" \
+            ${uid:+--uid "${uid}"} "${user}"
+        echo "launch.sh: created account '${user}' (uid $(id -u "${user}"), gid $(id -g ecflow))"
+    done
+
+    # The server runs as 'ecflow', unless it has to spawn each job as the owner of its task
+    # (spawn_as_owner in server.cfg), which only root can do: ECFLOW_SPAWN_AS_OWNER=true then keeps the
+    # server as root, and the server refuses to start if the setting and the account disagree.
+    case "${ECFLOW_SPAWN_AS_OWNER:-false}" in
+        true|1|yes)
+            echo "launch.sh: the server runs as root, to spawn each job as its owner"
+            export HOME=/root USER=root LOGNAME=root
+            ;;
+        *)
+            export HOME=/home/ecflow USER=ecflow LOGNAME=ecflow
+            exec setpriv --reuid=ecflow --regid=ecflow --init-groups "$0" "$@"
+            ;;
+    esac
 fi
 
 # Source Python virtual environment

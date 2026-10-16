@@ -209,6 +209,7 @@ def test_various_repeat_types():
     task8.add_repeat(RepeatDay())
     assert task8.get_try_no() == "0"
     assert task8.get_int_try_no() == 0
+    assert task8.get_owner() == ""
     assert task8.get_defs() is not None
 
 

@@ -357,10 +357,19 @@ void Node::begin() {
 }
 
 void Node::requeue(Requeue_args& args) {
+    requeue(args, ecf::UnrestrictedAuthorisationContext{});
+}
+
+void Node::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
     // Note: we do not reset verify attributes as they record state stat's
+
+    if (!authorisation.allows(this->absNodePath(), Allowed::EXECUTE)) {
+        // User not authorised to requeue this node
+        return;
+    }
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
@@ -1385,6 +1394,9 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                 generated_variable = true;
             }
             else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos) {
+                generated_variable = true;
+            }
+            else if (percentVar.find(ecf::environment::ECF_OWNER) != std::string::npos) {
                 generated_variable = true;
             }
         }

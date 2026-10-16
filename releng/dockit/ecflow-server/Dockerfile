@@ -3,9 +3,13 @@
 
 FROM debian:13.7-slim
 
+# ca-certificates provides the trust store with which the jobs' ecflow_client verifies an HTTPS server
+# openssh-client provides ssh and scp, which troika runs to submit jobs to a remote site (ECF_JOB_CMD)
 # procps provides ps (and pgrep), which troika runs to monitor jobs on a direct site (ECF_STATUS_CMD)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        openssh-client \
         procps \
         python3 \
         python3-venv \

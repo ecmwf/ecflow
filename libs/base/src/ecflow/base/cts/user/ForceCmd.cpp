@@ -147,7 +147,8 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
             }
 
             if (recursive_) {
-                node->set_state_hierarchically(new_state, true /* force */);
+                ServiceAuthorisationContext ctx{this->identity(), *defs, as->authorisation()};
+                node->set_state_hierarchically(new_state, ctx, true /* force */);
             }
             else {
                 node->set_state(new_state, true /* force */);
@@ -158,6 +159,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
             // reset events,meters and late flag ECFLOW-1617
             if (new_state == NState::QUEUED) {
                 node->reset_late_event_meters();
+                node->set_owner(identity().username().value());
             }
         }
         else {

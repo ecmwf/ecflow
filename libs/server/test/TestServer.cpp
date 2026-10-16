@@ -3,11 +3,15 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <unistd.h>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
+#include <sys/wait.h>
 
 #include "ecflow/base/ServerProtocol.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -17,6 +21,9 @@
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
+
+using ecf::test::scaffold::NamedTestFile;
+using ecf::test::scaffold::WithTestFile;
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 
@@ -146,6 +153,38 @@ BOOST_AUTO_TEST_CASE(test_server) {
 
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_refuses_to_start_when_spawn_as_owner_needs_root) {
+    ECF_NAME_THIS_TEST();
+
+    if (geteuid() == 0) {
+        std::cout << "  Skipped: the switch is honoured as root, the server would start\n";
+        return;
+    }
+
+    // A directory with the default environment file and a server.cfg that enables the switch
+    std::string server_exe = File::find_ecf_server_path();
+    BOOST_REQUIRE_MESSAGE(!server_exe.empty(), "The ecflow_server executable must be available");
+    const std::string dir = "refuse_dir";
+    fs::create_directories(dir);
+    std::string env_content;
+    File::open(File::test_data("Server/server_environment.cfg", "Server"), env_content);
+    WithTestFile env(NamedTestFile{dir + "/server_environment.cfg"}, env_content);
+    WithTestFile config(NamedTestFile{dir + "/server.cfg"}, "{\"spawn_as_owner\": true}");
+
+    // The server exits before binding any port, hence no free port is needed
+    std::string output  = dir + "/output.txt";
+    std::string command = "cd " + dir + " && " + server_exe + " --port 3199 > output.txt 2>&1";
+    int status          = std::system(command.c_str());
+    BOOST_CHECK_MESSAGE(status != 0 && WIFEXITED(status) && WEXITSTATUS(status) == 1,
+                        "Expected the server to exit with status 1, got " << status);
+    std::string out;
+    File::open(output, out);
+    BOOST_CHECK_MESSAGE(out.find("spawn_as_owner") != std::string::npos && out.find("root") != std::string::npos,
+                        "Expected the refusal to name the flag and root:\n"
+                            << out);
+    fs::remove_all(dir);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

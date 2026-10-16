@@ -40,12 +40,15 @@ set(test_srcs
   test/TestNode_main.cpp # test entry point
   test/TestOperations.cpp
   test/TestOrder.cpp
+  test/TestPermissions.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp
   test/TestReplace.cpp
   test/TestSetState.cpp
   test/TestSpecificIssues.cpp
+  test/TestSpawnAsOwner.cpp
+  test/TestSpawnIdentity.cpp
   test/TestSystem.cpp
   test/TestSystemDescriptors.cpp
   test/TestTaskScriptGenerator.cpp

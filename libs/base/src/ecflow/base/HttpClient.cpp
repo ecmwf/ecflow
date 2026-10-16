@@ -72,10 +72,12 @@ HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
     client_.set_read_timeout(std::chrono::seconds{timeout});
     client_.set_write_timeout(std::chrono::seconds{timeout});
 
-    // Disable cert verification
     if (scheme_ == "https") {
 #ifdef ECF_OPENSSL
-        client_.enable_server_certificate_verification(false);
+        // The server certificate is verified against the default trust store of OpenSSL (overridable
+        // with SSL_CERT_FILE or SSL_CERT_DIR), and must name the host; otherwise the request fails
+        // before any credentials are sent.
+        client_.enable_server_certificate_verification(true);
 #else
         // Without SSL support, the underlying HTTP library is unable to establish an HTTPS connection,
         // and reporting this immediately is preferable to attempting the request and failing obscurely.

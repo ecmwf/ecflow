@@ -17,15 +17,16 @@ set(test_srcs
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
   test/TestHelpCatalog.cpp
+  test/TestHttpsCertificateVerification.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
-  test/TestPermissions.cpp
   test/TestProgramOptions.cpp
   test/TestQueryCmd.cpp
   test/TestQueueCmd.cpp
   test/TestRequest.cpp
+  test/TestOwnerCmd.cpp
   test/TestRequeueNodeCmd.cpp
   test/TestResolveDependencies.cpp
   test/TestSpecificIssues.cpp
