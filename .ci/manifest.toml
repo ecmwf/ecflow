@@ -13,30 +13,15 @@ repo = "ecmwf/ecflow"
 visibility = "public"
 compiler-inputs = ["cxx-compiler"]
 
-[[deps]]
-repo = "ecmwf/ecbuild"
-package = "ecbuild"
-ref = "develop"
-compiler-inputs = []
-unless = { execution = "hpc-atos" }
-
-[[deps]]
-repo = "ecmwf/stack-dependencies"
-package = "pybind11"
-ref = "master"
-compiler-inputs = ["cxx-compiler"]
-unless = { execution = "hpc-atos" }
-
-# On HPC each leg's `platform` names its toolchain configuration (atos-<configuration>),
-# which upstreams do not publish; `upstream-platform` and `upstream-cxx-compiler` select
-# the upstream build to use instead.
+# Each leg names the upstream build of its deps through `upstream-platform` and
+# `upstream-cxx-compiler`: an HPC leg's `platform` is its toolchain configuration
+# (atos-<configuration>), and some runner platforms have no upstream build.
 [[deps]]
 repo = "ecmwf/ecbuild"
 package = "ecbuild"
 ref = "develop"
 compiler-inputs = []
 platform-input = "upstream-platform"
-when = { execution = "hpc-atos" }
 
 [[deps]]
 repo = "ecmwf/stack-dependencies"
@@ -44,7 +29,6 @@ package = "pybind11"
 ref = "master"
 compiler-inputs = ["upstream-cxx-compiler"]
 platform-input = "upstream-platform"
-when = { execution = "hpc-atos" }
 
 [matrix.build.defaults]
 job-script = "./.ci/runner/build.sh.j2"
@@ -53,37 +37,119 @@ runs-on = "arc-runner-very-large"
 ctest-args = "-L nightly -j 8"
 
 [[matrix.build.include]]
+platform = "ubuntu-22.04"
+cxx-compiler = "g++-11"
+c-compiler = "gcc-11"
+container = "eccr.ecmwf.int/public-ci-images/ubuntu22.04-gcc11-gfortran11-boost-qt6:latest"
+upstream-platform = "ubuntu-24.04"
+upstream-cxx-compiler = "g++-13"
+
+[[matrix.build.include]]
+platform = "ubuntu-24.04"
 cxx-compiler = "g++-13"
 c-compiler = "gcc-13"
 container = "eccr.ecmwf.int/public-ci-images/ubuntu24.04-gcc13-gfortran13-boost-qt6:latest"
-platform = "ubuntu-24.04"
+upstream-platform = "ubuntu-24.04"
+upstream-cxx-compiler = "g++-13"
 
 [[matrix.build.include]]
+platform = "ubuntu-26.04"
+cxx-compiler = "g++-15"
+c-compiler = "gcc-15"
+container = "eccr.ecmwf.int/public-ci-images/ubuntu26.04-gcc15-gfortran15-boost-qt6:latest"
+upstream-platform = "ubuntu-26.04"
+upstream-cxx-compiler = "g++-15"
+
+[[matrix.build.include]]
+platform = "rocky-8"
 cxx-compiler = "g++-8"
 c-compiler = "gcc-8"
 container = "eccr.ecmwf.int/public-ci-images/rocky8-gcc8-gfortran8-boost-qt5:latest"
-platform = "rocky-8"
+upstream-platform = "rocky-8"
+upstream-cxx-compiler = "g++-8"
 
 [[matrix.build.include]]
+platform = "rocky-9"
+cxx-compiler = "g++-11"
+c-compiler = "gcc-11"
+container = "eccr.ecmwf.int/public-ci-images/rocky9-gcc11-gfortran11-boost-qt5:latest"
+upstream-platform = "rocky-9"
+upstream-cxx-compiler = "g++-11"
+
+[[matrix.build.include]]
+platform = "rocky-10"
+cxx-compiler = "g++-14"
+c-compiler = "gcc-14"
+container = "eccr.ecmwf.int/public-ci-images/rocky10-gcc14-gfortran14-boost-qt6:latest"
+upstream-platform = "rocky-10"
+upstream-cxx-compiler = "g++-14"
+
+[[matrix.build.include]]
+platform = "debian-11"
 cxx-compiler = "g++-10"
 c-compiler = "gcc-10"
 container = "eccr.ecmwf.int/public-ci-images/debian11-gcc10-gfortran10-boost-qt5:latest"
-platform = "debian-11"
+upstream-platform = "debian-11"
+upstream-cxx-compiler = "g++-10"
+
+[[matrix.build.include]]
+platform = "debian-12"
+cxx-compiler = "g++-12"
+c-compiler = "gcc-12"
+container = "eccr.ecmwf.int/public-ci-images/debian12-gcc12-gfortran12-boost-qt6:latest"
+upstream-platform = "debian-12"
+upstream-cxx-compiler = "g++-12"
+
+[[matrix.build.include]]
+platform = "debian-13"
+cxx-compiler = "g++-14"
+c-compiler = "gcc-14"
+container = "eccr.ecmwf.int/public-ci-images/debian13-gcc14-gfortran14-boost-qt6:latest"
+upstream-platform = "debian-13"
+upstream-cxx-compiler = "g++-14"
+
+[[matrix.build.include]]
+platform = "fedora-43"
+cxx-compiler = "g++-15"
+c-compiler = "gcc-15"
+container = "eccr.ecmwf.int/public-ci-images/fedora43-gcc15-gfortran15-boost-qt6:latest"
+upstream-platform = "ubuntu-26.04"
+upstream-cxx-compiler = "g++-15"
+
+[[matrix.build.include]]
+platform = "fedora-44"
+cxx-compiler = "g++-16"
+c-compiler = "gcc-16"
+container = "eccr.ecmwf.int/public-ci-images/fedora44-gcc16-gfortran16-boost-qt6:latest"
+upstream-platform = "ubuntu-26.04"
+upstream-cxx-compiler = "g++-15"
+
+[[matrix.build.include]]
+platform = "rolling-arch"
+cxx-compiler = "g++"
+c-compiler = "gcc"
+container = "eccr.ecmwf.int/public-ci-images/rolling-arch-gcc-gfortran-boost-qt6:latest"
+upstream-platform = "ubuntu-26.04"
+upstream-cxx-compiler = "g++-15"
 
 # Off: the self-hosted macOS builders may trust the compromised eMudhra CAs (Oct 2026).
 # [[matrix.build.include]]
+# platform = "macos-13-arm"
 # cxx-compiler = "clang++"
 # c-compiler = "clang"
 # runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
-# platform = "macos-13-arm"
 # boost-root = "/opt/homebrew"
+# upstream-platform = "macos-13-arm"
+# upstream-cxx-compiler = "clang++"
 
 # [[matrix.build.include]]
+# platform = "macos-13-x86"
 # cxx-compiler = "clang++"
 # c-compiler = "clang"
 # runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
-# platform = "macos-13-x86"
 # boost-root = "/usr/local"
+# upstream-platform = "macos-13-x86"
+# upstream-cxx-compiler = "clang++"
 
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]
