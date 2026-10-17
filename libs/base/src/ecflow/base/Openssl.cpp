@@ -127,6 +127,7 @@ std::string Openssl::selected_crt() const {
 bool Openssl::try_enable_from_option(std::string host, const std::string& port, Option option) {
     requested_ = std::move(option);
     selected_.reset();
+    reset_context();
     if (!requested_.enabled()) {
         return false;
     }

@@ -549,6 +549,36 @@ BOOST_AUTO_TEST_CASE(does_not_fall_back_when_specific_certificate_cannot_be_load
     BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), somehost + '.' + someport + ".crt");
 }
 
+BOOST_AUTO_TEST_CASE(initializes_client_context_again_after_a_new_selection) {
+    ECF_NAME_THIS_TEST();
+    auto directory = MakeDirectory{}.create();
+    auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).with("invalid shared").create();
+    auto specific  = MakeTestFile{}
+                        .with(SpecificFileLocation{somehost + '.' + someport + ".crt", directory})
+                        .with("invalid specific")
+                        .create();
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+
+    // Loading an invalid certificate throws, which shows whether initialization was attempted.
+    ecf::Openssl ssl;
+    ssl.enable_prefer_specific(somehost, someport);
+    BOOST_CHECK_THROW(ssl.init_for_client(), boost::system::system_error);
+    // Within one selection, initialization is attempted only once.
+    BOOST_CHECK_NO_THROW(ssl.init_for_client());
+
+    // A new selection discards the previous context and is initialized again.
+    ssl.enable_prefer_shared(somehost, someport);
+    BOOST_CHECK_EQUAL(ssl.selected_crt(), "server.crt");
+    BOOST_CHECK_THROW(ssl.init_for_client(), boost::system::system_error);
+
+    // Disabling and enabling again also starts from a fresh context.
+    ssl.disable();
+    BOOST_CHECK_NO_THROW(ssl.init_for_client()); // SSL disabled: nothing to initialize
+    BOOST_CHECK(ssl.try_enable_from_option(somehost, someport, ecf::Openssl::Option::make_option_specific()));
+    BOOST_CHECK_EQUAL(ssl.selected_crt(), somehost + '.' + someport + ".crt");
+    BOOST_CHECK_THROW(ssl.init_for_client(), boost::system::system_error);
+}
+
 BOOST_AUTO_TEST_CASE(selects_peer_certificate_following_the_server_selection) {
     ECF_NAME_THIS_TEST();
     const std::string peer_host = "peerhost";

@@ -298,13 +298,14 @@ public:
     void enable_based_on_envvar(std::string host, const std::string& port);
 
     ///
-    /// @brief Disables SSL and clears the selected certificate.
+    /// @brief Disables SSL and clears the selected certificate and its SSL context.
     ///
     /// The ECF_SSL environment variable is preserved. Never throws.
     ///
     void disable() {
         requested_ = Option{};
         selected_.reset();
+        reset_context();
     }
 
     ///
@@ -358,7 +359,8 @@ public:
     /// Loading failures do not trigger certificate fallback.
     ///
     /// Does nothing if SSL is disabled or initialization was already attempted.
-    /// Initialization is attempted at most once per instance, even if it fails.
+    /// Initialization is attempted at most once per certificate selection, even if it fails;
+    /// selecting a certificate again, or disabling SSL, discards the context.
     ///
     /// @throws boost::system::system_error if context creation or loading the selected certificate fails.
     ///
@@ -464,7 +466,17 @@ private:
     std::unique_ptr<boost::asio::ssl::context> ssl_context_;
 
     ///
-    /// Records whether client context initialization has been attempted.
+    /// @brief Discards the SSL context, so that the next initialization uses the current selection.
+    ///
+    /// Never throws.
+    ///
+    void reset_context() {
+        ssl_context_.reset();
+        init_for_client_ = false;
+    }
+
+    ///
+    /// Records whether client context initialization has been attempted for the current selection.
     ///
     bool init_for_client_{false};
 };
