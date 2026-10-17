@@ -247,6 +247,14 @@ public:
     const std::optional<Certificate>& certificate() const { return selected_; }
 
     ///
+    /// @brief Returns the preferred certificate that was missing when the fallback certificate was selected.
+    ///
+    /// @return The absolute path of the certificate tried first, when the other certificate had to be selected;
+    /// otherwise no path.
+    ///
+    const std::optional<std::filesystem::path>& fallback_from() const { return fallback_from_; }
+
+    ///
     /// @brief Checks whether SSL is enabled.
     ///
     /// @return True if a certificate has been selected; otherwise, false.
@@ -305,6 +313,7 @@ public:
     void disable() {
         requested_ = Option{};
         selected_.reset();
+        fallback_from_.reset();
         reset_context();
     }
 
@@ -459,6 +468,11 @@ private:
     /// Selected certificate, absent until a certificate has been found.
     ///
     std::optional<Certificate> selected_;
+
+    ///
+    /// Certificate tried first, set only when the selection fell back to the other certificate.
+    ///
+    std::optional<std::filesystem::path> fallback_from_;
 
     ///
     /// SSL context, created on demand when SSL is enabled.

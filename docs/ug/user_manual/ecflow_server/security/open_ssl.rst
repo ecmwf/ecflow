@@ -74,6 +74,10 @@ not a certificate path.
 If the selected certificate cannot be loaded or fails verification, the
 client reports an error without trying another certificate.
 
+At start-up, ``ecflow_server`` records the selected certificate in its log.
+When the certificate tried first is absent and the other one is used, the
+log also contains a warning naming the missing certificate.
+
 The files expected in the selected directory depend on the certificate
 that is selected:
 

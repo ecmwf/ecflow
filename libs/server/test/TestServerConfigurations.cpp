@@ -15,6 +15,7 @@
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
@@ -201,6 +202,66 @@ BOOST_AUTO_TEST_CASE(does_not_export_ecf_ssl_when_ssl_is_disabled) {
 
     BOOST_CHECK(!env.ssl());
     BOOST_CHECK_EQUAL(exported_ecf_ssl(env), "<not exported>");
+}
+
+BOOST_AUTO_TEST_CASE(logs_selected_certificate_and_warns_on_fallback_at_start_up) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string specific_name = somehost + '.' + someport + ".crt";
+
+    // Returns the log line containing the given text, or an empty string when there is none
+    auto line_with = [](const std::string& log, const std::string& text) {
+        std::istringstream lines(log);
+        for (std::string line; std::getline(lines, line);) {
+            if (line.find(text) != std::string::npos) {
+                return line;
+            }
+        }
+        return std::string{};
+    };
+
+    auto check_log = [&](const std::string& ecf_ssl, bool has_shared, bool has_specific) {
+        auto directory   = MakeDirectory{}.create();
+        auto shared_name = has_shared ? std::string("server.crt") : std::string("unused-shared");
+        auto shared      = MakeTestFile{}.with(SpecificFileLocation{shared_name, directory}).create();
+        auto other_name  = has_specific ? specific_name : std::string("unused-specific");
+        auto specific    = MakeTestFile{}.with(SpecificFileLocation{other_name, directory}).create();
+        WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+        WithTestEnvironmentVariable ecf_log("ECF_LOG", (directory.path() / "server.log").string());
+        WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
+        WithTestEnvironmentVariable ssl_env("ECF_SSL", ecf_ssl);
+
+        MockServerInvoker server("ecflow_server");
+        BOOST_REQUIRE(server.environment().ssl());
+        const auto log = ecf::Log::instance()->contents(-100);
+
+        const bool shared_first    = ecf_ssl.empty() || ecf_ssl == "1";
+        const bool shared_selected = has_shared && (shared_first || !has_specific);
+        const std::string kind     = shared_selected ? "shared" : "server-specific";
+        const auto selected        = (directory.path() / (shared_selected ? "server.crt" : specific_name)).string();
+        const auto info            = line_with(log, "SSL certificate selected: '" + selected + "' (" + kind + ")");
+        BOOST_CHECK_MESSAGE(info.rfind("MSG:", 0) == 0, "Expected a MSG record of the selection in:\n" << log);
+
+        const auto missing = (directory.path() / (shared_first ? "server.crt" : specific_name)).string();
+        const auto warning = line_with(log, "not found; using the");
+        if (shared_selected != shared_first) {
+            const auto expected = "SSL certificate '" + missing + "' not found; using the " + kind + " certificate";
+            BOOST_CHECK_MESSAGE(warning.rfind("WAR:", 0) == 0, "Expected a WAR record of the fallback in:\n" << log);
+            BOOST_CHECK_MESSAGE(warning.find(expected) != std::string::npos, "Expected '" << expected << "'");
+        }
+        else {
+            BOOST_CHECK_MESSAGE(warning.empty(), "Expected no fallback warning in:\n" << log);
+        }
+    };
+
+    // Specific-first: falls back to the shared certificate only when the specific one is absent
+    check_log(somehost + '.' + someport, true, false);
+    check_log(somehost + '.' + someport, true, true);
+    check_log("X", false, true);
+    // Shared-first: falls back to the specific certificate only when the shared one is absent
+    check_log("1", false, true);
+    check_log("1", true, true);
+    check_log("", true, false);
 }
 
 BOOST_AUTO_TEST_CASE(

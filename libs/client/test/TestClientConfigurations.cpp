@@ -134,6 +134,13 @@ BOOST_AUTO_TEST_CASE(requested_mode_and_selected_certificate_track_fallback) {
                                   shared_selected ? "server.crt"
                                   : has_specific  ? specific + ".crt"
                                                   : "");
+                // The certificate tried first is reported only when the other one had to be selected.
+                const bool fell_back = (has_shared || has_specific) && shared_selected != requested.shared();
+                BOOST_REQUIRE_EQUAL(ssl.fallback_from().has_value(), fell_back);
+                if (fell_back) {
+                    const auto first = requested.shared() ? std::string("server.crt") : specific + ".crt";
+                    BOOST_CHECK_EQUAL(ssl.fallback_from()->string(), (directory.path() / first).string());
+                }
                 std::ostringstream output;
                 output << ssl;
                 BOOST_CHECK_EQUAL(output.str(), expected);
@@ -142,6 +149,7 @@ BOOST_AUTO_TEST_CASE(requested_mode_and_selected_certificate_track_fallback) {
                 BOOST_CHECK(!ssl.enabled());
                 BOOST_CHECK(!ssl.requested().enabled());
                 BOOST_CHECK(!ssl.certificate().has_value());
+                BOOST_CHECK(!ssl.fallback_from().has_value());
                 BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
             }
         }

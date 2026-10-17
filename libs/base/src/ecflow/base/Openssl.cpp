@@ -127,6 +127,7 @@ std::string Openssl::selected_crt() const {
 bool Openssl::try_enable_from_option(std::string host, const std::string& port, Option option) {
     requested_ = std::move(option);
     selected_.reset();
+    fallback_from_.reset();
     reset_context();
     if (!requested_.enabled()) {
         return false;
@@ -143,7 +144,8 @@ bool Openssl::try_enable_from_option(std::string host, const std::string& port, 
         return true;
     }
     if (fs::exists(second.crt_file())) {
-        selected_ = second;
+        selected_      = second;
+        fallback_from_ = first.crt_file();
         return true;
     }
     return false;
