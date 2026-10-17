@@ -81,6 +81,7 @@ ssdtmp = "30G"
 job-script = "./.ci/hpc/build.sh.j2"
 
 [[matrix.build-hpc.include]]
+name = "atos-gcc8"
 cxx-compiler = "g++-8"
 platform = "hpc-atos-gnu"
 # gcc/old, not a version number: as of now gives you 8.5.0
@@ -93,6 +94,7 @@ python-root = "/usr/local/apps/python3/3.11.8-01"
 tests = true
 
 [[matrix.build-hpc.include]]
+name = "atos-intel2025_3"
 cxx-compiler = "icpx"
 platform = "hpc-atos-intel"
 modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.3.1", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
@@ -103,6 +105,7 @@ python-root = "/usr/local/apps/python3/3.13.13-01"
 tests = true
 
 [[matrix.build-hpc.include]]
+name = "atos-aocc4"
 cxx-compiler = "clang++"
 platform = "hpc-atos-aocc"
 modules = ["load prgenv/amd", "unload aocc", "load aocc/4.0.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
@@ -113,6 +116,7 @@ python-root = "/usr/local/apps/python3/3.10.10-01"
 tests = false
 
 [[matrix.build-hpc.include]]
+name = "atos-nvidia24_11"
 cxx-compiler = "nvc++"
 platform = "hpc-atos-nvidia"
 modules = ["load prgenv/nvidia", "unload nvidia", "load nvidia/24.11", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
