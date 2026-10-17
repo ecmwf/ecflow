@@ -80,11 +80,19 @@ public:
         [[nodiscard]] bool shared() const { return preference_ == Preference::SharedFirst; }
 
         ///
-        /// @brief Returns the requested lookup order.
+        /// @brief Describes the requested lookup order.
         ///
-        /// @return The requested preference, or Disabled when SSL was not requested.
+        /// @return The shared-first or specific-first strategy, or an empty string when SSL was not requested.
         ///
-        [[nodiscard]] Preference preference() const { return preference_; }
+        [[nodiscard]] const char* strategy() const;
+
+        ///
+        /// @brief Describes how SSL was requested and the resulting lookup order, for debug output.
+        ///
+        /// @param[in] via_option True when the `--ssl` command-line option was given.
+        /// @return The source of the request (`--ssl` and/or ECF_SSL, with its value) followed by the strategy.
+        ///
+        [[nodiscard]] std::string describe(bool via_option) const;
 
         ///
         /// @brief Returns the supplied ECF_SSL value without interpreting it as a file path.
@@ -397,11 +405,15 @@ private:
     void check_server_certificates() const;
 
     ///
-    /// @brief Loads the selected certificate into an SSL context for peer verification.
+    /// @brief Enables SSL using an explicit option, reporting a missing certificate as an error.
     ///
-    /// @param[in,out] context SSL context to configure.
+    /// @param[in] host Server hostname; localhost is resolved to the local hostname.
+    /// @param[in] port Server port used to select the certificate.
+    /// @param[in] option Requested certificate preference; must be enabled.
+    /// @throws std::runtime_error if neither certificate file exists; SSL is left disabled.
+    /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
     ///
-    void load_verify_file(boost::asio::ssl::context& context);
+    void enable_or_throw(std::string host, const std::string& port, const Option& option);
 
     ///
     /// @brief Returns the configured certificate directory.

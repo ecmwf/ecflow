@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE(parses_ssl_options_without_conflating_unset_and_empty) {
     ECF_NAME_THIS_TEST();
     using Option = ecf::Openssl::Option;
     BOOST_CHECK(!Option{}.enabled());
+    BOOST_CHECK_EQUAL(std::string(Option{}.strategy()), "");
     BOOST_CHECK(Option::make_option_shared().enabled());
     BOOST_CHECK(Option::make_option_shared().shared());
     BOOST_CHECK(!Option::make_option_specific().shared());

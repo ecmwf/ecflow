@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <iostream>
+#include <sstream>
+
+#include <boost/io/ios_state.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/cts/user/CtsCmd.hpp"
@@ -199,6 +203,49 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
+}
+
+BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_strategy_and_selected_certificate_in_debug_output) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = MakeDirectory{}.create();
+    auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+    WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
+
+    const std::string shared_first   = "shared certificate first, server-specific certificate as fallback";
+    const std::string specific_first = "server-specific certificate first, shared certificate as fallback";
+    const std::string selected =
+        "  SSL certificate selected: '" + (directory.path() / "server.crt").string() + "' (shared)\n";
+
+    auto check_output = [&](bool flag, const std::string& source, const std::string& strategy) {
+        for (const bool debug : {false, true}) {
+            std::ostringstream output;
+            {
+                boost::io::ios_rdbuf_saver capture(std::cout, output.rdbuf());
+                MockServerInvoker server(std::string("ecflow_server") + (flag ? " --ssl" : "") + (debug ? " -d" : ""));
+                BOOST_CHECK_EQUAL(server.environment().openssl().selected_crt(), "server.crt");
+            }
+            if (debug) {
+                const auto expected = "  SSL enable: " + source + " (" + strategy + ")\n";
+                BOOST_CHECK_NE(output.str().find(expected), std::string::npos);
+                BOOST_CHECK_NE(output.str().find(selected), std::string::npos);
+                BOOST_CHECK_LT(output.str().find(expected), output.str().find(selected));
+            }
+            else {
+                BOOST_CHECK_EQUAL(output.str().find("SSL enable:"), std::string::npos);
+            }
+        }
+    };
+
+    check_output(true, "via --ssl, ECF_SSL unset", shared_first);
+    for (const auto* value : {"", "1", "X"}) {
+        WithTestEnvironmentVariable ssl_env("ECF_SSL", value);
+        const auto& strategy = std::string(value).empty() || std::string(value) == "1" ? shared_first : specific_first;
+        check_output(false, "via ECF_SSL='" + std::string(value) + "'", strategy);
+        check_output(true, "via --ssl with ECF_SSL='" + std::string(value) + "'", strategy);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

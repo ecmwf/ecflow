@@ -182,18 +182,9 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 #ifdef ECF_OPENSSL
     if (auto ecf_ssl = getenv("ECF_SSL"); vm.count("ssl") || ecf_ssl) {
         if (env->debug()) {
-            std::cout << "  SSL enable: ";
-            if (ecf_ssl) {
-                std::cout << (vm.count("ssl") ? "via --ssl with " : "via ") << "ECF_SSL='" << ecf_ssl << "'";
-            }
-            else {
-                std::cout << "via --ssl, ECF_SSL unset";
-            }
-            const bool shared_first = !ecf_ssl || !*ecf_ssl || std::string(ecf_ssl) == "1";
-            std::cout << " ("
-                      << (shared_first ? "shared certificate first, server-specific certificate as fallback"
-                                       : "server-specific certificate first, shared certificate as fallback")
-                      << ")\n";
+            const auto option =
+                ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_shared();
+            std::cout << "  SSL enable: " << option.describe(vm.count("ssl") > 0) << '\n';
         }
 
         if (ecf_ssl) {

@@ -21,23 +21,57 @@ namespace {
 /// @param[in] directory Configured certificate directory, which may be relative.
 /// @param[in] host Server hostname after localhost resolution.
 /// @param[in] port Server port used in the specific certificate filename.
-/// @param[in] shared_first True for shared-first selection; false for specific-first selection.
+/// @param[in] option Requested lookup order, which determines the order of the paths and the strategy.
 /// @return An error containing both absolute certificate paths and the requested strategy.
 /// @throws std::filesystem::filesystem_error if an absolute path cannot be determined.
 ///
 std::string missing_certificate_error(const std::string& directory,
                                       const std::string& host,
                                       const std::string& port,
-                                      bool shared_first) {
-    const auto shared    = fs::absolute(fs::path{directory} / "server.crt").lexically_normal().string();
-    const auto specific  = fs::absolute(fs::path{directory} / (host + "." + port + ".crt")).lexically_normal().string();
-    const auto* strategy = shared_first ? "shared certificate first, server-specific certificate as fallback"
-                                        : "server-specific certificate first, shared certificate as fallback";
-    return "Error: Unable to find certificate file: '" + (shared_first ? shared : specific) + "' or '" +
-           (shared_first ? specific : shared) + "' (using strategy: " + strategy + ")";
+                                      const Openssl::Option& option) {
+    const auto shared   = fs::absolute(fs::path{directory} / "server.crt").lexically_normal().string();
+    const auto specific = fs::absolute(fs::path{directory} / (host + "." + port + ".crt")).lexically_normal().string();
+    return "Error: Unable to find certificate file: '" + (option.shared() ? shared : specific) + "' or '" +
+           (option.shared() ? specific : shared) + "' (using strategy: " + option.strategy() + ")";
+}
+
+///
+/// @brief Resolves `localhost` to the local hostname, as used in server-specific certificate names.
+///
+/// @param[in] host Server hostname.
+/// @return The local hostname for `localhost`, otherwise @p host unchanged.
+///
+std::string resolve_host(std::string host) {
+    if (host == ecf::string_constants::localhost) {
+        return Host().name();
+    }
+    return host;
 }
 
 } // namespace
+
+const char* Openssl::Option::strategy() const {
+    switch (preference_) {
+        case Preference::SharedFirst:
+            return "shared certificate first, server-specific certificate as fallback";
+        case Preference::SpecificFirst:
+            return "server-specific certificate first, shared certificate as fallback";
+        case Preference::Disabled:
+            break;
+    }
+    return "";
+}
+
+std::string Openssl::Option::describe(bool via_option) const {
+    std::string source;
+    if (envvar_value_) {
+        source = std::string(via_option ? "via --ssl with " : "via ") + "ECF_SSL='" + *envvar_value_ + "'";
+    }
+    else {
+        source = "via --ssl, ECF_SSL unset";
+    }
+    return source + " (" + strategy() + ")";
+}
 
 Openssl::Option Openssl::Option::make_from_envvar_value(std::string value) {
     const auto preference =
@@ -96,9 +130,7 @@ bool Openssl::try_enable_from_option(std::string host, const std::string& port, 
     if (!requested_.enabled()) {
         return false;
     }
-    if (host == ecf::string_constants::localhost) {
-        host = Host().name();
-    }
+    host = resolve_host(std::move(host));
 
     const fs::path directory = fs::absolute(certificates_dir()).lexically_normal();
     Certificate shared       = Certificate::make_shared_certificate(directory);
@@ -116,36 +148,25 @@ bool Openssl::try_enable_from_option(std::string host, const std::string& port, 
     return false;
 }
 
-void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
-    if (host == ecf::string_constants::localhost) {
-        host = Host().name();
+void Openssl::enable_or_throw(std::string host, const std::string& port, const Option& option) {
+    host = resolve_host(std::move(host));
+    if (!try_enable_from_option(host, port, option)) {
+        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, option));
     }
+}
 
-    if (!try_enable_from_option(host, port, Option::make_option_shared())) {
-        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, true));
-    }
+void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
+    enable_or_throw(std::move(host), port, Option::make_option_shared());
 }
 
 void Openssl::enable_based_on_envvar(std::string host, const std::string& port) {
     if (auto option = Option::make_from_envvar(); option.enabled()) {
-        if (host == ecf::string_constants::localhost) {
-            host = Host().name();
-        }
-
-        if (!try_enable_from_option(host, port, option)) {
-            throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, option.shared()));
-        }
+        enable_or_throw(std::move(host), port, option);
     }
 }
 
 void Openssl::enable_prefer_specific(std::string host, const std::string& port) {
-    if (host == ecf::string_constants::localhost) {
-        host = Host().name();
-    }
-
-    if (!try_enable_from_option(host, port, Option::make_option_specific())) {
-        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, false));
-    }
+    enable_or_throw(std::move(host), port, Option::make_option_specific());
 }
 
 boost::asio::ssl::context& Openssl::context() {
