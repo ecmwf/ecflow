@@ -119,6 +119,20 @@ public:
     ///
     void enable_ssl_prefer_specific() { clientEnv_.enable_ssl_prefer_specific(); }
 
+    ///
+    /// @brief Enables SSL with the certificate selection used by ecFlowUI.
+    ///
+    /// ecFlowUI ignores ECF_SSL and always prefers the server-specific certificate, falling back to the
+    /// shared certificate when the specific one is absent.
+    ///
+    /// @return The description of the selected certificate, for the UI log.
+    /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
+    ///
+    std::string enable_ssl_for_ui() {
+        enable_ssl_prefer_specific();
+        return clientEnv_.openssl().info();
+    }
+
     void disable_ssl() { clientEnv_.disable_ssl(); } // override environment setting for ECF_SSL
     std::string get_certificate() const;
 #endif

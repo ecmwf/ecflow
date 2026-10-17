@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 
 #include <boost/io/ios_state.hpp>
@@ -354,6 +355,54 @@ BOOST_AUTO_TEST_CASE(prefers_specific_certificate_independently_of_ssl_environme
     for (const auto* value : {"", "1", "X"}) {
         WithTestEnvironmentVariable ssl_env("ECF_SSL", value);
         check_selection();
+    }
+}
+
+BOOST_AUTO_TEST_CASE(enables_ssl_for_ui_with_specific_first_selection_and_reports_it) {
+    ECF_NAME_THIS_TEST();
+    const auto specific_name = somehost + '.' + someport + ".crt";
+
+    for (const bool has_shared : {false, true}) {
+        for (const bool has_specific : {false, true}) {
+            auto directory = MakeDirectory{}.create();
+            WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+            auto shared_file = MakeTestFile{}
+                                   .with(SpecificFileLocation{has_shared ? "server.crt" : "unused-shared", directory})
+                                   .create();
+            auto specific_file =
+                MakeTestFile{}
+                    .with(SpecificFileLocation{has_specific ? specific_name : "unused-specific", directory})
+                    .create();
+
+            // ecFlowUI ignores ECF_SSL, whether unset or requesting either lookup order.
+            for (const auto* value : {static_cast<const char*>(nullptr), "", "1", "X"}) {
+                std::optional<WithTestEnvironmentVariable> ssl_env;
+                std::optional<WithoutTestEnvironmentVariable> no_ssl;
+                if (value) {
+                    ssl_env.emplace("ECF_SSL", value);
+                }
+                else {
+                    no_ssl.emplace("ECF_SSL");
+                }
+
+                ClientInvoker ui(true, somehost, someport);
+                if (!has_shared && !has_specific) {
+                    BOOST_CHECK_EXCEPTION(ui.enable_ssl_for_ui(), std::runtime_error, [](const std::runtime_error& e) {
+                        return std::string(e.what()).find("server-specific certificate first") != std::string::npos;
+                    });
+                    BOOST_CHECK(!ui.environment().ssl());
+                    continue;
+                }
+
+                const auto selected = has_specific ? specific_name : std::string("server.crt");
+                const auto kind     = has_specific ? "server-specific" : "shared";
+                BOOST_CHECK_EQUAL(ui.enable_ssl_for_ui(),
+                                  "SSL certificate selected: '" + (directory.path() / selected).string() + "' (" +
+                                      kind + ")");
+                BOOST_CHECK(ui.environment().protocol() == ecf::Protocol::Ssl);
+                BOOST_CHECK_EQUAL(ui.get_certificate(), selected);
+            }
+        }
     }
 }
 
