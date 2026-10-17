@@ -116,6 +116,27 @@ std::string Openssl::info() const {
     return "SSL certificate selected: '" + path + "' (" + (selected_->shared() ? "shared" : "server-specific") + ")";
 }
 
+std::string Openssl::request_summary() const {
+    if (!requested_.enabled()) {
+        return "disabled";
+    }
+
+    std::string value = "(unset)";
+    if (const auto& envvar = requested_.envvar_value()) {
+        value = envvar->empty() ? "''" : *envvar;
+    }
+    return value + " (" + requested_.strategy() + ")";
+}
+
+std::string Openssl::selection_summary() const {
+    if (!enabled()) {
+        return "";
+    }
+
+    return std::string("found ") + (selected_->shared() ? "shared" : "server-specific") +
+           " certificate: " + selected_->crt_file().filename().string();
+}
+
 std::string Openssl::selected_crt() const {
     if (enabled()) {
         return selected_->crt_file().filename().string();

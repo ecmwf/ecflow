@@ -413,6 +413,24 @@ public:
     std::string info() const;
 
     ///
+    /// @brief Describes the SSL request without revealing the certificate directory, for the server statistics.
+    ///
+    /// The value of ECF_SSL is shown as given, `''` when explicitly empty, or `(unset)` when SSL was requested
+    /// without ECF_SSL (for example with `--ssl`).
+    ///
+    /// @return `<ECF_SSL value> (<requested strategy>)`, or "disabled" when SSL was not requested.
+    ///
+    std::string request_summary() const;
+
+    ///
+    /// @brief Describes the selected certificate by its file name only, for the server statistics.
+    ///
+    /// @return `found shared certificate: server.crt` or `found server-specific certificate: <host>.<port>.crt`,
+    /// or an empty string when no certificate is selected.
+    ///
+    std::string selection_summary() const;
+
+    ///
     /// @brief Returns the selected certificate filename.
     ///
     /// @return `server.crt` for the shared certificate, `<host>.<port>.crt` for a server-specific

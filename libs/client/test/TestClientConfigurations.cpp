@@ -557,6 +557,44 @@ BOOST_AUTO_TEST_CASE(does_not_fall_back_when_specific_certificate_cannot_be_load
     BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), somehost + '.' + someport + ".crt");
 }
 
+BOOST_AUTO_TEST_CASE(summarises_request_and_selection_without_the_certificate_directory) {
+    ECF_NAME_THIS_TEST();
+    using Option                     = ecf::Openssl::Option;
+    const std::string shared_first   = "shared certificate first, server-specific certificate as fallback";
+    const std::string specific_first = "server-specific certificate first, shared certificate as fallback";
+    const auto specific_name         = somehost + '.' + someport + ".crt";
+
+    auto directory = MakeDirectory{}.create();
+    auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+
+    ecf::Openssl ssl;
+    BOOST_CHECK_EQUAL(ssl.request_summary(), "disabled");
+    BOOST_CHECK_EQUAL(ssl.selection_summary(), "");
+
+    // The value of ECF_SSL is shown as given; an explicitly empty value and an unset variable are distinguished
+    ssl.try_enable_from_option(somehost, someport, Option::make_from_envvar_value("X"));
+    BOOST_CHECK_EQUAL(ssl.request_summary(), "X (" + specific_first + ")");
+    ssl.try_enable_from_option(somehost, someport, Option::make_from_envvar_value(""));
+    BOOST_CHECK_EQUAL(ssl.request_summary(), "'' (" + shared_first + ")");
+    ssl.try_enable_from_option(somehost, someport, Option::make_option_shared());
+    BOOST_CHECK_EQUAL(ssl.request_summary(), "(unset) (" + shared_first + ")");
+    BOOST_CHECK_EQUAL(ssl.selection_summary(), "found shared certificate: server.crt");
+
+    auto specific = MakeTestFile{}.with(SpecificFileLocation{specific_name, directory}).create();
+    ssl.try_enable_from_option(somehost, someport, Option::make_from_envvar_value(somehost + '.' + someport));
+    BOOST_CHECK_EQUAL(ssl.request_summary(), somehost + '.' + someport + " (" + specific_first + ")");
+    BOOST_CHECK_EQUAL(ssl.selection_summary(), "found server-specific certificate: " + specific_name);
+
+    // Neither summary reveals the certificate directory
+    BOOST_CHECK_EQUAL(ssl.request_summary().find(directory.path().string()), std::string::npos);
+    BOOST_CHECK_EQUAL(ssl.selection_summary().find(directory.path().string()), std::string::npos);
+
+    ssl.disable();
+    BOOST_CHECK_EQUAL(ssl.request_summary(), "disabled");
+    BOOST_CHECK_EQUAL(ssl.selection_summary(), "");
+}
+
 BOOST_AUTO_TEST_CASE(initializes_client_context_again_after_a_new_selection) {
     ECF_NAME_THIS_TEST();
     auto directory = MakeDirectory{}.create();
