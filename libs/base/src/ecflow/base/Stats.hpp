@@ -62,6 +62,7 @@ struct Stats
     std::string ECF_CHECK_;
     std::string ECF_LOG_;
     std::string ECF_SSL_{"disabled"};
+    std::string ECF_SSL_CERTIFICATE_; // empty unless a certificate is selected; serialised from version 3
 
     int status_{0}; // 0 HALTED, 1 SHUTDOWN, 2 RUNNING
     int request_count_{0};
@@ -254,7 +255,10 @@ private:
         if (version > 1) {
             ar & protocol_;
         }
+        if (version > 2) {
+            ar & ECF_SSL_CERTIFICATE_;
+        }
     }
 };
 
-CEREAL_CLASS_VERSION(Stats, 2)
+CEREAL_CLASS_VERSION(Stats, 3)

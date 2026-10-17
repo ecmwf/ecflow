@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
 #include "MockServer.hpp"
@@ -185,6 +189,52 @@ BOOST_AUTO_TEST_CASE(is_able_to_preserve_protocol_when_serialised) {
     BOOST_REQUIRE_MESSAGE(restored.protocol_ == saved.protocol_,
                           "protocol_ was not preserved by (de)serialisation: expected '"
                               << saved.protocol_ << "', got '" << restored.protocol_ << "'");
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_report_ssl_request_and_selected_certificate) {
+    ECF_NAME_THIS_TEST();
+
+    // Returns the values of every report line labelled ECF_SSL, in order
+    auto ssl_lines = [](const Stats& stats) {
+        std::ostringstream os;
+        stats.show(os);
+        std::vector<std::string> values;
+        std::istringstream lines(os.str());
+        for (std::string line; std::getline(lines, line);) {
+            if (line.rfind("  ECF_SSL ", 0) == 0) {
+                values.push_back(line.substr(Stats::width + 2 /* amount of spaces before label */));
+            }
+        }
+        return values;
+    };
+
+    Stats stats;
+    BOOST_REQUIRE_EQUAL(ssl_lines(stats).size(), 1U);
+    BOOST_CHECK_EQUAL(ssl_lines(stats)[0], "disabled");
+
+    stats.ECF_SSL_             = "X (server-specific certificate first, shared certificate as fallback)";
+    stats.ECF_SSL_CERTIFICATE_ = "found shared certificate: server.crt";
+    const auto lines           = ssl_lines(stats);
+    BOOST_REQUIRE_EQUAL(lines.size(), 2U);
+    BOOST_CHECK_EQUAL(lines[0], stats.ECF_SSL_);
+    BOOST_CHECK_EQUAL(lines[1], stats.ECF_SSL_CERTIFICATE_);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_preserve_selected_certificate_when_serialised) {
+    ECF_NAME_THIS_TEST();
+
+    Stats saved;
+    saved.ECF_SSL_             = "1 (shared certificate first, server-specific certificate as fallback)";
+    saved.ECF_SSL_CERTIFICATE_ = "found server-specific certificate: somehost.3141.crt";
+
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+
+    Stats restored;
+    ecf::restore_from_string(archive_data, restored);
+
+    BOOST_CHECK_EQUAL(restored.ECF_SSL_, saved.ECF_SSL_);
+    BOOST_CHECK_EQUAL(restored.ECF_SSL_CERTIFICATE_, saved.ECF_SSL_CERTIFICATE_);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

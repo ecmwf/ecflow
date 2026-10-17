@@ -190,7 +190,7 @@ void ServerHandler::createClient(bool init) {
 #ifdef ECF_OPENSSL
         if (isSsl()) {
             try {
-                client_->enable_ssl();
+                UiLogS(this).info() << client_->enable_ssl_for_ui();
                 ssl_enabled = true;
             }
             catch (std::exception& e) {

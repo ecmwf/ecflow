@@ -78,6 +78,8 @@ command:
      - The main server port; default value is ``3141``.
    * - ``ECF_SSL``
      - Enable secure (TLS) communication between the client and the server.
+   * - ``ECF_SSL_DIR``
+     - Directory of the SSL certificates; default value is ``$HOME/.ecflowrc/ssl/``.
    * - ``ECF_HOSTFILE``
      - File that lists alternate hosts to try, if the connection to the main host fails.
    * - ``ECF_HOSTFILE_POLICY``

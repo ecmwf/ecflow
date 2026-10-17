@@ -171,6 +171,19 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     LOG(Log::MSG, "ECF_HOME " << ecf_home());
     LOG(Log::MSG, "Job scheduling interval: " << submitJobsInterval_);
+
+#ifdef ECF_OPENSSL
+    // Record the certificate in use, and warn when it is not the one requested first
+    if (ssl_.enabled()) {
+        LOG(Log::MSG, ssl_.info());
+        if (const auto& missing = ssl_.fallback_from()) {
+            LOG(Log::WAR,
+                "SSL certificate '" << missing->string() << "' not found; using the "
+                                    << (ssl_.certificate()->shared() ? "shared" : "server-specific")
+                                    << " certificate instead");
+        }
+    }
+#endif
 }
 
 ServerEnvironment::~ServerEnvironment() {
@@ -363,9 +376,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
-        theRetVec.emplace_back(
-            std::string("ECF_SSL"),
-            ssl_.ssl()); // 1 means shared ssl certificate, <host>.<port> means server specific certificates
+        theRetVec.emplace_back(std::string("ECF_SSL"), ssl_.certificate()->to_envvar_value());
     }
 #endif
 }

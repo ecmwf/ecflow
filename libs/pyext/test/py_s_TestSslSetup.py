@@ -4,6 +4,7 @@
 # This test ensures the SSL setup for the ecFlow client works as expected.
 
 import os
+from contextlib import ExitStack
 
 import pytest
 
@@ -18,6 +19,53 @@ host = os.uname()[1]
 def isolated_ssl_directory(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("ECF_SSL_DIR", str(tmp_path) + os.sep)
+
+
+@pytest.mark.parametrize("mode", ["", "1", "X", "other"])
+@pytest.mark.parametrize(
+    "specific,shared", [(True, True), (True, False), (False, True), (False, False)]
+)
+@pytest.mark.parametrize("explicit", [False, True])
+def test_certificate_selection_strategies(
+    mode, specific, shared, explicit, monkeypatch
+):
+    specific_crt = f"{host}.{port}.crt"
+    monkeypatch.delenv("ECF_SSL", raising=False)
+
+    with ExitStack() as files:
+        if specific:
+            files.enter_context(Test.MockFile(specific_crt))
+        if shared:
+            files.enter_context(Test.MockFile("server.crt"))
+
+        client = ecf.Client(host, port) if explicit else None
+        monkeypatch.setenv("ECF_SSL", mode)
+
+        def enable():
+            if explicit:
+                client.enable_ssl()
+                return client
+            return ecf.Client(host, port)
+
+        if not specific and not shared:
+            strategy = (
+                "shared certificate first, server-specific certificate as fallback"
+                if mode in ("", "1")
+                else "server-specific certificate first, shared certificate as fallback"
+            )
+            with pytest.raises(RuntimeError) as error:
+                enable()
+            message = str(error.value)
+            assert "Unable to find certificate file" in message
+            assert specific_crt in message and "server.crt" in message
+            assert f"(using strategy: {strategy})" in message
+        else:
+            expected = (
+                specific_crt
+                if specific and (mode not in ("", "1") or not shared)
+                else "server.crt"
+            )
+            assert enable().get_certificate() == expected
 
 
 def test_setup_client_without_ssl_and_get_empty_certificate():

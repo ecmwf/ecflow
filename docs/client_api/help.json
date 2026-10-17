@@ -2437,7 +2437,8 @@
       "summary": "Enables the use of SSL when contacting the server.",
       "description": [
         "Enables the use of SSL when contacting the server.",
-        "When specified overrides the environment variable ECF_SSL."
+        "When ECF_SSL is set, its value selects the certificate lookup order;",
+        "otherwise server.crt is tried first, then <host>.<port>.crt."
       ]
     },
     {
@@ -2514,7 +2515,16 @@
       "applies_to": "both",
       "requires": "ECF_OPENSSL",
       "overridable_by": "ssl",
-      "description": "Enable secure communication between client and server."
+      "description": "Enable secure communication. Empty or '1': server.crt first; other values: <host>.<port>.crt first."
+    },
+    {
+      "name": "ECF_SSL_DIR",
+      "type": "string",
+      "required": "optional",
+      "applies_to": "both",
+      "requires": "ECF_OPENSSL",
+      "description": "Directory of the SSL certificates, with or without a trailing '/'. Does not enable SSL.",
+      "default": "$HOME/.ecflowrc/ssl/"
     },
     {
       "name": "ECF_HOSTFILE",
