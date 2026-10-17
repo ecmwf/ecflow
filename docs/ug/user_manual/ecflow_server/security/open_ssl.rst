@@ -74,27 +74,49 @@ not a certificate path.
 If the selected certificate cannot be loaded or fails verification, the
 client reports an error without trying another certificate.
 
-The following filenames illustrate shared-certificate mode. The ecFlow
-server expects these files in the selected directory:
+The files expected in the selected directory depend on the certificate
+that is selected:
 
--  dh2048.pem
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
 
--  server.crt
+   * - File
+     - Server-specific certificate
+     - Shared certificate
 
--  server.key
+   * - Certificate (server and client)
+     - ``<host>.<port>.crt``
+     - ``server.crt``
 
--  server.passwd (optional) if this exists it must contain the
-   passphrase used to create server.key.
+   * - Private key (server)
+     - ``<host>.<port>.key``
+     - ``server.key``
 
-The ecFlow client requires the following file in the selected directory:
+   * - DH parameters (server)
+     - ``<host>.<port>.pem``
+     - ``dh2048.pem`` (``dh1024.pem`` if absent)
 
--  server.crt ( this must be the same as the server)
+   * - Passphrase (server, optional)
+     - ``<host>.<port>.passwd``
+     - ``server.passwd``
+
+Notes:
+
+-  The client requires only the certificate, which must be identical
+   to the certificate of the server.
+
+-  The passphrase file, if present, must contain the passphrase used
+   to create the private key.
 
 
 How to create certificates?
 ============================
 
-The following steps, show you how to create these files:
+The following steps create the files of a shared certificate. For a
+server-specific certificate, use ``<host>.<port>`` instead of ``server``
+and ``dh2048`` in every filename, for example ``myhost.3141.key``,
+``myhost.3141.crt`` and ``myhost.3141.pem``.
 
 -  Generate a password-protected private key. This will request a
    passphrase.

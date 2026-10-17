@@ -26,7 +26,9 @@ public:
     ///
     class Option {
     public:
+        ///
         /// @brief Identifies the requested SSL certificate lookup order.
+        ///
         enum class Preference { Disabled, SharedFirst, SpecificFirst };
 
         ///
@@ -102,10 +104,14 @@ public:
             : preference_(preference),
               envvar_value_(std::move(value)) {}
 
+        ///
         /// Requested mode, independent of which certificate is ultimately selected.
+        ///
         Preference preference_{Preference::Disabled};
 
+        ///
         /// Original ECF_SSL value, including an explicitly empty string; absent for CLI and UI requests.
+        ///
         std::optional<std::string> envvar_value_;
     };
 
@@ -190,10 +196,14 @@ public:
         ///
         Certificate(std::filesystem::path directory, std::string stem);
 
+        ///
         /// Directory captured during selection, so later environment changes cannot change the loaded files.
+        ///
         std::filesystem::path directory_;
 
+        ///
         /// Selected filename stem: `server` for shared, otherwise `<host>.<port>`.
+        ///
         std::string stem_;
     };
 
@@ -236,15 +246,16 @@ public:
     bool enabled() const { return selected_.has_value(); }
 
     ///
-    /// @brief Tries to enable SSL using an explicit option, without reading the environment.
+    /// @brief Tries to enable SSL using an explicit option, without reading ECF_SSL.
     ///
+    /// The certificate directory is still read from ECF_SSL_DIR, or derived from HOME.
     /// Returns false when neither certificate exists; filesystem errors can still throw.
     ///
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.
     /// @param[in] option Requested certificate preference.
     /// @return True if either certificate exists; false if neither exists, leaving SSL disabled.
-    /// @throws fs::filesystem_error if a certificate lookup fails.
+    /// @throws std::filesystem::filesystem_error if a certificate lookup fails.
     ///
     bool try_enable_from_option(std::string host, const std::string& port, Option option);
 
@@ -296,6 +307,7 @@ public:
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.
     /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
+    /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
     ///
     void enable_prefer_specific(std::string host, const std::string& port);
 
@@ -364,7 +376,6 @@ public:
     /// @brief Describes the selected SSL certificate for diagnostic logging.
     ///
     /// @return The absolute certificate path and its shared or server-specific category, or "SSL disabled".
-    /// @throws std::filesystem::filesystem_error if the absolute certificate path cannot be determined.
     ///
     std::string info() const;
 
@@ -390,7 +401,7 @@ private:
     ///
     /// @param[in,out] context SSL context to configure.
     ///
-    void load_verify_file(boost::asio::ssl::context&);
+    void load_verify_file(boost::asio::ssl::context& context);
 
     ///
     /// @brief Returns the configured certificate directory.

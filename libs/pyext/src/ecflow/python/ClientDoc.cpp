@@ -54,7 +54,7 @@ const char* ClientDoc::class_client() {
            "for each client/server interaction\n\n"
            "Secure communication between client and server can be enabled when creating of a new Client, by "
            "defining the environment variable `ECF_SSL`:\n\n"
-           "* `ECF_SSL=X` (recommended), or any nonempty value except '1': search for `<host>.<port>.crt` first, "
+           "* `ECF_SSL=X` (recommended), or any non-empty value except '1': search for `<host>.<port>.crt` first, "
            "falling back to `server.crt` if the specific certificate is absent.\n"
            "* `ECF_SSL=1`, or an explicitly empty value: search for `server.crt` first, falling back to "
            "`<host>.<port>.crt` if the shared certificate is absent. This strategy is retained for compatibility "

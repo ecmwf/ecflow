@@ -930,7 +930,7 @@ Glossary
              |
 
              Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
-             When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
+             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=1`` is assumed.
 
              |
 
@@ -950,8 +950,8 @@ Glossary
          * - ECF_SSL_DIR
 
              (User + Task)
-           - Overrides the certificate directory for ``ecflow_client`` and
-             ``ecflow_ui``. A trailing ``/`` is optional. It does not enable
+           - Overrides the certificate directory for ``ecflow_client``,
+             ``ecflow_ui`` and the Python ``Client``. A trailing ``/`` is optional. It does not enable
              SSL or change certificate selection.
 
              |
@@ -1300,7 +1300,7 @@ Glossary
              |
 
              Secure communication can also be activated using the :code:`ecflow_server --ssl ...` option.
-             When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
+             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=1`` is assumed.
 
              |
 

@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 
     // Note:
-    //   The actual value of ECF_SSL is not used find the specific certificate.
+    //   The actual value of ECF_SSL is not used to find the specific certificate.
     //   Instead, the host name is resolved by the OS, and the selected port is used.
 }
 

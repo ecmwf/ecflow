@@ -64,7 +64,7 @@ To optimize resources consider reusing the same Client instance, rather than cre
 
 Secure communication between client and server can be enabled when creating of a new Client, by defining the environment variable `ECF_SSL`:
 
-* `ECF_SSL=X` (recommended), or any nonempty value except '1': search for `<host>.<port>.crt` first, falling back to `server.crt` if the specific certificate is absent.
+* `ECF_SSL=X` (recommended), or any non-empty value except '1': search for `<host>.<port>.crt` first, falling back to `server.crt` if the specific certificate is absent.
 * `ECF_SSL=1`, or an explicitly empty value: search for `server.crt` first, falling back to `<host>.<port>.crt` if the shared certificate is absent. This strategy is retained for compatibility with intentionally shared certificates.
 
 Certificates are loaded from `$HOME/.ecflowrc/ssl/` unless `ECF_SSL_DIR` overrides the directory. A trailing '/' is optional. Loading or verification failures do not trigger fallback.
