@@ -175,7 +175,7 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
         if (env->debug_) {
             const auto option =
                 ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_shared();
-            std::cout << "  SSL enabled: " << option.describe(vm_.count("ssl") > 0) << '\n';
+            std::cout << "SSL enabled: " << option.describe(vm_.count("ssl") > 0) << '\n';
         }
 
         if (ecf_ssl) {
@@ -186,7 +186,7 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
         }
 
         if (env->debug_) {
-            std::cout << "  " << env->openssl().info() << '\n';
+            std::cout << env->openssl().info() << '\n';
         }
     }
 #endif

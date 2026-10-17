@@ -328,8 +328,9 @@ BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_strategy_and_selected_certificate
 
     const std::string shared_first   = "shared certificate first, server-specific certificate as fallback";
     const std::string specific_first = "server-specific certificate first, shared certificate as fallback";
+    // The leading newline requires each line to start at column 0, as the other server debug lines do
     const std::string selected =
-        "  SSL certificate selected: '" + (directory.path() / "server.crt").string() + "' (shared)\n";
+        "\nSSL certificate selected: '" + (directory.path() / "server.crt").string() + "' (shared)\n";
 
     auto check_output = [&](bool flag, const std::string& source, const std::string& strategy) {
         for (const bool debug : {false, true}) {
@@ -340,10 +341,12 @@ BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_strategy_and_selected_certificate
                 BOOST_CHECK_EQUAL(server.environment().openssl().selected_crt(), "server.crt");
             }
             if (debug) {
-                const auto expected = "  SSL enabled: " + source + " (" + strategy + ")\n";
-                BOOST_CHECK_NE(output.str().find(expected), std::string::npos);
-                BOOST_CHECK_NE(output.str().find(selected), std::string::npos);
-                BOOST_CHECK_LT(output.str().find(expected), output.str().find(selected));
+                // Prepended newline: the first line of the output also has to start at column 0
+                const auto text     = "\n" + output.str();
+                const auto expected = "\nSSL enabled: " + source + " (" + strategy + ")\n";
+                BOOST_CHECK_NE(text.find(expected), std::string::npos);
+                BOOST_CHECK_NE(text.find(selected), std::string::npos);
+                BOOST_CHECK_LT(text.find(expected), text.find(selected));
             }
             else {
                 BOOST_CHECK_EQUAL(output.str().find("SSL enabled:"), std::string::npos);
