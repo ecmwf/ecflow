@@ -181,27 +181,21 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 
 #ifdef ECF_OPENSSL
     if (auto ecf_ssl = getenv("ECF_SSL"); vm.count("ssl") || ecf_ssl) {
-        if (!vm.count("ssl") && ecf_ssl) {
-            if (env->debug()) {
-                std::cout << "  ssl enabled via environment variable\n";
-            }
-            env->enable_ssl_if_defined();
+        if (env->debug()) {
+            const auto option =
+                ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_shared();
+            std::cout << "  SSL enable: " << option.describe(vm.count("ssl") > 0) << '\n';
         }
-        else if (vm.count("ssl") && !ecf_ssl) {
-            if (env->debug()) {
-                std::cout << "  ssl explicitly enabled via command line\n";
-            }
-            env->enable_ssl();
+
+        if (ecf_ssl) {
+            env->enable_ssl_if_defined();
         }
         else {
-            if (env->debug()) {
-                std::cout << "  ssl explicitly enabled via command line, but also enabled via environment variable\n";
-            }
-            env->enable_ssl_if_defined();
+            env->enable_ssl();
         }
 
         if (env->debug()) {
-            std::cout << "  ssl certificate: '" << env->openssl().info() << "' \n";
+            std::cout << "  " << env->openssl().info() << '\n';
         }
     }
 #endif

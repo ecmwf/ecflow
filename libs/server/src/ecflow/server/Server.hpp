@@ -24,7 +24,10 @@ public:
 
     std::string ssl() const override {
 #ifdef ECF_OPENSSL
-        return serverEnv_.openssl().ssl();
+        if (auto certificate = serverEnv_.openssl().certificate()) {
+            return certificate->to_envvar_value();
+        }
+        return "";
 #else
         return "";
 #endif

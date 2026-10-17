@@ -363,9 +363,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
-        theRetVec.emplace_back(
-            std::string("ECF_SSL"),
-            ssl_.ssl()); // 1 means shared ssl certificate, <host>.<port> means server specific certificates
+        theRetVec.emplace_back(std::string("ECF_SSL"), ssl_.certificate()->to_envvar_value());
     }
 #endif
 }
