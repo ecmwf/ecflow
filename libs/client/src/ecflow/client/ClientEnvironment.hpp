@@ -261,7 +261,7 @@ public:
 
     bool enable_ssl_no_throw() {
         protocol_ = ecf::Protocol::Ssl;
-        return ssl_.try_enable_from_envvar(host(), port());
+        return ssl_.try_enable_from_option(host(), port(), ecf::Openssl::Option::make_option_shared());
     } // search server.crt first, then <host>.<port>.crt
     void disable_ssl() {
         protocol_ = ecf::Protocol::Plain;

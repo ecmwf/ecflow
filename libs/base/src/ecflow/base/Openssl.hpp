@@ -3,16 +3,200 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
+#include <utility>
 
 #include <boost/asio/ssl.hpp>
 
 namespace ecf {
 
 class Openssl {
+    static constexpr const char* shared_envvar_value_ = "1";
+
 public:
+    ///
+    /// @brief Represents a request to enable SSL and its certificate lookup order.
+    ///
+    /// An unset ECF_SSL variable leaves SSL disabled; an explicitly empty value requests shared-first selection.
+    /// The environment value is retained only when the request originated from ECF_SSL.
+    ///
+    class Option {
+    public:
+        /// @brief Identifies the requested SSL certificate lookup order.
+        enum class Preference { Disabled, SharedFirst, SpecificFirst };
+
+        ///
+        /// @brief Constructs a disabled SSL request.
+        ///
+        Option() = default;
+
+        ///
+        /// @brief Requests SSL with shared-first selection, independently of ECF_SSL.
+        ///
+        /// @return A shared-first option.
+        ///
+        static Option make_option_shared() { return Option(Preference::SharedFirst); }
+
+        ///
+        /// @brief Requests SSL with specific-first selection, independently of ECF_SSL.
+        ///
+        /// @return A specific-first option.
+        ///
+        static Option make_option_specific() { return Option(Preference::SpecificFirst); }
+
+        ///
+        /// @brief Parses a supplied ECF_SSL value without reading the environment.
+        ///
+        /// @param[in] value Empty or "1" selects shared-first; any other value selects specific-first.
+        /// @return An enabled option retaining the supplied value, including an explicitly empty value.
+        ///
+        static Option make_from_envvar_value(std::string value);
+
+        ///
+        /// @brief Reads ECF_SSL, distinguishing an unset variable from an explicitly empty value.
+        ///
+        /// @return A parsed option, or a disabled option when ECF_SSL is unset.
+        ///
+        static Option make_from_envvar();
+
+        ///
+        /// @brief Reports whether SSL was requested.
+        ///
+        /// @return True for either enabled preference.
+        ///
+        [[nodiscard]] bool enabled() const { return preference_ != Preference::Disabled; }
+
+        ///
+        /// @brief Reports whether shared-first selection was requested.
+        ///
+        /// @return True for the shared-first preference.
+        ///
+        [[nodiscard]] bool shared() const { return preference_ == Preference::SharedFirst; }
+
+        ///
+        /// @brief Returns the requested lookup order.
+        ///
+        /// @return The requested preference, or Disabled when SSL was not requested.
+        ///
+        [[nodiscard]] Preference preference() const { return preference_; }
+
+        ///
+        /// @brief Returns the supplied ECF_SSL value without interpreting it as a file path.
+        ///
+        /// @return The original value, including an empty value, or no value for an explicit request.
+        ///
+        [[nodiscard]] const std::optional<std::string>& envvar_value() const { return envvar_value_; }
+
+    private:
+        ///
+        /// @brief Constructs a requested mode and its optional source environment value.
+        ///
+        /// @param[in] preference Requested lookup order, or Disabled.
+        /// @param[in] value Original ECF_SSL value if supplied; an empty string is distinct from no value.
+        ///
+        explicit Option(Preference preference, std::optional<std::string> value = std::nullopt)
+            : preference_(preference),
+              envvar_value_(std::move(value)) {}
+
+        /// Requested mode, independent of which certificate is ultimately selected.
+        Preference preference_{Preference::Disabled};
+
+        /// Original ECF_SSL value, including an explicitly empty string; absent for CLI and UI requests.
+        std::optional<std::string> envvar_value_;
+    };
+
+    ///
+    /// @brief Identifies a selected SSL certificate and its certificate directory.
+    ///
+    /// The directory is captured at selection time. File paths are derived from it and the selected stem;
+    /// the shared certificate uses the legacy `1` value only when exported as ECF_SSL.
+    ///
+    class Certificate {
+    public:
+        ///
+        /// @brief Creates the shared certificate selection.
+        ///
+        /// @param[in] directory Absolute certificate directory captured during selection.
+        /// @return A certificate identifying `server.crt`.
+        ///
+        static Certificate make_shared_certificate(std::filesystem::path directory);
+
+        ///
+        /// @brief Creates a server-specific certificate selection.
+        ///
+        /// @param[in] directory Absolute certificate directory captured during selection.
+        /// @param[in] stem Selected `<host>.<port>` filename stem.
+        /// @return A certificate identifying the server-specific files.
+        ///
+        static Certificate make_specific_certificate(std::filesystem::path directory, std::string stem);
+
+        ///
+        /// @brief Reports whether the selected certificate is shared.
+        ///
+        /// @return True for `server.crt`.
+        ///
+        [[nodiscard]] bool shared() const { return stem_ == shared_stem_; }
+
+        ///
+        /// @brief Returns the effective ECF_SSL value for the selected certificate.
+        ///
+        /// @return `1` for shared, otherwise the selected `<host>.<port>` stem.
+        ///
+        [[nodiscard]] std::string to_envvar_value() const { return shared() ? shared_envvar_value_ : stem_; }
+
+        ///
+        /// @brief Returns the full path to the selected certificate.
+        ///
+        /// @return The shared or server-specific `.crt` path.
+        ///
+        [[nodiscard]] std::filesystem::path crt_file() const { return directory_ / (stem_ + ".crt"); }
+
+        ///
+        /// @brief Returns the full path to the selected private key.
+        ///
+        /// @return The shared or server-specific `.key` path.
+        ///
+        [[nodiscard]] std::filesystem::path key_file() const { return directory_ / (stem_ + ".key"); }
+
+        ///
+        /// @brief Returns the full path to the selected passphrase file.
+        ///
+        /// @return The shared or server-specific `.passwd` path.
+        ///
+        [[nodiscard]] std::filesystem::path passwd_file() const { return directory_ / (stem_ + ".passwd"); }
+
+        ///
+        /// @brief Returns the full path to the selected DH parameters.
+        ///
+        /// For shared certificates, prefers `dh2048.pem` and falls back to `dh1024.pem` when absent.
+        ///
+        /// @return The shared or server-specific `.pem` path.
+        /// @throws std::filesystem::filesystem_error if checking the shared DH file fails.
+        ///
+        [[nodiscard]] std::filesystem::path pem_file() const;
+
+    private:
+        static constexpr const char* shared_stem_ = "server";
+
+        ///
+        /// @brief Stores the selected stem and certificate directory.
+        ///
+        /// @param[in] directory Absolute directory captured during certificate lookup.
+        /// @param[in] stem `server` for a shared certificate, or `<host>.<port>` for a specific certificate.
+        ///
+        Certificate(std::filesystem::path directory, std::string stem);
+
+        /// Directory captured during selection, so later environment changes cannot change the loaded files.
+        std::filesystem::path directory_;
+
+        /// Selected filename stem: `server` for shared, otherwise `<host>.<port>`.
+        std::string stem_;
+    };
+
     ///
     /// @brief Constructs an SSL configuration with SSL disabled.
     ///
@@ -31,34 +215,38 @@ public:
     ~Openssl() = default;
 
     ///
-    /// @brief Returns the selected certificate name.
+    /// @brief Returns the requested SSL mode and its optional environment value.
     ///
-    /// An empty string means SSL is disabled. The value is `1` for the shared certificate, or
-    /// `<host>.<port>` for a server-specific certificate.
+    /// @return The request, including its lookup order when SSL was requested.
     ///
-    /// @return The selected certificate name, without its directory or `.crt` suffix.
+    const Option& requested() const { return requested_; }
+
     ///
-    const std::string& ssl() const { return ssl_; }
+    /// @brief Returns the selected certificate after lookup and fallback.
+    ///
+    /// @return The selected certificate, or no certificate when SSL is disabled or lookup failed.
+    ///
+    const std::optional<Certificate>& certificate() const { return selected_; }
 
     ///
     /// @brief Checks whether SSL is enabled.
     ///
     /// @return True if a certificate has been selected; otherwise, false.
     ///
-    bool enabled() const { return !ssl_.empty(); }
+    bool enabled() const { return selected_.has_value(); }
 
     ///
-    /// @brief Tries to enable SSL using the supplied ECF_SSL value, without reading the environment.
+    /// @brief Tries to enable SSL using an explicit option, without reading the environment.
     ///
     /// Returns false when neither certificate exists; filesystem errors can still throw.
     ///
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.
-    /// @param[in] ecf_ssl_env Empty or "1" selects shared-first; any other value selects specific-first.
+    /// @param[in] option Requested certificate preference.
     /// @return True if either certificate exists; false if neither exists, leaving SSL disabled.
     /// @throws fs::filesystem_error if a certificate lookup fails.
     ///
-    bool try_enable_from_envvar(std::string host, const std::string& port, const std::string& ecf_ssl_env = "");
+    bool try_enable_from_option(std::string host, const std::string& port, Option option);
 
     ///
     /// @brief Enables SSL using shared-first certificate selection.
@@ -95,7 +283,10 @@ public:
     ///
     /// The ECF_SSL environment variable is preserved. Never throws.
     ///
-    void disable() { ssl_.clear(); }
+    void disable() {
+        requested_ = Option{};
+        selected_.reset();
+    }
 
     ///
     /// @brief Enables SSL preferring the server-specific certificate, independently of ECF_SSL.
@@ -159,11 +350,15 @@ public:
     ///
     /// @brief Writes the selected certificate name to a stream.
     ///
-    /// Writes the same value returned by `ssl()`; writes nothing when SSL is disabled.
+    /// Writes the environment-compatible selected certificate; writes nothing when SSL is disabled.
     ///
     /// @param[out] os Stream to receive the certificate name.
     ///
-    void print(std::ostream& os) const { os << ssl_; }
+    void print(std::ostream& os) const {
+        if (selected_) {
+            os << selected_->to_envvar_value();
+        }
+    }
 
     ///
     /// @brief Describes the selected SSL certificate for diagnostic logging.
@@ -217,41 +412,14 @@ private:
     std::string get_password() const;
 
     ///
-    /// @brief Returns the selected DH parameter file path.
+    /// Requested SSL mode, disabled by default; preserved on lookup failure for diagnostics.
     ///
-    /// For the shared certificate, uses `dh2048.pem` if present, otherwise `dh1024.pem`.
-    /// For a server-specific certificate, uses `<host>.<port>.pem`.
-    ///
-    /// @return DH parameter file path.
-    ///
-    std::string pem() const;
+    Option requested_;
 
     ///
-    /// @brief Returns the selected certificate file path.
+    /// Selected certificate, absent until a certificate has been found.
     ///
-    /// @return `server.crt` for the shared certificate, otherwise `<host>.<port>.crt`.
-    ///
-    std::string crt() const;
-
-    ///
-    /// @brief Returns the selected private key file path.
-    ///
-    /// @return `server.key` for the shared certificate, otherwise `<host>.<port>.key`.
-    ///
-    std::string key() const;
-
-    ///
-    /// @brief Returns the selected private key passphrase file path.
-    ///
-    /// @return `server.passwd` for the shared certificate, otherwise `<host>.<port>.passwd`.
-    ///
-    std::string passwd() const;
-
-private:
-    ///
-    /// Selected certificate name: empty when disabled, `1` for shared, or `<host>.<port>` for server-specific.
-    ///
-    std::string ssl_;
+    std::optional<Certificate> selected_;
 
     ///
     /// SSL context, created on demand when SSL is enabled.
