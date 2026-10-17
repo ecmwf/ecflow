@@ -242,11 +242,11 @@ public:
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl_if_defined() {
         protocol_ = ecf::Protocol::Ssl;
-        ssl_.enable_if_defined(host(), port());
+        ssl_.enable_based_on_envvar(host(), port());
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
     void enable_ssl() {
         protocol_ = ecf::Protocol::Ssl;
-        ssl_.enable(host(), port());
+        ssl_.enable_prefer_shared(host(), port());
     } // search server.crt first, then <host>.<port>.crt
 
     ///
@@ -261,7 +261,7 @@ public:
 
     bool enable_ssl_no_throw() {
         protocol_ = ecf::Protocol::Ssl;
-        return ssl_.enable_no_throw(host(), port());
+        return ssl_.try_enable_from_envvar(host(), port());
     } // search server.crt first, then <host>.<port>.crt
     void disable_ssl() {
         protocol_ = ecf::Protocol::Plain;

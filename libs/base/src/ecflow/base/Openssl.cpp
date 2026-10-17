@@ -56,7 +56,7 @@ std::string Openssl::selected_crt() const {
     return "";
 }
 
-bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
+bool Openssl::try_enable_from_envvar(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
     if (host == ecf::string_constants::localhost) {
         host = Host().name();
     }
@@ -96,17 +96,17 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
     return true;
 }
 
-void Openssl::enable(std::string host, const std::string& port) {
+void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
     if (host == ecf::string_constants::localhost) {
         host = Host().name();
     }
 
-    if (!enable_no_throw(host, port)) {
+    if (!try_enable_from_envvar(host, port)) {
         throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, true));
     }
 }
 
-void Openssl::enable_if_defined(std::string host, const std::string& port) {
+void Openssl::enable_based_on_envvar(std::string host, const std::string& port) {
     if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
         std::string ecf_ssl_env = ecf_ssl.value();
 
@@ -114,7 +114,7 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
             host = Host().name();
         }
 
-        if (!enable_no_throw(host, port, ecf_ssl_env)) {
+        if (!try_enable_from_envvar(host, port, ecf_ssl_env)) {
             const bool shared_first = ecf_ssl_env.empty() || ecf_ssl_env == "1";
             throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, shared_first));
         }
@@ -126,7 +126,7 @@ void Openssl::enable_prefer_specific(std::string host, const std::string& port) 
         host = Host().name();
     }
 
-    if (!enable_no_throw(host, port, "X")) {
+    if (!try_enable_from_envvar(host, port, "X")) {
         throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, false));
     }
 }

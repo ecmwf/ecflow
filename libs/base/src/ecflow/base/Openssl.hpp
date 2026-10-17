@@ -48,7 +48,9 @@ public:
     bool enabled() const { return !ssl_.empty(); }
 
     ///
-    /// @brief Enables SSL using shared-first or specific-first certificate selection.
+    /// @brief Tries to enable SSL using the supplied ECF_SSL value, without reading the environment.
+    ///
+    /// Returns false when neither certificate exists; filesystem errors can still throw.
     ///
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.
@@ -56,7 +58,7 @@ public:
     /// @return True if either certificate exists; false if neither exists, leaving SSL disabled.
     /// @throws fs::filesystem_error if a certificate lookup fails.
     ///
-    bool enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env = "");
+    bool try_enable_from_envvar(std::string host, const std::string& port, const std::string& ecf_ssl_env = "");
 
     ///
     /// @brief Enables SSL using shared-first certificate selection.
@@ -69,7 +71,7 @@ public:
     /// @throws std::runtime_error if neither certificate file exists; SSL is left disabled.
     /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
     ///
-    void enable(std::string host, const std::string& port);
+    void enable_prefer_shared(std::string host, const std::string& port);
 
     ///
     /// @brief Enables SSL according to ECF_SSL when the variable is set.
@@ -86,7 +88,7 @@ public:
     /// @throws std::runtime_error if SSL is requested but neither certificate file exists; SSL is left disabled.
     /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
     ///
-    void enable_if_defined(std::string host, const std::string& port);
+    void enable_based_on_envvar(std::string host, const std::string& port);
 
     ///
     /// @brief Disables SSL and clears the selected certificate.

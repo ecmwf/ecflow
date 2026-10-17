@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(finds_server_tls_files_with_optional_trailing_separator) {
     for (const auto& path : {directory.path().string(), directory.path().string() + "/"}) {
         WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", path);
         ecf::Openssl server;
-        server.enable(somehost, someport);
+        server.enable_prefer_shared(somehost, someport);
 
         const auto key_path = (directory.path() / "server.key").string();
         BOOST_CHECK_EXCEPTION(server.init_for_server(), std::runtime_error, [&](const std::runtime_error& error) {
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(reports_missing_certificates_without_enabling_ssl) {
             BOOST_CHECK_EQUAL(ui.environment().openssl().info(), "SSL disabled");
 
             ecf::Openssl ssl;
-            BOOST_CHECK_EXCEPTION(ssl.enable(host, someport), std::runtime_error, matches_shared);
+            BOOST_CHECK_EXCEPTION(ssl.enable_prefer_shared(host, someport), std::runtime_error, matches_shared);
             BOOST_CHECK(!ssl.enabled());
             BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
             BOOST_CHECK_EXCEPTION(
@@ -340,8 +340,8 @@ BOOST_AUTO_TEST_CASE(reports_missing_certificates_without_enabling_ssl) {
                                           std::runtime_error,
                                           matches_cli_expected);
                 }
-                BOOST_CHECK_EXCEPTION(ssl.enable_if_defined(host, someport), std::runtime_error, matches_expected);
-                BOOST_CHECK(!ssl.enable_no_throw(host, someport, mode));
+                BOOST_CHECK_EXCEPTION(ssl.enable_based_on_envvar(host, someport), std::runtime_error, matches_expected);
+                BOOST_CHECK(!ssl.try_enable_from_envvar(host, someport, mode));
                 BOOST_CHECK(!ssl.enabled());
                 BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
             }

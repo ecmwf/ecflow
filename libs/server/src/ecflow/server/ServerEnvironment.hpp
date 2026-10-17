@@ -71,11 +71,11 @@ public:
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl_if_defined() {
-        ssl_.enable_if_defined(serverHost_, the_port());
+        ssl_.enable_based_on_envvar(serverHost_, the_port());
         update_protocol_after_ssl();
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
     void enable_ssl() {
-        ssl_.enable(serverHost_, the_port());
+        ssl_.enable_prefer_shared(serverHost_, the_port());
         update_protocol_after_ssl();
     } // search server.crt first, then <host>.<port>.crt
 #endif
