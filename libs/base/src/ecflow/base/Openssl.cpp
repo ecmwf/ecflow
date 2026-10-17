@@ -100,6 +100,12 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
     }
 }
 
+void Openssl::enable_prefer_specific(const std::string& host, const std::string& port) {
+    if (!enable_no_throw(host, port, "X")) {
+        enable(host, port);
+    }
+}
+
 boost::asio::ssl::context& Openssl::context() {
     assert(ssl_context_);
     return *ssl_context_;

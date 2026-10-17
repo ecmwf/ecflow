@@ -248,6 +248,17 @@ public:
         protocol_ = ecf::Protocol::Ssl;
         ssl_.enable(host(), port());
     } // search server.crt first, then <host>.<port>.crt
+
+    ///
+    /// @brief Enables SSL using the server-specific certificate first, independently of ECF_SSL.
+    ///
+    /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
+    ///
+    void enable_ssl_prefer_specific() {
+        protocol_ = ecf::Protocol::Ssl;
+        ssl_.enable_prefer_specific(host(), port());
+    }
+
     bool enable_ssl_no_throw() {
         protocol_ = ecf::Protocol::Ssl;
         return ssl_.enable_no_throw(host(), port());

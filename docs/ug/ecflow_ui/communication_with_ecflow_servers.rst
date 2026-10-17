@@ -129,6 +129,14 @@ A server is reached over one of four protocols, chosen per server in the
 Both ends must be configured for the same protocol. A client set to one protocol
 cannot talk to a server serving another, however healthy that server is.
 
+For **TCP/IP with SSL**, ecFlowUI selects the certificate separately for each
+server. It first looks for ``$HOME/.ecflowrc/ssl/<host>.<port>.crt`` and uses
+``$HOME/.ecflowrc/ssl/server.crt`` only if the server-specific file is absent.
+The ``ECF_SSL`` environment variable does not affect this selection. If the
+selected certificate cannot be loaded or fails verification, the connection
+fails without trying another certificate. The command-line client's certificate
+selection remains controlled by ``ECF_SSL`` and ``--ssl``.
+
 .. note::
 
    ``ecflow_server`` does not serve HTTPS. To provide HTTPS, a reverse proxy is

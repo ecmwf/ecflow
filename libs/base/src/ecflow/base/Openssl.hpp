@@ -42,6 +42,17 @@ public:
     void enable_if_defined(std::string host, const std::string& port); // Can throw if certificate (CRT) are missing
     void disable() { ssl_.clear(); }                                   // override environment setting for ECF_SSL
 
+    ///
+    /// @brief Enables SSL using the server-specific certificate, falling back to the shared certificate if absent.
+    ///
+    /// The ECF_SSL environment variable is ignored. Certificate loading and verification failures do not trigger
+    /// fallback.
+    /// @param[in] host Server hostname; localhost is resolved to the local hostname.
+    /// @param[in] port Server port used to select the certificate.
+    /// @throws std::runtime_error if neither certificate file exists.
+    ///
+    void enable_prefer_specific(const std::string& host, const std::string& port);
+
     void init_for_server();
     void init_for_client();
 

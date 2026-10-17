@@ -111,6 +111,14 @@ public:
     void enable_ssl_if_defined() { clientEnv_.enable_ssl_if_defined(); }
     /// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
     void enable_ssl() { clientEnv_.enable_ssl(); }
+
+    ///
+    /// @brief Enables SSL using the server-specific certificate first, independently of ECF_SSL.
+    ///
+    /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
+    ///
+    void enable_ssl_prefer_specific() { clientEnv_.enable_ssl_prefer_specific(); }
+
     void disable_ssl() { clientEnv_.disable_ssl(); } // override environment setting for ECF_SSL
     std::string get_certificate() const;
 #endif
