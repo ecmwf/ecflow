@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <boost/io/ios_state.hpp>
 #include <boost/test/unit_test.hpp>
@@ -45,6 +48,23 @@ std::string somehost = ecf::Host().name();
 std::string someport = "31415";
 std::string someuser = "someuser";
 std::string somepass = "somepass";
+
+///
+/// @brief Returns the ECF_SSL value that the server exports to jobs.
+///
+/// @param[in] env Server environment to inspect.
+/// @return The exported value, or `<not exported>` when the server exports no ECF_SSL variable.
+///
+std::string exported_ecf_ssl(const ServerEnvironment& env) {
+    std::vector<std::pair<std::string, std::string>> variables;
+    env.variables(variables);
+    for (const auto& [name, value] : variables) {
+        if (name == "ECF_SSL") {
+            return value;
+        }
+    }
+    return "<not exported>";
+}
 
 BOOST_AUTO_TEST_SUITE(T_ServerConfiguration)
 
@@ -117,6 +137,8 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK(env.ssl());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
     BOOST_CHECK_EQUAL(env.openssl().selected_crt(), "server.crt");
+    // Jobs follow the selected (shared) certificate, not the requested order.
+    BOOST_CHECK_EQUAL(exported_ecf_ssl(env), "1");
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -133,6 +155,7 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
+    BOOST_CHECK_EQUAL(exported_ecf_ssl(env), somehost + '.' + someport);
 
     // Note:
     //   Even though ECF_SSL specifies the use of shared certificate, the specific certificate is selected
@@ -153,6 +176,21 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
+    BOOST_CHECK_EQUAL(exported_ecf_ssl(env), somehost + '.' + someport);
+}
+
+BOOST_AUTO_TEST_CASE(does_not_export_ecf_ssl_when_ssl_is_disabled) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+    WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
+
+    MockServerInvoker server("ecflow_server");
+    const ServerEnvironment& env = server.environment();
+
+    BOOST_CHECK(!env.ssl());
+    BOOST_CHECK_EQUAL(exported_ecf_ssl(env), "<not exported>");
 }
 
 BOOST_AUTO_TEST_CASE(

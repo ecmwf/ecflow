@@ -327,6 +327,8 @@ BOOST_AUTO_TEST_CASE(finds_server_tls_files_with_optional_trailing_separator) {
         });
 
         auto parameters = MakeTestFile{}.with(SpecificFileLocation{"dh2048.pem", directory}).create();
+        BOOST_REQUIRE(server.certificate().has_value());
+        BOOST_CHECK_EQUAL(server.certificate()->pem_file().string(), (directory.path() / "dh2048.pem").string());
         // All files are found; loading the empty certificate must now fail.
         BOOST_CHECK_THROW(server.init_for_server(), boost::system::system_error);
     }
@@ -496,6 +498,37 @@ BOOST_AUTO_TEST_CASE(does_not_fall_back_when_specific_certificate_cannot_be_load
     MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ssl --ping");
     BOOST_CHECK_THROW(cli.environment().openssl().init_for_client(), boost::system::system_error);
     BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), somehost + '.' + someport + ".crt");
+}
+
+BOOST_AUTO_TEST_CASE(selects_peer_certificate_following_the_server_selection) {
+    ECF_NAME_THIS_TEST();
+    const std::string peer_host = "peerhost";
+    const std::string peer_port = "31416";
+    const std::string peer_crt  = peer_host + '.' + peer_port + ".crt";
+
+    for (const bool has_shared : {false, true}) {
+        for (const bool has_specific : {false, true}) {
+            auto directory = MakeDirectory{}.create();
+            WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+            auto shared_file = MakeTestFile{}
+                                   .with(SpecificFileLocation{has_shared ? "server.crt" : "unused-shared", directory})
+                                   .create();
+            auto specific_file = MakeTestFile{}
+                                     .with(SpecificFileLocation{has_specific ? peer_crt : "unused-specific", directory})
+                                     .create();
+
+            for (const auto& server_ssl : {std::string("1"), somehost + '.' + someport}) {
+                // The process-wide setting must not affect the selection derived from this server.
+                WithTestEnvironmentVariable ssl_env("ECF_SSL", server_ssl == "1" ? "X" : "1");
+                ecf::Openssl ssl;
+                BOOST_CHECK_EQUAL(ssl.try_enable_for_peer(peer_host, peer_port, server_ssl),
+                                  has_shared || has_specific);
+                const bool shared_selected = has_shared && (server_ssl == "1" || !has_specific);
+                BOOST_CHECK_EQUAL(ssl.selected_crt(), shared_selected ? "server.crt" : has_specific ? peer_crt : "");
+                BOOST_CHECK_EQUAL(ssl.enabled(), has_shared || has_specific);
+            }
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(selects_specific_certificate_for_localhost_without_shared_certificate) {

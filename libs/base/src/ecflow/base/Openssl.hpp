@@ -320,6 +320,20 @@ public:
     void enable_prefer_specific(std::string host, const std::string& port);
 
     ///
+    /// @brief Tries to enable SSL for a connection to another server, following the selection of this server.
+    ///
+    /// A shared selection (`1`) of this server requests shared-first selection for the peer; a server-specific
+    /// selection requests specific-first selection. The ECF_SSL environment variable is ignored.
+    ///
+    /// @param[in] host Peer server hostname; localhost is resolved to the local hostname.
+    /// @param[in] port Peer server port used to select the certificate.
+    /// @param[in] server_ssl Effective ECF_SSL value of this server, as returned by `AbstractServer::ssl()`.
+    /// @return True if either certificate of the peer exists; false if neither exists, leaving SSL disabled.
+    /// @throws std::filesystem::filesystem_error if a certificate lookup fails.
+    ///
+    bool try_enable_for_peer(std::string host, const std::string& port, const std::string& server_ssl);
+
+    ///
     /// @brief Creates or replaces the SSL context for server connections.
     ///
     /// Allows TLS 1.3 or later. Does nothing if SSL is disabled.

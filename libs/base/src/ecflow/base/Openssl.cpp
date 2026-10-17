@@ -169,6 +169,10 @@ void Openssl::enable_prefer_specific(std::string host, const std::string& port) 
     enable_or_throw(std::move(host), port, Option::make_option_specific());
 }
 
+bool Openssl::try_enable_for_peer(std::string host, const std::string& port, const std::string& server_ssl) {
+    return try_enable_from_option(std::move(host), port, Option::make_from_envvar_value(server_ssl));
+}
+
 boost::asio::ssl::context& Openssl::context() {
     assert(ssl_context_);
     return *ssl_context_;
