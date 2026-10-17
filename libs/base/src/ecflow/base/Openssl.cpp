@@ -229,7 +229,6 @@ std::string Openssl::get_password() const {
 
 std::string Openssl::certificates_dir() const {
     if (auto found = ecf::environment::fetch<std::string>("ECF_SSL_DIR"); found) {
-        // This is used for testing, to avoid using the default location
         return found.value();
     }
     else {
@@ -238,55 +237,32 @@ std::string Openssl::certificates_dir() const {
 }
 
 std::string Openssl::pem() const {
-    std::string str = certificates_dir();
+    const fs::path directory{certificates_dir()};
     if (ssl_ == "1") {
         // assume 2048-bit dh key, but accept 1024-bit for
         // backwards-compatibility (note: openssl might
         // not accept it, depending on the version used)
-        str += "dh2048.pem";
+        auto path = directory / "dh2048.pem";
 
-        if (!fs::exists(str)) {
-            return certificates_dir() + "dh1024.pem";
+        if (!fs::exists(path)) {
+            return (directory / "dh1024.pem").string();
         }
-        return str;
+        return path.string();
     }
 
-    str += ssl_;
-    str += ".pem";
-    return str;
+    return (directory / (ssl_ + ".pem")).string();
 }
 
 std::string Openssl::crt() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.crt";
-        return str;
-    }
-    str += ssl_;
-    str += ".crt";
-    return str;
+    return (fs::path{certificates_dir()} / (ssl_ == "1" ? "server.crt" : ssl_ + ".crt")).string();
 }
 
 std::string Openssl::key() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.key";
-        return str;
-    }
-    str += ssl_;
-    str += ".key";
-    return str;
+    return (fs::path{certificates_dir()} / (ssl_ == "1" ? "server.key" : ssl_ + ".key")).string();
 }
 
 std::string Openssl::passwd() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.passwd";
-        return str;
-    }
-    str += ssl_;
-    str += ".passwd";
-    return str;
+    return (fs::path{certificates_dir()} / (ssl_ == "1" ? "server.passwd" : ssl_ + ".passwd")).string();
 }
 
 const char* Openssl::ssl_info() {

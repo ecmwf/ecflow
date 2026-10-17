@@ -47,6 +47,81 @@ std::string someport = "31415";
 std::string someuser = "someuser";
 std::string somepass = "somepass";
 
+BOOST_AUTO_TEST_CASE(accepts_certificate_directories_with_optional_trailing_separator) {
+    ECF_NAME_THIS_TEST();
+    auto directory          = MakeDirectory{}.create();
+    const auto certificates = directory.path() / "ssl certificates";
+    fs::create_directory(certificates);
+    auto shared = MakeTestFile{}.with(SpecificFileLocation{"server.crt", certificates}).create();
+    auto specific =
+        MakeTestFile{}.with(SpecificFileLocation{somehost + '.' + someport + ".crt", certificates}).create();
+
+    for (const auto& path : {certificates.string(), certificates.string() + "/", fs::relative(certificates).string()}) {
+        WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", path);
+        for (const auto* mode : {"1", "X"}) {
+            WithTestEnvironmentVariable ssl_env("ECF_SSL", mode);
+            MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ssl --ping");
+            BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(),
+                              std::string(mode) == "1" ? "server.crt" : somehost + '.' + someport + ".crt");
+        }
+
+        ClientInvoker ui(true, somehost, someport);
+        ui.enable_ssl_prefer_specific();
+        BOOST_CHECK_EQUAL(ui.get_certificate(), somehost + '.' + someport + ".crt");
+
+        ClientInvoker shared_ui(true, "sharedhost", someport);
+        shared_ui.enable_ssl_prefer_specific();
+        BOOST_CHECK_EQUAL(shared_ui.get_certificate(), "server.crt");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(uses_default_certificate_directory_when_override_is_unset) {
+    ECF_NAME_THIS_TEST();
+    auto directory          = MakeDirectory{}.create();
+    const auto certificates = directory.path() / ".ecflowrc" / "ssl";
+    fs::create_directories(certificates);
+    auto shared = MakeTestFile{}.with(SpecificFileLocation{"server.crt", certificates}).create();
+    auto specific =
+        MakeTestFile{}.with(SpecificFileLocation{somehost + '.' + someport + ".crt", certificates}).create();
+    WithTestEnvironmentVariable home("HOME", directory.path().string());
+    WithoutTestEnvironmentVariable ssl_dir("ECF_SSL_DIR");
+    WithTestEnvironmentVariable ssl_env("ECF_SSL", "X");
+
+    MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ssl --ping");
+    BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), somehost + '.' + someport + ".crt");
+
+    ClientInvoker ui(true, somehost, someport);
+    ui.enable_ssl_prefer_specific();
+    BOOST_CHECK_EQUAL(ui.get_certificate(), somehost + '.' + someport + ".crt");
+}
+
+BOOST_AUTO_TEST_CASE(finds_server_tls_files_with_optional_trailing_separator) {
+    ECF_NAME_THIS_TEST();
+    auto directory   = MakeDirectory{}.create();
+    auto certificate = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
+
+    for (const auto& path : {directory.path().string(), directory.path().string() + "/"}) {
+        WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", path);
+        ecf::Openssl server;
+        server.enable(somehost, someport);
+
+        const auto key_path = (directory.path() / "server.key").string();
+        BOOST_CHECK_EXCEPTION(server.init_for_server(), std::runtime_error, [&](const std::runtime_error& error) {
+            return std::string(error.what()).find("'" + key_path + "'") != std::string::npos;
+        });
+
+        auto key            = MakeTestFile{}.with(SpecificFileLocation{"server.key", directory}).create();
+        const auto pem_path = (directory.path() / "dh1024.pem").string();
+        BOOST_CHECK_EXCEPTION(server.init_for_server(), std::runtime_error, [&](const std::runtime_error& error) {
+            return std::string(error.what()).find("'" + pem_path + "'") != std::string::npos;
+        });
+
+        auto parameters = MakeTestFile{}.with(SpecificFileLocation{"dh2048.pem", directory}).create();
+        // All files are found; loading the empty certificate must now fail.
+        BOOST_CHECK_THROW(server.init_for_server(), boost::system::system_error);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(prefers_specific_certificate_independently_of_ssl_environment) {
     ECF_NAME_THIS_TEST();
     auto directory = MakeDirectory{}.create();
