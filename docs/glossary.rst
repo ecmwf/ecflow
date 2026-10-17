@@ -911,13 +911,18 @@ Glossary
 
              |
 
-             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
-             and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+             When ``ECF_SSL=1`` or an empty value is set, ``ecflow_client``
+             searches for ``server.crt`` first, falling back to
+             ``<host>.<port>.crt`` if the shared file is absent. The directory
+             defaults to ``$HOME/.ecflowrc/ssl/`` and can be overridden with
+             ``ECF_SSL_DIR``.
 
              |
 
-             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
-             allows users to specify a custom certificate path.
+             Any other value, such as ``ECF_SSL=X``, requires the
+             server-specific ``<host>.<port>.crt`` file in that directory.
+             The value does not specify a certificate path. ``ecflow_ui``
+             ignores ``ECF_SSL`` and selects certificates per server.
 
              |
 
@@ -933,12 +938,23 @@ Glossary
                export ECF_SSL=1 # or empty value
 
                # To use a specific certificate
-               export ECF_SSL=<value>
+               export ECF_SSL=X
 
              |
 
              :Default: not set (communication is not secured)
-             :Values: ``1`` or empty, for the shared certificate; any other value, for a custom certificate path
+             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to require the server-specific certificate
+
+         * - ECF_SSL_DIR
+
+             (User + Task)
+           - Overrides the certificate directory for ``ecflow_client`` and
+             ``ecflow_ui``. A trailing ``/`` is optional. It does not enable
+             SSL or change certificate selection.
+
+             |
+
+             :Default: ``$HOME/.ecflowrc/ssl/``
 
          * - :term:`ECF_NAME`
 
@@ -1265,13 +1281,17 @@ Glossary
 
              |
 
-             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
-             and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+             When ``ECF_SSL=1`` or an empty value is set, the server searches
+             for ``server.crt`` first, falling back to
+             ``<host>.<port>.crt`` if the shared file is absent. The directory
+             defaults to ``$HOME/.ecflowrc/ssl/`` and can be overridden with
+             ``ECF_SSL_DIR``.
 
              |
 
-             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
-             allows users to specify a custom certificate path.
+             Any other value, such as ``ECF_SSL=X``, requires the
+             server-specific ``<host>.<port>.crt`` file in that directory.
+             The value does not specify a certificate path.
 
              |
 
@@ -1285,7 +1305,7 @@ Glossary
              |
 
              :Default: not set (communication is not secured)
-             :Values: ``1`` or empty, for the shared certificate; any other value, for a custom certificate path
+             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to require the server-specific certificate
 
              |
 
@@ -1296,7 +1316,16 @@ Glossary
                 export ECF_SSL=1 # or empty value
 
                 # To use a specific certificate
-                export ECF_SSL=<value>
+                export ECF_SSL=X
+
+         * - ECF_SSL_DIR
+           - Overrides the SSL certificate directory for ``ecflow_server``,
+             including the associated key and TLS parameter files. A trailing
+             ``/`` is optional. Setting the variable does not enable SSL.
+
+             |
+
+             :Default: ``$HOME/.ecflowrc/ssl/``
 
 
       The server can be in several states. The default when first started is :term:`halted`, See :term:`server states`

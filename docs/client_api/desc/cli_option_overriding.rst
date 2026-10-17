@@ -47,6 +47,43 @@ The user can also export the environment variable :code:`ECF_HOSTFILE`, and defi
 
 
 
+.. rubric:: SSL certificate directory
+
+For SSL connections, ``ecflow_client`` uses ``$HOME/.ecflowrc/ssl/`` by default.
+``ECF_SSL_DIR`` selects another directory, with or without a trailing ``/``.
+
+Certificate selection depends on ``ECF_SSL``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
+
+   * - Value
+     - First certificate
+     - Fallback if absent
+
+   * - ``1`` or empty
+     - ``server.crt``
+     - ``<host>.<port>.crt``
+
+   * - Any other value, such as ``X``
+     - ``<host>.<port>.crt``
+     - None
+
+Example using a server-specific certificate:
+
+.. code-block:: shell
+
+    ECF_SSL_DIR="/path/to/certificates" ECF_SSL=X \
+        ecflow_client --host server.example --port 3141 --ping
+
+Enable SSL with ``ECF_SSL`` or :ref:`--ssl <ssl_cli>`; ``ECF_SSL_DIR`` only
+selects the directory. ``ECF_SSL`` values select a mode, not a certificate path.
+
+The directory override also applies to :term:`ecflow_ui`, which selects
+certificates per server. See :ref:`open_ssl` for certificate setup.
+
+
 .. rubric:: Option Overriding Summary
 
 The table below summarises the options that can be provided using environment variables and command line options.
@@ -80,3 +117,7 @@ The table below summarises the options that can be provided using environment va
     * - SSL
       - :code:`ECF_SSL`
       - :code:`--ssl`
+
+    * - SSL certificate directory
+      - :code:`ECF_SSL_DIR`
+      - No command-line option

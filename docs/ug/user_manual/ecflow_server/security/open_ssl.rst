@@ -23,13 +23,53 @@ found on the system.
 Certificates
 ===============
 
-In order to use OpenSSL, we need to set up some certificates. (These
-will be self-signed certificates, rather than a certificate authority).
+SSL communication requires matching self-signed certificates.
 
-The ecFlow client and server will look for the certificates in
-**$HOME/.ecflowrc/ssl** directory.
+ecFlow loads certificates from ``$HOME/.ecflowrc/ssl/`` by default.
+``ECF_SSL_DIR`` overrides the directory for the current process.
+A trailing ``/`` is optional:
 
-ecFlow server expects the following files in : **$HOME/.ecflowrc/ssl**
+.. code-block:: shell
+
+   export ECF_SSL_DIR="/path/to/certificates"
+
+Enable SSL with ``ECF_SSL`` or ``--ssl`` for the CLI and server. In the UI,
+select **TCP/IP with SSL** for each server.
+
+Certificate selection within the directory:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 25 25
+
+   * - Program
+     - ``ECF_SSL``
+     - First certificate
+     - Fallback if absent
+
+   * - ``ecflow_client`` / ``ecflow_server``
+     - ``1`` or empty
+     - ``server.crt``
+     - ``<host>.<port>.crt``
+
+   * - ``ecflow_client`` / ``ecflow_server``
+     - Any other value, such as ``X``
+     - ``<host>.<port>.crt``
+     - None
+
+   * - ``ecflow_ui``
+     - Ignored
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+``ECF_SSL_DIR`` does not enable SSL. ``ECF_SSL`` values select a mode,
+not a certificate path.
+
+If the selected certificate cannot be loaded or fails verification, the
+client reports an error without trying another certificate.
+
+The following filenames illustrate shared-certificate mode. The ecFlow
+server expects these files in the selected directory:
 
 -  dh2048.pem
 
@@ -40,7 +80,7 @@ ecFlow server expects the following files in : **$HOME/.ecflowrc/ssl**
 -  server.passwd (optional) if this exists it must contain the
    passphrase used to create server.key.
 
-ecFlow client expects the following files in: **$HOME/.ecflowrc/ssl**
+The ecFlow client requires the following file in the selected directory:
 
 -  server.crt ( this must be the same as the server)
 
