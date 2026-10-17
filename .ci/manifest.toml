@@ -18,12 +18,33 @@ repo = "ecmwf/ecbuild"
 package = "ecbuild"
 ref = "develop"
 compiler-inputs = []
+unless = { execution = "hpc-atos" }
 
 [[deps]]
 repo = "ecmwf/stack-dependencies"
 package = "pybind11"
 ref = "master"
 compiler-inputs = ["cxx-compiler"]
+unless = { execution = "hpc-atos" }
+
+# On HPC each leg's `platform` names its toolchain configuration (atos-<configuration>),
+# which upstreams do not publish; `upstream-platform` and `upstream-cxx-compiler` select
+# the upstream build to use instead.
+[[deps]]
+repo = "ecmwf/ecbuild"
+package = "ecbuild"
+ref = "develop"
+compiler-inputs = []
+platform-input = "upstream-platform"
+when = { execution = "hpc-atos" }
+
+[[deps]]
+repo = "ecmwf/stack-dependencies"
+package = "pybind11"
+ref = "master"
+compiler-inputs = ["upstream-cxx-compiler"]
+platform-input = "upstream-platform"
+when = { execution = "hpc-atos" }
 
 [matrix.build.defaults]
 job-script = "./.ci/runner/build.sh.j2"
@@ -81,9 +102,8 @@ ssdtmp = "30G"
 job-script = "./.ci/hpc/build.sh.j2"
 
 [[matrix.build-hpc.include]]
-name = "atos-gcc8"
+platform = "atos-gcc8"
 cxx-compiler = "g++-8"
-platform = "hpc-atos-gnu"
 # gcc/old, not a version number: as of now gives you 8.5.0
 # `module avail gcc` lists no 8.5.0 to pin directly.
 modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/6.6.1", "load cmake/new"]
@@ -91,40 +111,182 @@ c-compiler-binary = "gcc"
 cxx-compiler-binary = "g++"
 boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
 python-root = "/usr/local/apps/python3/3.11.8-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-8"
 tests = true
 
 [[matrix.build-hpc.include]]
-name = "atos-intel2025_3"
+platform = "atos-gcc8qt5"
+cxx-compiler = "g++-8"
+# gcc/old, not a version number: as of now gives you 8.5.0
+# `module avail gcc` lists no 8.5.0 to pin directly.
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.84.0", "load ninja", "load python3/3.11.10-01", "load qt/5.12.0", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.11.10-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-8"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc9"
+cxx-compiler = "g++-9"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/9.3.0", "load boost/1.75.0", "load ninja", "load python3/3.8.8-01", "load qt/6.2.0", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.75.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.8.8-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc11"
+cxx-compiler = "g++-11"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/11.2.0", "load boost/1.71.0", "load ninja", "load python3/3.8.8-01", "load qt/6.2.0", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.71.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.8.8-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc12_2"
+cxx-compiler = "g++-12"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/12.2.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.81.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.10.10-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc13_2"
+cxx-compiler = "g++-13"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/13.2.0", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/6.6.1", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.84.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.11.8-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc14_2"
+cxx-compiler = "g++-14"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/14.2.0", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.87.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.12.9-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-gcc15_2"
+cxx-compiler = "g++-15"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/15.2.0", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+boost-root = "/usr/local/apps/boost/1.90.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.13.13-01"
+upstream-platform = "hpc-atos-gnu"
+upstream-cxx-compiler = "g++-15"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-intel2021_4"
+cxx-compiler = "icpx-2021.4"
+modules = ["load prgenv/intel", "unload intel", "load intel/2021.4.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
+c-compiler-binary = "icc"
+cxx-compiler-binary = "icpx"
+boost-root = "/usr/local/apps/boost/1.81.0/INTEL/2021.4"
+python-root = "/usr/local/apps/python3/3.10.10-01"
+upstream-platform = "hpc-atos-intel"
+upstream-cxx-compiler = "icpc-2023.2"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-intel2023_2"
+cxx-compiler = "icpx-2023.2"
+modules = ["load prgenv/intel", "unload intel", "load intel/2023.2.0", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/6.6.1", "load cmake/new"]
+c-compiler-binary = "icx"
+cxx-compiler-binary = "icpx"
+boost-root = "/usr/local/apps/boost/1.84.0/INTEL/2023.2"
+python-root = "/usr/local/apps/python3/3.11.8-01"
+upstream-platform = "hpc-atos-intel"
+upstream-cxx-compiler = "icpc-2023.2"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-intel2025_0"
+cxx-compiler = "icpx-2025.0"
+modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.0.1", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
+c-compiler-binary = "icx"
+cxx-compiler-binary = "icpx"
+boost-root = "/usr/local/apps/boost/1.87.0/INTEL/2025.0"
+python-root = "/usr/local/apps/python3/3.12.9-01"
+upstream-platform = "hpc-atos-intel"
+upstream-cxx-compiler = "icpx"
+tests = true
+
+[[matrix.build-hpc.include]]
+platform = "atos-intel2025_3"
 cxx-compiler = "icpx"
-platform = "hpc-atos-intel"
 modules = ["load prgenv/intel-llvm", "unload intel", "load intel/2025.3.1", "load boost/1.90.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
 c-compiler-binary = "icx"
 cxx-compiler-binary = "icpx"
 boost-root = "/usr/local/apps/boost/1.90.0/INTEL/2025.3"
 python-root = "/usr/local/apps/python3/3.13.13-01"
+upstream-platform = "hpc-atos-intel"
+upstream-cxx-compiler = "icpx"
 tests = true
 
 [[matrix.build-hpc.include]]
-name = "atos-aocc4"
+platform = "atos-aocc4"
 cxx-compiler = "clang++"
-platform = "hpc-atos-aocc"
 modules = ["load prgenv/amd", "unload aocc", "load aocc/4.0.0", "load boost/1.81.0", "load ninja", "load python3/3.10.10-01", "load qt/6.2.0", "load cmake/new"]
 c-compiler-binary = "clang"
 cxx-compiler-binary = "clang++"
 boost-root = "/usr/local/apps/boost/1.81.0/AMD/4.0"
 python-root = "/usr/local/apps/python3/3.10.10-01"
+upstream-platform = "hpc-atos-aocc"
+upstream-cxx-compiler = "clang++"
 tests = false
 
 [[matrix.build-hpc.include]]
-name = "atos-nvidia24_11"
+platform = "atos-nvidia24_1"
+cxx-compiler = "nvc++-24.1"
+modules = ["load prgenv/nvidia", "unload nvidia", "load nvidia/24.1", "load boost/1.84.0", "load ninja", "load python3/3.11.8-01", "load qt/5.12.0", "load cmake/new"]
+c-compiler-binary = "nvc"
+cxx-compiler-binary = "nvc++"
+boost-root = "/usr/local/apps/boost/1.84.0/NVIDIA/24.1"
+python-root = "/usr/local/apps/python3/3.11.8-01"
+upstream-platform = "hpc-atos-nvidia"
+upstream-cxx-compiler = "nvc++"
+tests = false
+
+[[matrix.build-hpc.include]]
+platform = "atos-nvidia24_11"
 cxx-compiler = "nvc++"
-platform = "hpc-atos-nvidia"
 modules = ["load prgenv/nvidia", "unload nvidia", "load nvidia/24.11", "load boost/1.87.0", "load ninja", "load python3/3.12.9-01", "load qt/6.6.1", "load cmake/new"]
 c-compiler-binary = "nvc"
 cxx-compiler-binary = "nvc++"
 boost-root = "/usr/local/apps/boost/1.87.0/NVIDIA/24.11"
 python-root = "/usr/local/apps/python3/3.12.9-01"
+upstream-platform = "hpc-atos-nvidia"
+upstream-cxx-compiler = "nvc++"
 tests = false
+
+# NVIDIA 25.11 is not used: the only Boost built for it, 1.90.0, fails to
+# compile with nvc++ (Asio's work_result is not SFINAE-friendly; fixed in 1.92.0).
 
 [matrix.build-hpc]
 execution = "hpc-atos"
