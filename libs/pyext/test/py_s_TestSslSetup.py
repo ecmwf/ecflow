@@ -48,8 +48,17 @@ def test_certificate_selection_strategies(
             return ecf.Client(host, port)
 
         if not specific and not shared:
-            with pytest.raises(RuntimeError):
+            strategy = (
+                "shared certificate first, server-specific certificate as fallback"
+                if mode in ("", "1")
+                else "server-specific certificate first, shared certificate as fallback"
+            )
+            with pytest.raises(RuntimeError) as error:
                 enable()
+            message = str(error.value)
+            assert "Unable to find certificate file" in message
+            assert specific_crt in message and "server.crt" in message
+            assert f"(using strategy: {strategy})" in message
         else:
             expected = (
                 specific_crt

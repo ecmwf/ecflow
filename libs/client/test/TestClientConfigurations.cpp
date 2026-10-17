@@ -593,6 +593,7 @@ BOOST_AUTO_TEST_CASE(selects_specific_certificate_for_localhost_without_shared_c
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
@@ -607,10 +608,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_c
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_specific_and_options_none_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
@@ -625,6 +628,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_specific_and_options_none_and
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 
     // Note:
@@ -633,6 +637,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_specific_and_options_none_and
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_certificates_specific_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
 
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
@@ -647,10 +652,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_c
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_certificates_shared_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -664,10 +671,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_none_and_c
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_ssl_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
@@ -682,10 +691,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_shared_and_options_ssl_and_ce
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
@@ -699,6 +710,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_cert
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 
     // Note:
@@ -707,6 +719,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_cert
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_certificates_specific_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -719,10 +732,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_cert
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_certificates_shared_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -735,10 +750,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_ssl_and_cert
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -751,10 +768,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and_certificates_specific_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
@@ -766,10 +785,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and_certificates_shared_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
@@ -781,10 +802,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_request_none_and_options_host_ssl_and
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_host_request_none_and_options_host_ssl_and_certificates_shared_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -797,10 +820,12 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_host_request_none_and_options_host_ss
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_env_host_request_none_and_options_host_ssl_and_certificates_specific_only) {
+    ECF_NAME_THIS_TEST();
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
@@ -813,11 +838,13 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_env_host_request_none_and_options_host_ss
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 }
 
 BOOST_AUTO_TEST_CASE(
     is_able_to_handle_env_host_request_none_and_options_host_ssl_and_certificates_shared_and_specific) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
@@ -831,10 +858,12 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_handle_environment_without_ssl) {
+    ECF_NAME_THIS_TEST();
     WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);

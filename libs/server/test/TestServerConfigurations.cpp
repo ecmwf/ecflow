@@ -82,6 +82,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
@@ -99,6 +100,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 
     // Note:
@@ -119,6 +121,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
@@ -135,10 +138,15 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
     BOOST_CHECK_EQUAL(env.openssl().selected_crt(), "server.crt");
     // Jobs follow the selected (shared) certificate, not the requested order.
     BOOST_CHECK_EQUAL(exported_ecf_ssl(env), "1");
+
+    // Note:
+    //   Even though ECF_SSL requests the specific certificate, the shared certificate is selected
+    //   since it is the only one available.
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -154,6 +162,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
     BOOST_CHECK_EQUAL(exported_ecf_ssl(env), somehost + '.' + someport);
 
@@ -175,6 +184,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
     BOOST_CHECK_EQUAL(exported_ecf_ssl(env), somehost + '.' + someport);
 }
@@ -206,6 +216,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 
     // Note:
@@ -225,6 +236,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
 }
 
@@ -240,6 +252,7 @@ BOOST_AUTO_TEST_CASE(
 
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
+    BOOST_REQUIRE(env.openssl().certificate());
     BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
 }
 
