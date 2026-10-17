@@ -35,23 +35,30 @@ public:
     const std::string& ssl() const { return ssl_; }
     bool enabled() const { return !ssl_.empty(); }
 
-    bool enable_no_throw(std::string host,
-                         const std::string& port,
-                         const std::string& ecf_ssl_env = "");         // returns false if cannot enable
+    ///
+    /// @brief Enables SSL using shared-first or specific-first certificate selection.
+    ///
+    /// @param[in] host Server hostname; localhost is resolved to the local hostname.
+    /// @param[in] port Server port used to select the certificate.
+    /// @param[in] ecf_ssl_env Empty or "1" selects shared-first; any other value selects specific-first.
+    /// @return True if either certificate exists; false if neither exists, leaving SSL disabled.
+    /// @throws fs::filesystem_error if a certificate lookup fails.
+    ///
+    bool enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env = "");
+
     void enable(std::string host, const std::string& port);            // Can throw if certificate (CRT) are missing
     void enable_if_defined(std::string host, const std::string& port); // Can throw if certificate (CRT) are missing
     void disable() { ssl_.clear(); }                                   // override environment setting for ECF_SSL
 
     ///
-    /// @brief Enables SSL using the server-specific certificate, falling back to the shared certificate if absent.
+    /// @brief Enables SSL preferring the server-specific certificate, independently of ECF_SSL.
     ///
-    /// The ECF_SSL environment variable is ignored. Certificate loading and verification failures do not trigger
-    /// fallback.
+    /// Uses the same certificate selection as ECF_SSL=X, falling back to server.crt only if absent.
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.
-    /// @throws std::runtime_error if neither certificate file exists.
+    /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
     ///
-    void enable_prefer_specific(const std::string& host, const std::string& port);
+    void enable_prefer_specific(std::string host, const std::string& port);
 
     void init_for_server();
     void init_for_client();

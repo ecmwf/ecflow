@@ -57,8 +57,11 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
         ssl_ += ".";
         ssl_ += port;
         if (!fs::exists(crt())) { // crt() uses ssl_
-            ssl_.clear();
-            return false;
+            ssl_ = "1";
+            if (!fs::exists(crt())) {
+                ssl_.clear();
+                return false;
+            }
         }
     }
 
@@ -86,23 +89,31 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
 
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
             std::string error;
-            if (ecf_ssl_env == "1") {
+            if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
                 error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* "
                                 << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)");
             }
             else {
-                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) "
-                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "."
-                                << port << ")");
+                const auto directory = fs::path{certificates_dir()};
+                error                = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) '"
+                                << (directory / (host + "." + port + ".crt")).string() << "' or '"
+                                << (directory / "server.crt").string() << "' (with ECF_SSL=" << ecf_ssl_env << ")");
             }
             throw std::runtime_error(error);
         }
     }
 }
 
-void Openssl::enable_prefer_specific(const std::string& host, const std::string& port) {
+void Openssl::enable_prefer_specific(std::string host, const std::string& port) {
+    if (host == ecf::string_constants::localhost) {
+        host = Host().name();
+    }
+
     if (!enable_no_throw(host, port, "X")) {
-        enable(host, port);
+        const auto certificate = fs::path{certificates_dir()} / (host + "." + port + ".crt");
+        const auto shared      = fs::path{certificates_dir()} / "server.crt";
+        throw std::runtime_error("Error: Unable to find the self-signed certificate file(CRT) '" +
+                                 certificate.string() + "' or '" + shared.string() + "'");
     }
 }
 
@@ -267,14 +278,15 @@ std::string Openssl::passwd() const {
 
 const char* Openssl::ssl_info() {
     return "ecFlow client and server are SSL enabled. To use SSL choose between:\n"
-           "  1. export ECF_SSL=1              # search for server.crt otherwise <host>.<port>.crt\n"
-           "  2. export ECF_SSL=<host>.<port>  # Use server specific certificates <host>.<port>.***\n"
-           "  3. use --ssl           # argument on ecflow_client/ecflow_server, same as option 1.\n"
+           "  1. export ECF_SSL=X    # recommended: search <host>.<port>.crt, then server.crt\n"
+           "  2. export ECF_SSL=1    # shared certificate: search server.crt, then <host>.<port>.crt\n"
+           "  3. use --ssl           # use ECF_SSL if set; otherwise, use shared-first mode\n"
            "                         # Typically ssl server can be started with ecflow_start.sh -s\n"
            "  4. Client.enable_ssl() # for python client\n\n"
-           "ecFlow expects the certificates to be in directory $HOME/.ecflowrc/ssl\n"
-           "The certificates can be shared if you have multiple servers running on\n"
-           "the same machine. In this case use ECF_SSL=1, then\n"
+           "ecflow_ui uses the specific-first strategy (ECF_SSL=X) and ignores ECF_SSL.\n"
+           "ecFlow expects certificates in $HOME/.ecflowrc/ssl unless ECF_SSL_DIR overrides the directory.\n"
+           "Shared certificates should be avoided. Use ECF_SSL=1 only for intentionally shared certificates.\n"
+           "Its shared-first selection is retained for compatibility. In this mode,\n"
            "ecflow_server expects the following files in $HOME/.ecflowrc/ssl\n\n"
            "   - dh2048.pem\n"
            "   - server.crt\n"
@@ -282,13 +294,13 @@ const char* Openssl::ssl_info() {
            "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n\n"
            "ecflow_client expects the following files in : $HOME/.ecflowrc/ssl\n\n"
            "   - server.crt (this must be the same as server)\n\n"
-           "Alternatively you can have different setting for each server ECF_SSL=<host>.<port>\n"
-           "Then server expect files of the type:\n\n"
+           "The recommended ECF_SSL=X mode uses separate certificates for each server.\n"
+           "In this mode, the server expects:\n\n"
            "   - <host>.<port>.pem\n"
            "   - <host>.<port>.crt\n"
            "   - <host>.<port>.key\n"
            "   - <host>.<port>.passwd (optional)\n\n"
-           "and client expect files of the type:\n\n"
+           "The client requires:\n\n"
            "   - <host>.<port>.crt  # as before this must be same as the server\n\n"
            "The server/client will automatically check existence of both variants,\n"
            "but will give preference to NON <host>.<port>.*** variants first, when ECF_SSL=1\n"

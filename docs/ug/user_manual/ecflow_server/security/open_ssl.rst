@@ -36,7 +36,13 @@ A trailing ``/`` is optional:
 Enable SSL with ``ECF_SSL`` or ``--ssl`` for the CLI and server. In the UI,
 select **TCP/IP with SSL** for each server.
 
-Certificate selection within the directory:
+Server-specific certificates are recommended. Set ``ECF_SSL=X`` for the CLI
+and server to try ``<host>.<port>.crt`` first, falling back to ``server.crt`` if
+it is absent. The UI always uses this selection mode, independently of ``ECF_SSL``.
+
+Shared certificates should be avoided. Use ``ECF_SSL=1`` only when a shared
+certificate is intentional. Its existing shared-first behaviour is retained
+for compatibility. Certificate selection within the directory:
 
 .. list-table::
    :header-rows: 1
@@ -48,14 +54,14 @@ Certificate selection within the directory:
      - Fallback if absent
 
    * - ``ecflow_client`` / ``ecflow_server``
+     - Any other value, such as ``X``
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+   * - ``ecflow_client`` / ``ecflow_server``
      - ``1`` or empty
      - ``server.crt``
      - ``<host>.<port>.crt``
-
-   * - ``ecflow_client`` / ``ecflow_server``
-     - Any other value, such as ``X``
-     - ``<host>.<port>.crt``
-     - None
 
    * - ``ecflow_ui``
      - Ignored

@@ -149,13 +149,25 @@ BOOST_AUTO_TEST_CASE(falls_back_to_shared_certificate_when_specific_is_absent) {
     ECF_NAME_THIS_TEST();
     auto directory = MakeDirectory{}.create();
     auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
-    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string() + "/");
-    WithTestEnvironmentVariable ssl_env("ECF_SSL", "X");
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
 
-    ClientInvoker client(true, somehost, someport);
-    client.enable_ssl_prefer_specific();
-    BOOST_CHECK(client.environment().ssl());
-    BOOST_CHECK_EQUAL(client.get_certificate(), "server.crt");
+    auto check_selection = [] {
+        ClientInvoker client(true, somehost, someport);
+        client.enable_ssl_prefer_specific();
+        BOOST_CHECK(client.environment().ssl());
+        BOOST_CHECK_EQUAL(client.get_certificate(), "server.crt");
+    };
+
+    check_selection();
+    for (const auto* value : {"", "1", "X", "other"}) {
+        WithTestEnvironmentVariable ssl_env("ECF_SSL", value);
+        check_selection();
+
+        MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ssl --ping");
+        BOOST_CHECK(cli.environment().ssl());
+        BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), "server.crt");
+    }
 }
 
 BOOST_AUTO_TEST_CASE(selects_certificates_independently_for_multiple_servers) {
@@ -187,10 +199,29 @@ BOOST_AUTO_TEST_CASE(reports_missing_certificates_without_enabling_ssl) {
     auto directory = MakeDirectory{}.create();
     WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string() + "/");
 
-    ClientInvoker client(true, somehost, someport);
-    BOOST_CHECK_THROW(client.enable_ssl_prefer_specific(), std::runtime_error);
-    BOOST_CHECK(!client.environment().ssl());
-    BOOST_CHECK_EQUAL(client.get_certificate(), "");
+    for (const auto& host : {somehost, std::string("localhost")}) {
+        ClientInvoker client(true, host, someport);
+        const auto resolved_host    = host == "localhost" ? ecf::Host().name() : host;
+        const auto certificate_path = (directory.path() / (resolved_host + '.' + someport + ".crt")).string();
+        BOOST_CHECK_EXCEPTION(
+            client.enable_ssl_prefer_specific(), std::runtime_error, [&](const std::runtime_error& error) {
+                const auto message = std::string(error.what());
+                return message.find(certificate_path) != std::string::npos &&
+                       message.find((directory.path() / "server.crt").string()) != std::string::npos;
+            });
+        BOOST_CHECK(!client.environment().ssl());
+        BOOST_CHECK_EQUAL(client.get_certificate(), "");
+        for (const auto* mode : {"1", "X"}) {
+            WithTestEnvironmentVariable ssl_env("ECF_SSL", mode);
+            BOOST_CHECK_THROW(
+                MockClientInvoker{"ecflow_client --host " + host + " --port " + someport + " --ssl --ping"},
+                std::runtime_error);
+            ecf::Openssl ssl;
+            BOOST_CHECK(!ssl.enable_no_throw(host, someport, mode));
+            BOOST_CHECK(!ssl.enabled());
+            BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(does_not_fall_back_when_specific_certificate_cannot_be_loaded) {
@@ -207,6 +238,11 @@ BOOST_AUTO_TEST_CASE(does_not_fall_back_when_specific_certificate_cannot_be_load
     client.enable_ssl_prefer_specific();
     BOOST_CHECK_THROW(client.environment().openssl().init_for_client(), boost::system::system_error);
     BOOST_CHECK_EQUAL(client.get_certificate(), somehost + '.' + someport + ".crt");
+
+    WithTestEnvironmentVariable ssl_env("ECF_SSL", "X");
+    MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ssl --ping");
+    BOOST_CHECK_THROW(cli.environment().openssl().init_for_client(), boost::system::system_error);
+    BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), somehost + '.' + someport + ".crt");
 }
 
 BOOST_AUTO_TEST_CASE(selects_specific_certificate_for_localhost_without_shared_certificate) {

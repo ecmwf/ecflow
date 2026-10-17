@@ -911,18 +911,21 @@ Glossary
 
              |
 
-             When ``ECF_SSL=1`` or an empty value is set, ``ecflow_client``
-             searches for ``server.crt`` first, falling back to
-             ``<host>.<port>.crt`` if the shared file is absent. The directory
-             defaults to ``$HOME/.ecflowrc/ssl/`` and can be overridden with
-             ``ECF_SSL_DIR``.
+             The recommended setting, ``ECF_SSL=X``, searches for the
+             server-specific ``<host>.<port>.crt`` first, falling back to
+             ``server.crt`` if it is absent. The directory defaults to
+             ``$HOME/.ecflowrc/ssl/`` and can be overridden with ``ECF_SSL_DIR``.
+             ``ecflow_ui`` always uses this specific-first strategy and
+             ignores ``ECF_SSL``.
 
              |
 
-             Any other value, such as ``ECF_SSL=X``, requires the
-             server-specific ``<host>.<port>.crt`` file in that directory.
-             The value does not specify a certificate path. ``ecflow_ui``
-             ignores ``ECF_SSL`` and selects certificates per server.
+             Shared certificates should be avoided. Use ``ECF_SSL=1`` only
+             when a shared certificate is intentional. For compatibility,
+             ``1`` or an empty value searches for ``server.crt`` first,
+             falling back to ``<host>.<port>.crt`` if the shared file is absent.
+             Any other value behaves like ``X``; it does not specify a
+             certificate path.
 
              |
 
@@ -933,17 +936,16 @@ Glossary
 
              .. code-block:: shell
 
-               # To use a shared certificate
-               # amongst multiple servers
-               export ECF_SSL=1 # or empty value
-
-               # To use a specific certificate
+               # Recommended: prefer a server-specific certificate
                export ECF_SSL=X
+
+               # Only for intentionally shared certificates
+               export ECF_SSL=1 # or empty value
 
              |
 
              :Default: not set (communication is not secured)
-             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to require the server-specific certificate
+             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to prefer the server-specific certificate
 
          * - ECF_SSL_DIR
 
@@ -1281,17 +1283,19 @@ Glossary
 
              |
 
-             When ``ECF_SSL=1`` or an empty value is set, the server searches
-             for ``server.crt`` first, falling back to
-             ``<host>.<port>.crt`` if the shared file is absent. The directory
-             defaults to ``$HOME/.ecflowrc/ssl/`` and can be overridden with
-             ``ECF_SSL_DIR``.
+             The recommended setting, ``ECF_SSL=X``, searches for the
+             server-specific ``<host>.<port>.crt`` first, falling back to
+             ``server.crt`` if it is absent. The directory defaults to
+             ``$HOME/.ecflowrc/ssl/`` and can be overridden with ``ECF_SSL_DIR``.
 
              |
 
-             Any other value, such as ``ECF_SSL=X``, requires the
-             server-specific ``<host>.<port>.crt`` file in that directory.
-             The value does not specify a certificate path.
+             Shared certificates should be avoided. Use ``ECF_SSL=1`` only
+             when a shared certificate is intentional. For compatibility,
+             ``1`` or an empty value searches for ``server.crt`` first,
+             falling back to ``<host>.<port>.crt`` if the shared file is absent.
+             Any other value behaves like ``X``; it does not specify a
+             certificate path.
 
              |
 
@@ -1305,18 +1309,17 @@ Glossary
              |
 
              :Default: not set (communication is not secured)
-             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to require the server-specific certificate
+             :Values: ``1`` or empty, to prefer the shared certificate; any other value, to prefer the server-specific certificate
 
              |
 
              .. code-block:: shell
 
-                # To use a shared certificate
-                # amongst multiple servers
-                export ECF_SSL=1 # or empty value
-
-                # To use a specific certificate
+                # Recommended: prefer a server-specific certificate
                 export ECF_SSL=X
+
+                # Only for intentionally shared certificates
+                export ECF_SSL=1 # or empty value
 
          * - ECF_SSL_DIR
            - Overrides the SSL certificate directory for ``ecflow_server``,

@@ -250,7 +250,7 @@ public:
     } // search server.crt first, then <host>.<port>.crt
 
     ///
-    /// @brief Enables SSL using the server-specific certificate first, independently of ECF_SSL.
+    /// @brief Enables SSL preferring the server-specific certificate, independently of ECF_SSL.
     ///
     /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
     ///

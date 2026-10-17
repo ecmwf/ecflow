@@ -140,16 +140,16 @@ a trailing ``/``, for all SSL connections in the UI process. For example:
 
 ``ECF_SSL_DIR`` controls where certificates are found and does not enable SSL.
 
-Certificate lookup order within the selected directory:
+The UI ignores ``ECF_SSL`` and uses the same certificate selection strategy as
+``ecflow_client`` with ``ECF_SSL=X``. Lookup within the selected directory follows
+this order:
 
 1. Use ``<host>.<port>.crt`` if present.
 2. Otherwise, use ``server.crt``.
 
-The UI ignores ``ECF_SSL``. The command-line client selects certificates
-using ``ECF_SSL`` and ``--ssl``.
-
-If the selected certificate cannot be loaded or fails verification, the
-connection fails without trying another certificate.
+If neither certificate exists, the connection fails. If the selected certificate
+cannot be loaded or fails verification, the connection fails without trying
+another certificate.
 
 .. note::
 
