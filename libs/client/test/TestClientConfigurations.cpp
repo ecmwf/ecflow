@@ -189,12 +189,12 @@ BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_and_requested_strategy) {
                 BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), "server.crt");
             }
             if (debug) {
-                const auto expected = "SSL enable: " + source + " (" + strategy + ")";
+                const auto expected = "SSL enabled: " + source + " (" + strategy + ")";
                 BOOST_CHECK_NE(output.str().find(expected), std::string::npos);
                 BOOST_CHECK_LT(output.str().find(expected), output.str().find("SSL certificate selected:"));
             }
             else {
-                BOOST_CHECK_EQUAL(output.str().find("SSL enable:"), std::string::npos);
+                BOOST_CHECK_EQUAL(output.str().find("SSL enabled:"), std::string::npos);
             }
         }
     };
