@@ -67,6 +67,13 @@ public:
 
     static const char* ssl_info();
     void print(std::ostream& os) const { os << ssl_; }
+
+    ///
+    /// @brief Describes the selected SSL certificate for diagnostic logging.
+    ///
+    /// @return The absolute certificate path and its shared or server-specific category, or "SSL disabled".
+    /// @throws std::filesystem::filesystem_error if the absolute certificate path cannot be determined.
+    ///
     std::string info() const;
 
     std::string selected_crt() const;

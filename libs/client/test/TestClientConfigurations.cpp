@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <iostream>
+#include <sstream>
+
+#include <boost/io/ios_state.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/cts/user/CtsCmd.hpp"
@@ -47,6 +51,89 @@ std::string someport = "31415";
 std::string someuser = "someuser";
 std::string somepass = "somepass";
 
+BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_and_requested_strategy) {
+    ECF_NAME_THIS_TEST();
+    auto directory = MakeDirectory{}.create();
+    auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
+
+    const std::string shared_first   = "shared certificate first, server-specific certificate as fallback";
+    const std::string specific_first = "server-specific certificate first, shared certificate as fallback";
+
+    auto check_output = [&](bool flag, const std::string& source, const std::string& strategy) {
+        for (const bool debug : {false, true}) {
+            std::ostringstream output;
+            {
+                boost::io::ios_rdbuf_saver capture(std::cout, output.rdbuf());
+                MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ping" +
+                                      (flag ? " --ssl" : "") + (debug ? " -d" : ""));
+                BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), "server.crt");
+            }
+            if (debug) {
+                const auto expected = "SSL enable: " + source + " (" + strategy + ")";
+                BOOST_CHECK_NE(output.str().find(expected), std::string::npos);
+                BOOST_CHECK_LT(output.str().find(expected), output.str().find("SSL certificate selected:"));
+            }
+            else {
+                BOOST_CHECK_EQUAL(output.str().find("SSL enable:"), std::string::npos);
+            }
+        }
+    };
+
+    check_output(true, "via --ssl, ECF_SSL unset", shared_first);
+    for (const auto* value : {"", "1", "X", "?"}) {
+        WithTestEnvironmentVariable ssl_env("ECF_SSL", value);
+        const auto& strategy = std::string(value).empty() || std::string(value) == "1" ? shared_first : specific_first;
+        check_output(false, "via ECF_SSL='" + std::string(value) + "'", strategy);
+        check_output(true, "via --ssl with ECF_SSL='" + std::string(value) + "'", strategy);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(reports_selected_certificate_in_debug_output) {
+    ECF_NAME_THIS_TEST();
+    auto directory = MakeDirectory{}.create();
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", fs::relative(directory.path()).string());
+    const auto specific_name = somehost + '.' + someport + ".crt";
+
+    auto check_output = [&](const std::string& shared_first, const std::string& specific_first) {
+        for (const auto* mode : {"", "1", "X", "?"}) {
+            WithTestEnvironmentVariable ssl_env("ECF_SSL", mode);
+            const auto selected = std::string(mode).empty() || std::string(mode) == "1" ? shared_first : specific_first;
+            const auto path     = (directory.path() / selected).string();
+            const auto kind     = selected == "server.crt" ? "shared" : "server-specific";
+            const auto message  = "SSL certificate selected: '" + path + "' (" + kind + ")";
+
+            for (const bool debug : {false, true}) {
+                std::ostringstream output;
+                {
+                    boost::io::ios_rdbuf_saver capture(std::cout, output.rdbuf());
+                    MockClientInvoker cli("ecflow_client --host " + somehost + " --port " + someport + " --ping" +
+                                          (debug ? " -d" : ""));
+                    BOOST_CHECK_EQUAL(cli.environment().openssl().selected_crt(), selected);
+                }
+                if (debug) {
+                    BOOST_CHECK_NE(output.str().find(message), std::string::npos);
+                }
+                else {
+                    BOOST_CHECK_EQUAL(output.str().find("SSL certificate selected:"), std::string::npos);
+                }
+            }
+        }
+    };
+
+    {
+        auto shared = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
+        check_output("server.crt", "server.crt");
+        auto specific = MakeTestFile{}.with(SpecificFileLocation{specific_name, directory}).create();
+        check_output("server.crt", specific_name);
+    }
+    {
+        auto specific = MakeTestFile{}.with(SpecificFileLocation{specific_name, directory}).create();
+        check_output(specific_name, specific_name);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(accepts_certificate_directories_with_optional_trailing_separator) {
     ECF_NAME_THIS_TEST();
     auto directory          = MakeDirectory{}.create();
@@ -68,10 +155,14 @@ BOOST_AUTO_TEST_CASE(accepts_certificate_directories_with_optional_trailing_sepa
         ClientInvoker ui(true, somehost, someport);
         ui.enable_ssl_prefer_specific();
         BOOST_CHECK_EQUAL(ui.get_certificate(), somehost + '.' + someport + ".crt");
+        BOOST_CHECK_EQUAL(ui.environment().openssl().info(),
+                          "SSL certificate selected: '" + specific.path().string() + "' (server-specific)");
 
         ClientInvoker shared_ui(true, "sharedhost", someport);
         shared_ui.enable_ssl_prefer_specific();
         BOOST_CHECK_EQUAL(shared_ui.get_certificate(), "server.crt");
+        BOOST_CHECK_EQUAL(shared_ui.environment().openssl().info(),
+                          "SSL certificate selected: '" + shared.path().string() + "' (shared)");
     }
 }
 
@@ -93,6 +184,8 @@ BOOST_AUTO_TEST_CASE(uses_default_certificate_directory_when_override_is_unset) 
     ClientInvoker ui(true, somehost, someport);
     ui.enable_ssl_prefer_specific();
     BOOST_CHECK_EQUAL(ui.get_certificate(), somehost + '.' + someport + ".crt");
+    BOOST_CHECK_EQUAL(ui.environment().openssl().info(),
+                      "SSL certificate selected: '" + specific.path().string() + "' (server-specific)");
 }
 
 BOOST_AUTO_TEST_CASE(finds_server_tls_files_with_optional_trailing_separator) {
@@ -196,31 +289,73 @@ BOOST_AUTO_TEST_CASE(selects_certificates_independently_for_multiple_servers) {
 
 BOOST_AUTO_TEST_CASE(reports_missing_certificates_without_enabling_ssl) {
     ECF_NAME_THIS_TEST();
-    auto directory = MakeDirectory{}.create();
-    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string() + "/");
+    auto directory          = MakeDirectory{}.create();
+    const auto certificates = directory.path() / "ssl certificates";
+    fs::create_directory(certificates);
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
 
-    for (const auto& host : {somehost, std::string("localhost")}) {
-        ClientInvoker client(true, host, someport);
-        const auto resolved_host    = host == "localhost" ? ecf::Host().name() : host;
-        const auto certificate_path = (directory.path() / (resolved_host + '.' + someport + ".crt")).string();
-        BOOST_CHECK_EXCEPTION(
-            client.enable_ssl_prefer_specific(), std::runtime_error, [&](const std::runtime_error& error) {
-                const auto message = std::string(error.what());
-                return message.find(certificate_path) != std::string::npos &&
-                       message.find((directory.path() / "server.crt").string()) != std::string::npos;
-            });
-        BOOST_CHECK(!client.environment().ssl());
-        BOOST_CHECK_EQUAL(client.get_certificate(), "");
-        for (const auto* mode : {"1", "X"}) {
-            WithTestEnvironmentVariable ssl_env("ECF_SSL", mode);
-            BOOST_CHECK_THROW(
-                MockClientInvoker{"ecflow_client --host " + host + " --port " + someport + " --ssl --ping"},
-                std::runtime_error);
+    auto check_errors = [&](const fs::path& certificate_directory) {
+        for (const auto& host : {somehost, std::string("localhost")}) {
+            const auto resolved_host = host == "localhost" ? ecf::Host().name() : host;
+            const auto specific      = (certificate_directory / (resolved_host + '.' + someport + ".crt")).string();
+            const auto shared        = (certificate_directory / "server.crt").string();
+            const auto shared_error =
+                "Error: Unable to find certificate file: '" + shared + "' or '" + specific +
+                "' (using strategy: shared certificate first, server-specific certificate as fallback)";
+            const auto specific_error =
+                "Error: Unable to find certificate file: '" + specific + "' or '" + shared +
+                "' (using strategy: server-specific certificate first, shared certificate as fallback)";
+            auto matches_shared     = [&](const std::runtime_error& error) { return error.what() == shared_error; };
+            auto matches_specific   = [&](const std::runtime_error& error) { return error.what() == specific_error; };
+            auto matches_cli_shared = [&](const std::runtime_error& error) {
+                return std::string(error.what()).find("\n" + shared_error + "\n") != std::string::npos;
+            };
+
+            ClientInvoker ui(true, host, someport);
+            BOOST_CHECK_EXCEPTION(ui.enable_ssl_prefer_specific(), std::runtime_error, matches_specific);
+            BOOST_CHECK(!ui.environment().ssl());
+            BOOST_CHECK_EQUAL(ui.get_certificate(), "");
+            BOOST_CHECK_EQUAL(ui.environment().openssl().info(), "SSL disabled");
+
             ecf::Openssl ssl;
-            BOOST_CHECK(!ssl.enable_no_throw(host, someport, mode));
+            BOOST_CHECK_EXCEPTION(ssl.enable(host, someport), std::runtime_error, matches_shared);
             BOOST_CHECK(!ssl.enabled());
             BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
+            BOOST_CHECK_EXCEPTION(
+                MockClientInvoker{"ecflow_client --host " + host + " --port " + someport + " --ssl --ping"},
+                std::runtime_error,
+                matches_cli_shared);
+
+            for (const auto* mode : {"", "1", "X", "?"}) {
+                WithTestEnvironmentVariable ssl_env("ECF_SSL", mode);
+                const auto& expected =
+                    std::string(mode).empty() || std::string(mode) == "1" ? shared_error : specific_error;
+                auto matches_expected     = [&](const std::runtime_error& error) { return error.what() == expected; };
+                auto matches_cli_expected = [&](const std::runtime_error& error) {
+                    return std::string(error.what()).find("\n" + expected + "\n") != std::string::npos;
+                };
+                for (const bool flag : {false, true}) {
+                    BOOST_CHECK_EXCEPTION(MockClientInvoker{"ecflow_client --host " + host + " --port " + someport +
+                                                            " --ping" + (flag ? " --ssl" : "")},
+                                          std::runtime_error,
+                                          matches_cli_expected);
+                }
+                BOOST_CHECK_EXCEPTION(ssl.enable_if_defined(host, someport), std::runtime_error, matches_expected);
+                BOOST_CHECK(!ssl.enable_no_throw(host, someport, mode));
+                BOOST_CHECK(!ssl.enabled());
+                BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
+            }
         }
+    };
+
+    for (const auto& path : {certificates.string(), certificates.string() + "/", fs::relative(certificates).string()}) {
+        WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", path);
+        check_errors(certificates);
+    }
+    {
+        WithTestEnvironmentVariable home("HOME", directory.path().string());
+        WithoutTestEnvironmentVariable ssl_dir("ECF_SSL_DIR");
+        check_errors(directory.path() / ".ecflowrc" / "ssl");
     }
 }
 

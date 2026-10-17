@@ -13,11 +13,39 @@
 
 namespace ecf {
 
+namespace {
+
+///
+/// @brief Formats a missing-certificate error in the requested lookup order.
+///
+/// @param[in] directory Configured certificate directory, which may be relative.
+/// @param[in] host Server hostname after localhost resolution.
+/// @param[in] port Server port used in the specific certificate filename.
+/// @param[in] shared_first True for shared-first selection; false for specific-first selection.
+/// @return An error containing both absolute certificate paths and the requested strategy.
+/// @throws std::filesystem::filesystem_error if an absolute path cannot be determined.
+///
+std::string missing_certificate_error(const std::string& directory,
+                                      const std::string& host,
+                                      const std::string& port,
+                                      bool shared_first) {
+    const auto shared    = fs::absolute(fs::path{directory} / "server.crt").lexically_normal().string();
+    const auto specific  = fs::absolute(fs::path{directory} / (host + "." + port + ".crt")).lexically_normal().string();
+    const auto* strategy = shared_first ? "shared certificate first, server-specific certificate as fallback"
+                                        : "server-specific certificate first, shared certificate as fallback";
+    return "Error: Unable to find certificate file: '" + (shared_first ? shared : specific) + "' or '" +
+           (shared_first ? specific : shared) + "' (using strategy: " + strategy + ")";
+}
+
+} // namespace
+
 std::string Openssl::info() const {
-    if (ssl_ == "1") {
-        return "1 : enabled : uses shared ssl certificates";
+    if (!enabled()) {
+        return "SSL disabled";
     }
-    return ssl_ + " : enabled : uses server/port specific ssl certificates";
+
+    const auto path = fs::absolute(crt()).lexically_normal().string();
+    return "SSL certificate selected: '" + path + "' (" + (ssl_ == "1" ? "shared" : "server-specific") + ")";
 }
 
 std::string Openssl::selected_crt() const {
@@ -74,8 +102,7 @@ void Openssl::enable(std::string host, const std::string& port) {
     }
 
     if (!enable_no_throw(host, port)) {
-        throw std::runtime_error(MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt or "
-                                         << host << "." << port << ".crt in $HOME/.ecflowrc/ssl"));
+        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, true));
     }
 }
 
@@ -88,18 +115,8 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
         }
 
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
-            std::string error;
-            if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
-                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* "
-                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)");
-            }
-            else {
-                const auto directory = fs::path{certificates_dir()};
-                error                = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) '"
-                                << (directory / (host + "." + port + ".crt")).string() << "' or '"
-                                << (directory / "server.crt").string() << "' (with ECF_SSL=" << ecf_ssl_env << ")");
-            }
-            throw std::runtime_error(error);
+            const bool shared_first = ecf_ssl_env.empty() || ecf_ssl_env == "1";
+            throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, shared_first));
         }
     }
 }
@@ -110,10 +127,7 @@ void Openssl::enable_prefer_specific(std::string host, const std::string& port) 
     }
 
     if (!enable_no_throw(host, port, "X")) {
-        const auto certificate = fs::path{certificates_dir()} / (host + "." + port + ".crt");
-        const auto shared      = fs::path{certificates_dir()} / "server.crt";
-        throw std::runtime_error("Error: Unable to find the self-signed certificate file(CRT) '" +
-                                 certificate.string() + "' or '" + shared.string() + "'");
+        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, false));
     }
 }
 

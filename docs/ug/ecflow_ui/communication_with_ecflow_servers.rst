@@ -151,6 +151,10 @@ If neither certificate exists, the connection fails. If the selected certificate
 cannot be loaded or fails verification, the connection fails without trying
 another certificate.
 
+The UI log records the selected certificate's absolute path and whether it is
+shared or server-specific when each SSL client is created. The entry identifies
+the server and appears before the certificate is loaded.
+
 .. note::
 
    ``ecflow_server`` does not serve HTTPS. To provide HTTPS, a reverse proxy is

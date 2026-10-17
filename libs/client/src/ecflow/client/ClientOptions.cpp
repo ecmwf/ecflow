@@ -181,27 +181,30 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 
 #ifdef ECF_OPENSSL
     if (auto ecf_ssl = getenv("ECF_SSL"); vm.count("ssl") || ecf_ssl) {
-        if (!vm.count("ssl") && ecf_ssl) {
-            if (env->debug()) {
-                std::cout << "  ssl enabled via environment variable\n";
+        if (env->debug()) {
+            std::cout << "  SSL enable: ";
+            if (ecf_ssl) {
+                std::cout << (vm.count("ssl") ? "via --ssl with " : "via ") << "ECF_SSL='" << ecf_ssl << "'";
             }
-            env->enable_ssl_if_defined();
+            else {
+                std::cout << "via --ssl, ECF_SSL unset";
+            }
+            const bool shared_first = !ecf_ssl || !*ecf_ssl || std::string(ecf_ssl) == "1";
+            std::cout << " ("
+                      << (shared_first ? "shared certificate first, server-specific certificate as fallback"
+                                       : "server-specific certificate first, shared certificate as fallback")
+                      << ")\n";
         }
-        else if (vm.count("ssl") && !ecf_ssl) {
-            if (env->debug()) {
-                std::cout << "  ssl explicitly enabled via command line\n";
-            }
-            env->enable_ssl();
+
+        if (ecf_ssl) {
+            env->enable_ssl_if_defined();
         }
         else {
-            if (env->debug()) {
-                std::cout << "  ssl explicitly enabled via command line, but also enabled via environment variable\n";
-            }
-            env->enable_ssl_if_defined();
+            env->enable_ssl();
         }
 
         if (env->debug()) {
-            std::cout << "  ssl certificate: '" << env->openssl().info() << "' \n";
+            std::cout << "  " << env->openssl().info() << '\n';
         }
     }
 #endif

@@ -86,6 +86,12 @@ Example using a server-specific certificate:
 Enable SSL with ``ECF_SSL`` or :ref:`--ssl <ssl_cli>`; ``ECF_SSL_DIR`` only
 selects the directory. ``ECF_SSL`` values select a mode, not a certificate path.
 
+Add ``-d`` to report how SSL was enabled and the requested certificate order.
+When ``ECF_SSL`` is set, the output includes its value.
+
+Before the certificate is loaded, the debug output reports its absolute path
+and identifies whether it is shared or server-specific.
+
 The directory override also applies to :term:`ecflow_ui`, which selects
 certificates per server. See :ref:`open_ssl` for certificate setup.
 
