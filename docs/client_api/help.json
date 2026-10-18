@@ -2496,7 +2496,9 @@
       "required": "mandatory",
       "applies_to": "both",
       "overridable_by": "host",
-      "description": "The main server hostname",
+      "description": [
+        "The main server hostname"
+      ],
       "default": "localhost"
     },
     {
@@ -2505,7 +2507,9 @@
       "required": "mandatory",
       "applies_to": "both",
       "overridable_by": "port",
-      "description": "The main server port",
+      "description": [
+        "The main server port"
+      ],
       "default": 3141
     },
     {
@@ -2515,7 +2519,9 @@
       "applies_to": "both",
       "requires": "ECF_OPENSSL",
       "overridable_by": "ssl",
-      "description": "Enable secure communication. Empty or '1': server.crt first; other values: <host>.<port>.crt first."
+      "description": [
+        "Enable secure communication. Empty or '1': server.crt first; other values: <host>.<port>.crt first."
+      ]
     },
     {
       "name": "ECF_SSL_DIR",
@@ -2523,7 +2529,9 @@
       "required": "optional",
       "applies_to": "both",
       "requires": "ECF_OPENSSL",
-      "description": "Directory of the SSL certificates, with or without a trailing '/'. Does not enable SSL.",
+      "description": [
+        "Directory of the SSL certificates, with or without a trailing '/'. Does not enable SSL."
+      ],
       "default": "$HOME/.ecflowrc/ssl/"
     },
     {
@@ -2531,14 +2539,18 @@
       "type": "string",
       "required": "optional",
       "applies_to": "both",
-      "description": "File that lists alternate hosts to try, if connection to main host fails"
+      "description": [
+        "File that lists alternate hosts to try, if connection to main host fails"
+      ]
     },
     {
       "name": "ECF_HOSTFILE_POLICY",
       "type": "string",
       "required": "optional",
       "applies_to": "both",
-      "description": "The policy ('task' or 'all') to define which commands consider using alternate hosts.",
+      "description": [
+        "The policy ('task' or 'all') to define which commands consider using alternate hosts."
+      ],
       "default": "task"
     },
     {
@@ -2546,21 +2558,27 @@
       "type": "string",
       "required": "mandatory",
       "applies_to": "task",
-      "description": "Full path name to the task"
+      "description": [
+        "Full path name to the task"
+      ]
     },
     {
       "name": "ECF_PASS",
       "type": "string",
       "required": "mandatory",
       "applies_to": "task",
-      "description": "The job password (defined by the server, and used to authenticate client requests)"
+      "description": [
+        "The job password (defined by the server, and used to authenticate client requests)"
+      ]
     },
     {
       "name": "ECF_TRYNO",
       "type": "int",
       "required": "mandatory",
       "applies_to": "task",
-      "description": "The run number of the job (defined by the server, and used in job/output file name generation)."
+      "description": [
+        "The run number of the job (defined by the server, and used in job/output file name generation)."
+      ]
     },
     {
       "name": "ECF_RID",
@@ -2568,14 +2586,18 @@
       "required": "mandatory",
       "applies_to": "task",
       "overridable_by": "rid",
-      "description": "The process identifier. Supports identifying zombies and automated killing of running jobs"
+      "description": [
+        "The process identifier. Supports identifying zombies and automated killing of running jobs"
+      ]
     },
     {
       "name": "ECF_TIMEOUT",
       "type": "int",
       "required": "optional",
       "applies_to": "task",
-      "description": "Maximum time for a task command to deliver a message to the server, retrying the main and alternate hosts until the limit is reached",
+      "description": [
+        "Maximum time for a task command to deliver a message to the server, retrying the main and alternate hosts until the limit is reached"
+      ],
       "default": 3600,
       "minimum": 60,
       "maximum": 86400,
@@ -2586,7 +2608,9 @@
       "type": "int",
       "required": "optional",
       "applies_to": "task",
-      "description": "Maximum time for a task command flagged as a zombie by the server to keep retrying; the ECF_TIMEOUT limit still applies, so the effective limit is the smaller of the two",
+      "description": [
+        "Maximum time for a task command flagged as a zombie by the server to keep retrying; the ECF_TIMEOUT limit still applies, so the effective limit is the smaller of the two"
+      ],
       "default": 1800,
       "minimum": 60,
       "maximum": 86400,
@@ -2597,7 +2621,9 @@
       "type": "int",
       "required": "optional",
       "applies_to": "task",
-      "description": "Maximum time to establish a connection with the server; 0 means that the timeout is taken from the command being executed",
+      "description": [
+        "Maximum time to establish a connection with the server; 0 means that the timeout is taken from the command being executed"
+      ],
       "default": 0,
       "unit": "seconds"
     },
@@ -2606,14 +2632,18 @@
       "type": "any",
       "required": "optional",
       "applies_to": "task",
-      "description": "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUT's wait."
+      "description": [
+        "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUT's wait."
+      ]
     },
     {
       "name": "NO_ECF",
       "type": "any",
       "required": "optional",
       "applies_to": "task",
-      "description": "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
+      "description": [
+        "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
+      ]
     }
   ],
   "definitions": [
