@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -18,6 +19,7 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -149,6 +151,34 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
     fs::remove(h.ecf_log_file(serverEnv.the_port()));
 
     /// Destroy Log singleton to avoid valgrind from complaining
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_version_after_start_time) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args);
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+    Log::instance()->flush();
+
+    std::vector<std::string> lines;
+    BOOST_REQUIRE(File::splitFileIntoLines(Log::instance()->path(), lines));
+
+    // The log may hold earlier runs, so the last start-up is the one written by this test
+    auto started = std::find_if(lines.rbegin(), lines.rend(), [](const std::string& line) {
+        return line.find("] Started at ") != std::string::npos;
+    });
+    BOOST_REQUIRE_MESSAGE(started != lines.rend(), "Expected a 'Started at' line in the log");
+
+    auto version = started.base(); // the line following 'Started at'
+    BOOST_REQUIRE_MESSAGE(version != lines.end(), "Expected a line after 'Started at' in the log");
+    BOOST_CHECK_MESSAGE(ecf::algorithm::starts_with(*version, "MSG:["),
+                        "Expected a MSG line after 'Started at', but found: " << *version);
+    BOOST_CHECK_MESSAGE(ecf::algorithm::ends_with(*version, "] " + Version::description()),
+                        "Expected the version description after 'Started at', but found: " << *version);
+
+    remove_log_file(serverEnv);
     Log::destroy();
 }
 

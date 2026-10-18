@@ -163,6 +163,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     // Init log file:
     LOG(Log::MSG, ""); // previous log may not end in newline
     LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
+    LOG(Log::MSG, Version::description());
     if (tcp_protocol_.family() == 2 /*PF_INET*/) {
         LOG(Log::MSG, "Host(" << hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v4");
     }
