@@ -460,6 +460,7 @@ Token ClientEnvironment::get_token(const std::string& url) const {
         for (auto token : data.tokens) {
             std::regex pattern(token.server);
             if (std::regex_match(url, pattern)) {
+                token.source = tokens_path.string();
                 return token;
             }
         }
@@ -468,7 +469,7 @@ Token ClientEnvironment::get_token(const std::string& url) const {
         throw;
     }
 
-    throw UnavailableToken("Unable to find token for URL: "s + url);
+    throw UnavailableToken("Unable to find token for URL: "s + url + ", in tokens file: " + tokens_path.string());
 }
 
 bool ClientEnvironment::host_file_policy_is_task() const {

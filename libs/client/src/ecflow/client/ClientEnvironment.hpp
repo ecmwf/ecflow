@@ -21,6 +21,7 @@ struct Token
     std::string email;
     std::string username;
     std::string password;
+    std::string source; ///< The location of the tokens file from which the token was loaded
 
     static Token make_basic(const std::string& server, const std::string& username, const std::string& password) {
         return Token{server, username, password};
