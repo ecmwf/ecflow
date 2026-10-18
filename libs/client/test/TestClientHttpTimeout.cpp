@@ -115,6 +115,11 @@ BOOST_AUTO_TEST_CASE(test_http_client_gives_up_after_the_configured_connect_time
     // The request reached the peer, so the failure is not one that happened before any exchange
     BOOST_CHECK_MESSAGE(peer.received() > 0, "expected the request to reach the peer: " << client.errorMsg());
 
+    // The reply did not arrive in time, on a connection that the peer kept open
+    const auto& diagnosis = client.connection_diagnosis();
+    BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::Timeout);
+    BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+
     // The client waited for the configured timeout, and not for the timeout of the ping command (10 seconds), nor
     // for the former fixed timeout (120 seconds); the upper bound leaves room for a loaded machine
     BOOST_CHECK_MESSAGE(elapsed >= std::chrono::milliseconds{900},

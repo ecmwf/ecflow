@@ -367,6 +367,20 @@ BOOST_AUTO_TEST_CASE(test_http_client_uses_the_timeout_of_the_command_unless_giv
                 std::chrono::seconds{2});
 }
 
+BOOST_AUTO_TEST_CASE(test_http_client_reports_a_silent_peer_as_a_timeout) {
+    ECF_NAME_THIS_TEST();
+
+    FakePeer peer(FakePeer::Behaviour::StaySilent);
+
+    auto diagnosis = run_http_request(FakePeer::host(), peer.port());
+
+    // The read timed out on a connection that stayed open: the peer neither closed it, nor
+    // answered with something other than HTTP, so nothing suggests a protocol mismatch
+    BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::Timeout);
+    BOOST_CHECK_EQUAL(diagnosis.client_protocol, Protocol::Http);
+    BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+}
+
 BOOST_AUTO_TEST_CASE(test_http_client_reports_a_peer_that_does_not_answer_http) {
     ECF_NAME_THIS_TEST();
 

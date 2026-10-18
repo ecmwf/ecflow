@@ -3,6 +3,7 @@
 
 #include "ecflow/base/HttpClient.hpp"
 
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -119,6 +120,7 @@ void HttpClient::run() {
 
     client_.set_default_headers(headers_);
 
+    const auto start = std::chrono::steady_clock::now();
     if (auto result = client_.Post("/v1/ecflow", outbound, "application/json"); result) {
         status_ = static_cast<ecf::http::Status>(result->status);
         reason_ = "";
@@ -139,7 +141,13 @@ void HttpClient::run() {
         reason_ = httplib::to_string(result.error());
 
         auto failure = ecf::http::classify_httplib_error(result.error());
-        if (result.error() == httplib::Error::Connection) {
+        if ((result.error() == httplib::Error::Read || result.error() == httplib::Error::Write) &&
+            std::chrono::steady_clock::now() - start >= timeout_) {
+            // The HTTP library reports a read or write that timed out, and a peer that closed the
+            // connection, as the same error; only the former takes as long as the timeout.
+            failure = ecf::ConnectionFailure::Timeout;
+        }
+        else if (result.error() == httplib::Error::Connection) {
             // The HTTP library reports a refused connection, and one left unanswered until the operating
             // system gives up, as the same error; a separate connection attempt tells the two apart.
             if (auto observed = ecf::probe_connect(host_, port_, CONNECT_PROBE_TIMEOUT);
