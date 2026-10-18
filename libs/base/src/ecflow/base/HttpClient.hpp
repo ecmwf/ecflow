@@ -126,7 +126,7 @@ public:
     /// @param[in] scheme    Either "http" or "https"
     /// @param[in] host      The server host name
     /// @param[in] port      The server port
-    /// @param[in] timeout   The connect, read and write timeout, in seconds
+    /// @param[in] timeout   The connect, read and write timeout; when zero, the timeout of @p cmd_ptr is used
     /// @param[out] diagnosis Storage for the diagnosis of the exchange, which outlives this client;
     ///                      when null, the diagnosis is kept internally and lost on destruction
     /// @throws std::runtime_error if @p cmd_ptr is null, or if HTTPS is requested by an ecFlow
@@ -136,10 +136,17 @@ public:
                const std::string& scheme,
                const std::string& host,
                const std::string& port,
-               int timeout                         = 120,
+               std::chrono::milliseconds timeout   = std::chrono::seconds{0},
                ecf::ConnectionDiagnosis* diagnosis = nullptr);
 
     std::string url() const { return base_url_; }
+
+    ///
+    /// @brief Returns the connect, read and write timeout in effect.
+    ///
+    /// @return The timeout given on construction or, when that was zero, the timeout of the command
+    ///
+    std::chrono::milliseconds timeout() const { return timeout_; }
 
     void run();
 
@@ -176,6 +183,7 @@ private:
     std::string host_;   /// the servers name
     std::string port_;   /// the port on the server
     std::string base_url_;
+    std::chrono::milliseconds timeout_; /// the connect, read and write timeout
     httplib::Client client_;
     httplib::Headers headers_;
 

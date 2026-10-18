@@ -258,7 +258,8 @@ ConnectionDiagnosis run_plain_request(const std::string& host, const std::string
 ConnectionDiagnosis run_http_request(const std::string& host, const std::string& port) {
     ConnectionDiagnosis diagnosis;
     try {
-        HttpClient client(std::make_shared<CtsCmd>(CtsCmd::PING), "http", host, port, 2, &diagnosis);
+        HttpClient client(
+            std::make_shared<CtsCmd>(CtsCmd::PING), "http", host, port, std::chrono::seconds{2}, &diagnosis);
         client.run();
         ServerReply reply;
         client.handle_server_response(reply, false);
@@ -353,6 +354,17 @@ BOOST_AUTO_TEST_CASE(test_http_client_reports_nothing_listening_as_a_refused_con
     BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::ConnectionRefused);
     BOOST_CHECK_EQUAL(diagnosis.client_protocol, Protocol::Http);
     BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+}
+
+BOOST_AUTO_TEST_CASE(test_http_client_uses_the_timeout_of_the_command_unless_given_one) {
+    ECF_NAME_THIS_TEST();
+
+    // Constructing the client does not connect, so no peer is needed
+    const auto ping = std::make_shared<CtsCmd>(CtsCmd::PING);
+
+    BOOST_CHECK(HttpClient(ping, "http", FakePeer::host(), unused_port()).timeout() == ping->timeout());
+    BOOST_CHECK(HttpClient(ping, "http", FakePeer::host(), unused_port(), std::chrono::seconds{2}).timeout() ==
+                std::chrono::seconds{2});
 }
 
 BOOST_AUTO_TEST_CASE(test_http_client_reports_a_peer_that_does_not_answer_http) {

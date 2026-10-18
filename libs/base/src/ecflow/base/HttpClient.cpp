@@ -55,12 +55,13 @@ HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
                        const std::string& scheme,
                        const std::string& host,
                        const std::string& port,
-                       int timeout,
+                       std::chrono::milliseconds timeout,
                        ecf::ConnectionDiagnosis* diagnosis)
     : scheme_(scheme),
       host_(host),
       port_(port),
       base_url_(make_scheme_host_port(scheme, host, port)),
+      timeout_(timeout),
       client_(base_url_),
       headers_(),
       diagnosis_(diagnosis ? *diagnosis : owned_diagnosis_) {
@@ -70,9 +71,14 @@ HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
     diagnosis_.host            = host_;
     diagnosis_.port            = port_;
 
-    client_.set_connection_timeout(std::chrono::seconds{timeout});
-    client_.set_read_timeout(std::chrono::seconds{timeout});
-    client_.set_write_timeout(std::chrono::seconds{timeout});
+    // As for the TCP/IP clients, the timeout is defined per command when not set explicitly
+    if (timeout_ == std::chrono::milliseconds{0} && cmd_ptr) {
+        timeout_ = cmd_ptr->timeout();
+    }
+
+    client_.set_connection_timeout(timeout_);
+    client_.set_read_timeout(timeout_);
+    client_.set_write_timeout(timeout_);
 
     // Disable cert verification
     if (scheme_ == "https") {

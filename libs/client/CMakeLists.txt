@@ -51,6 +51,7 @@ set(test_srcs
   test/TestClientInterface.cpp
   test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
+  test/TestClientHttpTimeout.cpp
   test/TestClientRetry.cpp
   test/TestClientToken.cpp
   test/TestHostsFile.cpp

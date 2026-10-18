@@ -543,8 +543,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             effective_protocol_ = clientEnv_.protocol();
 
                             const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
-                            HttpClient theClient(
-                                cts_cmd, scheme, clientEnv_.host(), clientEnv_.port(), 120, &diagnosis_);
+                            HttpClient theClient(cts_cmd,
+                                                 scheme,
+                                                 clientEnv_.host(),
+                                                 clientEnv_.port(),
+                                                 clientEnv_.connect_timeout(),
+                                                 &diagnosis_);
                             try {
                                 cfg(clientEnv_, theClient);
                             }
