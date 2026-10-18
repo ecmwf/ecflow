@@ -114,6 +114,16 @@ public:
     /// @return The OpenSSL library version as a string.
     ///
     static std::string openssl();
+
+    ///
+    /// @brief Return the version of the Aviso client library ecFlow was built against.
+    ///
+    /// The version is recorded at build time, so it is the same in every binary, including those that do not
+    /// link the library (only the server does).
+    ///
+    /// @return The Aviso client library version, or `disabled` when ecFlow is built without Aviso support.
+    ///
+    static std::string aviso();
 };
 
 } // namespace ecf

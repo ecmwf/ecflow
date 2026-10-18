@@ -76,6 +76,21 @@ BOOST_AUTO_TEST_CASE(test_version_description_names_git_commit_after_version) {
                         "Expected git(" << Version::git() << ") after version(...) in: " << desc);
 }
 
+BOOST_AUTO_TEST_CASE(test_version_aviso_is_the_version_built_against) {
+    ECF_NAME_THIS_TEST();
+
+    // ECF_TEST_EXPECTED_AVISO is set by CMake: the Aviso client library version, or 'disabled'
+    BOOST_CHECK_EQUAL(Version::aviso(), std::string(ECF_TEST_EXPECTED_AVISO));
+}
+
+BOOST_AUTO_TEST_CASE(test_version_description_names_aviso) {
+    ECF_NAME_THIS_TEST();
+
+    auto desc = Version::description();
+    BOOST_CHECK_MESSAGE(contains(desc, "aviso(" + Version::aviso() + ")"),
+                        "Expected aviso(" << Version::aviso() << ") in: " << desc);
+}
+
 BOOST_AUTO_TEST_CASE(test_version_raw_components) {
     ECF_NAME_THIS_TEST();
 

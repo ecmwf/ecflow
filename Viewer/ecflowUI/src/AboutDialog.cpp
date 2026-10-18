@@ -28,8 +28,9 @@ AboutDialog::AboutDialog(QWidget* parent)
 
     descTxt += "<br><b>git commit:</b> " + QString::fromStdString(ecf::Version::git());
     descTxt += "<br><b>boost version:</b> " + QString::fromStdString(ecf::Version::boost());
-    descTxt += "<br><b>compiler</b>: " + QString::fromStdString(ecf::Version::compiler());
+    descTxt += "<br><b>compiler:</b> " + QString::fromStdString(ecf::Version::compiler());
     descTxt += "<br><b>serialisation:</b> JSON cereal " + QString::fromStdString(ecf::Version::cereal());
+    descTxt += "<br><b>aviso version:</b> " + QString::fromStdString(ecf::Version::aviso());
     descTxt += "<br><b>compiled on:</b> " + desc.section("Compiled on", 1, 1);
 
     const char* qtv = qVersion();

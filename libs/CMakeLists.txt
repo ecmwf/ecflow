@@ -38,6 +38,20 @@ add_custom_target(ecflow_git_commit
   VERBATIM)
 
 #
+# Record the version of the Aviso client library built against, shown as aviso(<version>) in the version
+# description of every binary, or aviso(disabled) when ENABLE_AVISO is off.
+#
+if (NOT ENABLE_AVISO)
+  set(found_aviso_ffi_version "disabled")
+elseif (AVISO_FFI_VERSION)
+  set(found_aviso_ffi_version "${AVISO_FFI_VERSION}")
+else ()
+  set(found_aviso_ffi_version "unknown")
+endif ()
+set_property(SOURCE core/src/ecflow/core/Version.cpp
+  APPEND PROPERTY COMPILE_DEFINITIONS "AVISO_FFI_VERSION=\"${found_aviso_ffi_version}\"")
+
+#
 # Embed the CLI help manifest (docs/client_api/help.json) as a C++ header.
 #
 # A build-time custom command is used instead of configure_file(), so the

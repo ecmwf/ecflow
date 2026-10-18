@@ -88,6 +88,8 @@ ecflow_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  DEFINITIONS
+    ECF_TEST_EXPECTED_AVISO=\"${found_aviso_ffi_version}\"
   FORMAT
 )
 

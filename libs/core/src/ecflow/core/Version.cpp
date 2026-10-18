@@ -45,6 +45,7 @@ std::string Version::description() {
     ss << "compiler(" << Version::compiler() << ") ";
     ss << "serialisation(JSON cereal " << Version::cereal() << ") ";
     ss << "openssl(" << Version::openssl() << ") ";
+    ss << "aviso(" << Version::aviso() << ") ";
     ss << "Compiled on " << __DATE__ << " " << __TIME__;
     return ss.str();
 }
@@ -134,6 +135,11 @@ std::string Version::openssl() {
     return "disabled";
 
 #endif
+}
+
+std::string Version::aviso() {
+    // AVISO_FFI_VERSION is defined by CMake, for this source file only
+    return AVISO_FFI_VERSION;
 }
 
 } // namespace ecf

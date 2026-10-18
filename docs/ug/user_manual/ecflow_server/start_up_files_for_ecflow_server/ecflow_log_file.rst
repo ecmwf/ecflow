@@ -85,7 +85,7 @@ Each time the server starts, it writes the following lines to the log file, befo
 
   MSG:[12:00:00 18.10.2026]
   MSG:[12:00:00 18.10.2026] Started at 2026-Oct-18 12:00:00 universal time
-  MSG:[12:00:00 18.10.2026] Ecflow version(5.20.0) git(1a2b3c4d5e6f) boost(1.92.0) compiler(gcc 14.2.0) serialisation(JSON cereal 1.3.2) openssl(3.0.13) Compiled on Oct 18 2026 10:00:00
+  MSG:[12:00:00 18.10.2026] Ecflow version(5.20.0) git(1a2b3c4d5e6f) boost(1.92.0) compiler(gcc 14.2.0) serialisation(JSON cereal 1.3.2) openssl(3.0.13) aviso(2.4.2) Compiled on Oct 18 2026 10:00:00
 
 The lines are:
 
@@ -115,5 +115,8 @@ The version line names:
      - the serialisation format, and the version of the Cereal library
    * - ``openssl``
      - the version of the OpenSSL library, or ``disabled``
+   * - ``aviso``
+     - the version of the Aviso client library ecFlow was built against, or ``disabled`` when built without
+       Aviso support (``ENABLE_AVISO=OFF``)
    * - ``Compiled on``
      - the date and time of the compilation
