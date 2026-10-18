@@ -18,6 +18,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -43,6 +44,123 @@ namespace {
 void remove_log_file(const ServerEnvironment& serverEnv) {
     Host host;
     fs::remove(host.ecf_log_file(serverEnv.the_port()));
+}
+
+///
+/// @brief Returns the lines of the last start-up written to the log, from 'Started at', without their prefix.
+///
+/// @return The lines, each without its `XXX:[time] ` prefix; empty when the log holds no start-up.
+///
+std::vector<std::string> last_startup_lines() {
+    Log::instance()->flush();
+
+    std::vector<std::string> lines;
+    BOOST_REQUIRE(File::splitFileIntoLines(Log::instance()->path(), lines));
+
+    auto started = std::find_if(lines.rbegin(), lines.rend(), [](const std::string& line) {
+        return line.find("] Started at ") != std::string::npos;
+    });
+    if (started == lines.rend()) {
+        return {};
+    }
+
+    std::vector<std::string> startup;
+    for (auto line = std::prev(started.base()); line != lines.end(); ++line) {
+        auto prefix_end = line->find("] ");
+        startup.push_back(prefix_end == std::string::npos ? *line : line->substr(prefix_end + 2));
+    }
+    return startup;
+}
+
+///
+/// @brief Returns the value of the given server variable.
+///
+/// @param[in] serverEnv The server environment providing the variables
+/// @param[in] name The name of the variable
+/// @return The value of the variable; empty when the variable is not defined.
+///
+std::string server_variable(const ServerEnvironment& serverEnv, const std::string& name) {
+    std::vector<std::pair<std::string, std::string>> variables;
+    serverEnv.variables(variables);
+    for (const auto& [key, value] : variables) {
+        if (key == name) {
+            return value;
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Returns the runtime configuration block expected in the log, for the given server environment.
+///
+/// @param[in] serverEnv The server environment that wrote the log
+/// @param[in] connection The expected value of the Connection entry
+/// @param[in] ssl_certificate The expected value of the SSL certificate entry; empty when SSL is not enabled
+/// @return The lines of the block, starting with its title.
+///
+std::vector<std::string> expected_runtime_configuration(const ServerEnvironment& serverEnv,
+                                                        const std::string& connection,
+                                                        const std::string& ssl_certificate) {
+    auto entry    = [](const std::string& key, const std::string& value) { return "  " + key + " = " + value; };
+    auto variable = [&](const std::string& name) { return entry(name, server_variable(serverEnv, name)); };
+    auto command  = [&](const std::string& name) {
+        return entry(name, ecf::mask_credentials(server_variable(serverEnv, name)));
+    };
+
+    std::vector<std::string> block = {"Runtime Configuration",
+                                      entry("Host", serverEnv.hostPort().first),
+                                      entry("Port", serverEnv.the_port()),
+                                      entry("Connection", connection)};
+    if (!ssl_certificate.empty()) {
+        block.push_back(entry("SSL certificate", ssl_certificate));
+    }
+    std::vector<std::string> settings = {
+        variable("ECF_HOME"),
+        variable("ECF_LOG"),
+        variable("ECF_CHECK"),
+        variable("ECF_CHECKOLD"),
+        variable("ECF_LISTS"),
+        variable("ECF_PASSWD"),
+        variable("ECF_CUSTOM_PASSWD"),
+        entry("ECF_CHECKINTERVAL", std::to_string(serverEnv.checkPtInterval())),
+        entry("ECF_CHECKMODE", serverEnv.check_mode_str()),
+        entry("ECF_PRUNE_NODE_LOG", std::to_string(serverEnv.ecf_prune_node_log())),
+        entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold())),
+        entry("ECF_DEBUG_SERVER", serverEnv.debug() ? "enabled" : "disabled"),
+        command("ECF_JOB_CMD"),
+        command("ECF_KILL_CMD"),
+        command("ECF_STATUS_CMD"),
+        command("ECF_CHECK_CMD"),
+        command("ECF_URL_CMD"),
+        command("ECF_URL_BASE"),
+        command("ECF_URL"),
+        command("ECF_MICRO"),
+        entry("Job scheduling interval", std::to_string(serverEnv.submitJobsInterval())),
+        entry("Job generation", serverEnv.jobGeneration() ? "enabled" : "disabled"),
+        entry("Checkpoint save time alarm", std::to_string(serverEnv.checkpt_save_time_alarm()))};
+    block.insert(block.end(), settings.begin(), settings.end());
+    return block;
+}
+
+///
+/// @brief Checks that the log holds the runtime configuration block, right after the version line.
+///
+/// @param[in] serverEnv The server environment that wrote the log
+/// @param[in] connection The expected value of the Connection entry
+/// @param[in] ssl_certificate The expected value of the SSL certificate entry; empty when SSL is not enabled
+///
+void check_runtime_configuration(const ServerEnvironment& serverEnv,
+                                 const std::string& connection,
+                                 const std::string& ssl_certificate = {}) {
+    auto startup  = last_startup_lines();
+    auto expected = expected_runtime_configuration(serverEnv, connection, ssl_certificate);
+
+    BOOST_REQUIRE_MESSAGE(startup.size() >= 2 + expected.size(),
+                          "Expected 'Started at', the version line and "
+                              << expected.size() << " lines of runtime configuration, but found " << startup.size()
+                              << " lines");
+    std::vector<std::string> actual(startup.begin() + 2, startup.begin() + 2 + expected.size());
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
 
 } // namespace
@@ -177,6 +295,96 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_version_after_start_time) {
                         "Expected a MSG line after 'Started at', but found: " << *version);
     BOOST_CHECK_MESSAGE(ecf::algorithm::ends_with(*version, "] " + Version::description()),
                         "Expected the version description after 'Started at', but found: " << *version);
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_plain_connection) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args);
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+
+    check_runtime_configuration(serverEnv, "TCP/IP v4");
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_http_connection) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http"};
+    ServerEnvironment serverEnv(args);
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+
+    check_runtime_configuration(serverEnv, "HTTP over TCP/IP v4");
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_ipv6) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--v6"};
+    ServerEnvironment serverEnv(args);
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+
+    check_runtime_configuration(serverEnv, "TCP/IP v6");
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_non_default_runtime_configuration) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestFile config(NamedTestFile{"non_default.server_environment.cfg"},
+                        "ECF_CHECKINTERVAL = 300\n"
+                        "ECF_CHECKMODE = CHECK_ALWAYS\n"
+                        "ECF_PRUNE_NODE_LOG = 7\n");
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--dis_job_gen"};
+    ServerEnvironment serverEnv(args, "non_default.server_environment.cfg");
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+
+    check_runtime_configuration(serverEnv, "TCP/IP v4");
+
+    // The values are checked independently of the server environment that wrote them
+    auto startup = last_startup_lines();
+    for (const auto* line : {"  Job generation = disabled",
+                             "  ECF_CHECKINTERVAL = 300",
+                             "  ECF_CHECKMODE = CHECK_ALWAYS",
+                             "  ECF_PRUNE_NODE_LOG = 7"}) {
+        BOOST_CHECK_MESSAGE(std::find(startup.begin(), startup.end(), line) != startup.end(),
+                            "Expected '" << line << "' in the runtime configuration");
+    }
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_server_environment_masks_credentials_in_runtime_configuration) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestFile config(NamedTestFile{"masks_credentials.server_environment.cfg"},
+                        "ECF_JOB_CMD = submit --token s3cr3t %ECF_JOB%\n"
+                        "ECF_URL = https://user:s3cr3t@host/\n");
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args, "masks_credentials.server_environment.cfg");
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+
+    auto startup = last_startup_lines();
+    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_JOB_CMD = submit --token *** %ECF_JOB%") !=
+                startup.end());
+    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_URL = https://user:***@host/") != startup.end());
+    for (const auto& line : startup) {
+        BOOST_CHECK_MESSAGE(line.find("s3cr3t") == std::string::npos, "Unmasked credential in: " << line);
+    }
 
     remove_log_file(serverEnv);
     Log::destroy();
@@ -433,6 +641,25 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_http_when_requested) {
 }
 
 #ifdef ECF_OPENSSL
+
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_ssl_connection) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", "./");
+    WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--ssl"};
+    ServerEnvironment serverEnv(args);
+    BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+    BOOST_REQUIRE_MESSAGE(serverEnv.ssl(), "Expected SSL to be enabled");
+
+    check_runtime_configuration(
+        serverEnv, "TCP/IP v4 with SSL", serverEnv.openssl().certificate()->crt_file().string() + " (shared)");
+
+    remove_log_file(serverEnv);
+    Log::destroy();
+}
 
 BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_promoted_to_ssl_when_ssl_is_enabled) {
     ECF_NAME_THIS_TEST();

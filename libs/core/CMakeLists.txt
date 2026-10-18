@@ -52,6 +52,7 @@ set(test_srcs
   test/TestGetUserDetails.cpp
   test/TestIdentity.cpp
   test/TestLog.cpp
+  test/TestMaskCredentials.cpp
   test/TestMessage.cpp
   test/TestMigration.cpp
   test/TestNodeNameValidity.cpp

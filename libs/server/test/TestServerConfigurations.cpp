@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(logs_selected_certificate_and_warns_on_fallback_at_start_up
         const bool shared_selected = has_shared && (shared_first || !has_specific);
         const std::string kind     = shared_selected ? "shared" : "server-specific";
         const auto selected        = (directory.path() / (shared_selected ? "server.crt" : specific_name)).string();
-        const auto info            = line_with(log, "SSL certificate selected: '" + selected + "' (" + kind + ")");
+        const auto info            = line_with(log, "  SSL certificate = " + selected + " (" + kind + ")");
         BOOST_CHECK_MESSAGE(info.rfind("MSG:", 0) == 0, "Expected a MSG record of the selection in:\n" << log);
 
         const auto missing = (directory.path() / (shared_first ? "server.crt" : specific_name)).string();

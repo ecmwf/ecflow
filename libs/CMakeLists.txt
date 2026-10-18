@@ -329,6 +329,7 @@ set(srcs
   core/src/ecflow/core/Identity.hpp
   core/src/ecflow/core/Log.hpp
   core/src/ecflow/core/LogVerification.hpp
+  core/src/ecflow/core/MaskCredentials.hpp
   core/src/ecflow/core/Message.hpp
   core/src/ecflow/core/NOrder.hpp
   core/src/ecflow/core/NState.hpp
@@ -375,6 +376,7 @@ set(srcs
   core/src/ecflow/core/Host.cpp
   core/src/ecflow/core/Log.cpp
   core/src/ecflow/core/LogVerification.cpp
+  core/src/ecflow/core/MaskCredentials.cpp
   core/src/ecflow/core/NOrder.cpp
   core/src/ecflow/core/NState.cpp
   core/src/ecflow/core/NodePath.cpp
