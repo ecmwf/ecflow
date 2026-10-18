@@ -175,7 +175,7 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
                 record_failure(connect_failure_, connect_detail_);
             }
             else {
-                record_failure(ecf::ConnectionFailure::Timeout, "connect timed out");
+                record_failure(ecf::ConnectionFailure::ConnectionUnanswered, "connect timed out");
             }
             throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points : connection error ( "
                                              << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
@@ -214,6 +214,8 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
 #endif
 
         // **Successfully** established connection to the server
+        connected_ = true;
+
         start_handshake();
     }
 }
@@ -418,7 +420,8 @@ void SslClient::check_deadline() {
         // asynchronous operations are cancelled.
         stop();
 
-        record_failure(ecf::ConnectionFailure::Timeout, MESSAGE("timed out after " << timeout_.count() << "ms"));
+        record_failure(connected_ ? ecf::ConnectionFailure::Timeout : ecf::ConnectionFailure::ConnectionUnanswered,
+                       MESSAGE("timed out after " << timeout_.count() << "ms"));
         throw std::runtime_error(MESSAGE("SslClient::check_deadline: timed out after "
                                          << timeout_.count() << "ms for request( " << outbound_request_ << " ) on "
                                          << host_ << ":" << port_));

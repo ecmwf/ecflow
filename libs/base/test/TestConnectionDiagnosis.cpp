@@ -133,7 +133,8 @@ BOOST_AUTO_TEST_CASE(test_connect_errors_are_classified) {
         ecf::classify_connect_error(boost::system::errc::make_error_code(boost::system::errc::address_not_available)),
         ConnectionFailure::ConnectionRefused);
 
-    BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::timed_out), ConnectionFailure::Timeout);
+    // The operating system gave up waiting for an answer to the connection attempt
+    BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::timed_out), ConnectionFailure::ConnectionUnanswered);
 
     BOOST_CHECK_EQUAL(ecf::classify_connect_error(error::access_denied), ConnectionFailure::Other);
 
@@ -205,6 +206,7 @@ BOOST_AUTO_TEST_CASE(test_only_failures_after_a_successful_connect_suggest_a_mis
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::None));
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::HostResolution));
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::ConnectionRefused));
+    BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::ConnectionUnanswered));
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::Timeout));
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::RejectedRequest));
     BOOST_CHECK(!ecf::suggests_protocol_mismatch(ConnectionFailure::Other));
@@ -225,7 +227,8 @@ BOOST_AUTO_TEST_CASE(test_httplib_errors_are_classified) {
     BOOST_CHECK_EQUAL(classify_httplib_error(httplib::Error::Connection), ConnectionFailure::ConnectionRefused);
     BOOST_CHECK_EQUAL(classify_httplib_error(httplib::Error::BindIPAddress), ConnectionFailure::ConnectionRefused);
 
-    BOOST_CHECK_EQUAL(classify_httplib_error(httplib::Error::ConnectionTimeout), ConnectionFailure::Timeout);
+    BOOST_CHECK_EQUAL(classify_httplib_error(httplib::Error::ConnectionTimeout),
+                      ConnectionFailure::ConnectionUnanswered);
     BOOST_CHECK_EQUAL(classify_httplib_error(httplib::Error::Canceled), ConnectionFailure::Timeout);
 
     // Connected, then failed while exchanging data: the signature of a peer that is listening but
@@ -336,6 +339,24 @@ BOOST_AUTO_TEST_CASE(test_a_failure_that_is_not_a_mismatch_is_not_reported_as_on
     BOOST_CHECK_MESSAGE(explanation.find("Cannot communicate with the server") != std::string::npos, explanation);
     BOOST_CHECK_MESSAGE(explanation.find("nothing is listening") != std::string::npos, explanation);
     BOOST_CHECK_MESSAGE(explanation.find("server is running") != std::string::npos, explanation);
+}
+
+BOOST_AUTO_TEST_CASE(test_an_unanswered_connection_is_not_reported_as_refused) {
+    ECF_NAME_THIS_TEST();
+
+    ConnectionDiagnosis diagnosis;
+    diagnosis.client_protocol = Protocol::Https;
+    diagnosis.failure         = ConnectionFailure::ConnectionUnanswered;
+    diagnosis.host            = "hostname";
+    diagnosis.port            = "3141";
+
+    const std::string explanation = ecf::explain(diagnosis);
+
+    BOOST_CHECK_MESSAGE(explanation.find("Cannot communicate with the server") != std::string::npos, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("received no answer") != std::string::npos, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("firewall") != std::string::npos, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("refused") == std::string::npos, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("nothing is listening") == std::string::npos, explanation);
 }
 
 BOOST_AUTO_TEST_CASE(test_a_rejected_certificate_advises_about_certificates_not_about_protocols) {

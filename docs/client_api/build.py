@@ -203,7 +203,9 @@ def format_env_var(var):
     required = var["required"]
     if var.get("overridable_by"):
         required += "*"
-    return f"  {var['name']} <{var['type']}> [{required}]\n    {var['description']}\n" + format_env_var_default(var)
+    # Reproduces Help.cpp's format_env_var(): one indented line per element of the description
+    description = "".join(f"    {line}\n" for line in var["description"])
+    return f"  {var['name']} <{var['type']}> [{required}]\n" + description + format_env_var_default(var)
 
 
 def render_client_env_description(env_vars):

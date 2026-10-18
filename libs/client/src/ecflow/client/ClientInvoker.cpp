@@ -82,6 +82,10 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
     try {
         auto token = env.get_token(client.url());
 
+        if (env.debug()) {
+            std::cerr << "Found token for URL: " << client.url() << ", in tokens file: " << token.source << std::endl;
+        }
+
         if (token.type == "bearer") {
             auto key = token.key;
             client.set_authorisation_bearer(key);
@@ -96,7 +100,9 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
         }
     }
     catch (const UnavailableToken& e) {
-        std::cerr << e.what() << std::endl;
+        if (env.debug()) {
+            std::cerr << e.what() << std::endl;
+        }
     }
 }
 
@@ -537,8 +543,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             effective_protocol_ = clientEnv_.protocol();
 
                             const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
-                            HttpClient theClient(
-                                cts_cmd, scheme, clientEnv_.host(), clientEnv_.port(), 120, &diagnosis_);
+                            HttpClient theClient(cts_cmd,
+                                                 scheme,
+                                                 clientEnv_.host(),
+                                                 clientEnv_.port(),
+                                                 clientEnv_.connect_timeout(),
+                                                 &diagnosis_);
                             try {
                                 cfg(clientEnv_, theClient);
                             }

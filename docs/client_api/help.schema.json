@@ -144,7 +144,11 @@
           "type": "string",
           "minLength": 1
         },
-        "description": { "type": "string", "minLength": 1 },
+        "description": {
+          "description": "The help text, one line per element; each line is indented when rendered, so that a long description can be wrapped.",
+          "$ref": "#/$defs/description",
+          "minItems": 1
+        },
         "default": {
           "description": "Value used when the variable is not set. Mirrors the constant in the client sources (e.g. ClientEnvironment::DEFAULT_TIMEOUT); an integer for numeric variables, a string otherwise.",
           "type": ["integer", "string"]

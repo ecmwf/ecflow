@@ -90,6 +90,7 @@ def check_cross_references(manifest):
         ("command", manifest.get("commands", [])),
         ("option", manifest.get("options", [])),
         ("definition item", manifest.get("definitions", [])),
+        ("environment variable", manifest.get("environment_variables", [])),
     ):
         for entry in entries:
             for index, line in enumerate(entry.get("description", [])):

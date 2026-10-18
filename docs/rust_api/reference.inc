@@ -1035,6 +1035,12 @@ Failure
 
    No listener accepted the connection.
 
+.. _rust_failure_connectionunanswered:
+
+.. describe:: ConnectionUnanswered
+
+   The connection attempt received no answer, as when a firewall drops it.
+
 .. _rust_failure_timeout:
 
 .. describe:: Timeout

@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include <boost/asio.hpp>
 #include <boost/test/unit_test.hpp>
@@ -159,6 +160,85 @@ std::string unused_port() {
     return port;
 }
 
+///
+/// @brief A listener that never accepts, and whose queue of pending connections is full.
+///
+/// The operating system drops further connection attempts without answering them, which is how a
+/// firewall that drops packets looks to a client.
+///
+class SaturatedListener {
+public:
+    ///
+    /// @brief Starts listening on a kernel-assigned loopback port, and fills the queue of pending connections.
+    ///
+    /// Connections are attempted, without ever being accepted, until one attempt receives no answer within 200
+    /// milliseconds, or until 64 attempts have been made.
+    ///
+    /// @throws boost::system::system_error if the listening socket cannot be opened, bound, or put in listening
+    ///         state
+    ///
+    SaturatedListener()
+        : acceptor_(io_) {
+        acceptor_.open(boost::asio::ip::tcp::v4());
+        acceptor_.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("127.0.0.1"), 0));
+        acceptor_.listen(1);
+        port_ = ecf::convert_to<std::string>(acceptor_.local_endpoint().port());
+
+        // Connect until an attempt is left unanswered, which shows that the queue is full
+        for (int i = 0; i < 64 && !saturated_; ++i) {
+            auto socket = std::make_shared<boost::asio::ip::tcp::socket>(io_);
+            // The handler of the unanswered attempt runs only when the socket is closed, on destruction
+            auto completed = std::make_shared<bool>(false);
+            socket->async_connect(acceptor_.local_endpoint(),
+                                  [completed](const boost::system::error_code&) { *completed = true; });
+            io_.restart();
+            io_.run_for(std::chrono::milliseconds{200});
+            sockets_.push_back(socket);
+            saturated_ = !*completed;
+        }
+    }
+
+    SaturatedListener(const SaturatedListener&)            = delete;
+    SaturatedListener& operator=(const SaturatedListener&) = delete;
+
+    ///
+    /// @brief Closes the pending connections and the listening socket.
+    ///
+    /// Runs the handlers left outstanding by the closed connections before the execution context is destroyed.
+    ///
+    ~SaturatedListener() {
+        boost::system::error_code ignored;
+        for (auto& socket : sockets_) {
+            socket->close(ignored);
+        }
+        acceptor_.close(ignored);
+        io_.restart();
+        io_.poll();
+    }
+
+    ///
+    /// @brief Reports whether the queue of pending connections was filled.
+    ///
+    /// @return true when a connection attempt was left unanswered, and further attempts are therefore dropped;
+    ///         false when every attempt was answered
+    ///
+    [[nodiscard]] bool saturated() const { return saturated_; }
+
+    ///
+    /// @brief Returns the port on which the listener is bound.
+    ///
+    /// @return The port number, as text
+    ///
+    [[nodiscard]] const std::string& port() const { return port_; }
+
+private:
+    boost::asio::io_context io_;                                         ///< Drives the connection attempts
+    boost::asio::ip::tcp::acceptor acceptor_;                            ///< Listens, and never accepts
+    std::vector<std::shared_ptr<boost::asio::ip::tcp::socket>> sockets_; ///< The pending connections
+    std::string port_;                                                   ///< The bound port, as text
+    bool saturated_{false}; ///< Whether a connection attempt was left unanswered
+};
+
 /// Runs a plain TCP/IP request against the given endpoint, and returns the resulting diagnosis.
 ConnectionDiagnosis run_plain_request(const std::string& host, const std::string& port) {
     ConnectionDiagnosis diagnosis;
@@ -178,7 +258,8 @@ ConnectionDiagnosis run_plain_request(const std::string& host, const std::string
 ConnectionDiagnosis run_http_request(const std::string& host, const std::string& port) {
     ConnectionDiagnosis diagnosis;
     try {
-        HttpClient client(std::make_shared<CtsCmd>(CtsCmd::PING), "http", host, port, 2, &diagnosis);
+        HttpClient client(
+            std::make_shared<CtsCmd>(CtsCmd::PING), "http", host, port, std::chrono::seconds{2}, &diagnosis);
         client.run();
         ServerReply reply;
         client.handle_server_response(reply, false);
@@ -236,6 +317,20 @@ BOOST_AUTO_TEST_CASE(test_plain_client_reports_an_undecodable_reply) {
     BOOST_CHECK(diagnosis.is_protocol_mismatch());
 }
 
+BOOST_AUTO_TEST_CASE(test_plain_client_reports_an_unanswered_connection_attempt) {
+    ECF_NAME_THIS_TEST();
+
+    SaturatedListener listener;
+    BOOST_REQUIRE_MESSAGE(listener.saturated(), "unable to fill the queue of pending connections");
+
+    auto diagnosis = run_plain_request(FakePeer::host(), listener.port());
+
+    // The client deadline expires while connecting: nothing accepted the connection, so the
+    // diagnosis must not claim that it was accepted, nor suggest a protocol mismatch
+    BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::ConnectionUnanswered);
+    BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+}
+
 BOOST_AUTO_TEST_CASE(test_plain_client_reports_a_silent_peer_as_a_timeout) {
     ECF_NAME_THIS_TEST();
 
@@ -257,6 +352,31 @@ BOOST_AUTO_TEST_CASE(test_http_client_reports_nothing_listening_as_a_refused_con
     auto diagnosis = run_http_request(FakePeer::host(), unused_port());
 
     BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::ConnectionRefused);
+    BOOST_CHECK_EQUAL(diagnosis.client_protocol, Protocol::Http);
+    BOOST_CHECK(!diagnosis.is_protocol_mismatch());
+}
+
+BOOST_AUTO_TEST_CASE(test_http_client_uses_the_timeout_of_the_command_unless_given_one) {
+    ECF_NAME_THIS_TEST();
+
+    // Constructing the client does not connect, so no peer is needed
+    const auto ping = std::make_shared<CtsCmd>(CtsCmd::PING);
+
+    BOOST_CHECK(HttpClient(ping, "http", FakePeer::host(), unused_port()).timeout() == ping->timeout());
+    BOOST_CHECK(HttpClient(ping, "http", FakePeer::host(), unused_port(), std::chrono::seconds{2}).timeout() ==
+                std::chrono::seconds{2});
+}
+
+BOOST_AUTO_TEST_CASE(test_http_client_reports_a_silent_peer_as_a_timeout) {
+    ECF_NAME_THIS_TEST();
+
+    FakePeer peer(FakePeer::Behaviour::StaySilent);
+
+    auto diagnosis = run_http_request(FakePeer::host(), peer.port());
+
+    // The read timed out on a connection that stayed open: the peer neither closed it, nor
+    // answered with something other than HTTP, so nothing suggests a protocol mismatch
+    BOOST_CHECK_EQUAL(diagnosis.failure, ConnectionFailure::Timeout);
     BOOST_CHECK_EQUAL(diagnosis.client_protocol, Protocol::Http);
     BOOST_CHECK(!diagnosis.is_protocol_mismatch());
 }
@@ -345,6 +465,31 @@ BOOST_AUTO_TEST_CASE(test_the_explanation_of_a_real_failure_names_the_endpoint_a
     BOOST_CHECK_MESSAGE(explanation.find("Protocol mismatch") != std::string::npos, explanation);
     BOOST_CHECK_MESSAGE(explanation.find("TCP/IP") != std::string::npos, explanation);
     BOOST_CHECK_MESSAGE(explanation.find(peer.port()) != std::string::npos, explanation);
+}
+
+// The connect probe
+
+BOOST_AUTO_TEST_CASE(test_connect_probe_reports_nothing_listening_as_a_refused_connection) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_EQUAL(ecf::probe_connect(FakePeer::host(), unused_port(), std::chrono::seconds{3}),
+                      ConnectionFailure::ConnectionRefused);
+}
+
+BOOST_AUTO_TEST_CASE(test_connect_probe_reports_an_accepted_connection_as_no_failure) {
+    ECF_NAME_THIS_TEST();
+
+    FakePeer peer(FakePeer::Behaviour::StaySilent);
+
+    BOOST_CHECK_EQUAL(ecf::probe_connect(FakePeer::host(), peer.port(), std::chrono::seconds{3}),
+                      ConnectionFailure::None);
+}
+
+BOOST_AUTO_TEST_CASE(test_connect_probe_reports_an_unresolvable_host) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_EQUAL(ecf::probe_connect("host.invalid", "3141", std::chrono::seconds{3}),
+                      ConnectionFailure::HostResolution);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

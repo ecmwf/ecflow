@@ -7,6 +7,7 @@
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ecflow/client/Help.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -128,6 +129,23 @@ BOOST_AUTO_TEST_CASE(test_command_help_for_task_command_appends_both_env_banners
     BOOST_CHECK(contains(out, "ECF_HOST"));
     BOOST_CHECK(contains(out, task_env_banner));
     BOOST_CHECK(contains(out, "ECF_NAME"));
+}
+
+BOOST_AUTO_TEST_CASE(test_command_help_renders_each_env_var_description_line_indented) {
+    ECF_NAME_THIS_TEST();
+
+    // A task command lists every environment variable; each description line is rendered on a
+    // line of its own, indented below the variable name.
+    std::string out = render("abort");
+    for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
+        if (var.contains("requires")) {
+            continue; // Gated by a build feature; see test_env_banner_ssl_visibility_follows_openssl_build
+        }
+        for (const auto& line : var.at("description")) {
+            const auto expected = "\n    " + line.get<std::string>() + "\n";
+            BOOST_CHECK_MESSAGE(contains(out, expected), "expected the line '" << expected << "' in:\n" << out);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_command_help_for_user_command_omits_task_env_banner) {

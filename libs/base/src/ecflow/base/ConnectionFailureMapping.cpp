@@ -39,8 +39,9 @@ ConnectionFailure classify_connect_error(const boost::system::error_code& error)
         return ConnectionFailure::ConnectionRefused;
     }
 
+    // The operating system gave up waiting for an answer to the connection attempt
     if (error == boost::asio::error::timed_out) {
-        return ConnectionFailure::Timeout;
+        return ConnectionFailure::ConnectionUnanswered;
     }
 
     return ConnectionFailure::Other;
@@ -80,6 +81,7 @@ bool suggests_protocol_mismatch(ConnectionFailure failure) {
         case ConnectionFailure::None:
         case ConnectionFailure::HostResolution:
         case ConnectionFailure::ConnectionRefused:
+        case ConnectionFailure::ConnectionUnanswered:
         case ConnectionFailure::Timeout:
         case ConnectionFailure::CertificateRejected:
         case ConnectionFailure::RejectedRequest:

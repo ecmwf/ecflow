@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 
+#include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 
 namespace ecf {
@@ -35,6 +36,21 @@ std::optional<Protocol> probe_server_protocol(const std::string& host,
                                               const std::string& port,
                                               std::chrono::milliseconds timeout = std::chrono::seconds{3},
                                               std::optional<Protocol> try_first = std::nullopt);
+
+///
+/// @brief Attempts a plain TCP connection to the endpoint, and classifies how the attempt ends.
+///
+/// This determines why a connection failed when the transport that observed the failure does not
+/// say, as the HTTP library does for a refused connection and for one left unanswered alike.
+///
+/// @param[in] host    The server host name
+/// @param[in] port    The server port
+/// @param[in] timeout The time to wait for an answer to the connection attempt
+/// @return ConnectionFailure::None when the connection was established;
+///         ConnectionFailure::ConnectionUnanswered when no answer arrived within @p timeout;
+///         the classification of the connect error otherwise
+///
+ConnectionFailure probe_connect(const std::string& host, const std::string& port, std::chrono::milliseconds timeout);
 
 ///
 /// @brief Reports whether the endpoint answers an ecFlow request over plain TCP/IP.
