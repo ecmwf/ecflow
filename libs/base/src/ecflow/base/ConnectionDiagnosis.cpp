@@ -29,6 +29,9 @@ std::string observation_of(ConnectionFailure failure) {
             return "The host name could not be resolved.";
         case ConnectionFailure::ConnectionRefused:
             return "The connection was refused, which means that nothing is listening on that port.";
+        case ConnectionFailure::ConnectionUnanswered:
+            return "The connection attempt received no answer, which suggests that a firewall drops it, or that the "
+                   "host is down.";
         case ConnectionFailure::Timeout:
             return "The connection was accepted, but no reply arrived before the timeout elapsed.";
         case ConnectionFailure::ClosedWithoutReply:
@@ -66,6 +69,9 @@ std::string advice_of(const ConnectionDiagnosis& diagnosis) {
     if (diagnosis.failure == ConnectionFailure::ConnectionRefused ||
         diagnosis.failure == ConnectionFailure::HostResolution) {
         return "Check that the server is running, and that the host and port are correct.";
+    }
+    if (diagnosis.failure == ConnectionFailure::ConnectionUnanswered) {
+        return "Check that the host and port are correct, and that no firewall blocks the port.";
     }
     return "";
 }

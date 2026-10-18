@@ -9,6 +9,8 @@
  */
 #define ECF_HTTP_CUSTOM_THREAD_POOL_COUNT 1
 
+#include <chrono>
+
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/Connection.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
@@ -166,6 +168,9 @@ public:
 private:
     /// Records a failure, together with the endpoint and the originating message.
     void record_failure(ecf::ConnectionFailure failure, const std::string& detail);
+
+    /// The time to wait for an answer when determining why a connection failed.
+    static constexpr std::chrono::milliseconds CONNECT_PROBE_TIMEOUT = std::chrono::seconds{3};
 
     std::string scheme_; /// the scheme to use
     std::string host_;   /// the servers name

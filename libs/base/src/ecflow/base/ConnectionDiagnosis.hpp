@@ -20,16 +20,17 @@ namespace ecf {
 /// ConnectionDiagnosis::peer_protocol and ConnectionDiagnosis::protocol_mismatch_suspected.
 ///
 enum class ConnectionFailure {
-    None,                ///< No failure was observed
-    HostResolution,      ///< The host name could not be resolved
-    ConnectionRefused,   ///< No listener accepted the connection
-    Timeout,             ///< The peer accepted the connection but did not reply in time
-    ClosedWithoutReply,  ///< The peer accepted the connection and then closed it without replying
-    HandshakeFailed,     ///< The TLS handshake did not complete
-    CertificateRejected, ///< The TLS handshake failed while verifying the peer certificate
-    UndecodableReply,    ///< A reply was received that the transport cannot decode
-    RejectedRequest,     ///< The peer answered, refusing the request
-    Other                ///< A failure that none of the other values describes
+    None,                 ///< No failure was observed
+    HostResolution,       ///< The host name could not be resolved
+    ConnectionRefused,    ///< No listener accepted the connection
+    ConnectionUnanswered, ///< The connection attempt received no answer, as when a firewall drops it
+    Timeout,              ///< The peer accepted the connection but did not reply in time
+    ClosedWithoutReply,   ///< The peer accepted the connection and then closed it without replying
+    HandshakeFailed,      ///< The TLS handshake did not complete
+    CertificateRejected,  ///< The TLS handshake failed while verifying the peer certificate
+    UndecodableReply,     ///< A reply was received that the transport cannot decode
+    RejectedRequest,      ///< The peer answered, refusing the request
+    Other                 ///< A failure that none of the other values describes
 };
 
 namespace detail {
@@ -37,10 +38,11 @@ namespace detail {
 template <>
 struct EnumTraits<ConnectionFailure>
 {
-    static constexpr std::array<std::pair<ConnectionFailure, const char*>, 10> map = {
+    static constexpr std::array<std::pair<ConnectionFailure, const char*>, 11> map = {
         {std::make_pair(ConnectionFailure::None, "NONE"),
          std::make_pair(ConnectionFailure::HostResolution, "HOST_RESOLUTION"),
          std::make_pair(ConnectionFailure::ConnectionRefused, "CONNECTION_REFUSED"),
+         std::make_pair(ConnectionFailure::ConnectionUnanswered, "CONNECTION_UNANSWERED"),
          std::make_pair(ConnectionFailure::Timeout, "TIMEOUT"),
          std::make_pair(ConnectionFailure::ClosedWithoutReply, "CLOSED_WITHOUT_REPLY"),
          std::make_pair(ConnectionFailure::HandshakeFailed, "HANDSHAKE_FAILED"),
@@ -50,7 +52,7 @@ struct EnumTraits<ConnectionFailure>
          std::make_pair(ConnectionFailure::Other, "OTHER")}};
 
     static constexpr size_t size = map.size();
-    static_assert(size == 10, "ConnectionFailure enum size mismatch");
+    static_assert(size == 11, "ConnectionFailure enum size mismatch");
 };
 
 } // namespace detail

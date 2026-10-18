@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/ConnectionFailureMapping.hpp"
+#include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Message.hpp"
@@ -22,6 +23,7 @@ ConnectionFailure classify_httplib_error(httplib::Error error) {
         case httplib::Error::BindIPAddress:
             return ecf::ConnectionFailure::ConnectionRefused;
         case httplib::Error::ConnectionTimeout:
+            return ecf::ConnectionFailure::ConnectionUnanswered;
         case httplib::Error::Canceled:
             return ecf::ConnectionFailure::Timeout;
         case httplib::Error::Read:
@@ -129,7 +131,21 @@ void HttpClient::run() {
     else {
         status_ = ecf::http::Status::Unknown;
         reason_ = httplib::to_string(result.error());
-        record_failure(ecf::http::classify_httplib_error(result.error()), reason_);
+
+        auto failure = ecf::http::classify_httplib_error(result.error());
+        if (result.error() == httplib::Error::Connection) {
+            // The HTTP library reports a refused connection, and one left unanswered until the operating
+            // system gives up, as the same error; a separate connection attempt tells the two apart.
+            if (auto observed = ecf::probe_connect(host_, port_, CONNECT_PROBE_TIMEOUT);
+                observed != ecf::ConnectionFailure::None) {
+                failure = observed;
+            }
+            else {
+                // The endpoint accepts connections now, so the cause of the failure is no longer known
+                failure = ecf::ConnectionFailure::Other;
+            }
+        }
+        record_failure(failure, reason_);
     }
 }
 

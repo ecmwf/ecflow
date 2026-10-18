@@ -17,6 +17,8 @@ pub enum Failure {
     HostResolution,
     /// No listener accepted the connection.
     ConnectionRefused,
+    /// The connection attempt received no answer, as when a firewall drops it.
+    ConnectionUnanswered,
     /// The peer accepted the connection but did not reply in time.
     Timeout,
     /// The peer accepted the connection and then closed it without replying.
@@ -40,6 +42,7 @@ impl From<ecflow_sys::ConnectionFailure> for Failure {
             Bridge::None => Self::None,
             Bridge::HostResolution => Self::HostResolution,
             Bridge::ConnectionRefused => Self::ConnectionRefused,
+            Bridge::ConnectionUnanswered => Self::ConnectionUnanswered,
             Bridge::Timeout => Self::Timeout,
             Bridge::ClosedWithoutReply => Self::ClosedWithoutReply,
             Bridge::HandshakeFailed => Self::HandshakeFailed,

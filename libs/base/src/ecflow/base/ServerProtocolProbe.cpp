@@ -14,10 +14,53 @@
 
 #include "ecflow/base/Client.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/ConnectionFailureMapping.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 
 namespace ecf {
+
+ConnectionFailure probe_connect(const std::string& host, const std::string& port, std::chrono::milliseconds timeout) {
+    boost::asio::io_context io;
+
+    boost::system::error_code resolve_error;
+    boost::asio::ip::tcp::resolver resolver(io);
+    auto endpoints = resolver.resolve(host, port, resolve_error);
+    if (resolve_error) {
+        return classify_connect_error(resolve_error);
+    }
+
+    boost::asio::ip::tcp::socket socket(io);
+    boost::system::error_code connect_error;
+    bool finished  = false;
+    bool timed_out = false;
+
+    boost::asio::system_timer deadline(io);
+    deadline.expires_after(timeout);
+    deadline.async_wait([&](const boost::system::error_code& error) {
+        if (!error && !finished) {
+            timed_out = true;
+            boost::system::error_code ignored;
+            socket.close(ignored);
+        }
+    });
+
+    boost::asio::async_connect(socket, endpoints, [&](const boost::system::error_code& error, const auto&) {
+        connect_error = error;
+        finished      = true;
+        deadline.cancel();
+    });
+
+    io.run();
+
+    boost::system::error_code ignored;
+    socket.close(ignored);
+
+    if (timed_out) {
+        return ConnectionFailure::ConnectionUnanswered;
+    }
+    return connect_error ? classify_connect_error(connect_error) : ConnectionFailure::None;
+}
 
 bool probes_as_plain(const std::string& host, const std::string& port, std::chrono::milliseconds timeout) {
     try {
