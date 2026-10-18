@@ -12,6 +12,7 @@
 #endif
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/ecflow_git_commit.h"
 #include "ecflow/core/ecflow_version.h"
 
 namespace ecf {
@@ -39,6 +40,7 @@ std::string Version::description() {
     ss << "(debug) ";
 #endif
     ss << "version(" << Version::full() << ") ";
+    ss << "git(" << Version::git() << ") ";
     ss << "boost(" << Version::boost() << ") ";
     ss << "compiler(" << Version::compiler() << ") ";
     ss << "serialisation(JSON cereal " << Version::cereal() << ") ";
@@ -58,6 +60,10 @@ std::string Version::base() {
 
 std::string Version::full() {
     return Version::base() + Version::suffix();
+}
+
+std::string Version::git() {
+    return ECFLOW_GIT_COMMIT;
 }
 
 std::string Version::boost() {

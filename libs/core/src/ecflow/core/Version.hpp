@@ -77,6 +77,17 @@ public:
     static std::string full();
 
     ///
+    /// @brief Return the git commit of the sources ecFlow was built from.
+    ///
+    /// The commit is recorded at build time, from the CMake variable ECFLOW_GIT_COMMIT when set,
+    /// or otherwise from the git repository of the sources.
+    ///
+    /// @return The first 12 characters of the commit, followed by `-dirty` when tracked files had
+    ///         uncommitted changes, or `none` when no commit is known (e.g. a build from a release tarball).
+    ///
+    static std::string git();
+
+    ///
     /// @brief Return the version of the Boost library.
     ///
     /// @return The Boost library version as a string.

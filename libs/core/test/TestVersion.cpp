@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -57,6 +58,22 @@ BOOST_AUTO_TEST_CASE(test_version_description_names_serialisation) {
     BOOST_CHECK_MESSAGE(contains(desc, "serialisation(JSON cereal " + Version::cereal() + ")"),
                         "Expected serialisation(JSON cereal " << Version::cereal() << ") in: " << desc);
     BOOST_CHECK_MESSAGE(!contains(desc, "protocol("), "Unexpected protocol(...) in: " << desc);
+}
+
+BOOST_AUTO_TEST_CASE(test_version_git_is_a_short_commit_or_none) {
+    ECF_NAME_THIS_TEST();
+
+    auto git = Version::git();
+    BOOST_CHECK_MESSAGE(std::regex_match(git, std::regex("none|[0-9a-f]{12}(-dirty)?")),
+                        "Expected 'none' or a 12-character commit, optionally with -dirty, but found: " << git);
+}
+
+BOOST_AUTO_TEST_CASE(test_version_description_names_git_commit_after_version) {
+    ECF_NAME_THIS_TEST();
+
+    auto desc = Version::description();
+    BOOST_CHECK_MESSAGE(contains(desc, "version(" + Version::full() + ") git(" + Version::git() + ")"),
+                        "Expected git(" << Version::git() << ") after version(...) in: " << desc);
 }
 
 BOOST_AUTO_TEST_CASE(test_version_raw_components) {

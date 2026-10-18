@@ -26,6 +26,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     descTxt += "<br><b>OpenSSL:</b> disabled";
 #endif
 
+    descTxt += "<br><b>git commit:</b> " + QString::fromStdString(ecf::Version::git());
     descTxt += "<br><b>boost version:</b> " + QString::fromStdString(ecf::Version::boost());
     descTxt += "<br><b>compiler</b>: " + QString::fromStdString(ecf::Version::compiler());
     descTxt += "<br><b>serialisation:</b> JSON cereal " + QString::fromStdString(ecf::Version::cereal());

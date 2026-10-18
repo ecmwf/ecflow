@@ -90,3 +90,17 @@ ecflow_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   FORMAT
 )
+
+ecflow_add_test(
+  TARGET
+    u_core_generate_git_commit
+  LABELS
+    unit nightly fast
+  COMMAND
+    ${CMAKE_COMMAND}
+  ARGS
+    -DSCRIPT=${ecflow_SOURCE_DIR}/cmake/GenerateGitCommit.cmake
+    -DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/u_core_generate_git_commit
+    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test/TestGenerateGitCommit.cmake
+)

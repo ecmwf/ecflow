@@ -9,6 +9,35 @@ configure_file(
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h)
 
 #
+# Record the git commit of the sources, shown as git(<commit>) in the version description.
+#
+# A custom target runs at every build, so the commit stays current without requiring a CMake
+# reconfigure; the header changes, and Version.cpp recompiles, only when the commit does.
+#
+set(ECFLOW_GIT_COMMIT "" CACHE STRING
+  "Git commit to report in the version description, instead of the one of the source tree")
+if (NOT ECFLOW_GIT_COMMIT STREQUAL "")
+  string(LENGTH "${ECFLOW_GIT_COMMIT}" ecflow_git_commit_length)
+  if (NOT ECFLOW_GIT_COMMIT MATCHES "^[0-9a-f]+$" OR ecflow_git_commit_length LESS 12)
+    message(FATAL_ERROR
+      "ECFLOW_GIT_COMMIT must be a git commit hash of at least 12 characters (found: '${ECFLOW_GIT_COMMIT}')")
+  endif ()
+endif ()
+find_package(Git QUIET)
+set(ecflow_git_commit_generated_header
+    ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_git_commit.h)
+add_custom_target(ecflow_git_commit
+  COMMAND ${CMAKE_COMMAND}
+          -DSOURCE_DIR=${ecflow_SOURCE_DIR}
+          -DOUTPUT=${ecflow_git_commit_generated_header}
+          -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+          -DCOMMIT=${ECFLOW_GIT_COMMIT}
+          -P ${ecflow_SOURCE_DIR}/cmake/GenerateGitCommit.cmake
+  BYPRODUCTS ${ecflow_git_commit_generated_header}
+  COMMENT "Recording the git commit of the ecFlow sources"
+  VERBATIM)
+
+#
 # Embed the CLI help manifest (docs/client_api/help.json) as a C++ header.
 #
 # A build-time custom command is used instead of configure_file(), so the
@@ -623,6 +652,7 @@ ecflow_add_library(
     $<$<VERSION_GREATER_EQUAL:${SELECTED_BOOST_VERSION},1.69.0>:BOOST_ASIO_NO_DEPRECATED>
   FORMAT
 )
+add_dependencies(ecflow_all ecflow_git_commit)
 
 
 add_subdirectory(core)
