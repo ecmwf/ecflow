@@ -718,11 +718,20 @@ Glossary
 
    ECF_TIMEOUT
       ECF_TIMEOUT is an environment variable, used by the :term:`ecflow_client`, and specifies how much time
-      (measured in seconds) a *task command* will continue to try contacting the server(s) before giving up.
+      (measured in seconds) a command continues to try contacting the server(s) before giving up.
 
       .. important::
 
-         This timeout is only applicable to :term:`task commands <task command>`.
+         This timeout applies to the commands that retry, which are:
+
+         - :term:`task commands <task command>`;
+         - user commands, when ECF_HOSTFILE_POLICY is set to ``all``.
+
+      The limit is checked after each round of attempts, so a command can exceed it by the duration of one
+      round. Each attempt is limited by the timeout of each of its steps (see ECF_CONNECT_TIMEOUT).
+
+      The task command :code:`wait` keeps waiting for as long as the server reports that its expression does
+      not hold; ECF_TIMEOUT does not limit that wait.
 
       When ECF_TIMEOUT is not set, the client uses the default value of 1 hour (3600 seconds).
       The minimum value allowed is 60 seconds, while the maximum value is 24 hours (86400 seconds).
@@ -1065,7 +1074,7 @@ Glossary
 
          * - ECF_TIMEOUT
 
-             (Task only)
+             (Task, and User with ECF_HOSTFILE_POLICY=all)
            - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) with the server before giving up.
 
              |
@@ -1086,12 +1095,35 @@ Glossary
 
          * - ECF_CONNECT_TIMEOUT
 
-             (Task only)
-           - Maximum time (in seconds) for the client to establish connection with the server before giving up.
+             (User + Task)
+           - Maximum time (in seconds) for each step of an exchange of the client with the server: connecting, sending the request, and receiving the reply.
 
              |
 
-             :Default: ``0`` seconds (no dedicated connection timeout; the timeout of the command in use applies)
+             When set to ``0``, the timeout of the command in use applies, for example:
+
+             - ``10`` seconds for :code:`ping`
+             - ``60`` seconds for most user commands
+             - ``190`` seconds for task commands
+
+             See :ref:`client_command_timeouts` for the complete list.
+
+             |
+
+             The timeout applies to each step separately, and again to each address tried when the host name resolves to several addresses.
+             For HTTP and HTTPS, it limits each wait for data, rather than the whole step.
+             How long a command keeps retrying is limited by ECF_TIMEOUT.
+
+             |
+
+             .. code-block:: shell
+
+               # To give up on each step after 5 seconds
+               export ECF_CONNECT_TIMEOUT=5
+
+             |
+
+             :Default: ``0`` seconds (the timeout of the command in use applies)
 
          * - ECF_ZOMBIE_TIMEOUT
 
