@@ -221,6 +221,11 @@ The following table shows an overview of useful CMake options.
    * - ENABLE_STATIC_BOOST_LIBS
      - allow using static or dynamic Boost libraries (static are used by default)
      - ON
+   * - ECFLOW_GIT_COMMIT
+     - git commit hash (at least 12 characters) to report as ``git(...)`` in the version description, instead of
+       the commit of the source tree; useful when building from a release tarball, which carries no git history.
+       When not set, the commit of the source tree is used, or ``none`` when no git repository is found
+     -
 
 CMake generates Unix Makefiles by default, but Ninja build files can also be used.
 To generate Ninja build files, consider the following example command.

@@ -75,3 +75,107 @@ manipulate the log files using the client command --log. Type::
   ecflow_client --help log
 
 for details. This allows you to get, clear, flush, or create a new log file.
+
+Start-up lines
+--------------
+
+Each time the server starts, it writes the following lines to the log file, before any other message:
+
+.. code-block:: text
+
+  MSG:[12:00:00 18.10.2026]
+  MSG:[12:00:00 18.10.2026] Started at 2026-Oct-18 12:00:00 universal time
+  MSG:[12:00:00 18.10.2026] Ecflow version(5.20.0) git(1a2b3c4d5e6f) boost(1.92.0) compiler(gcc 14.2.0) serialisation(JSON cereal 1.3.2) openssl(3.0.13) aviso(2.4.2) Compiled on Oct 18 2026 10:00:00
+  MSG:[12:00:00 18.10.2026] Runtime Configuration
+  MSG:[12:00:00 18.10.2026]   Host = myhost
+  MSG:[12:00:00 18.10.2026]   Port = 3141
+  MSG:[12:00:00 18.10.2026]   Connection = TCP/IP v4 with SSL
+  MSG:[12:00:00 18.10.2026]   SSL certificate = /home/user/.ecflowrc/ssl/server.crt (shared)
+  MSG:[12:00:00 18.10.2026]   ECF_HOME = /home/user/ecflow_server
+  MSG:[12:00:00 18.10.2026]   ECF_LOG = myhost.3141.ecf.log
+  ...
+  MSG:[12:00:00 18.10.2026]   ECF_MICRO = %
+
+The lines are:
+
+- an empty ``MSG`` line, so that the start-up begins on a line of its own, even when the previous log ends
+  without a newline;
+- the start time, in universal time;
+- the version line, which identifies the build of the server, in the format shown by ``--version``;
+- the runtime configuration block, which lists the settings of the server, one indented
+  ``Key = value`` entry per line.
+
+Other commands show a version line in the same format, each for a different program:
+
+- ``ecflow_client --stats`` shows the version line of the running server;
+- ``ecflow_server --version`` and ``ecflow_client --version`` describe the program invoked, which matches the server
+  only when both come from the same build.
+
+The version line names:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Field
+     - Meaning
+   * - ``version``
+     - the ecFlow version
+   * - ``git``
+     - the first 12 characters of the git commit the server was built from, followed by ``-dirty`` when the sources
+       had uncommitted changes, or ``none`` when the commit is not known (for example, a build from a release tarball)
+   * - ``boost``
+     - the version of the Boost libraries
+   * - ``compiler``
+     - the compiler and its version
+   * - ``serialisation``
+     - the serialisation format, and the version of the Cereal library
+   * - ``openssl``
+     - the version of the OpenSSL library, or ``disabled``
+   * - ``aviso``
+     - the version of the Aviso client library ecFlow was built against, or ``disabled`` when built without
+       Aviso support (``ENABLE_AVISO=OFF``)
+   * - ``Compiled on``
+     - the date and time of the compilation
+
+The runtime configuration block lists, in order:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Entries
+     - Meaning
+   * - ``Host``, ``Port``
+     - the host name and the port of the server
+   * - ``Connection``
+     - how clients connect: ``TCP/IP v4``, ``TCP/IP v4 with SSL`` or ``HTTP over TCP/IP v4``
+       (``v6`` instead of ``v4`` when the server is started with ``--v6``)
+   * - ``SSL certificate``
+     - only when SSL is enabled: the certificate in use, and whether it is shared or server-specific; a ``WAR``
+       line follows when the certificate requested first was not found
+   * - ``ECF_HOME``, ``ECF_LOG``, ``ECF_CHECK``, ``ECF_CHECKOLD``, ``ECF_LISTS``, ``ECF_PASSWD``,
+       ``ECF_CUSTOM_PASSWD``
+     - the locations used by the server; files are named by their path only, never by their content
+   * - ``ECF_CHECKINTERVAL``, ``ECF_CHECKMODE``, ``ECF_PRUNE_NODE_LOG``, ``ECF_TASK_THRESHOLD``,
+       ``ECF_DEBUG_SERVER``
+     - the check-pointing, node log pruning, job profiling and debugging settings
+   * - ``ECF_JOB_CMD``, ``ECF_KILL_CMD``, ``ECF_STATUS_CMD``, ``ECF_CHECK_CMD``, ``ECF_URL_CMD``,
+       ``ECF_URL_BASE``, ``ECF_URL``, ``ECF_MICRO``
+     - the commands and URLs of the server
+   * - ``Job scheduling interval``, ``Job generation``, ``Checkpoint save time alarm``
+     - the job scheduling interval, whether jobs are generated, and the time (in seconds) above which saving the
+       checkpoint logs a warning and sets the ``late`` flag of the server
+
+Notes:
+
+- Any part of a command or URL that looks like a credential is replaced by ``***``:
+
+  - the password of a URL: ``https://user:***@host``;
+  - the value of a credential name: ``API_TOKEN=***``, or ``?access_token=***&x=1`` in a URL query;
+  - the value of a credential option: ``--password ***``.
+
+- A credential name has a part, split at ``_``, ``-`` or ``.``, equal to ``password``, ``passwd``, ``token``,
+  ``secret`` or ``key``, in any case: ``API_KEY`` and ``db_passwd`` are credential names, ``keyfile`` is not.
+- A value is a complete shell word, quoted segments and escaped characters included; an unterminated quote masks
+  the rest of the value.
+- The masking is a best effort: a secret not given as the value of a credential name or option is logged as it
+  is.

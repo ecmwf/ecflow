@@ -11,12 +11,6 @@
 #include "WidgetNameProvider.hpp"
 #include "ecflow/core/Version.hpp"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-    #include <QRegExp>
-#endif
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
-
 AboutDialog::AboutDialog(QWidget* parent)
     : QDialog(parent) {
     setupUi(this);
@@ -32,42 +26,11 @@ AboutDialog::AboutDialog(QWidget* parent)
     descTxt += "<br><b>OpenSSL:</b> disabled";
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
-    QRegularExpression rx(R"(boost\((\S+)\))");
-    auto match = rx.match(desc);
-    if (match.hasMatch()) {
-        descTxt += "<br><b>boost version:</b> " + match.captured(1);
-    }
-
-    rx    = QRegularExpression(R"(compiler\(([^\)]+)\))");
-    match = rx.match(desc);
-    if (match.hasMatch()) {
-        descTxt += "<br><b>compiler</b>: " + match.captured(1);
-    }
-
-    rx    = QRegularExpression(R"(protocol\((\S+)\))");
-    match = rx.match(desc);
-    if (match.hasMatch()) {
-        descTxt += "<br><b>protocol:</b> " + match.captured(1);
-    }
-
-#else
-    int pos = 0;
-    QRegExp rx("boost\\((\\S+)\\)");
-    if ((pos = rx.indexIn(desc, pos)) != -1) {
-        descTxt += "<br><b>boost version:</b> " + rx.cap(1);
-    }
-
-    rx = QRegExp("compiler\\(([^\\)]+)\\)");
-    if ((pos = rx.indexIn(desc, pos)) != -1) {
-        descTxt += "<br><b>compiler</b>: " + rx.cap(1);
-    }
-
-    rx = QRegExp("protocol\\((\\S+)\\)");
-    if ((pos = rx.indexIn(desc, pos)) != -1) {
-        descTxt += "<br><b>protocol:</b> " + rx.cap(1);
-    }
-#endif
+    descTxt += "<br><b>git commit:</b> " + QString::fromStdString(ecf::Version::git());
+    descTxt += "<br><b>boost version:</b> " + QString::fromStdString(ecf::Version::boost());
+    descTxt += "<br><b>compiler:</b> " + QString::fromStdString(ecf::Version::compiler());
+    descTxt += "<br><b>serialisation:</b> JSON cereal " + QString::fromStdString(ecf::Version::cereal());
+    descTxt += "<br><b>aviso version:</b> " + QString::fromStdString(ecf::Version::aviso());
     descTxt += "<br><b>compiled on:</b> " + desc.section("Compiled on", 1, 1);
 
     const char* qtv = qVersion();

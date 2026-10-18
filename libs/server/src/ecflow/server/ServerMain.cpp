@@ -6,8 +6,6 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 
 #ifdef ECF_AVISO
-    #include <aviso_ffi/aviso.h>
-
     #include "ecflow/service/aviso/AvisoBackend.hpp"
 #endif
 
@@ -103,7 +101,6 @@ int main(int argc, char* argv[]) {
         }
 
 #ifdef ECF_AVISO
-        ecf::log(Log::MSG, std::string("Using Aviso client library, version ") + aviso_version());
         ecf::service::aviso::AvisoBackend::register_as_default();
 #endif
 
