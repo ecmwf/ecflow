@@ -50,6 +50,15 @@ BOOST_AUTO_TEST_CASE(test_version) {
     ECF_NAME_THIS_TEST(<< ", found version: " << desc);
 }
 
+BOOST_AUTO_TEST_CASE(test_version_description_names_serialisation) {
+    ECF_NAME_THIS_TEST();
+
+    auto desc = Version::description();
+    BOOST_CHECK_MESSAGE(contains(desc, "serialisation(JSON cereal " + Version::cereal() + ")"),
+                        "Expected serialisation(JSON cereal " << Version::cereal() << ") in: " << desc);
+    BOOST_CHECK_MESSAGE(!contains(desc, "protocol("), "Unexpected protocol(...) in: " << desc);
+}
+
 BOOST_AUTO_TEST_CASE(test_version_raw_components) {
     ECF_NAME_THIS_TEST();
 

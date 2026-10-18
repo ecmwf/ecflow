@@ -76,7 +76,6 @@ public:
     ///
     static std::string full();
 
-private:
     ///
     /// @brief Return the version of the Boost library.
     ///

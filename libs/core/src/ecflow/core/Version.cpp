@@ -41,7 +41,7 @@ std::string Version::description() {
     ss << "version(" << Version::full() << ") ";
     ss << "boost(" << Version::boost() << ") ";
     ss << "compiler(" << Version::compiler() << ") ";
-    ss << "protocol(JSON cereal " << Version::cereal() << ") ";
+    ss << "serialisation(JSON cereal " << Version::cereal() << ") ";
     ss << "openssl(" << Version::openssl() << ") ";
     ss << "Compiled on " << __DATE__ << " " << __TIME__;
     return ss.str();
