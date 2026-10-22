@@ -239,6 +239,45 @@ void check_server_home_resolution(bool from_environment, bool nested_home, bool 
     }
 }
 
+///
+/// @brief Checks that a configuration parsing failure stops initialisation before environment overrides.
+///
+/// @param[in] content Invalid configuration content to parse
+/// @param[in] expected_error Fragment of the original parser diagnostic that must be preserved
+/// @param[in] invalid_environment Whether an invalid port override competes with the configuration error
+///
+void check_server_config_parse_error(const std::string& content,
+                                     const std::string& expected_error,
+                                     bool invalid_environment = false) {
+    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto original_path = fs::current_path();
+    const auto log_path      = directory.path() / "server.log";
+    WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+    WithTestEnvironmentVariable home("ECF_HOME", original_path.string());
+    WithTestEnvironmentVariable port("ECF_PORT", invalid_environment ? "invalid_environment_port" : "3144");
+    WithTestEnvironmentVariable log("ECF_LOG", log_path.string());
+    WithTestEnvironmentVariable checkpoint("ECF_CHECK", (directory.path() / "primary.check").string());
+    WithTestEnvironmentVariable backup("ECF_CHECKOLD", (directory.path() / "backup.check").string());
+    WithTestEnvironmentVariable passwd("ECF_PASSWD", (directory.path() / "missing.passwd").string());
+    WithTestEnvironmentVariable custom_passwd("ECF_CUSTOM_PASSWD",
+                                              (directory.path() / "missing.custom_passwd").string());
+    WithTestEnvironmentVariable lists("ECF_LISTS", (directory.path() / "missing.lists").string());
+
+    const std::vector<std::string> args = {"ServerEnvironment"};
+    BOOST_CHECK_EXCEPTION(ServerEnvironment(args, config.path().string()),
+                          ServerEnvironmentException,
+                          [&](const ServerEnvironmentException& error) {
+                              const std::string message = error.what();
+                              return message.find("Could not parse server configuration file") != std::string::npos &&
+                                     message.find(config.path().string()) != std::string::npos &&
+                                     message.find(expected_error) != std::string::npos &&
+                                     message.find("invalid_environment_port") == std::string::npos;
+                          });
+    BOOST_CHECK(fs::current_path() == original_path);
+    BOOST_CHECK(!fs::exists(log_path));
+    BOOST_CHECK(!Log::instance());
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -665,6 +704,69 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_applies_non_default_values) {
     BOOST_CHECK(serverEnv.checkMode() == CheckPt::ALWAYS);
     BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 17);
     BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), "17");
+}
+
+///
+/// @brief Verifies that malformed configuration fails with its original parser diagnostic.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_rejects_parse_errors) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::pair<std::string, std::string>> invalid_configs = {
+        {"[unterminated\n", "unterminated"},
+        {"UNKNOWN_SERVER_OPTION = 1\n", "UNKNOWN_SERVER_OPTION"},
+        {"ECF_PORT = not_a_config_port\n", "not_a_config_port"},
+        {"ECF_PORT = 99999999999999999999999999999999999999\n", "99999999999999999999999999999999999999"},
+        {"ECF_PORT = 3141\nECF_PORT = 3142\n", "ECF_PORT"},
+        {"ECF_INTERVAL = 17\nECF_JOB_CMD = configured_submit\nECF_PORT = invalid_after_valid_entries\n",
+         "invalid_after_valid_entries"}};
+    for (const auto& [content, expected_error] : invalid_configs) {
+        BOOST_TEST_CONTEXT("Invalid config: " << content) {
+            check_server_config_parse_error(content, expected_error);
+        }
+    }
+}
+
+///
+/// @brief Verifies that environment parsing cannot replace an earlier configuration error.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_error_precedes_environment_error) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_parse_error("UNKNOWN_SERVER_OPTION = 1\n", "UNKNOWN_SERVER_OPTION", true);
+}
+
+///
+/// @brief Verifies that missing, empty and comments-only configuration files still apply defaults.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_optional_content_uses_defaults) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory         = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto config_path = directory.path() / "server_environment.cfg";
+    WithTestEnvironmentVariable home("ECF_HOME", fs::current_path().string());
+    WithTestEnvironmentVariable port("ECF_PORT", "3144");
+    WithoutTestEnvironmentVariable no_check_interval("ECF_CHECKINTERVAL");
+    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
+    WithoutTestEnvironmentVariable no_threshold("ECF_TASK_THRESHOLD");
+    const std::vector<std::optional<std::string>> contents = {std::nullopt, "", "# Comment only\n\n"};
+    for (size_t i = 0; i < contents.size(); ++i) {
+        BOOST_TEST_CONTEXT("Optional config case " << i) {
+            std::optional<WithTestFile> config;
+            if (contents[i]) {
+                config.emplace(NamedTestFile{config_path.string()}, *contents[i]);
+            }
+            const auto log_path = directory.path() / ("server-" + std::to_string(i) + ".log");
+            WithTestEnvironmentVariable log("ECF_LOG", log_path.string());
+            const std::vector<std::string> args = {"ServerEnvironment"};
+            ServerEnvironment serverEnv(args, config_path.string());
+
+            BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), CheckPt::default_interval());
+            BOOST_CHECK(serverEnv.checkMode() == CheckPt::ON_TIME);
+            BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 60);
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_JOB_CMD"), Ecf::JOB_CMD());
+            BOOST_CHECK(fs::exists(log_path));
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
