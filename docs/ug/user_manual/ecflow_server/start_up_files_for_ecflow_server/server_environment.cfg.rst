@@ -16,6 +16,16 @@ tasks.
 
     The server looks for the file in the CWD, hence make sure you move it.
 
+``ECF_CHECKMODE`` accepts the following case-sensitive values:
+
+- ``CHECK_NEVER``: disable automatic checkpointing.
+- ``CHECK_ON_TIME``: save checkpoints periodically.
+- ``CHECK_ALWAYS``: save a checkpoint after each state change.
+
+When the setting is omitted, the default is ``CHECK_ON_TIME``. An explicitly empty or unsupported
+value stops server initialisation; the diagnostic identifies the configuration file, the invalid
+value and the supported modes.
+
 The example below shows some of the default variables you can configure.
 
 .. code-block:: shell

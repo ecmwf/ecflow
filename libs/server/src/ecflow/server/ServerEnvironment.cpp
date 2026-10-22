@@ -545,6 +545,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         else if (theCheckMode == "CHECK_ALWAYS") {
             checkMode_ = ecf::CheckPt::ALWAYS;
         }
+        else if (vm.count("ECF_CHECKMODE")) {
+            throw std::runtime_error("Invalid ECF_CHECKMODE value '" + theCheckMode +
+                                     "'. Expected CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS.");
+        }
 
         authentication_service_.set_passwd_file(passwd_file);
         authentication_service_.set_custom_passwd_file(custom_passwd_file);

@@ -736,6 +736,54 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_error_precedes_environment_error) {
 }
 
 ///
+/// @brief Verifies the supported checkpoint modes and the default when the setting is absent.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_check_modes) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    WithTestEnvironmentVariable home("ECF_HOME", fs::current_path().string());
+    WithTestEnvironmentVariable port("ECF_PORT", "3144");
+    const std::vector<std::pair<std::string, CheckPt::Mode>> modes = {{"CHECK_NEVER", CheckPt::NEVER},
+                                                                      {"CHECK_ON_TIME", CheckPt::ON_TIME},
+                                                                      {"CHECK_ALWAYS", CheckPt::ALWAYS},
+                                                                      {"", CheckPt::ON_TIME}};
+    for (const auto& [name, expected_mode] : modes) {
+        BOOST_TEST_CONTEXT("Checkpoint mode: " << (name.empty() ? "absent" : name)) {
+            std::string content = "ECF_INTERVAL = 17\n";
+            if (!name.empty()) {
+                content += "ECF_CHECKMODE =  " + name + "  # Mode comment\n";
+            }
+            WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+            WithTestEnvironmentVariable log("ECF_LOG", (directory.path() / "server.log").string());
+            const std::vector<std::string> args = {"ServerEnvironment"};
+            ServerEnvironment serverEnv(args, config.path().string());
+
+            BOOST_CHECK(serverEnv.checkMode() == expected_mode);
+            BOOST_CHECK_EQUAL(serverEnv.check_mode_str(), name.empty() ? "CHECK_ON_TIME" : name);
+            BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 17);
+        }
+    }
+}
+
+///
+/// @brief Verifies that unsupported or explicitly empty checkpoint modes cannot silently select the default.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_check_modes_reject_invalid_values) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto& value : std::vector<std::string>{
+             "TYPO", "check_on_time", "UNDEFINED", "CHECK_NEVER_EXTRA", "0", "", "   ", "\"CHECK_ON_TIME\""}) {
+        BOOST_TEST_CONTEXT("Invalid checkpoint mode: '" << value << "'") {
+            const auto parsed_value   = value.find_first_not_of(' ') == std::string::npos ? std::string{} : value;
+            const auto expected_error = "Invalid ECF_CHECKMODE value '" + parsed_value +
+                                        "'. Expected CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS.";
+            check_server_config_parse_error("ECF_CHECKMODE = " + value + "\n", expected_error);
+        }
+    }
+}
+
+///
 /// @brief Verifies that missing, empty and comments-only configuration files still apply defaults.
 ///
 BOOST_AUTO_TEST_CASE(test_server_config_file_optional_content_uses_defaults) {
