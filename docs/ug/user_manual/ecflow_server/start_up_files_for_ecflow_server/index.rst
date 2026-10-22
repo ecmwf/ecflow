@@ -6,20 +6,28 @@
 Start-up files for ecFlow server
 ////////////////////////////////
 
-When ecFlow is started up it uses a number of files for configuration
-and reporting.
+The ecFlow server uses files for configuration and reporting.
 
-These files can be configured through `environment variables <https://confluence.ecmwf.int/display/ECFLOW/ecFlow+Server+environment+variables>`__
-or in an ecFlow configuration file (e.g. the file
-**server_environment.config** in the ecFlow source directories\ **)**.
+Initialisation distinguishes two directory roles:
 
-The first thing ecFlow does is to change the **current working
-directory** (or CWD) into `ECF_HOME <https://confluence.ecmwf.int/display/ECFLOW/ecFlow+Server+environment+variables>`__,
-so all the other files listed there are read from that directory (unless
-full path names are used).
+- **Startup directory:** the current working directory when ``ecflow_server`` is invoked.
+  The server reads :ref:`server_environment.cfg` here, before changing directory.
+- **Server home:** the directory selected by :term:`ECF_HOME` from the configuration file or
+  an :ref:`environment override <ecflow_server_environment_variables>`.
+  The default, ``.``, means the startup directory. A relative home is resolved against that
+  directory before runtime filenames are constructed.
 
-This directory must be accessible and writable by the user starting
-ecFlow otherwise ecFlow cannot start.
+The server changes into ``ECF_HOME`` before opening the log and loading the password and white list files.
+
+Relative paths for these files are resolved against ``ECF_HOME``.
+Relative checkpoint paths are anchored there before the directory change; absolute file paths
+are used unchanged.
+
+``ECF_HOME`` must exist and be accessible and writable by the account running the server;
+otherwise, initialisation fails.
+
+See :ref:`ecflow_server_initialisation` for configuration precedence, the complete loading
+sequence and an example with separate startup and server-home directories.
 
 .. toctree::
     :maxdepth: 1
