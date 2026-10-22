@@ -29,6 +29,7 @@ repos:
     hooks:
       # Refuse commits to the ECMWF CI configuration that lack the required approval.
       - id: check-ci-approval
+      - id: check-ci-result
 
   - repo: https://github.com/fsfe/reuse-tool
     rev: v6.2.0
