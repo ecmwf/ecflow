@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <list>
 #include <optional>
 #include <stdexcept>
 #include <vector>
@@ -417,6 +418,56 @@ void check_server_config_discovery(const std::optional<std::string>& startup_con
     if (expected_home != directory.path()) {
         BOOST_CHECK(!fs::exists(directory.path() / host.ecf_log_file("3141")));
     }
+}
+
+///
+/// @brief Runs precedence assertions with isolated configuration, environment and command-line inputs.
+///
+/// @tparam Check Callable accepting the server environment and the startup directory
+/// @param[in] content Configuration-file content
+/// @param[in] environment Explicit environment overrides
+/// @param[in] args Command-line tokens including the executable name
+/// @param[in] check Assertions to run after successful initialisation and validation
+///
+template <typename Check>
+void check_server_precedence(const std::string& content,
+                             const std::vector<std::pair<std::string, std::string>>& environment,
+                             const std::vector<std::string>& args,
+                             Check check) {
+    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto original_path = fs::current_path();
+    const auto old_threshold = JobProfiler::task_threshold();
+    BOOST_SCOPE_EXIT_ALL(&) {
+        Log::destroy();
+        JobProfiler::set_task_threshold(old_threshold);
+        std::error_code error;
+        fs::current_path(original_path, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
+    };
+
+    std::list<WithoutTestEnvironmentVariable> cleared;
+    for (const auto* name :
+         {"ECF_HOME",           "ECF_PORT",          "ECF_LOG",          "ECF_CHECK",         "ECF_CHECKOLD",
+          "ECF_PASSWD",         "ECF_CUSTOM_PASSWD", "ECF_LISTS",        "ECF_CHECKINTERVAL", "ECF_PRUNE_NODE_LOG",
+          "ECF_TASK_THRESHOLD", "ECF_SSL",           "ECF_DEBUG_SERVER", "ECF_INTERVAL",      "ECF_CHECKMODE",
+          "ECF_JOB_CMD",        "ECF_KILL_CMD",      "ECF_STATUS_CMD",   "ECF_CHECK_CMD",     "ECF_URL_CMD",
+          "ECF_URL_BASE",       "ECF_URL",           "ECF_MICRODEF",     "ECF_MICRO"}) {
+        cleared.emplace_back(name);
+    }
+    std::list<WithTestEnvironmentVariable> overrides;
+    for (const auto& [name, value] : environment) {
+        overrides.emplace_back(name, value);
+    }
+    JobProfiler::set_task_threshold(4000);
+    fs::create_directories(directory.path() / "config home");
+    fs::create_directories(directory.path() / "environment home");
+    WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv(args);
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    check(serverEnv, directory.path());
 }
 
 } // namespace
@@ -1050,6 +1101,250 @@ BOOST_AUTO_TEST_CASE(test_server_config_discovery_config_selects_home) {
     ECF_NAME_THIS_TEST();
     check_server_config_discovery(
         "ECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n", "ECF_CHECKINTERVAL = 251\nECF_INTERVAL = 23\n", true, 137, 17);
+}
+
+///
+/// @brief Verifies all eight port-source combinations and the dependent default filenames.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_ports) {
+    ECF_NAME_THIS_TEST();
+    const std::vector<std::string> expected_ports = {"3141", "3142", "3143", "3143", "3144", "3144", "3144", "3144"};
+    for (unsigned sources = 0; sources < expected_ports.size(); ++sources) {
+        BOOST_TEST_CONTEXT("Port source mask: " << sources) {
+            const auto content = sources & 1 ? "ECF_PORT = 3142\n" : "";
+            std::vector<std::pair<std::string, std::string>> environment;
+            if (sources & 2) {
+                environment.emplace_back("ECF_PORT", "3143");
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (sources & 4) {
+                args.emplace_back("--port=3144");
+            }
+            check_server_precedence(content, environment, args, [&](const auto& serverEnv, const auto& startup) {
+                const auto& port  = expected_ports[sources];
+                const auto prefix = Host{}.name() + "." + port + ".";
+                BOOST_CHECK_EQUAL(serverEnv.the_port(), port);
+                BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), port);
+                for (const auto& [name, suffix] :
+                     std::vector<std::pair<std::string, std::string>>{{"ECF_LOG", "ecf.log"},
+                                                                      {"ECF_CHECK", "ecf.check"},
+                                                                      {"ECF_CHECKOLD", "ecf.check.b"},
+                                                                      {"ECF_PASSWD", "ecf.passwd"},
+                                                                      {"ECF_CUSTOM_PASSWD", "ecf.custom_passwd"},
+                                                                      {"ECF_LISTS", "ecf.lists"}}) {
+                    const auto expected = name == "ECF_LOG" || name == "ECF_CHECK" || name == "ECF_CHECKOLD"
+                                              ? (startup / (prefix + suffix)).string()
+                                              : prefix + suffix;
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, name), expected);
+                }
+                BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), (startup / (prefix + "ecf.check")).string());
+                BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), (startup / (prefix + "ecf.check.b")).string());
+                BOOST_CHECK(fs::is_regular_file(startup / (prefix + "ecf.log")));
+                const auto lines = last_startup_lines();
+                BOOST_CHECK(std::find(lines.begin(), lines.end(), "  Port = " + port) != lines.end());
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies default, config-only, environment-only and conflicting path selections.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_paths) {
+    ECF_NAME_THIS_TEST();
+    const std::vector<std::pair<std::string, std::string>> settings = {{"ECF_HOME", ""},
+                                                                       {"ECF_LOG", "ecf.log"},
+                                                                       {"ECF_CHECK", "ecf.check"},
+                                                                       {"ECF_CHECKOLD", "ecf.check.b"},
+                                                                       {"ECF_PASSWD", "ecf.passwd"},
+                                                                       {"ECF_CUSTOM_PASSWD", "ecf.custom_passwd"},
+                                                                       {"ECF_LISTS", "ecf.lists"}};
+    for (const auto& setting : settings) {
+        const auto& name         = setting.first;
+        const auto& default_name = setting.second;
+        for (unsigned sources = 0; sources < 4; ++sources) {
+            BOOST_TEST_CONTEXT(name << ", source mask: " << sources) {
+                const auto config_value      = name == "ECF_HOME" ? "config home" : "config.file";
+                const auto environment_value = name == "ECF_HOME" ? "environment home" : "environment.file";
+                const auto content           = sources & 1 ? name + " = " + config_value + "\n" : "";
+                std::vector<std::pair<std::string, std::string>> environment;
+                if (sources & 2) {
+                    environment.emplace_back(name, environment_value);
+                }
+                check_server_precedence(
+                    content, environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto& startup) {
+                        const std::string selected = sources & 2 ? environment_value : config_value;
+                        const auto home            = name == "ECF_HOME" && sources ? startup / selected : startup;
+                        std::string expected;
+                        if (name == "ECF_HOME") {
+                            expected = home.string();
+                        }
+                        else {
+                            const auto filename = sources ? selected : Host{}.name() + ".3141." + default_name;
+                            expected            = name == "ECF_LOG" || name == "ECF_CHECK" || name == "ECF_CHECKOLD"
+                                                      ? (home / filename).string()
+                                                      : filename;
+                        }
+                        BOOST_CHECK_EQUAL(server_variable(serverEnv, name), expected);
+                        BOOST_CHECK_EQUAL(serverEnv.ecf_home(), home.string());
+                        BOOST_CHECK(fs::equivalent(fs::current_path(), home));
+                        const auto log_name = name == "ECF_LOG" && sources ? selected : Host{}.name() + ".3141.ecf.log";
+                        BOOST_CHECK(fs::is_regular_file(home / log_name));
+                    });
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies config and environment precedence for the three numeric environment settings.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_numeric_settings) {
+    ECF_NAME_THIS_TEST();
+    for (const auto& setting : std::vector<std::pair<std::string, int>>{
+             {"ECF_CHECKINTERVAL", 120}, {"ECF_PRUNE_NODE_LOG", 30}, {"ECF_TASK_THRESHOLD", 4000}}) {
+        const auto& name        = setting.first;
+        const int default_value = setting.second;
+        for (unsigned sources = 0; sources < 4; ++sources) {
+            BOOST_TEST_CONTEXT(name << ", source mask: " << sources) {
+                const auto content = sources & 1 ? name + " = 137\n" : "";
+                std::vector<std::pair<std::string, std::string>> environment;
+                if (sources & 2) {
+                    environment.emplace_back(name, "251");
+                }
+                const int expected = sources & 2 ? 251 : sources & 1 ? 137 : default_value;
+                check_server_precedence(
+                    content, environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto&) {
+                        const int actual = name == "ECF_CHECKINTERVAL"    ? serverEnv.checkPtInterval()
+                                           : name == "ECF_PRUNE_NODE_LOG" ? serverEnv.ecf_prune_node_log()
+                                                                          : JobProfiler::task_threshold();
+                        BOOST_CHECK_EQUAL(actual, expected);
+                        const auto lines = last_startup_lines();
+                        BOOST_CHECK(std::find(lines.begin(),
+                                              lines.end(),
+                                              "  " + name + " = " + std::to_string(expected)) != lines.end());
+                    });
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies scheduling defaults and CLI precedence over configuration.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_scheduling_interval) {
+    ECF_NAME_THIS_TEST();
+    for (unsigned sources = 0; sources < 4; ++sources) {
+        BOOST_TEST_CONTEXT("Scheduling source mask: " << sources) {
+            const auto content            = sources & 1 ? "ECF_INTERVAL = 17\n" : "";
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (sources & 2) {
+                args.emplace_back("--ecfinterval=23");
+            }
+            check_server_precedence(content, {}, args, [&](const auto& serverEnv, const auto&) {
+                const int expected = sources & 2 ? 23 : sources & 1 ? 17 : 60;
+                BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), expected);
+                BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(expected));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that independent selections from all three sources coexist in one initialisation.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_mixed_sources) {
+    ECF_NAME_THIS_TEST();
+    check_server_precedence(
+        "ECF_HOME = config home\nECF_PORT = 3142\nECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n"
+        "ECF_CHECK = config.check\nECF_JOB_CMD = configured_submit\nECF_PRUNE_NODE_LOG = 19\n",
+        {{"ECF_HOME", "environment home"},
+         {"ECF_PORT", "3143"},
+         {"ECF_CHECKINTERVAL", "251"},
+         {"ECF_LOG", "environment.log"}},
+        {"ServerEnvironment", "--port=3144", "--ecfinterval=23"},
+        [](const auto& serverEnv, const auto& startup) {
+            const auto home = startup / "environment home";
+            BOOST_CHECK_EQUAL(serverEnv.the_port(), "3144");
+            BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 23);
+            BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 251);
+            BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), 19);
+            BOOST_CHECK_EQUAL(serverEnv.ecf_home(), home.string());
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_LOG"), (home / "environment.log").string());
+            BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), (home / "config.check").string());
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_JOB_CMD"), "configured_submit");
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PASSWD"), Host{}.name() + ".3144.ecf.passwd");
+            BOOST_CHECK(fs::is_regular_file(home / "environment.log"));
+        });
+}
+
+///
+/// @brief Verifies that config-only settings do not acquire unsupported environment overrides.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_config_only_settings) {
+    ECF_NAME_THIS_TEST();
+    const std::vector<std::pair<std::string, std::string>> commands = {{"ECF_JOB_CMD", "ECF_JOB_CMD"},
+                                                                       {"ECF_KILL_CMD", "ECF_KILL_CMD"},
+                                                                       {"ECF_STATUS_CMD", "ECF_STATUS_CMD"},
+                                                                       {"ECF_CHECK_CMD", "ECF_CHECK_CMD"},
+                                                                       {"ECF_URL_CMD", "ECF_URL_CMD"},
+                                                                       {"ECF_URL_BASE", "ECF_URL_BASE"},
+                                                                       {"ECF_URL", "ECF_URL"},
+                                                                       {"ECF_MICRODEF", "ECF_MICRO"}};
+    for (const bool configured : {false, true}) {
+        BOOST_TEST_CONTEXT("Config-only settings present: " << configured) {
+            std::string content = configured ? "ECF_INTERVAL = 17\nECF_CHECKMODE = CHECK_ALWAYS\n" : "";
+            std::vector<std::pair<std::string, std::string>> environment = {
+                {"ECF_INTERVAL", "23"}, {"ECF_CHECKMODE", "CHECK_NEVER"}, {"ECF_MICRO", "!"}};
+            for (const auto& [key, exported] : commands) {
+                if (configured) {
+                    content += key + " = " + (key == "ECF_MICRODEF" ? "@" : "config_" + key) + "\n";
+                }
+                environment.emplace_back(key, key == "ECF_MICRODEF" ? "!" : "environment_" + key);
+            }
+            check_server_precedence(
+                content, environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto&) {
+                    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), configured ? 17 : 60);
+                    BOOST_CHECK(serverEnv.checkMode() == (configured ? CheckPt::ALWAYS : CheckPt::ON_TIME));
+                    const std::vector<std::string> defaults = {Ecf::JOB_CMD(),
+                                                               Ecf::KILL_CMD(),
+                                                               Ecf::STATUS_CMD(),
+                                                               Ecf::CHECK_CMD(),
+                                                               Ecf::URL_CMD(),
+                                                               Ecf::URL_BASE(),
+                                                               Ecf::URL(),
+                                                               "%"};
+                    for (size_t i = 0; i < commands.size(); ++i) {
+                        const auto& [key, exported] = commands[i];
+                        const auto expected =
+                            configured ? (key == "ECF_MICRODEF" ? "@" : "config_" + key) : defaults[i];
+                        BOOST_CHECK_EQUAL(server_variable(serverEnv, exported), expected);
+                    }
+                });
+        }
+    }
+}
+
+///
+/// @brief Verifies that valid environment and CLI overrides cannot conceal a configuration parsing error.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_config_error_before_cli) {
+    ECF_NAME_THIS_TEST();
+    const auto original_path = fs::current_path();
+    BOOST_CHECK_EXCEPTION(check_server_precedence("ECF_PORT = invalid_config_port\n",
+                                                  {{"ECF_PORT", "3143"}},
+                                                  {"ServerEnvironment", "--port=3144"},
+                                                  [](const auto&, const auto&) {
+                                                      BOOST_FAIL("Invalid configuration must not be accepted");
+                                                  }),
+                          ServerEnvironmentException,
+                          [](const ServerEnvironmentException& error) {
+                              const std::string message = error.what();
+                              return message.find("server_environment.cfg") != std::string::npos &&
+                                     message.find("invalid_config_port") != std::string::npos;
+                          });
+    BOOST_CHECK(fs::current_path() == original_path);
+    BOOST_CHECK(!Log::instance());
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
