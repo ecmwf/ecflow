@@ -276,10 +276,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    if (checkPtInterval_ == 0) {
-        ss << "Checkpoint interval not set. Please set in Server/server_environment.cfg or\n";
-        ss << "set the environment variable ECF_CHECKINTERVAL. The value must be\n";
-        ss << "convertible to a integer\n";
+    if (checkPtInterval_ <= 0) {
+        ss << "ECF_CHECKINTERVAL must be a positive integer in seconds, but found " << checkPtInterval_ << ".\n";
         errorMsg = ss.str();
         return false;
     }
