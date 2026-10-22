@@ -29,6 +29,7 @@
 using namespace ecf;
 
 // Imported individually, rather than the whole namespace, since the scaffold also declares a Host.
+using ecf::test::scaffold::AutomaticTestFile;
 using ecf::test::scaffold::NamedTestFile;
 using ecf::test::scaffold::WithoutTestEnvironmentVariable;
 using ecf::test::scaffold::WithTestEnvironmentVariable;
@@ -393,10 +394,13 @@ BOOST_AUTO_TEST_CASE(test_server_environment_masks_credentials_in_runtime_config
 BOOST_AUTO_TEST_CASE(test_server_config_file) {
     ECF_NAME_THIS_TEST();
 
-    // Regression test to make sure the server environment variable do not get removed
+    // Verify that the shipped configuration preserves the expected server variables and defaults.
+
+    const auto config_path = File::test_data("libs/server/server_environment.cfg", "libs/server");
+    BOOST_REQUIRE_MESSAGE(fs::is_regular_file(config_path), "Server configuration fixture not found: " << config_path);
 
     std::vector<std::string> args = {"ServerEnvironment"};
-    ServerEnvironment serverEnv(args, File::test_data("Server/server_environment.cfg", "Server"));
+    ServerEnvironment serverEnv(args, config_path);
 
     std::vector<std::string> expected_variables = ServerEnvironment::expected_variables();
 
@@ -531,6 +535,29 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     // tear down remove the log file created by ServerEnvironment
     Host host;
     fs::remove(host.ecf_log_file(serverEnv.the_port()));
+}
+
+///
+/// @brief Verifies that configuration-file values replace the built-in defaults.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_applies_non_default_values) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestFile config(AutomaticTestFile{"server_environment.cfg"},
+                        "ECF_CHECKINTERVAL = 137\n"
+                        "ECF_CHECKMODE = CHECK_ALWAYS\n"
+                        "ECF_INTERVAL = 17\n");
+    WithTestFile log_file(AutomaticTestFile{"server-config.log"}, "");
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", log_file.path().string());
+    WithoutTestEnvironmentVariable no_check_interval("ECF_CHECKINTERVAL");
+
+    const std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args, config.path().string());
+
+    BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 137);
+    BOOST_CHECK(serverEnv.checkMode() == CheckPt::ALWAYS);
+    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 17);
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), "17");
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
