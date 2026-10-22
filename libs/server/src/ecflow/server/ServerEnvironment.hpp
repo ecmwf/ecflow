@@ -55,7 +55,15 @@ public:
 
     ~ServerEnvironment();
 
-    /// return true if option are valid false and error message otherwise
+    ///
+    /// @brief Validates the effective server configuration and loads optional security files.
+    ///
+    /// The checkpoint interval must be positive after configuration and environment overrides have been applied.
+    ///
+    /// @param[in,out] errorMsg Receives diagnostic details for an invalid configuration or security file
+    /// @return True if the configuration and optional security files are valid; false otherwise.
+    /// @throws std::filesystem::filesystem_error if a security-file path cannot be inspected.
+    ///
     bool valid(std::string& errorMsg) const;
 
     /// return the directory path associated with smshome

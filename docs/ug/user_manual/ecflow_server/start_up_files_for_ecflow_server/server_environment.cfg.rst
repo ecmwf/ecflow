@@ -16,6 +16,12 @@ tasks.
 
     The server looks for the file in the CWD, hence make sure you move it.
 
+``ECF_CHECKINTERVAL`` sets the checkpoint interval in seconds, with a default of 120.
+The environment variable of the same name overrides the configuration-file value.
+
+The effective interval after overrides must be a positive integer; zero and negative values
+stop server initialisation with a diagnostic identifying the setting and its value.
+
 ``ECF_CHECKMODE`` accepts the following case-sensitive values:
 
 - ``CHECK_NEVER``: disable automatic checkpointing.

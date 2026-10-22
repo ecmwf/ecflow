@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <vector>
@@ -284,6 +285,55 @@ void check_server_config_parse_error(const std::string& content,
     BOOST_CHECK(fs::current_path() == original_path);
     BOOST_CHECK(!fs::exists(log_path));
     BOOST_CHECK(!Log::instance());
+}
+
+///
+/// @brief Checks validation of the effective checkpoint interval after environment overrides.
+///
+/// @param[in] configured_interval Optional interval in the configuration file; absent selects the default
+/// @param[in] environment_interval Optional environment override; absent leaves the configuration value unchanged
+///
+void check_server_checkpoint_interval(std::optional<int> configured_interval, std::optional<int> environment_interval) {
+    auto directory      = ecf::test::scaffold::MakeDirectory{}.create();
+    std::string content = "ECF_INTERVAL = 17\n";
+    if (configured_interval) {
+        content += "ECF_CHECKINTERVAL = " + std::to_string(*configured_interval) + "\n";
+    }
+    WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+    WithTestEnvironmentVariable home("ECF_HOME", fs::current_path().string());
+    WithTestEnvironmentVariable port("ECF_PORT", "3144");
+    WithTestEnvironmentVariable log("ECF_LOG", (directory.path() / "server.log").string());
+    WithTestEnvironmentVariable checkpoint("ECF_CHECK", (directory.path() / "primary.check").string());
+    WithTestEnvironmentVariable backup("ECF_CHECKOLD", (directory.path() / "backup.check").string());
+    WithTestEnvironmentVariable passwd("ECF_PASSWD", (directory.path() / "missing.passwd").string());
+    WithTestEnvironmentVariable custom_passwd("ECF_CUSTOM_PASSWD",
+                                              (directory.path() / "missing.custom_passwd").string());
+    WithTestEnvironmentVariable lists("ECF_LISTS", (directory.path() / "missing.lists").string());
+    WithoutTestEnvironmentVariable no_interval("ECF_CHECKINTERVAL");
+    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
+    WithoutTestEnvironmentVariable no_threshold("ECF_TASK_THRESHOLD");
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
+    WithoutTestEnvironmentVariable no_debug("ECF_DEBUG_SERVER");
+    std::optional<WithTestEnvironmentVariable> interval_override;
+    if (environment_interval) {
+        interval_override.emplace("ECF_CHECKINTERVAL", std::to_string(*environment_interval));
+    }
+
+    const auto expected = environment_interval.value_or(configured_interval.value_or(CheckPt::default_interval()));
+    const std::vector<std::string> args = {"ServerEnvironment"};
+    ServerEnvironment serverEnv(args, config.path().string());
+    BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), expected);
+    std::string error;
+    const bool valid = serverEnv.valid(error);
+    BOOST_CHECK_EQUAL(valid, expected > 0);
+    if (expected > 0) {
+        BOOST_CHECK_MESSAGE(error.empty(), error);
+    }
+    else {
+        BOOST_CHECK_MESSAGE(error.find("ECF_CHECKINTERVAL") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find("positive integer") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find(std::to_string(expected)) != std::string::npos, error);
+    }
 }
 
 } // namespace
@@ -789,6 +839,46 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_check_modes_reject_invalid_values) 
             check_server_config_parse_error("ECF_CHECKMODE = " + value + "\n", expected_error);
         }
     }
+}
+
+///
+/// @brief Verifies checkpoint-interval boundaries read from the configuration file.
+///
+BOOST_AUTO_TEST_CASE(test_server_checkpoint_interval_from_config) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int interval :
+         {std::numeric_limits<int>::min(), -120, -1, 0, 1, 120, 137, std::numeric_limits<int>::max()}) {
+        BOOST_TEST_CONTEXT("Configured checkpoint interval: " << interval) {
+            check_server_checkpoint_interval(interval, std::nullopt);
+        }
+    }
+}
+
+///
+/// @brief Verifies checkpoint-interval boundaries selected by an environment override.
+///
+BOOST_AUTO_TEST_CASE(test_server_checkpoint_interval_from_environment) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int interval :
+         {std::numeric_limits<int>::min(), -120, -1, 0, 1, 120, 137, std::numeric_limits<int>::max()}) {
+        BOOST_TEST_CONTEXT("Environment checkpoint interval: " << interval) {
+            check_server_checkpoint_interval(300, interval);
+        }
+    }
+}
+
+///
+/// @brief Verifies checkpoint-interval defaults and validation after environment overrides.
+///
+BOOST_AUTO_TEST_CASE(test_server_checkpoint_interval_defaults_and_precedence) {
+    ECF_NAME_THIS_TEST();
+
+    check_server_checkpoint_interval(std::nullopt, std::nullopt);
+    check_server_checkpoint_interval(std::nullopt, 137);
+    check_server_checkpoint_interval(-1, 1);
+    check_server_checkpoint_interval(0, 120);
 }
 
 ///
