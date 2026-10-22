@@ -328,6 +328,89 @@ void check_server_checkpoint_interval(std::optional<int> configured_interval, st
     }
 }
 
+///
+/// @brief Checks configuration discovery using the default filename in an isolated startup directory.
+///
+/// @param[in] startup_content Optional startup-directory configuration; absent leaves the file missing
+/// @param[in] home_content Optional configuration in a separate server home
+/// @param[in] config_selects_home Whether the startup configuration selects the separate home
+/// @param[in] expected_interval Independently expected checkpoint interval in seconds
+/// @param[in] expected_schedule Independently expected scheduling interval in seconds
+///
+void check_server_config_discovery(const std::optional<std::string>& startup_content,
+                                   const std::optional<std::string>& home_content,
+                                   bool config_selects_home,
+                                   int expected_interval,
+                                   int expected_schedule) {
+    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto original_path = fs::current_path();
+    const auto home_path     = directory.path() / "server home";
+    const auto expected_home = home_content || config_selects_home ? home_path : directory.path();
+    BOOST_SCOPE_EXIT_ALL(&) {
+        Log::destroy();
+        std::error_code error;
+        fs::current_path(original_path, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
+    };
+
+    WithoutTestEnvironmentVariable no_home("ECF_HOME");
+    WithoutTestEnvironmentVariable no_port("ECF_PORT");
+    WithoutTestEnvironmentVariable no_log("ECF_LOG");
+    WithoutTestEnvironmentVariable no_check("ECF_CHECK");
+    WithoutTestEnvironmentVariable no_checkold("ECF_CHECKOLD");
+    WithoutTestEnvironmentVariable no_passwd("ECF_PASSWD");
+    WithoutTestEnvironmentVariable no_custom_passwd("ECF_CUSTOM_PASSWD");
+    WithoutTestEnvironmentVariable no_lists("ECF_LISTS");
+    WithoutTestEnvironmentVariable no_interval("ECF_CHECKINTERVAL");
+    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
+    WithoutTestEnvironmentVariable no_threshold("ECF_TASK_THRESHOLD");
+    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
+    WithoutTestEnvironmentVariable no_debug("ECF_DEBUG_SERVER");
+    std::optional<WithTestEnvironmentVariable> home_override;
+    std::optional<WithTestFile> startup_config;
+    std::optional<WithTestFile> home_config;
+    fs::create_directories(home_path);
+    if (startup_content) {
+        const auto content = (config_selects_home ? "ECF_HOME = " + home_path.string() + "\n" : "") + *startup_content;
+        startup_config.emplace(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+    }
+    if (home_content) {
+        home_config.emplace(NamedTestFile{(home_path / "server_environment.cfg").string()}, *home_content);
+        if (!config_selects_home) {
+            home_override.emplace("ECF_HOME", home_path.string());
+        }
+    }
+    fs::current_path(directory.path());
+
+    const std::vector<std::string> args = {"ServerEnvironment"};
+    ServerEnvironment serverEnv(args);
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    BOOST_CHECK_EQUAL(serverEnv.the_port(), "3141");
+    BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), expected_interval);
+    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), expected_schedule);
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(expected_schedule));
+    BOOST_CHECK_EQUAL(serverEnv.ecf_home(), expected_home.string());
+    BOOST_CHECK(fs::equivalent(fs::current_path(), expected_home));
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_HOME"), expected_home.string());
+
+    Host host;
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_LOG"), (expected_home / host.ecf_log_file("3141")).string());
+    BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), (expected_home / host.ecf_checkpt_file("3141")).string());
+    BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), (expected_home / host.ecf_backup_checkpt_file("3141")).string());
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CHECK"),
+                      (expected_home / host.ecf_checkpt_file("3141")).string());
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CHECKOLD"),
+                      (expected_home / host.ecf_backup_checkpt_file("3141")).string());
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PASSWD"), host.name() + ".3141.ecf.passwd");
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CUSTOM_PASSWD"), host.name() + ".3141.ecf.custom_passwd");
+    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_LISTS"), host.ecf_lists_file("3141"));
+    BOOST_CHECK(fs::is_regular_file(expected_home / host.ecf_log_file("3141")));
+    if (expected_home != directory.path()) {
+        BOOST_CHECK(!fs::exists(directory.path() / host.ecf_log_file("3141")));
+    }
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -905,6 +988,60 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_optional_content_uses_defaults) {
             BOOST_CHECK(fs::exists(log_path));
         }
     }
+}
+
+///
+/// @brief Verifies discovery defaults when the startup configuration is absent.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_missing) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_discovery(std::nullopt, std::nullopt, false, 120, 60);
+}
+
+///
+/// @brief Verifies discovery defaults for empty and comments-only startup configurations.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_empty) {
+    ECF_NAME_THIS_TEST();
+    for (const auto& content : std::vector<std::string>{"", "# Comment only\n\n"}) {
+        BOOST_TEST_CONTEXT("Startup configuration: '" << content << "'") {
+            check_server_config_discovery(content, std::nullopt, false, 120, 60);
+        }
+    }
+}
+
+///
+/// @brief Verifies that default discovery applies distinctive startup-directory settings.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_startup_directory) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_discovery("ECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n", std::nullopt, false, 137, 17);
+}
+
+///
+/// @brief Verifies that a configuration found only in server home is not discovered.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_ignores_home_only) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_discovery(std::nullopt, "ECF_CHECKINTERVAL = 251\nECF_INTERVAL = 23\n", false, 120, 60);
+}
+
+///
+/// @brief Verifies that conflicting server-home settings cannot replace startup-directory settings.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_startup_wins) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_discovery(
+        "ECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n", "ECF_CHECKINTERVAL = 251\nECF_INTERVAL = 23\n", false, 137, 17);
+}
+
+///
+/// @brief Verifies that the startup configuration is fully read before changing to its selected home.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_discovery_config_selects_home) {
+    ECF_NAME_THIS_TEST();
+    check_server_config_discovery(
+        "ECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n", "ECF_CHECKINTERVAL = 251\nECF_INTERVAL = 23\n", true, 137, 17);
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
