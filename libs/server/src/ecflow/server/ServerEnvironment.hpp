@@ -209,10 +209,11 @@ private:
     ///
     /// A missing or empty configuration file uses the built-in defaults. Parsing failures stop initialisation
     /// before environment overrides or startup side effects are applied.
+    /// An explicitly specified checkpoint mode must match one of the supported names.
     ///
     /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
     /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
-    /// @throws ServerEnvironmentException if configuration parsing fails, including the path and original error.
+    /// @throws ServerEnvironmentException if parsing or checkpoint-mode validation fails, including the path and cause.
     ///
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
