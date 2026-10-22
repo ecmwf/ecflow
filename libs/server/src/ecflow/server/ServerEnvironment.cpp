@@ -591,6 +591,13 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (ecfHome_ == ".") { // expand to absolute paths
         ecfHome_ = fs::current_path().string();
     }
+    else if (!ecfHome_.empty() && fs::path(ecfHome_).is_relative()) {
+        auto home = fs::absolute(ecfHome_).lexically_normal();
+        if (home.filename().empty() && home.has_relative_path()) {
+            home = home.parent_path(); // drop the trailing separator
+        }
+        ecfHome_ = home.string();
+    }
 
     ecf::environment::get(ecf::environment::ECF_LOG, log_file_name);
 

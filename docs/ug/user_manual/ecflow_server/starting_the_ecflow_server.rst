@@ -126,7 +126,11 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    These adjustments do not modify the process environment or the configuration file.
 
 #. **Change the working directory to** ``ECF_HOME``. The default value, ``.``, means the
-   directory in which the process started. The directory must exist and allow read, write
+   directory in which the process started. A relative ``ECF_HOME`` is converted to an absolute
+   path against that startup directory before filenames are resolved or the working directory changes.
+   The converted path has no ``.`` or ``..`` segments and no trailing separator.
+   The resolved value is exposed as the ecFlow server variable ``ECF_HOME``.
+   The directory must exist and allow read, write
    and search access for the account running the server; otherwise, initialisation fails.
 
 #. **Open the log.** The server applies the same host and port prefix rule to the log filename,

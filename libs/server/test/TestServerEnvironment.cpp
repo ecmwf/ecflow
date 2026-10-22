@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
+#include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/ServerProtocol.hpp"
@@ -164,11 +166,124 @@ void check_runtime_configuration(const ServerEnvironment& serverEnv,
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
 
+///
+/// @brief Checks server-home and checkpoint resolution across a working-directory change.
+///
+/// @param[in] from_environment Whether the environment overrides the home in the configuration file
+/// @param[in] nested_home Whether a duplicate relative home exists beneath the selected home
+/// @param[in] custom_checkpoints Whether to use an explicit relative checkpoint and an absolute backup path
+///
+void check_server_home_resolution(bool from_environment, bool nested_home, bool custom_checkpoints) {
+    auto startup               = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto original_path   = fs::current_path();
+    const auto absolute_home   = startup.path() / "absolute workspace";
+    const auto absolute_backup = startup.path() / "backup.check";
+    BOOST_SCOPE_EXIT_ALL(&) {
+        Log::destroy();
+        std::error_code error;
+        fs::current_path(original_path, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
+    };
+
+    WithoutTestEnvironmentVariable no_home("ECF_HOME");
+    WithoutTestEnvironmentVariable no_log("ECF_LOG");
+    WithoutTestEnvironmentVariable no_check("ECF_CHECK");
+    WithoutTestEnvironmentVariable no_checkold("ECF_CHECKOLD");
+    WithoutTestEnvironmentVariable no_passwd("ECF_PASSWD");
+    WithoutTestEnvironmentVariable no_custom_passwd("ECF_CUSTOM_PASSWD");
+    WithoutTestEnvironmentVariable no_lists("ECF_LISTS");
+    WithTestEnvironmentVariable port("ECF_PORT", "3144");
+
+    for (const auto& home : std::vector<std::string>{"workspace",
+                                                     "./workspace",
+                                                     "other/../workspace",
+                                                     "workspace/",
+                                                     "workspace with spaces",
+                                                     absolute_home.string()}) {
+        BOOST_TEST_CONTEXT("ECF_HOME=" << home) {
+            fs::current_path(startup.path());
+            // A relative home is exported in normal form, without dot segments or a trailing separator
+            auto expected_home = (startup.path() / home).lexically_normal();
+            if (expected_home.filename().empty()) {
+                expected_home = expected_home.parent_path();
+            }
+            fs::create_directories(expected_home / "checkpoints");
+            if (nested_home && fs::path(home).is_relative()) {
+                fs::create_directories(expected_home / home);
+            }
+
+            const auto checkpoint   = custom_checkpoints ? "checkpoints/primary.check" : Ecf::CHECKPT();
+            const auto backup       = custom_checkpoints ? absolute_backup.string() : Ecf::BACKUP_CHECKPT();
+            std::string config_text = "ECF_HOME = " + (from_environment ? std::string(".") : home) + "\n";
+            config_text += "ECF_LOG = server.log\n";
+            config_text += "ECF_CHECK = " + checkpoint + "\n";
+            config_text += "ECF_CHECKOLD = " + backup + "\n";
+            WithTestFile config(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config_text);
+            std::optional<WithTestEnvironmentVariable> home_override;
+            if (from_environment) {
+                home_override.emplace("ECF_HOME", home);
+            }
+
+            const std::vector<std::string> args = {"ServerEnvironment"};
+            ServerEnvironment serverEnv(args);
+            std::string error;
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+            BOOST_CHECK_EQUAL(serverEnv.ecf_home(), expected_home.string());
+            BOOST_CHECK(fs::equivalent(fs::current_path(), expected_home));
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_HOME"), expected_home.string());
+
+            Host host;
+            const auto expected_check =
+                expected_home / (custom_checkpoints ? std::string(checkpoint) : host.ecf_checkpt_file("3144"));
+            const auto expected_backup =
+                custom_checkpoints ? absolute_backup : expected_home / host.ecf_backup_checkpt_file("3144");
+            BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), expected_check.string());
+            BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), expected_backup.string());
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CHECK"), expected_check.string());
+            BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CHECKOLD"), expected_backup.string());
+            BOOST_CHECK(fs::exists(expected_home / "server.log"));
+            BOOST_CHECK(!fs::exists(startup.path() / "server.log"));
+        }
+    }
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 
 BOOST_AUTO_TEST_SUITE(T_ServerEnvironment)
+
+///
+/// @brief Verifies home resolution from configuration before constructing default checkpoint paths.
+///
+BOOST_AUTO_TEST_CASE(test_server_home_resolution_from_config) {
+    ECF_NAME_THIS_TEST();
+    check_server_home_resolution(false, false, false);
+}
+
+///
+/// @brief Verifies home resolution from environment overrides before changing directory.
+///
+BOOST_AUTO_TEST_CASE(test_server_home_resolution_from_environment) {
+    ECF_NAME_THIS_TEST();
+    check_server_home_resolution(true, false, false);
+}
+
+///
+/// @brief Verifies that a duplicate nested home does not conceal incorrect path resolution.
+///
+BOOST_AUTO_TEST_CASE(test_server_home_resolution_with_nested_home) {
+    ECF_NAME_THIS_TEST();
+    check_server_home_resolution(false, true, false);
+}
+
+///
+/// @brief Verifies explicit relative checkpoint paths and absolute backup paths with a selected home.
+///
+BOOST_AUTO_TEST_CASE(test_server_home_resolution_with_explicit_checkpoints) {
+    ECF_NAME_THIS_TEST();
+    check_server_home_resolution(true, true, true);
+}
 
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     ECF_NAME_THIS_TEST();

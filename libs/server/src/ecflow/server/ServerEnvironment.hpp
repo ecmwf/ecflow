@@ -207,7 +207,16 @@ private:
     ///  defaults are read from a config file
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
-    /// Get the standard environment variables, overwrite any settings from config file
+    ///
+    /// @brief Applies environment overrides and resolves a relative server home against the startup directory.
+    ///
+    /// A relative server home becomes an absolute path in normal form, without dot segments or a trailing separator.
+    /// Absolute server-home paths are preserved. An empty value is left for startup validation to reject.
+    ///
+    /// @param[in,out] log_file_name Configured log filename, replaced when ECF_LOG is set in the environment
+    /// @throws ServerEnvironmentException if a numeric environment setting cannot be parsed.
+    /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
+    ///
     void read_environment_variables(std::string& log_file_name);
 
     void change_dir_to_ecf_home_and_check_accesibility();
