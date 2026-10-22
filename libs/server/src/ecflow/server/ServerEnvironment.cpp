@@ -553,8 +553,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             JobProfiler::set_task_threshold(the_task_threshold);
         }
     }
-    catch (std::exception& e) {
-        std::cerr << "ServerEnvironment::read_config_file() " << e.what() << "\n";
+    catch (const std::exception& e) {
+        throw ServerEnvironmentException("Could not parse server configuration file '" + path_to_config_file +
+                                         "': " + e.what());
     }
 }
 

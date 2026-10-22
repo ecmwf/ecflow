@@ -204,7 +204,16 @@ public:
 private:
     void init(const CommandLine& cl, const std::string& path_to_config_file);
 
-    ///  defaults are read from a config file
+    ///
+    /// @brief Reads configuration settings and applies built-in defaults for unspecified options.
+    ///
+    /// A missing or empty configuration file uses the built-in defaults. Parsing failures stop initialisation
+    /// before environment overrides or startup side effects are applied.
+    ///
+    /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
+    /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
+    /// @throws ServerEnvironmentException if configuration parsing fails, including the path and original error.
+    ///
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
     ///

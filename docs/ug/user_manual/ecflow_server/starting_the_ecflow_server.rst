@@ -99,6 +99,8 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    from the directory in which the process starts, before changing to ``ECF_HOME``.
    The filename is fixed, and no environment variable or command-line option allows
    selecting another file.
+   A parsing error stops initialisation before environment overrides are applied;
+   the diagnostic identifies the configuration file and the original parsing error.
 
 #. **Apply overrides.** Environment variables override settings in the configuration file.
    Command-line options override the corresponding environment settings; for example,
