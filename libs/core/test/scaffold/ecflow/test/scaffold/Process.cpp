@@ -3,10 +3,17 @@
 
 #include "Process.hpp"
 
+#include <cerrno>
+#include <csignal>
 #include <iostream>
+#include <mutex>
+#include <optional>
 #include <sstream>
+#include <system_error>
+#include <unistd.h>
 
 #include <boost/version.hpp>
+#include <sys/wait.h>
 
 #include "Naming.hpp"
 
@@ -38,9 +45,20 @@ namespace bp = boost::process;
 
 namespace ecf::test::scaffold {
 
+///
+/// @brief Shares child identity, native-wait ownership and cached completion across process backends.
+///
+struct ProcessLifecycle
+{
+    int process_id{0};
+    std::mutex wait_mutex;
+    std::mutex status_mutex;
+    std::optional<int> exit_status;
+};
+
 #if BOOST_PROCESS_VERSION == 1
 
-struct Process::Impl
+struct Process::Impl : ProcessLifecycle
 {
     Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
         : out_{},
@@ -52,19 +70,32 @@ struct Process::Impl
 
         // Start the process
         handle_ = bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+        process_id = handle_.id();
     }
     ~Impl() = default;
 
-    int pid() const { return handle_.id(); }
+    int wait_native() {
+        // Reap without bp::child::wait(), which on older Boost throws for a signalled child after reaping it,
+        // and reports a signalled child as a successful exit
+        int status = 0;
+        pid_t ret  = 0;
+        do {
+            ret = ::waitpid(process_id, &status, 0);
+        } while (ret == -1 && errno == EINTR);
+        if (ret == -1) {
+            throw std::system_error(errno, std::generic_category(), "waitpid(2) failed");
+        }
+        // The child is reaped, so the handle must no longer probe or signal its process id
+        handle_.detach();
 
-    int wait() {
-        handle_.wait();
-        return handle_.exit_code();
-    }
-
-    int terminate() {
-        handle_.terminate();
-        return 0;
+        // Match the exit status reported by the Boost.Process v2 backend
+        if (WIFEXITED(status)) {
+            return WEXITSTATUS(status);
+        }
+        if (WIFSIGNALED(status)) {
+            return WTERMSIG(status);
+        }
+        return status;
     }
 
     std::string read_stdout() {
@@ -93,7 +124,7 @@ struct Process::Impl
 
 #elif BOOST_PROCESS_VERSION == 2
 
-struct Process::Impl
+struct Process::Impl : ProcessLifecycle
 {
     Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
         : ctx_{},
@@ -101,23 +132,11 @@ struct Process::Impl
           stderr_pipe_{ctx_},
           start_dir_{cwd.c_str()},
           handle_{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}} {
-        // The process is started in the constructor
+        process_id = handle_.id();
     }
     ~Impl() = default;
 
-    int pid() const { return handle_.id(); }
-
-    int wait() { return handle_.wait(); }
-
-    int terminate() {
-        bp::error_code ec;
-        handle_.terminate(ec);
-        if (ec) {
-            ECF_TEST_DBG("Failed to terminate process: " << ec.message());
-            return 1;
-        }
-        return 0;
-    }
+    int wait_native() { return handle_.wait(); }
 
     std::string read_stdout() {
         std::string stdout_buffer;
@@ -171,15 +190,48 @@ Process& Process::operator=(Process&& rhs) {
 Process::~Process() = default;
 
 int Process::pid() const {
-    return impl_->pid();
+    return impl_->process_id;
 }
 
 int Process::wait() {
-    return impl_->wait();
+    std::lock_guard<std::mutex> waiter(impl_->wait_mutex);
+    {
+        std::lock_guard<std::mutex> status(impl_->status_mutex);
+        if (impl_->exit_status) {
+            return *impl_->exit_status;
+        }
+    }
+
+    const int result = impl_->wait_native();
+    {
+        std::lock_guard<std::mutex> status(impl_->status_mutex);
+        impl_->exit_status = result;
+    }
+    return result;
 }
 
-int Process::terminate() {
-    return impl_->terminate();
+int Process::terminate() noexcept {
+    if (!impl_) {
+        return 0;
+    }
+    try {
+        {
+            std::lock_guard<std::mutex> status(impl_->status_mutex);
+            if (impl_->exit_status) {
+                return 0;
+            }
+            // Signal without Boost.Process::terminate(), which reaps on some backends.
+            // The single waiter below (or an existing asynchronous waiter) owns reaping.
+            if (::kill(impl_->process_id, SIGKILL) != 0 && errno != ESRCH) {
+                return 1;
+            }
+        }
+        wait();
+        return 0;
+    }
+    catch (...) {
+        return 1;
+    }
 }
 
 bool Process::is_running() const {

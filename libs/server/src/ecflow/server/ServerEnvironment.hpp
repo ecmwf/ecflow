@@ -213,6 +213,9 @@ private:
     ///
     /// @brief Selects startup settings and validates required strings and the effective profiling threshold.
     ///
+    /// Command-line syntax is parsed first. Help and version requests return without reading configuration
+    /// or environment settings, applying transport options or accessing runtime files.
+    ///
     /// @param[in] cl Command-line tokens, applied after configuration and environment settings
     /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
     /// @throws ServerEnvironmentException if parsing, required-setting validation or server-home access fails.

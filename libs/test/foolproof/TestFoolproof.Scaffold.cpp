@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <chrono>
+#include <future>
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -9,6 +12,67 @@
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
 BOOST_AUTO_TEST_SUITE(T_Scaffold)
+
+///
+/// @brief Verifies repeated waits and termination after natural exit without reaping twice.
+///
+BOOST_AUTO_TEST_CASE(test_process_wait_caches_exit_status) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process process("/bin/sh", {"-c", "exit 23"});
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+    BOOST_CHECK_EQUAL(process.terminate(), 0);
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+}
+
+///
+/// @brief Verifies termination followed by repeated waits and cleanup without a second native reap.
+///
+BOOST_AUTO_TEST_CASE(test_process_terminate_then_wait) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process process("/bin/sh", {"-c", "exec sleep 30"});
+    static_assert(noexcept(process.terminate()));
+    BOOST_REQUIRE_EQUAL(process.terminate(), 0);
+    const int status = process.wait();
+    BOOST_CHECK_NE(status, 0);
+    BOOST_CHECK_EQUAL(process.wait(), status);
+    BOOST_CHECK_EQUAL(process.terminate(), 0);
+    BOOST_CHECK_EQUAL(process.wait(), status);
+}
+
+///
+/// @brief Verifies that termination cooperates with an asynchronous waiter instead of racing to reap the child.
+///
+BOOST_AUTO_TEST_CASE(test_process_terminate_with_pending_wait) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    for (int iteration = 0; iteration < 8; ++iteration) {
+        BOOST_TEST_CONTEXT("Wait/terminate interleaving " << iteration) {
+            Process process("/bin/sh", {"-c", "exec sleep 30"});
+            std::promise<void> started;
+            auto ready      = started.get_future();
+            auto completion = std::async(std::launch::async, [&] {
+                started.set_value();
+                return process.wait();
+            });
+            ready.wait();
+
+            BOOST_REQUIRE_EQUAL(process.terminate(), 0);
+            BOOST_REQUIRE(completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready);
+            const int status = completion.get();
+            BOOST_CHECK_NE(status, 0);
+            BOOST_CHECK_EQUAL(process.wait(), status);
+        }
+    }
+}
 
 BOOST_AUTO_TEST_CASE(test_creating_host) {
     ECF_NAME_THIS_TEST();
