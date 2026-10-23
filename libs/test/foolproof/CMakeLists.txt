@@ -22,6 +22,7 @@ ecflow_add_test(
     TestFoolproof.Scaffold.cpp
     TestFoolproof.ServerOptions.cpp
     TestFoolproof.ServerPaths.cpp
+    TestFoolproof.ServerRecovery.cpp
     TestFoolproof.ServerReload.cpp
     TestFoolproof.ServerSecurity.cpp
     TestFoolproof.ServerValidation.cpp

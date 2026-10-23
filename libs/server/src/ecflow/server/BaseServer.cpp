@@ -119,26 +119,33 @@ void BaseServer::handle_terminate() {
 // ============================== other privates ===========================================
 
 bool BaseServer::load_check_pt_file_on_startup() {
-    // On start up we want different behaviour.
-    // If check pt file exists and we cannot load then we want to exit
-    // This avoids the server from overwriting the check point file
-    // Which may be from a different version. let the user handle it.
     LogToCout logToCout;
     bool checkpt_failed = false;
-    if (restore_from_checkpt(serverEnv_.checkPtFilename(), checkpt_failed)) {
+    std::string checkpt_error;
+    if (restore_from_checkpt(serverEnv_.checkPtFilename(), checkpt_failed, &checkpt_error)) {
         return true;
+    }
+    if (checkpt_failed) {
+        // Failed parsing can leave user variables as well as nodes behind.
+        // The backup must be restored into a fresh definition.
+        defs_ = Defs::create();
+        defs_->ecf_prune_node_log(serverEnv_.ecf_prune_node_log());
     }
     bool backup_checkpt_failed = false;
-    if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed)) {
+    std::string backup_checkpt_error;
+    if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed, &backup_checkpt_error)) {
         return true;
     }
 
-    if (backup_checkpt_failed && !fs::exists(serverEnv_.checkPtFilename())) {
-        throw std::runtime_error("Cannot start server, please handle the backup checkpoint file first");
-    }
-
-    if (checkpt_failed && !fs::exists(serverEnv_.oldCheckPtFilename())) {
-        throw std::runtime_error("Cannot start server, please handle the checkpoint file first");
+    if (checkpt_failed || backup_checkpt_failed) {
+        std::string message = "Cannot start server: no usable checkpoint.\n";
+        message += checkpt_failed ? "Failed to load ECF_CHECK '" + serverEnv_.checkPtFilename() + "': " + checkpt_error
+                                  : "ECF_CHECK '" + serverEnv_.checkPtFilename() + "' is missing.";
+        message += "\n";
+        message += backup_checkpt_failed ? "Failed to load ECF_CHECKOLD '" + serverEnv_.oldCheckPtFilename() +
+                                               "': " + backup_checkpt_error
+                                         : "ECF_CHECKOLD '" + serverEnv_.oldCheckPtFilename() + "' is missing.";
+        throw ServerEnvironmentException(message);
     }
     return false;
 }
@@ -157,7 +164,11 @@ void BaseServer::loadCheckPtFile() {
     }
 }
 
-bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed) {
+bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed, std::string* diagnostic) {
+    failed = false;
+    if (diagnostic) {
+        diagnostic->clear();
+    }
     // cout << "BaseServer::restore_from_checkpt " << filename;
     if (fs::exists(filename)) {
         // cout << " file exists\n";
@@ -169,6 +180,9 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed)
         log(Log::MSG, s);
 
         try {
+            if (!fs::is_regular_file(filename)) {
+                throw std::runtime_error("Checkpoint path is not a regular file");
+            }
             defs_->restore(filename);   // this can throw
             defs_->handle_migration();  // handle any migration of checkpt file.
             update_defs_server_state(); // works on def_
@@ -185,6 +199,10 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed)
             return true;
         }
         catch (std::exception& e) {
+            failed = true;
+            if (diagnostic) {
+                *diagnostic = e.what();
+            }
             LOG(Log::ERR, "Failed to load *DEFS* check point file " << filename << ", because: " << e.what());
         }
     }
