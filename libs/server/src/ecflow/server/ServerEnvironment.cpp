@@ -74,6 +74,7 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
       checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
       submitJobsInterval_(defaultSubmitJobsInterval),
       ecf_prune_node_log_(0),
+      ecf_task_threshold_(JobProfiler::task_threshold_default()),
       jobGeneration_(true),
       protocol_{ecf::Protocol::Plain},
       debug_(false),
@@ -127,6 +128,32 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (version_option_) {
         return; // User is printing the version
     }
+
+    for (const auto& [name, value] : std::vector<std::pair<std::string, std::string>>{
+             {"ECF_HOME", ecfHome_},
+             {"ECF_LOG", log_file_name},
+             {"ECF_CHECK", ecf_checkpt_file_},
+             {"ECF_CHECKOLD", ecf_backup_checkpt_file_},
+             {"ECF_PASSWD", authentication_service_.passwd_file()},
+             {"ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file()},
+             {"ECF_LISTS", ecf_white_list_file_},
+             {"ECF_JOB_CMD", ecf_cmd_},
+             {"ECF_KILL_CMD", killCmd_},
+             {"ECF_STATUS_CMD", statusCmd_},
+             {"ECF_CHECK_CMD", checkCmd_},
+             {"ECF_URL_CMD", urlCmd_},
+             {"ECF_URL_BASE", urlBase_},
+             {"ECF_URL", url_},
+             {"ECF_MICRODEF", ecf_micro_}}) {
+        if (value.empty()) {
+            throw ServerEnvironmentException(name + " must not be empty (found '').");
+        }
+    }
+    if (ecf_task_threshold_ <= 0) {
+        throw ServerEnvironmentException("ECF_TASK_THRESHOLD must be a positive integer in milliseconds, but found " +
+                                         std::to_string(ecf_task_threshold_) + ".");
+    }
+    JobProfiler::set_task_threshold(static_cast<size_t>(ecf_task_threshold_));
 
     /// Config, Environment, or Options may have updated port, update port dependent file names
     /// If we have default names make unique, by prefixing host and port
@@ -282,14 +309,14 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
     if (submitJobsInterval_ < 1 || submitJobsInterval_ > 60) {
-        ss << "Submit jobs interval not set correctly. Please set in Server/server_environment.cfg\n";
-        ss << "or provide as an argument. It must be in the range [1-60] \n";
+        ss << "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found "
+           << submitJobsInterval_ << ".\n";
         errorMsg = ss.str();
         return false;
     }
     if (ecf_prune_node_log_ < 0) {
-        ss << "ECF_PRUNE_NODE_LOG not set correctly. Please set in Server/server_environment.cfg\n";
-        ss << "or via environment variable of same name. It must be in the range [1-356] \n";
+        ss << "ECF_PRUNE_NODE_LOG must be a non-negative integer in days, but found " << ecf_prune_node_log_
+           << ". Zero preserves all edit history.\n";
         errorMsg = ss.str();
         return false;
     }
@@ -486,7 +513,6 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
     try {
         std::string theCheckMode;
-        int the_task_threshold = 0;
 
         std::string passwd_file;
         std::string custom_passwd_file;
@@ -517,11 +543,23 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(ecf::string_constants::white_list_file), "Path name to file the list valid users and their access rights")
             ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(std::string{AuthenticationService::default_passwd_file()}), "Path name to passwd file")
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(std::string{AuthenticationService::default_custom_passwd_file()}), "Path name to custom passwd file, for user who don't use login name")
-            ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
+            ("ECF_TASK_THRESHOLD", po::value<int>(&ecf_task_threshold_)->default_value(JobProfiler::task_threshold_default()), "The positive threshold in milliseconds when profiling job generation")
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
         // clang-format on
 
+        std::error_code status_error;
+        const auto status = fs::status(path_to_config_file, status_error);
+        if (status_error && status_error != std::errc::no_such_file_or_directory) {
+            throw std::runtime_error("Cannot inspect configuration file: " + status_error.message());
+        }
+        if (fs::exists(status) && !fs::is_regular_file(status)) {
+            throw std::runtime_error("Configuration path is not a regular file");
+        }
+
         std::ifstream ifs(path_to_config_file.c_str());
+        if (fs::exists(status) && !ifs) {
+            throw std::runtime_error("Cannot open configuration file for reading");
+        }
         if (!ifs) {
             if (debug()) {
                 std::cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
@@ -533,6 +571,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         po::variables_map vm;
         po::store(parse_config_file(ifs, config_file_options), vm);
         po::notify(vm);
+        if (ifs.bad()) {
+            throw std::runtime_error("Error reading configuration file");
+        }
 
         if (theCheckMode == "CHECK_ON_TIME") {
             checkMode_ = ecf::CheckPt::ON_TIME;
@@ -550,10 +591,6 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
         authentication_service_.set_passwd_file(passwd_file);
         authentication_service_.set_custom_passwd_file(custom_passwd_file);
-
-        if (the_task_threshold != 0) {
-            JobProfiler::set_task_threshold(the_task_threshold);
-        }
     }
     catch (const std::exception& e) {
         throw ServerEnvironmentException("Could not parse server configuration file '" + path_to_config_file +
@@ -630,7 +667,7 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (auto var = ecf::environment::fetch("ECF_TASK_THRESHOLD"); var) {
         std::string task_threshold = var.value();
         try {
-            JobProfiler::set_task_threshold(ecf::convert_to<int>(task_threshold));
+            ecf_task_threshold_ = ecf::convert_to<int>(task_threshold);
         }
         catch (...) {
             throw ServerEnvironmentException(
