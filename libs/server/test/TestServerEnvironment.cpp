@@ -462,6 +462,104 @@ void check_server_precedence(const std::string& content,
     check(serverEnv, directory.path());
 }
 
+///
+/// @brief Checks all six resolved filename variables for both supported input sources.
+///
+/// @param[in] form Path form: unset, default, custom, dot, nested, absolute or spaces
+///
+void check_server_filename_resolution(const std::string& form) {
+    for (const bool from_environment : {false, true}) {
+        BOOST_TEST_CONTEXT("Path form: " << form << ", environment source: " << from_environment) {
+            auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
+            const auto original_path = fs::current_path();
+            const auto old_threshold = JobProfiler::task_threshold();
+            const auto home          = directory.path() / "server home";
+            const auto outside       = directory.path() / "external files";
+            BOOST_SCOPE_EXIT_ALL(&) {
+                Log::destroy();
+                JobProfiler::set_task_threshold(old_threshold);
+                std::error_code error;
+                fs::current_path(original_path, error);
+                BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
+            };
+            std::list<WithoutTestEnvironmentVariable> cleared;
+            for (const auto* name : {"ECF_HOME",
+                                     "ECF_PORT",
+                                     "ECF_LOG",
+                                     "ECF_CHECK",
+                                     "ECF_CHECKOLD",
+                                     "ECF_PASSWD",
+                                     "ECF_CUSTOM_PASSWD",
+                                     "ECF_LISTS",
+                                     "ECF_CHECKINTERVAL",
+                                     "ECF_PRUNE_NODE_LOG",
+                                     "ECF_TASK_THRESHOLD",
+                                     "ECF_SSL",
+                                     "ECF_DEBUG_SERVER"}) {
+                cleared.emplace_back(name);
+            }
+            fs::create_directories(home / "runtime");
+            fs::create_directories(home / "runtime with spaces");
+            fs::create_directories(outside);
+            std::string content = "ECF_HOME = server home\n";
+            std::list<WithTestEnvironmentVariable> overrides;
+            std::vector<std::pair<std::string, std::string>> expected;
+            const auto prefix = Host{}.name() + ".3144.";
+            for (const auto& [name, basename] :
+                 std::vector<std::pair<std::string, std::string>>{{"ECF_LOG", "ecf.log"},
+                                                                  {"ECF_CHECK", "ecf.check"},
+                                                                  {"ECF_CHECKOLD", "ecf.check.b"},
+                                                                  {"ECF_PASSWD", "ecf.passwd"},
+                                                                  {"ECF_CUSTOM_PASSWD", "ecf.custom_passwd"},
+                                                                  {"ECF_LISTS", "ecf.lists"}}) {
+                std::string input = basename;
+                if (form == "custom") {
+                    input = "custom." + basename;
+                }
+                else if (form == "dot") {
+                    input = "./" + basename;
+                }
+                else if (form == "nested") {
+                    input = "runtime/" + basename;
+                }
+                else if (form == "absolute") {
+                    input = (outside / basename).string();
+                }
+                else if (form == "spaces") {
+                    input = "runtime with spaces/custom " + basename;
+                }
+                if (form != "unset") {
+                    if (from_environment) {
+                        overrides.emplace_back(name, input);
+                    }
+                    else {
+                        content += name + " = " + input + "\n";
+                    }
+                }
+                const auto resolved = form == "unset" || form == "default" ? prefix + basename : input;
+                const bool anchored = name == "ECF_LOG" || name == "ECF_CHECK" || name == "ECF_CHECKOLD";
+                expected.emplace_back(name, anchored ? (home / resolved).string() : resolved);
+            }
+            WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+            fs::current_path(directory.path());
+            ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+            std::string error;
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+            BOOST_CHECK_EQUAL(serverEnv.ecf_home(), home.string());
+            BOOST_CHECK(fs::equivalent(fs::current_path(), home));
+            for (const auto& [name, value] : expected) {
+                BOOST_CHECK_EQUAL(server_variable(serverEnv, name), value);
+            }
+            BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), expected[1].second);
+            BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), expected[2].second);
+            BOOST_CHECK(fs::is_regular_file(expected[0].second));
+            if (form != "unset" && form != "default") {
+                BOOST_CHECK(!fs::exists(home / (prefix + "ecf.log")));
+            }
+        }
+    }
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -1337,6 +1435,62 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_config_error_before_cli) {
                           });
     BOOST_CHECK(fs::current_path() == original_path);
     BOOST_CHECK(!Log::instance());
+}
+
+///
+/// @brief Verifies default filename selection when all six settings are absent.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_unset) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("unset");
+}
+
+///
+/// @brief Verifies host and port prefixing of explicitly supplied bare defaults.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_explicit_defaults) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("default");
+}
+
+///
+/// @brief Verifies that non-default basenames are not prefixed.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_custom_basenames) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("custom");
+}
+
+///
+/// @brief Verifies that dot-prefixed defaults are treated as explicit paths.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_dot_prefixed) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("dot");
+}
+
+///
+/// @brief Verifies relative directory paths against a separate server home.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_relative_directories) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("nested");
+}
+
+///
+/// @brief Verifies that absolute filenames outside server home are unchanged.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_absolute) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("absolute");
+}
+
+///
+/// @brief Verifies that spaces in directory and file names survive both input sources.
+///
+BOOST_AUTO_TEST_CASE(test_server_filenames_spaces) {
+    ECF_NAME_THIS_TEST();
+    check_server_filename_resolution("spaces");
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
