@@ -251,6 +251,13 @@ private:
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
+    ///
+    /// @brief Loads a regular whitelist file and applies its authorisation rules.
+    ///
+    /// @param[out] err Diagnostic identifying the selected path and cause on failure
+    /// @return True if the file was loaded and its authorisation rules were installed.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool load_whitelist_file(std::string& err) const;
 
 #ifdef ECF_OPENSSL
