@@ -163,6 +163,13 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    matching the server host and port. A missing white list imposes no white-list restrictions;
    it does not disable password authentication configured through the password files.
 
+   Existing security paths must name readable regular files; directories and unreadable
+   files prevent startup. Empty and version-only password files contain no matching
+   credentials and therefore prevent startup. Empty and version-only white lists impose
+   no white-list restrictions, just like an absent white list. Regular and custom password
+   files protect their respective identity kinds independently; configuring one does not
+   supply credentials for the other.
+
 #. **Restore the server definition and start accepting requests.** The server attempts to
    restore ``ECF_CHECK``, then ``ECF_CHECKOLD`` if necessary. With neither file present,
    it starts with an empty definition. The initial server state is ``HALTED``; accepting

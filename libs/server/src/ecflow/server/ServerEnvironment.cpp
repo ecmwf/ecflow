@@ -476,6 +476,11 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 }
 
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
+    if (!fs::is_regular_file(ecf_white_list_file_)) {
+        errorMsg = "ECF_LISTS path '" + ecf_white_list_file_ + "' is not a regular file";
+        return false;
+    }
+
     // Only override valid users if we successfully opened and parsed file
     if (white_list_file_.load(ecf_white_list_file_, errorMsg)) {
         std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
