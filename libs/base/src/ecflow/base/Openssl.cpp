@@ -13,91 +13,188 @@
 
 namespace ecf {
 
-std::string Openssl::info() const {
-    if (ssl_ == "1") {
-        return "1 : enabled : uses shared ssl certificates";
+namespace {
+
+///
+/// @brief Formats a missing-certificate error in the requested lookup order.
+///
+/// @param[in] directory Configured certificate directory, which may be relative.
+/// @param[in] host Server hostname after localhost resolution.
+/// @param[in] port Server port used in the specific certificate filename.
+/// @param[in] option Requested lookup order, which determines the order of the paths and the strategy.
+/// @return An error containing both absolute certificate paths and the requested strategy.
+/// @throws std::filesystem::filesystem_error if an absolute path cannot be determined.
+///
+std::string missing_certificate_error(const std::string& directory,
+                                      const std::string& host,
+                                      const std::string& port,
+                                      const Openssl::Option& option) {
+    const auto shared   = fs::absolute(fs::path{directory} / "server.crt").lexically_normal().string();
+    const auto specific = fs::absolute(fs::path{directory} / (host + "." + port + ".crt")).lexically_normal().string();
+    return "Error: Unable to find certificate file: '" + (option.shared() ? shared : specific) + "' or '" +
+           (option.shared() ? specific : shared) + "' (using strategy: " + option.strategy() + ")";
+}
+
+///
+/// @brief Resolves `localhost` to the local hostname, as used in server-specific certificate names.
+///
+/// @param[in] host Server hostname.
+/// @return The local hostname for `localhost`, otherwise @p host unchanged.
+///
+std::string resolve_host(std::string host) {
+    if (host == ecf::string_constants::localhost) {
+        return Host().name();
     }
-    return ssl_ + " : enabled : uses server/port specific ssl certificates";
+    return host;
+}
+
+} // namespace
+
+const char* Openssl::Option::strategy() const {
+    switch (preference_) {
+        case Preference::SharedFirst:
+            return "shared certificate first, server-specific certificate as fallback";
+        case Preference::SpecificFirst:
+            return "server-specific certificate first, shared certificate as fallback";
+        case Preference::Disabled:
+            break;
+    }
+    return "";
+}
+
+std::string Openssl::Option::describe(bool via_option) const {
+    std::string source;
+    if (envvar_value_) {
+        source = std::string(via_option ? "via --ssl with " : "via ") + "ECF_SSL='" + *envvar_value_ + "'";
+    }
+    else {
+        source = "via --ssl, ECF_SSL unset";
+    }
+    return source + " (" + strategy() + ")";
+}
+
+Openssl::Option Openssl::Option::make_from_envvar_value(std::string value) {
+    const auto preference =
+        value.empty() || value == shared_envvar_value_ ? Preference::SharedFirst : Preference::SpecificFirst;
+    return Option(preference, std::move(value));
+}
+
+Openssl::Option Openssl::Option::make_from_envvar() {
+    if (auto value = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); value) {
+        return make_from_envvar_value(value.value());
+    }
+    return {};
+}
+
+Openssl::Certificate Openssl::Certificate::make_shared_certificate(fs::path directory) {
+    return Certificate(std::move(directory), shared_stem_);
+}
+
+Openssl::Certificate Openssl::Certificate::make_specific_certificate(fs::path directory, std::string stem) {
+    return Certificate(std::move(directory), std::move(stem));
+}
+
+Openssl::Certificate::Certificate(fs::path directory, std::string stem)
+    : directory_(std::move(directory)),
+      stem_(std::move(stem)) {
+}
+
+fs::path Openssl::Certificate::pem_file() const {
+    if (shared()) {
+        const auto preferred = directory_ / "dh2048.pem";
+        return fs::exists(preferred) ? preferred : directory_ / "dh1024.pem";
+    }
+    return directory_ / (stem_ + ".pem");
+}
+
+std::string Openssl::info() const {
+    if (!enabled()) {
+        return "SSL disabled";
+    }
+
+    const auto path = selected_->crt_file().string();
+    return "SSL certificate selected: '" + path + "' (" + (selected_->shared() ? "shared" : "server-specific") + ")";
+}
+
+std::string Openssl::request_summary() const {
+    if (!requested_.enabled()) {
+        return "disabled";
+    }
+
+    std::string value = "(unset)";
+    if (const auto& envvar = requested_.envvar_value()) {
+        value = envvar->empty() ? "''" : *envvar;
+    }
+    return value + " (" + requested_.strategy() + ")";
+}
+
+std::string Openssl::selection_summary() const {
+    if (!enabled()) {
+        return "";
+    }
+
+    return std::string("found ") + (selected_->shared() ? "shared" : "server-specific") +
+           " certificate: " + selected_->crt_file().filename().string();
 }
 
 std::string Openssl::selected_crt() const {
     if (enabled()) {
-        return ssl_ == "1" ? "server.crt" : ssl_ + ".crt";
+        return selected_->crt_file().filename().string();
     }
 
     return "";
 }
 
-bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
-    if (host == ecf::string_constants::localhost) {
-        host = Host().name();
+bool Openssl::try_enable_from_option(std::string host, const std::string& port, Option option) {
+    requested_ = std::move(option);
+    selected_.reset();
+    fallback_from_.reset();
+    reset_context();
+    if (!requested_.enabled()) {
+        return false;
     }
+    host = resolve_host(std::move(host));
 
-    if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
-        // LOOK for      $HOME/.ecflowrc/ssl/server.crt
-        // THEN LOOK for $HOME/.ecflowrc/ssl/<host>.<port>.crt
-        // Look for the certificate that HAS to exist on both client and server, i.e. self-signed certificate (CRT)
-        // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
-
-        ssl_ = "1";
-        if (!fs::exists(crt())) { // crt() uses ssl_
-
-            // More specific per server. But we take an extra hit on file access.
-            ssl_ = host;
-            ssl_ += ".";
-            ssl_ += port;
-            if (!fs::exists(crt())) { // crt() uses ssl_
-                ssl_.clear();
-                return false;
-            }
-        }
+    const fs::path directory = fs::absolute(certificates_dir()).lexically_normal();
+    Certificate shared       = Certificate::make_shared_certificate(directory);
+    Certificate specific     = Certificate::make_specific_certificate(directory, host + "." + port);
+    const auto& first        = requested_.shared() ? shared : specific;
+    const auto& second       = requested_.shared() ? specific : shared;
+    if (fs::exists(first.crt_file())) {
+        selected_ = first;
+        return true;
     }
-    else {
-        ssl_ = host;
-        ssl_ += ".";
-        ssl_ += port;
-        if (!fs::exists(crt())) { // crt() uses ssl_
-            ssl_.clear();
-            return false;
-        }
+    if (fs::exists(second.crt_file())) {
+        selected_      = second;
+        fallback_from_ = first.crt_file();
+        return true;
     }
-
-    return true;
+    return false;
 }
 
-void Openssl::enable(std::string host, const std::string& port) {
-    if (host == ecf::string_constants::localhost) {
-        host = Host().name();
-    }
-
-    if (!enable_no_throw(host, port)) {
-        throw std::runtime_error(MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt or "
-                                         << host << "." << port << ".crt in $HOME/.ecflowrc/ssl"));
+void Openssl::enable_or_throw(std::string host, const std::string& port, const Option& option) {
+    host = resolve_host(std::move(host));
+    if (!try_enable_from_option(host, port, option)) {
+        throw std::runtime_error(missing_certificate_error(certificates_dir(), host, port, option));
     }
 }
 
-void Openssl::enable_if_defined(std::string host, const std::string& port) {
-    if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
-        std::string ecf_ssl_env = ecf_ssl.value();
+void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
+    enable_or_throw(std::move(host), port, Option::make_option_shared());
+}
 
-        if (host == ecf::string_constants::localhost) {
-            host = Host().name();
-        }
-
-        if (!enable_no_throw(host, port, ecf_ssl_env)) {
-            std::string error;
-            if (ecf_ssl_env == "1") {
-                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* "
-                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)");
-            }
-            else {
-                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) "
-                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "."
-                                << port << ")");
-            }
-            throw std::runtime_error(error);
-        }
+void Openssl::enable_based_on_envvar(std::string host, const std::string& port) {
+    if (auto option = Option::make_from_envvar(); option.enabled()) {
+        enable_or_throw(std::move(host), port, option);
     }
+}
+
+void Openssl::enable_prefer_specific(std::string host, const std::string& port) {
+    enable_or_throw(std::move(host), port, Option::make_option_specific());
+}
+
+bool Openssl::try_enable_for_peer(std::string host, const std::string& port, const std::string& server_ssl) {
+    return try_enable_from_option(std::move(host), port, Option::make_from_envvar_value(server_ssl));
 }
 
 boost::asio::ssl::context& Openssl::context() {
@@ -171,9 +268,9 @@ void Openssl::init_for_server() {
             [this](std::size_t size, boost::asio::ssl::context_base::password_purpose purpose) {
                 return this->get_password();
             });
-        ssl_context_->use_certificate_chain_file(crt());
-        ssl_context_->use_private_key_file(key(), boost::asio::ssl::context::pem);
-        ssl_context_->use_tmp_dh_file(pem());
+        ssl_context_->use_certificate_chain_file(selected_->crt_file().string());
+        ssl_context_->use_private_key_file(selected_->key_file().string(), boost::asio::ssl::context::pem);
+        ssl_context_->use_tmp_dh_file(selected_->pem_file().string());
     }
 }
 
@@ -198,12 +295,12 @@ void Openssl::init_for_client() {
         //   (i.e. protection against man-in-the-middle attacks).
         //
         ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_client);
-        ssl_context_->load_verify_file(crt());
+        ssl_context_->load_verify_file(selected_->crt_file().string());
     }
 }
 
 std::string Openssl::get_password() const {
-    std::string passwd_file = passwd();
+    std::string passwd_file = selected_->passwd_file().string();
     if (fs::exists(passwd_file)) {
         std::string contents;
         if (ecf::File::open(passwd_file, contents)) {
@@ -223,7 +320,6 @@ std::string Openssl::get_password() const {
 
 std::string Openssl::certificates_dir() const {
     if (auto found = ecf::environment::fetch<std::string>("ECF_SSL_DIR"); found) {
-        // This is used for testing, to avoid using the default location
         return found.value();
     }
     else {
@@ -231,96 +327,43 @@ std::string Openssl::certificates_dir() const {
     }
 }
 
-std::string Openssl::pem() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        // assume 2048-bit dh key, but accept 1024-bit for
-        // backwards-compatibility (note: openssl might
-        // not accept it, depending on the version used)
-        str += "dh2048.pem";
-
-        if (!fs::exists(str)) {
-            return certificates_dir() + "dh1024.pem";
-        }
-        return str;
-    }
-
-    str += ssl_;
-    str += ".pem";
-    return str;
-}
-
-std::string Openssl::crt() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.crt";
-        return str;
-    }
-    str += ssl_;
-    str += ".crt";
-    return str;
-}
-
-std::string Openssl::key() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.key";
-        return str;
-    }
-    str += ssl_;
-    str += ".key";
-    return str;
-}
-
-std::string Openssl::passwd() const {
-    std::string str = certificates_dir();
-    if (ssl_ == "1") {
-        str += "server.passwd";
-        return str;
-    }
-    str += ssl_;
-    str += ".passwd";
-    return str;
-}
-
 const char* Openssl::ssl_info() {
     return "ecFlow client and server are SSL enabled. To use SSL choose between:\n"
-           "  1. export ECF_SSL=1              # search for server.crt otherwise <host>.<port>.crt\n"
-           "  2. export ECF_SSL=<host>.<port>  # Use server specific certificates <host>.<port>.***\n"
-           "  3. use --ssl           # argument on ecflow_client/ecflow_server, same as option 1.\n"
+           "  1. export ECF_SSL=X    # recommended: search <host>.<port>.crt, then server.crt\n"
+           "  2. export ECF_SSL=1    # shared certificate: search server.crt, then <host>.<port>.crt\n"
+           "  3. use --ssl           # use ECF_SSL if set; otherwise, use shared-first mode\n"
            "                         # Typically ssl server can be started with ecflow_start.sh -s\n"
            "  4. Client.enable_ssl() # for python client\n\n"
-           "ecFlow expects the certificates to be in directory $HOME/.ecflowrc/ssl\n"
-           "The certificates can be shared if you have multiple servers running on\n"
-           "the same machine. In this case use ECF_SSL=1, then\n"
-           "ecflow_server expects the following files in $HOME/.ecflowrc/ssl\n\n"
+           "ecflow_ui uses the specific-first strategy (ECF_SSL=X) and ignores ECF_SSL.\n"
+           "ecFlow expects certificates in $HOME/.ecflowrc/ssl unless ECF_SSL_DIR overrides the directory.\n"
+           "Shared certificates should be avoided. Use ECF_SSL=1 only for intentionally shared certificates;\n"
+           "ECF_SSL=1 keeps its shared-first selection for compatibility. In this mode,\n"
+           "ecflow_server expects the following files in the certificate directory:\n\n"
            "   - dh2048.pem\n"
            "   - server.crt\n"
            "   - server.key\n"
            "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n\n"
-           "ecflow_client expects the following files in : $HOME/.ecflowrc/ssl\n\n"
+           "ecflow_client expects the following file in the certificate directory:\n\n"
            "   - server.crt (this must be the same as server)\n\n"
-           "Alternatively you can have different setting for each server ECF_SSL=<host>.<port>\n"
-           "Then server expect files of the type:\n\n"
+           "The recommended ECF_SSL=X mode uses separate certificates for each server.\n"
+           "In this mode, the server expects:\n\n"
            "   - <host>.<port>.pem\n"
            "   - <host>.<port>.crt\n"
            "   - <host>.<port>.key\n"
            "   - <host>.<port>.passwd (optional)\n\n"
-           "and client expect files of the type:\n\n"
+           "The client requires:\n\n"
            "   - <host>.<port>.crt  # as before this must be same as the server\n\n"
-           "The server/client will automatically check existence of both variants,\n"
-           "but will give preference to NON <host>.<port>.*** variants first, when ECF_SSL=1\n"
-           "The following steps, show you how to create the certificate files.\n"
-           "This may need to be adapted if you want to use <host>.<port>.***\n\n"
+           "The following steps create the certificate files for the shared mode.\n"
+           "For server-specific certificates, replace 'server' and 'dh2048' with <host>.<port>.\n\n"
            "- Generate a password protected private key. This will request a pass phrase.\n"
            "  This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored\n"
            "  in a PEM format so that it is readable as ASCII text\n\n"
            "     > openssl genrsa -des3 -out server.key 1024   # Password protected private key\n"
            "- Additional security.\n"
-           "  If you want additional security, create a file called 'server.passwd' and add the pass phrase to the "
+           "  For additional security, create a file called 'server.passwd' and add the pass phrase to the "
            "file.\n"
            "  Then set the file permission so that file is only readable by the server process.\n"
-           "  Or you can choose to remove password requirement. In that case we don't need server.passwd file.\n\n"
+           "  Alternatively, remove the password requirement; server.passwd is then not needed.\n\n"
            "     > cp server.key server.key.secure\n"
            "     > openssl rsa -in server.key.secure -out server.key  # remove password requirement\n"
            "- Sign certificate with private key (self-signed certificate). Generate Certificate Signing Request(CSR).\n"
@@ -335,14 +378,14 @@ const char* Openssl::ssl_info() {
 
 void Openssl::check_server_certificates() const {
     {
-        std::string server_key = key();
+        std::string server_key = selected_->key_file().string();
         if (!fs::exists(server_key)) {
             throw std::runtime_error("Error: The password protected private server key file '" + server_key +
                                      "' does not exist\n\n" + ssl_info());
         }
     }
     {
-        std::string server_pem = pem();
+        std::string server_pem = selected_->pem_file().string();
         if (!fs::exists(server_pem)) {
             throw std::runtime_error("Error: The dhparam file(pem) '" + server_pem + "' does not exist\n\n" +
                                      ssl_info());

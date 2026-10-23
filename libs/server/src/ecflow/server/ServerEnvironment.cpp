@@ -13,6 +13,7 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
@@ -36,6 +37,27 @@ static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     std::cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
     assert(false);
     return std::string{};
+}
+
+// Describes how clients connect, e.g. "TCP/IP v4", "TCP/IP v4 with SSL", "HTTP over TCP/IP v6"
+static std::string the_connection(ecf::Protocol protocol, const boost::asio::ip::tcp& tcp) {
+    const std::string transport = (tcp.family() == 2 /*PF_INET*/) ? "TCP/IP v4" : "TCP/IP v6";
+    switch (protocol) {
+        case ecf::Protocol::Plain:
+            return transport;
+        case ecf::Protocol::Ssl:
+            return transport + " with SSL";
+        case ecf::Protocol::Http:
+            return "HTTP over " + transport;
+        case ecf::Protocol::Https:
+            return "HTTP over " + transport + " with SSL";
+    }
+    return transport;
+}
+
+// Logs one entry of the runtime configuration block
+static void log_entry(const std::string& key, const std::string& value) {
+    LOG(Log::MSG, "  " << key << " = " << value);
 }
 
 // This can be overridden by calling "server --ecfinterval 3" for test purposes
@@ -163,14 +185,54 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     // Init log file:
     LOG(Log::MSG, ""); // previous log may not end in newline
     LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
-    if (tcp_protocol_.family() == 2 /*PF_INET*/) {
-        LOG(Log::MSG, "Host(" << hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v4");
+    LOG(Log::MSG, Version::description());
+
+    // Runtime configuration: the connection, locations, scheduling and check-pointing settings, and commands of
+    // the server, one entry per line. Commands and URLs are set by the operator, and may hold credentials, which
+    // are masked.
+    LOG(Log::MSG, "Runtime Configuration");
+    log_entry("Host", hostPort().first);
+    log_entry("Port", hostPort().second);
+    log_entry("Connection", the_connection(protocol_, tcp_protocol_));
+
+#ifdef ECF_OPENSSL
+    // Record the certificate in use, and warn when it is not the one requested first
+    if (ssl_.enabled()) {
+        log_entry("SSL certificate",
+                  ssl_.certificate()->crt_file().string() + " (" +
+                      (ssl_.certificate()->shared() ? "shared" : "server-specific") + ")");
+        if (const auto& missing = ssl_.fallback_from()) {
+            LOG(Log::WAR,
+                "SSL certificate '" << missing->string() << "' not found; using the "
+                                    << (ssl_.certificate()->shared() ? "shared" : "server-specific")
+                                    << " certificate instead");
+        }
     }
-    else {
-        LOG(Log::MSG, "Host(" << hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v6");
-    }
-    LOG(Log::MSG, "ECF_HOME " << ecf_home());
-    LOG(Log::MSG, "Job scheduling interval: " << submitJobsInterval_);
+#endif
+
+    log_entry("ECF_HOME", ecfHome_);
+    log_entry("ECF_LOG", Log::instance()->path());
+    log_entry("ECF_CHECK", ecf_checkpt_file_);
+    log_entry("ECF_CHECKOLD", ecf_backup_checkpt_file_);
+    log_entry("ECF_LISTS", ecf_white_list_file_);
+    log_entry("ECF_PASSWD", authentication_service_.passwd_file());
+    log_entry("ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file());
+    log_entry("ECF_CHECKINTERVAL", std::to_string(checkPtInterval_));
+    log_entry("ECF_CHECKMODE", the_check_mode(checkMode_));
+    log_entry("ECF_PRUNE_NODE_LOG", std::to_string(ecf_prune_node_log_));
+    log_entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold()));
+    log_entry("ECF_DEBUG_SERVER", debug_ ? "enabled" : "disabled");
+    log_entry("ECF_JOB_CMD", ecf::mask_credentials(ecf_cmd_));
+    log_entry("ECF_KILL_CMD", ecf::mask_credentials(killCmd_));
+    log_entry("ECF_STATUS_CMD", ecf::mask_credentials(statusCmd_));
+    log_entry("ECF_CHECK_CMD", ecf::mask_credentials(checkCmd_));
+    log_entry("ECF_URL_CMD", ecf::mask_credentials(urlCmd_));
+    log_entry("ECF_URL_BASE", ecf::mask_credentials(urlBase_));
+    log_entry("ECF_URL", ecf::mask_credentials(url_));
+    log_entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_));
+    log_entry("Job scheduling interval", std::to_string(submitJobsInterval_));
+    log_entry("Job generation", jobGeneration_ ? "enabled" : "disabled");
+    log_entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_));
 }
 
 ServerEnvironment::~ServerEnvironment() {
@@ -363,9 +425,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
-        theRetVec.emplace_back(
-            std::string("ECF_SSL"),
-            ssl_.ssl()); // 1 means shared ssl certificate, <host>.<port> means server specific certificates
+        theRetVec.emplace_back(std::string("ECF_SSL"), ssl_.certificate()->to_envvar_value());
     }
 #endif
 }

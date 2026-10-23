@@ -91,9 +91,10 @@ std::string format_env_var_default(const nlohmann::json& var) {
 ///
 /// @details The first line carries the variable name, its type, and its requirement level; a
 /// trailing asterisk marks a variable whose value can be overridden by a command-line option. The
-/// second line carries the description, and an optional third line the default value and accepted
-/// range. The layout matches the documentation renderer in docs/client_api/build.py, so that the
-/// CLI help and the generated documentation agree.
+/// following lines carry the description, one indented line per element of the "description"
+/// array, and an optional last line the default value and accepted range. The layout matches the
+/// documentation renderer in docs/client_api/build.py, so that the CLI help and the generated
+/// documentation agree.
 ///
 /// @param[in] var Manifest entry taken from the "environment_variables" array; must contain the
 ///                "required", "name", "type", and "description" fields, and may contain
@@ -112,9 +113,12 @@ std::string format_env_var(const nlohmann::json& var) {
     line += var.at("type").get<std::string>();
     line += "> [";
     line += required;
-    line += "]\n    ";
-    line += var.at("description").get<std::string>();
-    line += "\n";
+    line += "]\n";
+    for (const auto& text : var.at("description")) {
+        line += "    ";
+        line += text.get<std::string>();
+        line += "\n";
+    }
     line += format_env_var_default(var);
     return line;
 }

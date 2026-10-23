@@ -21,6 +21,7 @@ struct Token
     std::string email;
     std::string username;
     std::string password;
+    std::string source; ///< The location of the tokens file from which the token was loaded
 
     static Token make_basic(const std::string& server, const std::string& username, const std::string& password) {
         return Token{server, username, password};
@@ -240,18 +241,49 @@ public:
     ecf::Openssl& openssl() { return ssl_; }
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
+
+    ///
+    /// @brief Enables SSL according to ECF_SSL when the variable is set.
+    ///
+    /// Empty or "1" searches `server.crt` first, then `<host>.<port>.crt`;
+    /// any other value searches `<host>.<port>.crt` first, then `server.crt`.
+    ///
+    /// @throws std::runtime_error if ECF_SSL is set but neither certificate file exists.
+    ///
     void enable_ssl_if_defined() {
         protocol_ = ecf::Protocol::Ssl;
-        ssl_.enable_if_defined(host(), port());
-    } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
+        ssl_.enable_based_on_envvar(host(), port());
+    }
+
+    ///
+    /// @brief Enables SSL preferring the shared certificate, independently of ECF_SSL.
+    ///
+    /// @throws std::runtime_error if neither the shared nor the server-specific certificate file exists.
+    ///
     void enable_ssl() {
         protocol_ = ecf::Protocol::Ssl;
-        ssl_.enable(host(), port());
-    } // search server.crt first, then <host>.<port>.crt
+        ssl_.enable_prefer_shared(host(), port());
+    }
+
+    ///
+    /// @brief Enables SSL preferring the server-specific certificate, independently of ECF_SSL.
+    ///
+    /// @throws std::runtime_error if neither the server-specific nor shared certificate file exists.
+    ///
+    void enable_ssl_prefer_specific() {
+        protocol_ = ecf::Protocol::Ssl;
+        ssl_.enable_prefer_specific(host(), port());
+    }
+
+    ///
+    /// @brief Tries to enable SSL preferring the shared certificate, independently of ECF_SSL.
+    ///
+    /// @return True if either certificate file exists; false if neither exists, leaving SSL disabled.
+    ///
     bool enable_ssl_no_throw() {
         protocol_ = ecf::Protocol::Ssl;
-        return ssl_.enable_no_throw(host(), port());
-    } // search server.crt first, then <host>.<port>.crt
+        return ssl_.try_enable_from_option(host(), port(), ecf::Openssl::Option::make_option_shared());
+    }
     void disable_ssl() {
         protocol_ = ecf::Protocol::Plain;
         ssl_.disable();

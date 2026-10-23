@@ -129,6 +129,32 @@ A server is reached over one of four protocols, chosen per server in the
 Both ends must be configured for the same protocol. A client set to one protocol
 cannot talk to a server serving another, however healthy that server is.
 
+For **TCP/IP with SSL**, ecFlowUI selects the certificate separately for each
+server. The certificate directory defaults to ``$HOME/.ecflowrc/ssl/``.
+Set ``ECF_SSL_DIR`` to use a different certificate directory, specified with or without
+a trailing ``/``, for all SSL connections in the UI process. For example:
+
+.. code-block:: shell
+
+   ECF_SSL_DIR="/path/to/certificates" ecflow_ui
+
+``ECF_SSL_DIR`` controls where certificates are found and does not enable SSL.
+
+The UI ignores ``ECF_SSL`` and uses the same certificate selection strategy as
+``ecflow_client`` with ``ECF_SSL=X``. Lookup within the selected directory follows
+this order:
+
+1. Use ``<host>.<port>.crt`` if present.
+2. Otherwise, use ``server.crt``.
+
+If neither certificate exists, the connection fails. If the selected certificate
+cannot be loaded or fails verification, the connection fails without trying
+another certificate.
+
+The UI log records the selected certificate's absolute path and whether it is
+shared or server-specific when each SSL client is created. The entry identifies
+the server and appears before the certificate is loaded.
+
 .. note::
 
    ``ecflow_server`` does not serve HTTPS. To provide HTTPS, a reverse proxy is

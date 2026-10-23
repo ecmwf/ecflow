@@ -52,6 +52,7 @@ set(test_srcs
   test/TestGetUserDetails.cpp
   test/TestIdentity.cpp
   test/TestLog.cpp
+  test/TestMaskCredentials.cpp
   test/TestMessage.cpp
   test/TestMigration.cpp
   test/TestNodeNameValidity.cpp
@@ -88,5 +89,21 @@ ecflow_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  DEFINITIONS
+    ECF_TEST_EXPECTED_AVISO=\"${found_aviso_ffi_version}\"
   FORMAT
+)
+
+ecflow_add_test(
+  TARGET
+    u_core_generate_git_commit
+  LABELS
+    unit nightly fast
+  COMMAND
+    ${CMAKE_COMMAND}
+  ARGS
+    -DSCRIPT=${ecflow_SOURCE_DIR}/cmake/GenerateGitCommit.cmake
+    -DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/u_core_generate_git_commit
+    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/test/TestGenerateGitCommit.cmake
 )

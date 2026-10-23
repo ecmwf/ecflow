@@ -99,6 +99,10 @@ private:
 
     time_duration_t timeout_;
 
+    /// Whether the connection to the server has been established; a deadline that expires before then
+    /// means that the connection attempt received no answer
+    bool connected_{false};
+
     /// The best connect failure seen so far, and the message that produced it
     ecf::ConnectionFailure connect_failure_{ecf::ConnectionFailure::None};
     std::string connect_detail_;

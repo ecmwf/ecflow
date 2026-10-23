@@ -3,11 +3,13 @@
 
 #include "ecflow/base/HttpClient.hpp"
 
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
 #include "ecflow/base/ConnectionFailureMapping.hpp"
+#include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Message.hpp"
@@ -22,6 +24,7 @@ ConnectionFailure classify_httplib_error(httplib::Error error) {
         case httplib::Error::BindIPAddress:
             return ecf::ConnectionFailure::ConnectionRefused;
         case httplib::Error::ConnectionTimeout:
+            return ecf::ConnectionFailure::ConnectionUnanswered;
         case httplib::Error::Canceled:
             return ecf::ConnectionFailure::Timeout;
         case httplib::Error::Read:
@@ -53,12 +56,13 @@ HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
                        const std::string& scheme,
                        const std::string& host,
                        const std::string& port,
-                       int timeout,
+                       std::chrono::milliseconds timeout,
                        ecf::ConnectionDiagnosis* diagnosis)
     : scheme_(scheme),
       host_(host),
       port_(port),
       base_url_(make_scheme_host_port(scheme, host, port)),
+      timeout_(timeout),
       client_(base_url_),
       headers_(),
       diagnosis_(diagnosis ? *diagnosis : owned_diagnosis_) {
@@ -68,9 +72,14 @@ HttpClient::HttpClient(const Cmd_ptr& cmd_ptr,
     diagnosis_.host            = host_;
     diagnosis_.port            = port_;
 
-    client_.set_connection_timeout(std::chrono::seconds{timeout});
-    client_.set_read_timeout(std::chrono::seconds{timeout});
-    client_.set_write_timeout(std::chrono::seconds{timeout});
+    // As for the TCP/IP clients, the timeout is defined per command when not set explicitly
+    if (timeout_ == std::chrono::milliseconds{0} && cmd_ptr) {
+        timeout_ = cmd_ptr->timeout();
+    }
+
+    client_.set_connection_timeout(timeout_);
+    client_.set_read_timeout(timeout_);
+    client_.set_write_timeout(timeout_);
 
     // Disable cert verification
     if (scheme_ == "https") {
@@ -111,6 +120,7 @@ void HttpClient::run() {
 
     client_.set_default_headers(headers_);
 
+    const auto start = std::chrono::steady_clock::now();
     if (auto result = client_.Post("/v1/ecflow", outbound, "application/json"); result) {
         status_ = static_cast<ecf::http::Status>(result->status);
         reason_ = "";
@@ -129,7 +139,27 @@ void HttpClient::run() {
     else {
         status_ = ecf::http::Status::Unknown;
         reason_ = httplib::to_string(result.error());
-        record_failure(ecf::http::classify_httplib_error(result.error()), reason_);
+
+        auto failure = ecf::http::classify_httplib_error(result.error());
+        if ((result.error() == httplib::Error::Read || result.error() == httplib::Error::Write) &&
+            std::chrono::steady_clock::now() - start >= timeout_) {
+            // The HTTP library reports a read or write that timed out, and a peer that closed the
+            // connection, as the same error; only the former takes as long as the timeout.
+            failure = ecf::ConnectionFailure::Timeout;
+        }
+        else if (result.error() == httplib::Error::Connection) {
+            // The HTTP library reports a refused connection, and one left unanswered until the operating
+            // system gives up, as the same error; a separate connection attempt tells the two apart.
+            if (auto observed = ecf::probe_connect(host_, port_, CONNECT_PROBE_TIMEOUT);
+                observed != ecf::ConnectionFailure::None) {
+                failure = observed;
+            }
+            else {
+                // The endpoint accepts connections now, so the cause of the failure is no longer known
+                failure = ecf::ConnectionFailure::Other;
+            }
+        }
+        record_failure(failure, reason_);
     }
 }
 

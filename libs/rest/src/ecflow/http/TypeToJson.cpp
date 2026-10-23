@@ -145,6 +145,7 @@ void to_json(ojson& j, const ::Stats& s) {
     j["ECF_LOG"]                   = s.ECF_LOG_;
     j["ECF_CHECK"]                 = s.ECF_CHECK_;
     j["ECF_SSL"]                   = s.ECF_SSL_;
+    j["ECF_SSL_CERTIFICATE"]       = s.ECF_SSL_CERTIFICATE_;
     j["checkpt_interval"]          = s.checkpt_interval_;
     j["checkpt_mode"]              = s.checkpt_mode_;
     j["checkpt_save_time_alarm"]   = s.checkpt_save_time_alarm_;

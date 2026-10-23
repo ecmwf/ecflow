@@ -76,7 +76,17 @@ public:
     ///
     static std::string full();
 
-private:
+    ///
+    /// @brief Return the git commit of the sources ecFlow was built from.
+    ///
+    /// The commit is recorded at build time, from the CMake variable ECFLOW_GIT_COMMIT when set,
+    /// or otherwise from the git repository of the sources.
+    ///
+    /// @return The first 12 characters of the commit, followed by `-dirty` when tracked files had
+    ///         uncommitted changes, or `none` when no commit is known (e.g. a build from a release tarball).
+    ///
+    static std::string git();
+
     ///
     /// @brief Return the version of the Boost library.
     ///
@@ -104,6 +114,16 @@ private:
     /// @return The OpenSSL library version as a string.
     ///
     static std::string openssl();
+
+    ///
+    /// @brief Return the version of the Aviso client library ecFlow was built against.
+    ///
+    /// The version is recorded at build time, so it is the same in every binary, including those that do not
+    /// link the library (only the server does).
+    ///
+    /// @return The Aviso client library version, or `disabled` when ecFlow is built without Aviso support.
+    ///
+    static std::string aviso();
 };
 
 } // namespace ecf

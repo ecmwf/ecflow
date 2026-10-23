@@ -14,7 +14,9 @@ using namespace ecf;
 
 SslTcpServer::SslTcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
     : TcpBaseServer(server, io, serverEnv) {
-    server_->stats().ECF_SSL_ = serverEnv.openssl().info();
+    // The statistics are visible to every client, so they never include the certificate directory
+    server_->stats().ECF_SSL_             = serverEnv.openssl().request_summary();
+    server_->stats().ECF_SSL_CERTIFICATE_ = serverEnv.openssl().selection_summary();
 
     serverEnv.openssl().init_for_server();
 

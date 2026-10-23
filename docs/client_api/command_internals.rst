@@ -78,10 +78,20 @@ command:
      - The main server port; default value is ``3141``.
    * - ``ECF_SSL``
      - Enable secure (TLS) communication between the client and the server.
+   * - ``ECF_SSL_DIR``
+     - Directory of the SSL certificates; default value is ``$HOME/.ecflowrc/ssl/``.
    * - ``ECF_HOSTFILE``
      - File that lists alternate hosts to try, if the connection to the main host fails.
    * - ``ECF_HOSTFILE_POLICY``
      - The policy (``task`` or ``all``) that defines which commands consider using alternate hosts.
+   * - ``ECF_TIMEOUT``
+     - Maximum time, in seconds, for the client to deliver a message to the server, retrying the main
+       and alternate hosts; default is 1 hour (3600 seconds). It also applies to user commands when
+       ``ECF_HOSTFILE_POLICY`` is ``all``.
+   * - ``ECF_CONNECT_TIMEOUT``
+     - Maximum time, in seconds, for each step of an exchange with the server: connecting, sending
+       the request, and receiving the reply. The default, 0, applies the timeout of the command
+       being executed (see :ref:`client_command_timeouts`).
 
 ``ECF_HOST`` and ``ECF_PORT`` (or the equivalent ``--host`` / ``--port`` options) must be set for the
 client to reach the server; the others are optional.
@@ -103,16 +113,10 @@ into the job at submission time:
      - The remote (process) identifier; supports identifying zombies and killing running jobs.
    * - ``ECF_TRYNO``
      - The run number of the job, used in job and output file-name generation.
-   * - ``ECF_TIMEOUT``
-     - Maximum time, in seconds, for the client to deliver a message to the server; default is 1
-       hour (3600 seconds).
    * - ``ECF_ZOMBIE_TIMEOUT``
      - Maximum time, in seconds, for a task command flagged as a zombie to keep retrying; default is
        30 minutes (1800 seconds). The ``ECF_TIMEOUT`` limit still applies, so the effective limit is
        the smaller of the two.
-   * - ``ECF_CONNECT_TIMEOUT``
-     - Maximum time, in seconds, to establish a connection with the server; default is 0, meaning
-       that the timeout is taken from the command being executed.
    * - ``ECF_DENIED``
      - Lets the task exit with an error on connection failure, instead of waiting for ``ECF_TIMEOUT``.
    * - ``NO_ECF``
@@ -125,6 +129,52 @@ populates the optional ``pswd_`` and ``cu_`` fields noted in *Reading the payloa
 of constants is declared in ``.../libs/core/src/ecflow/core/Environment.hpp``. The per-command tables
 in the reference below highlight the variables each command reads directly; the connection variables
 above apply to every command throughout.
+
+.. _client_command_timeouts:
+
+Command timeouts
+----------------
+
+Each command defines the time the client waits for each step of an exchange with the server:
+connecting, sending the request, and receiving the reply. The same value applies to every
+transport (TCP/IP, SSL, HTTP and HTTPS); the notes below describe how it is measured.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 60 40
+
+   * - Command
+     - Timeout
+   * - ``--ping``
+     - 10 seconds
+   * - ``--news``
+     - 20 seconds
+   * - Other user commands
+     - 60 seconds
+   * - ``--begin``
+     - 80 seconds
+   * - ``--plug``, ``--migrate``
+     - 120 seconds
+   * - Task commands
+     - 190 seconds
+   * - ``--replace``
+     - 300 seconds
+   * - ``--load``, ``--get``, ``--sync``, ``--sync_full``, ``--sync_clock``
+     - 600 seconds
+
+Notes:
+
+- Setting ``ECF_CONNECT_TIMEOUT`` to a value other than 0 replaces the timeout of every command.
+- The timeout applies to each step separately (for SSL, also to the TLS handshake), and again to
+  each address tried when the host name resolves to several addresses. A single attempt can
+  therefore take longer than the timeout.
+- For TCP/IP and SSL, the timeout limits the whole of each step. For HTTP and HTTPS, it limits each
+  wait for data: a request or reply that keeps progressing, however slowly, is not interrupted.
+- Task commands, and user commands when ``ECF_HOSTFILE_POLICY`` is ``all``, retry after a failure.
+  ``ECF_TIMEOUT`` limits how long they keep retrying; it is checked after each round of attempts,
+  so a command can exceed it by the duration of one round.
+- The task command ``--wait`` keeps waiting for as long as the server reports that its expression
+  does not hold; ``ECF_TIMEOUT`` does not limit that wait.
 
 Task commands versus user commands
 ----------------------------------

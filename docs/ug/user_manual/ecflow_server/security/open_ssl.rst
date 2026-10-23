@@ -23,32 +23,104 @@ found on the system.
 Certificates
 ===============
 
-In order to use OpenSSL, we need to set up some certificates. (These
-will be self-signed certificates, rather than a certificate authority).
+SSL communication requires matching self-signed certificates.
 
-The ecFlow client and server will look for the certificates in
-**$HOME/.ecflowrc/ssl** directory.
+ecFlow loads certificates from ``$HOME/.ecflowrc/ssl/`` by default.
+``ECF_SSL_DIR`` overrides the directory for the current process.
+A trailing ``/`` is optional:
 
-ecFlow server expects the following files in : **$HOME/.ecflowrc/ssl**
+.. code-block:: shell
 
--  dh2048.pem
+   export ECF_SSL_DIR="/path/to/certificates"
 
--  server.crt
+Enable SSL with ``ECF_SSL`` or ``--ssl`` for the CLI and server. In the UI,
+select **TCP/IP with SSL** for each server.
 
--  server.key
+Server-specific certificates are recommended. Set ``ECF_SSL=X`` for the CLI
+and server to try ``<host>.<port>.crt`` first, falling back to ``server.crt`` if
+it is absent. The UI always uses this selection mode, independently of ``ECF_SSL``.
 
--  server.passwd (optional) if this exists it must contain the
-   passphrase used to create server.key.
+Shared certificates should be avoided. Use ``ECF_SSL=1`` only when a shared
+certificate is intentional. Its existing shared-first behaviour is retained
+for compatibility. Certificate selection within the directory:
 
-ecFlow client expects the following files in: **$HOME/.ecflowrc/ssl**
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 25 25
 
--  server.crt ( this must be the same as the server)
+   * - Program
+     - ``ECF_SSL``
+     - First certificate
+     - Fallback if absent
+
+   * - ``ecflow_client`` / ``ecflow_server``
+     - Any other value, such as ``X``
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+   * - ``ecflow_client`` / ``ecflow_server``
+     - ``1`` or empty
+     - ``server.crt``
+     - ``<host>.<port>.crt``
+
+   * - ``ecflow_ui``
+     - Ignored
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+``ECF_SSL_DIR`` does not enable SSL. ``ECF_SSL`` values select a mode,
+not a certificate path.
+
+If the selected certificate cannot be loaded or fails verification, the
+client reports an error without trying another certificate.
+
+At start-up, ``ecflow_server`` records the selected certificate in its log.
+When the certificate tried first is absent and the other one is used, the
+log also contains a warning naming the missing certificate.
+
+The files expected in the selected directory depend on the certificate
+that is selected:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
+
+   * - File
+     - Server-specific certificate
+     - Shared certificate
+
+   * - Certificate (server and client)
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+   * - Private key (server)
+     - ``<host>.<port>.key``
+     - ``server.key``
+
+   * - DH parameters (server)
+     - ``<host>.<port>.pem``
+     - ``dh2048.pem`` (``dh1024.pem`` if absent)
+
+   * - Passphrase (server, optional)
+     - ``<host>.<port>.passwd``
+     - ``server.passwd``
+
+Notes:
+
+-  The client requires only the certificate, which must be identical
+   to the certificate of the server.
+
+-  The passphrase file, if present, must contain the passphrase used
+   to create the private key.
 
 
 How to create certificates?
 ============================
 
-The following steps, show you how to create these files:
+The following steps create the files of a shared certificate. For a
+server-specific certificate, use ``<host>.<port>`` instead of ``server``
+and ``dh2048`` in every filename, for example ``myhost.3141.key``,
+``myhost.3141.crt`` and ``myhost.3141.pem``.
 
 -  Generate a password-protected private key. This will request a
    passphrase.
