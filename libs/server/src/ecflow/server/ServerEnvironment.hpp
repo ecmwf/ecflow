@@ -178,14 +178,27 @@ public:
     ///        ECF_HOST(jobs).   ECF_HOST is the server machine host name
     void variables(std::vector<std::pair<std::string, std::string>>&) const;
 
-    /// Ask the server to reload file the hold list of users and their access rights
-    /// The white list file is specified by the environment variable ECF_LISTS
-    /// This allows/disallows user access on the live server
-    /// Return true if file is reloaded ok, else false and error message if:
-    /// 	a/ File does not exist
-    ///  	b/ File is empty
-    ///  	c/ Errors in parsing file
-    /// If errors arise the exist user still stay in affect
+    ///
+    /// @brief Reloads the startup-selected whitelist while preserving active permissions on failure.
+    ///
+    /// Behaviour:
+    /// - Reuses the startup-selected ECF_LISTS path without rereading configuration.
+    /// - Updates live-server read/write permissions after successful parsing.
+    /// - Accepts empty and version-only whitelists without whitelist restrictions.
+    /// - Leaves password authentication unchanged.
+    ///
+    /// Reload fails if the selected file is:
+    /// - Missing.
+    /// - Unreadable.
+    /// - Not a regular file.
+    /// - Malformed.
+    ///
+    /// Failed reloads leave previously active permissions unchanged.
+    ///
+    /// @param[in,out] errorMsg Receives appended path and cause diagnostics on failure
+    /// @return True if replacement permissions were parsed and installed successfully.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool reloadWhiteListFile(std::string& errorMsg);
 
     ecf::AuthenticationService& authentication() { return authentication_service_; }
@@ -252,9 +265,11 @@ private:
     void change_dir_to_ecf_home_and_check_accesibility();
 
     ///
-    /// @brief Loads a regular whitelist file and applies its authorisation rules.
+    /// @brief Loads a regular whitelist file and installs its rules only after successful parsing.
     ///
-    /// @param[out] err Diagnostic identifying the selected path and cause on failure
+    /// Failed parsing leaves the previously active permissions unchanged.
+    ///
+    /// @param[in,out] err Receives appended diagnostics identifying the selected path and cause on failure
     /// @return True if the file was loaded and its authorisation rules were installed.
     /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
     ///

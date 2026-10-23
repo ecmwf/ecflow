@@ -226,3 +226,12 @@ The configuration file is read only at startup. Security-file contents can be re
 with :ref:`reloadpasswdfile_cli`, :ref:`reloadcustompasswdfile_cli` and :ref:`reloadwsfile_cli`.
 These commands reuse the paths selected at startup; they do not reread the configuration file
 or select new paths.
+
+A successful reload replaces the contents of the selected password database or whitelist.
+Updated passwords, added or removed identities, and changed whitelist permissions take effect
+on subsequent requests. Reloading one file does not replace the other security databases.
+
+If the selected file has been removed, is unreadable, names a directory or cannot be parsed,
+the reload fails and reports the file and cause. Previously active credentials and permissions remain in force;
+neither an empty database nor partially parsed replacement entries are installed. Correcting
+the original file and retrying the reload does not require restarting the server.

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <utility>
 #include <vector>
 
 #include "Message.hpp"
@@ -19,6 +20,14 @@ using namespace ecf;
 WhiteListFile::WhiteListFile() = default;
 
 WhiteListFile::~WhiteListFile() = default;
+
+void WhiteListFile::swap(WhiteListFile& other) noexcept {
+    std::swap(all_users_have_read_access_, other.all_users_have_read_access_);
+    std::swap(all_users_have_write_access_, other.all_users_have_write_access_);
+    white_list_file_.swap(other.white_list_file_);
+    users_with_read_access_.swap(other.users_with_read_access_);
+    users_with_write_access_.swap(other.users_with_write_access_);
+}
 
 bool WhiteListFile::verify_read_access(const std::string& user) const {
     // Please note that the presence of * , even with paths means all users, have access

@@ -60,6 +60,13 @@ public:
     // The parser expects version number  4.4.5
     bool load(const std::string& file, std::string& errorMsg);
 
+    ///
+    /// @brief Exchanges loaded access rules, wildcard flags and source paths without parsing or allocating.
+    ///
+    /// @param[in,out] other Whitelist receiving the previous access rules and path
+    ///
+    void swap(WhiteListFile& other) noexcept;
+
     // Function used in test:
     // Will overwrite the existing file
     static bool createWithReadAccess(const std::string& pathToFile, std::string& errorMsg);

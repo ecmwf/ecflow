@@ -134,13 +134,21 @@ bool AuthenticationService::reload_passwd_file(std::string& error) {
         return false;
     }
 
-    // Only override valid users if we successfully opened and parsed file
+    if (!fs::is_regular_file(ecf_passwd_file_)) {
+        error += "ECF_PASSWD file '" + ecf_passwd_file_ + "' is not a regular file";
+        return false;
+    }
+
     std::cout << "*** Password file to be loaded from '" << ecf_passwd_file_ << "'\n";
-    auto loaded = passwd_file_.load(ecf_passwd_file_, debug_, error);
+    PasswdFile replacement;
+    std::string parse_error;
+    const bool loaded = replacement.load(ecf_passwd_file_, debug_, parse_error);
     if (loaded) {
+        passwd_file_.swap(replacement);
         std::cout << "*** Password file loaded [OK]\n";
     }
     else {
+        error += "Could not reload ECF_PASSWD file '" + ecf_passwd_file_ + "': " + parse_error;
         std::cout << "*** Password file loaded [FAIL]: due to " << error << "\n";
     }
     return loaded;
@@ -164,10 +172,20 @@ bool AuthenticationService::reload_custom_passwd_file(std::string& error) {
         return false;
     }
 
-    // Only override valid users if we successfully opened and parsed file
-    auto loaded = passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error);
+    if (!fs::is_regular_file(ecf_passwd_custom_file_)) {
+        error += "ECF_CUSTOM_PASSWD file '" + ecf_passwd_custom_file_ + "' is not a regular file";
+        return false;
+    }
+
+    PasswdFile replacement;
+    std::string parse_error;
+    const bool loaded = replacement.load(ecf_passwd_custom_file_, debug_, parse_error);
     if (loaded) {
-        std::cout << "Password file " << ecf_passwd_file_ << " opening...\n";
+        passwd_custom_file_.swap(replacement);
+        std::cout << "Custom password file " << ecf_passwd_custom_file_ << " reloaded\n";
+    }
+    else {
+        error += "Could not reload ECF_CUSTOM_PASSWD file '" + ecf_passwd_custom_file_ + "': " + parse_error;
     }
     return loaded;
 }
