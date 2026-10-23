@@ -93,6 +93,18 @@ to recognise the port used. This can be done in the Manage servers dialog.
 Server initialisation
 ---------------------
 
+Command-line syntax is parsed before server settings are loaded. ``--help`` (``-h``)
+and ``--version`` (``-v``) print the requested information and exit successfully
+without reading the configuration file, parsing environment settings, accessing
+``ECF_HOME``, loading security files, enabling SSL, creating logs or opening a listener.
+This also applies when server settings are invalid. Invalid command-line syntax,
+missing or invalid numeric arguments, and repeated numeric options still fail;
+informational options do not conceal command-line errors.
+
+Numeric options accept both ``--port=3141`` and ``--port 3141`` forms (and likewise
+for ``--ecfinterval``). Repeating either numeric option is rejected, rather than
+selecting one of the supplied values.
+
 For a normal start, ``ecflow_server`` performs the following steps in order:
 
 #. **Read the configuration file.** The server reads :ref:`server_environment.cfg`

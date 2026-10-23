@@ -20,6 +20,7 @@ ecflow_add_test(
     TestFoolproof.NodeExtern.cpp
     TestFoolproof.PasswordsAndWhiteLists.cpp
     TestFoolproof.Scaffold.cpp
+    TestFoolproof.ServerOptions.cpp
     TestFoolproof.ServerPaths.cpp
     TestFoolproof.ServerValidation.cpp
   LIBS

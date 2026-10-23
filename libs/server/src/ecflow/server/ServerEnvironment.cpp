@@ -91,6 +91,13 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
 }
 
 void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_config_file) {
+    ServerOptions options(cl);
+    help_option_    = options.help_option();
+    version_option_ = options.version_option();
+    if (help_option_ || version_option_) {
+        return;
+    }
+
     std::string log_file_name;
     try {
         read_config_file(log_file_name, path_to_config_file);
@@ -118,16 +125,8 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     // std::cout << "PID = " << ecf_pid_ << "\n";
 
-    // The options(argc/argv) must be read after the environment, since they override everything else
-    ServerOptions options(cl, this);
-    help_option_ = options.help_option();
-    if (help_option_) {
-        return; // User is printing the help
-    }
-    version_option_ = options.version_option();
-    if (version_option_) {
-        return; // User is printing the version
-    }
+    // Apply CLI values after the environment so that command-line overrides retain the highest priority.
+    options.apply(this);
 
     for (const auto& [name, value] : std::vector<std::pair<std::string, std::string>>{
              {"ECF_HOME", ecfHome_},
