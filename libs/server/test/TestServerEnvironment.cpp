@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <list>
 #include <optional>
@@ -414,13 +416,18 @@ void check_server_config_discovery(const std::optional<std::string>& startup_con
 }
 
 ///
-/// @brief Runs precedence assertions with isolated configuration, environment and command-line inputs.
+/// @brief Runs startup assertions with isolated inputs and scoped cleanup.
+///
+/// Cleanup:
+/// - Restores the working directory and environment inputs.
+/// - Restores the server-process flag and profiling threshold.
+/// - Destroys the log created during initialisation.
 ///
 /// @tparam Check Callable accepting the server environment and the startup directory
 /// @param[in] content Configuration-file content
 /// @param[in] environment Explicit environment overrides
 /// @param[in] args Command-line tokens including the executable name
-/// @param[in] check Assertions to run after successful initialisation and validation
+/// @param[in] check Assertions to run after construction and the expected validation outcome
 /// @param[in] expected_error Diagnostic fragment required when validation is expected to fail
 ///
 template <typename Check>
@@ -429,12 +436,14 @@ void check_server_precedence(const std::string& content,
                              const std::vector<std::string>& args,
                              Check check,
                              const std::string& expected_error = {}) {
-    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
-    const auto original_path = fs::current_path();
-    const auto old_threshold = JobProfiler::task_threshold();
+    auto directory             = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto original_path   = fs::current_path();
+    const auto old_threshold   = JobProfiler::task_threshold();
+    const bool original_server = Ecf::server();
     BOOST_SCOPE_EXIT_ALL(&) {
         Log::destroy();
         JobProfiler::set_task_threshold(old_threshold);
+        Ecf::set_server(original_server);
         std::error_code error;
         fs::current_path(original_path, error);
         BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
@@ -1749,6 +1758,135 @@ BOOST_AUTO_TEST_CASE(test_server_validation_empty_config_with_environment_overri
                                         const auto expected = anchored ? (startup / selected).string() : selected;
                                         BOOST_CHECK_EQUAL(server_variable(serverEnv, name), expected);
                                     });
+        }
+    }
+}
+
+///
+/// @brief Verifies filename resolution leaves exact configuration bytes and environment inputs unchanged.
+///
+BOOST_AUTO_TEST_CASE(test_server_observability_inputs_are_not_mutated) {
+    ECF_NAME_THIS_TEST();
+
+    WithTestEnvironmentVariable unrelated("ECF_OBSERVABILITY_SENTINEL", "unchanged unrelated input");
+    const std::vector<std::pair<std::string, std::string>> settings = {{"ECF_HOME", "environment home"},
+                                                                       {"ECF_PORT", "3143"},
+                                                                       {"ECF_LOG", "ecf.log"},
+                                                                       {"ECF_CHECK", "ecf.check"},
+                                                                       {"ECF_CHECKOLD", "ecf.check.b"},
+                                                                       {"ECF_PASSWD", "ecf.passwd"},
+                                                                       {"ECF_CUSTOM_PASSWD", "ecf.custom_passwd"},
+                                                                       {"ECF_LISTS", "ecf.lists"}};
+    const std::string content =
+        "# Preserve whitespace and comments exactly.\n\nECF_HOME = config home\nECF_PORT = 3142\n"
+        "ECF_LOG = ecf.log\nECF_CHECK = ecf.check\nECF_CHECKOLD = ecf.check.b\n"
+        "ECF_PASSWD = ecf.passwd\nECF_CUSTOM_PASSWD = ecf.custom_passwd\nECF_LISTS = ecf.lists\n";
+
+    for (const bool from_environment : {false, true}) {
+        BOOST_TEST_CONTEXT("Environment inputs present: " << from_environment) {
+            const auto environment = from_environment ? settings : std::vector<std::pair<std::string, std::string>>{};
+            check_server_precedence(
+                content,
+                environment,
+                {"ServerEnvironment", "--port=3144"},
+                [&](const auto& serverEnv, const auto& startup) {
+                    std::ifstream input(startup / "server_environment.cfg", std::ios::binary);
+                    BOOST_REQUIRE(input.is_open());
+                    const std::string actual{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+                    BOOST_CHECK_EQUAL(actual, content);
+                    for (const auto& [name, value] : settings) {
+                        const auto* selected = std::getenv(name.c_str());
+                        if (from_environment) {
+                            BOOST_REQUIRE(selected);
+                            BOOST_CHECK_EQUAL(selected, value);
+                        }
+                        else {
+                            BOOST_CHECK(selected == nullptr);
+                        }
+                    }
+                    BOOST_CHECK_EQUAL(std::getenv("ECF_OBSERVABILITY_SENTINEL"), "unchanged unrelated input");
+                    BOOST_CHECK_EQUAL(serverEnv.the_port(), "3144");
+                    BOOST_CHECK_EQUAL(serverEnv.ecf_home(),
+                                      (startup / (from_environment ? "environment home" : "config home")).string());
+                    BOOST_CHECK_NE(server_variable(serverEnv, "ECF_CHECK"), "ecf.check");
+                    BOOST_CHECK_NE(server_variable(serverEnv, "ECF_LOG"), "ecf.log");
+                });
+        }
+    }
+}
+
+///
+/// @brief Verifies isolated startup fixtures restore inputs and global state on success and exception unwinding.
+///
+BOOST_AUTO_TEST_CASE(test_server_observability_fixture_restores_state) {
+    ECF_NAME_THIS_TEST();
+
+    const auto original_path      = fs::current_path();
+    const auto original_threshold = JobProfiler::task_threshold();
+    const bool original_server    = Ecf::server();
+    BOOST_SCOPE_EXIT_ALL(&) {
+        JobProfiler::set_task_threshold(original_threshold);
+        Ecf::set_server(original_server);
+    };
+
+    const std::vector<std::pair<std::string, std::string>> ambient = {{"ECF_HOME", "/nonexistent/outer-home"},
+                                                                      {"ECF_PORT", "invalid_outer_port"},
+                                                                      {"ECF_LOG", "/nonexistent/outer.log"},
+                                                                      {"ECF_CHECKINTERVAL", "invalid_outer_interval"},
+                                                                      {"ECF_TASK_THRESHOLD", "invalid_outer_threshold"},
+                                                                      {"ECF_SSL", "unsupported_outer_ssl"},
+                                                                      {"ECF_LISTS", ""},
+                                                                      {"ECF_OBSERVABILITY_SENTINEL", "outer sentinel"}};
+    std::list<WithTestEnvironmentVariable> inputs;
+    for (const auto& [name, value] : ambient) {
+        inputs.emplace_back(name, value);
+    }
+    WithoutTestEnvironmentVariable absent("ECF_CUSTOM_PASSWD");
+
+    for (const bool fail_after_startup : {false, true}) {
+        BOOST_TEST_CONTEXT("Exception after startup: " << fail_after_startup) {
+            JobProfiler::set_task_threshold(987);
+            Ecf::set_server(false);
+            const auto run = [&] {
+                check_server_precedence(
+                    "ECF_HOME = config home\nECF_TASK_THRESHOLD = 137\n",
+                    {{"ECF_HOME", "environment home"},
+                     {"ECF_PORT", "3143"},
+                     {"ECF_LOG", "selected.log"},
+                     {"ECF_TASK_THRESHOLD", "251"}},
+                    {"ServerEnvironment", "--port=3144"},
+                    [&](const auto& serverEnv, const auto& startup) {
+                        BOOST_CHECK_EQUAL(serverEnv.the_port(), "3144");
+                        BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), 251);
+                        BOOST_CHECK(Ecf::server());
+                        BOOST_CHECK(fs::equivalent(fs::current_path(), startup / "environment home"));
+                        BOOST_CHECK(std::getenv("ECF_CHECKINTERVAL") == nullptr);
+                        BOOST_CHECK(std::getenv("ECF_SSL") == nullptr);
+                        BOOST_CHECK_EQUAL(std::getenv("ECF_OBSERVABILITY_SENTINEL"), "outer sentinel");
+                        if (fail_after_startup) {
+                            throw std::runtime_error("intentional observation failure");
+                        }
+                    });
+            };
+            if (fail_after_startup) {
+                BOOST_CHECK_EXCEPTION(run(), std::runtime_error, [](const auto& error) {
+                    return std::string(error.what()) == "intentional observation failure";
+                });
+            }
+            else {
+                run();
+            }
+
+            BOOST_CHECK(fs::current_path() == original_path);
+            BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), 987);
+            BOOST_CHECK(!Ecf::server());
+            BOOST_CHECK(!Log::instance());
+            for (const auto& [name, value] : ambient) {
+                const auto* restored = std::getenv(name.c_str());
+                BOOST_REQUIRE(restored);
+                BOOST_CHECK_EQUAL(restored, value);
+            }
+            BOOST_CHECK(std::getenv("ECF_CUSTOM_PASSWD") == nullptr);
         }
     }
 }
