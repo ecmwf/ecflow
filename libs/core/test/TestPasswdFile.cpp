@@ -9,6 +9,7 @@
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
 
@@ -17,6 +18,37 @@ using namespace ecf;
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_PasswdFile)
+
+///
+/// @brief Verifies non-throwing exchange of loaded password databases.
+///
+BOOST_AUTO_TEST_CASE(test_passwd_swap_loaded_databases) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::test::scaffold::AutomaticTestFile;
+    using ecf::test::scaffold::WithTestFile;
+
+    WithTestFile first(AutomaticTestFile{"first.passwd"}, "4.5.0\nalice host 3141 first_secret\n");
+    WithTestFile second(AutomaticTestFile{"second.passwd"}, "4.5.0\nbob host 3141 second_secret\n");
+    PasswdFile active, replacement;
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(active.load(first.path().string(), false, error), error);
+    BOOST_REQUIRE_MESSAGE(replacement.load(second.path().string(), false, error), error);
+    static_assert(noexcept(active.swap(replacement)));
+    const auto first_dump  = active.dump();
+    const auto second_dump = replacement.dump();
+
+    active.swap(replacement);
+    BOOST_CHECK(active.authenticate("bob", PasswordEncryption::encrypt("second_secret", "bob")));
+    BOOST_CHECK(!active.authenticate("alice", PasswordEncryption::encrypt("first_secret", "alice")));
+    BOOST_CHECK(replacement.authenticate("alice", PasswordEncryption::encrypt("first_secret", "alice")));
+    BOOST_CHECK(!replacement.authenticate("bob", PasswordEncryption::encrypt("second_secret", "bob")));
+    BOOST_CHECK_EQUAL(active.dump(), second_dump);
+    BOOST_CHECK_EQUAL(replacement.dump(), first_dump);
+
+    active.swap(active);
+    BOOST_CHECK(active.authenticate("bob", PasswordEncryption::encrypt("second_secret", "bob")));
+}
 
 void test_passwd_files(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);

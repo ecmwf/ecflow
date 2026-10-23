@@ -477,31 +477,39 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     if (!fs::is_regular_file(ecf_white_list_file_)) {
-        errorMsg = "ECF_LISTS path '" + ecf_white_list_file_ + "' is not a regular file";
+        errorMsg += "ECF_LISTS path '" + ecf_white_list_file_ + "' is not a regular file";
         return false;
     }
 
-    // Only override valid users if we successfully opened and parsed file
-    if (white_list_file_.load(ecf_white_list_file_, errorMsg)) {
+    WhiteListFile replacement;
+    std::string parse_error;
+    if (replacement.load(ecf_white_list_file_, parse_error)) {
         std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
         if (debug()) {
-            std::cout << white_list_file_.dump_valid_users() << "\n";
+            std::cout << replacement.dump_valid_users() << "\n";
         }
         // If the user accidentally removes the server/user from whitelist,
         // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
         // Hence always allow server user write access *IF* required for non-empty file
-        white_list_file_.allow_write_access_for_server_user();
+        replacement.allow_write_access_for_server_user();
 
+        // Authorisation retains a reference to the stable member, not the temporary replacement.
         if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
+            white_list_file_.swap(replacement);
             authorisation_service_ = result.value();
             std::cout << "Loaded server permissions based on Whitelist file\n";
             return true;
         }
         else {
+            errorMsg += "Unable to install authorisation from ECF_LISTS file '" + ecf_white_list_file_ +
+                        "': " + result.reason();
             std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
             return false;
         }
+    }
+    else {
+        errorMsg += "Could not load ECF_LISTS file '" + ecf_white_list_file_ + "': " + parse_error;
     }
     return false;
 }
