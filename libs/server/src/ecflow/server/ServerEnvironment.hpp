@@ -210,18 +210,28 @@ public:
     static std::vector<std::string> expected_variables();
 
 private:
+    ///
+    /// @brief Selects startup settings and validates required strings and the effective profiling threshold.
+    ///
+    /// @param[in] cl Command-line tokens, applied after configuration and environment settings
+    /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
+    /// @throws ServerEnvironmentException if parsing, required-setting validation or server-home access fails.
+    /// @throws std::exception if command-line parsing or runtime file setup fails.
+    ///
     void init(const CommandLine& cl, const std::string& path_to_config_file);
 
     ///
     /// @brief Reads configuration settings and applies built-in defaults for unspecified options.
     ///
-    /// A missing or empty configuration file uses the built-in defaults. Parsing failures stop initialisation
+    /// A missing or empty configuration file uses the built-in defaults. An existing file must be readable
+    /// and regular. File-access and parsing failures stop initialisation
     /// before environment overrides or startup side effects are applied.
     /// An explicitly specified checkpoint mode must match one of the supported names.
     ///
     /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
     /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
-    /// @throws ServerEnvironmentException if parsing or checkpoint-mode validation fails, including the path and cause.
+    /// @throws ServerEnvironmentException if file access, parsing or checkpoint-mode validation fails, including the
+    /// path and cause.
     ///
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
@@ -263,7 +273,8 @@ private:
     int checkpt_save_time_alarm_;
     int submitJobsInterval_;
     int ecf_prune_node_log_;
-    bool jobGeneration_; // used in debug/test mode only
+    int ecf_task_threshold_; ///< Effective signed millisecond threshold, validated before updating the profiler.
+    bool jobGeneration_;     // used in debug/test mode only
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

@@ -21,6 +21,7 @@ ecflow_add_test(
     TestFoolproof.PasswordsAndWhiteLists.cpp
     TestFoolproof.Scaffold.cpp
     TestFoolproof.ServerPaths.cpp
+    TestFoolproof.ServerValidation.cpp
   LIBS
     ecflow_all
     test_scaffold

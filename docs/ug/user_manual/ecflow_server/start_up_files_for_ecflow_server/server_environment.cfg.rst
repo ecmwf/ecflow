@@ -16,6 +16,25 @@ tasks.
 
     The server looks for the file in the CWD, hence make sure you move it.
 
+A missing, empty or comments-only configuration file uses built-in defaults.
+An existing configuration path must name a readable regular file; a directory, an
+unreadable file or a read error stops initialisation with the path and cause.
+
+Explicitly empty required paths and command strings are rejected after environment
+overrides, before filename resolution, changing directory or opening the log.
+This includes the server home, log, checkpoint and security-file paths, configured
+commands, URL settings and preprocessing character. Omitting a setting still selects
+its default; a supported non-empty environment override can replace an empty config value.
+
+``ECF_TASK_THRESHOLD`` sets the job-profiling threshold in milliseconds, with a
+default of 4000. Environment settings override the configuration-file value.
+The effective value must be a positive integer; zero and negative values stop startup
+before the value is converted to the profiler's unsigned representation.
+
+``ECF_PRUNE_NODE_LOG`` is a non-negative number of days. Zero preserves all edit
+history when recovering a checkpoint. The default is 30 days, and the environment
+variable of the same name overrides the configuration-file value.
+
 ``ECF_CHECKINTERVAL`` sets the checkpoint interval in seconds, with a default of 120.
 The environment variable of the same name overrides the configuration-file value.
 

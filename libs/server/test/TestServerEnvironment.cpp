@@ -25,6 +25,7 @@
 #include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -420,12 +421,14 @@ void check_server_config_discovery(const std::optional<std::string>& startup_con
 /// @param[in] environment Explicit environment overrides
 /// @param[in] args Command-line tokens including the executable name
 /// @param[in] check Assertions to run after successful initialisation and validation
+/// @param[in] expected_error Diagnostic fragment required when validation is expected to fail
 ///
 template <typename Check>
 void check_server_precedence(const std::string& content,
                              const std::vector<std::pair<std::string, std::string>>& environment,
                              const std::vector<std::string>& args,
-                             Check check) {
+                             Check check,
+                             const std::string& expected_error = {}) {
     auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
     const auto original_path = fs::current_path();
     const auto old_threshold = JobProfiler::task_threshold();
@@ -458,8 +461,59 @@ void check_server_precedence(const std::string& content,
 
     ServerEnvironment serverEnv(args);
     std::string error;
-    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    const bool valid = serverEnv.valid(error);
+    if (expected_error.empty()) {
+        BOOST_REQUIRE_MESSAGE(valid, error);
+    }
+    else {
+        BOOST_CHECK(!valid);
+        BOOST_CHECK_MESSAGE(error.find(expected_error) != std::string::npos, error);
+    }
     check(serverEnv, directory.path());
+}
+
+///
+/// @brief Checks rejection of malformed or out-of-range integer text through every supported source.
+///
+/// @param[in] value Invalid integer text that must remain visible in the diagnostic
+///
+void check_server_invalid_integer(const std::string& value) {
+    for (const std::string name :
+         {"ECF_PORT", "ECF_CHECKINTERVAL", "ECF_INTERVAL", "ECF_PRUNE_NODE_LOG", "ECF_TASK_THRESHOLD"}) {
+        for (const std::string source : {"config", "environment", "cli"}) {
+            if ((source == "environment" && name == "ECF_INTERVAL") ||
+                (source == "cli" && name != "ECF_PORT" && name != "ECF_INTERVAL")) {
+                continue;
+            }
+            BOOST_TEST_CONTEXT(name << " from " << source << ": " << value) {
+                std::string content;
+                std::vector<std::pair<std::string, std::string>> environment;
+                std::vector<std::string> args = {"ServerEnvironment"};
+                std::string diagnostic_key    = name;
+                if (source == "config") {
+                    content = name + " = " + value + "\n";
+                }
+                else if (source == "environment") {
+                    environment.emplace_back(name, value);
+                }
+                else {
+                    diagnostic_key = name == "ECF_PORT" ? "--port" : "--ecfinterval";
+                    args.emplace_back(diagnostic_key + "=" + value);
+                }
+
+                BOOST_CHECK_EXCEPTION(
+                    check_server_precedence(content, environment, args, [](const auto&, const auto&) {}),
+                    std::exception,
+                    [&](const std::exception& error) {
+                        const std::string message = error.what();
+                        return message.find(diagnostic_key) != std::string::npos &&
+                               message.find(value) != std::string::npos &&
+                               (source != "config" || message.find("server_environment.cfg") != std::string::npos);
+                    });
+                BOOST_CHECK(!Log::instance());
+            }
+        }
+    }
 }
 
 ///
@@ -1491,6 +1545,212 @@ BOOST_AUTO_TEST_CASE(test_server_filenames_absolute) {
 BOOST_AUTO_TEST_CASE(test_server_filenames_spaces) {
     ECF_NAME_THIS_TEST();
     check_server_filename_resolution("spaces");
+}
+
+///
+/// @brief Verifies controlled rejection of nonnumeric and partially numeric integer inputs.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_integer_text) {
+    ECF_NAME_THIS_TEST();
+
+    check_server_invalid_integer("not_an_integer");
+    check_server_invalid_integer("12seconds");
+}
+
+///
+/// @brief Verifies rejection of integers outside the destination range without truncation or wraparound.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_integer_overflow_and_underflow) {
+    ECF_NAME_THIS_TEST();
+
+    check_server_invalid_integer(std::to_string(static_cast<long long>(std::numeric_limits<int>::max()) + 1));
+    check_server_invalid_integer(std::to_string(static_cast<long long>(std::numeric_limits<int>::min()) - 1));
+}
+
+///
+/// @brief Verifies port-range boundaries from configuration, environment and command-line inputs without listeners.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_port_boundaries) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int port : {1023, 1024, 49150, 49151}) {
+        for (const std::string source : {"config", "environment", "cli"}) {
+            BOOST_TEST_CONTEXT("Port " << port << " from " << source) {
+                std::string content;
+                std::vector<std::pair<std::string, std::string>> environment;
+                std::vector<std::string> args = {"ServerEnvironment"};
+                if (source == "config") {
+                    content = "ECF_PORT = " + std::to_string(port) + "\n";
+                }
+                else if (source == "environment") {
+                    environment.emplace_back("ECF_PORT", std::to_string(port));
+                }
+                else {
+                    args.emplace_back("--port=" + std::to_string(port));
+                }
+
+                check_server_precedence(
+                    content,
+                    environment,
+                    args,
+                    [&](const auto& serverEnv, const auto&) {
+                        BOOST_CHECK_EQUAL(serverEnv.port(), port);
+                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
+                    },
+                    port == 1023 || port == 49151 ? "ECF_PORT" : "");
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies scheduling-interval boundaries from configuration and command-line inputs.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_scheduling_boundaries) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int interval : {0, 1, 60, 61}) {
+        for (const bool from_cli : {false, true}) {
+            BOOST_TEST_CONTEXT("Scheduling interval " << interval << ", CLI source: " << from_cli) {
+                const auto content            = from_cli ? "" : "ECF_INTERVAL = " + std::to_string(interval) + "\n";
+                std::vector<std::string> args = {"ServerEnvironment"};
+                if (from_cli) {
+                    args.emplace_back("--ecfinterval=" + std::to_string(interval));
+                }
+
+                check_server_precedence(
+                    content,
+                    {},
+                    args,
+                    [&](const auto& serverEnv, const auto&) {
+                        BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
+                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
+                    },
+                    interval == 0 || interval == 61 ? "ECF_INTERVAL" : "");
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies pruning boundaries and preservation of historical checkpoint entries when pruning is zero.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int days : {-1, 0, std::numeric_limits<int>::max()}) {
+        for (const bool from_environment : {false, true}) {
+            BOOST_TEST_CONTEXT("Pruning days " << days << ", environment source: " << from_environment) {
+                const auto content = from_environment ? "" : "ECF_PRUNE_NODE_LOG = " + std::to_string(days) + "\n";
+                std::vector<std::pair<std::string, std::string>> environment;
+                if (from_environment) {
+                    environment.emplace_back("ECF_PRUNE_NODE_LOG", std::to_string(days));
+                }
+
+                check_server_precedence(
+                    content,
+                    environment,
+                    {"ServerEnvironment"},
+                    [&](const auto& serverEnv, const auto& startup) {
+                        BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), days);
+                        if (days == 0) {
+                            const std::string history = "MSG:[07:36:05 10.3.2016] --requeue force /retained :tester";
+                            Defs original;
+                            original.add_suite("retained");
+                            original.add_edit_history("/retained", history);
+                            const auto checkpoint = (startup / "history.check").string();
+                            original.write_to_checkpt_file(checkpoint);
+
+                            Defs restored;
+                            restored.ecf_prune_node_log(serverEnv.ecf_prune_node_log());
+                            std::string error, warning;
+                            BOOST_REQUIRE_MESSAGE(restored.restore(checkpoint, error, warning), error);
+                            const auto& entries = restored.get_edit_history();
+                            BOOST_REQUIRE_EQUAL(entries.count("/retained"), 1);
+                            BOOST_REQUIRE_EQUAL(entries.at("/retained").size(), 1);
+                            BOOST_CHECK_EQUAL(entries.at("/retained").front(), history);
+                        }
+                    },
+                    days < 0 ? "ECF_PRUNE_NODE_LOG" : "");
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies positive profiling thresholds and rejects zero and negative values before unsigned conversion.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_boundaries) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int threshold : {std::numeric_limits<int>::min(), -1, 0, 1, std::numeric_limits<int>::max()}) {
+        for (const bool from_environment : {false, true}) {
+            BOOST_TEST_CONTEXT("Task threshold " << threshold << ", environment source: " << from_environment) {
+                const auto content = from_environment ? "" : "ECF_TASK_THRESHOLD = " + std::to_string(threshold) + "\n";
+                std::vector<std::pair<std::string, std::string>> environment;
+                if (from_environment) {
+                    environment.emplace_back("ECF_TASK_THRESHOLD", std::to_string(threshold));
+                }
+
+                const auto run = [&] {
+                    check_server_precedence(content, environment, {"ServerEnvironment"}, [&](const auto&, const auto&) {
+                        BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), static_cast<size_t>(threshold));
+                    });
+                };
+                if (threshold > 0) {
+                    run();
+                }
+                else {
+                    BOOST_CHECK_EXCEPTION(run(), ServerEnvironmentException, [&](const auto& error) {
+                        const std::string message = error.what();
+                        return message.find("ECF_TASK_THRESHOLD") != std::string::npos &&
+                               message.find(std::to_string(threshold)) != std::string::npos &&
+                               message.find("positive integer") != std::string::npos;
+                    });
+                }
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies that positive environment thresholds replace non-positive config values before validation.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_effective_value) {
+    ECF_NAME_THIS_TEST();
+
+    for (const int configured : {-1, 0}) {
+        BOOST_TEST_CONTEXT("Configured threshold: " << configured) {
+            check_server_precedence(
+                "ECF_TASK_THRESHOLD = " + std::to_string(configured) + "\n",
+                {{"ECF_TASK_THRESHOLD", "137"}},
+                {"ServerEnvironment"},
+                [](const auto&, const auto&) { BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), 137); });
+        }
+    }
+}
+
+///
+/// @brief Verifies that supported non-empty environment values replace empty configuration paths before validation.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_empty_config_with_environment_override) {
+    ECF_NAME_THIS_TEST();
+
+    for (const std::string name :
+         {"ECF_HOME", "ECF_LOG", "ECF_CHECK", "ECF_CHECKOLD", "ECF_PASSWD", "ECF_CUSTOM_PASSWD", "ECF_LISTS"}) {
+        BOOST_TEST_CONTEXT("Overridden empty config setting: " << name) {
+            const auto selected = name == "ECF_HOME" ? "environment home" : "selected.file";
+            check_server_precedence(name + " =\n",
+                                    {{name, selected}},
+                                    {"ServerEnvironment"},
+                                    [&](const auto& serverEnv, const auto& startup) {
+                                        const bool anchored = name == "ECF_HOME" || name == "ECF_LOG" ||
+                                                              name == "ECF_CHECK" || name == "ECF_CHECKOLD";
+                                        const auto expected = anchored ? (startup / selected).string() : selected;
+                                        BOOST_CHECK_EQUAL(server_variable(serverEnv, name), expected);
+                                    });
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {

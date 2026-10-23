@@ -274,7 +274,9 @@ void check_server_home_failure(const std::string& failure, bool from_environment
     if (!selected.empty()) {
         BOOST_CHECK_MESSAGE(output.find(selected) != std::string::npos, output);
     }
-    const auto cause = failure == "read" || failure == "write" ? "Access restriction" : "Can't chdir";
+    const auto cause = failure == "empty"                        ? "must not be empty"
+                       : failure == "read" || failure == "write" ? "Access restriction"
+                                                                 : "Can't chdir";
     BOOST_CHECK_MESSAGE(output.find(cause) != std::string::npos, output);
     BOOST_CHECK(!fs::exists(log));
 
