@@ -24,4 +24,8 @@ boost_root="{{ boost_root }}"
   -DBoost_INCLUDE_DIR="$boost_root/include" \
   -DPython3_ROOT_DIR={{ python_root }} \
   -DPython3_EXECUTABLE={{ python_root }}/bin/python3 \
+{# The python tests otherwise load the system libstdc++, too old for gcc >= 13. #}
+{% if pyext_test_ld_library_path | default("") %}
+  -DECFLOW_PYEXT_TEST_LD_LIBRARY_PATH={{ pyext_test_ld_library_path }} \
+{% endif %}
 {% endblock %}
