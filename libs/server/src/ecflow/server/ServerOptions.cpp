@@ -15,7 +15,7 @@
 
 using namespace ecf;
 
-ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
+ServerOptions::ServerOptions(const CommandLine& cl) {
 
     namespace po = boost::program_options;
 
@@ -23,6 +23,9 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     po::options_description desc(description, po::options_description::m_default_line_length + 80);
 
     desc.add_options()("help,h",
+                       "Help and version bypass server configuration and environment settings.\n"
+                       "Invalid or repeated numeric command-line options are still rejected.\n"
+                       "\n"
                        "The server reads the LANG for the locale. Please ensure that\n"
                        "locale is valid otherwise the server will abort on startup.\n"
                        "For a list of valid locale use 'locale -a'.\n"
@@ -119,13 +122,15 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
                 "version,v",
                 "Show ecflow version number,boost library version, compiler used and compilation date, then exit");
 
-    // 1) Parse the CLI options
-    po::parsed_options parsed_options =
-        po::command_line_parser(cl.tokens()).options(desc).style(po::command_line_style::default_style).run();
-
-    // 2) Store the CLI options into the variable map
-    po::store(parsed_options, vm_);
-    po::notify(vm_);
+    try {
+        const auto parsed_options =
+            po::command_line_parser(cl.tokens()).options(desc).style(po::command_line_style::default_style).run();
+        po::store(parsed_options, vm_);
+        po::notify(vm_);
+    }
+    catch (const po::error& error) {
+        throw ServerEnvironmentException("Invalid server command line: " + std::string(error.what()));
+    }
 
     if (vm_.count("help")) {
         std::cout << desc << "\n";
@@ -134,7 +139,9 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     if (vm_.count("version")) {
         std::cout << Version::description() << "\n";
     }
+}
 
+void ServerOptions::apply(ServerEnvironment* env) const {
     if (vm_.count("debug")) {
         env->debug_ = true;
     }

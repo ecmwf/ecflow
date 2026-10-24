@@ -56,6 +56,13 @@ public:
     // The parser expects version number  4.5.0
     bool load(const std::string& file, bool debug, std::string& errorMsg);
 
+    ///
+    /// @brief Exchanges loaded credentials and source paths without parsing or allocating.
+    ///
+    /// @param[in,out] other Database receiving the previous credentials and path
+    ///
+    void swap(PasswdFile& other) noexcept;
+
     // to be called by the server, to at least one user with given host and port
     bool check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port);
 

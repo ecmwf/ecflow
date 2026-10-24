@@ -30,10 +30,32 @@ public:
 
     void handle_terminate();
 
-    // abort server if check pt files exist, but cannot be loaded
+    ///
+    /// @brief Restores the primary checkpoint or its backup before accepting requests.
+    ///
+    /// Selection:
+    /// - A valid primary takes precedence over the backup.
+    /// - A failed primary is discarded before attempting backup recovery.
+    /// - Two absent files leave an empty definition.
+    /// - Present but unusable files reject startup without overwriting either input.
+    ///
+    /// @return True if a checkpoint was restored, or false if both files are absent.
+    /// @throws ServerEnvironmentException if neither checkpoint is usable after a restore failure.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool load_check_pt_file_on_startup();
     void loadCheckPtFile();
-    bool restore_from_checkpt(const std::string& filename, bool& failed);
+
+    ///
+    /// @brief Attempts to restore a present regular checkpoint file and records its failure state and cause.
+    ///
+    /// @param[in] filename Selected checkpoint path
+    /// @param[out] failed True for a present file that cannot be restored; false for an absent or restored file
+    /// @param[out] diagnostic Optional failure diagnostic destination; cleared when no failure occurs
+    /// @return True if the checkpoint was restored successfully.
+    /// @throws std::filesystem::filesystem_error if initial filesystem inspection fails.
+    ///
+    bool restore_from_checkpt(const std::string& filename, bool& failed, std::string* diagnostic = nullptr);
     void update_defs_server_state();
     void set_server_state(SState::State);
 

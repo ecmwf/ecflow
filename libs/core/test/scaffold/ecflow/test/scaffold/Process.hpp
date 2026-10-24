@@ -25,8 +25,24 @@ public:
 
     int pid() const;
 
+    ///
+    /// @brief Reaps the child once and returns its cached exit status on subsequent calls.
+    ///
+    /// Concurrent wait and termination requests share a single native waiter.
+    ///
+    /// @return The child's exit status.
+    /// @throws std::exception if the native wait fails.
+    ///
     int wait();
-    int terminate();
+
+    ///
+    /// @brief Terminates and reaps the owned child without throwing or reaping it twice.
+    ///
+    /// An already reaped child is left untouched. Concurrent wait requests receive the same exit status.
+    ///
+    /// @return Zero on success, or one if signalling or waiting fails.
+    ///
+    int terminate() noexcept;
 
     bool is_running() const;
 

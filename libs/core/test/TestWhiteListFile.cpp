@@ -9,6 +9,7 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
 
@@ -17,6 +18,37 @@ using namespace ecf;
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
+
+///
+/// @brief Verifies non-throwing exchange of whitelist paths, wildcard flags and path-specific access rules.
+///
+BOOST_AUTO_TEST_CASE(test_whitelist_swap_loaded_rules) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::test::scaffold::AutomaticTestFile;
+    using ecf::test::scaffold::WithTestFile;
+
+    WithTestFile first(AutomaticTestFile{"first.lists"}, "4.5.0\nalice\n-bob /limited\n");
+    WithTestFile second(AutomaticTestFile{"second.lists"}, "4.5.0\n-*\ncarol /private\n");
+    WhiteListFile active, replacement;
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(active.load(first.path().string(), error), error);
+    BOOST_REQUIRE_MESSAGE(replacement.load(second.path().string(), error), error);
+    static_assert(noexcept(active.swap(replacement)));
+
+    active.swap(replacement);
+    BOOST_CHECK(active.verify_read_access("any_user", "/anywhere"));
+    BOOST_CHECK(active.verify_write_access("carol", "/private"));
+    BOOST_CHECK(!active.verify_write_access("alice", "/private"));
+    BOOST_CHECK(replacement.verify_write_access("alice", "/anywhere"));
+    BOOST_CHECK(replacement.verify_read_access("bob", "/limited"));
+    BOOST_CHECK(!replacement.verify_write_access("bob", "/limited"));
+    BOOST_CHECK(active.dump_valid_users().find(second.path().string()) != std::string::npos);
+    BOOST_CHECK(replacement.dump_valid_users().find(first.path().string()) != std::string::npos);
+
+    active.swap(active);
+    BOOST_CHECK(active.verify_write_access("carol", "/private"));
+}
 
 void test_white_list_files(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);

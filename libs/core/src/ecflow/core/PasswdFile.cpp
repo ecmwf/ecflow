@@ -18,6 +18,11 @@ PasswdFile::PasswdFile() = default;
 
 PasswdFile::~PasswdFile() = default;
 
+void PasswdFile::swap(PasswdFile& other) noexcept {
+    passwd_file_.swap(other.passwd_file_);
+    vec_.swap(other.vec_);
+}
+
 // #define DEBUG_ME 1
 
 // Parse the file if any errors found return false and errorMsg
