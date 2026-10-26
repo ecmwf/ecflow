@@ -25,10 +25,11 @@ repos:
         exclude: '^(docs|tools|releng)/|^libs/(client|node|pyext)/test/data/|^libs/test/overall/data/'
 
   - repo: https://github.com/ecmwf/ci-infrastructure
-    rev: 59ef84bcae9f677cb46a8536744d06b215374011
+    rev: 8adba3f59f501cd1e6306538d3a806850c0d0f73
     hooks:
       # Refuse commits to the ECMWF CI configuration that lack the required approval.
       - id: check-ci-approval
+      - id: check-ci-result
 
   - repo: https://github.com/fsfe/reuse-tool
     rev: v6.2.0
