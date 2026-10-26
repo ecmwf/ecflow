@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# GENERATED FILE - DO NOT EDIT.
+# Regenerate via the ci-infrastructure-generate CLI.
+# Source of truth: each repo's .ci/manifest.toml.
+name: '[PR] Downstream-CI label gate'
+on:
+  pull_request_target:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - labeled
+    - unlabeled
+permissions:
+  statuses: write
+jobs:
+  gate:
+    runs-on: ubuntu-slim
+    steps:
+    - uses: ecmwf/ci-infrastructure/actions/post-downstream-decision@main
+      with:
+        no-consumers: downstream/runner downstream/hpc-atos
