@@ -25,7 +25,7 @@ repos:
         exclude: '^(docs|tools|releng)/|^libs/(client|node|pyext)/test/data/|^libs/test/overall/data/'
 
   - repo: https://github.com/ecmwf/ci-infrastructure
-    rev: 4be0d5dda3709733300e27a87f47f0020d1da6c7
+    rev: 06cf62814f378131303f7cca6ebfc9f3659f7d90
     hooks:
       # Refuse commits to the ECMWF CI configuration that lack the required approval.
       - id: check-ci-approval
