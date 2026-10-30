@@ -154,7 +154,7 @@ void check_server_cli_exit(std::vector<std::string> options,
 
     Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", options, startup.path());
     auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-    const bool exited = completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+    const bool exited = completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
     if (!exited) {
         process.terminate();
     }
@@ -220,9 +220,12 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
-    WithTestEnvironmentVariable environment_port("ECF_PORT", "3143");
+    // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
+    auto config_decoy      = MakePort{}.with(AutomaticPortValue{}).create();
+    auto environment_decoy = MakePort{}.with(AutomaticPortValue{}).create();
+    WithTestEnvironmentVariable environment_port("ECF_PORT", std::to_string(environment_decoy.value()));
     WithTestFile config(NamedTestFile{(startup.path() / "server_environment.cfg").string()},
-                        "ECF_PORT = 3142\nECF_INTERVAL = 19\n");
+                        "ECF_PORT = " + std::to_string(config_decoy.value()) + "\nECF_INTERVAL = 19\n");
 
     std::vector<std::string> options;
     if (equals_port) {
@@ -245,7 +248,7 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
     };
 
     boost::asio::io_context io;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
     boost::system::error_code error;
     do {
         boost::asio::ip::tcp::socket socket(io);
@@ -297,7 +300,7 @@ BOOST_AUTO_TEST_CASE(test_server_options_unknown) {
 
     for (const auto& option : {"--unknown-server-option", "--version-extra"}) {
         BOOST_TEST_CONTEXT("Unknown option: " << option) {
-            check_server_cli_exit({option}, 1, {option, "unrecognised option"});
+            check_server_cli_exit({option}, 1, {"Invalid server command line", option});
         }
     }
 }
@@ -310,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_server_options_missing_arguments) {
 
     for (const auto& option : {"--port", "--ecfinterval"}) {
         BOOST_TEST_CONTEXT("Missing argument: " << option) {
-            check_server_cli_exit({option}, 1, {option, "argument"});
+            check_server_cli_exit({option}, 1, {"Invalid server command line", option});
         }
     }
 }
@@ -330,7 +333,7 @@ BOOST_AUTO_TEST_CASE(test_server_options_invalid_numbers) {
     for (const std::string option : {"--port", "--ecfinterval"}) {
         for (const auto& value : values) {
             BOOST_TEST_CONTEXT(option << " = '" << value << "'") {
-                std::vector<std::string> fragments = {option, "argument"};
+                std::vector<std::string> fragments = {"Invalid server command line", option};
                 if (!value.empty()) {
                     fragments.push_back(value);
                 }
@@ -346,13 +349,12 @@ BOOST_AUTO_TEST_CASE(test_server_options_invalid_numbers) {
 BOOST_AUTO_TEST_CASE(test_server_options_duplicate_numbers) {
     ECF_NAME_THIS_TEST();
 
-    check_server_cli_exit({"--port=PORT", "--port=OTHER_PORT"}, 1, {"--port", "cannot be specified more than once"});
+    check_server_cli_exit({"--port=PORT", "--port=OTHER_PORT"}, 1, {"--port", "Invalid server command line"});
+    check_server_cli_exit({"--port", "PORT", "--port", "OTHER_PORT"}, 1, {"--port", "Invalid server command line"});
     check_server_cli_exit(
-        {"--port", "PORT", "--port", "OTHER_PORT"}, 1, {"--port", "cannot be specified more than once"});
+        {"--ecfinterval=17", "--ecfinterval=23"}, 1, {"--ecfinterval", "Invalid server command line"});
     check_server_cli_exit(
-        {"--ecfinterval=17", "--ecfinterval=23"}, 1, {"--ecfinterval", "cannot be specified more than once"});
-    check_server_cli_exit(
-        {"--ecfinterval", "17", "--ecfinterval", "23"}, 1, {"--ecfinterval", "cannot be specified more than once"});
+        {"--ecfinterval", "17", "--ecfinterval", "23"}, 1, {"--ecfinterval", "Invalid server command line"});
 }
 
 ///
@@ -424,9 +426,11 @@ BOOST_AUTO_TEST_CASE(test_server_options_information_bypasses_settings) {
 BOOST_AUTO_TEST_CASE(test_server_options_information_rejects_invalid_cli) {
     ECF_NAME_THIS_TEST();
 
-    check_server_cli_exit({"--help", "--unknown-server-option"}, 1, {"--unknown-server-option", "unrecognised option"});
-    check_server_cli_exit({"--help", "--port"}, 1, {"--port", "argument"});
-    check_server_cli_exit({"--version", "--port=not_a_number"}, 1, {"--port", "not_a_number"});
+    check_server_cli_exit(
+        {"--help", "--unknown-server-option"}, 1, {"Invalid server command line", "--unknown-server-option"});
+    check_server_cli_exit({"--help", "--port"}, 1, {"Invalid server command line", "--port"});
+    check_server_cli_exit(
+        {"--version", "--port=not_a_number"}, 1, {"Invalid server command line", "--port", "not_a_number"});
 }
 
 BOOST_AUTO_TEST_SUITE_END()

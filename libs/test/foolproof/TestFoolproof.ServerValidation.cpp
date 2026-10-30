@@ -102,7 +102,7 @@ void check_rejected_initialisation(const std::string& content,
 
     Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", args, startup.path());
     auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-    const bool exited = completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+    const bool exited = completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
     if (!exited) {
         process.terminate();
     }

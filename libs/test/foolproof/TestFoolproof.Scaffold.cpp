@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <chrono>
+#include <functional>
 #include <future>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -47,29 +52,36 @@ BOOST_AUTO_TEST_CASE(test_process_terminate_then_wait) {
 }
 
 ///
-/// @brief Verifies that termination cooperates with an asynchronous waiter instead of racing to reap the child.
+/// @brief Verifies that termination cooperates with a concurrent waiter instead of racing to reap the child.
+///
+/// The waiter usually, but not always, blocks before termination starts; the iterations cover both orders. Both
+/// requests run on detached threads with bounded waits, so that a deadlock fails the test instead of hanging it.
 ///
 BOOST_AUTO_TEST_CASE(test_process_terminate_with_pending_wait) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf::test::scaffold;
 
+    // Runs the request on a detached thread, which shares ownership of the process in case the test gives up
+    const auto run_detached = [](const std::shared_ptr<Process>& process, std::function<int(Process&)> request) {
+        std::packaged_task<int()> task([process, request = std::move(request)] { return request(*process); });
+        auto result = task.get_future();
+        std::thread(std::move(task)).detach();
+        return result;
+    };
+
     for (int iteration = 0; iteration < 8; ++iteration) {
         BOOST_TEST_CONTEXT("Wait/terminate interleaving " << iteration) {
-            Process process("/bin/sh", {"-c", "exec sleep 30"});
-            std::promise<void> started;
-            auto ready      = started.get_future();
-            auto completion = std::async(std::launch::async, [&] {
-                started.set_value();
-                return process.wait();
-            });
-            ready.wait();
+            auto process     = std::make_shared<Process>("/bin/sh", std::vector<std::string>{"-c", "exec sleep 30"});
+            auto completion  = run_detached(process, [](Process& p) { return p.wait(); });
+            auto termination = run_detached(process, [](Process& p) { return p.terminate(); });
 
-            BOOST_REQUIRE_EQUAL(process.terminate(), 0);
-            BOOST_REQUIRE(completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready);
+            BOOST_REQUIRE(termination.wait_for(server_startup_timeout) == std::future_status::ready);
+            BOOST_REQUIRE_EQUAL(termination.get(), 0);
+            BOOST_REQUIRE(completion.wait_for(server_startup_timeout) == std::future_status::ready);
             const int status = completion.get();
             BOOST_CHECK_NE(status, 0);
-            BOOST_CHECK_EQUAL(process.wait(), status);
+            BOOST_CHECK_EQUAL(process->wait(), status);
         }
     }
 }

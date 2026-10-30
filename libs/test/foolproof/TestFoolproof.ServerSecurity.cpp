@@ -158,8 +158,9 @@ void check_server_security(const std::array<std::string, 3>& kinds,
     };
 
     if (rejected_index >= 0) {
-        auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-        const bool exited = completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+        auto completion = std::async(std::launch::async, [&] { return process.wait(); });
+        const bool exited =
+            completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
         if (!exited) {
             ::kill(process.pid(), SIGKILL);
         }
@@ -183,7 +184,7 @@ void check_server_security(const std::array<std::string, 3>& kinds,
 
     boost::asio::io_context io;
     boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
     do {
         boost::asio::ip::tcp::socket socket(io);
         socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);

@@ -147,7 +147,7 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
 
     boost::asio::io_context io;
     boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
     do {
         boost::asio::ip::tcp::socket socket(io);
         socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);

@@ -55,6 +55,47 @@ void remove_log_file(const ServerEnvironment& serverEnv) {
 }
 
 ///
+/// @brief Isolates a server start-up from the ambient environment and from the global state of other tests.
+///
+/// Clears every environment variable read by the server, and restores the working directory, the profiling
+/// threshold and the server flag on destruction, after destroying the log.
+///
+class IsolatedServerStartup {
+public:
+    IsolatedServerStartup()
+        : original_path_{fs::current_path()},
+          original_threshold_{JobProfiler::task_threshold()},
+          original_server_{Ecf::server()} {
+        for (const auto* name :
+             {"ECF_HOME",           "ECF_PORT",          "ECF_LOG",          "ECF_CHECK",         "ECF_CHECKOLD",
+              "ECF_PASSWD",         "ECF_CUSTOM_PASSWD", "ECF_LISTS",        "ECF_CHECKINTERVAL", "ECF_PRUNE_NODE_LOG",
+              "ECF_TASK_THRESHOLD", "ECF_SSL",           "ECF_DEBUG_SERVER", "ECF_INTERVAL",      "ECF_CHECKMODE",
+              "ECF_JOB_CMD",        "ECF_KILL_CMD",      "ECF_STATUS_CMD",   "ECF_CHECK_CMD",     "ECF_URL_CMD",
+              "ECF_URL_BASE",       "ECF_URL",           "ECF_MICRODEF",     "ECF_MICRO"}) {
+            cleared_.emplace_back(name);
+        }
+    }
+
+    IsolatedServerStartup(const IsolatedServerStartup&)            = delete;
+    IsolatedServerStartup& operator=(const IsolatedServerStartup&) = delete;
+
+    ~IsolatedServerStartup() {
+        Log::destroy();
+        JobProfiler::set_task_threshold(original_threshold_);
+        Ecf::set_server(original_server_);
+        std::error_code error;
+        fs::current_path(original_path_, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
+    }
+
+private:
+    fs::path original_path_;
+    size_t original_threshold_;
+    bool original_server_;
+    std::list<WithoutTestEnvironmentVariable> cleared_;
+};
+
+///
 /// @brief Returns the lines of the last start-up written to the log, from 'Started at', without their prefix.
 ///
 /// @return The lines, each without its `XXX:[time] ` prefix; empty when the log holds no start-up.
@@ -179,7 +220,8 @@ void check_runtime_configuration(const ServerEnvironment& serverEnv,
 /// @param[in] custom_checkpoints Whether to use an explicit relative checkpoint and an absolute backup path
 ///
 void check_server_home_resolution(bool from_environment, bool nested_home, bool custom_checkpoints) {
-    auto startup               = ecf::test::scaffold::MakeDirectory{}.create();
+    auto startup = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     const auto original_path   = fs::current_path();
     const auto absolute_home   = startup.path() / "absolute workspace";
     const auto absolute_backup = startup.path() / "backup.check";
@@ -262,7 +304,8 @@ void check_server_home_resolution(bool from_environment, bool nested_home, bool 
 void check_server_config_parse_error(const std::string& content,
                                      const std::string& expected_error,
                                      bool invalid_environment = false) {
-    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     const auto original_path = fs::current_path();
     const auto log_path      = directory.path() / "server.log";
     WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
@@ -298,7 +341,8 @@ void check_server_config_parse_error(const std::string& content,
 /// @param[in] environment_interval Optional environment override; absent leaves the configuration value unchanged
 ///
 void check_server_checkpoint_interval(std::optional<int> configured_interval, std::optional<int> environment_interval) {
-    auto directory      = ecf::test::scaffold::MakeDirectory{}.create();
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     std::string content = "ECF_INTERVAL = 17\n";
     if (configured_interval) {
         content += "ECF_CHECKINTERVAL = " + std::to_string(*configured_interval) + "\n";
@@ -1043,6 +1087,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 BOOST_AUTO_TEST_CASE(test_server_config_file_applies_non_default_values) {
     ECF_NAME_THIS_TEST();
 
+    IsolatedServerStartup isolation;
     WithTestFile config(AutomaticTestFile{"server_environment.cfg"},
                         "ECF_CHECKINTERVAL = 137\n"
                         "ECF_CHECKMODE = CHECK_ALWAYS\n"
@@ -1258,6 +1303,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_check_modes) {
     ECF_NAME_THIS_TEST();
 
     auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     WithTestEnvironmentVariable home("ECF_HOME", fs::current_path().string());
     WithTestEnvironmentVariable port("ECF_PORT", "3144");
     const std::vector<std::pair<std::string, CheckPt::Mode>> modes = {{"CHECK_NEVER", CheckPt::NEVER},
@@ -2117,38 +2163,26 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
 BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
     ECF_NAME_THIS_TEST();
 
+    // Restores the environment, the profiling threshold and the working directory, and destroys the log
+    IsolatedServerStartup isolation;
+
     std::vector<std::string> args = {"ServerEnvironment"};
     {
-        auto* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
-        BOOST_CHECK_MESSAGE(putenv(put) == 0, "putenv failed for " << put);
-    }
-    ServerEnvironment serverEnv(args);
-    BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,
-                        "Expected task threshold of 9 but found " << JobProfiler::task_threshold());
+        WithTestEnvironmentVariable threshold("ECF_TASK_THRESHOLD", "9");
+        ServerEnvironment serverEnv(args);
+        BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,
+                            "Expected task threshold of 9 but found " << JobProfiler::task_threshold());
 
-    // ==================================================================================
-    // Note test for errors
-    std::vector<std::string> dodgy_thresholds;
-    dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=x");
-    dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=,");
-    dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=:");
-    dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=,,");
-
-    for (auto& dodgy_threshold : dodgy_thresholds) {
-        // cout << "check -------> " << dodgy_thresholds[i] << endl;
-        BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_threshold.c_str())) == 0,
-                            "putenv failed for " << dodgy_threshold);
-        BOOST_CHECK_THROW(ServerEnvironment serverEnv(args), std::runtime_error);
+        Host h;
+        fs::remove(h.ecf_log_file(serverEnv.the_port()));
     }
 
-    unsetenv(const_cast<char*>(
-        "ECF_TASK_THRESHOLD")); // remove from env, otherwise valgrind complains, *AND* affects other tests
-
-    Host h;
-    fs::remove(h.ecf_log_file(serverEnv.the_port()));
-
-    /// Destroy Log singleton to avoid valgrind from complaining
-    Log::destroy();
+    for (const auto* dodgy_threshold : {"x", ",", ":", ",,"}) {
+        BOOST_TEST_CONTEXT("ECF_TASK_THRESHOLD=" << dodgy_threshold) {
+            WithTestEnvironmentVariable threshold("ECF_TASK_THRESHOLD", dodgy_threshold);
+            BOOST_CHECK_THROW(ServerEnvironment serverEnv(args), std::runtime_error);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_plain_by_default) {

@@ -45,6 +45,22 @@ namespace bp = boost::process;
 
 namespace ecf::test::scaffold {
 
+namespace {
+
+// Blocks until the child has exited, leaving it unreaped, so that its process id remains reserved
+void wait_for_exit_without_reaping(int process_id) {
+    siginfo_t info{};
+    int ret = 0;
+    do {
+        ret = ::waitid(P_PID, static_cast<id_t>(process_id), &info, WEXITED | WNOWAIT);
+    } while (ret == -1 && errno == EINTR);
+    if (ret == -1) {
+        throw std::system_error(errno, std::generic_category(), "waitid(2) failed");
+    }
+}
+
+} // namespace
+
 ///
 /// @brief Shares child identity, native-wait ownership and cached completion across process backends.
 ///
@@ -202,12 +218,13 @@ int Process::wait() {
         }
     }
 
-    const int result = impl_->wait_native();
-    {
-        std::lock_guard<std::mutex> status(impl_->status_mutex);
-        impl_->exit_status = result;
-    }
-    return result;
+    wait_for_exit_without_reaping(impl_->process_id);
+
+    // Reap and record under the status lock: terminate() signals under the same lock, and therefore only ever
+    // signals a child that is still running or not yet reaped, whose process id cannot have been reused
+    std::lock_guard<std::mutex> status(impl_->status_mutex);
+    impl_->exit_status = impl_->wait_native();
+    return *impl_->exit_status;
 }
 
 int Process::terminate() noexcept {

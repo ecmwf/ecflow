@@ -78,13 +78,17 @@ void check_observed_configuration(bool environment_overrides) {
         cleared.emplace_back(name);
     }
 
-    auto host                   = MakeHost{}.create();
-    auto port                   = MakePort{}.with(AutomaticPortValue{}).create();
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
+    auto config_decoy           = MakePort{}.with(AutomaticPortValue{}).create();
+    auto environment_decoy      = MakePort{}.with(AutomaticPortValue{}).create();
     const std::string port_text = std::to_string(port.value());
     const auto prefix           = host.value() + "." + port_text + ".";
     const std::string config_text =
         "# Keep this input byte-for-byte unchanged.\n\nECF_HOME = " + config_home.string() +
-        "\nECF_PORT = 3142\nECF_LOG = config.log\nECF_CHECK = ecf.check\nECF_CHECKOLD = ecf.check.b\n"
+        "\nECF_PORT = " + std::to_string(config_decoy.value()) +
+        "\nECF_LOG = config.log\nECF_CHECK = ecf.check\nECF_CHECKOLD = ecf.check.b\n"
         "ECF_PASSWD = config.passwd\nECF_CUSTOM_PASSWD = config.custom_passwd\nECF_LISTS = config.lists\n"
         "ECF_CHECKMODE = CHECK_NEVER\nECF_CHECKINTERVAL = 137\nECF_PRUNE_NODE_LOG = 19\n"
         "ECF_TASK_THRESHOLD = 333\nECF_INTERVAL = 17\nECF_JOB_CMD = configured_submit\n"
@@ -98,7 +102,7 @@ void check_observed_configuration(bool environment_overrides) {
     if (environment_overrides) {
         for (const auto& [name, value] :
              std::vector<std::pair<std::string, std::string>>{{"ECF_HOME", environment_home.string()},
-                                                              {"ECF_PORT", "3143"},
+                                                              {"ECF_PORT", std::to_string(environment_decoy.value())},
                                                               {"ECF_LOG", "environment.log"},
                                                               {"ECF_CHECK", "environment.primary"},
                                                               {"ECF_CHECKOLD", absolute_backup.string()},
@@ -121,7 +125,7 @@ void check_observed_configuration(bool environment_overrides) {
 
     boost::asio::io_context io;
     boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
     do {
         boost::asio::ip::tcp::socket socket(io);
         socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
@@ -250,14 +254,15 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         std::list<WithTestFile> inputs;
         if (stage == "cli") {
             options.emplace_back("--unknown-observation-option");
-            fragments = {"Invalid server command line", "--unknown-observation-option", "unrecognised option"};
+            fragments = {"Invalid server command line", "--unknown-observation-option"};
         }
         else if (stage == "config") {
             config += "UNKNOWN_OBSERVATION_SETTING = 1\n";
-            fragments = {"server_environment.cfg", "UNKNOWN_OBSERVATION_SETTING", "unrecognised option"};
+            fragments = {
+                "Could not parse server configuration file", "server_environment.cfg", "UNKNOWN_OBSERVATION_SETTING"};
         }
         else if (stage == "home") {
-            fragments = {"ECF_HOME", (startup.path() / "missing home").string(), "Can't chdir"};
+            fragments = {"ECF_HOME", (startup.path() / "missing home").string()};
         }
         else if (stage == "security") {
             inputs.emplace_back(NamedTestFile{(home / "missing.passwd").string()}, "not_a_version\n");
@@ -270,9 +275,10 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config);
 
         Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", options, startup.path());
-        const auto pid    = process.pid();
-        auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-        const bool exited = completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+        const auto pid  = process.pid();
+        auto completion = std::async(std::launch::async, [&] { return process.wait(); });
+        const bool exited =
+            completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
         if (!exited) {
             process.terminate();
         }

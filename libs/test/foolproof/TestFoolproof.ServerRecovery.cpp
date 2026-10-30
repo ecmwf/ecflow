@@ -133,8 +133,11 @@ void check_server_recovery(const std::string& primary,
         cleared.emplace_back(name);
     }
 
-    auto host                                  = MakeHost{}.create();
-    auto port                                  = MakePort{}.with(AutomaticPortValue{}).create();
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
+    auto config_decoy                          = MakePort{}.with(AutomaticPortValue{}).create();
+    auto environment_decoy                     = MakePort{}.with(AutomaticPortValue{}).create();
     const std::array<std::string, 2> kinds     = {primary, backup};
     const std::array<std::string, 2> names     = {"ECF_CHECK", "ECF_CHECKOLD"};
     const std::array<std::string, 2> filenames = {"primary.check", "backup.check"};
@@ -190,8 +193,8 @@ void check_server_recovery(const std::string& primary,
         }
     }
 
-    std::string config = "ECF_HOME = " + home.string() +
-                         "\nECF_PORT = 3142\nECF_LOG = server.log\n"
+    std::string config = "ECF_HOME = " + home.string() + "\nECF_PORT = " + std::to_string(config_decoy.value()) +
+                         "\nECF_LOG = server.log\n"
                          "ECF_CHECKMODE = CHECK_NEVER\nECF_CHECKINTERVAL = 137\nECF_INTERVAL = 17\n"
                          "ECF_PASSWD = no.passwd\nECF_CUSTOM_PASSWD = no.custom_passwd\nECF_LISTS = no.lists\n"
                          "ECF_JOB_CMD = configured_submit\nECF_KILL_CMD = configured_kill\n"
@@ -199,7 +202,7 @@ void check_server_recovery(const std::string& primary,
                          "ECF_URL_CMD = configured_url_command\nECF_URL_BASE = https://current.invalid\n"
                          "ECF_URL = current/path\nECF_MICRODEF = @\n";
     std::list<WithTestEnvironmentVariable> overrides;
-    WithTestEnvironmentVariable environment_port("ECF_PORT", "3143");
+    WithTestEnvironmentVariable environment_port("ECF_PORT", std::to_string(environment_decoy.value()));
     for (size_t i = 0; i < names.size(); ++i) {
         config += names[i] + " = " + (from_environment ? "unused." + filenames[i] : filenames[i]) + "\n";
         if (from_environment) {
@@ -221,8 +224,9 @@ void check_server_recovery(const std::string& primary,
     const bool no_checkpoints = primary == "missing" && backup == "missing";
     const bool recoverable    = primary == "valid" || backup == "valid";
     if (!no_checkpoints && !recoverable) {
-        auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-        const bool exited = completion.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+        auto completion = std::async(std::launch::async, [&] { return process.wait(); });
+        const bool exited =
+            completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
         if (!exited) {
             process.terminate();
         }
@@ -246,7 +250,7 @@ void check_server_recovery(const std::string& primary,
     else {
         boost::asio::io_context io;
         boost::system::error_code error;
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
         do {
             boost::asio::ip::tcp::socket socket(io);
             socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
@@ -385,7 +389,7 @@ void check_runtime_restore(const std::string& backup) {
 
     boost::asio::io_context io;
     boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
     do {
         boost::asio::ip::tcp::socket socket(io);
         socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);

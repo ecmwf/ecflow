@@ -1467,6 +1467,13 @@ private:
 };
 
 ///
+/// @brief Bounds the wait for a launched server to listen, or to exit after a rejected start-up.
+///
+/// The bound only delays a failing test, so it is generous enough for loaded machines and sanitizer builds.
+///
+inline constexpr std::chrono::seconds server_startup_timeout{30};
+
+///
 /// @brief Reports a check skipped because the account does not enforce file permissions (for example, root).
 ///
 /// The skip is recorded as a test warning. When the environment variable ECF_TEST_REQUIRE_PERMISSIONS is set, the
