@@ -115,7 +115,7 @@ jobs:
 
   build:
     needs: [ci-approval, resolve, wait-build]
-    name: build+test (${{ matrix._resolved['job-name'] }})
+    name: ${{ matrix.name || matrix.platform }}
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container || '' }}
@@ -209,7 +209,7 @@ jobs:
 
   build-hpc:
     needs: [ci-approval, resolve, wait-build-hpc]
-    name: build-hpc (${{ matrix._resolved['job-name'] }})
+    name: ${{ matrix.name || matrix.platform }}
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container }}
