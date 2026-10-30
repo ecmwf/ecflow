@@ -1,0 +1,7 @@
+{# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+   SPDX-License-Identifier: Apache-2.0 #}
+{% extends "ci-infrastructure/rust-bindings-publish.sh.j2" %}
+{# ecFlow's CMake does not search system paths for Boost. #}
+{% block set_environment %}
+export BOOST_ROOT=/usr
+{% endblock %}
