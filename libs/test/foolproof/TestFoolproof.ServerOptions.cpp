@@ -146,8 +146,7 @@ void check_server_cli_exit(std::vector<std::string> options,
         if (scenario == "unreadable_config") {
             fs::permissions(config_path, fs::perms::none, fs::perm_options::replace);
             if (::access(config_path.c_str(), R_OK) == 0) {
-                BOOST_TEST_MESSAGE(
-                    "Skipping unreadable config case: read restrictions are not enforced for this account");
+                ecf::test::scaffold::skip_unenforced_permissions("the unreadable config case");
                 return;
             }
         }

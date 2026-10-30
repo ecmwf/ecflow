@@ -57,9 +57,9 @@ public:
     bool load(const std::string& file, bool debug, std::string& errorMsg);
 
     ///
-    /// @brief Exchanges loaded credentials and source paths without parsing or allocating.
+    /// @brief Exchanges loaded credentials without parsing or allocating.
     ///
-    /// @param[in,out] other Database receiving the previous credentials and path
+    /// @param[in,out] other Database receiving the previous credentials
     ///
     void swap(PasswdFile& other) noexcept;
 

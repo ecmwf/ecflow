@@ -237,8 +237,7 @@ void check_server_home_failure(const std::string& failure, bool from_environment
         fs::permissions(home, fs::perms::owner_all & ~removed, fs::perm_options::replace);
         const int mode = failure == "read" ? R_OK : failure == "write" ? W_OK : X_OK;
         if (::access(home.c_str(), mode) == 0) {
-            BOOST_TEST_MESSAGE("Skipping " << failure
-                                           << " permission case: restrictions are not enforced for this account");
+            ecf::test::scaffold::skip_unenforced_permissions("the " + failure + " permission case");
             return;
         }
     }
@@ -289,14 +288,21 @@ void check_server_home_failure(const std::string& failure, bool from_environment
 }
 
 ///
-/// @brief Checks the default or explicit dot home in an isolated server process.
+/// @brief Checks a home selected relative to the startup directory in an isolated server process.
 ///
-/// @param[in] source Default, config or environment selection of the startup-directory home
+/// @param[in] source Default, config or environment selection of the home
+/// @param[in] home Relative home to select; ignored for the default source, which selects the startup directory
 ///
-void check_server_dot_home(const std::string& source) {
+void check_server_relative_home(const std::string& source, const std::string& home = ".") {
     using namespace ecf::test::scaffold;
 
     auto startup = MakeDirectory{}.create();
+    // The exported home is absolute and in normal form, without dot segments or a trailing separator
+    auto expected_home = (startup.path() / (source == "default" ? std::string(".") : home)).lexically_normal();
+    if (expected_home.filename().empty()) {
+        expected_home = expected_home.parent_path();
+    }
+    fs::create_directories(expected_home);
 
     std::list<WithoutTestEnvironmentVariable> cleared;
     for (const auto* name : {"ECF_HOME",
@@ -318,11 +324,11 @@ void check_server_dot_home(const std::string& source) {
     }
 
     WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()},
-                               source == "config" ? "ECF_HOME = .\n" : "");
+                               source == "config" ? "ECF_HOME = " + home + "\n" : std::string());
 
     std::list<WithTestEnvironmentVariable> overrides;
     if (source == "environment") {
-        overrides.emplace_back("ECF_HOME", ".");
+        overrides.emplace_back("ECF_HOME", home);
     }
 
     auto host = MakeHost{}.create();
@@ -339,20 +345,20 @@ void check_server_dot_home(const std::string& source) {
 
     BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
     BOOST_REQUIRE(client.defs());
-    BOOST_CHECK_EQUAL(client.defs()->server_state().find_variable("ECF_HOME"), startup.path().string());
+    BOOST_CHECK_EQUAL(client.defs()->server_state().find_variable("ECF_HOME"), expected_home.string());
 
     const auto prefix = host.value() + "." + std::to_string(port.value()) + ".";
     for (const auto& [name, suffix] : std::vector<std::pair<std::string, std::string>>{
              {"ECF_LOG", "ecf.log"}, {"ECF_CHECK", "ecf.check"}, {"ECF_CHECKOLD", "ecf.check.b"}}) {
         BOOST_CHECK_EQUAL(client.defs()->server_state().find_variable(name),
-                          (startup.path() / (prefix + suffix)).string());
+                          (expected_home / (prefix + suffix)).string());
     }
 
     BOOST_REQUIRE_MESSAGE(client.checkPtDefs() == 0, client.errorMsg());
     BOOST_REQUIRE_MESSAGE(client.checkPtDefs() == 0, client.errorMsg());
 
     for (const auto& suffix : {"ecf.log", "ecf.check", "ecf.check.b"}) {
-        BOOST_CHECK(fs::is_regular_file(startup.path() / (prefix + suffix)));
+        BOOST_CHECK(fs::is_regular_file(expected_home / (prefix + suffix)));
     }
 }
 
@@ -396,7 +402,21 @@ BOOST_AUTO_TEST_CASE(test_server_home_default_and_dot) {
 
     for (const auto& source : {"default", "config", "environment"}) {
         BOOST_TEST_CONTEXT("Home source: " << source) {
-            check_server_dot_home(source);
+            check_server_relative_home(source);
+        }
+    }
+}
+
+///
+/// @brief Verifies that a relative home with dot segments and a trailing separator is used and exported in normal
+/// form, relative to the startup directory.
+///
+BOOST_AUTO_TEST_CASE(test_server_home_relative) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto& source : {"config", "environment"}) {
+        BOOST_TEST_CONTEXT("Home source: " << source) {
+            check_server_relative_home(source, "./server home/");
         }
     }
 }

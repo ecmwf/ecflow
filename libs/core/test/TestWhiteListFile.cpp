@@ -29,17 +29,22 @@ BOOST_AUTO_TEST_CASE(test_whitelist_swap_loaded_rules) {
     using ecf::test::scaffold::WithTestFile;
 
     WithTestFile first(AutomaticTestFile{"first.lists"}, "4.5.0\nalice\n-bob /limited\n");
-    WithTestFile second(AutomaticTestFile{"second.lists"}, "4.5.0\n-*\ncarol /private\n");
+    // The second file grants read (-*) and write (*) access to all users; the first grants neither
+    WithTestFile second(AutomaticTestFile{"second.lists"}, "4.5.0\n-*\n*\ncarol /private\n");
     WhiteListFile active, replacement;
     std::string error;
     BOOST_REQUIRE_MESSAGE(active.load(first.path().string(), error), error);
     BOOST_REQUIRE_MESSAGE(replacement.load(second.path().string(), error), error);
     static_assert(noexcept(active.swap(replacement)));
+    BOOST_REQUIRE(!active.verify_read_access("any_user", "/anywhere"));
+    BOOST_REQUIRE(!active.verify_write_access("any_user", "/anywhere"));
 
     active.swap(replacement);
     BOOST_CHECK(active.verify_read_access("any_user", "/anywhere"));
+    BOOST_CHECK(active.verify_write_access("any_user", "/anywhere"));
     BOOST_CHECK(active.verify_write_access("carol", "/private"));
-    BOOST_CHECK(!active.verify_write_access("alice", "/private"));
+    BOOST_CHECK(!replacement.verify_read_access("any_user", "/anywhere"));
+    BOOST_CHECK(!replacement.verify_write_access("any_user", "/anywhere"));
     BOOST_CHECK(replacement.verify_write_access("alice", "/anywhere"));
     BOOST_CHECK(replacement.verify_read_access("bob", "/limited"));
     BOOST_CHECK(!replacement.verify_write_access("bob", "/limited"));

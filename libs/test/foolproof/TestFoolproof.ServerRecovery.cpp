@@ -184,8 +184,7 @@ void check_server_recovery(const std::string& primary,
         if (kinds[i] == "unreadable") {
             fs::permissions(path, fs::perms::none, fs::perm_options::replace);
             if (::access(path.c_str(), R_OK) == 0) {
-                BOOST_TEST_MESSAGE(
-                    "Skipping unreadable checkpoint: read restrictions are not enforced for this account");
+                ecf::test::scaffold::skip_unenforced_permissions("the unreadable checkpoint case");
                 return;
             }
         }

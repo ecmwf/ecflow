@@ -470,7 +470,8 @@ void check_server_precedence(const std::string& content,
     for (const auto& [name, value] : environment) {
         overrides.emplace_back(name, value);
     }
-    JobProfiler::set_task_threshold(4000);
+    // A sentinel distinct from the default, so that a default left unapplied is detected
+    JobProfiler::set_task_threshold(987);
     fs::create_directories(directory.path() / "config home");
     fs::create_directories(directory.path() / "environment home");
     WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
@@ -896,7 +897,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     // Verify that the shipped configuration preserves the expected server variables and defaults.
 
     const auto config_path = File::test_data("libs/server/server_environment.cfg", "libs/server");
-    BOOST_REQUIRE_MESSAGE(fs::is_regular_file(config_path), "Server configuration fixture not found: " << config_path);
+    BOOST_REQUIRE_MESSAGE(fs::is_regular_file(config_path), "Shipped server configuration not found: " << config_path);
 
     std::vector<std::string> args = {"ServerEnvironment"};
     ServerEnvironment serverEnv(args, config_path);
@@ -1057,6 +1058,168 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_applies_non_default_values) {
     BOOST_CHECK(serverEnv.checkMode() == CheckPt::ALWAYS);
     BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 17);
     BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), "17");
+}
+
+///
+/// @brief Verifies that every line of the shipped configuration is parsed and applied.
+///
+/// The shipped values equal the built-in defaults, so a copy with two changed values is loaded instead; values
+/// placed near the start and the end of the file show that the whole file is read.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_shipped_values_are_applied) {
+    ECF_NAME_THIS_TEST();
+
+    const auto shipped_path = File::test_data("libs/server/server_environment.cfg", "libs/server");
+    std::ifstream shipped(shipped_path);
+    BOOST_REQUIRE_MESSAGE(shipped.is_open(), "Shipped server configuration not found: " << shipped_path);
+    std::string content{std::istreambuf_iterator<char>(shipped), std::istreambuf_iterator<char>()};
+
+    for (const auto& [from, to] :
+         std::vector<std::pair<std::string, std::string>>{{"ECF_CHECKINTERVAL = 120\n", "ECF_CHECKINTERVAL = 121\n"},
+                                                          {"ECF_PRUNE_NODE_LOG = 30\n", "ECF_PRUNE_NODE_LOG = 31\n"}}) {
+        const auto position = content.find(from);
+        BOOST_REQUIRE_MESSAGE(position != std::string::npos, "Shipped configuration has no line: " << from);
+        content.replace(position, from.size(), to);
+    }
+
+    WithTestFile config(AutomaticTestFile{"server_environment.cfg"}, content);
+    WithTestFile log_file(AutomaticTestFile{"server-config.log"}, "");
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", log_file.path().string());
+    WithoutTestEnvironmentVariable no_check_interval("ECF_CHECKINTERVAL");
+    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
+
+    const std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args, config.path().string());
+
+    BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 121);
+    BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), 31);
+}
+
+///
+/// @brief Verifies that help and version requests read no configuration, environment setting or runtime file.
+///
+BOOST_AUTO_TEST_CASE(test_server_information_options_bypass_settings) {
+    ECF_NAME_THIS_TEST();
+
+    // A directory as configuration file and an invalid port would both stop a normal start
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    WithTestEnvironmentVariable invalid_port("ECF_PORT", "not_a_port");
+    WithTestEnvironmentVariable invalid_threshold("ECF_TASK_THRESHOLD", "0");
+    Log::destroy();
+
+    for (const std::string option : {"--help", "-h", "--version", "-v"}) {
+        BOOST_TEST_CONTEXT("Option " << option) {
+            const auto original_path            = fs::current_path();
+            const std::vector<std::string> args = {"ServerEnvironment", option};
+            std::optional<ServerEnvironment> serverEnv;
+            BOOST_REQUIRE_NO_THROW(serverEnv.emplace(args, directory.path().string()));
+            const bool help = option == "--help" || option == "-h";
+            BOOST_CHECK_EQUAL(serverEnv->help_option(), help);
+            BOOST_CHECK_EQUAL(serverEnv->version_option(), !help);
+            BOOST_CHECK(!Log::instance());
+            BOOST_CHECK_EQUAL(fs::current_path(), original_path);
+        }
+    }
+}
+
+///
+/// @brief Verifies that a failed whitelist reload reports the selected file and its cause, and that a corrected
+/// file can be reloaded afterwards.
+///
+/// Permissions kept in force after a failed reload are verified end to end by s_foolproof (T_ServerReload).
+///
+BOOST_AUTO_TEST_CASE(test_server_whitelist_failed_reload_reports_cause) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory                  = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto lists                = directory.path() / "selected.lists";
+    const std::string valid_content = "4.5.0\nalice\n";
+    {
+        std::ofstream output(lists);
+        output << valid_content;
+    }
+    BOOST_SCOPE_EXIT_ALL(&) {
+        Log::destroy();
+    };
+
+    std::list<WithoutTestEnvironmentVariable> cleared;
+    for (const auto* name : {"ECF_HOME", "ECF_PASSWD", "ECF_CUSTOM_PASSWD", "ECF_CHECK", "ECF_CHECKOLD"}) {
+        cleared.emplace_back(name);
+    }
+    WithTestEnvironmentVariable ecf_lists("ECF_LISTS", lists.string());
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", (directory.path() / "server.log").string());
+
+    const std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args, (directory.path() / "missing.cfg").string());
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    for (const std::string replacement : {"malformed", "directory", "missing"}) {
+        BOOST_TEST_CONTEXT("Replacement " << replacement) {
+            fs::remove_all(lists);
+            if (replacement == "malformed") {
+                std::ofstream output(lists);
+                output << "not_a_version\n";
+            }
+            else if (replacement == "directory") {
+                fs::create_directory(lists);
+            }
+
+            error = "prefix: ";
+            BOOST_CHECK(!serverEnv.reloadWhiteListFile(error));
+            BOOST_CHECK_EQUAL(error.rfind("prefix: ", 0), 0u);
+            BOOST_CHECK_MESSAGE(error.find(lists.string()) != std::string::npos, error);
+            const std::string cause = replacement == "malformed"   ? "Could not load ECF_LISTS file"
+                                      : replacement == "directory" ? "is not a regular file"
+                                                                   : "does not exist";
+            BOOST_CHECK_MESSAGE(error.find(cause) != std::string::npos, error);
+
+            fs::remove_all(lists);
+            {
+                std::ofstream output(lists);
+                output << valid_content;
+            }
+            error.clear();
+            BOOST_CHECK_MESSAGE(serverEnv.reloadWhiteListFile(error), error);
+        }
+    }
+}
+
+///
+/// @brief Verifies that a configuration path that cannot be inspected stops initialisation, unlike a missing file.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_cannot_be_inspected) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory      = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto locked   = directory.path() / "locked";
+    const auto config   = locked / "server_environment.cfg";
+    const auto log_path = directory.path() / "server.log";
+    fs::create_directories(locked);
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::error_code error;
+        fs::permissions(locked, fs::perms::owner_all, fs::perm_options::replace, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore directory permissions: " << error.message());
+        Log::destroy();
+    };
+    fs::permissions(locked, fs::perms::none, fs::perm_options::replace);
+
+    std::error_code status_error;
+    [[maybe_unused]] const auto status = fs::status(config, status_error);
+    if (status_error != std::errc::permission_denied) {
+        ecf::test::scaffold::skip_unenforced_permissions("the uninspectable configuration case");
+        return;
+    }
+
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", log_path.string());
+    const std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    BOOST_CHECK_EXCEPTION(
+        ServerEnvironment(args, config.string()), ServerEnvironmentException, [&](const ServerEnvironmentException& e) {
+            const std::string what = e.what();
+            return what.find("Cannot inspect configuration file") != std::string::npos &&
+                   what.find(config.string()) != std::string::npos;
+        });
+    BOOST_CHECK(!fs::exists(log_path));
 }
 
 ///
@@ -1655,7 +1818,7 @@ BOOST_AUTO_TEST_CASE(test_server_validation_scheduling_boundaries) {
 BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
     ECF_NAME_THIS_TEST();
 
-    for (const int days : {-1, 0, std::numeric_limits<int>::max()}) {
+    for (const int days : {-1, 0, 1, std::numeric_limits<int>::max()}) {
         for (const bool from_environment : {false, true}) {
             BOOST_TEST_CONTEXT("Pruning days " << days << ", environment source: " << from_environment) {
                 const auto content = from_environment ? "" : "ECF_PRUNE_NODE_LOG = " + std::to_string(days) + "\n";
@@ -1670,7 +1833,8 @@ BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
                     {"ServerEnvironment"},
                     [&](const auto& serverEnv, const auto& startup) {
                         BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), days);
-                        if (days == 0) {
+                        // An entry from 2016 survives only when pruning is disabled (zero days)
+                        if (days == 0 || days == 1) {
                             const std::string history = "MSG:[07:36:05 10.3.2016] --requeue force /retained :tester";
                             Defs original;
                             original.add_suite("retained");
@@ -1683,12 +1847,17 @@ BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
                             std::string error, warning;
                             BOOST_REQUIRE_MESSAGE(restored.restore(checkpoint, error, warning), error);
                             const auto& entries = restored.get_edit_history();
-                            BOOST_REQUIRE_EQUAL(entries.count("/retained"), 1);
-                            BOOST_REQUIRE_EQUAL(entries.at("/retained").size(), 1);
-                            BOOST_CHECK_EQUAL(entries.at("/retained").front(), history);
+                            if (days == 0) {
+                                BOOST_REQUIRE_EQUAL(entries.count("/retained"), 1);
+                                BOOST_REQUIRE_EQUAL(entries.at("/retained").size(), 1);
+                                BOOST_CHECK_EQUAL(entries.at("/retained").front(), history);
+                            }
+                            else {
+                                BOOST_CHECK_EQUAL(entries.count("/retained"), 0);
+                            }
                         }
                     },
-                    days < 0 ? "ECF_PRUNE_NODE_LOG" : "");
+                    days < 0 ? "ECF_PRUNE_NODE_LOG must be a non-negative integer" : "");
             }
         }
     }

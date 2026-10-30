@@ -206,8 +206,7 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
     else if (action == "unreadable") {
         fs::permissions(selected, fs::perms::none, fs::perm_options::replace);
         if (::access(selected.c_str(), R_OK) == 0) {
-            BOOST_TEST_MESSAGE(
-                "Skipping unreadable reload fixture: read restrictions are not enforced for this account");
+            ecf::test::scaffold::skip_unenforced_permissions("the unreadable reload case");
             return;
         }
     }
@@ -303,11 +302,11 @@ BOOST_AUTO_TEST_SUITE(T_ServerReload)
 BOOST_AUTO_TEST_CASE(test_server_reload_keeps_selected_paths) {
     ECF_NAME_THIS_TEST();
 
+    // Only configuration-selected paths are used: with environment-selected paths, a reload that wrongly rereads
+    // the configuration would still be overridden by the unchanged environment, and the case could not fail
     for (size_t index = 0; index < 3; ++index) {
-        for (const bool from_environment : {false, true}) {
-            BOOST_TEST_CONTEXT("Security index " << index << ", environment source: " << from_environment) {
-                check_security_reload(index, "config", from_environment);
-            }
+        BOOST_TEST_CONTEXT("Security index " << index) {
+            check_security_reload(index, "config", false);
         }
     }
 }

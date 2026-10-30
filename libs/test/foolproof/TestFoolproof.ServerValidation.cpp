@@ -84,8 +84,7 @@ void check_rejected_initialisation(const std::string& content,
         if (config_kind == "unreadable") {
             fs::permissions(config_path, fs::perms::none, fs::perm_options::replace);
             if (::access(config_path.c_str(), R_OK) == 0) {
-                BOOST_TEST_MESSAGE(
-                    "Skipping unreadable config case: read restrictions are not enforced for this account");
+                ecf::test::scaffold::skip_unenforced_permissions("the unreadable config case");
                 return;
             }
         }
@@ -213,6 +212,37 @@ BOOST_AUTO_TEST_CASE(test_server_validation_numeric_ranges) {
             check_rejected_initialisation("",
                                           {{"ECF_TASK_THRESHOLD", std::to_string(threshold)}},
                                           {"ECF_TASK_THRESHOLD", std::to_string(threshold), "positive integer"});
+        }
+    }
+
+    for (const int interval : {-1, 0}) {
+        BOOST_TEST_CONTEXT("Checkpoint interval: " << interval) {
+            check_rejected_initialisation("ECF_CHECKINTERVAL = " + std::to_string(interval) + "\n",
+                                          {},
+                                          {"ECF_CHECKINTERVAL", std::to_string(interval), "positive integer"},
+                                          false);
+            check_rejected_initialisation("",
+                                          {{"ECF_CHECKINTERVAL", std::to_string(interval)}},
+                                          {"ECF_CHECKINTERVAL", std::to_string(interval), "positive integer"},
+                                          false);
+        }
+    }
+}
+
+///
+/// @brief Verifies that an unsupported checkpoint mode stops startup, naming the file, the value and the modes.
+///
+BOOST_AUTO_TEST_CASE(test_server_validation_check_mode) {
+    ECF_NAME_THIS_TEST();
+
+    for (const std::string mode : {"unsupported", "check_on_time", ""}) {
+        BOOST_TEST_CONTEXT("Checkpoint mode: '" << mode << "'") {
+            check_rejected_initialisation("ECF_CHECKMODE = " + mode + "\n",
+                                          {},
+                                          {"server_environment.cfg",
+                                           "ECF_CHECKMODE",
+                                           "'" + mode + "'",
+                                           "CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS"});
         }
     }
 }

@@ -123,8 +123,7 @@ void check_server_security(const std::array<std::string, 3>& kinds,
             if (kind == "unreadable") {
                 fs::permissions(selected, fs::perms::none, fs::perm_options::replace);
                 if (::access(selected.c_str(), R_OK) == 0) {
-                    BOOST_TEST_MESSAGE("Skipping " << names[i]
-                                                   << ": read restrictions are not enforced for this account");
+                    ecf::test::scaffold::skip_unenforced_permissions("the unreadable " + names[i] + " case");
                     return;
                 }
             }
