@@ -156,13 +156,6 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
 
     /// Config, Environment, or Options may have updated port, update port dependent file names
     /// If we have default names make unique, by prefixing host and port
-    assert(!ecf_checkpt_file_.empty());                            // expect name of form "ecf.check"
-    assert(!ecf_backup_checkpt_file_.empty());                     // expect name of form "ecf.check.b"
-    assert(!log_file_name.empty());                                // expect name of form "ecf.log"
-    assert(!ecf_white_list_file_.empty());                         // expect name of form "ecf.lists"
-    assert(!authentication_service_.passwd_file().empty());        // expect name of form "ecf.passwd"
-    assert(!authentication_service_.custom_passwd_file().empty()); // expect name of form "ecf.custom_passwd"
-
     std::string port = ecf::convert_to<std::string>(serverPort_);
 
     // If path is absolute leave as is
@@ -290,12 +283,6 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    if (ecfHome_.empty()) {
-        ss << "No ECF_HOME specified. Please set in Server/server_environment.cfg or\n";
-        ss << "set the environment variable ECF_HOME\n";
-        errorMsg = ss.str();
-        return false;
-    }
     if (!Log::instance() || Log::instance()->path().empty()) {
         ss << "No log file name specified. Please set in Server/server_environment.cfg or\n";
         ss << "set the environment variable ECF_LOG\n";
@@ -319,60 +306,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    if (ecf_checkpt_file_.empty()) {
-        ss << "No checkpoint file name specified. Please set in Server/server_environment.cfg or\n";
-        ss << "set the environment variable ECF_CHECK\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (ecf_backup_checkpt_file_.empty()) {
-        ss << "No old checkpoint file name specified. Please set in Server/server_environment.cfg or\n";
-        ss << "set the environment variable ECF_CHECKOLD\n";
-        errorMsg = ss.str();
-        return false;
-    }
     if (checkMode_ == ecf::CheckPt::UNDEFINED) {
         ss << "No ECF_CHECKMODE specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (ecf_cmd_.empty()) {
-        ss << "No ECF_JOB_CMD specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (killCmd_.empty()) {
-        ss << "No ECF_KILL_CMD specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (statusCmd_.empty()) {
-        ss << "No ECF_STATUS_CMD specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (checkCmd_.empty()) {
-        ss << "No ECF_CHECK_CMD specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (urlCmd_.empty()) {
-        ss << "No ECF_URL_CMD specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (urlBase_.empty()) {
-        ss << "No ECF_URL_BASE specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (url_.empty()) {
-        ss << "No ECF_URL specified. Please set in Server/server_environment.cfg\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (ecf_micro_.empty()) {
-        ss << "No ECF_MICRODEF specified. Please set in Server/server_environment.cfg\n";
         errorMsg = ss.str();
         return false;
     }
@@ -494,19 +429,12 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
         // Hence always allow server user write access *IF* required for non-empty file
         replacement.allow_write_access_for_server_user();
 
-        // Authorisation retains a reference to the stable member, not the temporary replacement.
-        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
-            white_list_file_.swap(replacement);
-            authorisation_service_ = result.value();
-            std::cout << "Loaded server permissions based on Whitelist file\n";
-            return true;
-        }
-        else {
-            errorMsg += "Unable to install authorisation from ECF_LISTS file '" + ecf_white_list_file_ +
-                        "': " + result.reason();
-            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
-            return false;
-        }
+        // Authorisation retains a reference to the stable member, not to the temporary replacement; building it
+        // from a whitelist cannot fail
+        white_list_file_.swap(replacement);
+        authorisation_service_ = AuthorisationService::load_permissions_from_whitelist(white_list_file_).value();
+        std::cout << "Loaded server permissions based on Whitelist file\n";
+        return true;
     }
     else {
         errorMsg += "Could not load ECF_LISTS file '" + ecf_white_list_file_ + "': " + parse_error;

@@ -3,19 +3,18 @@
 
 #include "Process.hpp"
 
+#include <cassert>
 #include <cerrno>
 #include <csignal>
-#include <iostream>
 #include <mutex>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <system_error>
 #include <unistd.h>
 
 #include <boost/version.hpp>
 #include <sys/wait.h>
-
-#include "Naming.hpp"
 
 #if BOOST_VERSION < 106600
 
@@ -206,10 +205,16 @@ Process& Process::operator=(Process&& rhs) {
 Process::~Process() = default;
 
 int Process::pid() const {
+    if (!impl_) {
+        throw std::logic_error("Process::pid() requires an owned child process");
+    }
     return impl_->process_id;
 }
 
 int Process::wait() {
+    if (!impl_) {
+        throw std::logic_error("Process::wait() requires an owned child process");
+    }
     std::lock_guard<std::mutex> waiter(impl_->wait_mutex);
     {
         std::lock_guard<std::mutex> status(impl_->status_mutex);
@@ -252,7 +257,11 @@ int Process::terminate() noexcept {
 }
 
 bool Process::is_running() const {
-    return impl_ != nullptr;
+    if (!impl_) {
+        return false;
+    }
+    std::lock_guard<std::mutex> status(impl_->status_mutex);
+    return !impl_->exit_status;
 }
 
 std::string Process::read_stdout() const {

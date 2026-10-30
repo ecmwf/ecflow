@@ -13,6 +13,8 @@ ecflow_add_test(
   SOURCES
     # Test entry point
     TestFoolproof_main.cpp # test entry point
+    # Helpers shared by the server start-up tests
+    ServerStartup.hpp
     # Test sources
     TestFoolproof.Basic.cpp
     TestFoolproof.InLimit.cpp

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <chrono>
-#include <future>
 #include <list>
 #include <string>
 #include <unistd.h>
@@ -12,6 +10,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -39,26 +38,7 @@ void check_server_runtime_paths(bool from_environment, const std::string& form) 
     fs::create_directories(home);
     fs::create_directories(admin);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_HOST",
-                             "ECF_USER",
-                             "ECF_PASS",
-                             "ECF_PASSWORD"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -131,10 +111,7 @@ void check_server_runtime_paths(bool from_environment, const std::string& form) 
     BOOST_REQUIRE_MESSAGE(server.ok(), (server.ok() ? "" : server.reason()));
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), std::to_string(port.value()));
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
     client.set_user_name(allowed.username);
     client.set_password(PasswordEncryption::encrypt(allowed.password, allowed.username));
 
@@ -207,23 +184,7 @@ void check_server_home_failure(const std::string& failure, bool from_environment
         }
     };
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     std::list<WithTestFile> files;
     if (failure == "file") {
@@ -256,17 +217,9 @@ void check_server_home_failure(const std::string& failure, bool from_environment
 
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server",
-                    {"--port=" + std::to_string(port.value())},
-                    root.path());
-    auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-    const bool exited = completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
-    if (!exited) {
-        process.terminate();
-    }
-
-    const int status  = completion.get();
-    const auto output = process.read_stdout() + process.read_stderr();
+    Process process(
+        ecf::test::foolproof::ecflow_server_executable(), {"--port=" + std::to_string(port.value())}, root.path());
+    const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
     BOOST_REQUIRE_MESSAGE(exited, "Invalid home did not cause bounded startup rejection: " << output);
     BOOST_CHECK_EQUAL(status, 1);
     BOOST_CHECK_MESSAGE(output.find("ECF_HOME") != std::string::npos, output);
@@ -279,10 +232,7 @@ void check_server_home_failure(const std::string& failure, bool from_environment
     }
     BOOST_CHECK(!fs::exists(log));
 
-    boost::asio::io_context io;
-    boost::asio::ip::tcp::socket socket(io);
-    boost::system::error_code error;
-    socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
+    const auto error = ecf::test::foolproof::probe_no_listener(port.value());
     BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                         "Expected connection refusal after failed startup, found: " << error.message());
 }
@@ -304,24 +254,7 @@ void check_server_relative_home(const std::string& source, const std::string& ho
     }
     fs::create_directories(expected_home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_HOST",
-                             "ECF_USER"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()},
                                source == "config" ? "ECF_HOME = " + home + "\n" : std::string());
@@ -338,10 +271,7 @@ void check_server_relative_home(const std::string& source, const std::string& ho
     BOOST_REQUIRE_MESSAGE(server.ok(), (server.ok() ? "" : server.reason()));
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), std::to_string(port.value()));
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
 
     BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
     BOOST_REQUIRE(client.defs());

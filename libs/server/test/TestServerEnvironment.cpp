@@ -222,23 +222,8 @@ void check_runtime_configuration(const ServerEnvironment& serverEnv,
 void check_server_home_resolution(bool from_environment, bool nested_home, bool custom_checkpoints) {
     auto startup = ecf::test::scaffold::MakeDirectory{}.create();
     IsolatedServerStartup isolation;
-    const auto original_path   = fs::current_path();
     const auto absolute_home   = startup.path() / "absolute workspace";
     const auto absolute_backup = startup.path() / "backup.check";
-    BOOST_SCOPE_EXIT_ALL(&) {
-        Log::destroy();
-        std::error_code error;
-        fs::current_path(original_path, error);
-        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
-    };
-
-    WithoutTestEnvironmentVariable no_home("ECF_HOME");
-    WithoutTestEnvironmentVariable no_log("ECF_LOG");
-    WithoutTestEnvironmentVariable no_check("ECF_CHECK");
-    WithoutTestEnvironmentVariable no_checkold("ECF_CHECKOLD");
-    WithoutTestEnvironmentVariable no_passwd("ECF_PASSWD");
-    WithoutTestEnvironmentVariable no_custom_passwd("ECF_CUSTOM_PASSWD");
-    WithoutTestEnvironmentVariable no_lists("ECF_LISTS");
     WithTestEnvironmentVariable port("ECF_PORT", "3144");
 
     for (const auto& home : std::vector<std::string>{"workspace",
@@ -357,11 +342,6 @@ void check_server_checkpoint_interval(std::optional<int> configured_interval, st
     WithTestEnvironmentVariable custom_passwd("ECF_CUSTOM_PASSWD",
                                               (directory.path() / "missing.custom_passwd").string());
     WithTestEnvironmentVariable lists("ECF_LISTS", (directory.path() / "missing.lists").string());
-    WithoutTestEnvironmentVariable no_interval("ECF_CHECKINTERVAL");
-    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
-    WithoutTestEnvironmentVariable no_threshold("ECF_TASK_THRESHOLD");
-    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
-    WithoutTestEnvironmentVariable no_debug("ECF_DEBUG_SERVER");
     std::optional<WithTestEnvironmentVariable> interval_override;
     if (environment_interval) {
         interval_override.emplace("ECF_CHECKINTERVAL", std::to_string(*environment_interval));
@@ -398,30 +378,10 @@ void check_server_config_discovery(const std::optional<std::string>& startup_con
                                    bool config_selects_home,
                                    int expected_interval,
                                    int expected_schedule) {
-    auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
-    const auto original_path = fs::current_path();
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     const auto home_path     = directory.path() / "server home";
     const auto expected_home = home_content || config_selects_home ? home_path : directory.path();
-    BOOST_SCOPE_EXIT_ALL(&) {
-        Log::destroy();
-        std::error_code error;
-        fs::current_path(original_path, error);
-        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
-    };
-
-    WithoutTestEnvironmentVariable no_home("ECF_HOME");
-    WithoutTestEnvironmentVariable no_port("ECF_PORT");
-    WithoutTestEnvironmentVariable no_log("ECF_LOG");
-    WithoutTestEnvironmentVariable no_check("ECF_CHECK");
-    WithoutTestEnvironmentVariable no_checkold("ECF_CHECKOLD");
-    WithoutTestEnvironmentVariable no_passwd("ECF_PASSWD");
-    WithoutTestEnvironmentVariable no_custom_passwd("ECF_CUSTOM_PASSWD");
-    WithoutTestEnvironmentVariable no_lists("ECF_LISTS");
-    WithoutTestEnvironmentVariable no_interval("ECF_CHECKINTERVAL");
-    WithoutTestEnvironmentVariable no_prune("ECF_PRUNE_NODE_LOG");
-    WithoutTestEnvironmentVariable no_threshold("ECF_TASK_THRESHOLD");
-    WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
-    WithoutTestEnvironmentVariable no_debug("ECF_DEBUG_SERVER");
     std::optional<WithTestEnvironmentVariable> home_override;
     std::optional<WithTestFile> startup_config;
     std::optional<WithTestFile> home_config;
@@ -488,28 +448,8 @@ void check_server_precedence(const std::string& content,
                              const std::vector<std::string>& args,
                              Check check,
                              const std::string& expected_error = {}) {
-    auto directory             = ecf::test::scaffold::MakeDirectory{}.create();
-    const auto original_path   = fs::current_path();
-    const auto old_threshold   = JobProfiler::task_threshold();
-    const bool original_server = Ecf::server();
-    BOOST_SCOPE_EXIT_ALL(&) {
-        Log::destroy();
-        JobProfiler::set_task_threshold(old_threshold);
-        Ecf::set_server(original_server);
-        std::error_code error;
-        fs::current_path(original_path, error);
-        BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
-    };
-
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name :
-         {"ECF_HOME",           "ECF_PORT",          "ECF_LOG",          "ECF_CHECK",         "ECF_CHECKOLD",
-          "ECF_PASSWD",         "ECF_CUSTOM_PASSWD", "ECF_LISTS",        "ECF_CHECKINTERVAL", "ECF_PRUNE_NODE_LOG",
-          "ECF_TASK_THRESHOLD", "ECF_SSL",           "ECF_DEBUG_SERVER", "ECF_INTERVAL",      "ECF_CHECKMODE",
-          "ECF_JOB_CMD",        "ECF_KILL_CMD",      "ECF_STATUS_CMD",   "ECF_CHECK_CMD",     "ECF_URL_CMD",
-          "ECF_URL_BASE",       "ECF_URL",           "ECF_MICRODEF",     "ECF_MICRO"}) {
-        cleared.emplace_back(name);
-    }
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
     std::list<WithTestEnvironmentVariable> overrides;
     for (const auto& [name, value] : environment) {
         overrides.emplace_back(name, value);
@@ -586,34 +526,10 @@ void check_server_invalid_integer(const std::string& value) {
 void check_server_filename_resolution(const std::string& form) {
     for (const bool from_environment : {false, true}) {
         BOOST_TEST_CONTEXT("Path form: " << form << ", environment source: " << from_environment) {
-            auto directory           = ecf::test::scaffold::MakeDirectory{}.create();
-            const auto original_path = fs::current_path();
-            const auto old_threshold = JobProfiler::task_threshold();
-            const auto home          = directory.path() / "server home";
-            const auto outside       = directory.path() / "external files";
-            BOOST_SCOPE_EXIT_ALL(&) {
-                Log::destroy();
-                JobProfiler::set_task_threshold(old_threshold);
-                std::error_code error;
-                fs::current_path(original_path, error);
-                BOOST_CHECK_MESSAGE(!error, "Unable to restore test working directory: " << error.message());
-            };
-            std::list<WithoutTestEnvironmentVariable> cleared;
-            for (const auto* name : {"ECF_HOME",
-                                     "ECF_PORT",
-                                     "ECF_LOG",
-                                     "ECF_CHECK",
-                                     "ECF_CHECKOLD",
-                                     "ECF_PASSWD",
-                                     "ECF_CUSTOM_PASSWD",
-                                     "ECF_LISTS",
-                                     "ECF_CHECKINTERVAL",
-                                     "ECF_PRUNE_NODE_LOG",
-                                     "ECF_TASK_THRESHOLD",
-                                     "ECF_SSL",
-                                     "ECF_DEBUG_SERVER"}) {
-                cleared.emplace_back(name);
-            }
+            auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+            IsolatedServerStartup isolation;
+            const auto home    = directory.path() / "server home";
+            const auto outside = directory.path() / "external files";
             fs::create_directories(home / "runtime");
             fs::create_directories(home / "runtime with spaces");
             fs::create_directories(outside);
@@ -1183,14 +1099,7 @@ BOOST_AUTO_TEST_CASE(test_server_whitelist_failed_reload_reports_cause) {
         std::ofstream output(lists);
         output << valid_content;
     }
-    BOOST_SCOPE_EXIT_ALL(&) {
-        Log::destroy();
-    };
-
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME", "ECF_PASSWD", "ECF_CUSTOM_PASSWD", "ECF_CHECK", "ECF_CHECKOLD"}) {
-        cleared.emplace_back(name);
-    }
+    IsolatedServerStartup isolation;
     WithTestEnvironmentVariable ecf_lists("ECF_LISTS", lists.string());
     WithTestEnvironmentVariable ecf_log("ECF_LOG", (directory.path() / "server.log").string());
 

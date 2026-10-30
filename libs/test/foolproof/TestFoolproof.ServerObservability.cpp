@@ -3,15 +3,12 @@
 
 #include <algorithm>
 #include <cerrno>
-#include <chrono>
 #include <csignal>
 #include <fstream>
-#include <future>
 #include <iterator>
 #include <list>
 #include <sstream>
 #include <string>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -20,6 +17,7 @@
 #include <boost/test/unit_test.hpp>
 #include <sys/wait.h>
 
+#include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -27,20 +25,6 @@
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 namespace {
-
-///
-/// @brief Reads an owned input or log file without normalising whitespace.
-///
-/// @param[in] path Readable owned fixture path
-/// @return The exact file contents.
-///
-std::string observed_file_bytes(const fs::path& path) {
-    std::ifstream input(path, std::ios::binary);
-    BOOST_REQUIRE_MESSAGE(input.is_open(), "Unable to read fixture: " << path);
-    std::string text{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
-    BOOST_REQUIRE_MESSAGE(!input.bad(), "Unable to finish reading fixture: " << path);
-    return text;
-}
 
 ///
 /// @brief Checks logged and exported settings against expectations derived only from fixture inputs.
@@ -57,26 +41,7 @@ void check_observed_configuration(bool environment_overrides) {
     fs::create_directories(config_home);
     fs::create_directories(environment_home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST",
-                             "ECF_PASS",
-                             "ECF_PASSWORD"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -116,31 +81,18 @@ void check_observed_configuration(bool environment_overrides) {
         }
     }
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server",
+    Process process(ecf::test::foolproof::ecflow_server_executable(),
                     {"--port=" + port_text, "--ecfinterval=23", "--dis_job_gen"},
                     startup.path());
     BOOST_SCOPE_EXIT_ALL(&) {
         BOOST_CHECK_EQUAL(process.terminate(), 0);
     };
 
-    boost::asio::io_context io;
-    boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
-    do {
-        boost::asio::ip::tcp::socket socket(io);
-        socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
-        if (!error) {
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    } while (std::chrono::steady_clock::now() < deadline);
+    const auto error = ecf::test::foolproof::wait_for_listener(port.value());
     BOOST_REQUIRE_MESSAGE(!error, "Observed server did not start: " << error.message());
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), port_text);
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
     BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
     BOOST_REQUIRE(client.defs());
     BOOST_REQUIRE_EQUAL(process.terminate(), 0);
@@ -149,7 +101,7 @@ void check_observed_configuration(bool environment_overrides) {
     const auto primary  = home / (environment_overrides ? "environment.primary" : prefix + "ecf.check");
     const auto backup   = environment_overrides ? absolute_backup : home / (prefix + "ecf.check.b");
     std::vector<std::string> lines;
-    std::istringstream log(observed_file_bytes(log_path));
+    std::istringstream log(ecf::test::foolproof::read_file_bytes(log_path));
     for (std::string line; std::getline(log, line);) {
         const auto delimiter = line.find("] ");
         lines.push_back(delimiter == std::string::npos ? line : line.substr(delimiter + 2));
@@ -197,7 +149,7 @@ void check_observed_configuration(bool environment_overrides) {
         BOOST_CHECK_MESSAGE(std::find(lines.begin(), lines.end(), expected_line) != lines.end(),
                             "Missing independently expected log entry: " << expected_line);
     }
-    BOOST_CHECK_EQUAL(observed_file_bytes(config.path()), config_text);
+    BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(config.path()), config_text);
     BOOST_CHECK(!fs::exists(primary));
     BOOST_CHECK(!fs::exists(backup));
 }
@@ -215,24 +167,7 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
     const auto home = startup.path() / "home";
     fs::create_directories(home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     fs::path owned_lock;
     std::string owned_lock_contents;
@@ -242,7 +177,7 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         owned_lock    = port.lock_location();
         selected_port = port.value();
         BOOST_REQUIRE(fs::is_regular_file(owned_lock));
-        owned_lock_contents = observed_file_bytes(owned_lock);
+        owned_lock_contents = ecf::test::foolproof::read_file_bytes(owned_lock);
 
         std::vector<std::string> options = {"--port=" + std::to_string(selected_port)};
         std::string config =
@@ -274,23 +209,16 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         }
         WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config);
 
-        Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", options, startup.path());
-        const auto pid  = process.pid();
-        auto completion = std::async(std::launch::async, [&] { return process.wait(); });
-        const bool exited =
-            completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
-        if (!exited) {
-            process.terminate();
-        }
-        const int status  = completion.get();
-        const auto output = process.read_stdout() + process.read_stderr();
-        BOOST_REQUIRE_MESSAGE(exited, "Failed startup did not finish within five seconds: " << output);
+        Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
+        const auto pid                      = process.pid();
+        const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
+        BOOST_REQUIRE_MESSAGE(exited, "Failed startup did not finish: " << output);
         BOOST_CHECK_EQUAL(status, 1);
         for (const auto& fragment : fragments) {
             BOOST_CHECK_MESSAGE(output.find(fragment) != std::string::npos, output);
         }
         BOOST_CHECK_EQUAL(fs::exists(home / "server.log"), stage == "security" || stage == "checkpoint");
-        BOOST_CHECK_EQUAL(observed_file_bytes(configuration.path()), config);
+        BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(configuration.path()), config);
         BOOST_CHECK(!fs::exists(home / "backup.check"));
 
         int native_status          = 0;
@@ -301,12 +229,9 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         BOOST_CHECK_EQUAL(wait_error, ECHILD);
         BOOST_CHECK_EQUAL(process.wait(), 1);
         BOOST_CHECK(fs::is_regular_file(owned_lock));
-        BOOST_CHECK_EQUAL(observed_file_bytes(owned_lock), owned_lock_contents);
+        BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(owned_lock), owned_lock_contents);
 
-        boost::asio::io_context io;
-        boost::asio::ip::tcp::socket socket(io);
-        boost::system::error_code error;
-        socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(selected_port)}, error);
+        const auto error = ecf::test::foolproof::probe_no_listener(selected_port);
         BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                             "Failed startup left a listener: " << error.message());
     }
@@ -320,7 +245,7 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         owned_reservation_remains = contents == owned_lock_contents;
     }
     BOOST_CHECK_MESSAGE(!owned_reservation_remains, "Failed startup leaked its owned port lock: " << owned_lock);
-    BOOST_CHECK_EQUAL(observed_file_bytes(foreign_lock), "preserve unrelated lock\n");
+    BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(foreign_lock), "preserve unrelated lock\n");
 }
 
 } // namespace

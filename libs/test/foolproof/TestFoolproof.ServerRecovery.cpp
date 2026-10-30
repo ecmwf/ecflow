@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <array>
-#include <chrono>
 #include <fstream>
-#include <future>
-#include <iterator>
 #include <list>
 #include <string>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -16,6 +12,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -24,20 +21,6 @@
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 namespace {
-
-///
-/// @brief Reads exact checkpoint bytes for fixture and preservation assertions.
-///
-/// @param[in] path Readable owned fixture path
-/// @return The complete file contents, including whitespace and final newlines.
-///
-std::string checkpoint_bytes(const fs::path& path) {
-    std::ifstream input(path, std::ios::binary);
-    BOOST_REQUIRE_MESSAGE(input.is_open(), "Unable to read checkpoint fixture: " << path);
-    std::string result{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
-    BOOST_REQUIRE_MESSAGE(!input.bad(), "Unable to finish reading checkpoint fixture: " << path);
-    return result;
-}
 
 ///
 /// @brief Writes a distinctive checkpoint with persisted node states and optional stale server settings.
@@ -72,7 +55,7 @@ void write_recovery_checkpoint(const fs::path& path, const std::string& marker, 
     }
     definition.write_to_checkpt_file(path.string());
     if (stale_settings) {
-        BOOST_CHECK(checkpoint_bytes(path).find("stale_ECF_HOME") != std::string::npos);
+        BOOST_CHECK(ecf::test::foolproof::read_file_bytes(path).find("stale_ECF_HOME") != std::string::npos);
     }
 }
 
@@ -112,26 +95,7 @@ void check_server_recovery(const std::string& primary,
     const auto home = startup.path() / "server home";
     fs::create_directories(home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST",
-                             "ECF_PASS",
-                             "ECF_PASSWORD"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -169,7 +133,7 @@ void check_server_recovery(const std::string& primary,
         if (kinds[i] == "directory") {
             fs::create_directory(path);
             files.emplace_back(NamedTestFile{(path / "sentinel").string()}, "preserve directory contents\n");
-            snapshots.emplace_back(path / "sentinel", checkpoint_bytes(path / "sentinel"));
+            snapshots.emplace_back(path / "sentinel", ecf::test::foolproof::read_file_bytes(path / "sentinel"));
             continue;
         }
 
@@ -183,7 +147,7 @@ void check_server_recovery(const std::string& primary,
         else {
             write_recovery_checkpoint(path, marker, stale_settings);
         }
-        snapshots.emplace_back(path, checkpoint_bytes(path));
+        snapshots.emplace_back(path, ecf::test::foolproof::read_file_bytes(path));
         if (kinds[i] == "unreadable") {
             fs::permissions(path, fs::perms::none, fs::perm_options::replace);
             if (::access(path.c_str(), R_OK) == 0) {
@@ -211,7 +175,7 @@ void check_server_recovery(const std::string& primary,
     }
     WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config);
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server",
+    Process process(ecf::test::foolproof::ecflow_server_executable(),
                     {"--port=" + std::to_string(port.value()), "--ecfinterval=23", "--dis_job_gen"},
                     startup.path());
     bool stopped = false;
@@ -224,15 +188,8 @@ void check_server_recovery(const std::string& primary,
     const bool no_checkpoints = primary == "missing" && backup == "missing";
     const bool recoverable    = primary == "valid" || backup == "valid";
     if (!no_checkpoints && !recoverable) {
-        auto completion = std::async(std::launch::async, [&] { return process.wait(); });
-        const bool exited =
-            completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
-        if (!exited) {
-            process.terminate();
-        }
-        const auto status = completion.get();
-        stopped           = true;
-        const auto output = process.read_stdout() + process.read_stderr();
+        const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
+        stopped                             = true;
         BOOST_REQUIRE_MESSAGE(exited, "Unusable checkpoints did not reject startup: " << output);
         BOOST_CHECK_EQUAL(status, 1);
         BOOST_CHECK_MESSAGE(output.find("no usable checkpoint") != std::string::npos, output);
@@ -248,24 +205,11 @@ void check_server_recovery(const std::string& primary,
         }
     }
     else {
-        boost::asio::io_context io;
-        boost::system::error_code error;
-        const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
-        do {
-            boost::asio::ip::tcp::socket socket(io);
-            socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
-            if (!error) {
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        } while (std::chrono::steady_clock::now() < deadline);
+        const auto error = ecf::test::foolproof::wait_for_listener(port.value());
         BOOST_REQUIRE_MESSAGE(!error, "Recoverable server did not start: " << error.message());
 
         ClientInvoker client;
-        client.set_throw_on_error(false);
-        client.set_host_port(host.value(), std::to_string(port.value()));
-        client.set_connection_attempts(1);
-        client.set_connect_timeout(std::chrono::seconds(5));
+        ecf::test::foolproof::configure_client(client, host.value(), port.value());
         BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
         BOOST_REQUIRE(client.defs());
         const auto definition = client.defs();
@@ -318,7 +262,7 @@ void check_server_recovery(const std::string& primary,
 
     restore_permissions();
     for (const auto& [path, content] : snapshots) {
-        BOOST_CHECK_EQUAL(checkpoint_bytes(path), content);
+        BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(path), content);
     }
     for (size_t i = 0; i < kinds.size(); ++i) {
         if (kinds[i] == "missing") {
@@ -329,10 +273,7 @@ void check_server_recovery(const std::string& primary,
         }
     }
 
-    boost::asio::io_context io;
-    boost::asio::ip::tcp::socket socket(io);
-    boost::system::error_code error;
-    socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
+    const auto error = ecf::test::foolproof::probe_no_listener(port.value());
     BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                         "Recovery fixture left a listener: " << error.message());
 }
@@ -352,26 +293,7 @@ void check_runtime_restore(const std::string& backup) {
     const auto home = startup.path() / "server home";
     fs::create_directories(home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST",
-                             "ECF_PASS",
-                             "ECF_PASSWORD"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -380,31 +302,18 @@ void check_runtime_restore(const std::string& backup) {
                                    "\nECF_LOG = server.log\nECF_CHECKMODE = CHECK_NEVER\n"
                                    "ECF_CHECK = primary.check\nECF_CHECKOLD = backup.check\n");
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server",
+    Process process(ecf::test::foolproof::ecflow_server_executable(),
                     {"--port=" + std::to_string(port.value()), "--dis_job_gen"},
                     startup.path());
     BOOST_SCOPE_EXIT_ALL(&) {
         BOOST_CHECK_EQUAL(process.terminate(), 0);
     };
 
-    boost::asio::io_context io;
-    boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
-    do {
-        boost::asio::ip::tcp::socket socket(io);
-        socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
-        if (!error) {
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    } while (std::chrono::steady_clock::now() < deadline);
+    const auto error = ecf::test::foolproof::wait_for_listener(port.value());
     BOOST_REQUIRE_MESSAGE(!error, "Server without checkpoints did not start: " << error.message());
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), std::to_string(port.value()));
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
 
     // Written after start-up, so that the server holds an empty, HALTED definition when the restore is requested
     {

@@ -23,6 +23,12 @@ public:
     Process(Process&& rhs);
     Process& operator=(Process&& rhs);
 
+    ///
+    /// @brief Returns the process id of the owned child.
+    ///
+    /// @return The process id, which stays reserved until the child is reaped.
+    /// @throws std::logic_error if no child is owned (default-constructed or moved-from object).
+    ///
     int pid() const;
 
     ///
@@ -31,6 +37,7 @@ public:
     /// Concurrent wait and termination requests share a single native waiter.
     ///
     /// @return The child's exit status.
+    /// @throws std::logic_error if no child is owned (default-constructed or moved-from object).
     /// @throws std::exception if the native wait fails.
     ///
     int wait();
@@ -44,6 +51,11 @@ public:
     ///
     int terminate() noexcept;
 
+    ///
+    /// @brief Reports whether a child is owned and has not yet been reaped.
+    ///
+    /// @return False for a default-constructed or moved-from object, and once the child has been waited for.
+    ///
     bool is_running() const;
 
     std::string read_stdout() const;

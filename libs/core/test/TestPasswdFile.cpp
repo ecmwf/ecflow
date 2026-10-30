@@ -30,7 +30,8 @@ BOOST_AUTO_TEST_CASE(test_passwd_swap_loaded_databases) {
 
     WithTestFile first(AutomaticTestFile{"first.passwd"}, "4.5.0\nalice host 3141 first_secret\n");
     WithTestFile second(AutomaticTestFile{"second.passwd"}, "4.5.0\nbob host 3141 second_secret\n");
-    PasswdFile active, replacement;
+    PasswdFile active;
+    PasswdFile replacement;
     std::string error;
     BOOST_REQUIRE_MESSAGE(active.load(first.path().string(), false, error), error);
     BOOST_REQUIRE_MESSAGE(replacement.load(second.path().string(), false, error), error);

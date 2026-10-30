@@ -5,6 +5,7 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -27,10 +28,33 @@ BOOST_AUTO_TEST_CASE(test_process_wait_caches_exit_status) {
     using namespace ecf::test::scaffold;
 
     Process process("/bin/sh", {"-c", "exit 23"});
+    BOOST_CHECK(process.is_running());
     BOOST_CHECK_EQUAL(process.wait(), 23);
+    BOOST_CHECK(!process.is_running());
     BOOST_CHECK_EQUAL(process.wait(), 23);
     BOOST_CHECK_EQUAL(process.terminate(), 0);
     BOOST_CHECK_EQUAL(process.wait(), 23);
+}
+
+///
+/// @brief Verifies that an object without a child can be terminated, but not waited for or asked for its id.
+///
+BOOST_AUTO_TEST_CASE(test_process_without_child) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process empty;
+    BOOST_CHECK(!empty.is_running());
+    BOOST_CHECK_EQUAL(empty.terminate(), 0);
+    BOOST_CHECK_THROW(empty.wait(), std::logic_error);
+    BOOST_CHECK_THROW(empty.pid(), std::logic_error);
+
+    Process owner("/bin/sh", {"-c", "exit 0"});
+    Process moved(std::move(owner));
+    BOOST_CHECK(!owner.is_running()); // NOLINT(bugprone-use-after-move): the moved-from state is under test
+    BOOST_CHECK_THROW(owner.wait(), std::logic_error);
+    BOOST_CHECK_EQUAL(moved.wait(), 0);
 }
 
 ///

@@ -31,7 +31,8 @@ BOOST_AUTO_TEST_CASE(test_whitelist_swap_loaded_rules) {
     WithTestFile first(AutomaticTestFile{"first.lists"}, "4.5.0\nalice\n-bob /limited\n");
     // The second file grants read (-*) and write (*) access to all users; the first grants neither
     WithTestFile second(AutomaticTestFile{"second.lists"}, "4.5.0\n-*\n*\ncarol /private\n");
-    WhiteListFile active, replacement;
+    WhiteListFile active;
+    WhiteListFile replacement;
     std::string error;
     BOOST_REQUIRE_MESSAGE(active.load(first.path().string(), error), error);
     BOOST_REQUIRE_MESSAGE(replacement.load(second.path().string(), error), error);

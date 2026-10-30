@@ -1,12 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <chrono>
-#include <future>
 #include <limits>
 #include <list>
 #include <string>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -14,6 +11,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -38,30 +36,12 @@ void check_server_cli_exit(std::vector<std::string> options,
     auto startup           = MakeDirectory{}.create();
     const auto config_path = startup.path() / "server_environment.cfg";
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
     for (auto& option : options) {
         for (const auto& [placeholder, value] : std::vector<std::pair<std::string, std::string>>{
-                 {"OTHER_PORT", std::to_string(port.value() == 49150 ? 49149 : port.value() + 1)},
-                 {"PORT", std::to_string(port.value())}}) {
+                 {"OTHER_PORT", std::to_string(port.value() + 1)}, {"PORT", std::to_string(port.value())}}) {
             const auto position = option.find(placeholder);
             if (position != std::string::npos) {
                 option.replace(position, placeholder.size(), value);
@@ -152,16 +132,9 @@ void check_server_cli_exit(std::vector<std::string> options,
         }
     }
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", options, startup.path());
-    auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-    const bool exited = completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
-    if (!exited) {
-        process.terminate();
-    }
-
-    const int status  = completion.get();
-    const auto output = process.read_stdout() + process.read_stderr();
-    BOOST_REQUIRE_MESSAGE(exited, "CLI request did not finish within five seconds: " << output);
+    Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
+    const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
+    BOOST_REQUIRE_MESSAGE(exited, "CLI request did not finish: " << output);
     BOOST_CHECK_EQUAL(status, expected_status);
     for (const auto& fragment : fragments) {
         BOOST_CHECK_MESSAGE(output.find(fragment) != std::string::npos, output);
@@ -180,10 +153,7 @@ void check_server_cli_exit(std::vector<std::string> options,
     BOOST_CHECK(output.find("Password file located") == std::string::npos);
     BOOST_CHECK(output.find("SSL enabled:") == std::string::npos);
 
-    boost::asio::io_context io;
-    boost::asio::ip::tcp::socket socket(io);
-    boost::system::error_code error;
-    socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
+    const auto error = ecf::test::foolproof::probe_no_listener(port.value());
     BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                         "Expected no listener after CLI completion, found: " << error.message());
 }
@@ -199,24 +169,7 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
 
     auto startup = MakeDirectory{}.create();
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -241,30 +194,17 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
         options.insert(options.end(), {"--ecfinterval", "17"});
     }
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", options, startup.path());
+    Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
     BOOST_SCOPE_EXIT_ALL(&) {
         process.terminate();
         process.wait();
     };
 
-    boost::asio::io_context io;
-    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
-    boost::system::error_code error;
-    do {
-        boost::asio::ip::tcp::socket socket(io);
-        socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
-        if (!error) {
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    } while (std::chrono::steady_clock::now() < deadline);
+    const auto error = ecf::test::foolproof::wait_for_listener(port.value());
     BOOST_REQUIRE_MESSAGE(!error, "Server did not start with the selected argument forms: " << error.message());
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), std::to_string(port.value()));
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
 
     BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
     BOOST_REQUIRE(client.defs());

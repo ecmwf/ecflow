@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <chrono>
-#include <future>
 #include <limits>
 #include <list>
 #include <string>
@@ -13,6 +11,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ServerStartup.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
@@ -33,29 +32,12 @@ void check_rejected_initialisation(const std::string& content,
                                    bool before_log                = true,
                                    const std::string& config_kind = "regular") {
     using namespace ecf::test::scaffold;
+    using namespace ecf::test::foolproof;
 
     auto startup           = MakeDirectory{}.create();
     const auto config_path = startup.path() / "server_environment.cfg";
     const auto log_path    = startup.path() / "server.log";
-
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST"}) {
-        cleared.emplace_back(name);
-    }
+    ClearedServerEnvironment cleared;
 
     auto port          = MakePort{}.with(AutomaticPortValue{}).create();
     std::string config = content;
@@ -100,26 +82,16 @@ void check_rejected_initialisation(const std::string& content,
         }
     }
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server", args, startup.path());
-    auto completion   = std::async(std::launch::async, [&] { return process.wait(); });
-    const bool exited = completion.wait_for(ecf::test::scaffold::server_startup_timeout) == std::future_status::ready;
-    if (!exited) {
-        process.terminate();
-    }
-
-    const int status  = completion.get();
-    const auto output = process.read_stdout() + process.read_stderr();
-    BOOST_REQUIRE_MESSAGE(exited, "Invalid settings did not stop startup within five seconds: " << output);
+    Process process(ecflow_server_executable(), args, startup.path());
+    const auto [exited, status, output] = wait_for_exit(process);
+    BOOST_REQUIRE_MESSAGE(exited, "Invalid settings did not stop startup: " << output);
     BOOST_CHECK_EQUAL(status, 1);
     for (const auto& fragment : fragments) {
         BOOST_CHECK_MESSAGE(output.find(fragment) != std::string::npos, output);
     }
     BOOST_CHECK_EQUAL(fs::exists(log_path), !before_log);
 
-    boost::asio::io_context io;
-    boost::asio::ip::tcp::socket socket(io);
-    boost::system::error_code error;
-    socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
+    const auto error = probe_no_listener(port.value());
     BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                         "Expected connection refusal after failed startup, found: " << error.message());
 }

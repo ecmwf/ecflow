@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <array>
-#include <chrono>
 #include <fstream>
 #include <list>
 #include <string>
-#include <thread>
 #include <unistd.h>
 
 #include <boost/asio.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/User.hpp"
@@ -77,26 +76,7 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
     const auto home = startup.path() / "server home";
     fs::create_directories(home);
 
-    std::list<WithoutTestEnvironmentVariable> cleared;
-    for (const auto* name : {"ECF_HOME",
-                             "ECF_PORT",
-                             "ECF_LOG",
-                             "ECF_CHECK",
-                             "ECF_CHECKOLD",
-                             "ECF_PASSWD",
-                             "ECF_CUSTOM_PASSWD",
-                             "ECF_LISTS",
-                             "ECF_CHECKINTERVAL",
-                             "ECF_PRUNE_NODE_LOG",
-                             "ECF_TASK_THRESHOLD",
-                             "ECF_SSL",
-                             "ECF_DEBUG_SERVER",
-                             "ECF_USER",
-                             "ECF_HOST",
-                             "ECF_PASS",
-                             "ECF_PASSWORD"}) {
-        cleared.emplace_back(name);
-    }
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
@@ -138,31 +118,17 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
     }
     WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config);
 
-    Process process(fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server",
-                    {"--port=" + std::to_string(port.value())},
-                    startup.path());
+    Process process(
+        ecf::test::foolproof::ecflow_server_executable(), {"--port=" + std::to_string(port.value())}, startup.path());
     BOOST_SCOPE_EXIT_ALL(&) {
         BOOST_CHECK_EQUAL(process.terminate(), 0);
     };
 
-    boost::asio::io_context io;
-    boost::system::error_code error;
-    const auto deadline = std::chrono::steady_clock::now() + ecf::test::scaffold::server_startup_timeout;
-    do {
-        boost::asio::ip::tcp::socket socket(io);
-        socket.connect({boost::asio::ip::address_v4::loopback(), static_cast<unsigned short>(port.value())}, error);
-        if (!error) {
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    } while (std::chrono::steady_clock::now() < deadline);
+    const auto error = ecf::test::foolproof::wait_for_listener(port.value());
     BOOST_REQUIRE_MESSAGE(!error, "Reload fixture server did not start: " << error.message());
 
     ClientInvoker client;
-    client.set_throw_on_error(false);
-    client.set_host_port(host.value(), std::to_string(port.value()));
-    client.set_connection_attempts(1);
-    client.set_connect_timeout(std::chrono::seconds(5));
+    ecf::test::foolproof::configure_client(client, host.value(), port.value());
 
     check_reload_access(client, regular, false, true);
     check_reload_access(client, probe, true, true);
