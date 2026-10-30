@@ -185,7 +185,7 @@ tests = true
 [[matrix.build-hpc.include]]
 name = "atos-gcc8qt5"
 cxx-compiler = "g++-8"
-platform = "hpc-atos-gnu"
+platform = "hpc-atos-gnu-qt5"
 modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.84.0", "load ninja", "load python3/3.11.10-01", "load qt/5.12.0", "load cmake/new"]
 c-compiler-binary = "gcc"
 cxx-compiler-binary = "g++"
