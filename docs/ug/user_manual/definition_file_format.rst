@@ -1403,7 +1403,7 @@ Eight variants, each with its own value grammar:
    - For ``integer``: ``start``, ``end``, and ``delta`` are integers.
    - For ``date``: ``start``, ``end`` are yyyymmdd integers, and ``delta`` is a signed integer number of days (default: 1).
    - For ``datelist``: each ``yyyymmdd`` is an integer.
-   - For ``datetime``: ``instant-start`` and ``instant-end`` are ISO 8601 instants (``yyyymmddTHHMMSS``), and ``delta`` is an ``hh:mm:ss`` duration.
+   - For ``datetime``: ``instant-start`` and ``instant-end`` are ISO 8601 instants (``yyyymmddTHHMMSS``), and ``delta`` is a ``[+|-]H[:MM[:SS]]`` duration, with minutes and seconds below 60; a leading sign applies to the whole duration (e.g. ``-00:30:00``).
    - For ``datetimelist``: each ``instant`` is a yyyymmddTHHMMSS (ISO 8601) string.
    - For ``enumerated``: each ``value`` is an opaque string (quoted if it contains whitespace).
    - For ``string``: each ``value`` is an opaque string (quoted if it contains whitespace).

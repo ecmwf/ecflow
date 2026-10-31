@@ -297,6 +297,27 @@ BOOST_AUTO_TEST_CASE(datetime_without_step_does_not_accept_a_comment) {
     BOOST_CHECK(!loaded.ok);
 }
 
+BOOST_AUTO_TEST_CASE(datetime_steps_in_a_definition) {
+    ECF_NAME_THIS_TEST();
+
+    // A leading sign applies to the whole step, which is written back with the sign on its first non-zero field
+    {
+        auto loaded = load(suite_with("repeat datetime T 20240102T000000 20240101T000000 -00:30:00"));
+        BOOST_REQUIRE_MESSAGE(loaded.ok, loaded.error);
+        BOOST_CHECK_EQUAL(loaded.repeat().as<RepeatDateTime>().step_duration().as_seconds().count(), -1800);
+        auto written = ecf::as_string(*loaded.defs, PrintStyle::DEFS);
+        BOOST_CHECK_MESSAGE(written.find("repeat datetime T 20240102T000000 20240101T000000 00:-30:00\n") !=
+                                std::string::npos,
+                            written);
+        BOOST_CHECK(load(written).ok);
+    }
+
+    for (const std::string step : {"00:90:00", "01:02:03:04", "01:-30:00"}) {
+        auto loaded = load(suite_with("repeat datetime T 20240101T000000 20240102T000000 " + step));
+        BOOST_CHECK_MESSAGE(!loaded.ok, step << " should be refused");
+    }
+}
+
 BOOST_AUTO_TEST_CASE(integer_tokens_in_a_definition) {
     ECF_NAME_THIS_TEST();
 

@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(datetime_construction_errors) {
     const std::string end   = "20240102T000000";
 
     BOOST_CHECK_THROW(RepeatDateTime("DT", start, end, "00:00:00"), std::runtime_error); // zero step
-    BOOST_CHECK_THROW(RepeatDateTime("DT", start, end, ""), std::runtime_error);         // parses as a zero step
+    BOOST_CHECK_THROW(RepeatDateTime("DT", start, end, ""), std::runtime_error);         // not a duration
     BOOST_CHECK_THROW(RepeatDateTime("DT", start, end, "abc"), std::runtime_error);
     BOOST_CHECK_THROW(RepeatDateTime("", start, end, "01:00:00"), std::runtime_error); // no name
     BOOST_CHECK_THROW(RepeatDateTime("DT", "garbage", end, "01:00:00"), std::runtime_error);

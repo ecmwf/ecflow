@@ -597,13 +597,33 @@ BOOST_AUTO_TEST_CASE(generated_variables_follow_the_change) {
                       std::to_string(ecf::CalendarDate(20260101).as_julian_day().value()));
 }
 
-BOOST_AUTO_TEST_CASE(step_parsed_leniently) {
+BOOST_AUTO_TEST_CASE(sign_of_the_step_applies_to_the_whole_duration) {
     ECF_NAME_THIS_TEST();
 
-    // The sign of a duration is taken from its hours (a known defect of Duration::parse): -0:30 is +30 minutes
+    {
+        Repeat rep(RepeatDateTime("DT", "20260101T000000", "20260102T000000", "06:00:00"));
+        check_refused(rep, "--step -0:30", "The start must be greater than the end date+time");
+    }
+    {
+        Repeat rep(RepeatDateTime("DT", "20260102T000000", "20260101T000000", "-06:00:00"));
+        rep.change("20260101T120000");
+        check_changed(
+            rep, "--step -0:30", "datetime DT 20260102T000000 20260101T000000 00:-30:00", seconds("20260101T120000"));
+        check_changed(rep,
+                      "--step 00:-45:00",
+                      "datetime DT 20260102T000000 20260101T000000 00:-45:00",
+                      seconds("20260101T120000"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(malformed_steps_are_refused) {
+    ECF_NAME_THIS_TEST();
+
     Repeat rep(RepeatDateTime("DT", "20260101T000000", "20260102T000000", "06:00:00"));
-    check_changed(
-        rep, "--step -0:30", "datetime DT 20260101T000000 20260102T000000 00:30:00", seconds("20260101T000000"));
+    for (const std::string step : {"00:90:00", "01:02:03:04", "01:-30:00", "1:"}) {
+        check_refused(
+            rep, "--step " + step, "the value of --step (" + step + ") is not a valid duration, expected H[:MM[:SS]]");
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END() // repeat_datetime

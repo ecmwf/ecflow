@@ -21,13 +21,15 @@ Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an i
 
 Constructor::
 
-   RepeatDateTime(variable, start, end[, step])
-      string variable:     The name of the repeat. The Repeat can referenced in
-                           in trigger expressions using the variable name
-      int start:           Start date+time instant, formatted as yyyymmddTHHMMSS
-      int end:             End date+time instant, formatted as yyyymmddTHHMMSS
-      int step:            The increment duration used to update the instant when iterating
-                           Formatted as HH:MM.SS, if not provided default delta is '24:00:00'.
+   RepeatDateTime(name, start, end[, delta])
+      string name:         The name of the repeat. The Repeat can be referenced in
+                           trigger expressions using this name
+      string start:        Start date+time instant, formatted as yyyymmddTHHMMSS
+      string end:          End date+time instant, formatted as yyyymmddTHHMMSS
+      string delta:        The increment duration used to update the instant when iterating,
+                           formatted as [+|-]H[:MM[:SS]], with minutes and seconds below 60;
+                           a leading sign applies to the whole duration (e.g. '-00:30:00').
+                           If not provided, the default delta is '24:00:00'.
 
 Exception:
 

@@ -165,7 +165,6 @@ BOOST_AUTO_TEST_CASE(is_able_to_parse_and_format_duration) {
     BOOST_CHECK_EQUAL(seconds("-06:00:00"), -21600);
     BOOST_CHECK_EQUAL(seconds("-01:30:00"), -5400);
     BOOST_CHECK_EQUAL(seconds("00:-30:00"), -1800);
-    BOOST_CHECK_EQUAL(seconds(""), 0);
     BOOST_CHECK_THROW(seconds("1.5"), std::runtime_error);
     BOOST_CHECK_THROW(seconds("abc"), std::runtime_error);
 
@@ -180,17 +179,104 @@ BOOST_AUTO_TEST_CASE(is_able_to_parse_and_format_duration) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(duration_parsing_is_lenient) {
+BOOST_AUTO_TEST_CASE(duration_parsing_applies_a_leading_sign_to_the_whole_duration) {
     ECF_NAME_THIS_TEST();
 
     auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
 
-    // The sign is taken from the hours only, so a negative duration under one hour must be written 00:-MM:SS
-    BOOST_CHECK_EQUAL(seconds("-00:30:00"), 1800);
-    BOOST_CHECK_EQUAL(seconds("-0:0:30"), 30);
-    // Fields after the seconds are ignored, and minutes and seconds are not limited to 59
-    BOOST_CHECK_EQUAL(seconds("01:02:03:04"), 3723);
-    BOOST_CHECK_EQUAL(seconds("00:90:00"), 5400);
+    BOOST_CHECK_EQUAL(seconds("-00:30:00"), -1800);
+    BOOST_CHECK_EQUAL(seconds("-0:0:30"), -30);
+    BOOST_CHECK_EQUAL(seconds("-00:30"), -1800);
+    BOOST_CHECK_EQUAL(seconds("-1:30:00"), -5400);
+    BOOST_CHECK_EQUAL(seconds("-12"), -43200);
+    BOOST_CHECK_EQUAL(seconds("-0"), 0);
+    BOOST_CHECK_EQUAL(seconds("+00:30:00"), 1800);
+    BOOST_CHECK_EQUAL(seconds("+0:0:30"), 30);
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_accepts_the_sign_written_by_format) {
+    ECF_NAME_THIS_TEST();
+
+    auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
+
+    // A negative duration is written with the sign on its first non-zero field, the preceding fields being zero
+    BOOST_CHECK_EQUAL(seconds("00:-30:00"), -1800);
+    BOOST_CHECK_EQUAL(seconds("00:00:-30"), -30);
+    BOOST_CHECK_EQUAL(seconds("00:-1:30"), -90);
+    BOOST_CHECK_EQUAL(seconds("0:-30"), -1800);
+    BOOST_CHECK_EQUAL(seconds("00:-00:30"), -30);
+
+    // Every formatted duration parses back to the same value
+    for (long value : {0L,  1L,   59L,  60L,  61L,    3599L,  3600L,  3601L,   86399L,  86400L,  259200L,
+                       -1L, -59L, -60L, -61L, -3599L, -3600L, -3601L, -86399L, -86400L, -259200L}) {
+        auto formatted = Duration::format(Duration{std::chrono::seconds{value}});
+        BOOST_CHECK_MESSAGE(seconds(formatted) == value,
+                            value << " is formatted as " << formatted << ", which parses as " << seconds(formatted));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_refuses_misplaced_signs) {
+    ECF_NAME_THIS_TEST();
+
+    for (const std::string value : {"01:-30:00",
+                                    "-1:-30:00",
+                                    "-00:-30:00",
+                                    "00:-30:-10",
+                                    "00:30:-10",
+                                    "00:+30:00",
+                                    "00:00:+30",
+                                    "--1",
+                                    "+-1",
+                                    "-+1",
+                                    "-",
+                                    "+",
+                                    "00:-",
+                                    "1-",
+                                    "1:3-0"}) {
+        BOOST_CHECK_THROW(Duration::parse(value), std::runtime_error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_refuses_malformed_fields) {
+    ECF_NAME_THIS_TEST();
+
+    for (const std::string value :
+         {"",   ":",     "::",    ":30", "1:",     "1::", "1::00", "01:02:03:04", "1:2:3:4", "00:00:00:00", " 1",
+          "1 ", "1:00 ", "1: 00", "1.5", "1:30.5", "abc", "1h",    "0x10",        "1e2",     "12:3a"}) {
+        BOOST_CHECK_THROW(Duration::parse(value), std::runtime_error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_limits_minutes_and_seconds_to_59) {
+    ECF_NAME_THIS_TEST();
+
+    auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
+
+    BOOST_CHECK_EQUAL(seconds("00:59:59"), 3599);
+    BOOST_CHECK_EQUAL(seconds("0:0:59"), 59);
+    BOOST_CHECK_EQUAL(seconds("00:-59:59"), -3599);
+    BOOST_CHECK_EQUAL(seconds("1:2:3"), 3723);
+    BOOST_CHECK_EQUAL(seconds("007:05:09"), 25509);
+
+    for (const std::string value : {"00:60", "00:60:00", "00:00:60", "00:90:00", "00:-60:00", "0:0:-60", "1:100:00"}) {
+        BOOST_CHECK_THROW(Duration::parse(value), std::runtime_error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(duration_parsing_refuses_hours_beyond_the_range_of_seconds) {
+    ECF_NAME_THIS_TEST();
+
+    auto seconds = [](const std::string& value) { return Duration::parse(value).as_seconds().count(); };
+
+    // The largest number of seconds is 9223372036854775807, i.e. 2562047788015215 hours, 30 minutes and 7 seconds
+    BOOST_CHECK_EQUAL(seconds("4800:00:00"), 17280000);
+    BOOST_CHECK_EQUAL(seconds("2562047788015215:30:07"), 9223372036854775807L);
+    BOOST_CHECK_EQUAL(seconds("-2562047788015215:30:07"), -9223372036854775807L);
+
+    for (const std::string value :
+         {"2562047788015215:30:08", "2562047788015216", "-2562047788015216", "99999999999999999999"}) {
+        BOOST_CHECK_THROW(Duration::parse(value), std::runtime_error);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(instant_beyond_2038_does_not_round_trip) {

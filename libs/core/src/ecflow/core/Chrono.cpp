@@ -5,10 +5,13 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <iomanip>
+#include <limits>
 #include <sstream>
+#include <string_view>
+#include <vector>
 
-#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
@@ -156,43 +159,69 @@ std::string format_duration(DurationIn d) {
     return out;
 }
 
-template <class DurationOut, class FirstDuration, class... RestDurations>
-DurationOut parse_duration(const std::string& d) {
-    auto found       = d.find(':');
-    std::string head = d.substr(0, found);
-
-    // Convert head (if any) to duration
-    auto value = FirstDuration(0);
-    if (!head.empty()) {
-        value = FirstDuration(ecf::convert_to<int>(head.c_str()));
-    }
-    DurationOut out = std::chrono::duration_cast<DurationOut>(value);
-
-    if (found == std::string::npos) {
-        return out;
-    }
-
-    // Extract tail
-    std::string tail = d.substr(found + 1, std::string::npos);
-
-    if constexpr (sizeof...(RestDurations) > 0) {
-        // Important!
-        // The whole duration has the same sign as the first component
-        // e.g. -23:59:59, is interpreted as (-23 hours) + (-59 minutes) + (-59 seconds) = -86399 seconds
-        int sign = value >= FirstDuration{0} ? 1 : -1;
-
-        out = out + (sign)*parse_duration<DurationOut, RestDurations...>(tail);
-    }
-
-    return out;
-}
-
 } // namespace detail
 
 Duration Duration::parse(const std::string& value) {
-    return Duration{
-        detail::parse_duration<Duration::duration_t, std::chrono::hours, std::chrono::minutes, std::chrono::seconds>(
-            value)};
+    auto invalid = [&value](const std::string& reason) {
+        return std::runtime_error("Unable to parse invalid duration value: " + value + " (" + reason + ")");
+    };
+
+    // Split the value into hours, minutes and seconds
+    std::vector<std::string_view> fields;
+    std::string_view rest = value;
+    for (auto found = rest.find(':');; found = rest.find(':')) {
+        fields.push_back(rest.substr(0, found));
+        if (found == std::string_view::npos) {
+            break;
+        }
+        rest.remove_prefix(found + 1);
+    }
+    if (fields.size() > 3) {
+        throw invalid("expected at most hours, minutes and seconds");
+    }
+
+    using count_t                                 = Duration::duration_t::rep;
+    constexpr std::array<count_t, 3> field_length = {3600, 60, 1};
+    constexpr count_t largest                     = std::numeric_limits<count_t>::max();
+
+    bool negative = false;
+    bool has_sign = false;
+    count_t total = 0;
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        auto field = fields[i];
+
+        // A sign applies to the whole duration. It is accepted at the start of the value (e.g. -00:30:00), and,
+        // as written by Duration::format, on the first non-zero field after zero fields (e.g. 00:-30:00)
+        if (!field.empty() && (field.front() == '+' || field.front() == '-')) {
+            bool leading           = (i == 0);
+            bool written_by_format = !has_sign && field.front() == '-' && total == 0;
+            if (!leading && !written_by_format) {
+                throw invalid("misplaced sign");
+            }
+            negative = (field.front() == '-');
+            has_sign = true;
+            field.remove_prefix(1);
+        }
+
+        if (field.empty() || !std::all_of(field.begin(), field.end(), [](char c) { return c >= '0' && c <= '9'; })) {
+            throw invalid("expected [+|-]H[:MM[:SS]]");
+        }
+
+        count_t number = 0;
+        if (auto [_, error] = std::from_chars(field.data(), field.data() + field.size(), number);
+            error != std::errc{}) {
+            throw invalid("out of range");
+        }
+        if (i > 0 && number > 59) {
+            throw invalid("minutes and seconds must be less than 60");
+        }
+        if (number > (largest - total) / field_length[i]) {
+            throw invalid("out of range");
+        }
+        total += number * field_length[i];
+    }
+
+    return Duration{std::chrono::seconds{negative ? -total : total}};
 }
 
 std::string Duration::format(const Duration& value) {

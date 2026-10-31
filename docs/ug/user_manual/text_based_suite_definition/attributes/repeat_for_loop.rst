@@ -58,7 +58,8 @@ generated for each iteration):
 
   repeat datetime <variable> <begin> <end> [<delta>]
     # <begin> and <end> are given as YYYYMMDDTHHMMSS
-    # <delta> is given as a duration in the format HH:MM:SS
+    # <delta> is given as a duration in the format [+|-]H[:MM[:SS]]
+    # minutes and seconds are below 60, and a leading sign applies to the whole duration (e.g. -00:30:00)
     # if <delta> is not provided, the default value is '24:00:00'
     # seconds-based arithmetic is used when evaluating trigger/complete expressions
 
