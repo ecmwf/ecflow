@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_server_security_invalid_password_content) {
 BOOST_AUTO_TEST_CASE(test_server_security_whitelist_content) {
     ECF_NAME_THIS_TEST();
 
-    check_server_security({"valid", "valid", "malformed"}, false, 2, "ECF_LISTS");
+    check_server_security({"valid", "valid", "malformed"}, false, 2, "Could not load ECF_LISTS file");
     check_server_security({"valid", "valid", "empty"});
     check_server_security({"valid", "valid", "version"});
 }

@@ -240,6 +240,8 @@ void check_server_home_resolution(bool from_environment, bool nested_home, bool 
                 expected_home = expected_home.parent_path();
             }
             fs::create_directories(expected_home / "checkpoints");
+            // Several forms name the same directory, so a log left by a previous form must not satisfy the check
+            fs::remove(expected_home / "server.log");
             if (nested_home && fs::path(home).is_relative()) {
                 fs::create_directories(expected_home / home);
             }
@@ -505,12 +507,13 @@ void check_server_invalid_integer(const std::string& value) {
 
                 BOOST_CHECK_EXCEPTION(
                     check_server_precedence(content, environment, args, [](const auto&, const auto&) {}),
-                    std::exception,
-                    [&](const std::exception& error) {
+                    ServerEnvironmentException,
+                    [&](const ServerEnvironmentException& error) {
                         const std::string message = error.what();
                         return message.find(diagnostic_key) != std::string::npos &&
                                message.find(value) != std::string::npos &&
-                               (source != "config" || message.find("server_environment.cfg") != std::string::npos);
+                               (source != "config" || message.find("server_environment.cfg") != std::string::npos) &&
+                               (source != "cli" || message.find("Invalid server command line") != std::string::npos);
                     });
                 BOOST_CHECK(!Log::instance());
             }
@@ -1732,7 +1735,7 @@ BOOST_AUTO_TEST_CASE(test_server_validation_port_boundaries) {
                         BOOST_CHECK_EQUAL(serverEnv.port(), port);
                         BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
                     },
-                    port == 1023 || port == 49151 ? "ECF_PORT" : "");
+                    port == 1023 || port == 49151 ? "Server port " + std::to_string(port) + " not set correctly" : "");
             }
         }
     }
@@ -1761,7 +1764,10 @@ BOOST_AUTO_TEST_CASE(test_server_validation_scheduling_boundaries) {
                         BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
                         BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
                     },
-                    interval == 0 || interval == 61 ? "ECF_INTERVAL" : "");
+                    interval == 0 || interval == 61
+                        ? "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found " +
+                              std::to_string(interval)
+                        : "");
             }
         }
     }
@@ -1940,8 +1946,11 @@ BOOST_AUTO_TEST_CASE(test_server_observability_inputs_are_not_mutated) {
                     BOOST_CHECK_EQUAL(serverEnv.the_port(), "3144");
                     BOOST_CHECK_EQUAL(serverEnv.ecf_home(),
                                       (startup / (from_environment ? "environment home" : "config home")).string());
-                    BOOST_CHECK_NE(server_variable(serverEnv, "ECF_CHECK"), "ecf.check");
-                    BOOST_CHECK_NE(server_variable(serverEnv, "ECF_LOG"), "ecf.log");
+                    const auto home = startup / (from_environment ? "environment home" : "config home");
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_CHECK"),
+                                      (home / Host{}.ecf_checkpt_file("3144")).string());
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_LOG"),
+                                      (home / Host{}.ecf_log_file("3144")).string());
                 });
         }
     }

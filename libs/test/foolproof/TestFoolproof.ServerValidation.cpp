@@ -91,9 +91,12 @@ void check_rejected_initialisation(const std::string& content,
     }
     BOOST_CHECK_EQUAL(fs::exists(log_path), !before_log);
 
-    const auto error = probe_no_listener(port.value());
-    BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
-                        "Expected connection refusal after failed startup, found: " << error.message());
+    // Only the command line points the server at the reserved port; otherwise no listener could appear there
+    if (!args.empty()) {
+        const auto error = probe_no_listener(port.value());
+        BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
+                            "Expected connection refusal after failed startup, found: " << error.message());
+    }
 }
 
 } // namespace
@@ -225,6 +228,8 @@ BOOST_AUTO_TEST_CASE(test_server_validation_check_mode) {
 BOOST_AUTO_TEST_CASE(test_server_validation_unreadable_config) {
     ECF_NAME_THIS_TEST();
 
+    // The invalid port is a safety net: a server that wrongly treated the file as absent still exits, instead of
+    // listening on the default port
     check_rejected_initialisation("",
                                   {{"ECF_PORT", "invalid_environment_port"}},
                                   {"server_environment.cfg", "Cannot open", "reading"},
@@ -238,6 +243,8 @@ BOOST_AUTO_TEST_CASE(test_server_validation_unreadable_config) {
 BOOST_AUTO_TEST_CASE(test_server_validation_directory_config) {
     ECF_NAME_THIS_TEST();
 
+    // The invalid port is a safety net: a server that wrongly treated the file as absent still exits, instead of
+    // listening on the default port
     check_rejected_initialisation("",
                                   {{"ECF_PORT", "invalid_environment_port"}},
                                   {"server_environment.cfg", "not a regular file"},

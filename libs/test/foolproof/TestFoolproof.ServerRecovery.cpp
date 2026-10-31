@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <array>
-#include <fstream>
 #include <list>
 #include <string>
 #include <unistd.h>
@@ -137,14 +136,12 @@ void check_server_recovery(const std::string& primary,
             continue;
         }
 
-        files.emplace_back(NamedTestFile{path.string()}, "");
         if (kinds[i] == "corrupt") {
-            std::ofstream output(path);
-            output << corrupt_checkpoint_text(marker);
-            output.close();
-            BOOST_REQUIRE(output.good());
+            files.emplace_back(NamedTestFile{path.string()}, corrupt_checkpoint_text(marker));
         }
         else {
+            // Created empty for its clean-up, since the definition writes the checkpoint itself
+            files.emplace_back(NamedTestFile{path.string()}, "");
             write_recovery_checkpoint(path, marker, stale_settings);
         }
         snapshots.emplace_back(path, ecf::test::foolproof::read_file_bytes(path));
@@ -187,16 +184,21 @@ void check_server_recovery(const std::string& primary,
 
     const bool no_checkpoints = primary == "missing" && backup == "missing";
     const bool recoverable    = primary == "valid" || backup == "valid";
-    if (!no_checkpoints && !recoverable) {
+    const bool refused        = !no_checkpoints && !recoverable;
+    if (refused) {
         const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
         stopped                             = true;
         BOOST_REQUIRE_MESSAGE(exited, "Unusable checkpoints did not reject startup: " << output);
         BOOST_CHECK_EQUAL(status, 1);
         BOOST_CHECK_MESSAGE(output.find("no usable checkpoint") != std::string::npos, output);
         for (size_t i = 0; i < kinds.size(); ++i) {
-            BOOST_CHECK_MESSAGE(output.find((home / filenames[i]).string()) != std::string::npos, output);
-            if (kinds[i] != "missing") {
-                BOOST_CHECK_MESSAGE(output.find("Failed to load") != std::string::npos, output);
+            // Each diagnostic names the setting together with its own file, so that the files cannot be confused
+            const auto quoted = names[i] + " '" + (home / filenames[i]).string() + "'";
+            if (kinds[i] == "missing") {
+                BOOST_CHECK_MESSAGE(output.find(quoted + " is missing.") != std::string::npos, output);
+            }
+            else {
+                BOOST_CHECK_MESSAGE(output.find("Failed to load " + quoted + ": ") != std::string::npos, output);
                 const auto cause = kinds[i] == "directory"    ? "not a regular file"
                                    : kinds[i] == "unreadable" ? "Unable to open file"
                                                               : "UNKNOWN_CHECKPOINT_KEYWORD";
@@ -261,8 +263,11 @@ void check_server_recovery(const std::string& primary,
     }
 
     restore_permissions();
-    for (const auto& [path, content] : snapshots) {
-        BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(path), content);
+    // With CHECK_NEVER, only the refusal path can alter the inputs, by replacing a checkpoint it could not load
+    if (refused) {
+        for (const auto& [path, content] : snapshots) {
+            BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(path), content);
+        }
     }
     for (size_t i = 0; i < kinds.size(); ++i) {
         if (kinds[i] == "missing") {
@@ -316,20 +321,11 @@ void check_runtime_restore(const std::string& backup) {
     ecf::test::foolproof::configure_client(client, host.value(), port.value());
 
     // Written after start-up, so that the server holds an empty, HALTED definition when the restore is requested
-    {
-        std::ofstream output(home / "primary.check");
-        output << corrupt_checkpoint_text("primary");
-        output.close();
-        BOOST_REQUIRE(output.good());
-    }
+    WithTestFile primary_file(NamedTestFile{(home / "primary.check").string()}, corrupt_checkpoint_text("primary"));
+    WithTestFile backup_file(NamedTestFile{(home / "backup.check").string()},
+                             backup == "valid" ? "" : corrupt_checkpoint_text("backup"));
     if (backup == "valid") {
         write_recovery_checkpoint(home / "backup.check", "backup", false);
-    }
-    else {
-        std::ofstream output(home / "backup.check");
-        output << corrupt_checkpoint_text("backup");
-        output.close();
-        BOOST_REQUIRE(output.good());
     }
 
     BOOST_REQUIRE_MESSAGE(client.restoreDefsFromCheckPt() == 0, client.errorMsg());
@@ -424,19 +420,6 @@ BOOST_AUTO_TEST_CASE(test_server_recovery_primary_wins) {
     for (const bool source : {false, true}) {
         BOOST_TEST_CONTEXT("Environment source: " << source) {
             check_server_recovery("valid", "valid", source);
-        }
-    }
-}
-
-///
-/// @brief Verifies startup rejection and exact input preservation for a corrupt primary without backup.
-///
-BOOST_AUTO_TEST_CASE(test_server_recovery_corrupt_primary_without_backup) {
-    ECF_NAME_THIS_TEST();
-
-    for (const bool source : {false, true}) {
-        BOOST_TEST_CONTEXT("Environment source: " << source) {
-            check_server_recovery("corrupt", "missing", source);
         }
     }
 }

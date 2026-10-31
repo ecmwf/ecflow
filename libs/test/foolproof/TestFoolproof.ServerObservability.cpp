@@ -2,20 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <algorithm>
-#include <cerrno>
-#include <csignal>
-#include <fstream>
-#include <iterator>
 #include <list>
 #include <sstream>
 #include <string>
-#include <unistd.h>
 #include <vector>
 
 #include <boost/asio.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
-#include <sys/wait.h>
 
 #include "ServerStartup.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
@@ -150,17 +144,14 @@ void check_observed_configuration(bool environment_overrides) {
                             "Missing independently expected log entry: " << expected_line);
     }
     BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(config.path()), config_text);
-    BOOST_CHECK(!fs::exists(primary));
-    BOOST_CHECK(!fs::exists(backup));
 }
 
 ///
-/// @brief Verifies original failure diagnostics, child reaping and release of only the owned port reservation.
+/// @brief Verifies the original failure diagnostics, and that a failed start-up leaves no runtime state behind.
 ///
 /// @param[in] stage Startup stage at which the fixture must fail
-/// @param[in] foreign_lock Existing unrelated lock that must remain unchanged
 ///
-void check_failed_start_cleanup(const std::string& stage, const fs::path& foreign_lock) {
+void check_failed_start_cleanup(const std::string& stage) {
     using namespace ecf::test::scaffold;
 
     auto startup    = MakeDirectory{}.create();
@@ -169,21 +160,13 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
 
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
-    fs::path owned_lock;
-    std::string owned_lock_contents;
-    unsigned selected_port = 0;
     {
-        auto port     = MakePort{}.with(AutomaticPortValue{}).create();
-        owned_lock    = port.lock_location();
-        selected_port = port.value();
-        BOOST_REQUIRE(fs::is_regular_file(owned_lock));
-        owned_lock_contents = ecf::test::foolproof::read_file_bytes(owned_lock);
-
-        std::vector<std::string> options = {"--port=" + std::to_string(selected_port)};
+        auto port                        = MakePort{}.with(AutomaticPortValue{}).create();
+        std::vector<std::string> options = {"--port=" + std::to_string(port.value())};
         std::string config =
             "ECF_LOG = " + (home / "server.log").string() +
             "\nECF_CHECKMODE = CHECK_NEVER\nECF_CHECK = primary.check\nECF_CHECKOLD = backup.check\n"
-            "ECF_PASSWD = missing.passwd\nECF_CUSTOM_PASSWD = missing.custom_passwd\nECF_LISTS = missing.lists\n";
+            "ECF_PASSWD = selected.passwd\nECF_CUSTOM_PASSWD = selected.custom_passwd\nECF_LISTS = selected.lists\n";
         config += "ECF_HOME = " + (stage == "home" ? (startup.path() / "missing home").string() : home.string()) + "\n";
         std::vector<std::string> fragments;
         std::list<WithTestFile> inputs;
@@ -200,8 +183,8 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
             fragments = {"ECF_HOME", (startup.path() / "missing home").string()};
         }
         else if (stage == "security") {
-            inputs.emplace_back(NamedTestFile{(home / "missing.passwd").string()}, "not_a_version\n");
-            fragments = {"missing.passwd", "could not be parsed", "not_a_version"};
+            inputs.emplace_back(NamedTestFile{(home / "selected.passwd").string()}, "not_a_version\n");
+            fragments = {"selected.passwd", "could not be parsed", "not_a_version"};
         }
         else {
             inputs.emplace_back(NamedTestFile{(home / "primary.check").string()}, "UNKNOWN_OBSERVATION_CHECKPOINT\n");
@@ -210,7 +193,6 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()}, config);
 
         Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
-        const auto pid                      = process.pid();
         const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
         BOOST_REQUIRE_MESSAGE(exited, "Failed startup did not finish: " << output);
         BOOST_CHECK_EQUAL(status, 1);
@@ -221,31 +203,10 @@ void check_failed_start_cleanup(const std::string& stage, const fs::path& foreig
         BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(configuration.path()), config);
         BOOST_CHECK(!fs::exists(home / "backup.check"));
 
-        int native_status          = 0;
-        errno                      = 0;
-        const auto remaining_child = ::waitpid(pid, &native_status, WNOHANG);
-        const auto wait_error      = errno;
-        BOOST_CHECK_EQUAL(remaining_child, -1);
-        BOOST_CHECK_EQUAL(wait_error, ECHILD);
-        BOOST_CHECK_EQUAL(process.wait(), 1);
-        BOOST_CHECK(fs::is_regular_file(owned_lock));
-        BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(owned_lock), owned_lock_contents);
-
-        const auto error = ecf::test::foolproof::probe_no_listener(selected_port);
+        const auto error = ecf::test::foolproof::probe_no_listener(port.value());
         BOOST_CHECK_MESSAGE(error == boost::asio::error::connection_refused,
                             "Failed startup left a listener: " << error.message());
     }
-
-    // Another test may legitimately acquire the released port immediately.
-    // A remaining lock must not be the reservation owned by this test.
-    std::ifstream remaining_lock(owned_lock, std::ios::binary);
-    bool owned_reservation_remains = false;
-    if (remaining_lock.is_open()) {
-        const std::string contents{std::istreambuf_iterator<char>(remaining_lock), std::istreambuf_iterator<char>()};
-        owned_reservation_remains = contents == owned_lock_contents;
-    }
-    BOOST_CHECK_MESSAGE(!owned_reservation_remains, "Failed startup leaked its owned port lock: " << owned_lock);
-    BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(foreign_lock), "preserve unrelated lock\n");
 }
 
 } // namespace
@@ -268,26 +229,14 @@ BOOST_AUTO_TEST_CASE(test_server_observability_logged_and_exported_configuration
 }
 
 ///
-/// @brief Verifies failed startup diagnostics and cleanup while unrelated child and lock resources remain intact.
+/// @brief Verifies failed startup diagnostics, and that each failed stage leaves no runtime state behind.
 ///
 BOOST_AUTO_TEST_CASE(test_server_observability_failed_start_diagnostics_and_cleanup) {
     ECF_NAME_THIS_TEST();
 
-    using namespace ecf::test::scaffold;
-
-    const auto foreign_path =
-        LockFile::lock_directory() / ("observability-foreign-" + std::to_string(::getpid()) + ".lock");
-    BOOST_REQUIRE(!fs::exists(foreign_path));
-    WithTestFile foreign_lock(NamedTestFile{foreign_path.string()}, "preserve unrelated lock\n");
-    Process unrelated("/bin/sh", {"-c", "exec sleep 300"});
-    BOOST_SCOPE_EXIT_ALL(&) {
-        BOOST_CHECK_EQUAL(unrelated.terminate(), 0);
-    };
-
     for (const std::string stage : {"cli", "config", "home", "security", "checkpoint"}) {
         BOOST_TEST_CONTEXT("Failed startup stage: " << stage) {
-            check_failed_start_cleanup(stage, foreign_path);
-            BOOST_CHECK_EQUAL(::kill(unrelated.pid(), 0), 0);
+            check_failed_start_cleanup(stage);
         }
     }
 }

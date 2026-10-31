@@ -149,8 +149,8 @@ void check_server_cli_exit(std::vector<std::string> options,
                             "CLI request created an unexpected runtime file: " << entry.path());
     }
 
-    BOOST_CHECK(output.find("Started at ") == std::string::npos);
-    BOOST_CHECK(output.find("Password file located") == std::string::npos);
+    // Start-up announcements (AuthenticationService and ServerOptions) prove that the request went past the CLI
+    BOOST_CHECK(output.find(" file located at '") == std::string::npos);
     BOOST_CHECK(output.find("SSL enabled:") == std::string::npos);
 
     const auto error = ecf::test::foolproof::probe_no_listener(port.value());
@@ -197,7 +197,6 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
     Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
     BOOST_SCOPE_EXIT_ALL(&) {
         process.terminate();
-        process.wait();
     };
 
     const auto error = ecf::test::foolproof::wait_for_listener(port.value());

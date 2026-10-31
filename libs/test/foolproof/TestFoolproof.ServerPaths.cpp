@@ -150,9 +150,7 @@ void check_server_runtime_paths(bool from_environment, const std::string& form) 
     client.set_user_name(excluded.username);
     client.set_password(PasswordEncryption::encrypt(excluded.password, excluded.username));
     BOOST_CHECK_NE(client.getDefs(), 0);
-    BOOST_CHECK_MESSAGE(client.errorMsg().find("white") != std::string::npos ||
-                            client.errorMsg().find("Authorisation") != std::string::npos,
-                        client.errorMsg());
+    BOOST_CHECK_MESSAGE(client.errorMsg().find("Authorisation") != std::string::npos, client.errorMsg());
 
     client.set_user_name("");
     client.set_password(PasswordEncryption::encrypt(regular.password, regular.username));
@@ -301,7 +299,7 @@ BOOST_AUTO_TEST_SUITE(T_ServerPaths)
 ///
 /// @brief Verifies actual file access and exported definition paths for config-selected filenames.
 ///
-BOOST_AUTO_TEST_CASE(test_server_filenames_from_config) {
+BOOST_AUTO_TEST_CASE(test_server_paths_filenames_from_config) {
     ECF_NAME_THIS_TEST();
 
     for (const auto& form : {"relative", "absolute", "spaces"}) {
@@ -314,7 +312,7 @@ BOOST_AUTO_TEST_CASE(test_server_filenames_from_config) {
 ///
 /// @brief Verifies actual file access and exported definition paths for environment-selected filenames.
 ///
-BOOST_AUTO_TEST_CASE(test_server_filenames_from_environment) {
+BOOST_AUTO_TEST_CASE(test_server_paths_filenames_from_environment) {
     ECF_NAME_THIS_TEST();
 
     for (const auto& form : {"relative", "absolute", "spaces"}) {
@@ -327,7 +325,7 @@ BOOST_AUTO_TEST_CASE(test_server_filenames_from_environment) {
 ///
 /// @brief Verifies absent and explicit dot homes without introducing an extra directory level.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_default_and_dot) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_default_and_dot) {
     ECF_NAME_THIS_TEST();
 
     for (const auto& source : {"default", "config", "environment"}) {
@@ -341,7 +339,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_default_and_dot) {
 /// @brief Verifies that a relative home with dot segments and a trailing separator is used and exported in normal
 /// form, relative to the startup directory.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_relative) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_relative) {
     ECF_NAME_THIS_TEST();
 
     for (const auto& source : {"config", "environment"}) {
@@ -354,7 +352,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_relative) {
 ///
 /// @brief Verifies clean rejection of a nonexistent home from configuration and environment inputs.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_missing) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_missing) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {
@@ -367,7 +365,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_missing) {
 ///
 /// @brief Verifies clean rejection of a regular file selected as server home.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_regular_file) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_regular_file) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {
@@ -380,7 +378,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_regular_file) {
 ///
 /// @brief Verifies that an explicitly empty home fails without an assertion or signal.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_empty) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_empty) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {
@@ -393,7 +391,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_empty) {
 ///
 /// @brief Verifies startup rejection when server home lacks read permission.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_without_read_permission) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_without_read_permission) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {
@@ -406,7 +404,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_without_read_permission) {
 ///
 /// @brief Verifies startup rejection when server home lacks write permission.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_without_write_permission) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_without_write_permission) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {
@@ -419,7 +417,7 @@ BOOST_AUTO_TEST_CASE(test_server_home_without_write_permission) {
 ///
 /// @brief Verifies startup rejection when server home lacks search permission.
 ///
-BOOST_AUTO_TEST_CASE(test_server_home_without_search_permission) {
+BOOST_AUTO_TEST_CASE(test_server_paths_home_without_search_permission) {
     ECF_NAME_THIS_TEST();
 
     for (const bool from_environment : {false, true}) {

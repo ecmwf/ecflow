@@ -205,6 +205,12 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
         else if (action == "unreadable") {
             BOOST_CHECK_MESSAGE(client.errorMsg().find("Could not open") != std::string::npos, client.errorMsg());
         }
+        else {
+            const std::array<std::string, 3> causes = {"Could not reload ECF_PASSWD file",
+                                                       "Could not reload ECF_CUSTOM_PASSWD file",
+                                                       "Could not load ECF_LISTS file"};
+            BOOST_CHECK_MESSAGE(client.errorMsg().find(causes[index]) != std::string::npos, client.errorMsg());
+        }
     }
 
     check_reload_access(

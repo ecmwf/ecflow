@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <cerrno>
 #include <chrono>
+#include <csignal>
 #include <functional>
 #include <future>
 #include <memory>
@@ -11,7 +13,9 @@
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
+#include <sys/wait.h>
 
+#include "ServerStartup.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
@@ -28,9 +32,14 @@ BOOST_AUTO_TEST_CASE(test_process_wait_caches_exit_status) {
     using namespace ecf::test::scaffold;
 
     Process process("/bin/sh", {"-c", "exit 23"});
+    const auto pid = process.pid();
     BOOST_CHECK(process.is_running());
     BOOST_CHECK_EQUAL(process.wait(), 23);
     BOOST_CHECK(!process.is_running());
+    // The child is reaped, so no other child of this test can have reused its id
+    int native_status = 0;
+    BOOST_CHECK_EQUAL(::waitpid(pid, &native_status, WNOHANG), -1);
+    BOOST_CHECK_EQUAL(errno, ECHILD);
     BOOST_CHECK_EQUAL(process.wait(), 23);
     BOOST_CHECK_EQUAL(process.terminate(), 0);
     BOOST_CHECK_EQUAL(process.wait(), 23);
@@ -69,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_process_terminate_then_wait) {
     static_assert(noexcept(process.terminate()));
     BOOST_REQUIRE_EQUAL(process.terminate(), 0);
     const int status = process.wait();
-    BOOST_CHECK_NE(status, 0);
+    BOOST_CHECK_EQUAL(status, SIGKILL);
     BOOST_CHECK_EQUAL(process.wait(), status);
     BOOST_CHECK_EQUAL(process.terminate(), 0);
     BOOST_CHECK_EQUAL(process.wait(), status);
@@ -104,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_process_terminate_with_pending_wait) {
             BOOST_REQUIRE_EQUAL(termination.get(), 0);
             BOOST_REQUIRE(completion.wait_for(server_startup_timeout) == std::future_status::ready);
             const int status = completion.get();
-            BOOST_CHECK_NE(status, 0);
+            BOOST_CHECK_EQUAL(status, SIGKILL);
             BOOST_CHECK_EQUAL(process->wait(), status);
         }
     }
@@ -178,6 +187,30 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
     BOOST_CHECK(fs::exists(port_a.lock_location()));
     BOOST_CHECK(fs::exists(port_b.lock_location()));
     BOOST_CHECK(fs::exists(port_c.lock_location()));
+}
+
+///
+/// @brief Verifies that a port reservation releases its own lock on destruction, and leaves other locks intact.
+///
+BOOST_AUTO_TEST_CASE(test_locking_releases_only_owned_port) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    auto foreign                = MakePort{}.with(AutomaticPortValue{}).create();
+    const auto foreign_contents = ecf::test::foolproof::read_file_bytes(foreign.lock_location());
+    fs::path owned_lock;
+    std::string owned_contents;
+    {
+        auto owned     = MakePort{}.with(AutomaticPortValue{}).create();
+        owned_lock     = owned.lock_location();
+        owned_contents = ecf::test::foolproof::read_file_bytes(owned_lock);
+    }
+
+    // Another test may acquire the released port immediately, so only the owned reservation must be gone
+    BOOST_CHECK_MESSAGE(!fs::exists(owned_lock) || ecf::test::foolproof::read_file_bytes(owned_lock) != owned_contents,
+                        "Released port reservation remains: " << owned_lock);
+    BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(foreign.lock_location()), foreign_contents);
 }
 
 BOOST_AUTO_TEST_CASE(test_locking_known_udp_ports) {
