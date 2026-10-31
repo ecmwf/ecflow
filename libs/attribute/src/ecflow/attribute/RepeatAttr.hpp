@@ -645,9 +645,11 @@ public:
     ///
     /// @brief Retrieve the current zero-based index
     ///
+    /// A zero step, which only a checkpoint can restore, keeps the Repeat at the first index.
+    ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return (value_ - start_) / delta_; }
+    long current_index() const override { return delta_ == 0 ? 0 : (value_ - start_) / delta_; }
 
     ///
     /// @brief Retrieve the current value

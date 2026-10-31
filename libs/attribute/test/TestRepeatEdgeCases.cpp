@@ -295,6 +295,26 @@ BOOST_AUTO_TEST_CASE(integer_extremes) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(integer_with_a_zero_step_is_at_index_zero) {
+    ECF_NAME_THIS_TEST();
+
+    // A zero step is refused by definition files, --alter and Python, but is still restored from checkpoints
+    {
+        RepeatInteger rep("N", 0, 10, 0);
+        BOOST_CHECK_EQUAL(rep.current_index(), 0);
+        rep.set_value(4); // as restored from a checkpoint
+        BOOST_CHECK_EQUAL(rep.value(), 4);
+        BOOST_CHECK_EQUAL(rep.current_index(), 0);
+    }
+    {
+        Repeat rep(RepeatInteger("N", 10, 0, 0));
+        BOOST_CHECK_EQUAL(rep.current_index(), 0);
+        rep.change("7");
+        BOOST_CHECK_EQUAL(rep.value(), 7);
+        BOOST_CHECK_EQUAL(rep.current_index(), 0);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(duplicate_and_unsorted_members_are_accepted) {
     ECF_NAME_THIS_TEST();
 

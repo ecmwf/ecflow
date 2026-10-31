@@ -415,6 +415,10 @@ BOOST_AUTO_TEST_CASE(inconsistent_integer_in_a_checkpoint_is_loaded) {
     for (const std::string style : {"MIGRATE", "NET"}) {
         auto loaded = load(suite_with("repeat integer N 0 10 0 # 4", style));
         BOOST_CHECK_MESSAGE(loaded.ok, style << ": " << loaded.error);
+        if (loaded.ok) {
+            BOOST_CHECK_EQUAL(loaded.repeat().value(), 4);
+            BOOST_CHECK_EQUAL(loaded.repeat().current_index(), 0); // a zero step stays at the first index
+        }
     }
 
     // A STATE file is checked as a definition file
