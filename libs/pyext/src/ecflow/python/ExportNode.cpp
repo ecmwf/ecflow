@@ -1660,7 +1660,7 @@ void export_Node(py::module& m) {
 
         .def("get_defstatus", &Node::defStatus)
 
-        .def("get_repeat", &Node::repeat, py::return_value_policy::reference)
+        .def("get_repeat", &Node::repeat, py::return_value_policy::reference_internal)
 
         .def("get_late", &Node_get_late, py::return_value_policy::reference_internal)
 
