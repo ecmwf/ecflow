@@ -239,6 +239,19 @@ BOOST_AUTO_TEST_CASE(datetime_construction_limits) {
     BOOST_CHECK_EQUAL(rep.valueAsString(), "20240101T060000");
 }
 
+BOOST_AUTO_TEST_CASE(datetime_beyond_2038) {
+    ECF_NAME_THIS_TEST();
+
+    Repeat rep(RepeatDateTime("DT", "20400101T000000", "20400102T000000", "24:00:00"));
+    BOOST_CHECK_MESSAGE(rep.toString().find("repeat datetime DT 20400101T000000 20400102T000000 24:00:00") !=
+                            std::string::npos,
+                        rep.toString());
+    BOOST_CHECK_EQUAL(rep.valueAsString(), "20400101T000000");
+    rep.increment();
+    BOOST_CHECK(rep.valid());
+    BOOST_CHECK_EQUAL(rep.valueAsString(), "20400102T000000");
+}
+
 BOOST_AUTO_TEST_CASE(date_calendar_limits) {
     ECF_NAME_THIS_TEST();
 

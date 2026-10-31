@@ -279,15 +279,26 @@ BOOST_AUTO_TEST_CASE(duration_parsing_refuses_hours_beyond_the_range_of_seconds)
     }
 }
 
-BOOST_AUTO_TEST_CASE(instant_beyond_2038_does_not_round_trip) {
+BOOST_AUTO_TEST_CASE(instants_beyond_the_range_of_32_bit_seconds_round_trip) {
     ECF_NAME_THIS_TEST();
 
-    // The last instant representable in 32-bit seconds since the epoch
-    BOOST_CHECK_EQUAL(Instant::format(Instant::parse("20380119T031407")), "20380119T031407");
+    // The range of 32-bit seconds since the epoch is [19011213T204552, 20380119T031407]. The values stay within the
+    // range of std::chrono::system_clock with libstdc++ (nanoseconds, [16770922, 22620411]); libc++ uses microseconds
+    for (const std::string value : {"16780101T000000",
+                                    "18000101T000000",
+                                    "19011213T204551",
+                                    "19011213T204552",
+                                    "19700101T000000",
+                                    "20380119T031407",
+                                    "20380119T031408",
+                                    "21000101T000000",
+                                    "22611231T235959"}) {
+        BOOST_CHECK_EQUAL(Instant::format(Instant::parse(value)), value);
+    }
 
-    // Later instants overflow while being parsed
-    BOOST_CHECK_NE(Instant::format(Instant::parse("20380119T031408")), "20380119T031408");
-    BOOST_CHECK_NE(Instant::format(Instant::parse("21000101T000000")), "21000101T000000");
+    BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into_seconds(Instant::parse("20380119T031408")), 2147483648L);
+    BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into_seconds(Instant::parse("19011213T204551")), -2147483649L);
+    BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into_seconds(Instant::parse("19700101T000000")), 0L);
 }
 
 #if defined(_LIBCPP_VERSION)

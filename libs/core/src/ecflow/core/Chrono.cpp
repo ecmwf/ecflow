@@ -73,7 +73,9 @@ Instant Instant::parse(const std::string& value) {
         const unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1; // [0, 365]
         const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;          // [0, 146096]
 
-        time = (era * 146097 + static_cast<int>(doe) - 719468) * 86400 + tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
+        // The days and seconds are computed in std::time_t, since they exceed the range of int beyond 32-bit seconds
+        const std::time_t days = static_cast<std::time_t>(era) * 146097 + static_cast<std::time_t>(doe) - 719468;
+        time                   = days * 86400 + tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
     }
 
     return Instant{Instant::clock_t::from_time_t(time)};
