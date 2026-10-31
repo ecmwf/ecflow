@@ -113,6 +113,7 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    selecting another file.
    A parsing error stops initialisation before environment overrides are applied;
    the diagnostic identifies the configuration file and the original parsing error.
+   An unknown or obsolete setting is a parsing error.
 
 #. **Apply overrides.** Environment variables override settings in the configuration file.
    Command-line options override the corresponding environment settings; for example,

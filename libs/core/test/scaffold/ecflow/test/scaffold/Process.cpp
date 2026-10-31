@@ -63,6 +63,8 @@ void wait_for_exit_without_reaping(int process_id) {
 ///
 /// @brief Shares child identity, native-wait ownership and cached completion across process backends.
 ///
+/// @invariant exit_status is set exactly once, under status_mutex; wait_mutex serialises the native waits.
+///
 struct ProcessLifecycle
 {
     int process_id{0};

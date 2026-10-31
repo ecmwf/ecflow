@@ -8,17 +8,18 @@ server_environment.cfg
 
 
 The file server_environment.cfg can be found in the ecFlow/Server
-folder. Modifying this allows you to change the default environment variables
-for ecFlow including the default commands for submitting and killing
+folder. Modifying it changes the default environment variables
+for ecFlow, including the default commands for submitting and killing
 tasks.
 
 .. warning::
 
-    The server looks for the file in the CWD, hence make sure you move it.
+    The server looks for the file in the current working directory; move the file accordingly.
 
 A missing, empty or comments-only configuration file uses built-in defaults.
 An existing configuration path must name a readable regular file; a directory, an
 unreadable file or a read error stops initialisation with the path and cause.
+An unknown or obsolete setting is a parsing error, and also stops initialisation.
 
 Explicitly empty required paths and command strings are rejected after environment
 overrides, before filename resolution, changing directory or opening the log.
@@ -51,7 +52,7 @@ When the setting is omitted, the default is ``CHECK_ON_TIME``. An explicitly emp
 value stops server initialisation; the diagnostic identifies the configuration file, the invalid
 value and the supported modes.
 
-The example below shows some of the default variables you can configure.
+The example below shows some of the default variables that can be configured.
 
 .. code-block:: shell
     :caption: server_environment.cfg

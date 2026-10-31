@@ -77,7 +77,7 @@ void check_rejected_initialisation(const std::string& content,
     for (const auto& [name, value] : environment) {
         overrides.emplace_back(name, value);
         if (name == "ECF_PORT") {
-            // Do not turn the unresolved invalid-environment/valid-CLI policy into a contract.
+            // Tested without --port, since the precedence of a valid --port over an invalid ECF_PORT is not specified
             args.clear();
         }
     }
