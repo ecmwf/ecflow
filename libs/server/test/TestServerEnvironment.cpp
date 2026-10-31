@@ -2128,6 +2128,139 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_http_when_requested) {
     remove_log_file(serverEnv);
 }
 
+//
+// Inputs not accepted in server_environment.cfg: environment variables and command-line options only
+//
+
+///
+/// @brief Verifies that server_environment.cfg refuses the inputs that only other sources provide.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_rejects_inputs_of_other_sources) {
+    ECF_NAME_THIS_TEST();
+    for (const std::string name : {"ECF_HOST", "ECF_SSL", "ECF_DEBUG_SERVER"}) {
+        BOOST_TEST_CONTEXT("Setting: " << name) {
+            check_server_config_parse_error(name + " = 1\n", name);
+        }
+    }
+}
+
+///
+/// @brief Verifies that debug output is enabled by `--debug`, or by the presence of ECF_DEBUG_SERVER.
+///
+/// The value of ECF_DEBUG_SERVER is not interpreted: defining the variable, even as `0` or empty, enables debug.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_debug) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        std::optional<std::string> environment;
+        bool option;
+        bool expected;
+    };
+    for (const auto& c : std::vector<Case>{{std::nullopt, false, false},
+                                           {"1", false, true},
+                                           {"0", false, true},
+                                           {"", false, true},
+                                           {std::nullopt, true, true},
+                                           {"0", true, true}}) {
+        BOOST_TEST_CONTEXT("ECF_DEBUG_SERVER: " << c.environment.value_or("(unset)") << ", --debug: " << c.option) {
+            std::vector<std::pair<std::string, std::string>> environment;
+            if (c.environment) {
+                environment.emplace_back("ECF_DEBUG_SERVER", *c.environment);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.option) {
+                args.emplace_back("--debug");
+            }
+            check_server_precedence("", environment, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_CHECK_EQUAL(serverEnv.debug(), c.expected);
+                const auto lines = last_startup_lines();
+                const auto entry = std::string("  ECF_DEBUG_SERVER = ") + (c.expected ? "enabled" : "disabled");
+                BOOST_CHECK(std::find(lines.begin(), lines.end(), entry) != lines.end());
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that job generation is enabled by default, and disabled only by `--dis_job_gen`.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_job_generation) {
+    ECF_NAME_THIS_TEST();
+    for (const bool option : {false, true}) {
+        BOOST_TEST_CONTEXT("--dis_job_gen: " << option) {
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (option) {
+                args.emplace_back("--dis_job_gen");
+            }
+            check_server_precedence("", {}, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_CHECK_EQUAL(serverEnv.jobGeneration(), !option);
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that the server uses TCP over IPv4 by default, and IPv6 only with `--v6`, with or without HTTP.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_tcp_protocol) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        bool v6;
+        bool http;
+        ecf::Protocol expected_protocol;
+    };
+    for (const auto& c : std::vector<Case>{{false, false, ecf::Protocol::Plain},
+                                           {true, false, ecf::Protocol::Plain},
+                                           {false, true, ecf::Protocol::Http},
+                                           {true, true, ecf::Protocol::Http}}) {
+        BOOST_TEST_CONTEXT("--v6: " << c.v6 << ", --http: " << c.http) {
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.v6) {
+                args.emplace_back("--v6");
+            }
+            if (c.http) {
+                args.emplace_back("--http");
+            }
+            check_server_precedence("", {}, args, [&](const auto& serverEnv, const auto&) {
+                const auto expected_tcp = c.v6 ? boost::asio::ip::tcp::v6() : boost::asio::ip::tcp::v4();
+                BOOST_CHECK(serverEnv.tcp_protocol() == expected_tcp);
+                BOOST_CHECK_MESSAGE(serverEnv.protocol() == c.expected_protocol,
+                                    "Expected protocol " << ecf::to_ui_designation(c.expected_protocol) << " but found "
+                                                         << ecf::to_ui_designation(serverEnv.protocol()));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that the host is always the name of the machine, whatever ECF_HOST holds in the environment.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_host_ignores_environment) {
+    ECF_NAME_THIS_TEST();
+    const auto machine = Host{}.name();
+    for (const std::optional<std::string>& value :
+         {std::optional<std::string>{}, std::optional<std::string>{"other.host"}}) {
+        BOOST_TEST_CONTEXT("ECF_HOST: " << value.value_or("(unset)")) {
+            std::optional<WithoutTestEnvironmentVariable> unset;
+            std::vector<std::pair<std::string, std::string>> environment;
+            if (value) {
+                environment.emplace_back("ECF_HOST", *value);
+            }
+            else {
+                unset.emplace("ECF_HOST");
+            }
+            check_server_precedence(
+                "", environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto& startup) {
+                    BOOST_CHECK_EQUAL(serverEnv.hostPort().first, machine);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_HOST"), machine);
+                    BOOST_CHECK(fs::is_regular_file(startup / (machine + ".3141.ecf.log")));
+                });
+        }
+    }
+}
+
 #ifdef ECF_OPENSSL
 
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_ssl_connection) {
@@ -2222,6 +2355,118 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
                                 << ecf::to_ui_designation(serverEnv.protocol()));
 
         remove_log_file(serverEnv);
+    }
+}
+
+///
+/// @brief Verifies how ECF_SSL and `--ssl` select the certificate, and how SSL promotes the protocol.
+///
+/// Notes:
+///
+///   - ECF_SSL, when defined, decides the lookup order, also when `--ssl` is given:
+///     - `1` or empty: shared certificate first, server-specific certificate as fallback;
+///     - any other value: server-specific certificate first, shared certificate as fallback.
+///   - `--ssl` alone looks for the shared certificate first.
+///   - SSL promotes TCP/IP to SSL, and HTTP to HTTPS.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_ssl) {
+    ECF_NAME_THIS_TEST();
+    const auto specific_name = Host{}.name() + ".3141";
+    struct Case
+    {
+        std::optional<std::string> ecf_ssl;
+        bool ssl_option;
+        bool http_option;
+        bool shared_crt;
+        bool specific_crt;
+        bool expected_shared;
+        ecf::Protocol expected_protocol;
+    };
+    const std::vector<Case> cases = {// ECF_SSL alone
+                                     {"1", false, false, true, true, true, ecf::Protocol::Ssl},
+                                     {"", false, false, true, true, true, ecf::Protocol::Ssl},
+                                     {"1", false, false, false, true, false, ecf::Protocol::Ssl},
+                                     {specific_name, false, false, true, true, false, ecf::Protocol::Ssl},
+                                     {specific_name, false, false, true, false, true, ecf::Protocol::Ssl},
+                                     {"1", false, true, true, true, true, ecf::Protocol::Https},
+                                     // --ssl alone
+                                     {std::nullopt, true, false, true, true, true, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, false, false, true, false, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, true, true, true, true, ecf::Protocol::Https},
+                                     // ECF_SSL with --ssl
+                                     {specific_name, true, false, true, true, false, ecf::Protocol::Ssl},
+                                     {"1", true, true, true, true, true, ecf::Protocol::Https}};
+
+    for (const auto& c : cases) {
+        BOOST_TEST_CONTEXT("ECF_SSL: " << c.ecf_ssl.value_or("(unset)") << ", --ssl: " << c.ssl_option
+                                       << ", --http: " << c.http_option << ", shared: " << c.shared_crt
+                                       << ", specific: " << c.specific_crt) {
+            auto certificates = ecf::test::scaffold::MakeDirectory{}.create();
+            std::list<WithTestFile> crts;
+            if (c.shared_crt) {
+                crts.emplace_back(NamedTestFile{(certificates.path() / "server.crt").string()});
+            }
+            if (c.specific_crt) {
+                crts.emplace_back(NamedTestFile{(certificates.path() / (specific_name + ".crt")).string()});
+            }
+            std::vector<std::pair<std::string, std::string>> environment = {
+                {"ECF_SSL_DIR", certificates.path().string()}};
+            if (c.ecf_ssl) {
+                environment.emplace_back("ECF_SSL", *c.ecf_ssl);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.ssl_option) {
+                args.emplace_back("--ssl");
+            }
+            if (c.http_option) {
+                args.emplace_back("--http");
+            }
+            check_server_precedence("", environment, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_REQUIRE(serverEnv.ssl());
+                BOOST_REQUIRE(serverEnv.openssl().certificate());
+                BOOST_CHECK_EQUAL(serverEnv.openssl().certificate()->shared(), c.expected_shared);
+                BOOST_CHECK_MESSAGE(serverEnv.protocol() == c.expected_protocol,
+                                    "Expected protocol " << ecf::to_ui_designation(c.expected_protocol) << " but found "
+                                                         << ecf::to_ui_designation(serverEnv.protocol()));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that start-up stops when SSL is requested, by ECF_SSL or `--ssl`, and no certificate exists.
+///
+BOOST_AUTO_TEST_CASE(test_server_ssl_without_certificate_stops_startup) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        std::optional<std::string> ecf_ssl;
+        bool ssl_option;
+    };
+    for (const auto& [ecf_ssl, ssl_option] : std::vector<Case>{{"1", false}, {std::nullopt, true}, {"1", true}}) {
+        BOOST_TEST_CONTEXT("ECF_SSL: " << ecf_ssl.value_or("(unset)") << ", --ssl: " << ssl_option) {
+            auto certificates = ecf::test::scaffold::MakeDirectory{}.create();
+            std::vector<std::pair<std::string, std::string>> environment = {
+                {"ECF_SSL_DIR", certificates.path().string()}};
+            if (ecf_ssl) {
+                environment.emplace_back("ECF_SSL", *ecf_ssl);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (ssl_option) {
+                args.emplace_back("--ssl");
+            }
+            BOOST_CHECK_EXCEPTION(
+                check_server_precedence("",
+                                        environment,
+                                        args,
+                                        [](const auto&, const auto&) {
+                                            BOOST_FAIL("Start-up without a certificate must not be accepted");
+                                        }),
+                std::runtime_error,
+                [](const std::runtime_error& error) {
+                    return std::string(error.what()).find("Unable to find certificate file") != std::string::npos;
+                });
+        }
     }
 }
 
