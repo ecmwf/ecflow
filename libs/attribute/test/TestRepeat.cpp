@@ -883,9 +883,9 @@ BOOST_AUTO_TEST_CASE(increment) {
         BOOST_CHECK_MESSAGE(old_value2 != gen_var2.value<int>(), "Expected generated variables to change on increment");
 
         rep.reset();
-        BOOST_CHECK_MESSAGE(old_value = gen_var.value<int>(),
+        BOOST_CHECK_MESSAGE(old_value == gen_var.value<int>(),
                             "Expected generated variables to be the same after reset");
-        BOOST_CHECK_MESSAGE(old_value2 = gen_var2.value<int>(),
+        BOOST_CHECK_MESSAGE(old_value2 == gen_var2.value<int>(),
                             "Expected generated variables to be the same after reset");
     }
     {
@@ -923,11 +923,14 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
     BOOST_REQUIRE_THROW(RepeatDate("", 20090916, 20090920, 1), std::runtime_error);
     BOOST_REQUIRE_THROW(RepeatDate("YMD", 200909161, 20090920, 1), std::runtime_error); // start > 8
     BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090916, 200909201, 1), std::runtime_error); // end > 8
-    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090016, 200909201, 1), std::runtime_error); // invalid start month
-    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090900, 20090920, 1), std::runtime_error);  // invalid start day
-    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090916, 20090020, 1), std::runtime_error);  // invalid end month
-    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090916, 20090900, 1), std::runtime_error);  // invalid end day
-    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090916, 20090920, 0), std::runtime_error);  // delta cannot be zero
+    auto invalid_date = [](const std::runtime_error& e) {
+        return std::string(e.what()).find("The start/end is not a valid date") != std::string::npos;
+    };
+    BOOST_CHECK_EXCEPTION(RepeatDate("YMD", 20090016, 20090920, 1), std::runtime_error, invalid_date); // start month
+    BOOST_CHECK_EXCEPTION(RepeatDate("YMD", 20090900, 20090920, 1), std::runtime_error, invalid_date); // start day
+    BOOST_CHECK_EXCEPTION(RepeatDate("YMD", 20090916, 20091320, 1), std::runtime_error, invalid_date); // end month
+    BOOST_CHECK_EXCEPTION(RepeatDate("YMD", 20090916, 20090931, 1), std::runtime_error, invalid_date); // end day
+    BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090916, 20090920, 0), std::runtime_error); // delta cannot be zero
 
     BOOST_REQUIRE_THROW(RepeatDate("YMD", 20090920, 20090916, 1),
                         std::runtime_error); //  start day > end day, and delta > 0

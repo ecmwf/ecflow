@@ -1565,6 +1565,12 @@ void export_Node(py::module& m) {
 
         .def("change_complete", &Node::changeComplete)
 
+        .def("change_repeat",
+             &Node::changeRepeat,
+             py::arg("value"),
+             "Change the Repeat of the node as --alter change repeat does: a plain value changes the current value; "
+             "options (--begin, --end, --step, --current) change the given attributes together.")
+
         .def("sort_attributes", &Node_sort_attributes)
         .def("sort_attributes", &Node_sort_attributes1)
         .def("sort_attributes", &Node_sort_attributes2)
@@ -1654,7 +1660,7 @@ void export_Node(py::module& m) {
 
         .def("get_defstatus", &Node::defStatus)
 
-        .def("get_repeat", &Node::repeat, py::return_value_policy::reference)
+        .def("get_repeat", &Node::repeat, py::return_value_policy::reference_internal)
 
         .def("get_late", &Node_get_late, py::return_value_policy::reference_internal)
 

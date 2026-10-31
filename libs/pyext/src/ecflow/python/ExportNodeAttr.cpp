@@ -1172,7 +1172,12 @@ void export_NodeAttr(py::module& m) {
             [](const RepeatDate& self) -> py::object {
                 return py::cast(ecf::repeat::current_value_of<int>(self).value());
             },
-            "Return the current date as an integer in yyyymmdd format.");
+            "Return the current date as an integer in yyyymmdd format.")
+        .def("change",
+             &RepeatDate::change,
+             py::arg("value"),
+             "Change the Repeat as --alter change repeat does: a plain value changes the current value; options "
+             "(--begin, --end, --step, --current) change the given attributes together.");
 
     py::class_<RepeatDateTime>(m, "RepeatDateTime", py::dynamic_attr(), NodeAttrDoc::repeat_datetime_doc())
 
@@ -1195,6 +1200,11 @@ void export_NodeAttr(py::module& m) {
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatDateTime::toString)
         .def("__copy__", pyutil_copy_object<RepeatDateTime>)
+        .def("change",
+             &RepeatDateTime::change,
+             py::arg("value"),
+             "Change the Repeat as --alter change repeat does: a plain value changes the current value; options "
+             "(--begin, --end, --step, --current) change the given attributes together.")
         .def("name", &RepeatDateTime::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def(
             "start", &RepeatDateTime::start, "Return the start date as an integer (i.e. seconds since 19700101T000000)")
@@ -1257,7 +1267,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<RepeatInteger>(m, "RepeatInteger", py::dynamic_attr(), NodeAttrDoc::repeat_integer_doc())
 
-        .def(py::init<std::string, int, int, int>(),
+        .def(py::init([](const std::string& name, int start, int end, int delta) {
+                 RepeatInteger::validate(name, start, end, delta);
+                 return RepeatInteger(name, start, end, delta);
+             }),
              py::arg("name"),
              py::arg("start"),
              py::arg("end"),
@@ -1266,6 +1279,11 @@ void export_NodeAttr(py::module& m) {
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatInteger::toString)
         .def("__copy__", pyutil_copy_object<RepeatInteger>)
+        .def("change",
+             &RepeatInteger::change,
+             py::arg("value"),
+             "Change the Repeat as --alter change repeat does: a plain value changes the current value; options "
+             "(--begin, --end, --step, --current) change the given attributes together.")
         .def("name", &RepeatInteger::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatInteger::start)
         .def("end", &RepeatInteger::end)
@@ -1336,6 +1354,11 @@ void export_NodeAttr(py::module& m) {
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatDay::toString)
         .def("__copy__", pyutil_copy_object<RepeatDay>)
+        .def("change",
+             &RepeatDay::change,
+             py::arg("value"),
+             "Change the step as --alter change repeat does, with the option --step (e.g. \"--step 2\"); a "
+             "plain value is ignored, a repeat day having no current value.")
         .def("current_index",
              &RepeatDay::current_index,
              "Return the step as an integer value (n.b. RepeatDay has no position concept; the step is its only "

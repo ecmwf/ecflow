@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
+import gc
+import weakref
+
 import ecflow as ecf
 import pytest
 
@@ -1596,6 +1599,30 @@ class TestNode:
         """get_repeat() returns an empty Repeat when none is set."""
         t = ecf.Task("t1")
         assert t.get_repeat().empty()
+
+    def test_get_repeat_keeps_the_node_alive(self):
+        """The Repeat returned by get_repeat() keeps its node alive, as long as it is in use."""
+        t = ecf.Task("t1")
+        t.add_repeat(ecf.RepeatInteger("count", 0, 10, 1))
+        repeat = t.get_repeat()
+        node = weakref.ref(t)
+        del t
+        gc.collect()
+        assert node() is not None
+        assert repeat.name() == "count"
+        assert repeat.value() == 0
+        del repeat
+        gc.collect()
+        assert node() is None
+
+    def test_get_repeat_of_a_temporary_node(self):
+        """get_repeat() on a node that is not otherwise referenced returns a usable Repeat."""
+        repeat = (
+            ecf.Task("t1").add_repeat(ecf.RepeatInteger("count", 0, 10, 2)).get_repeat()
+        )
+        gc.collect()
+        assert repeat.name() == "count"
+        assert repeat.step() == 2
 
     # ------------------------------------------------------------------
     # Defstatus: add_defstatus / get_defstatus

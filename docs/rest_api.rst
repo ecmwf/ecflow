@@ -1168,6 +1168,12 @@ For unnamed attributes, such as :code:`repeat` or :code:`late`, consider that
 
 - :code:`name` is not required
 
+When :code:`type` is :code:`repeat`, the :code:`value` is the value given to
+:code:`ecflow_client --alter change repeat`: either a plain value, which becomes
+the current value, or a list of options applied together, such as
+:code:`"--begin 20260101 --end 20261231 --current 20260115"`
+(see :ref:`Changing a Repeat <alter_cli_change_repeat>`).
+
 Payload to update Node attribute (by Task)
 """"""""""""""""""""""""""""""""""""""""""
 

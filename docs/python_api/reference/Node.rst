@@ -1125,6 +1125,12 @@ Returns a list of :term:`aviso`\ s
    :module: ecflow
 
 
+.. py:method:: Node.change_repeat(self: ecflow.Node, value: str) -> None
+   :module: ecflow
+
+Change the Repeat of the node as --alter change repeat does: a plain value changes the current value; options (--begin, --end, --step, --current) change the given attributes together.
+
+
 .. py:method:: Node.change_trigger(self: ecflow.Node, arg0: str) -> None
    :module: ecflow
 

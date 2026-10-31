@@ -24,3 +24,100 @@ where
  - :code:`<path> (<path> (...))`, one or more paths to the nodes where the operation is to be performed
 
 See more details about each argument in the next section.
+
+.. _alter_cli_change_repeat:
+
+Changing a Repeat
+-----------------
+
+A node holds at most one Repeat, so the Repeat is identified by the node
+path alone, and no name is given (the same applies to the Trigger and the
+Complete expressions). The value is either a plain value, which becomes
+the current value of the Repeat, or a list of options, applied together:
+
+-  ``--begin <value>``, the first value of the Repeat;
+
+-  ``--end <value>``, the last value of the Repeat;
+
+-  ``--step <value>``, the increment;
+
+-  ``--current <value>``, the current value.
+
+The value is a single argument: a list of options must be quoted on the
+command line, so that it reaches the server as one value.
+
+.. code-block:: shell
+
+    # change the current value
+    ecflow_client --alter change repeat 20260115 /suite/family
+
+    # change the range, the current value being kept within it
+    ecflow_client --alter change repeat "--begin 20260101 --end 20261231" /suite/family
+
+    # change the range and the current value together
+    ecflow_client --alter change repeat "--begin 20260101 --end 20261231 --current 20260115" /suite/family
+
+    # change the step
+    ecflow_client --alter change repeat "--step 7" /suite/family
+
+The options accepted, and the format of their values, depend on the kind
+of Repeat:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Repeat
+     - Options and values
+   * - ``date``
+     - ``--begin``, ``--end`` and ``--current`` as ``yyyymmdd``;
+       ``--step`` as a number of days
+   * - ``datetime``
+     - ``--begin``, ``--end`` and ``--current`` as ``yyyymmddTHHMMSS``;
+       ``--step`` as a duration ``H[:MM[:SS]]``
+   * - ``integer``
+     - all options as integers
+   * - ``datelist``, ``datetimelist``
+     - only ``--current``, with a member of the list
+   * - ``enumerated``, ``string``
+     - only ``--current``, with a member of the list or its index; a
+       value equal to a member selects that member, even when it reads as
+       an option or an index
+   * - ``day``
+     - only ``--step``, as a number of days; a plain value is ignored,
+       since a ``repeat day`` has no current value
+
+An option that does not apply to the kind of Repeat is refused, as is a
+change that leaves the Repeat invalid, for example an end before the
+begin, or a step of zero; a refused change leaves the Repeat unchanged.
+When several paths are given, each Repeat is changed on its own: the
+change applies to every Repeat that accepts it, and an error names each
+Repeat that refused it.
+
+When ``--current`` is not given, the current value is kept within the new
+range and on the new step grid:
+
+-  a current value outside the new range is moved to the nearest limit of
+   the range;
+
+-  a current value off the new step grid is moved to the previous value
+   on the grid, towards the begin;
+
+-  a completed Repeat (whose current value lies past its end) stays
+   completed, unless the new range continues it, as when the end of the
+   Repeat is extended.
+
+When ``--current`` is given, its value must lie within the new range and
+on the new step grid; it is never moved.
+
+Changing a Repeat does not change the state of its node. A running node
+whose current value is moved keeps running, and its completion moves the
+Repeat to the next value: the moved value itself is not run. To run it,
+set it with ``--current`` once the node is no longer running.
+
+.. warning::
+
+   **The options require an ecFlow server of version 5.20 or later.** An
+   older server refuses a list of options as an invalid value, leaving
+   the Repeat unchanged, except for a ``repeat day``, on which the value
+   is silently ignored. A plain value is accepted by every version.

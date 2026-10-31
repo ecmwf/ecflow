@@ -95,6 +95,7 @@ if (ENABLE_SERVER)
   set(test_srcs
     # Sources
     test/TestClient_main.cpp # test entry point
+    test/TestAlterRepeat.cpp
     test/TestClientTimeout.cpp
     test/TestClientHandleCmd.cpp
     test/TestConnectionDiagnosisAgainstServer.cpp

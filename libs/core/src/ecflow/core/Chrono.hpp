@@ -88,6 +88,20 @@ public:
 
     [[nodiscard]] duration_t as_seconds() const { return duration_; }
 
+    ///
+    /// @brief Parses a duration given as [+|-]H[:MM[:SS]].
+    ///
+    /// The hours are any number of digits; the minutes and seconds are less than 60. A sign applies to the whole
+    /// duration, and is accepted either:
+    ///
+    ///   - at the start of the value (e.g. -00:30:00 is minus 30 minutes); or
+    ///   - on the first non-zero field after zero fields (e.g. 00:-30:00), as written by format().
+    ///
+    /// @param[in] value The text to parse.
+    /// @return The parsed duration.
+    /// @throws std::runtime_error if the value is empty, has an empty or non-numeric field, more than three fields,
+    ///         minutes or seconds of 60 or more, a sign anywhere else, or exceeds the range of seconds.
+    ///
     static Duration parse(const std::string& value);
     static std::string format(const Duration& value);
 

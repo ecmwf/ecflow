@@ -494,6 +494,11 @@ Nodes
    ``trigger``, ``repeat`` or ``defstatus``; ``name`` and ``value`` what the kind
    needs, empty otherwise.
 
+   To change a ``repeat``, give the new value as ``name``, and an empty
+   ``value``: either a plain value, which becomes the current value, or
+   options applied together, as for ``ecflow_client --alter change repeat``,
+   such as ``"--begin 20260101 --end 20261231 --current 20260115"``.
+
 .. _rust_client_sort_attributes:
 
 .. describe:: pub fn sort_attributes<I, S>(&mut self, paths: I, attribute: &str, recursive: bool) -> Result<()> where I: IntoIterator<Item = S>, S: AsRef<str>

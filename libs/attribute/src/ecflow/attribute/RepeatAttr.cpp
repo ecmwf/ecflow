@@ -3,7 +3,10 @@
 
 #include "ecflow/attribute/RepeatAttr.hpp"
 
+#include <cctype>
 #include <iomanip>
+#include <limits>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -36,6 +39,304 @@ std::string as_2_digits(T value) {
 template <typename T>
 std::string as_4_digits(T value) {
     return as_n_digits<4>(value);
+}
+
+///
+/// @brief The values covered by a Repeat with a step, from its start towards its end.
+///
+/// A positive step runs upwards from the start to the end; any other step runs downwards.
+///
+/// @tparam T the type of the values (an integral type, or ecf::Instant)
+///
+template <typename T>
+class StepRange {
+public:
+    ///
+    /// @param[in] start the first value
+    /// @param[in] end the last value
+    /// @param[in] ascending true when the step is positive
+    ///
+    StepRange(const T& start, const T& end, bool ascending)
+        : start_(start),
+          end_(end),
+          ascending_(ascending) {}
+
+    ///
+    /// @return true when the end lies in the direction of the step from the start, or equals the start
+    ///
+    [[nodiscard]] bool is_ordered() const { return ascending_ ? end_ >= start_ : start_ >= end_; }
+
+    ///
+    /// @return true when the value lies between the start and the end, both included
+    ///
+    [[nodiscard]] bool contains(const T& value) const {
+        return ascending_ ? !(value < start_ || value > end_) : !(value > start_ || value < end_);
+    }
+
+    ///
+    /// @return the value, or the nearest of the start and the end when the value lies outside the range
+    ///
+    [[nodiscard]] T clamp(const T& value) const {
+        if (ascending_) {
+            if (value < start_) {
+                return start_;
+            }
+            if (value > end_) {
+                return end_;
+            }
+            return value;
+        }
+        if (value > start_) {
+            return start_;
+        }
+        if (value < end_) {
+            return end_;
+        }
+        return value;
+    }
+
+private:
+    T start_;
+    T end_;
+    bool ascending_;
+};
+
+///
+/// @brief Checks that a value lies on the step grid anchored at the start of a Repeat.
+///
+/// @param[in] offset the distance from the start to the value, in units of the step
+/// @param[in] step the step of the Repeat (not zero)
+/// @return true when the offset is a whole number of steps
+///
+template <typename T>
+bool is_on_step_grid(T offset, T step) {
+    return offset % step == 0;
+}
+
+StepRange<long> step_range(long start, long end, long delta) {
+    return StepRange<long>(start, end, delta > 0);
+}
+
+StepRange<ecf::Instant> step_range(const ecf::Instant& start, const ecf::Instant& end, const ecf::Duration& delta) {
+    return StepRange<ecf::Instant>(start, end, delta > ecf::Duration{std::chrono::seconds{0}});
+}
+
+///
+/// @brief The options given in the value of `--alter change repeat`, such as "--begin 20260101 --end 20261231".
+///
+struct RepeatOptions
+{
+    std::optional<std::string> begin;
+    std::optional<std::string> end;
+    std::optional<std::string> step;
+    std::optional<std::string> current;
+};
+
+///
+/// @brief Tells a value made of options from a plain value.
+///
+/// @param[in] value the value given to `--alter change repeat`
+/// @return true when the value starts with "--"
+///
+bool is_option_string(const std::string& value) {
+    auto first = value.find_first_not_of(" \t\n\r\f\v");
+    return first != std::string::npos && value.compare(first, 2, "--") == 0;
+}
+
+///
+/// @brief Describes a Repeat in error messages: its definition, without indentation nor line break.
+///
+std::string definition_of(const RepeatBase& repeat) {
+    std::string text = repeat.toString(); // never blank, starting with "repeat"
+    auto first       = text.find_first_not_of(" ");
+    auto last        = text.find_last_not_of(" \n");
+    return text.substr(first, last - first + 1);
+}
+
+///
+/// @brief Tells whether a token names one of the options.
+///
+bool is_option_name(const std::string& token) {
+    return token == "--begin" || token == "--end" || token == "--step" || token == "--current";
+}
+
+///
+/// @brief Parses the options of a value, each followed by its argument.
+///
+/// @param[in] value the value given to `--alter change repeat`
+/// @param[in] context the prefix of the error messages
+/// @return the options found
+/// @throws std::runtime_error for an unknown option, an option given twice, or an option without argument
+///
+RepeatOptions parse_options(const std::string& value, const std::string& context) {
+    RepeatOptions options;
+    std::istringstream is(value);
+    std::string option;
+    while (is >> option) {
+        std::optional<std::string>* slot = nullptr;
+        if (option == "--begin") {
+            slot = &options.begin;
+        }
+        else if (option == "--end") {
+            slot = &options.end;
+        }
+        else if (option == "--step") {
+            slot = &options.step;
+        }
+        else if (option == "--current") {
+            slot = &options.current;
+        }
+        else {
+            throw std::runtime_error(MESSAGE(context << ": unknown option '" << option << "' in '" << value
+                                                     << "', expected --begin, --end, --step or --current"));
+        }
+        if (*slot) {
+            throw std::runtime_error(
+                MESSAGE(context << ": the option " << option << " is given more than once in '" << value << "'"));
+        }
+        std::string argument;
+        if (!(is >> argument) || is_option_name(argument)) {
+            throw std::runtime_error(
+                MESSAGE(context << ": the option " << option << " expects a value in '" << value << "'"));
+        }
+        *slot = argument;
+    }
+    return options;
+}
+
+///
+/// @brief Refuses an option that does not apply to the kind of Repeat.
+///
+void refuse_option(const std::optional<std::string>& option,
+                   const char* name,
+                   const std::string& context,
+                   const char* kind) {
+    if (option) {
+        throw std::runtime_error(MESSAGE(context << ": the option " << name << " does not apply to repeat " << kind));
+    }
+}
+
+///
+/// @brief Extracts the value of a list-based Repeat given as "--current <value>", the only option of these kinds.
+///
+/// @param[in] value the value given to `--alter change repeat`
+/// @param[in] context the prefix of the error messages
+/// @return the value following --current, or nothing when the value does not start with --current
+/// @throws std::runtime_error when --current has no value
+///
+std::optional<std::string> list_current_option(const std::string& value) {
+    const std::string option = "--current";
+    const char* space        = " \t\n\r\f\v";
+    if (value.compare(0, option.size(), option) != 0) {
+        return std::nullopt;
+    }
+    if (value.size() > option.size() && !std::isspace(static_cast<unsigned char>(value[option.size()]))) {
+        return std::nullopt; // e.g. "--currently", a plain value
+    }
+    auto first = value.find_first_not_of(space, option.size());
+    if (first == std::string::npos) {
+        return std::nullopt; // a bare "--current" is a plain value, which may match a member of that name
+    }
+    auto last = value.find_last_not_of(space);
+    return value.substr(first, last - first + 1);
+}
+
+///
+/// @brief Refuses, with a clear error, a value of a list-based Repeat that names an option of the Repeats with a range.
+///
+/// Called once the value has matched no member of the list.
+///
+void refuse_range_option_on_list(const std::string& value, const std::string& context, const char* kind) {
+    auto names = [&value](const std::string& name) {
+        return value.compare(0, name.size(), name) == 0 &&
+               (value.size() == name.size() || std::isspace(static_cast<unsigned char>(value[name.size()])));
+    };
+    if (names("--current")) {
+        throw std::runtime_error(MESSAGE(context << ": the option --current expects a value in '" << value << "'"));
+    }
+    for (const char* option : {"--begin", "--end", "--step"}) {
+        if (names(option)) {
+            throw std::runtime_error(MESSAGE(context << ": the option " << option << " does not apply to repeat "
+                                                     << kind << ", which only accepts --current"));
+        }
+    }
+}
+
+///
+/// @brief Converts the argument of an option into an int.
+///
+/// @throws std::runtime_error when the argument is not an integer, or does not fit an int
+///
+int option_as_int(const std::string& argument, const char* option, const std::string& context) {
+    long long value = 0;
+    try {
+        value = ecf::convert_to<long long>(argument);
+    }
+    catch (const ecf::bad_conversion&) {
+        auto digits = argument.find_first_not_of("+-") == 1 ? argument.substr(1) : argument; // never empty
+        if (digits.find_first_not_of("0123456789") == std::string::npos) {
+            throw std::runtime_error(MESSAGE(context << ": the value of " << option << " (" << argument
+                                                     << ") is out of the range of integers"));
+        }
+        throw std::runtime_error(
+            MESSAGE(context << ": the value of " << option << " (" << argument << ") is not an integer"));
+    }
+    if (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max()) {
+        throw std::runtime_error(
+            MESSAGE(context << ": the value of " << option << " (" << argument << ") is out of the range of integers"));
+    }
+    return static_cast<int>(value);
+}
+
+///
+/// @brief Converts the argument of an option into a date, given as yyyymmdd.
+///
+/// @throws std::runtime_error when the argument is not a valid date
+///
+int option_as_date(const std::string& argument, const char* option, const std::string& context) {
+    if (argument.size() != 8) {
+        throw std::runtime_error(MESSAGE(context << ": the value of " << option << " (" << argument
+                                                 << ") is not a valid date, expected yyyymmdd"));
+    }
+    int value = option_as_int(argument, option, context);
+    try {
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(argument));
+    }
+    catch (const std::exception&) {
+        throw std::runtime_error(MESSAGE(context << ": the value of " << option << " (" << argument
+                                                 << ") is not a valid date, expected yyyymmdd"));
+    }
+    return value;
+}
+
+///
+/// @brief Converts the argument of an option into an instant, given as yyyymmddTHHMMSS.
+///
+/// @throws std::runtime_error when the argument is not a valid instant
+///
+ecf::Instant option_as_instant(const std::string& argument, const char* option, const std::string& context) {
+    try {
+        return ecf::Instant::parse(argument);
+    }
+    catch (const std::exception&) {
+        throw std::runtime_error(MESSAGE(context << ": the value of " << option << " (" << argument
+                                                 << ") is not a valid date and time, expected yyyymmddTHHMMSS"));
+    }
+}
+
+///
+/// @brief Converts the argument of an option into a duration, given as H[:MM[:SS]].
+///
+/// @throws std::runtime_error when the argument is not a valid duration
+///
+ecf::Duration option_as_duration(const std::string& argument, const char* option, const std::string& context) {
+    try {
+        return ecf::Duration::parse(argument);
+    }
+    catch (const std::exception&) {
+        throw std::runtime_error(MESSAGE(context << ": the value of " << option << " (" << argument
+                                                 << ") is not a valid duration, expected H[:MM[:SS]]"));
+    }
 }
 
 } // namespace
@@ -174,21 +475,15 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
                                          << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
-    if (delta_ > 0) {
-        // assert end => start
-        if (!(end >= start)) {
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta_ > 0) {
             throw std::runtime_error(
                 MESSAGE("Invalid Repeat date: The end must be greater than the start date, when delta is positive "
                         << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
-    }
-    else {
-        // assert start >= end
-        if (!(start >= end)) {
-            throw std::runtime_error(
-                MESSAGE("Invalid Repeat date: The start must be greater than the end date, when delta is negative "
-                        << "repeat " << variable << " " << start << " " << end << " " << delta));
-        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat date: The start must be greater than the end date, when delta is negative "
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     // Use date lib to check YMD
@@ -243,7 +538,7 @@ void RepeatDate::update_repeat_genvar() const {
     dom_.set_name(name_ + "_DD");
     dom_.set_value("<invalid>");
     dow_.set_name(name_ + "_DOW");
-    dom_.set_value("<invalid>");
+    dow_.set_value("<invalid>");
     julian_.set_name(name_ + "_JULIAN");
     julian_.set_value("<invalid>");
 
@@ -318,22 +613,7 @@ long RepeatDate::last_valid_value() const {
 }
 
 long RepeatDate::valid_value(long value) const {
-    if (delta_ > 0) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 long RepeatDate::last_valid_value_minus(int val) const {
@@ -423,70 +703,106 @@ void RepeatDate::increment() {
     set_value(result.value());
 }
 
-void RepeatDate::change(const std::string& newdate) {
-    if (newdate.size() != 8) {
+void RepeatDate::change(const std::string& value) {
+    if (is_option_string(value)) {
+        const std::string context = MESSAGE("RepeatDate::change: " << definition_of(*this));
+        auto options              = parse_options(value, context);
+        if (!options.begin && !options.end && !options.step) {
+            changeValue(option_as_date(*options.current, "--current", context)); // as a plain value
+            return;
+        }
+
+        int start = options.begin ? option_as_date(*options.begin, "--begin", context) : start_;
+        int end   = options.end ? option_as_date(*options.end, "--end", context) : end_;
+        int delta = options.step ? option_as_int(*options.step, "--step", context) : delta_;
+
+        // The resulting Repeat must be valid as a whole; the constructor checks it
+        RepeatDate candidate(name_, start, end, delta);
+        if (options.current) {
+            candidate.changeValue(option_as_date(*options.current, "--current", context));
+        }
+        else {
+            // the options change the begin, the end or the step
+            auto julian_start = ecf::CalendarDate(start).as_julian_day().value();
+            auto julian_value = ecf::CalendarDate(value_).as_julian_day().value();
+            bool continues    = step_range(start, end, delta).contains(value_) &&
+                             is_on_step_grid<long>(julian_value - julian_start, delta);
+            if (!valid() && !continues) {
+                // A finished Repeat stays finished: its value moves one step past the new last value
+                auto julian_end = ecf::CalendarDate(end).as_julian_day().value();
+                auto last       = (julian_end - julian_start) / delta * delta;
+                candidate.set_value((ecf::CalendarDate(start) + static_cast<int>(last + delta)).value());
+            }
+            else {
+                // Keep the value within the range, and on the step grid, moving it towards the start
+                auto clamped        = step_range(start, end, delta).clamp(value_);
+                auto julian_clamped = ecf::CalendarDate(clamped).as_julian_day().value();
+                auto steps          = (julian_clamped - julian_start) / delta;
+                candidate.set_value((ecf::CalendarDate(start) + static_cast<int>(steps * delta)).value());
+            }
+        }
+
+        start_ = candidate.start_;
+        end_   = candidate.end_;
+        delta_ = candidate.delta_;
+        set_value(candidate.value_);
+        return;
+    }
+
+    if (value.size() != 8) {
         throw std::runtime_error(MESSAGE(
             "RepeatDate::change: " << toString()
                                    << " The new date is not valid, expected 8 characters in yyyymmdd format but found "
-                                   << newdate));
+                                   << value));
     }
 
-    long the_new_date = 0;
+    long new_date = 0;
     try {
-        the_new_date = ecf::convert_to<long>(newdate);
+        new_date = ecf::convert_to<long>(value);
     }
     catch (const ecf::bad_conversion&) {
-        throw std::runtime_error(MESSAGE("RepeatDate::change: " << toString() << " The new date(" << newdate
+        throw std::runtime_error(MESSAGE("RepeatDate::change: " << toString() << " The new date(" << value
                                                                 << ") is not convertible to an long"));
     }
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(newdate));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(value));
     }
     catch (std::exception& e) {
         throw std::runtime_error(
-            MESSAGE("RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not valid"));
+            MESSAGE("RepeatDate::change: " << toString() << " The new date(" << value << ") is not valid"));
     }
 
-    changeValue(the_new_date);
+    changeValue(new_date);
 }
 
-void RepeatDate::changeValue(long the_new_date) {
-    if (delta_ > 0) {
-        if (the_new_date < start_ || the_new_date > end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-                                                    << " : " << end_ << "] but found " << the_new_date));
-        }
-    }
-    else {
-        if (the_new_date > start_ || the_new_date < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-                                                    << " : " << end_ << "] but found " << the_new_date));
-        }
+void RepeatDate::changeValue(long value) {
+    if (!step_range(start_, end_, delta_).contains(value)) {
+        throw std::runtime_error(
+            MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                << " : " << end_ << "] but found " << value));
     }
 
     // Check new value is in step. ECFLOW-325 repeat date 7
-    long julian_new_date = ecf::CalendarDate(the_new_date).as_julian_day().value();
+    long julian_new_date = ecf::CalendarDate(value).as_julian_day().value();
     long julian_start    = ecf::CalendarDate(start_).as_julian_day().value();
     long diff            = julian_new_date - julian_start;
-    if (diff % delta_ != 0) {
-        throw std::runtime_error(MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date " << the_new_date
+    if (!is_on_step_grid<long>(diff, delta_)) {
+        throw std::runtime_error(MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date " << value
                                                                      << " is not in line with the delta/step"));
     }
 
-    set_value(the_new_date);
+    set_value(value);
 }
 
-void RepeatDate::set_value(long the_new_date) {
+void RepeatDate::set_value(long value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence the value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    value_ = the_new_date;
+    value_ = value;
     update_repeat_genvar_value();
     incr_state_change_no();
 }
@@ -528,21 +844,15 @@ RepeatDateTime::RepeatDateTime(const std::string& variable, Instant start, Insta
                     << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        // assert end => start
-        if (!(end >= start)) {
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta_ > Duration{std::chrono::seconds{0}}) {
             throw std::runtime_error(MESSAGE(
                 "Invalid Repeat datetime: The end must be greater than the start date+time, when delta is positive "
                 << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
-    }
-    else {
-        // assert start >= end
-        if (!(start >= end)) {
-            throw std::runtime_error(MESSAGE(
-                "Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative "
-                << "repeat " << variable << " " << start << " " << end << " " << delta));
-        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative "
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 }
 
@@ -646,22 +956,7 @@ long RepeatDateTime::last_valid_value() const {
 }
 
 Instant RepeatDateTime::valid_value(const Instant& value) const {
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 long RepeatDateTime::last_valid_value_minus(int val) const {
@@ -751,57 +1046,96 @@ void RepeatDateTime::increment() {
     set_value(ecf::coerce_from_instant_into_seconds(new_value));
 }
 
-void RepeatDateTime::change(const std::string& newdate) {
+void RepeatDateTime::change(const std::string& value) {
+    if (is_option_string(value)) {
+        const std::string context = MESSAGE("RepeatDateTime::change: " << definition_of(*this));
+        auto options              = parse_options(value, context);
+        if (!options.begin && !options.end && !options.step) {
+            auto current = option_as_instant(*options.current, "--current", context); // as a plain value
+            changeValue(ecf::coerce_from_instant_into_seconds(current));
+            return;
+        }
 
-    long the_new_date;
+        Instant start  = options.begin ? option_as_instant(*options.begin, "--begin", context) : start_;
+        Instant end    = options.end ? option_as_instant(*options.end, "--end", context) : end_;
+        Duration delta = options.step ? option_as_duration(*options.step, "--step", context) : delta_;
+
+        // The resulting Repeat must be valid as a whole; the constructor checks it
+        RepeatDateTime candidate(name_, start, end, delta);
+        if (options.current) {
+            auto current = option_as_instant(*options.current, "--current", context);
+            candidate.changeValue(ecf::coerce_from_instant_into_seconds(current));
+        }
+        else {
+            // the options change the begin, the end or the step
+            auto step      = delta.as_seconds().count();
+            bool continues = step_range(start, end, delta).contains(value_) &&
+                             is_on_step_grid((value_ - start).as_seconds().count(), step);
+            if (!valid() && !continues) {
+                // A finished Repeat stays finished: its value moves one step past the new last value
+                auto last        = (end - start).as_seconds().count() / step * step;
+                candidate.value_ = start + Duration{std::chrono::seconds{last + step}};
+            }
+            else {
+                // Keep the value within the range, and on the step grid, moving it towards the start
+                auto clamped     = step_range(start, end, delta).clamp(value_);
+                auto offset      = (clamped - start).as_seconds().count();
+                candidate.value_ = start + Duration{std::chrono::seconds{offset / step * step}};
+            }
+        }
+
+        start_ = candidate.start_;
+        end_   = candidate.end_;
+        delta_ = candidate.delta_;
+        set_value(ecf::coerce_from_instant_into_seconds(candidate.value_));
+        return;
+    }
+
+    long new_date;
     try {
-        auto instant = Instant::parse(newdate);
-        the_new_date = ecf::coerce_from_instant_into_seconds(instant);
+        auto instant = Instant::parse(value);
+        new_date     = ecf::coerce_from_instant_into_seconds(instant);
     }
     catch (std::exception& e) {
         throw std::runtime_error(
-            MESSAGE("RepeatDateTime::change: " << toString() << " The new date(" << newdate << ") is not valid"));
+            MESSAGE("RepeatDateTime::change: " << toString() << " The new date(" << value << ") is not valid"));
     }
 
-    changeValue(the_new_date);
+    changeValue(new_date);
 }
 
-void RepeatDateTime::changeValue(long the_new_date) {
+void RepeatDateTime::changeValue(long value) {
 
-    auto new_date = ecf::coerce_from_seconds_into_instant(the_new_date);
-    if (delta_ > Duration{std::chrono::seconds{0}}) {
-        if (new_date < start_ || new_date > end_) {
+    auto new_date = ecf::coerce_from_seconds_into_instant(value);
+    if (!step_range(start_, end_, delta_).contains(new_date)) {
+        // n.b. the value is reported as an instant for a positive step, and in seconds for a negative step
+        if (delta_ > Duration{std::chrono::seconds{0}}) {
             throw std::runtime_error(
                 MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
                                                         << start_ << " : " << end_ << "] but found " << new_date));
         }
-    }
-    else {
-        if (new_date > start_ || new_date < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
-                                                        << start_ << " : " << end_ << "] but found " << the_new_date));
-        }
+        throw std::runtime_error(
+            MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                    << " : " << end_ << "] but found " << value));
     }
 
     // Ensure that new value is in step
     auto diff = new_date - start_;
-    if (diff.as_seconds().count() % delta_.as_seconds().count() != 0) {
-        throw std::runtime_error(MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date "
-                                                                         << the_new_date
+    if (!is_on_step_grid(diff.as_seconds().count(), delta_.as_seconds().count())) {
+        throw std::runtime_error(MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date " << value
                                                                          << " is not in line with the delta/step"));
     }
 
-    set_value(the_new_date);
+    set_value(value);
 }
 
-void RepeatDateTime::set_value(long the_new_date) {
+void RepeatDateTime::set_value(long value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence the value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    value_ = coerce_from_seconds_into_instant(the_new_date);
+    value_ = coerce_from_seconds_into_instant(value);
     update_repeat_genvar_value();
     incr_state_change_no();
 }
@@ -878,7 +1212,7 @@ void RepeatDateList::update_repeat_genvar() const {
     dom_.set_name(name_ + "_DD");
     dom_.set_value("<invalid>");
     dow_.set_name(name_ + "_DOW");
-    dom_.set_value("<invalid>");
+    dow_.set_value("<invalid>");
     julian_.set_name(name_ + "_JULIAN");
     julian_.set_value("<invalid>");
 
@@ -1046,15 +1380,22 @@ std::string RepeatDateList::prev_value_as_string() const {
     return value_as_string(index);
 }
 
-void RepeatDateList::change(const std::string& newValue) {
+void RepeatDateList::change(const std::string& value) {
+    const std::string context    = MESSAGE("RepeatDateList::change: " << definition_of(*this));
+    auto current                 = list_current_option(value);
+    const std::string& selection = current ? *current : value;
+    if (!current) {
+        refuse_range_option_on_list(value, context, "datelist");
+    }
+
     // See if it matches one of the dates
     int new_val = 0;
     try {
-        new_val = ecf::convert_to<int>(newValue);
+        new_val = ecf::convert_to<int>(selection);
     }
     catch (...) {
         throw std::runtime_error(MESSAGE(
-            "RepeatDateList::change: " << toString() << "\nThe new value " << newValue
+            "RepeatDateList::change: " << toString() << "\nThe new value " << selection
                                        << " is must be convertible to integer, and correspond to an existing value\n"));
     }
 
@@ -1065,35 +1406,35 @@ void RepeatDateList::change(const std::string& newValue) {
         }
     }
 
-    throw std::runtime_error(MESSAGE("RepeatDateList::change: " << toString() << "\nThe new value " << newValue
+    throw std::runtime_error(MESSAGE("RepeatDateList::change: " << toString() << "\nThe new value " << selection
                                                                 << " is not a valid member of the date list\n"));
 }
 
-void RepeatDateList::changeValue(long the_new_index) {
+void RepeatDateList::changeValue(long value) {
     if (list_.empty()) {
         return;
     }
 
-    if (the_new_index < 0 || the_new_index >= static_cast<int>(list_.size())) {
-        throw std::runtime_error(MESSAGE("RepeatDateList::changeValue:" << toString() << "\nThe new value '"
-                                                                        << the_new_index << "' is not a valid index "
+    if (value < 0 || value >= static_cast<int>(list_.size())) {
+        throw std::runtime_error(MESSAGE("RepeatDateList::changeValue:" << toString() << "\nThe new value '" << value
+                                                                        << "' is not a valid index "
                                                                         << "expected range[0-" << list_.size() - 1
-                                                                        << "] but found '" << the_new_index << "'"));
+                                                                        << "] but found '" << value << "'"));
     }
-    set_value(the_new_index);
+    set_value(value);
 }
 
-void RepeatDateList::set_value(long the_new_index) {
+void RepeatDateList::set_value(long value) {
     if (list_.empty()) {
         return;
     }
 
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence the value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    currentIndex_ = the_new_index;
+    currentIndex_ = value;
     update_repeat_genvar_value();
     incr_state_change_no();
 }
@@ -1360,14 +1701,21 @@ std::string RepeatDateTimeList::prev_value_as_string() const {
     return value_as_string(currentIndex_ - 1);
 }
 
-void RepeatDateTimeList::change(const std::string& newValue) {
+void RepeatDateTimeList::change(const std::string& value) {
+    const std::string context    = MESSAGE("RepeatDateTimeList::change: " << definition_of(*this));
+    auto current                 = list_current_option(value);
+    const std::string& selection = current ? *current : value;
+    if (!current) {
+        refuse_range_option_on_list(value, context, "datetimelist");
+    }
+
     Instant target;
     try {
-        target = Instant::parse(newValue);
+        target = Instant::parse(selection);
     }
     catch (std::exception&) {
         throw std::runtime_error(
-            MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << newValue
+            MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << selection
                                                    << " is not a valid datetime (yyyymmddTHHMMSS)"));
     }
 
@@ -1378,28 +1726,28 @@ void RepeatDateTimeList::change(const std::string& newValue) {
         }
     }
 
-    throw std::runtime_error(MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << newValue
+    throw std::runtime_error(MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << selection
                                                                     << " is not a valid member of the datetimelist\n"));
 }
 
-void RepeatDateTimeList::changeValue(long the_new_index) {
+void RepeatDateTimeList::changeValue(long value) {
     if (list_.empty()) {
         return;
     }
-    if (the_new_index < 0 || the_new_index >= static_cast<long>(list_.size())) {
-        throw std::runtime_error(
-            MESSAGE("RepeatDateTimeList::changeValue:"
-                    << toString() << "\nThe new value '" << the_new_index << "' is not a valid index "
-                    << "expected range[0-" << list_.size() - 1 << "] but found '" << the_new_index << "'"));
+    if (value < 0 || value >= static_cast<long>(list_.size())) {
+        throw std::runtime_error(MESSAGE("RepeatDateTimeList::changeValue:" << toString() << "\nThe new value '"
+                                                                            << value << "' is not a valid index "
+                                                                            << "expected range[0-" << list_.size() - 1
+                                                                            << "] but found '" << value << "'"));
     }
-    set_value(the_new_index);
+    set_value(value);
 }
 
-void RepeatDateTimeList::set_value(long the_new_index) {
+void RepeatDateTimeList::set_value(long value) {
     if (list_.empty()) {
         return;
     }
-    currentIndex_ = the_new_index;
+    currentIndex_ = value;
     update_repeat_genvar_value();
     incr_state_change_no();
 }
@@ -1448,6 +1796,23 @@ RepeatInteger::RepeatInteger(const std::string& variable, int start, int end, in
 }
 RepeatInteger::RepeatInteger() = default;
 
+void RepeatInteger::validate(const std::string& variable, int start, int end, int delta) {
+    if (delta == 0) {
+        throw std::runtime_error(MESSAGE("Invalid Repeat integer: the step cannot be zero: repeat integer "
+                                         << variable << " " << start << " " << end << " " << delta));
+    }
+    if (!step_range(start, end, delta).is_ordered()) {
+        if (delta > 0) {
+            throw std::runtime_error(
+                MESSAGE("Invalid Repeat integer: the end cannot be less than the start, when the step is positive: "
+                        << "repeat integer " << variable << " " << start << " " << end << " " << delta));
+        }
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat integer: the start cannot be less than the end, when the step is negative: "
+                    << "repeat integer " << variable << " " << start << " " << end << " " << delta));
+    }
+}
+
 bool RepeatInteger::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatInteger*>(rb);
     if (!rhs) {
@@ -1466,22 +1831,7 @@ long RepeatInteger::last_valid_value() const {
 }
 
 long RepeatInteger::valid_value(long value) const {
-    if (delta_ > 0) {
-        if (value < start_) {
-            return start_;
-        }
-        if (value > end_) {
-            return end_;
-        }
-        return value;
-    }
-    if (value > start_) {
-        return start_;
-    }
-    if (value < end_) {
-        return end_;
-    }
-    return value;
+    return step_range(start_, end_, delta_).clamp(value);
 }
 
 void RepeatInteger::increment() {
@@ -1489,44 +1839,91 @@ void RepeatInteger::increment() {
     incr_state_change_no();
 }
 
-void RepeatInteger::change(const std::string& newValue) {
-    long the_new_value = 0;
+void RepeatInteger::change(const std::string& value) {
+    if (is_option_string(value)) {
+        const std::string context = MESSAGE("RepeatInteger::change: " << definition_of(*this));
+        auto options              = parse_options(value, context);
+        if (!options.begin && !options.end && !options.step) {
+            changeValue(option_as_int(*options.current, "--current", context)); // as a plain value
+            return;
+        }
+
+        int start = options.begin ? option_as_int(*options.begin, "--begin", context) : start_;
+        int end   = options.end ? option_as_int(*options.end, "--end", context) : end_;
+        int delta = options.step ? option_as_int(*options.step, "--step", context) : delta_;
+
+        // The resulting Repeat must be valid as a whole
+        validate(name_, start, end, delta);
+
+        // The value completing the Repeat (one step past the last value) is written to checkpoints as an int
+        long long last       = start + (static_cast<long long>(end) - start) / delta * delta;
+        long long completion = last + delta;
+        if (completion < std::numeric_limits<int>::min() || completion > std::numeric_limits<int>::max()) {
+            throw std::runtime_error(MESSAGE(context << ": the value completing the Repeat (" << completion
+                                                     << ") is out of the range of integers"));
+        }
+
+        RepeatInteger candidate(name_, start, end, delta, value_);
+        if (options.current) {
+            long current = option_as_int(*options.current, "--current", context);
+            candidate.changeValue(current);
+        }
+        else {
+            // the options change the begin, the end or the step
+            bool continues =
+                step_range(start, end, delta).contains(value_) && is_on_step_grid<long>(value_ - start, delta);
+            if (!valid() && !continues) {
+                // A finished Repeat stays finished: its value moves one step past the new last value
+                candidate.value_ = static_cast<long>(completion);
+            }
+            else {
+                // Keep the value within the range, and on the step grid, moving it towards the start
+                long clamped     = step_range(start, end, delta).clamp(value_);
+                candidate.value_ = start + (clamped - start) / delta * delta;
+            }
+        }
+
+        start_ = candidate.start_;
+        end_   = candidate.end_;
+        delta_ = candidate.delta_;
+        set_value(candidate.value_);
+        return;
+    }
+
+    long new_value = 0;
     try {
-        the_new_value = ecf::convert_to<long>(newValue);
+        new_value = ecf::convert_to<long>(value);
     }
     catch (const ecf::bad_conversion&) {
-        throw std::runtime_error(MESSAGE("RepeatInteger::change:" << toString() << " The new value(" << newValue
+        throw std::runtime_error(MESSAGE("RepeatInteger::change:" << toString() << " The new value(" << value
                                                                   << ") is not convertible to an long"));
     }
-    changeValue(the_new_value);
+    changeValue(new_value);
 }
 
-void RepeatInteger::changeValue(long the_new_value) {
-    if (delta_ > 0) {
-        if (the_new_value < start_ || the_new_value > end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
-                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
-        }
+void RepeatInteger::changeValue(long value) {
+    if (!step_range(start_, end_, delta_).contains(value)) {
+        throw std::runtime_error(
+            MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_
+                                                  << "-" << end_ << "] but found " << value));
     }
-    else {
-        if (the_new_value > start_ || the_new_value < end_) {
-            throw std::runtime_error(
-                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
-                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
-        }
+
+    // A zero step (possible in a Repeat restored from a checkpoint) defines no step grid
+    if (delta_ != 0 && !is_on_step_grid<long>(value - start_, delta_)) {
+        throw std::runtime_error(MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value " << value
+                                                                       << " is not in line with the delta/step"));
     }
-    set_value(the_new_value);
+    set_value(value);
 }
 
-void RepeatInteger::set_value(long the_new_value) {
+void RepeatInteger::set_value(long value) {
     // To be used by Memento only. as it does no checking
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    value_ = the_new_value;
+    value_ = value;
     incr_state_change_no();
 }
 
@@ -1776,47 +2173,54 @@ std::string RepeatEnumerated::prev_value_as_string() const {
     return theEnums_[index];
 }
 
-void RepeatEnumerated::change(const std::string& newValue) {
+void RepeatEnumerated::change(const std::string& value) {
+    const std::string context    = MESSAGE("RepeatEnumerated::change: " << definition_of(*this));
+    auto current                 = list_current_option(value);
+    const std::string& selection = current ? *current : value;
+
     // See if it matches one of the enums
     for (size_t i = 0; i < theEnums_.size(); i++) {
-        if (theEnums_[i] == newValue) {
+        if (theEnums_[i] == selection) {
             currentIndex_ = i;
             incr_state_change_no();
             return;
         }
     }
+    if (!current) {
+        refuse_range_option_on_list(value, context, "enumerated");
+    }
 
     // If the value is convertible to an integer, treat as an index
     try {
-        auto the_new_value = ecf::convert_to<long>(newValue);
-        changeValue(the_new_value); // can throw if out of range
+        auto index = ecf::convert_to<long>(selection);
+        changeValue(index); // can throw if out of range
         return;
     }
     catch (const ecf::bad_conversion&) {
     }
 
     throw std::runtime_error(
-        MESSAGE("RepeatEnumerated::change:" << toString() << "\nThe new value " << newValue
+        MESSAGE("RepeatEnumerated::change:" << toString() << "\nThe new value " << selection
                                             << " is not a valid index or a member of the enumerated list\n"));
 }
 
-void RepeatEnumerated::changeValue(long the_new_value) {
-    if (the_new_value < 0 || the_new_value >= static_cast<int>(theEnums_.size())) {
-        throw std::runtime_error(MESSAGE("RepeatEnumerated::changeValue:" << toString() << "\nThe new value '"
-                                                                          << the_new_value << "' is not a valid index "
+void RepeatEnumerated::changeValue(long value) {
+    if (value < 0 || value >= static_cast<int>(theEnums_.size())) {
+        throw std::runtime_error(MESSAGE("RepeatEnumerated::changeValue:" << toString() << "\nThe new value '" << value
+                                                                          << "' is not a valid index "
                                                                           << "expected range[0-" << theEnums_.size() - 1
-                                                                          << "] but found '" << the_new_value << "'"));
+                                                                          << "] but found '" << value << "'"));
     }
-    set_value(the_new_value);
+    set_value(value);
 }
 
-void RepeatEnumerated::set_value(long the_new_value) {
+void RepeatEnumerated::set_value(long value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    currentIndex_ = the_new_value;
+    currentIndex_ = value;
     incr_state_change_no();
 }
 
@@ -1956,46 +2360,52 @@ std::string RepeatString::value_as_string(int index) const {
     return std::string{};
 }
 
-void RepeatString::change(const std::string& newValue) {
+void RepeatString::change(const std::string& value) {
+    const std::string context    = MESSAGE("RepeatString::change: " << definition_of(*this));
+    auto current                 = list_current_option(value);
+    const std::string& selection = current ? *current : value;
+
     // See if it matches one of the strings
     for (size_t i = 0; i < theStrings_.size(); i++) {
-        if (theStrings_[i] == newValue) {
+        if (theStrings_[i] == selection) {
             currentIndex_ = i;
             incr_state_change_no();
             return;
         }
     }
+    if (!current) {
+        refuse_range_option_on_list(value, context, "string");
+    }
 
     // If the value is convertible to an integer, treat as an index
     try {
-        long the_new_value = ecf::convert_to<int>(newValue);
-        changeValue(the_new_value);
+        long index = ecf::convert_to<int>(selection);
+        changeValue(index);
         return;
     }
     catch (const ecf::bad_conversion&) {
     }
 
-    throw std::runtime_error(MESSAGE("RepeatString::change: " << toString() << "\nThe new value " << newValue
+    throw std::runtime_error(MESSAGE("RepeatString::change: " << toString() << "\nThe new value " << selection
                                                               << " is not a valid index or member of the string list"));
 }
 
-void RepeatString::changeValue(long the_new_value) {
-    if (the_new_value < 0 || the_new_value >= static_cast<int>(theStrings_.size())) {
-        throw std::runtime_error(MESSAGE("RepeatString::change: " << toString() << " The new the integer "
-                                                                  << the_new_value << " is not a valid index "
-                                                                  << "expected range[0-" << theStrings_.size() - 1
-                                                                  << "]'"));
+void RepeatString::changeValue(long value) {
+    if (value < 0 || value >= static_cast<int>(theStrings_.size())) {
+        throw std::runtime_error(MESSAGE("RepeatString::change: "
+                                         << toString() << " The new the integer " << value << " is not a valid index "
+                                         << "expected range[0-" << theStrings_.size() - 1 << "]'"));
     }
-    set_value(the_new_value);
+    set_value(value);
 }
 
-void RepeatString::set_value(long the_new_value) {
+void RepeatString::set_value(long value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside the valid range.
+    // hence value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    currentIndex_ = the_new_value;
+    currentIndex_ = value;
     incr_state_change_no();
 }
 
@@ -2020,6 +2430,23 @@ bool RepeatDay::compare(RepeatBase* rb) const {
         return false;
     }
     return operator==(*rhs);
+}
+
+void RepeatDay::change(const std::string& value) {
+    if (!is_option_string(value)) {
+        return; // a repeat day has no current value: a plain value is ignored
+    }
+
+    const std::string context = MESSAGE("RepeatDay::change: " << definition_of(*this));
+    auto options              = parse_options(value, context);
+    refuse_option(options.begin, "--begin", context, "day");
+    refuse_option(options.end, "--end", context, "day");
+    refuse_option(options.current, "--current", context, "day");
+
+    if (options.step) {
+        step_ = option_as_int(*options.step, "--step", context);
+        incr_state_change_no();
+    }
 }
 
 std::string RepeatDay::dump() const {
