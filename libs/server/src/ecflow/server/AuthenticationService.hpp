@@ -32,7 +32,22 @@ public:
     void retrieve_passwd_file();
     void retrieve_custom_passwd_file();
 
+    ///
+    /// @brief Reloads the originally selected regular password file without changing active credentials on failure.
+    ///
+    /// @param[in,out] error Receives appended path and cause diagnostics on failure
+    /// @return True if the replacement file was parsed and installed successfully.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool reload_passwd_file(std::string& error);
+
+    ///
+    /// @brief Reloads the originally selected custom password file without changing active credentials on failure.
+    ///
+    /// @param[in,out] error Receives appended path and cause diagnostics on failure
+    /// @return True if the replacement file was parsed and installed successfully.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool reload_custom_passwd_file(std::string& error);
 
     static inline std::string_view default_passwd_file() { return "ecf.passwd"; }

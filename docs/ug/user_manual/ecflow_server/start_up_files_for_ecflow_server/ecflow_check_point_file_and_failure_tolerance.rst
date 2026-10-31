@@ -6,39 +6,72 @@
 ecFlow check point file and failure tolerance
 /////////////////////////////////////////////
 
+A checkpoint saves the workflow definitions and task states. The server can restore
+this saved state after a server or host failure.
 
-There are a number of reasons that could cause ecFlow to stop working
-(server crashes, the computer ecFlow is running on crashes, etc.). The
-ecFlow checkpoint file allows ecFlow to restart at the point of the
-last checkpoint before a failure. This gives reasonable tolerance
-against failures.
+Checkpoint files
+----------------
 
-When the server starts, if the checkpoint file exists and is readable
-and is complete, the ecFlow server recovers from that file. Once
-recovered the status of the server may not exactly reflect the real
-status of the suite, it could be up to a few minutes old. Tasks that
-were running may have now completed so the task status should be
-checked for consistency.
+.. list-table::
+   :header-rows: 1
 
-The checkpoint files can be read by any ecFlow running on any
-operating system
+   * - Setting
+     - Purpose
+   * - ``ECF_CHECK``
+     - The main checkpoint file.
+   * - ``ECF_CHECKOLD``
+     - The backup from an earlier checkpoint save.
 
-There are two separate checkpoint files::
+Recovery at startup
+-------------------
 
-  ECF_CHECK     ecf.check
-  ECF_CHECKOLD  ecf.check.b
+The server chooses a checkpoint as follows:
 
-When ecFlow needs to write a checkpoint file it first moves (renames)
-the previous file ECF_CHECK to ECF_CHECKOLD and then creates a new file
-with the name ECF_CHECK. This means that you should always have a file
-that is good. If a crash happens while writing ECF_CHECK, you can still
-recover from ECF_CHECKOLD (by copying its contents to ECF_CHECK),
-although that version is not quite as up to date.
+.. list-table::
+   :header-rows: 1
 
-.. tip::
+   * - Available files
+     - Result
+   * - ``ECF_CHECK`` can be loaded.
+     - Restore the workflow from that file. The backup is not used.
+   * - ``ECF_CHECK`` is missing or cannot be loaded, but ``ECF_CHECKOLD`` can be loaded.
+     - Restore the workflow from the backup automatically; no manual copy is needed.
+   * - Neither file exists.
+     - Start with an empty workflow.
+   * - At least one file exists, but neither can be loaded.
+     - Refuse to start, report the filenames and errors, and leave both files unchanged.
 
-    You can copy the checkpoint files between systems.
+Checkpoint files must be readable files containing a valid workflow definition.
+A directory cannot be used as a checkpoint file.
 
-Another ecFlow server can be started with the original server's
-checkpoint file and take over from the original ecFlow server host in
-case of a catastrophic system failure.
+After successful recovery:
+
+- The server starts in ``HALTED`` state; job scheduling does not resume automatically.
+- Workflow definitions and task states come from the chosen checkpoint.
+- Server settings, such as ``ECF_HOME`` and ``ECF_PORT``, come from the current startup
+  configuration rather than the saved server settings.
+
+.. warning::
+
+   Saved task states may be out of date. A task that was running when the checkpoint
+   was saved may have completed since then. Check those tasks before restarting job scheduling.
+
+Saving checkpoints
+------------------
+
+The server saves a new checkpoint in three steps:
+
+#. Write the workflow to a temporary file beside ``ECF_CHECK``.
+#. Move an existing non-empty ``ECF_CHECK`` to ``ECF_CHECKOLD``, replacing the old backup.
+#. Rename the completed temporary file to ``ECF_CHECK``.
+
+If writing the temporary file fails, the existing main checkpoint and backup remain unchanged.
+The backup contains an older snapshot; changes made after that snapshot are not recovered
+when starting from the backup.
+
+Recovery on another system
+--------------------------
+
+Checkpoint files can be copied between systems, including systems with different
+operating systems. A replacement ecFlow server can restore a copied checkpoint
+to take over after a host failure.

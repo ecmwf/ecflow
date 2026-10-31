@@ -5,6 +5,7 @@
 
 #include <array>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -1464,5 +1465,28 @@ private:
     const Port* port_;
     const Directory* cwd_;
 };
+
+///
+/// @brief Bounds the wait for a launched server to listen, or to exit after a rejected start-up.
+///
+/// The bound only delays a failing test, so it is generous enough for loaded machines and sanitizer builds.
+///
+inline constexpr std::chrono::seconds server_startup_timeout{30};
+
+///
+/// @brief Reports a check skipped because the account does not enforce file permissions (for example, root).
+///
+/// The skip is recorded as a test warning. When the environment variable ECF_TEST_REQUIRE_PERMISSIONS is set, the
+/// skip fails the test instead, so that an environment expected to enforce permissions cannot lose coverage silently.
+///
+/// @param[in] what Description of the skipped check
+///
+inline void skip_unenforced_permissions(const std::string& what) {
+    BOOST_REQUIRE_MESSAGE(std::getenv("ECF_TEST_REQUIRE_PERMISSIONS") == nullptr,
+                          "Cannot check " << what
+                                          << ": file permissions are not enforced for this account, but "
+                                             "ECF_TEST_REQUIRE_PERMISSIONS is set");
+    BOOST_TEST_WARN(false, "Skipping " << what << ": file permissions are not enforced for this account");
+}
 
 } // namespace ecf::test::scaffold

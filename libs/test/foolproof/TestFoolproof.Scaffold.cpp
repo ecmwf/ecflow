@@ -1,14 +1,123 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <boost/test/unit_test.hpp>
+#include <cerrno>
+#include <chrono>
+#include <csignal>
+#include <functional>
+#include <future>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <vector>
 
+#include <boost/test/unit_test.hpp>
+#include <sys/wait.h>
+
+#include "ServerStartup.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
 BOOST_AUTO_TEST_SUITE(T_Scaffold)
+
+///
+/// @brief Verifies repeated waits and termination after natural exit without reaping twice.
+///
+BOOST_AUTO_TEST_CASE(test_process_wait_caches_exit_status) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process process("/bin/sh", {"-c", "exit 23"});
+    const auto pid = process.pid();
+    BOOST_CHECK(process.is_running());
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+    BOOST_CHECK(!process.is_running());
+    // The child is reaped, so no other child of this test can have reused its id
+    int native_status = 0;
+    BOOST_CHECK_EQUAL(::waitpid(pid, &native_status, WNOHANG), -1);
+    BOOST_CHECK_EQUAL(errno, ECHILD);
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+    BOOST_CHECK_EQUAL(process.terminate(), 0);
+    BOOST_CHECK_EQUAL(process.wait(), 23);
+}
+
+///
+/// @brief Verifies that an object without a child can be terminated, but not waited for or asked for its id.
+///
+BOOST_AUTO_TEST_CASE(test_process_without_child) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process empty;
+    BOOST_CHECK(!empty.is_running());
+    BOOST_CHECK_EQUAL(empty.terminate(), 0);
+    BOOST_CHECK_THROW(empty.wait(), std::logic_error);
+    BOOST_CHECK_THROW(empty.pid(), std::logic_error);
+
+    Process owner("/bin/sh", {"-c", "exit 0"});
+    Process moved(std::move(owner));
+    BOOST_CHECK(!owner.is_running()); // NOLINT(bugprone-use-after-move): the moved-from state is under test
+    BOOST_CHECK_THROW(owner.wait(), std::logic_error);
+    BOOST_CHECK_EQUAL(moved.wait(), 0);
+}
+
+///
+/// @brief Verifies termination followed by repeated waits and cleanup without a second native reap.
+///
+BOOST_AUTO_TEST_CASE(test_process_terminate_then_wait) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    Process process("/bin/sh", {"-c", "exec sleep 30"});
+    static_assert(noexcept(process.terminate()));
+    BOOST_REQUIRE_EQUAL(process.terminate(), 0);
+    const int status = process.wait();
+    BOOST_CHECK_EQUAL(status, SIGKILL);
+    BOOST_CHECK_EQUAL(process.wait(), status);
+    BOOST_CHECK_EQUAL(process.terminate(), 0);
+    BOOST_CHECK_EQUAL(process.wait(), status);
+}
+
+///
+/// @brief Verifies that termination cooperates with a concurrent waiter instead of racing to reap the child.
+///
+/// The waiter usually, but not always, blocks before termination starts; the iterations cover both orders. Both
+/// requests run on detached threads with bounded waits, so that a deadlock fails the test instead of hanging it.
+///
+BOOST_AUTO_TEST_CASE(test_process_terminate_with_pending_wait) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    // Runs the request on a detached thread, which shares ownership of the process in case the test gives up
+    const auto run_detached = [](const std::shared_ptr<Process>& process, std::function<int(Process&)> request) {
+        std::packaged_task<int()> task([process, request = std::move(request)] { return request(*process); });
+        auto result = task.get_future();
+        std::thread(std::move(task)).detach();
+        return result;
+    };
+
+    for (int iteration = 0; iteration < 8; ++iteration) {
+        BOOST_TEST_CONTEXT("Wait/terminate interleaving " << iteration) {
+            auto process     = std::make_shared<Process>("/bin/sh", std::vector<std::string>{"-c", "exec sleep 30"});
+            auto completion  = run_detached(process, [](Process& p) { return p.wait(); });
+            auto termination = run_detached(process, [](Process& p) { return p.terminate(); });
+
+            BOOST_REQUIRE(termination.wait_for(server_startup_timeout) == std::future_status::ready);
+            BOOST_REQUIRE_EQUAL(termination.get(), 0);
+            BOOST_REQUIRE(completion.wait_for(server_startup_timeout) == std::future_status::ready);
+            const int status = completion.get();
+            BOOST_CHECK_EQUAL(status, SIGKILL);
+            BOOST_CHECK_EQUAL(process->wait(), status);
+        }
+    }
+}
 
 BOOST_AUTO_TEST_CASE(test_creating_host) {
     ECF_NAME_THIS_TEST();
@@ -78,6 +187,30 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
     BOOST_CHECK(fs::exists(port_a.lock_location()));
     BOOST_CHECK(fs::exists(port_b.lock_location()));
     BOOST_CHECK(fs::exists(port_c.lock_location()));
+}
+
+///
+/// @brief Verifies that a port reservation releases its own lock on destruction, and leaves other locks intact.
+///
+BOOST_AUTO_TEST_CASE(test_locking_releases_only_owned_port) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    auto foreign                = MakePort{}.with(AutomaticPortValue{}).create();
+    const auto foreign_contents = ecf::test::foolproof::read_file_bytes(foreign.lock_location());
+    fs::path owned_lock;
+    std::string owned_contents;
+    {
+        auto owned     = MakePort{}.with(AutomaticPortValue{}).create();
+        owned_lock     = owned.lock_location();
+        owned_contents = ecf::test::foolproof::read_file_bytes(owned_lock);
+    }
+
+    // Another test may acquire the released port immediately, so only the owned reservation must be gone
+    BOOST_CHECK_MESSAGE(!fs::exists(owned_lock) || ecf::test::foolproof::read_file_bytes(owned_lock) != owned_contents,
+                        "Released port reservation remains: " << owned_lock);
+    BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(foreign.lock_location()), foreign_contents);
 }
 
 BOOST_AUTO_TEST_CASE(test_locking_known_udp_ports) {

@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <initializer_list>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -1109,6 +1110,73 @@ BOOST_AUTO_TEST_CASE(test_authentication_reload_error_is_appended_to_existing_me
     BOOST_CHECK(!service.reload_passwd_file(error));
     BOOST_CHECK_EQUAL(error.rfind("prefix: ", 0), 0u);
     BOOST_CHECK(error.size() > std::string("prefix: ").size());
+}
+
+///
+/// @brief Verifies that a failed reload of either password file installs nothing and keeps the active users.
+///
+/// Replacements:
+/// - malformed after a valid entry, which a partial load would install;
+/// - a directory at the selected path;
+/// - malformed from the first line.
+///
+BOOST_AUTO_TEST_CASE(test_authentication_failed_reload_keeps_previous_users) {
+    ECF_NAME_THIS_TEST();
+
+    for (const bool custom : {false, true}) {
+        for (const std::string replacement : {"partial", "directory", "malformed"}) {
+            BOOST_TEST_CONTEXT((custom ? "Custom" : "Regular") << " file, replacement " << replacement) {
+                auto passwd     = std::make_unique<WithTestFile>(AutomaticTestFile{"ecf.passwd"},
+                                                             passwd_file_content({{"alice", "secret"}}));
+                const auto path = passwd->path();
+
+                AuthenticationService service;
+                if (custom) {
+                    service.set_custom_passwd_file(path.string());
+                }
+                else {
+                    service.set_passwd_file(path.string());
+                }
+                std::string error;
+                BOOST_REQUIRE_MESSAGE(service.valid(test_host, test_port, error), error);
+
+                const auto make = [custom](const std::string& user, const std::string& password) {
+                    return custom ? Identity::make_custom_user(user, encrypted(user, password))
+                                  : Identity::make_user(user, encrypted(user, password));
+                };
+                BOOST_REQUIRE(service.is_authentic(make("alice", "secret")));
+
+                if (replacement == "directory") {
+                    passwd.reset();
+                    fs::create_directory(path);
+                }
+                else {
+                    std::ofstream output(path);
+                    output << (replacement == "partial"
+                                   ? passwd_file_content({{"mallory", "intruder"}}) + "not_a_valid_entry\n"
+                                   : std::string("not_a_version\n"));
+                }
+
+                error = "prefix: ";
+                const bool reloaded =
+                    custom ? service.reload_custom_passwd_file(error) : service.reload_passwd_file(error);
+                BOOST_CHECK(!reloaded);
+                BOOST_CHECK_EQUAL(error.rfind("prefix: ", 0), 0u);
+                BOOST_CHECK_MESSAGE(error.find(path.string()) != std::string::npos, error);
+                const std::string cause = replacement == "directory" ? "is not a regular file"
+                                          : custom                   ? "Could not reload ECF_CUSTOM_PASSWD file"
+                                                                     : "Could not reload ECF_PASSWD file";
+                BOOST_CHECK_MESSAGE(error.find(cause) != std::string::npos, error);
+
+                BOOST_CHECK(service.is_authentic(make("alice", "secret")));
+                BOOST_CHECK(!service.is_authentic(make("mallory", "intruder")));
+
+                if (replacement == "directory") {
+                    fs::remove(path);
+                }
+            }
+        }
+    }
 }
 
 // ===========================================================================

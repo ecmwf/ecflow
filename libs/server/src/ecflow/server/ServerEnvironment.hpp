@@ -55,7 +55,15 @@ public:
 
     ~ServerEnvironment();
 
-    /// return true if option are valid false and error message otherwise
+    ///
+    /// @brief Validates the effective server configuration and loads optional security files.
+    ///
+    /// The checkpoint interval must be positive after configuration and environment overrides have been applied.
+    ///
+    /// @param[in,out] errorMsg Receives diagnostic details for an invalid configuration or security file
+    /// @return True if the configuration and optional security files are valid; false otherwise.
+    /// @throws std::filesystem::filesystem_error if a security-file path cannot be inspected.
+    ///
     bool valid(std::string& errorMsg) const;
 
     /// return the directory path associated with smshome
@@ -170,14 +178,27 @@ public:
     ///        ECF_HOST(jobs).   ECF_HOST is the server machine host name
     void variables(std::vector<std::pair<std::string, std::string>>&) const;
 
-    /// Ask the server to reload file the hold list of users and their access rights
-    /// The white list file is specified by the environment variable ECF_LISTS
-    /// This allows/disallows user access on the live server
-    /// Return true if file is reloaded ok, else false and error message if:
-    /// 	a/ File does not exist
-    ///  	b/ File is empty
-    ///  	c/ Errors in parsing file
-    /// If errors arise the exist user still stay in affect
+    ///
+    /// @brief Reloads the startup-selected whitelist while preserving active permissions on failure.
+    ///
+    /// Behaviour:
+    /// - Reuses the startup-selected ECF_LISTS path without rereading configuration.
+    /// - Updates live-server read/write permissions after successful parsing.
+    /// - Accepts empty and version-only whitelists without whitelist restrictions.
+    /// - Leaves password authentication unchanged.
+    ///
+    /// Reload fails if the selected file is:
+    /// - Missing.
+    /// - Unreadable.
+    /// - Not a regular file.
+    /// - Malformed.
+    ///
+    /// Failed reloads leave previously active permissions unchanged.
+    ///
+    /// @param[in,out] errorMsg Receives appended path and cause diagnostics on failure
+    /// @return True if replacement permissions were parsed and installed successfully.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool reloadWhiteListFile(std::string& errorMsg);
 
     ecf::AuthenticationService& authentication() { return authentication_service_; }
@@ -202,16 +223,57 @@ public:
     static std::vector<std::string> expected_variables();
 
 private:
+    ///
+    /// @brief Selects startup settings and validates required strings and the effective profiling threshold.
+    ///
+    /// Command-line syntax is parsed first. Help and version requests return without reading configuration
+    /// or environment settings, applying transport options or accessing runtime files.
+    ///
+    /// @param[in] cl Command-line tokens, applied after configuration and environment settings
+    /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
+    /// @throws ServerEnvironmentException if parsing, required-setting validation or server-home access fails.
+    /// @throws std::exception if command-line parsing or runtime file setup fails.
+    ///
     void init(const CommandLine& cl, const std::string& path_to_config_file);
 
-    ///  defaults are read from a config file
+    ///
+    /// @brief Reads configuration settings and applies built-in defaults for unspecified options.
+    ///
+    /// A missing or empty configuration file uses the built-in defaults. An existing file must be readable
+    /// and regular. File-access and parsing failures stop initialisation
+    /// before environment overrides or startup side effects are applied.
+    /// An explicitly specified checkpoint mode must match one of the supported names.
+    ///
+    /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
+    /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
+    /// @throws ServerEnvironmentException if file access, parsing or checkpoint-mode validation fails, including the
+    /// path and cause.
+    ///
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
 
-    /// Get the standard environment variables, overwrite any settings from config file
+    ///
+    /// @brief Applies environment overrides and resolves a relative server home against the startup directory.
+    ///
+    /// A relative server home becomes an absolute path in normal form, without dot segments or a trailing separator.
+    /// Absolute server-home paths are preserved. An empty value is left for startup validation to reject.
+    ///
+    /// @param[in,out] log_file_name Configured log filename, replaced when ECF_LOG is set in the environment
+    /// @throws ServerEnvironmentException if a numeric environment setting cannot be parsed.
+    /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
+    ///
     void read_environment_variables(std::string& log_file_name);
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
+    ///
+    /// @brief Loads a regular whitelist file and installs its rules only after successful parsing.
+    ///
+    /// Failed parsing leaves the previously active permissions unchanged.
+    ///
+    /// @param[in,out] err Receives appended diagnostics identifying the selected path and cause on failure
+    /// @return True if the file was loaded and its authorisation rules were installed.
+    /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+    ///
     bool load_whitelist_file(std::string& err) const;
 
 #ifdef ECF_OPENSSL
@@ -237,7 +299,8 @@ private:
     int checkpt_save_time_alarm_;
     int submitJobsInterval_;
     int ecf_prune_node_log_;
-    bool jobGeneration_; // used in debug/test mode only
+    int ecf_task_threshold_; ///< Effective signed millisecond threshold, validated before updating the profiler.
+    bool jobGeneration_;     // used in debug/test mode only
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

@@ -22,6 +22,19 @@ void AuthenticationService::init(const Host& host, const std::string& port) {
 
 namespace {
 
+///
+/// @brief Loads a present regular password file and checks for an identity matching this server.
+///
+/// @param[in] kind Human-readable password-file kind for diagnostics
+/// @param[in] passwd_file Selected path; an absent file leaves authentication unconfigured
+/// @param[in] debug_ Whether password-parser debug output is enabled
+/// @param[out] passwd_db Password database populated from the selected file
+/// @param[in] host Server hostname required in at least one entry
+/// @param[in] port Server port required in at least one entry
+/// @param[out] error Failure diagnostic containing the selected path and cause
+/// @return True when the file is absent or contains valid credentials for this server.
+/// @throws std::filesystem::filesystem_error if filesystem inspection fails.
+///
 bool valid_passwd(std::string_view kind,
                   const std::string& passwd_file,
                   bool debug_,
@@ -39,6 +52,12 @@ bool valid_passwd(std::string_view kind,
         return true;
     }
 
+    if (!fs::is_regular_file(passwd_file)) {
+        error = std::string(kind) + " file '" + passwd_file + "' is not a regular file";
+        std::cout << error << '\n';
+        return false;
+    }
+
     std::cout << "*** " << kind << " file located at '" << passwd_file << "'\n";
     if (passwd_db.load(passwd_file, debug_, error)) {
         std::cout << "*** " << kind << " file successfully loaded\n";
@@ -49,8 +68,9 @@ bool valid_passwd(std::string_view kind,
     }
 
     if (!passwd_db.check_at_least_one_user_with_host_and_port(host, port)) {
-        std::cout << "!!! " << kind << " file '" << passwd_file
-                  << "' does not contain any users with access on this server\n";
+        error = std::string(kind) + " file '" + passwd_file +
+                "' does not contain any users with access on this server (" + host + ":" + port + ")";
+        std::cout << "!!! " << error << '\n';
         return false;
     }
 
@@ -114,13 +134,21 @@ bool AuthenticationService::reload_passwd_file(std::string& error) {
         return false;
     }
 
-    // Only override valid users if we successfully opened and parsed file
+    if (!fs::is_regular_file(ecf_passwd_file_)) {
+        error += "ECF_PASSWD file '" + ecf_passwd_file_ + "' is not a regular file";
+        return false;
+    }
+
     std::cout << "*** Password file to be loaded from '" << ecf_passwd_file_ << "'\n";
-    auto loaded = passwd_file_.load(ecf_passwd_file_, debug_, error);
+    PasswdFile replacement;
+    std::string parse_error;
+    const bool loaded = replacement.load(ecf_passwd_file_, debug_, parse_error);
     if (loaded) {
+        passwd_file_.swap(replacement);
         std::cout << "*** Password file loaded [OK]\n";
     }
     else {
+        error += "Could not reload ECF_PASSWD file '" + ecf_passwd_file_ + "': " + parse_error;
         std::cout << "*** Password file loaded [FAIL]: due to " << error << "\n";
     }
     return loaded;
@@ -144,10 +172,20 @@ bool AuthenticationService::reload_custom_passwd_file(std::string& error) {
         return false;
     }
 
-    // Only override valid users if we successfully opened and parsed file
-    auto loaded = passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error);
+    if (!fs::is_regular_file(ecf_passwd_custom_file_)) {
+        error += "ECF_CUSTOM_PASSWD file '" + ecf_passwd_custom_file_ + "' is not a regular file";
+        return false;
+    }
+
+    PasswdFile replacement;
+    std::string parse_error;
+    const bool loaded = replacement.load(ecf_passwd_custom_file_, debug_, parse_error);
     if (loaded) {
-        std::cout << "Password file " << ecf_passwd_file_ << " opening...\n";
+        passwd_custom_file_.swap(replacement);
+        std::cout << "Custom password file " << ecf_passwd_custom_file_ << " reloaded\n";
+    }
+    else {
+        error += "Could not reload ECF_CUSTOM_PASSWD file '" + ecf_passwd_custom_file_ + "': " + parse_error;
     }
     return loaded;
 }

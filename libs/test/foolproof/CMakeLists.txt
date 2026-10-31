@@ -13,6 +13,8 @@ ecflow_add_test(
   SOURCES
     # Test entry point
     TestFoolproof_main.cpp # test entry point
+    # Helpers shared with the server start-up tests
+    ServerStartup.hpp
     # Test sources
     TestFoolproof.Basic.cpp
     TestFoolproof.InLimit.cpp
@@ -30,6 +32,42 @@ ecflow_add_test(
     ecflow_client
   ARGS
     --random=1
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
+)
+
+ecflow_add_test(
+  TARGET
+    s_foolproof.server_startup
+  LABELS
+    integration nightly slow
+  SOURCES
+    # Test entry point
+    TestServerStartup_main.cpp # test entry point
+    # Helpers shared by the server start-up tests
+    ServerStartup.hpp
+    # Test sources
+    TestFoolproof.ServerObservability.cpp
+    TestFoolproof.ServerOptions.cpp
+    TestFoolproof.ServerPaths.cpp
+    TestFoolproof.ServerRecovery.cpp
+    TestFoolproof.ServerReload.cpp
+    TestFoolproof.ServerSecurity.cpp
+    TestFoolproof.ServerValidation.cpp
+  LIBS
+    ecflow_all
+    test_scaffold
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    ${ADDITIONAL_BOOST_COMPONENTS}
+  DEPENDS
+    ecflow_server
+    ecflow_client
+  ARGS
+    --random=1
+  ENVIRONMENT
+    # The launched servers listen on ports reserved from this base (range 17000-17999)
+    ECF_TEST_SERVER_STARTUP_PORT_BASE=17000
   CONDITION
     ENABLE_TESTS
   FORMAT
