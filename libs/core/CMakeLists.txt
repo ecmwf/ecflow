@@ -40,6 +40,7 @@ set(test_srcs
   test/TestCereal.cpp
   test/TestCerealOptionalNVP.cpp
   test/TestCerealWithHierarchy.cpp
+  test/TestCfgConfiguration.cpp
   test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp
   test/TestCollections.cpp
