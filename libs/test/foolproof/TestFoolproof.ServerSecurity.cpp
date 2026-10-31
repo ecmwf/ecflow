@@ -42,7 +42,7 @@ void check_server_security(const std::array<std::string, 3>& kinds,
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
 
     const User regular{ecf::get_login_name(), "regular_secret", "rw"};
     const User writer{"security_writer", "writer_secret", "rw"};

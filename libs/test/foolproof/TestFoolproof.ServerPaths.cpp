@@ -41,7 +41,7 @@ void check_server_runtime_paths(bool from_environment, const std::string& form) 
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
 
     const User allowed{"path_reader", "selected_secret", "rw"};
     const User excluded{"excluded_reader", "excluded_secret", "rw"};
@@ -213,7 +213,7 @@ void check_server_home_failure(const std::string& failure, bool from_environment
 
     WithTestFile configuration(NamedTestFile{(root.path() / "server_environment.cfg").string()}, config);
 
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
 
     Process process(
         ecf::test::foolproof::ecflow_server_executable(), {"--port=" + std::to_string(port.value())}, root.path());
@@ -263,7 +263,7 @@ void check_server_relative_home(const std::string& source, const std::string& ho
     }
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
 
     auto server = MakeServer{}.with(host).with(port).with(startup).launch();
     BOOST_REQUIRE_MESSAGE(server.ok(), (server.ok() ? "" : server.reason()));

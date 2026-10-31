@@ -79,7 +79,7 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
 
     const User regular{ecf::get_login_name(), "original_regular", "rw"};
     const User rotated_regular{regular.username, "rotated_regular", "rw"};

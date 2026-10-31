@@ -97,10 +97,10 @@ void check_server_recovery(const std::string& primary,
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
     // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
-    auto config_decoy                          = MakePort{}.with(AutomaticPortValue{}).create();
-    auto environment_decoy                     = MakePort{}.with(AutomaticPortValue{}).create();
+    auto config_decoy                          = ecf::test::foolproof::reserve_port();
+    auto environment_decoy                     = ecf::test::foolproof::reserve_port();
     const std::array<std::string, 2> kinds     = {primary, backup};
     const std::array<std::string, 2> names     = {"ECF_CHECK", "ECF_CHECKOLD"};
     const std::array<std::string, 2> filenames = {"primary.check", "backup.check"};
@@ -301,7 +301,7 @@ void check_runtime_restore(const std::string& backup) {
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
     WithTestFile configuration(NamedTestFile{(startup.path() / "server_environment.cfg").string()},
                                "ECF_HOME = " + home.string() +
                                    "\nECF_LOG = server.log\nECF_CHECKMODE = CHECK_NEVER\n"

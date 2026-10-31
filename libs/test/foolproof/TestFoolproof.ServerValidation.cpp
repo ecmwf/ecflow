@@ -39,7 +39,7 @@ void check_rejected_initialisation(const std::string& content,
     const auto log_path    = startup.path() / "server.log";
     ClearedServerEnvironment cleared;
 
-    auto port          = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port          = ecf::test::foolproof::reserve_port();
     std::string config = content;
     if (content.find("ECF_LOG =") == std::string::npos) {
         config += "ECF_LOG = server.log\n";

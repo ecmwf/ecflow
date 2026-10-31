@@ -5,10 +5,12 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <future>
 #include <iterator>
 #include <list>
+#include <stdexcept>
 #include <string>
 #include <thread>
 
@@ -61,6 +63,23 @@ private:
 ///
 inline fs::path ecflow_server_executable() {
     return fs::path(CMAKE_ECFLOW_BUILD_DIR()) / "bin" / "ecflow_server";
+}
+
+///
+/// @brief Reserves a free local port, scanning upwards from the base port assigned to the server start-up tests.
+///
+/// @return The reserved port, locked for the lifetime of the returned object.
+/// @throws std::runtime_error if ECF_TEST_SERVER_STARTUP_PORT_BASE is not set (it is set by the CMake test
+/// definition).
+///
+inline ecf::test::scaffold::Port reserve_port() {
+    const char* base = std::getenv("ECF_TEST_SERVER_STARTUP_PORT_BASE");
+    if (base == nullptr) {
+        throw std::runtime_error(
+            "ECF_TEST_SERVER_STARTUP_PORT_BASE is not defined (it is set by the CMake test definition)");
+    }
+    const auto base_port = static_cast<ecf::test::scaffold::Port::port_t>(std::stoul(base));
+    return ecf::test::scaffold::MakePort{}.with(ecf::test::scaffold::AutomaticPortValue{base_port}).create();
 }
 
 ///

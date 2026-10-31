@@ -38,7 +38,7 @@ void check_server_cli_exit(std::vector<std::string> options,
 
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
     for (auto& option : options) {
         for (const auto& [placeholder, value] : std::vector<std::pair<std::string, std::string>>{
                  {"OTHER_PORT", std::to_string(port.value() + 1)}, {"PORT", std::to_string(port.value())}}) {
@@ -172,10 +172,10 @@ void check_server_argument_forms(bool equals_port, bool equals_interval) {
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
     // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
-    auto config_decoy      = MakePort{}.with(AutomaticPortValue{}).create();
-    auto environment_decoy = MakePort{}.with(AutomaticPortValue{}).create();
+    auto config_decoy      = ecf::test::foolproof::reserve_port();
+    auto environment_decoy = ecf::test::foolproof::reserve_port();
     WithTestEnvironmentVariable environment_port("ECF_PORT", std::to_string(environment_decoy.value()));
     WithTestFile config(NamedTestFile{(startup.path() / "server_environment.cfg").string()},
                         "ECF_PORT = " + std::to_string(config_decoy.value()) + "\nECF_INTERVAL = 19\n");

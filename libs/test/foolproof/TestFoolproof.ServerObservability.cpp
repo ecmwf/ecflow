@@ -38,10 +38,10 @@ void check_observed_configuration(bool environment_overrides) {
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     auto host = MakeHost{}.create();
-    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+    auto port = ecf::test::foolproof::reserve_port();
     // The losing port settings are reserved too, so that a precedence regression cannot bind another test's port
-    auto config_decoy           = MakePort{}.with(AutomaticPortValue{}).create();
-    auto environment_decoy      = MakePort{}.with(AutomaticPortValue{}).create();
+    auto config_decoy           = ecf::test::foolproof::reserve_port();
+    auto environment_decoy      = ecf::test::foolproof::reserve_port();
     const std::string port_text = std::to_string(port.value());
     const auto prefix           = host.value() + "." + port_text + ".";
     const std::string config_text =
@@ -161,7 +161,7 @@ void check_failed_start_cleanup(const std::string& stage) {
     ecf::test::foolproof::ClearedServerEnvironment cleared;
 
     {
-        auto port                        = MakePort{}.with(AutomaticPortValue{}).create();
+        auto port                        = ecf::test::foolproof::reserve_port();
         std::vector<std::string> options = {"--port=" + std::to_string(port.value())};
         std::string config =
             "ECF_LOG = " + (home / "server.log").string() +

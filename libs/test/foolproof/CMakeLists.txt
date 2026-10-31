@@ -39,6 +39,9 @@ ecflow_add_test(
     ecflow_client
   ARGS
     --random=1
+  ENVIRONMENT
+    # The launched servers listen on ports reserved from this base (range 17000-17999)
+    ECF_TEST_SERVER_STARTUP_PORT_BASE=17000
   CONDITION
     ENABLE_TESTS
   FORMAT
