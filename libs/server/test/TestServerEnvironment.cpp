@@ -1090,7 +1090,8 @@ BOOST_AUTO_TEST_CASE(test_server_information_options_bypass_settings) {
 /// @brief Verifies that a failed whitelist reload reports the selected file and its cause, and that a corrected
 /// file can be reloaded afterwards.
 ///
-/// Permissions kept in force after a failed reload are verified end to end by s_foolproof (T_ServerReload).
+/// Permissions kept in force after a failed reload are verified end to end by s_foolproof.server_startup
+/// (T_ServerReload).
 ///
 BOOST_AUTO_TEST_CASE(test_server_whitelist_failed_reload_reports_cause) {
     ECF_NAME_THIS_TEST();

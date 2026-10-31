@@ -21,7 +21,7 @@
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
 ///
-/// Helpers shared by the s_foolproof suites that launch ecflow_server directly, to check its start-up.
+/// Helpers shared by the s_foolproof.server_startup suites, which launch ecflow_server directly to check its start-up.
 ///
 namespace ecf::test::foolproof {
 

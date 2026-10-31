@@ -13,7 +13,7 @@ ecflow_add_test(
   SOURCES
     # Test entry point
     TestFoolproof_main.cpp # test entry point
-    # Helpers shared by the server start-up tests
+    # Helpers shared with the server start-up tests
     ServerStartup.hpp
     # Test sources
     TestFoolproof.Basic.cpp
@@ -22,6 +22,32 @@ ecflow_add_test(
     TestFoolproof.NodeExtern.cpp
     TestFoolproof.PasswordsAndWhiteLists.cpp
     TestFoolproof.Scaffold.cpp
+  LIBS
+    ecflow_all
+    test_scaffold
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    ${ADDITIONAL_BOOST_COMPONENTS}
+  DEPENDS
+    ecflow_server
+    ecflow_client
+  ARGS
+    --random=1
+  CONDITION
+    ENABLE_TESTS
+  FORMAT
+)
+
+ecflow_add_test(
+  TARGET
+    s_foolproof.server_startup
+  LABELS
+    integration nightly slow
+  SOURCES
+    # Test entry point
+    TestServerStartup_main.cpp # test entry point
+    # Helpers shared by the server start-up tests
+    ServerStartup.hpp
+    # Test sources
     TestFoolproof.ServerObservability.cpp
     TestFoolproof.ServerOptions.cpp
     TestFoolproof.ServerPaths.cpp
