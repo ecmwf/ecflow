@@ -40,8 +40,10 @@ set(test_srcs
   test/TestCereal.cpp
   test/TestCerealOptionalNVP.cpp
   test/TestCerealWithHierarchy.cpp
+  test/TestCfgCTree.cpp
   test/TestCfgCatalogue.cpp
   test/TestCfgConfiguration.cpp
+  test/TestCfgJsonReader.cpp
   test/TestCfgServerCatalogue.cpp
   test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp
