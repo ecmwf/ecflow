@@ -62,7 +62,7 @@ Setting port_setting() {
     return Setting(port_key,
                    Type::Integer,
                    value_of<std::int64_t>(3141),
-                   Names{"ECF_PORT", "ECF_PORT", "port"},
+                   Names{"ECF_PORT", "/ecflow/server/variables/ECF_PORT", "ECF_PORT", "port"},
                    checks::range(1024, 49150));
 }
 
@@ -84,9 +84,10 @@ BOOST_AUTO_TEST_CASE(test_setting_describes_an_input) {
     BOOST_CHECK(setting.type() == Type::Integer);
     BOOST_REQUIRE(setting.default_value().has_value());
     BOOST_CHECK(*setting.default_value() == value_of<std::int64_t>(3141));
-    BOOST_CHECK(setting.names().file == std::optional<std::string>("ECF_PORT"));
-    BOOST_CHECK(setting.names().environment == std::optional<std::string>("ECF_PORT"));
-    BOOST_CHECK(setting.names().option == std::optional<std::string>("port"));
+    BOOST_CHECK(setting.names().env_cfg == std::optional<std::string>("ECF_PORT"));
+    BOOST_CHECK(setting.names().ecf_cfg == std::optional<std::string>("/ecflow/server/variables/ECF_PORT"));
+    BOOST_CHECK(setting.names().env == std::optional<std::string>("ECF_PORT"));
+    BOOST_CHECK(setting.names().cli == std::optional<std::string>("port"));
 }
 
 BOOST_AUTO_TEST_CASE(test_setting_without_default_or_names) {
@@ -94,9 +95,10 @@ BOOST_AUTO_TEST_CASE(test_setting_without_default_or_names) {
 
     const Setting setting(Key("ecflow.server.http"), Type::Boolean, std::nullopt, Names{});
     BOOST_CHECK(!setting.default_value().has_value());
-    BOOST_CHECK(!setting.names().file.has_value());
-    BOOST_CHECK(!setting.names().environment.has_value());
-    BOOST_CHECK(!setting.names().option.has_value());
+    BOOST_CHECK(!setting.names().env_cfg.has_value());
+    BOOST_CHECK(!setting.names().ecf_cfg.has_value());
+    BOOST_CHECK(!setting.names().env.has_value());
+    BOOST_CHECK(!setting.names().cli.has_value());
 }
 
 BOOST_AUTO_TEST_CASE(test_setting_refuses_invalid_default) {
@@ -166,7 +168,7 @@ BOOST_AUTO_TEST_CASE(test_parse_with_custom_rule) {
     const auto setting = Setting(Key("ecflow.server.variables@ECF_DEBUG_SERVER"),
                                  Type::Boolean,
                                  value_of(false),
-                                 Names{std::nullopt, "ECF_DEBUG_SERVER", "debug"},
+                                 Names{std::nullopt, std::nullopt, "ECF_DEBUG_SERVER", "debug"},
                                  {},
                                  [](std::string_view) { return Value(true); });
     for (const std::string text : {"", "0", "false", "anything"}) {
@@ -275,6 +277,50 @@ BOOST_AUTO_TEST_CASE(test_catalogue_refuses_duplicate_keys) {
     ECF_NAME_THIS_TEST();
 
     check_error([] { Catalogue({port_setting(), port_setting()}); }, "ECF_PORT");
+}
+
+BOOST_AUTO_TEST_CASE(test_path_of_key) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_EQUAL(ecf::cfg::path_of(Key("a")), "/a");
+    BOOST_CHECK_EQUAL(ecf::cfg::path_of(Key("a.b.c")), "/a/b/c");
+    BOOST_CHECK_EQUAL(ecf::cfg::path_of(Key("a.b@c")), "/a/b/c");
+    BOOST_CHECK_EQUAL(ecf::cfg::path_of(Key("ecflow.server.variables@ECF_PORT")), "/ecflow/server/variables/ECF_PORT");
+}
+
+BOOST_AUTO_TEST_CASE(test_setting_refuses_name_in_file_other_than_its_path) {
+    ECF_NAME_THIS_TEST();
+
+    // The name in <host>.<port>.ecf.cfg is the path designated by the key
+    for (const std::string name : {"/ecflow/server/variables/ECF_HOME",
+                                   "ecflow/server/variables/ECF_PORT",
+                                   "/ecflow/server/variables/ecf_port",
+                                   "/ecflow/server/variables@ECF_PORT",
+                                   "ecflow.server.variables@ECF_PORT",
+                                   ""}) {
+        BOOST_TEST_CONTEXT("name: '" << name << "'") {
+            check_error([&] { Setting(port_key, Type::Integer, std::nullopt, Names{std::nullopt, name}); },
+                        "/ecflow/server/variables/ECF_PORT");
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_catalogue_refuses_ambiguous_keys) {
+    ECF_NAME_THIS_TEST();
+
+    auto boolean = [](const std::string& key) { return Setting(Key(key), Type::Boolean, std::nullopt, Names{}); };
+
+    // The same place
+    check_error([&] { Catalogue({boolean("a.b.c"), boolean("a.b@c")}); }, "'a.b.c' and 'a.b@c'");
+    // A place inside another
+    check_error([&] { Catalogue({boolean("a.b"), boolean("a.b.c")}); }, "'a.b' and 'a.b.c'");
+    check_error([&] { Catalogue({boolean("a.b"), boolean("a.b@c")}); }, "'a.b' and 'a.b@c'");
+    check_error([&] { Catalogue({boolean("a@b"), boolean("a.b.c")}); }, "'a@b' and 'a.b.c'");
+    check_error([&] { Catalogue({boolean("a.b"), boolean("a.b_c"), boolean("a.b.c.d")}); }, "'a.b' and 'a.b.c.d'");
+
+    // Places side by side are accepted
+    const Catalogue catalogue({boolean("a.b"), boolean("a.bc"), boolean("a.b_c"), boolean("a.c@b"), boolean("a@bd")});
+    BOOST_CHECK_EQUAL(catalogue.settings().size(), 5U);
 }
 
 BOOST_AUTO_TEST_CASE(test_catalogue_parses_and_checks_by_key) {

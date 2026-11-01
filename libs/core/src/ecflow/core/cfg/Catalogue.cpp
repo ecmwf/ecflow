@@ -52,6 +52,13 @@ std::string join(const std::vector<std::string>& texts) {
 
 } // namespace
 
+std::string path_of(const Key& key) {
+    const auto [path, name] = key.components();
+    std::string pointer     = "/" + std::string(path);
+    std::replace(pointer.begin(), pointer.end(), '.', '/');
+    return name.empty() ? pointer : pointer + "/" + std::string(name);
+}
+
 //
 // Checks
 //
@@ -109,6 +116,11 @@ Setting::Setting(Key key, Type type, std::optional<Value> default_value, Names n
       names_{std::move(names)},
       check_{std::move(check)},
       parse_{std::move(parse)} {
+    if (names_.ecf_cfg && *names_.ecf_cfg != path_of(key_)) {
+        throw ConfigurationError("Configuration setting " + quoted(key_.key()) + " is named " +
+                                 quoted(*names_.ecf_cfg) + " in the configuration file, instead of " +
+                                 quoted(path_of(key_)));
+    }
     if (default_value_) {
         this->check(*default_value_); // the parameter named check is moved into check_
     }
@@ -184,6 +196,22 @@ Catalogue::Catalogue(std::vector<Setting> settings)
         duplicate != settings_.end()) {
         throw ConfigurationError("Configuration setting " + quoted(duplicate->key().key()) +
                                  " is declared more than once");
+    }
+
+    std::vector<std::pair<std::string, const Key*>> paths;
+    for (const auto& setting : settings_) {
+        paths.emplace_back(path_of(setting.key()), &setting.key());
+    }
+    // As '/' sorts before any character of a key, a path sorts right before the paths inside it
+    std::sort(paths.begin(), paths.end());
+    for (std::size_t i = 1; i < paths.size(); ++i) {
+        const auto& [outer, outer_key] = paths[i - 1];
+        const auto& [inner, inner_key] = paths[i];
+        if (inner == outer || inner.rfind(outer + "/", 0) == 0) {
+            throw ConfigurationError("Configuration settings " + quoted(outer_key->key()) + " and " +
+                                     quoted(inner_key->key()) + " are ambiguous: they designate overlapping paths, " +
+                                     quoted(outer) + " and " + quoted(inner));
+        }
     }
 }
 

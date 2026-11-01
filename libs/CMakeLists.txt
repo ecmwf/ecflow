@@ -362,6 +362,7 @@ set(srcs
   core/src/ecflow/core/cfg/Catalogue.hpp
   core/src/ecflow/core/cfg/Configuration.hpp
   core/src/ecflow/core/cfg/JsonReader.hpp
+  core/src/ecflow/core/cfg/Mapper.hpp
   core/src/ecflow/core/cfg/Reader.hpp
   core/src/ecflow/core/cfg/ServerCatalogue.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
@@ -405,6 +406,7 @@ set(srcs
   core/src/ecflow/core/cfg/Catalogue.cpp
   core/src/ecflow/core/cfg/Configuration.cpp
   core/src/ecflow/core/cfg/JsonReader.cpp
+  core/src/ecflow/core/cfg/Mapper.cpp
   core/src/ecflow/core/cfg/Reader.cpp
   core/src/ecflow/core/cfg/ServerCatalogue.cpp
   core/src/ecflow/core/resources/Machine.cpp

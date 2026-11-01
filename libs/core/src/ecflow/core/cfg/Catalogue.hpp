@@ -24,16 +24,28 @@ enum class Type {
 };
 
 ///
-/// @brief Names an input in each of the sources that can provide it.
+/// @brief Names an input in each of the origins that can provide it, as named by layers.
 ///
-/// A source that cannot provide the input leaves its name empty.
+/// An origin that cannot provide the input leaves its name empty.
 ///
 struct Names
 {
-    std::optional<std::string> file;        ///< The setting in a configuration file, e.g. `ECF_PORT`
-    std::optional<std::string> environment; ///< The environment variable, e.g. `ECF_PORT`
-    std::optional<std::string> option;      ///< The command-line option, without dashes, e.g. `port`
+    std::optional<std::string> env_cfg; ///< The setting in `server_environment.cfg`, e.g. `ECF_PORT`
+    std::optional<std::string> ecf_cfg; ///< The path in `<host>.<port>.ecf.cfg`, e.g. `/.../variables/ECF_SSL`
+    std::optional<std::string> env;     ///< The environment variable, e.g. `ECF_PORT`
+    std::optional<std::string> cli;     ///< The command-line option, without dashes, e.g. `port`
 };
+
+///
+/// @brief Returns the path designated by a key in a configuration file.
+///
+/// The path is a JSON Pointer (RFC 6901) made of the segments of the path of the key, followed by its variable name
+/// when it has one.
+///
+/// @param[in] key The key
+/// @return The path, e.g. `/a/b/c` for both the option `a.b.c` and the variable `a.b@c`.
+///
+[[nodiscard]] std::string path_of(const Key& key);
 
 ///
 /// @brief Checks a value of the expected type.
@@ -105,7 +117,8 @@ public:
     /// @param[in] names The names of the input in the sources that can provide it
     /// @param[in] check The check of the values; none when every value of the type is accepted
     /// @param[in] parse The rule turning text into a value; none to apply the rule of the type (see parse())
-    /// @throws ConfigurationError if the default value does not hold the type, or does not pass the check.
+    /// @throws ConfigurationError if the default value does not hold the type, or does not pass the check, or if the
+    ///   name in `<host>.<port>.ecf.cfg` is not the path designated by the key (see path_of()).
     ///
     Setting(Key key, Type type, std::optional<Value> default_value, Names names, Check check = {}, Parse parse = {});
 
@@ -174,7 +187,11 @@ private:
 ///
 /// @brief Holds the settings known to a component, by key.
 ///
+/// Each key designates a path in a configuration file (see path_of()), e.g. `/a/b/c` for both the option `a.b.c`
+/// and the variable `a.b@c`.
+///
 /// @invariant Each key appears once, and the settings are ordered by key.
+/// @invariant No two keys designate the same path, and no key designates a path inside that of another.
 ///
 class Catalogue {
 public:
@@ -182,7 +199,8 @@ public:
     /// @brief Creates a catalogue.
     ///
     /// @param[in] settings The settings, in any order
-    /// @throws ConfigurationError if a key appears more than once.
+    /// @throws ConfigurationError if a key appears more than once, or if two keys designate the same path, or
+    ///   paths one inside the other (e.g. `a.b.c` and `a.b@c`, or `a.b` and `a.b@c`).
     ///
     explicit Catalogue(std::vector<Setting> settings);
 

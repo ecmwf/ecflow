@@ -44,6 +44,7 @@ set(test_srcs
   test/TestCfgCatalogue.cpp
   test/TestCfgConfiguration.cpp
   test/TestCfgJsonReader.cpp
+  test/TestCfgMapper.cpp
   test/TestCfgServerCatalogue.cpp
   test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp

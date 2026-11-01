@@ -57,13 +57,19 @@ std::vector<Expected> expected_settings() {
     auto integer                 = [](std::int64_t v) { return std::optional<Value>(value_of<std::int64_t>(v)); };
     auto boolean                 = [](bool v) { return std::optional<Value>(value_of<bool>(v)); };
     auto variable                = [](const std::string& name) { return "ecflow.server.variables@" + name; };
-    auto in_file_and_environment = [](const std::string& name) { return Names{name, name, std::nullopt}; };
-    auto in_file_only            = [](const std::string& name) { return Names{name, std::nullopt, std::nullopt}; };
+    auto in_file                 = [](const std::string& name) { return "/ecflow/server/variables/" + name; };
+    auto in_file_and_environment = [&](const std::string& name) {
+        return Names{name, in_file(name), name, std::nullopt};
+    };
+    auto in_file_only = [&](const std::string& name) { return Names{name, in_file(name), std::nullopt, std::nullopt}; };
 
     return {
         // server_environment.cfg, overridden by the environment
         {variable("ECF_HOME"), Type::Text, text(Ecf::HOME()), in_file_and_environment("ECF_HOME")},
-        {variable("ECF_PORT"), Type::Integer, integer(Ecf::PORT()), Names{"ECF_PORT", "ECF_PORT", "port"}},
+        {variable("ECF_PORT"),
+         Type::Integer,
+         integer(Ecf::PORT()),
+         Names{"ECF_PORT", in_file("ECF_PORT"), "ECF_PORT", "port"}},
         {variable("ECF_CHECK"), Type::Text, text(Ecf::CHECKPT()), in_file_and_environment("ECF_CHECK")},
         {variable("ECF_CHECKOLD"), Type::Text, text(Ecf::BACKUP_CHECKPT()), in_file_and_environment("ECF_CHECKOLD")},
         {variable("ECF_CHECKINTERVAL"),
@@ -92,7 +98,7 @@ std::vector<Expected> expected_settings() {
         {variable("ECF_INTERVAL"),
          Type::Integer,
          integer(Ecf::SUBMIT_INTERVAL()),
-         Names{"ECF_INTERVAL", std::nullopt, "ecfinterval"}},
+         Names{"ECF_INTERVAL", in_file("ECF_INTERVAL"), std::nullopt, "ecfinterval"}},
         {variable("ECF_CHECKMODE"), Type::Text, text(Ecf::CHECK_MODE()), in_file_only("ECF_CHECKMODE")},
         {variable("ECF_JOB_CMD"), Type::Text, text(Ecf::JOB_CMD()), in_file_only("ECF_JOB_CMD")},
         {variable("ECF_KILL_CMD"), Type::Text, text(Ecf::KILL_CMD()), in_file_only("ECF_KILL_CMD")},
@@ -103,16 +109,36 @@ std::vector<Expected> expected_settings() {
         {variable("ECF_URL"), Type::Text, text(Ecf::URL()), in_file_only("ECF_URL")},
         {variable("ECF_MICRODEF"), Type::Text, text(Ecf::MICRO()), in_file_only("ECF_MICRODEF")},
         // Environment only, possibly overridden by the command line
-        {variable("ECF_SSL"), Type::Text, std::nullopt, Names{std::nullopt, "ECF_SSL", std::nullopt}},
-        {variable("ECF_DEBUG_SERVER"), Type::Boolean, boolean(false), Names{std::nullopt, "ECF_DEBUG_SERVER", "debug"}},
+        {variable("ECF_SSL"),
+         Type::Text,
+         std::nullopt,
+         Names{std::nullopt, in_file("ECF_SSL"), "ECF_SSL", std::nullopt}},
+        {variable("ECF_DEBUG_SERVER"),
+         Type::Boolean,
+         boolean(false),
+         Names{std::nullopt, in_file("ECF_DEBUG_SERVER"), "ECF_DEBUG_SERVER", "debug"}},
+        // Configuration file only
+        {variable("ECF_HOST"),
+         Type::Text,
+         std::nullopt,
+         Names{std::nullopt, in_file("ECF_HOST"), std::nullopt, std::nullopt}},
         // Command line only
-        {"ecflow.server.http", Type::Boolean, boolean(false), Names{std::nullopt, std::nullopt, "http"}},
-        {"ecflow.server.ipv6", Type::Boolean, boolean(false), Names{std::nullopt, std::nullopt, "v6"}},
-        {"ecflow.server.ssl", Type::Boolean, boolean(false), Names{std::nullopt, std::nullopt, "ssl"}},
+        {"ecflow.server.http",
+         Type::Boolean,
+         boolean(false),
+         Names{std::nullopt, "/ecflow/server/http", std::nullopt, "http"}},
+        {"ecflow.server.ipv6",
+         Type::Boolean,
+         boolean(false),
+         Names{std::nullopt, "/ecflow/server/ipv6", std::nullopt, "v6"}},
+        {"ecflow.server.ssl",
+         Type::Boolean,
+         boolean(false),
+         Names{std::nullopt, "/ecflow/server/ssl", std::nullopt, "ssl"}},
         {"ecflow.server.job_generation",
          Type::Boolean,
          boolean(true),
-         Names{std::nullopt, std::nullopt, "dis_job_gen"}},
+         Names{std::nullopt, "/ecflow/server/job_generation", std::nullopt, "dis_job_gen"}},
     };
 }
 
@@ -163,34 +189,40 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_describes_every_input) {
             BOOST_REQUIRE(setting);
             BOOST_CHECK(setting->type() == e.type);
             BOOST_CHECK(setting->default_value() == e.default_value);
-            BOOST_CHECK(setting->names().file == e.names.file);
-            BOOST_CHECK(setting->names().environment == e.names.environment);
-            BOOST_CHECK(setting->names().option == e.names.option);
+            BOOST_CHECK(setting->names().env_cfg == e.names.env_cfg);
+            BOOST_CHECK(setting->names().ecf_cfg == e.names.ecf_cfg);
+            BOOST_CHECK(setting->names().env == e.names.env);
+            BOOST_CHECK(setting->names().cli == e.names.cli);
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_server_catalogue_names_each_input_once_per_source) {
+BOOST_AUTO_TEST_CASE(test_server_catalogue_names_each_input_once_per_origin) {
     ECF_NAME_THIS_TEST();
 
-    std::vector<std::string> file, environment, option;
+    std::vector<std::string> env_cfg, ecf_cfg, env, cli;
     for (const auto& setting : server_catalogue().settings()) {
-        if (setting.names().file) {
-            file.push_back(*setting.names().file);
+        if (setting.names().env_cfg) {
+            env_cfg.push_back(*setting.names().env_cfg);
         }
-        if (setting.names().environment) {
-            environment.push_back(*setting.names().environment);
+        if (setting.names().ecf_cfg) {
+            ecf_cfg.push_back(*setting.names().ecf_cfg);
         }
-        if (setting.names().option) {
-            option.push_back(*setting.names().option);
+        if (setting.names().env) {
+            env.push_back(*setting.names().env);
+        }
+        if (setting.names().cli) {
+            cli.push_back(*setting.names().cli);
         }
     }
-    for (auto* names : {&file, &environment, &option}) {
+    for (auto* names : {&env_cfg, &ecf_cfg, &env, &cli}) {
         std::sort(names->begin(), names->end());
         BOOST_CHECK(std::adjacent_find(names->begin(), names->end()) == names->end());
     }
     // The 21 settings accepted in server_environment.cfg
-    BOOST_CHECK_EQUAL(file.size(), 21U);
+    BOOST_CHECK_EQUAL(env_cfg.size(), 21U);
+    // Every setting can be set in <host>.<port>.ecf.cfg (R10)
+    BOOST_CHECK_EQUAL(ecf_cfg.size(), server_catalogue().settings().size());
 }
 
 BOOST_AUTO_TEST_CASE(test_server_catalogue_integer_ranges) {
