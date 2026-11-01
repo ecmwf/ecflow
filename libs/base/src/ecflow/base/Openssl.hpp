@@ -306,6 +306,20 @@ public:
     void enable_based_on_envvar(std::string host, const std::string& port);
 
     ///
+    /// @brief Enables SSL according to an explicit request, independently of ECF_SSL.
+    ///
+    /// The request is typically made from an ECF_SSL value, by Option::make_from_envvar_value(), or from the `--ssl`
+    /// option, by Option::make_option_shared().
+    ///
+    /// @param[in] host Server hostname; localhost is resolved to the local hostname.
+    /// @param[in] port Server port used to select the certificate.
+    /// @param[in] option Requested certificate preference; must be enabled.
+    /// @throws std::runtime_error if neither certificate file exists; SSL is left disabled.
+    /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
+    ///
+    void enable(std::string host, const std::string& port, const Option& option);
+
+    ///
     /// @brief Disables SSL and clears the selected certificate and its SSL context.
     ///
     /// The ECF_SSL environment variable is preserved. Never throws.

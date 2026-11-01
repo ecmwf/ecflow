@@ -679,25 +679,25 @@ BOOST_AUTO_TEST_CASE(test_server_home_resolution_with_explicit_checkpoints) {
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     ECF_NAME_THIS_TEST();
 
-    // ecflow server interval is valid for range [1-60]
+    // ecflow server interval is valid for range [1-60], and refused at construction otherwise
     std::string port = ecf::string_constants::default_port_number;
     for (int i = -10; i < 70; ++i) {
-        std::string errorMsg;
         std::string argument          = "--ecfinterval=" + ecf::convert_to<std::string>(i);
         std::vector<std::string> args = {"ServerEnvironment", argument};
-        ServerEnvironment serverEnv(args);
-        bool valid = serverEnv.valid(errorMsg);
         if (i > 0 && i < 61) {
-            BOOST_REQUIRE_MESSAGE(valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
+            std::string errorMsg;
+            ServerEnvironment serverEnv(args);
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(errorMsg),
+                                  "Server environment ecfinterval valid range is [1-60] " << errorMsg);
             BOOST_CHECK_MESSAGE(serverEnv.submitJobsInterval() == i,
                                 "Expected submit jobs interval of " << i << " but found "
                                                                     << serverEnv.submitJobsInterval());
+            port = serverEnv.the_port();
         }
         else {
-            BOOST_CHECK_MESSAGE(!valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
+            const auto start = [&args] { ServerEnvironment serverEnv(args); };
+            BOOST_CHECK_THROW(start(), ServerEnvironmentException);
         }
-
-        port = serverEnv.the_port();
     }
 
     Host h;
@@ -711,30 +711,16 @@ BOOST_AUTO_TEST_CASE(test_server_environment_port) {
     //  o the Well Known Ports, (require root permission)      0 -1023\n";
     //  o the Registered Ports,                             1024 -49151\n";
     //  o Dynamic and/or Private Ports.                    49151 -65535\n\n";
-    //  Please set in the range 1024-49151 via argument or \n";
-    Host h;
-    {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=0"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
+    // A port outside 1024-49150 is refused at construction
+    for (const std::string port : {"0", "1000", "49151"}) {
+        BOOST_TEST_CONTEXT("--port=" << port) {
+            std::vector<std::string> args = {"ServerEnvironment", "--port=" + port};
+            const auto start              = [&args] { ServerEnvironment serverEnv(args); };
+            BOOST_CHECK_THROW(start(), ServerEnvironmentException);
+        }
     }
     {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=1000"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
-    }
-    {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=49151"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
-    }
-    {
+        Host h;
         std::string errorMsg;
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
         ServerEnvironment serverEnv(args);
@@ -1771,25 +1757,20 @@ BOOST_AUTO_TEST_CASE(test_server_validation_port_boundaries) {
                     args.emplace_back("--port=" + std::to_string(port));
                 }
 
-                const bool out_of_range = port == 1023 || port == 49151;
-                // The configuration file and the environment are checked when read; the command line, on validation
-                if (out_of_range && source != "cli") {
+                // Every origin is checked when read
+                if (port == 1023 || port == 49151) {
+                    const auto name = source == "cli" ? "Invalid server command line: --port" : "ECF_PORT";
                     check_server_refused(content,
                                          environment,
                                          args,
-                                         "ECF_PORT: invalid value '" + std::to_string(port) +
+                                         name + std::string(": invalid value '") + std::to_string(port) +
                                              "': expected a value in [1024, 49150]");
                     continue;
                 }
-                check_server_precedence(
-                    content,
-                    environment,
-                    args,
-                    [&](const auto& serverEnv, const auto&) {
-                        BOOST_CHECK_EQUAL(serverEnv.port(), port);
-                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
-                    },
-                    out_of_range ? "Server port " + std::to_string(port) + " not set correctly" : "");
+                check_server_precedence(content, environment, args, [&](const auto& serverEnv, const auto&) {
+                    BOOST_CHECK_EQUAL(serverEnv.port(), port);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
+                });
             }
         }
     }
@@ -1810,28 +1791,20 @@ BOOST_AUTO_TEST_CASE(test_server_validation_scheduling_boundaries) {
                     args.emplace_back("--ecfinterval=" + std::to_string(interval));
                 }
 
-                const bool out_of_range = interval == 0 || interval == 61;
-                // The configuration file is checked when read; the command line, on validation
-                if (out_of_range && !from_cli) {
+                // Every origin is checked when read
+                if (interval == 0 || interval == 61) {
+                    const auto name = from_cli ? "Invalid server command line: --ecfinterval" : "ECF_INTERVAL";
                     check_server_refused(content,
                                          {},
                                          args,
-                                         "ECF_INTERVAL: invalid value '" + std::to_string(interval) +
+                                         name + std::string(": invalid value '") + std::to_string(interval) +
                                              "': expected a value in [1, 60]");
                     continue;
                 }
-                check_server_precedence(
-                    content,
-                    {},
-                    args,
-                    [&](const auto& serverEnv, const auto&) {
-                        BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
-                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
-                    },
-                    out_of_range
-                        ? "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found " +
-                              std::to_string(interval)
-                        : "");
+                check_server_precedence(content, {}, args, [&](const auto& serverEnv, const auto&) {
+                    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
+                });
             }
         }
     }
@@ -2385,16 +2358,13 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_promoted_to_https_when_
 BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_not_enabled) {
     ECF_NAME_THIS_TEST();
 
-    // With ECF_SSL undefined, enabling SSL is a no-operation, and the protocol must not be promoted.
-    // This is the outcome reached whenever SSL is requested but no certificate is found.
+    // With neither ECF_SSL nor --ssl, SSL remains disabled, and the protocol is not promoted
 
     WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
 
     {
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
         ServerEnvironment serverEnv(args);
-
-        serverEnv.enable_ssl_if_defined();
 
         BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
         BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Plain,
@@ -2406,8 +2376,6 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
     {
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http"};
         ServerEnvironment serverEnv(args);
-
-        serverEnv.enable_ssl_if_defined();
 
         BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
         BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Http,

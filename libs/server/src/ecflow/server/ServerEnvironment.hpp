@@ -59,7 +59,8 @@ public:
     ///
     /// @brief Validates the effective server configuration and loads optional security files.
     ///
-    /// The checkpoint interval must be positive after configuration and environment overrides have been applied.
+    /// The settings are checked by the server catalogue at construction; this checks the server host, the log and
+    /// the security files.
     ///
     /// @param[in,out] errorMsg Receives diagnostic details for an invalid configuration or security file
     /// @return True if the configuration and optional security files are valid; false otherwise.
@@ -79,29 +80,6 @@ public:
     ecf::Openssl& openssl() { return ssl_; }
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
-
-    ///
-    /// @brief Enables SSL according to ECF_SSL when the variable is set.
-    ///
-    /// Empty or "1" searches `server.crt` first, then `<host>.<port>.crt`;
-    /// any other value searches `<host>.<port>.crt` first, then `server.crt`.
-    ///
-    /// @throws std::runtime_error if ECF_SSL is set but neither certificate file exists.
-    ///
-    void enable_ssl_if_defined() {
-        ssl_.enable_based_on_envvar(serverHost_, the_port());
-        update_protocol_after_ssl();
-    }
-
-    ///
-    /// @brief Enables SSL preferring the shared certificate, independently of ECF_SSL.
-    ///
-    /// @throws std::runtime_error if neither the shared nor the server-specific certificate file exists.
-    ///
-    void enable_ssl() {
-        ssl_.enable_prefer_shared(serverHost_, the_port());
-        update_protocol_after_ssl();
-    }
 #endif
 
     ecf::Protocol protocol() const { return protocol_; }
@@ -225,13 +203,14 @@ public:
 
 private:
     ///
-    /// @brief Selects the startup settings from the built-in defaults, the configuration file and the environment.
+    /// @brief Selects the startup settings from the built-in defaults, the configuration file, the environment and
+    /// the command line.
     ///
     /// Command-line syntax is parsed first. Help and version requests return without reading configuration
     /// or environment settings, applying transport options or accessing runtime files. Each value is checked by
     /// the server catalogue when it is read.
     ///
-    /// @param[in] cl Command-line tokens, applied after configuration and environment settings
+    /// @param[in] cl Command-line tokens, overriding configuration and environment settings
     /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
     /// @throws ServerEnvironmentException if reading a setting or server-home access fails.
     /// @throws std::exception if command-line parsing or runtime file setup fails.
@@ -249,6 +228,22 @@ private:
     /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
     ///
     void resolve(const ecf::cfg::Configuration& configuration, std::string& log_file_name);
+
+#ifdef ECF_OPENSSL
+    ///
+    /// @brief Enables SSL when ECF_SSL has a value or the SSL option is set, and promotes the protocol accordingly.
+    ///
+    /// The certificate lookup order is the following:
+    ///
+    ///   - ECF_SSL empty or "1":   `server.crt` first, then `<host>.<port>.crt`;
+    ///   - ECF_SSL with any other value:   `<host>.<port>.crt` first, then `server.crt`;
+    ///   - the SSL option alone:   as ECF_SSL empty.
+    ///
+    /// @param[in] configuration The configuration of the server, every value of which is valid
+    /// @throws std::runtime_error if SSL is requested but neither certificate file exists.
+    ///
+    void select_ssl(const ecf::cfg::Configuration& configuration);
+#endif
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
@@ -316,5 +311,4 @@ private:
 #endif
 
     boost::asio::ip::tcp tcp_protocol_; // defaults to IPv4 TCP protocol
-    friend class ServerOptions;
 };

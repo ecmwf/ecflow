@@ -361,6 +361,7 @@ set(srcs
   core/src/ecflow/core/cfg/CTree.hpp
   core/src/ecflow/core/cfg/Catalogue.hpp
   core/src/ecflow/core/cfg/CfgReader.hpp
+  core/src/ecflow/core/cfg/CliReader.hpp
   core/src/ecflow/core/cfg/Configuration.hpp
   core/src/ecflow/core/cfg/EnvReader.hpp
   core/src/ecflow/core/cfg/JsonReader.hpp
@@ -407,6 +408,7 @@ set(srcs
   core/src/ecflow/core/cfg/CTree.cpp
   core/src/ecflow/core/cfg/Catalogue.cpp
   core/src/ecflow/core/cfg/CfgReader.cpp
+  core/src/ecflow/core/cfg/CliReader.cpp
   core/src/ecflow/core/cfg/Configuration.cpp
   core/src/ecflow/core/cfg/EnvReader.cpp
   core/src/ecflow/core/cfg/JsonReader.cpp

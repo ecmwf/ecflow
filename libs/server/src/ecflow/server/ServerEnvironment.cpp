@@ -4,6 +4,8 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 
 #include <iostream>
+#include <optional>
+#include <vector>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -16,6 +18,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/core/cfg/CfgReader.hpp"
+#include "ecflow/core/cfg/CliReader.hpp"
 #include "ecflow/core/cfg/EnvReader.hpp"
 #include "ecflow/core/cfg/ServerCatalogue.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -97,13 +100,15 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
 
     std::string log_file_name;
+    std::optional<ecf::cfg::Configuration> configuration;
     try {
-        // The built-in defaults, overridden by server_environment.cfg, overridden by the environment
+        // The built-in defaults, overridden by server_environment.cfg, by the environment, then by the command line
         const auto& catalogue = ecf::cfg::server_catalogue();
-        const ecf::cfg::Configuration configuration({ecf::cfg::defaults_layer(catalogue),
-                                                     ecf::cfg::CfgReader(catalogue).read(path_to_config_file),
-                                                     ecf::cfg::EnvReader(catalogue).read()});
-        resolve(configuration, log_file_name);
+        configuration.emplace(std::vector<ecf::cfg::Layer>{ecf::cfg::defaults_layer(catalogue),
+                                                           ecf::cfg::CfgReader(catalogue).read(path_to_config_file),
+                                                           ecf::cfg::EnvReader(catalogue).read(),
+                                                           ecf::cfg::CliReader(catalogue).read(options.options())});
+        resolve(*configuration, log_file_name);
     }
     catch (std::exception& e) {
         std::string msg           = "Exception in ServerEnvironment::ServerEnvironment() : ";
@@ -127,8 +132,9 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     // std::cout << "PID = " << ecf_pid_ << "\n";
 
-    // Apply CLI values after the environment so that command-line overrides retain the highest priority.
-    options.apply(this);
+#ifdef ECF_OPENSSL
+    select_ssl(*configuration);
+#endif
 
     JobProfiler::set_task_threshold(static_cast<size_t>(ecf_task_threshold_));
 
@@ -249,31 +255,12 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
     std::ostringstream ss;
-    if (serverPort_ == 0 || serverPort_ <= 1023 || serverPort_ >= 49151) {
-
-        ss << "Server port " << serverPort_ << " not set correctly. \n";
-        ss << "The port numbers are divided into three ranges.\n";
-        ss << "   o the Well Known Ports, (require root permission)      0 -1023\n";
-        ss << "   o the Registered Ports,                             1024 -49151\n";
-        ss << "   o Dynamic and/or Private Ports.                    49151 -65535\n\n";
-        ss << "Please set in the range 1024-49151 via argument or \n";
-        ss << "Server/src/environment.cfg.h or set the environment variable ECF_PORT. \n";
-        errorMsg = ss.str();
-        return false;
-    }
     if (!Log::instance() || Log::instance()->path().empty()) {
         ss << "No log file name specified. Please set in Server/server_environment.cfg or\n";
         ss << "set the environment variable ECF_LOG\n";
         errorMsg = ss.str();
         return false;
     }
-    if (submitJobsInterval_ < 1 || submitJobsInterval_ > 60) {
-        ss << "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found "
-           << submitJobsInterval_ << ".\n";
-        errorMsg = ss.str();
-        return false;
-    }
-
     if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
         authorisation_service_ = result.value();
         std::cout << "Loaded server permissions based on Nodes\n";
@@ -413,6 +400,9 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     auto value = [&configuration](const char* name) {
         return *configuration.get(ecf::cfg::Key::for_variable("ecflow.server.variables", name));
     };
+    auto option = [&configuration](const char* path) {
+        return std::get<bool>(*configuration.get(ecf::cfg::Key::for_option(path)));
+    };
     auto text    = [&value](const char* name) { return std::get<std::string>(value(name)); };
     auto integer = [&value](const char* name) { return static_cast<int>(std::get<std::int64_t>(value(name))); };
 
@@ -435,6 +425,13 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     ecf_task_threshold_      = integer("ECF_TASK_THRESHOLD");
     ecf_prune_node_log_      = integer("ECF_PRUNE_NODE_LOG");
     debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
+    jobGeneration_           = option("ecflow.server.job_generation");
+    if (option("ecflow.server.http")) {
+        protocol_ = ecf::Protocol::Http;
+    }
+    if (option("ecflow.server.ipv6")) {
+        tcp_protocol_ = boost::asio::ip::tcp::v6();
+    }
     authentication_service_.set_passwd_file(text("ECF_PASSWD"));
     authentication_service_.set_custom_passwd_file(text("ECF_CUSTOM_PASSWD"));
 
@@ -461,6 +458,28 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
         ecfHome_ = home.string();
     }
 }
+
+#ifdef ECF_OPENSSL
+void ServerEnvironment::select_ssl(const ecf::cfg::Configuration& configuration) {
+    const auto value  = configuration.get(ecf::cfg::Key::for_variable("ecflow.server.variables", "ECF_SSL"));
+    const bool option = std::get<bool>(*configuration.get(ecf::cfg::Key::for_option("ecflow.server.ssl")));
+    if (!value && !option) {
+        return;
+    }
+
+    // ECF_SSL, when it has a value, decides the certificate lookup order, also when the option is set
+    const auto request = value ? ecf::Openssl::Option::make_from_envvar_value(std::get<std::string>(*value))
+                               : ecf::Openssl::Option::make_option_shared();
+    if (debug_) {
+        std::cout << "SSL enabled: " << request.describe(option) << '\n';
+    }
+    ssl_.enable(serverHost_, the_port(), request);
+    update_protocol_after_ssl();
+    if (debug_) {
+        std::cout << ssl_.info() << '\n';
+    }
+}
+#endif
 
 void ServerEnvironment::change_dir_to_ecf_home_and_check_accesibility() {
     if (chdir(ecfHome_.c_str()) != 0) {

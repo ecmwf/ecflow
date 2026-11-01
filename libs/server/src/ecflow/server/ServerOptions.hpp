@@ -3,14 +3,15 @@
 
 #pragma once
 
+#include <map>
+#include <string>
+
 #include <boost/program_options.hpp>
 
 #include "ecflow/core/CommandLine.hpp"
 
-class ServerEnvironment;
-
 ///
-/// @brief Parses server command-line syntax separately from applying runtime overrides.
+/// @brief Parses the syntax of the server command line; the values are checked by the server catalogue.
 ///
 class ServerOptions {
 public:
@@ -26,12 +27,11 @@ public:
     explicit ServerOptions(const CommandLine& cl);
 
     ///
-    /// @brief Applies parsed overrides after configuration and environment settings have been selected.
+    /// @brief Returns the options given, as read by ecf::cfg::CliReader.
     ///
-    /// @param[in,out] env Non-null server environment receiving command-line and transport settings
-    /// @throws std::exception if SSL selection or setup fails.
+    /// @return The options given, by long name, each with its text; the text of a switch is empty.
     ///
-    void apply(ServerEnvironment* env) const;
+    [[nodiscard]] std::map<std::string, std::string> options() const;
 
     // Disable copy (and move) semantics
     ServerOptions(const ServerOptions&)                  = delete;

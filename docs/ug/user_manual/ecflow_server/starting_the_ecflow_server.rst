@@ -115,9 +115,9 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    the diagnostic identifies the configuration file and the original parsing error.
    An unknown or obsolete setting is a parsing error.
 
-#. **Read the environment variables.** Each value, from the configuration file or the environment,
-   is checked when it is read; an invalid value stops initialisation, before the log is created.
-   See :ref:`server_configuration` for the accepted values.
+#. **Read the environment variables and the command-line options.** Each value, from the configuration
+   file, the environment or the command line, is checked when it is read; an invalid value stops
+   initialisation, before the log is created. See :ref:`server_configuration` for the accepted values.
 
 #. **Apply overrides.** Environment variables override settings in the configuration file.
    Command-line options override the corresponding environment settings; for example,

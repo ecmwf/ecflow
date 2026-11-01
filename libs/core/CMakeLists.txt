@@ -43,6 +43,7 @@ set(test_srcs
   test/TestCfgCTree.cpp
   test/TestCfgCatalogue.cpp
   test/TestCfgCfgReader.cpp
+  test/TestCfgCliReader.cpp
   test/TestCfgConfiguration.cpp
   test/TestCfgEnvReader.cpp
   test/TestCfgJsonReader.cpp
