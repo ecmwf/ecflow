@@ -5,17 +5,18 @@
 
 #include <iostream>
 
+#include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 
 namespace ecf {
 
 void AuthenticationService::init(const Host& host, const std::string& port) {
-    if (ecf_passwd_file_ == default_passwd_file()) {
+    if (ecf_passwd_file_ == Ecf::PASSWD_FILE()) {
         ecf_passwd_file_ = host.prefix_host_and_port(port, ecf_passwd_file_);
     }
 
-    if (ecf_passwd_custom_file_ == default_custom_passwd_file()) {
+    if (ecf_passwd_custom_file_ == Ecf::CUSTOM_PASSWD_FILE()) {
         ecf_passwd_custom_file_ = host.prefix_host_and_port(port, ecf_passwd_custom_file_);
     }
 }

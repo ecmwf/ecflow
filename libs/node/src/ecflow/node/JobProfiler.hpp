@@ -37,8 +37,6 @@ public:
     static void set_task_threshold(size_t threshold);
     static size_t task_threshold();
 
-    static int task_threshold_default();
-
 private:
     Task* node_;
     JobsParam& jobsParam_;

@@ -9,6 +9,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -86,8 +87,8 @@ BOOST_AUTO_TEST_CASE(test_authentication_default_constructed_service_has_no_file
 BOOST_AUTO_TEST_CASE(test_authentication_default_file_names) {
     ECF_NAME_THIS_TEST();
 
-    BOOST_CHECK_EQUAL(AuthenticationService::default_passwd_file(), "ecf.passwd");
-    BOOST_CHECK_EQUAL(AuthenticationService::default_custom_passwd_file(), "ecf.custom_passwd");
+    BOOST_CHECK_EQUAL(Ecf::PASSWD_FILE(), "ecf.passwd");
+    BOOST_CHECK_EQUAL(Ecf::CUSTOM_PASSWD_FILE(), "ecf.custom_passwd");
 }
 
 BOOST_AUTO_TEST_CASE(test_authentication_setters_and_getters_round_trip) {
@@ -117,8 +118,8 @@ BOOST_AUTO_TEST_CASE(test_authentication_init_prefixes_default_file_names_with_h
     ECF_NAME_THIS_TEST();
 
     AuthenticationService service;
-    service.set_passwd_file(std::string{AuthenticationService::default_passwd_file()});
-    service.set_custom_passwd_file(std::string{AuthenticationService::default_custom_passwd_file()});
+    service.set_passwd_file(Ecf::PASSWD_FILE());
+    service.set_custom_passwd_file(Ecf::CUSTOM_PASSWD_FILE());
 
     Host host(test_host);
     service.init(host, test_port);
@@ -131,8 +132,8 @@ BOOST_AUTO_TEST_CASE(test_authentication_init_with_empty_port_prefixes_with_host
     ECF_NAME_THIS_TEST();
 
     AuthenticationService service;
-    service.set_passwd_file(std::string{AuthenticationService::default_passwd_file()});
-    service.set_custom_passwd_file(std::string{AuthenticationService::default_custom_passwd_file()});
+    service.set_passwd_file(Ecf::PASSWD_FILE());
+    service.set_custom_passwd_file(Ecf::CUSTOM_PASSWD_FILE());
 
     Host host(test_host);
     service.init(host, "");
@@ -171,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_authentication_init_is_not_applied_twice) {
     ECF_NAME_THIS_TEST();
 
     AuthenticationService service;
-    service.set_passwd_file(std::string{AuthenticationService::default_passwd_file()});
+    service.set_passwd_file(Ecf::PASSWD_FILE());
 
     Host host(test_host);
     service.init(host, test_port);
@@ -186,7 +187,7 @@ BOOST_AUTO_TEST_CASE(test_authentication_init_expands_each_file_independently) {
 
     AuthenticationService service;
     service.set_passwd_file("regular.passwd");
-    service.set_custom_passwd_file(std::string{AuthenticationService::default_custom_passwd_file()});
+    service.set_custom_passwd_file(Ecf::CUSTOM_PASSWD_FILE());
 
     Host host(test_host);
     service.init(host, test_port);
@@ -1192,9 +1193,8 @@ BOOST_AUTO_TEST_CASE(test_authentication_server_start_up_sequence_with_default_f
     WithTestFile passwd(ecf::test::scaffold::NamedTestFile{regular_name}, passwd_file_content({{"alice", "secret"}}));
     WithTestFile custom(ecf::test::scaffold::NamedTestFile{custom_name}, passwd_file_content({{"bob", "hidden"}}));
 
-    WithTestEnvironmentVariable passwd_env("ECF_PASSWD", std::string{AuthenticationService::default_passwd_file()});
-    WithTestEnvironmentVariable custom_env("ECF_CUSTOM_PASSWD",
-                                           std::string{AuthenticationService::default_custom_passwd_file()});
+    WithTestEnvironmentVariable passwd_env("ECF_PASSWD", Ecf::PASSWD_FILE());
+    WithTestEnvironmentVariable custom_env("ECF_CUSTOM_PASSWD", Ecf::CUSTOM_PASSWD_FILE());
 
     AuthenticationService service;
     service.retrieve_passwd_file();

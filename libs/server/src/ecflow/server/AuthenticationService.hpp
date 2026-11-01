@@ -50,9 +50,6 @@ public:
     ///
     bool reload_custom_passwd_file(std::string& error);
 
-    static inline std::string_view default_passwd_file() { return "ecf.passwd"; }
-    static inline std::string_view default_custom_passwd_file() { return "ecf.custom_passwd"; }
-
 private:
     bool debug_{false};
 

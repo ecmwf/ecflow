@@ -987,7 +987,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             if (ecf::environment::has("ECF_PORT")) {
                 port = ecf::environment::get("ECF_PORT");
             }
-            std::string expected = host.prefix_host_and_port(port, AuthenticationService::default_passwd_file());
+            std::string expected = host.prefix_host_and_port(port, Ecf::PASSWD_FILE());
 
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_PASSWD expected " << expected << " but found " << p.second);
