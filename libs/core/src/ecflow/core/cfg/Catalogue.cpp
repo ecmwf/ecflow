@@ -1,0 +1,214 @@
+// SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+// SPDX-License-Identifier: Apache-2.0
+
+#include "ecflow/core/cfg/Catalogue.hpp"
+
+#include <algorithm>
+#include <charconv>
+#include <utility>
+
+namespace ecf::cfg {
+
+namespace {
+
+std::string quoted(std::string_view text) {
+    return "'" + std::string(text) + "'";
+}
+
+const char* type_name(Type type) {
+    switch (type) {
+        case Type::Boolean:
+            return "a boolean";
+        case Type::Integer:
+            return "an integer";
+        case Type::Text:
+            return "a text";
+    }
+    return "a value";
+}
+
+Type type_of(const Value& value) {
+    static constexpr Type types[] = {Type::Boolean, Type::Integer, Type::Text};
+    return types[value.index()];
+}
+
+std::string describe(const Value& value) {
+    if (const auto* b = std::get_if<bool>(&value)) {
+        return *b ? "true" : "false";
+    }
+    if (const auto* i = std::get_if<std::int64_t>(&value)) {
+        return std::to_string(*i);
+    }
+    return quoted(std::get<std::string>(value));
+}
+
+std::string join(const std::vector<std::string>& texts) {
+    std::string joined;
+    for (const auto& text : texts) {
+        joined += (joined.empty() ? "" : ", ") + text;
+    }
+    return joined;
+}
+
+} // namespace
+
+//
+// Checks
+//
+
+namespace checks {
+
+Check range(std::int64_t min, std::int64_t max) {
+    return [min, max](const Value& value) -> std::optional<std::string> {
+        const auto v = std::get<std::int64_t>(value);
+        if (v < min || v > max) {
+            return "expected a value in [" + std::to_string(min) + ", " + std::to_string(max) + "]";
+        }
+        return std::nullopt;
+    };
+}
+
+Check at_least(std::int64_t min) {
+    return [min](const Value& value) -> std::optional<std::string> {
+        if (std::get<std::int64_t>(value) < min) {
+            return "expected a value at least " + std::to_string(min);
+        }
+        return std::nullopt;
+    };
+}
+
+Check non_empty() {
+    return [](const Value& value) -> std::optional<std::string> {
+        if (std::get<std::string>(value).empty()) {
+            return std::string("expected a non-empty value");
+        }
+        return std::nullopt;
+    };
+}
+
+Check one_of(std::vector<std::string> accepted) {
+    return [accepted = std::move(accepted)](const Value& value) -> std::optional<std::string> {
+        const auto& v = std::get<std::string>(value);
+        if (std::find(accepted.begin(), accepted.end(), v) == accepted.end()) {
+            return "expected one of " + join(accepted);
+        }
+        return std::nullopt;
+    };
+}
+
+} // namespace checks
+
+//
+// Setting
+//
+
+Setting::Setting(Key key, Type type, std::optional<Value> default_value, Names names, Check check, Parse parse)
+    : key_{std::move(key)},
+      type_{type},
+      default_value_{std::move(default_value)},
+      names_{std::move(names)},
+      check_{std::move(check)},
+      parse_{std::move(parse)} {
+    if (default_value_) {
+        this->check(*default_value_); // the parameter named check is moved into check_
+    }
+}
+
+Value Setting::parse(std::string_view text) const {
+    auto refuse = [this, text](const std::string& reason) -> ConfigurationError {
+        return ConfigurationError("Invalid text " + quoted(text) + " for " + quoted(key_.key()) + ": " + reason);
+    };
+
+    Value value;
+    if (parse_) {
+        value = parse_(text);
+    }
+    else {
+        switch (type_) {
+            case Type::Integer: {
+                std::int64_t number  = 0;
+                const auto* first    = text.data();
+                const auto* last     = text.data() + text.size();
+                const auto [end, ec] = std::from_chars(first, last, number);
+                if (text.empty() || ec != std::errc{} || end != last) {
+                    throw refuse("expected a decimal integer in [" + std::to_string(INT64_MIN) + ", " +
+                                 std::to_string(INT64_MAX) + "]");
+                }
+                value = Value(std::in_place_type<std::int64_t>, number);
+                break;
+            }
+            case Type::Boolean:
+                if (text == "true") {
+                    value = Value(std::in_place_type<bool>, true);
+                }
+                else if (text == "false") {
+                    value = Value(std::in_place_type<bool>, false);
+                }
+                else {
+                    throw refuse("expected 'true' or 'false'");
+                }
+                break;
+            case Type::Text:
+                value = Value(std::in_place_type<std::string>, text);
+                break;
+        }
+    }
+    check(value);
+    return value;
+}
+
+void Setting::check(const Value& value) const {
+    if (type_of(value) != type_) {
+        throw ConfigurationError("Invalid value " + describe(value) + " for " + quoted(key_.key()) + ": expected " +
+                                 type_name(type_) + ", not " + type_name(type_of(value)));
+    }
+    if (check_) {
+        if (const auto reason = check_(value)) {
+            throw ConfigurationError("Invalid value " + describe(value) + " for " + quoted(key_.key()) + ": " +
+                                     *reason);
+        }
+    }
+}
+
+//
+// Catalogue
+//
+
+Catalogue::Catalogue(std::vector<Setting> settings)
+    : settings_{std::move(settings)} {
+    std::sort(settings_.begin(), settings_.end(), [](const Setting& lhs, const Setting& rhs) {
+        return lhs.key() < rhs.key();
+    });
+    const auto same = [](const Setting& lhs, const Setting& rhs) { return lhs.key() == rhs.key(); };
+    if (const auto duplicate = std::adjacent_find(settings_.begin(), settings_.end(), same);
+        duplicate != settings_.end()) {
+        throw ConfigurationError("Configuration setting " + quoted(duplicate->key().key()) +
+                                 " is declared more than once");
+    }
+}
+
+const Setting* Catalogue::find(const Key& key) const {
+    const auto found =
+        std::lower_bound(settings_.begin(), settings_.end(), key, [](const Setting& setting, const Key& k) {
+            return setting.key() < k;
+        });
+    return found != settings_.end() && found->key() == key ? &*found : nullptr;
+}
+
+Value Catalogue::parse(const Key& key, std::string_view text) const {
+    return get(key).parse(text);
+}
+
+void Catalogue::check(const Key& key, const Value& value) const {
+    get(key).check(value);
+}
+
+const Setting& Catalogue::get(const Key& key) const {
+    const auto* setting = find(key);
+    if (!setting) {
+        throw ConfigurationError("Unknown configuration key " + quoted(key.key()));
+    }
+    return *setting;
+}
+
+} // namespace ecf::cfg
