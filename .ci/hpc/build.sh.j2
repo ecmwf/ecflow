@@ -18,7 +18,9 @@ boost_root="{{ boost_root }}"
 }
 {% endblock %}
 {% block cmake_args %}
-  -DCMAKE_VERBOSE_MAKEFILE=ON \
+{% if cxx_compiler_binary == "nvc++" %}
+  -DCMAKE_CXX_FLAGS=--diag_suppress=partial_override \
+{% endif %}
   -DENABLE_AVISO=OFF \
   -DBoost_ROOT="$boost_root" \
   -DBoost_INCLUDE_DIR="$boost_root/include" \

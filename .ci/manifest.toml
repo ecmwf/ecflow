@@ -355,6 +355,8 @@ upstream-platform = "hpc-atos-nvidia"
 upstream-cxx-compiler = "nvc++"
 tests = false
 sccache = false
+# nvc++ needs ~1GB per compile; 64 of them in 64GB hit the memory killer.
+cpus-per-task = 32
 
 [[matrix.build-hpc.include]]
 name = "atos-nvidia24_11"
@@ -369,6 +371,8 @@ upstream-platform = "hpc-atos-nvidia"
 upstream-cxx-compiler = "nvc++"
 tests = false
 sccache = false
+# nvc++ needs ~1GB per compile; 64 of them in 64GB hit the memory killer.
+cpus-per-task = 32
 
 # NVIDIA 25.11 is not used: the only Boost built for it, 1.90.0, fails to
 # compile with nvc++ (Asio's work_result is not SFINAE-friendly; fixed in 1.92.0).
