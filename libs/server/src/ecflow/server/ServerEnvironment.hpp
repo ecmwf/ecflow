@@ -32,6 +32,8 @@
 // Added ServerEvinronmentException so that it can be in the same scope as server
 // in ServerMain. Previously we had a separate try block
 // Also distinguish between server and environment errors
+class ServerOptions;
+
 class ServerEnvironmentException : public std::runtime_error {
 public:
     explicit ServerEnvironmentException(const std::string& msg)
@@ -228,6 +230,22 @@ private:
     /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
     ///
     void resolve(const ecf::cfg::Configuration& configuration, std::string& log_file_name);
+
+    ///
+    /// @brief Reads the configuration of the server from all its origins.
+    ///
+    /// The port given by the built-in defaults, `server_environment.cfg`, the environment and the command line names
+    /// the configuration file, `<host>.<port>.ecf.cfg`, looked for in the current directory. When the file exists,
+    /// its layer is placed above `server_environment.cfg`, and below the environment.
+    ///
+    /// @param[in] options The parsed command line
+    /// @param[in] path_to_config_file The path of `server_environment.cfg`
+    /// @return The configuration, every value of which is valid.
+    /// @throws ecf::cfg::ConfigurationError if an origin is refused, or the configuration file defines a host or a
+    /// port other than those of its name.
+    ///
+    ecf::cfg::Configuration read_configuration(const ServerOptions& options,
+                                               const std::string& path_to_config_file) const;
 
 #ifdef ECF_OPENSSL
     ///

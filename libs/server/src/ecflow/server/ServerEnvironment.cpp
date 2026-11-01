@@ -20,6 +20,8 @@
 #include "ecflow/core/cfg/CfgReader.hpp"
 #include "ecflow/core/cfg/CliReader.hpp"
 #include "ecflow/core/cfg/EnvReader.hpp"
+#include "ecflow/core/cfg/JsonReader.hpp"
+#include "ecflow/core/cfg/Mapper.hpp"
 #include "ecflow/core/cfg/ServerCatalogue.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/node/System.hpp"
@@ -102,12 +104,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     std::string log_file_name;
     std::optional<ecf::cfg::Configuration> configuration;
     try {
-        // The built-in defaults, overridden by server_environment.cfg, by the environment, then by the command line
-        const auto& catalogue = ecf::cfg::server_catalogue();
-        configuration.emplace(std::vector<ecf::cfg::Layer>{ecf::cfg::defaults_layer(catalogue),
-                                                           ecf::cfg::CfgReader(catalogue).read(path_to_config_file),
-                                                           ecf::cfg::EnvReader(catalogue).read(),
-                                                           ecf::cfg::CliReader(catalogue).read(options.options())});
+        configuration.emplace(read_configuration(options, path_to_config_file));
         resolve(*configuration, log_file_name);
     }
     catch (std::exception& e) {
@@ -457,6 +454,48 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
         }
         ecfHome_ = home.string();
     }
+}
+
+ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOptions& options,
+                                                              const std::string& path_to_config_file) const {
+    const auto& catalogue = ecf::cfg::server_catalogue();
+    auto variable = [](const char* name) { return ecf::cfg::Key::for_variable("ecflow.server.variables", name); };
+
+    auto defaults = ecf::cfg::defaults_layer(catalogue);
+    auto env_cfg  = ecf::cfg::CfgReader(catalogue).read(path_to_config_file);
+    auto env      = ecf::cfg::EnvReader(catalogue).read();
+    auto cli      = ecf::cfg::CliReader(catalogue).read(options.options());
+
+    // The port given by the other origins names the configuration file; the host is that of the machine
+    ecf::cfg::Configuration configuration({defaults, env_cfg, env, cli});
+    const auto port = std::to_string(std::get<std::int64_t>(*configuration.get(variable("ECF_PORT"))));
+    const auto file = host_name_.prefix_host_and_port(port, Ecf::CONFIG_FILE());
+    std::error_code error;
+    if (!fs::exists(fs::symlink_status(file, error))) {
+        return configuration;
+    }
+
+    auto ecf_cfg =
+        ecf::cfg::Mapper(catalogue).map(ecf::cfg::JsonReader().read_file(file), ecf::cfg::layers::ecf_cfg, file);
+
+    // The file belongs to the server of its name
+    auto refuse = [&file](const char* name, const std::string& value, const char* part, const std::string& expected) {
+        return ecf::cfg::ConfigurationError(file + ": /ecflow/server/variables/" + name + ": invalid value " + value +
+                                            ": expected the " + part + " of the file name, " + expected);
+    };
+    if (const auto found = ecf_cfg.entries.find(variable("ECF_HOST")); found != ecf_cfg.entries.end()) {
+        if (const auto& host = std::get<std::string>(found->second); host != host_name_.name()) {
+            throw refuse("ECF_HOST", "'" + host + "'", "host", "'" + host_name_.name() + "'");
+        }
+    }
+    if (const auto found = ecf_cfg.entries.find(variable("ECF_PORT")); found != ecf_cfg.entries.end()) {
+        if (const auto value = std::to_string(std::get<std::int64_t>(found->second)); value != port) {
+            throw refuse("ECF_PORT", value, "port", port);
+        }
+    }
+
+    return ecf::cfg::Configuration(
+        {std::move(defaults), std::move(env_cfg), std::move(ecf_cfg), std::move(env), std::move(cli)});
 }
 
 #ifdef ECF_OPENSSL

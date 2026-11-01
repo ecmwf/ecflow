@@ -180,6 +180,13 @@ public:
     static const std::string& LOG_FILE();
 
     ///
+    /// @brief Returns the name of the configuration file of the server.
+    ///
+    /// @return The file name, `ecf.cfg`, before the `<host>.<port>` prefix is added.
+    ///
+    static const std::string& CONFIG_FILE();
+
+    ///
     /// @brief Returns the default name of the checkpoint file of the server.
     ///
     /// @return The file name, `ecf.check`, before the `<host>.<port>` prefix is added.

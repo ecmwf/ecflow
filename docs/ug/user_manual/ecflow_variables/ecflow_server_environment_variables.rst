@@ -14,11 +14,14 @@ The server starts without any of these variables being set, since each setting h
 value. A default can be overridden by:
 
 - a setting in :ref:`server_environment.cfg`, read from the directory in which the server starts;
-- an environment variable, which overrides the setting in ``server_environment.cfg``.
+- a setting in :ref:`server_configuration_file`, read from the same directory, which overrides
+  the setting in ``server_environment.cfg``;
+- an environment variable, which overrides the settings in both files.
 
-Not every setting has an environment variable; for example, ``ECF_INTERVAL`` and the commands,
-such as ``ECF_JOB_CMD``, can only be set in ``server_environment.cfg``, and ``ECF_SSL`` and
-``ECF_DEBUG_SERVER`` only in the environment.
+Not every setting has an environment variable. For example:
+
+- ``ECF_INTERVAL`` and the commands, such as ``ECF_JOB_CMD``, can only be set in the files;
+- ``ECF_SSL`` and ``ECF_DEBUG_SERVER`` cannot be set in ``server_environment.cfg``.
 
 See :ref:`server_configuration` for every setting, its default, the origins that can provide it
 and its accepted values.

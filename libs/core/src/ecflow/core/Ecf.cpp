@@ -34,6 +34,10 @@ const std::string& Ecf::LOG_FILE() {
     static const std::string LOG_FILE = "ecf.log";
     return LOG_FILE;
 }
+const std::string& Ecf::CONFIG_FILE() {
+    static const std::string CONFIG_FILE = "ecf.cfg";
+    return CONFIG_FILE;
+}
 const std::string& Ecf::CHECKPT() {
     static const std::string CHECKPT = "ecf.check";
     return CHECKPT;

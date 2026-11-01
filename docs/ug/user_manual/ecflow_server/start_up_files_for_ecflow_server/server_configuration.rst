@@ -17,12 +17,14 @@ highest precedence, the origins are:
 
 #. the built-in defaults;
 #. :ref:`server_environment.cfg`, read from the directory in which the server starts;
+#. :ref:`server_configuration_file`, read from the same directory, when it exists;
 #. the environment variables;
 #. the command-line options, for the settings that have one (see :ref:`ecflow_server_initialisation`).
 
-Each origin can provide only the settings listed for it in the table below. An unknown setting in
-``server_environment.cfg`` or an unknown command-line option stops start-up; an environment variable
-not listed for a setting is ignored.
+Each origin can provide only the settings listed for it in the table below; ``<host>.<port>.ecf.cfg``
+can provide every setting, as described in :ref:`server_configuration_file`. An unknown setting in
+either file, or an unknown command-line option, stops start-up; an environment variable not listed for
+a setting is ignored.
 
 Validation
 ==========
@@ -194,6 +196,12 @@ Settings
      - yes
      - ``--debug``, ``-d``
      - any text: defining the variable enables debugging; ``--debug`` enables it too
+   * - ``ECF_HOST``
+     - the host name of the machine
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``: the host name of the machine
    * - HTTP transport
      - disabled: the ecFlow protocol over TCP/IP
      - no

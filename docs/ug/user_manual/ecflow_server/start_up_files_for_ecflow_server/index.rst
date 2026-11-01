@@ -11,8 +11,9 @@ The ecFlow server uses files for configuration and reporting.
 Initialisation distinguishes two directory roles:
 
 - **Startup directory:** the current working directory when ``ecflow_server`` is invoked.
-  The server reads :ref:`server_environment.cfg` here, before changing directory.
-- **Server home:** the directory selected by :term:`ECF_HOME` from the configuration file or
+  The server reads :ref:`server_environment.cfg` and :ref:`server_configuration_file` here,
+  before changing directory.
+- **Server home:** the directory selected by :term:`ECF_HOME` from the configuration files or
   an :ref:`environment override <ecflow_server_environment_variables>`.
   The default, ``.``, means the startup directory. A relative home is resolved against that
   directory before runtime filenames are constructed.
@@ -36,4 +37,5 @@ startup and server-home directories.
     ecflow_log_file
     ecflow_check_point_file_and_failure_tolerance
     server_environment.cfg
+    server_configuration_file
     server_configuration
