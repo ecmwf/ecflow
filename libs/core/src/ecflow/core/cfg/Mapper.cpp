@@ -107,8 +107,8 @@ void Mapper::map_object(const CTree& tree, std::map<Key, Value>& entries, std::s
             try {
                 setting.check(*value);
             }
-            catch (const ConfigurationError& e) {
-                throw refuse(origin, member.path(), e.what());
+            catch (const InvalidValue& e) {
+                throw refuse(origin, member.path(), "invalid value " + e.value() + ": " + e.reason());
             }
             entries.emplace(setting.key(), std::move(*value));
         }

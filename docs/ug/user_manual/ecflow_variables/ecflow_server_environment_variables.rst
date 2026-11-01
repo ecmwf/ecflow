@@ -10,16 +10,15 @@ ecFlow server environment variables control the execution of ecFlow
 and may be set before the start of the server, typically in a
 **start-up script**.
 
-ecFlow will start happily without any of these variables being set
-since all of them have a default value. These default values can be
-overridden by:
+The server starts without any of these variables being set, since each setting has a default
+value. A default can be overridden by:
 
--  Setting them in **"server_environment.config".** This file should
-   then be placed in the current working directory when invoking the
-   server.
+- a setting in :ref:`server_environment.cfg`, read from the directory in which the server starts;
+- an environment variable, which overrides the setting in ``server_environment.cfg``.
 
--  Explicitly setting environment variables. These will override any
-   setting in the **"server_environment.config"** file.
+Not every setting has an environment variable; for example, ``ECF_INTERVAL`` and the commands,
+such as ``ECF_JOB_CMD``, can only be set in ``server_environment.cfg``, and ``ECF_SSL`` and
+``ECF_DEBUG_SERVER`` only in the environment.
 
-For the full list of environment variables used the server please see
-'ecflow_server' in the :ref:`Glossary`.
+See :ref:`server_configuration` for every setting, its default, the origins that can provide it
+and its accepted values.

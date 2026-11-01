@@ -241,16 +241,21 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_integer_ranges) {
     check_refused(interval, "0");
     check_refused(interval, "61");
 
+    // The server holds the following integers as int
     for (const std::string key :
          {"ecflow.server.variables@ECF_CHECKINTERVAL", "ecflow.server.variables@ECF_TASK_THRESHOLD"}) {
         check_accepted(key, "1", value_of<std::int64_t>(1));
+        check_accepted(key, "2147483647", value_of<std::int64_t>(2147483647));
         check_refused(key, "0");
         check_refused(key, "-1");
+        check_refused(key, "2147483648");
     }
 
     const std::string prune = "ecflow.server.variables@ECF_PRUNE_NODE_LOG";
     check_accepted(prune, "0", value_of<std::int64_t>(0));
+    check_accepted(prune, "2147483647", value_of<std::int64_t>(2147483647));
     check_refused(prune, "-1");
+    check_refused(prune, "2147483648");
 }
 
 BOOST_AUTO_TEST_CASE(test_server_catalogue_check_mode) {

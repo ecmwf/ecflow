@@ -59,6 +59,13 @@ std::string path_of(const Key& key) {
     return name.empty() ? pointer : pointer + "/" + std::string(name);
 }
 
+InvalidValue::InvalidValue(Key key, std::string value, std::string reason)
+    : ConfigurationError("Invalid value " + value + " for " + quoted(key.key()) + ": " + reason),
+      key_{std::move(key)},
+      value_{std::move(value)},
+      reason_{std::move(reason)} {
+}
+
 //
 // Checks
 //
@@ -127,9 +134,7 @@ Setting::Setting(Key key, Type type, std::optional<Value> default_value, Names n
 }
 
 Value Setting::parse(std::string_view text) const {
-    auto refuse = [this, text](const std::string& reason) -> ConfigurationError {
-        return ConfigurationError("Invalid text " + quoted(text) + " for " + quoted(key_.key()) + ": " + reason);
-    };
+    auto refuse = [this, text](const std::string& reason) { return InvalidValue(key_, quoted(text), reason); };
 
     Value value;
     if (parse_) {
@@ -143,8 +148,7 @@ Value Setting::parse(std::string_view text) const {
                 const auto* last     = text.data() + text.size();
                 const auto [end, ec] = std::from_chars(first, last, number);
                 if (text.empty() || ec != std::errc{} || end != last) {
-                    throw refuse("expected a decimal integer in [" + std::to_string(INT64_MIN) + ", " +
-                                 std::to_string(INT64_MAX) + "]");
+                    throw refuse("expected an integer");
                 }
                 value = Value(std::in_place_type<std::int64_t>, number);
                 break;
@@ -165,19 +169,23 @@ Value Setting::parse(std::string_view text) const {
                 break;
         }
     }
-    check(value);
+    try {
+        check(value);
+    }
+    catch (const InvalidValue& e) {
+        throw refuse(e.reason()); // shows the text as given
+    }
     return value;
 }
 
 void Setting::check(const Value& value) const {
     if (type_of(value) != type_) {
-        throw ConfigurationError("Invalid value " + describe(value) + " for " + quoted(key_.key()) + ": expected " +
-                                 type_name(type_) + ", not " + type_name(type_of(value)));
+        throw InvalidValue(
+            key_, describe(value), std::string("expected ") + type_name(type_) + ", not " + type_name(type_of(value)));
     }
     if (check_) {
         if (const auto reason = check_(value)) {
-            throw ConfigurationError("Invalid value " + describe(value) + " for " + quoted(key_.key()) + ": " +
-                                     *reason);
+            throw InvalidValue(key_, describe(value), *reason);
         }
     }
 }
@@ -229,6 +237,16 @@ Value Catalogue::parse(const Key& key, std::string_view text) const {
 
 void Catalogue::check(const Key& key, const Value& value) const {
     get(key).check(value);
+}
+
+Layer defaults_layer(const Catalogue& catalogue) {
+    Layer layer(layers::defaults);
+    for (const auto& setting : catalogue.settings()) {
+        if (setting.default_value()) {
+            layer.entries.emplace(setting.key(), *setting.default_value());
+        }
+    }
+    return layer;
 }
 
 const Setting& Catalogue::get(const Key& key) const {

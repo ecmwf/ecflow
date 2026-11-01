@@ -24,6 +24,48 @@ enum class Type {
 };
 
 ///
+/// @brief Reports a value refused by a setting, with the parts needed to describe it in the terms of its origin.
+///
+struct InvalidValue : public ConfigurationError
+{
+    ///
+    /// @brief Creates the error.
+    ///
+    /// @param[in] key The key of the setting
+    /// @param[in] value The refused value, as shown in messages: a text in single quotes, e.g. `'3141x'`, or a value
+    ///   of the tree of a configuration file, e.g. `80`
+    /// @param[in] reason The reason of the refusal, e.g. `expected a value in [1024, 49150]`
+    ///
+    InvalidValue(Key key, std::string value, std::string reason);
+
+    ///
+    /// @brief Returns the key of the setting.
+    ///
+    /// @return The key.
+    ///
+    [[nodiscard]] const Key& key() const { return key_; }
+
+    ///
+    /// @brief Returns the refused value, as shown in messages.
+    ///
+    /// @return The value, e.g. `'3141x'` or `80`.
+    ///
+    [[nodiscard]] const std::string& value() const { return value_; }
+
+    ///
+    /// @brief Returns the reason of the refusal.
+    ///
+    /// @return The reason, e.g. `expected a value in [1024, 49150]`.
+    ///
+    [[nodiscard]] const std::string& reason() const { return reason_; }
+
+private:
+    Key key_;
+    std::string value_;
+    std::string reason_;
+};
+
+///
 /// @brief Names an input in each of the origins that can provide it, as named by layers.
 ///
 /// An origin that cannot provide the input leaves its name empty.
@@ -163,7 +205,8 @@ public:
     ///
     /// @param[in] text The text provided by the source
     /// @return The value.
-    /// @throws ConfigurationError if the text cannot be turned into a value, or the value does not pass the check.
+    /// @throws InvalidValue if the text cannot be turned into a value, or the value does not pass the check; the
+    ///   error shows the text as given.
     ///
     [[nodiscard]] Value parse(std::string_view text) const;
 
@@ -171,7 +214,7 @@ public:
     /// @brief Checks a value of the setting.
     ///
     /// @param[in] value The value
-    /// @throws ConfigurationError if the value does not hold the type of the setting, or does not pass its check.
+    /// @throws InvalidValue if the value does not hold the type of the setting, or does not pass its check.
     ///
     void check(const Value& value) const;
 
@@ -243,5 +286,13 @@ private:
 
     std::vector<Setting> settings_; ///< Ordered by key
 };
+
+///
+/// @brief Creates the layer of the built-in defaults of a catalogue.
+///
+/// @param[in] catalogue The catalogue
+/// @return The layer named layers::defaults, holding the default of every setting that has one.
+///
+[[nodiscard]] Layer defaults_layer(const Catalogue& catalogue);
 
 } // namespace ecf::cfg

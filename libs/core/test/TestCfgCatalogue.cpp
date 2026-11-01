@@ -13,6 +13,7 @@
 
 using ecf::cfg::Catalogue;
 using ecf::cfg::ConfigurationError;
+using ecf::cfg::InvalidValue;
 using ecf::cfg::Key;
 using ecf::cfg::Names;
 using ecf::cfg::Setting;
@@ -250,6 +251,43 @@ BOOST_AUTO_TEST_CASE(test_check_one_of) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_refusals_carry_their_parts) {
+    ECF_NAME_THIS_TEST();
+
+    const auto setting = port_setting();
+    auto refusal       = [](auto f) -> InvalidValue {
+        try {
+            f();
+        }
+        catch (const InvalidValue& e) {
+            return e;
+        }
+        BOOST_FAIL("expected InvalidValue");
+        return InvalidValue(Key("none"), "", "");
+    };
+
+    // Parsing shows the text as given, in single quotes
+    const auto malformed = refusal([&] { (void)setting.parse("3141x"); });
+    BOOST_CHECK(malformed.key() == port_key);
+    BOOST_CHECK_EQUAL(malformed.value(), "'3141x'");
+    BOOST_CHECK_EQUAL(malformed.reason(), "expected an integer");
+
+    const auto out_of_range = refusal([&] { (void)setting.parse("80"); });
+    BOOST_CHECK_EQUAL(out_of_range.value(), "'80'");
+    BOOST_CHECK_EQUAL(out_of_range.reason(), "expected a value in [1024, 49150]");
+    BOOST_CHECK_EQUAL(std::string(out_of_range.what()),
+                      "Invalid value '80' for 'ecflow.server.variables@ECF_PORT': expected a value in [1024, 49150]");
+
+    // Checking shows the value
+    const auto checked = refusal([&] { setting.check(value_of<std::int64_t>(80)); });
+    BOOST_CHECK_EQUAL(checked.value(), "80");
+    BOOST_CHECK_EQUAL(checked.reason(), "expected a value in [1024, 49150]");
+
+    const auto mistyped = refusal([&] { setting.check(value_of<std::string>("3141")); });
+    BOOST_CHECK_EQUAL(mistyped.value(), "'3141'");
+    BOOST_CHECK_EQUAL(mistyped.reason(), "expected an integer, not a text");
+}
+
 //
 // Catalogue
 //
@@ -321,6 +359,18 @@ BOOST_AUTO_TEST_CASE(test_catalogue_refuses_ambiguous_keys) {
     // Places side by side are accepted
     const Catalogue catalogue({boolean("a.b"), boolean("a.bc"), boolean("a.b_c"), boolean("a.c@b"), boolean("a@bd")});
     BOOST_CHECK_EQUAL(catalogue.settings().size(), 5U);
+}
+
+BOOST_AUTO_TEST_CASE(test_defaults_layer) {
+    ECF_NAME_THIS_TEST();
+
+    // Only the settings with a default are in the layer
+    const Catalogue catalogue(
+        {port_setting(), Setting(Key("ecflow.server.http"), Type::Boolean, std::nullopt, Names{})});
+    const auto layer = ecf::cfg::defaults_layer(catalogue);
+    BOOST_CHECK_EQUAL(layer.name, std::string(ecf::cfg::layers::defaults));
+    BOOST_REQUIRE_EQUAL(layer.entries.size(), 1U);
+    BOOST_CHECK(layer.entries.at(port_key) == value_of<std::int64_t>(3141));
 }
 
 BOOST_AUTO_TEST_CASE(test_catalogue_parses_and_checks_by_key) {

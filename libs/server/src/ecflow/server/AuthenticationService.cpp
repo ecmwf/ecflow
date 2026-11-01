@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 
 namespace ecf {
@@ -107,14 +106,6 @@ bool AuthenticationService::is_authentic(const Identity& identity) const {
         }
     }
     return true;
-}
-
-void AuthenticationService::retrieve_passwd_file() {
-    ecf::environment::get(ecf::environment::ECF_PASSWD, ecf_passwd_file_);
-}
-
-void AuthenticationService::retrieve_custom_passwd_file() {
-    ecf::environment::get(ecf::environment::ECF_CUSTOM_PASSWD, ecf_passwd_custom_file_);
 }
 
 bool AuthenticationService::reload_passwd_file(std::string& error) {

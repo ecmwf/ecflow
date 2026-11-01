@@ -3,6 +3,8 @@
 
 #include "ecflow/core/cfg/ServerCatalogue.hpp"
 
+#include <limits>
+
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Str.hpp"
@@ -22,6 +24,8 @@ Parse always(bool value) {
 
 std::vector<Setting> server_settings() {
     const auto required = checks::non_empty();
+    // The server holds these integers as int
+    const auto int_max = std::int64_t{std::numeric_limits<int>::max()};
     // clang-format off
     return {
 
@@ -85,7 +89,7 @@ std::vector<Setting> server_settings() {
                 "ECF_CHECKINTERVAL",                          // env
                 std::nullopt                                  // cli
             },
-            checks::at_least(1)),
+            checks::range(1, int_max)),
 
         Setting(
             variable("ECF_LOG"),
@@ -145,7 +149,7 @@ std::vector<Setting> server_settings() {
                 "ECF_TASK_THRESHOLD",                          // env
                 std::nullopt                                   // cli
             },
-            checks::at_least(1)),
+            checks::range(1, int_max)),
 
         Setting(
             variable("ECF_PRUNE_NODE_LOG"),
@@ -157,7 +161,7 @@ std::vector<Setting> server_settings() {
                 "ECF_PRUNE_NODE_LOG",                          // env
                 std::nullopt                                   // cli
             },
-            checks::at_least(0)),
+            checks::range(0, int_max)),
 
         // server_environment.cfg only, possibly overridden by the command line
 

@@ -293,8 +293,9 @@ BOOST_AUTO_TEST_CASE(test_error_messages) {
         {R"({})", origin + ": missing the version of the format, expected \"version\": 1"},
         {R"(null)", origin + ": expected an object, not null"},
         {R"({ "version": 1, "ecflow": { "server": { "variables": { "ECF_PORT": 80 } } } })",
-         origin + ": /ecflow/server/variables/ECF_PORT: Invalid value 80 for 'ecflow.server.variables@ECF_PORT': "
-                  "expected a value in [1024, 49150]"},
+         origin + ": /ecflow/server/variables/ECF_PORT: invalid value 80: expected a value in [1024, 49150]"},
+        {R"({ "version": 1, "ecflow": { "server": { "variables": { "ECF_HOME": "" } } } })",
+         origin + ": /ecflow/server/variables/ECF_HOME: invalid value '': expected a non-empty value"},
     };
     for (const auto& [text, expected] : cases) {
         BOOST_TEST_CONTEXT("text: " << text) {

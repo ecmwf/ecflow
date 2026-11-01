@@ -197,89 +197,6 @@ BOOST_AUTO_TEST_CASE(test_authentication_init_expands_each_file_independently) {
 }
 
 // ===========================================================================
-// retrieve_*_passwd_file(): pick up of file names from the environment
-// ===========================================================================
-
-BOOST_AUTO_TEST_CASE(test_authentication_retrieve_passwd_file_from_environment) {
-    ECF_NAME_THIS_TEST();
-
-    WithTestEnvironmentVariable passwd("ECF_PASSWD", "from_env.passwd");
-    WithTestEnvironmentVariable custom("ECF_CUSTOM_PASSWD", "from_env.custom_passwd");
-
-    AuthenticationService service;
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
-
-    BOOST_CHECK_EQUAL(service.passwd_file(), "from_env.passwd");
-    BOOST_CHECK_EQUAL(service.custom_passwd_file(), "from_env.custom_passwd");
-}
-
-BOOST_AUTO_TEST_CASE(test_authentication_retrieve_passwd_file_overrides_previous_value) {
-    ECF_NAME_THIS_TEST();
-
-    WithTestEnvironmentVariable passwd("ECF_PASSWD", "from_env.passwd");
-    WithTestEnvironmentVariable custom("ECF_CUSTOM_PASSWD", "from_env.custom_passwd");
-
-    AuthenticationService service;
-    service.set_passwd_file("previous.passwd");
-    service.set_custom_passwd_file("previous.custom_passwd");
-
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
-
-    BOOST_CHECK_EQUAL(service.passwd_file(), "from_env.passwd");
-    BOOST_CHECK_EQUAL(service.custom_passwd_file(), "from_env.custom_passwd");
-}
-
-BOOST_AUTO_TEST_CASE(test_authentication_retrieve_passwd_file_keeps_value_when_environment_is_unset) {
-    ECF_NAME_THIS_TEST();
-
-    WithoutTestEnvironmentVariable passwd("ECF_PASSWD");
-    WithoutTestEnvironmentVariable custom("ECF_CUSTOM_PASSWD");
-
-    AuthenticationService service;
-    service.set_passwd_file("previous.passwd");
-    service.set_custom_passwd_file("previous.custom_passwd");
-
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
-
-    BOOST_CHECK_EQUAL(service.passwd_file(), "previous.passwd");
-    BOOST_CHECK_EQUAL(service.custom_passwd_file(), "previous.custom_passwd");
-}
-
-BOOST_AUTO_TEST_CASE(test_authentication_retrieve_passwd_file_accepts_empty_environment_value) {
-    ECF_NAME_THIS_TEST();
-
-    WithTestEnvironmentVariable passwd("ECF_PASSWD", "");
-    WithTestEnvironmentVariable custom("ECF_CUSTOM_PASSWD", "");
-
-    AuthenticationService service;
-    service.set_passwd_file("previous.passwd");
-    service.set_custom_passwd_file("previous.custom_passwd");
-
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
-
-    BOOST_CHECK(service.passwd_file().empty());
-    BOOST_CHECK(service.custom_passwd_file().empty());
-}
-
-BOOST_AUTO_TEST_CASE(test_authentication_retrieve_is_independent_per_file) {
-    ECF_NAME_THIS_TEST();
-
-    WithTestEnvironmentVariable passwd("ECF_PASSWD", "from_env.passwd");
-    WithoutTestEnvironmentVariable custom("ECF_CUSTOM_PASSWD");
-
-    AuthenticationService service;
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
-
-    BOOST_CHECK_EQUAL(service.passwd_file(), "from_env.passwd");
-    BOOST_CHECK(service.custom_passwd_file().empty());
-}
-
-// ===========================================================================
 // valid(): validation and loading at server start-up
 // ===========================================================================
 
@@ -1193,12 +1110,9 @@ BOOST_AUTO_TEST_CASE(test_authentication_server_start_up_sequence_with_default_f
     WithTestFile passwd(ecf::test::scaffold::NamedTestFile{regular_name}, passwd_file_content({{"alice", "secret"}}));
     WithTestFile custom(ecf::test::scaffold::NamedTestFile{custom_name}, passwd_file_content({{"bob", "hidden"}}));
 
-    WithTestEnvironmentVariable passwd_env("ECF_PASSWD", Ecf::PASSWD_FILE());
-    WithTestEnvironmentVariable custom_env("ECF_CUSTOM_PASSWD", Ecf::CUSTOM_PASSWD_FILE());
-
     AuthenticationService service;
-    service.retrieve_passwd_file();
-    service.retrieve_custom_passwd_file();
+    service.set_passwd_file(Ecf::PASSWD_FILE());
+    service.set_custom_passwd_file(Ecf::CUSTOM_PASSWD_FILE());
 
     Host host(test_host);
     service.init(host, test_port);

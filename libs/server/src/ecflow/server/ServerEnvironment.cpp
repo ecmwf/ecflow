@@ -5,8 +5,6 @@
 
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -17,6 +15,9 @@
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/core/cfg/CfgReader.hpp"
+#include "ecflow/core/cfg/EnvReader.hpp"
+#include "ecflow/core/cfg/ServerCatalogue.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerOptions.hpp"
@@ -97,8 +98,12 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
 
     std::string log_file_name;
     try {
-        read_config_file(log_file_name, path_to_config_file);
-        read_environment_variables(log_file_name); // overrides any settings in the config file
+        // The built-in defaults, overridden by server_environment.cfg, overridden by the environment
+        const auto& catalogue = ecf::cfg::server_catalogue();
+        const ecf::cfg::Configuration configuration({ecf::cfg::defaults_layer(catalogue),
+                                                     ecf::cfg::CfgReader(catalogue).read(path_to_config_file),
+                                                     ecf::cfg::EnvReader(catalogue).read()});
+        resolve(configuration, log_file_name);
     }
     catch (std::exception& e) {
         std::string msg           = "Exception in ServerEnvironment::ServerEnvironment() : ";
@@ -125,30 +130,6 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     // Apply CLI values after the environment so that command-line overrides retain the highest priority.
     options.apply(this);
 
-    for (const auto& [name, value] : std::vector<std::pair<std::string, std::string>>{
-             {"ECF_HOME", ecfHome_},
-             {"ECF_LOG", log_file_name},
-             {"ECF_CHECK", ecf_checkpt_file_},
-             {"ECF_CHECKOLD", ecf_backup_checkpt_file_},
-             {"ECF_PASSWD", authentication_service_.passwd_file()},
-             {"ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file()},
-             {"ECF_LISTS", ecf_white_list_file_},
-             {"ECF_JOB_CMD", ecf_cmd_},
-             {"ECF_KILL_CMD", killCmd_},
-             {"ECF_STATUS_CMD", statusCmd_},
-             {"ECF_CHECK_CMD", checkCmd_},
-             {"ECF_URL_CMD", urlCmd_},
-             {"ECF_URL_BASE", urlBase_},
-             {"ECF_URL", url_},
-             {"ECF_MICRODEF", ecf_micro_}}) {
-        if (value.empty()) {
-            throw ServerEnvironmentException(name + " must not be empty (found '').");
-        }
-    }
-    if (ecf_task_threshold_ <= 0) {
-        throw ServerEnvironmentException("ECF_TASK_THRESHOLD must be a positive integer in milliseconds, but found " +
-                                         std::to_string(ecf_task_threshold_) + ".");
-    }
     JobProfiler::set_task_threshold(static_cast<size_t>(ecf_task_threshold_));
 
     /// Config, Environment, or Options may have updated port, update port dependent file names
@@ -286,25 +267,9 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    if (checkPtInterval_ <= 0) {
-        ss << "ECF_CHECKINTERVAL must be a positive integer in seconds, but found " << checkPtInterval_ << ".\n";
-        errorMsg = ss.str();
-        return false;
-    }
     if (submitJobsInterval_ < 1 || submitJobsInterval_ > 60) {
         ss << "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found "
            << submitJobsInterval_ << ".\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (ecf_prune_node_log_ < 0) {
-        ss << "ECF_PRUNE_NODE_LOG must be a non-negative integer in days, but found " << ecf_prune_node_log_
-           << ". Zero preserves all edit history.\n";
-        errorMsg = ss.str();
-        return false;
-    }
-    if (checkMode_ == ecf::CheckPt::UNDEFINED) {
-        ss << "No ECF_CHECKMODE specified. Please set in Server/server_environment.cfg\n";
         errorMsg = ss.str();
         return false;
     }
@@ -443,174 +408,57 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
 // Privates:
 // ============================================================================================
 
-void ServerEnvironment::read_config_file(std::string& log_file_name, const std::string& path_to_config_file) {
-    if (debug()) {
-        std::cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
+void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, std::string& log_file_name) {
+    // Every setting used here has a default, hence an effective value
+    auto value = [&configuration](const char* name) {
+        return *configuration.get(ecf::cfg::Key::for_variable("ecflow.server.variables", name));
+    };
+    auto text    = [&value](const char* name) { return std::get<std::string>(value(name)); };
+    auto integer = [&value](const char* name) { return static_cast<int>(std::get<std::int64_t>(value(name))); };
+
+    ecfHome_                 = text("ECF_HOME");
+    serverPort_              = integer("ECF_PORT");
+    ecf_checkpt_file_        = text("ECF_CHECK");
+    ecf_backup_checkpt_file_ = text("ECF_CHECKOLD");
+    log_file_name            = text("ECF_LOG");
+    checkPtInterval_         = integer("ECF_CHECKINTERVAL");
+    submitJobsInterval_      = integer("ECF_INTERVAL");
+    ecf_cmd_                 = text("ECF_JOB_CMD");
+    killCmd_                 = text("ECF_KILL_CMD");
+    statusCmd_               = text("ECF_STATUS_CMD");
+    checkCmd_                = text("ECF_CHECK_CMD");
+    urlCmd_                  = text("ECF_URL_CMD");
+    urlBase_                 = text("ECF_URL_BASE");
+    url_                     = text("ECF_URL");
+    ecf_micro_               = text("ECF_MICRODEF");
+    ecf_white_list_file_     = text("ECF_LISTS");
+    ecf_task_threshold_      = integer("ECF_TASK_THRESHOLD");
+    ecf_prune_node_log_      = integer("ECF_PRUNE_NODE_LOG");
+    debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
+    authentication_service_.set_passwd_file(text("ECF_PASSWD"));
+    authentication_service_.set_custom_passwd_file(text("ECF_CUSTOM_PASSWD"));
+
+    // The catalogue accepts only the supported modes
+    if (const auto mode = text("ECF_CHECKMODE"); mode == "CHECK_NEVER") {
+        checkMode_ = ecf::CheckPt::NEVER;
+    }
+    else if (mode == "CHECK_ALWAYS") {
+        checkMode_ = ecf::CheckPt::ALWAYS;
+    }
+    else {
+        checkMode_ = ecf::CheckPt::ON_TIME;
     }
 
-    try {
-        std::string theCheckMode;
-
-        std::string passwd_file;
-        std::string custom_passwd_file;
-
-        namespace po = boost::program_options;
-
-        // read the environment from the config file.
-        // **** Port *must* be read before log file, and check pt files
-        po::options_description config_file_options("Configuration");
-        // clang-format off
-        config_file_options.add_options()
-            ("ECF_HOME", po::value<std::string>(&ecfHome_)->default_value(Ecf::HOME()), "ECF_HOME, the home for all ECF files")
-            ("ECF_PORT", po::value<int>(&serverPort_)->default_value(Ecf::PORT()), "The port number. Clients must use same port.")
-            ("ECF_CHECK", po::value<std::string>(&ecf_checkpt_file_)->default_value(Ecf::CHECKPT()), "Check point file name")
-            ("ECF_CHECKOLD", po::value<std::string>(&ecf_backup_checkpt_file_)->default_value(Ecf::BACKUP_CHECKPT()), "Backup checkpoint file name")
-            ("ECF_LOG", po::value<std::string>(&log_file_name)->default_value(Ecf::LOG_FILE()), "Log file name")
-            ("ECF_CHECKINTERVAL", po::value<int>(&checkPtInterval_)->default_value(CheckPt::default_interval()), "The interval in seconds to save check point file")
-            ("ECF_INTERVAL", po::value<int>(&submitJobsInterval_)->default_value(Ecf::SUBMIT_INTERVAL()), "Check time dependencies and submit any jobs")
-            ("ECF_CHECKMODE", po::value<std::string>(&theCheckMode), "The check mode, must be one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS")
-            ("ECF_JOB_CMD", po::value<std::string>(&ecf_cmd_)->default_value(Ecf::JOB_CMD()), "Command to be executed to submit a job.")
-            ("ECF_KILL_CMD", po::value<std::string>(&killCmd_)->default_value(Ecf::KILL_CMD()), "Command to be executed to kill a job.")
-            ("ECF_STATUS_CMD", po::value<std::string>(&statusCmd_)->default_value(Ecf::STATUS_CMD()), "Command to be obtain the job status from server.")
-            ("ECF_CHECK_CMD", po::value<std::string>(&checkCmd_)->default_value(Ecf::CHECK_CMD()), "Command to be obtain the job status from client.")
-            ("ECF_URL_CMD", po::value<std::string>(&urlCmd_)->default_value(Ecf::URL_CMD()), "Command to be obtain url.")
-            ("ECF_URL_BASE", po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")
-            ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
-            ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
-            ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(ecf::string_constants::white_list_file), "Path name to file the list valid users and their access rights")
-            ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(Ecf::PASSWD_FILE()), "Path name to passwd file")
-            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(Ecf::CUSTOM_PASSWD_FILE()), "Path name to custom passwd file, for user who don't use login name")
-            ("ECF_TASK_THRESHOLD", po::value<int>(&ecf_task_threshold_)->default_value(Ecf::TASK_THRESHOLD()), "The positive threshold in milliseconds when profiling job generation")
-            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(Ecf::PRUNE_NODE_LOG()), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
-        // clang-format on
-
-        std::error_code status_error;
-        const auto status = fs::status(path_to_config_file, status_error);
-        if (status_error && status_error != std::errc::no_such_file_or_directory) {
-            throw std::runtime_error("Cannot inspect configuration file: " + status_error.message());
-        }
-        if (fs::exists(status) && !fs::is_regular_file(status)) {
-            throw std::runtime_error("Configuration path is not a regular file");
-        }
-
-        std::ifstream ifs(path_to_config_file.c_str());
-        if (fs::exists(status) && !ifs) {
-            throw std::runtime_error("Cannot open configuration file for reading");
-        }
-        if (!ifs) {
-            if (debug()) {
-                std::cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
-            }
-        }
-
-        /// This is *NOT* redundant, when the file is empty/not present, then the default value
-        /// defined above are set.
-        po::variables_map vm;
-        po::store(parse_config_file(ifs, config_file_options), vm);
-        po::notify(vm);
-        if (ifs.bad()) {
-            throw std::runtime_error("Error reading configuration file");
-        }
-
-        if (theCheckMode == "CHECK_ON_TIME") {
-            checkMode_ = ecf::CheckPt::ON_TIME;
-        }
-        else if (theCheckMode == "CHECK_NEVER") {
-            checkMode_ = ecf::CheckPt::NEVER;
-        }
-        else if (theCheckMode == "CHECK_ALWAYS") {
-            checkMode_ = ecf::CheckPt::ALWAYS;
-        }
-        else if (vm.count("ECF_CHECKMODE")) {
-            throw std::runtime_error("Invalid ECF_CHECKMODE value '" + theCheckMode +
-                                     "'. Expected CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS.");
-        }
-
-        authentication_service_.set_passwd_file(passwd_file);
-        authentication_service_.set_custom_passwd_file(custom_passwd_file);
-    }
-    catch (const std::exception& e) {
-        throw ServerEnvironmentException("Could not parse server configuration file '" + path_to_config_file +
-                                         "': " + e.what());
-    }
-}
-
-void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
-    if (debug()) {
-        std::cout << "ServerEnvironment::read_environment_variables()\n";
-    }
-
-    if (auto var = ecf::environment::fetch<std::string>(ecf::environment::ECF_PORT); var) {
-        std::string port = var.value();
-        try {
-            serverPort_ = ecf::convert_to<int>(port);
-        }
-        catch (const ecf::bad_conversion&) {
-            throw ServerEnvironmentException(
-                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_PORT is defined("
-                        << port << ") but value is *not* convertible to an integer\n"));
-        }
-    }
-
-    if (auto var = ecf::environment::fetch<std::string>("ECF_CHECKINTERVAL"); var) {
-        std::string interval = var.value();
-        try {
-            checkPtInterval_ = ecf::convert_to<int>(interval);
-        }
-        catch (const ecf::bad_conversion&) {
-            throw ServerEnvironmentException(
-                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_CHECKINTERVAL is defined("
-                        << interval << ") but value is *not* convertible to an integer\n"));
-        }
-    }
-
-    ecf::environment::get(ecf::environment::ECF_HOME, ecfHome_);
-    if (ecfHome_ == ".") { // expand to absolute paths
+    // Resolve the server home against the startup directory
+    if (ecfHome_ == ".") {
         ecfHome_ = fs::current_path().string();
     }
-    else if (!ecfHome_.empty() && fs::path(ecfHome_).is_relative()) {
+    else if (fs::path(ecfHome_).is_relative()) {
         auto home = fs::absolute(ecfHome_).lexically_normal();
         if (home.filename().empty() && home.has_relative_path()) {
             home = home.parent_path(); // drop the trailing separator
         }
         ecfHome_ = home.string();
-    }
-
-    ecf::environment::get(ecf::environment::ECF_LOG, log_file_name);
-
-    ecf::environment::get("ECF_CHECK", ecf_checkpt_file_);
-
-    ecf::environment::get("ECF_CHECKOLD", ecf_backup_checkpt_file_);
-
-    ecf::environment::get("ECF_LISTS", ecf_white_list_file_);
-
-    authentication_service_.retrieve_passwd_file();
-    authentication_service_.retrieve_custom_passwd_file();
-
-    if (auto var = ecf::environment::fetch("ECF_PRUNE_NODE_LOG"); var) {
-        try {
-            ecf_prune_node_log_ = ecf::convert_to<int>(var.value());
-        }
-        catch (const ecf::bad_conversion&) {
-            throw ServerEnvironmentException(
-                MESSAGE("ServerEnvironment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an "
-                        "integer, but found: "
-                        << var.value()));
-        }
-    }
-
-    ecf::environment::get("ECF_DEBUG_SERVER", debug_);
-
-    if (auto var = ecf::environment::fetch("ECF_TASK_THRESHOLD"); var) {
-        std::string task_threshold = var.value();
-        try {
-            ecf_task_threshold_ = ecf::convert_to<int>(task_threshold);
-        }
-        catch (...) {
-            throw ServerEnvironmentException(
-                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined("
-                        << var.value() << ") but value is *not* convertible to an integer\n"));
-        }
     }
 }
 

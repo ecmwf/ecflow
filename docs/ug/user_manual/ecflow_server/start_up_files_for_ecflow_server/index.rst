@@ -26,8 +26,9 @@ are used unchanged.
 ``ECF_HOME`` must exist and be accessible and writable by the account running the server;
 otherwise, initialisation fails.
 
-See :ref:`ecflow_server_initialisation` for configuration precedence, the complete loading
-sequence and an example with separate startup and server-home directories.
+See :ref:`server_configuration` for every setting, its default and the origins that can provide it,
+and :ref:`ecflow_server_initialisation` for the complete loading sequence and an example with separate
+startup and server-home directories.
 
 .. toctree::
     :maxdepth: 1
@@ -35,3 +36,4 @@ sequence and an example with separate startup and server-home directories.
     ecflow_log_file
     ecflow_check_point_file_and_failure_tolerance
     server_environment.cfg
+    server_configuration

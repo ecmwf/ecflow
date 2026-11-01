@@ -22,6 +22,7 @@
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/core/cfg/Configuration.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
 #ifdef ECF_OPENSSL
@@ -224,44 +225,30 @@ public:
 
 private:
     ///
-    /// @brief Selects startup settings and validates required strings and the effective profiling threshold.
+    /// @brief Selects the startup settings from the built-in defaults, the configuration file and the environment.
     ///
     /// Command-line syntax is parsed first. Help and version requests return without reading configuration
-    /// or environment settings, applying transport options or accessing runtime files.
+    /// or environment settings, applying transport options or accessing runtime files. Each value is checked by
+    /// the server catalogue when it is read.
     ///
     /// @param[in] cl Command-line tokens, applied after configuration and environment settings
     /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
-    /// @throws ServerEnvironmentException if parsing, required-setting validation or server-home access fails.
+    /// @throws ServerEnvironmentException if reading a setting or server-home access fails.
     /// @throws std::exception if command-line parsing or runtime file setup fails.
     ///
     void init(const CommandLine& cl, const std::string& path_to_config_file);
 
     ///
-    /// @brief Reads configuration settings and applies built-in defaults for unspecified options.
+    /// @brief Takes the settings from their effective values, and resolves a relative server home.
     ///
-    /// A missing or empty configuration file uses the built-in defaults. An existing file must be readable
-    /// and regular. File-access and parsing failures stop initialisation
-    /// before environment overrides or startup side effects are applied.
-    /// An explicitly specified checkpoint mode must match one of the supported names.
+    /// A relative server home becomes an absolute path against the startup directory, in normal form, without dot
+    /// segments or a trailing separator. An absolute server home is preserved.
     ///
-    /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
-    /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
-    /// @throws ServerEnvironmentException if file access, parsing or checkpoint-mode validation fails, including the
-    /// path and cause.
-    ///
-    void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
-
-    ///
-    /// @brief Applies environment overrides and resolves a relative server home against the startup directory.
-    ///
-    /// A relative server home becomes an absolute path in normal form, without dot segments or a trailing separator.
-    /// Absolute server-home paths are preserved. An empty value is left for startup validation to reject.
-    ///
-    /// @param[in,out] log_file_name Configured log filename, replaced when ECF_LOG is set in the environment
-    /// @throws ServerEnvironmentException if a numeric environment setting cannot be parsed.
+    /// @param[in] configuration The configuration of the server, every value of which is valid
+    /// @param[out] log_file_name Receives the log filename
     /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
     ///
-    void read_environment_variables(std::string& log_file_name);
+    void resolve(const ecf::cfg::Configuration& configuration, std::string& log_file_name);
 
     void change_dir_to_ecf_home_and_check_accesibility();
 

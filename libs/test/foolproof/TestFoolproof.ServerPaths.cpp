@@ -226,7 +226,7 @@ void check_server_home_failure(const std::string& failure, bool from_environment
     }
     // Other failures are identified by the setting and the path, not by the wording of the cause
     if (failure == "empty") {
-        BOOST_CHECK_MESSAGE(output.find("must not be empty") != std::string::npos, output);
+        BOOST_CHECK_MESSAGE(output.find("expected a non-empty value") != std::string::npos, output);
     }
     BOOST_CHECK(!fs::exists(log));
 

@@ -360,7 +360,9 @@ set(srcs
   core/src/ecflow/core/cereal_optional_nvp.hpp
   core/src/ecflow/core/cfg/CTree.hpp
   core/src/ecflow/core/cfg/Catalogue.hpp
+  core/src/ecflow/core/cfg/CfgReader.hpp
   core/src/ecflow/core/cfg/Configuration.hpp
+  core/src/ecflow/core/cfg/EnvReader.hpp
   core/src/ecflow/core/cfg/JsonReader.hpp
   core/src/ecflow/core/cfg/Mapper.hpp
   core/src/ecflow/core/cfg/Reader.hpp
@@ -404,7 +406,9 @@ set(srcs
   core/src/ecflow/core/WhiteListFile.cpp
   core/src/ecflow/core/cfg/CTree.cpp
   core/src/ecflow/core/cfg/Catalogue.cpp
+  core/src/ecflow/core/cfg/CfgReader.cpp
   core/src/ecflow/core/cfg/Configuration.cpp
+  core/src/ecflow/core/cfg/EnvReader.cpp
   core/src/ecflow/core/cfg/JsonReader.cpp
   core/src/ecflow/core/cfg/Mapper.cpp
   core/src/ecflow/core/cfg/Reader.cpp

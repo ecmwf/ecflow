@@ -29,9 +29,6 @@ public:
     void set_passwd_file(const std::string& passwd_file) { ecf_passwd_file_ = passwd_file; }
     void set_custom_passwd_file(const std::string& custom_passwd_file) { ecf_passwd_custom_file_ = custom_passwd_file; }
 
-    void retrieve_passwd_file();
-    void retrieve_custom_passwd_file();
-
     ///
     /// @brief Reloads the originally selected regular password file without changing active credentials on failure.
     ///
