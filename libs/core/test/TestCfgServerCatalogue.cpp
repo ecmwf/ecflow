@@ -297,8 +297,25 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_switches) {
     // Command-line switches take no text: their presence decides the value
     check_accepted("ecflow.server.http", "", value_of(true));
     check_accepted("ecflow.server.ipv6", "", value_of(true));
-    check_accepted("ecflow.server.ssl", "", value_of(true));
     check_accepted("ecflow.server.job_generation", "", value_of(false));
+}
+
+BOOST_AUTO_TEST_CASE(test_server_catalogue_ssl_requires_support) {
+    ECF_NAME_THIS_TEST();
+
+#ifdef ECF_OPENSSL
+    check_accepted("ecflow.server.ssl", "", value_of(true));
+    for (const std::string text : {"", "1", "host.port"}) {
+        check_accepted("ecflow.server.variables@ECF_SSL", text, value_of(text));
+    }
+#else
+    // A server built without SSL support refuses any request for SSL
+    check_refused("ecflow.server.ssl", "");
+    for (const std::string text : {"", "1", "host.port"}) {
+        check_refused("ecflow.server.variables@ECF_SSL", text);
+    }
+    server_catalogue().find(Key("ecflow.server.ssl"))->check(value_of(false));
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()

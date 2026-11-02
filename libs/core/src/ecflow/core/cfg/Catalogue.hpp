@@ -141,6 +141,18 @@ Check non_empty();
 ///
 Check one_of(std::vector<std::string> accepted);
 
+///
+/// @brief Creates a check for a setting requesting a feature that may not be supported by the build.
+///
+/// A supported feature accepts every value. An unsupported feature accepts only `false`, i.e. a feature not
+/// requested, and refuses any other value, text included.
+///
+/// @param[in] supported Whether the build supports the feature
+/// @param[in] reason The reason given for a refusal, e.g. "this server was built without SSL support"
+/// @return The check.
+///
+Check only_when_supported(bool supported, std::string reason);
+
 } // namespace checks
 
 ///

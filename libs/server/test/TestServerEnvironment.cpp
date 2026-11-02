@@ -2463,6 +2463,33 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_host_ignores_environment) {
     }
 }
 
+#ifndef ECF_OPENSSL
+///
+/// @brief Verifies that a server built without SSL support refuses ECF_SSL, before creating its log.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_refuses_ssl_without_support) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    for (const std::string value : {"", "1"}) {
+        BOOST_TEST_CONTEXT("ECF_SSL='" << value << "'") {
+            WithTestEnvironmentVariable ecf_ssl("ECF_SSL", value);
+            const auto start = [] { ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"}); };
+            BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+                const std::string message = error.what();
+                BOOST_TEST_INFO("message: " << message);
+                return message.find("Environment variable ECF_SSL: invalid value '" + value +
+                                    "': this server was built without SSL support") != std::string::npos;
+            });
+            BOOST_CHECK(!Log::instance());
+        }
+    }
+}
+#endif
+
 #ifdef ECF_OPENSSL
 
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_ssl_connection) {

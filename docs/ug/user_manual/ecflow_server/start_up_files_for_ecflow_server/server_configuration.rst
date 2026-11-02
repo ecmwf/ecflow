@@ -234,3 +234,5 @@ Notes:
   and port of the server. An explicitly set filename equal to the default filename, e.g.
   ``ECF_LOG = ecf.log``, is prefixed in the same way.
 - Relative paths are resolved as described in :ref:`start_up_files_for_ecflow_server`.
+- A server built without SSL support refuses ``ECF_SSL`` and any request for SSL, whatever the origin, before
+  creating its log.

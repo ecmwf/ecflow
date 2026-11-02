@@ -22,6 +22,16 @@ Parse always(bool value) {
     return [value](std::string_view) { return Value{value}; };
 }
 
+// Refuses any request for SSL from a server built without SSL support
+Check ssl_supported() {
+#ifdef ECF_OPENSSL
+    constexpr bool supported = true;
+#else
+    constexpr bool supported = false;
+#endif
+    return checks::only_when_supported(supported, "this server was built without SSL support");
+}
+
 std::vector<Setting> server_settings() {
     const auto required = checks::non_empty();
     // The server holds these integers as int
@@ -296,7 +306,8 @@ std::vector<Setting> server_settings() {
                 "/ecflow/server/variables/ECF_SSL", // ecf_cfg
                 "ECF_SSL",                          // env
                 std::nullopt                        // cli
-            }),
+            },
+            ssl_supported()),
 
         Setting(
             variable("ECF_DEBUG_SERVER"),
@@ -362,7 +373,7 @@ std::vector<Setting> server_settings() {
                 std::nullopt,         // env
                 "ssl"                 // cli
             },
-            {},
+            ssl_supported(),
             always(true)),
 
         Setting(

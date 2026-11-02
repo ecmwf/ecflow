@@ -110,6 +110,18 @@ Check one_of(std::vector<std::string> accepted) {
     };
 }
 
+Check only_when_supported(bool supported, std::string reason) {
+    if (supported) {
+        return {};
+    }
+    return [reason = std::move(reason)](const Value& value) -> std::optional<std::string> {
+        if (const auto* requested = std::get_if<bool>(&value); requested && !*requested) {
+            return std::nullopt;
+        }
+        return reason;
+    };
+}
+
 } // namespace checks
 
 //

@@ -251,6 +251,35 @@ BOOST_AUTO_TEST_CASE(test_check_one_of) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_check_only_when_supported) {
+    ECF_NAME_THIS_TEST();
+
+    const auto reason = std::string("this server was built without SSL support");
+
+    // A supported feature accepts every value
+    const Setting supported(
+        Key("ecflow.server.ssl"), Type::Boolean, value_of(false), Names{}, checks::only_when_supported(true, reason));
+    supported.check(value_of(true));
+    supported.check(value_of(false));
+
+    // An unsupported feature accepts only false, i.e. not requested
+    const Setting option(
+        Key("ecflow.server.ssl"), Type::Boolean, value_of(false), Names{}, checks::only_when_supported(false, reason));
+    option.check(value_of(false));
+    check_error([&] { option.check(value_of(true)); }, reason);
+
+    const Setting variable(Key("ecflow.server.variables@ECF_SSL"),
+                           Type::Text,
+                           std::nullopt,
+                           Names{},
+                           checks::only_when_supported(false, reason));
+    for (const std::string value : {"", "1", "host.port"}) {
+        BOOST_TEST_CONTEXT("value: '" << value << "'") {
+            check_error([&] { variable.check(value_of(value)); }, reason);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(test_refusals_carry_their_parts) {
     ECF_NAME_THIS_TEST();
 
