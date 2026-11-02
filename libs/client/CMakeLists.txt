@@ -98,6 +98,7 @@ if (ENABLE_SERVER)
     test/TestAlterRepeat.cpp
     test/TestClientTimeout.cpp
     test/TestClientHandleCmd.cpp
+    test/TestClientRetryAgainstServer.cpp
     test/TestConnectionDiagnosisAgainstServer.cpp
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
