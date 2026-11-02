@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <list>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -94,11 +95,19 @@ void check_observed_configuration(bool environment_overrides) {
     const auto log_path = home / (environment_overrides ? "environment.log" : "config.log");
     const auto primary  = home / (environment_overrides ? "environment.primary" : prefix + "ecf.check");
     const auto backup   = environment_overrides ? absolute_backup : home / (prefix + "ecf.check.b");
+    // Each value of the runtime configuration, as `Key = value`, and its origin
     std::vector<std::string> lines;
+    std::map<std::string, std::string> origins;
     std::istringstream log(ecf::test::foolproof::read_file_bytes(log_path));
     for (std::string line; std::getline(log, line);) {
         const auto delimiter = line.find("] ");
-        lines.push_back(delimiter == std::string::npos ? line : line.substr(delimiter + 2));
+        auto text            = delimiter == std::string::npos ? line : line.substr(delimiter + 2);
+        if (const auto at = text.rfind(" @ "); at != std::string::npos && text.rfind("    ", 0) == 0) {
+            const auto entry                            = text.substr(4, at - 4);
+            origins[entry.substr(0, entry.find(" = "))] = text.substr(at + 3);
+            text                                        = entry;
+        }
+        lines.push_back(text);
     }
 
     for (const auto& [name, value] : std::vector<std::pair<std::string, std::string>>{
@@ -125,7 +134,7 @@ void check_observed_configuration(bool environment_overrides) {
                                    : name == "ECF_HOST"     ? "Host"
                                    : name == "ECF_INTERVAL" ? "Job scheduling interval"
                                                             : name;
-        const auto expected_line = "  " + label + " = " + value;
+        const auto expected_line = label + " = " + value;
         BOOST_CHECK_MESSAGE(std::find(lines.begin(), lines.end(), expected_line) != lines.end(),
                             "Missing independently expected log entry: " << expected_line);
     }
@@ -139,9 +148,32 @@ void check_observed_configuration(bool environment_overrides) {
                                                           {"ECF_DEBUG_SERVER", "disabled"},
                                                           {"Connection", "TCP/IP v4"},
                                                           {"Job generation", "disabled"}}) {
-        const auto expected_line = "  " + name + " = " + value;
+        const auto expected_line = name + " = " + value;
         BOOST_CHECK_MESSAGE(std::find(lines.begin(), lines.end(), expected_line) != lines.end(),
                             "Missing independently expected log entry: " << expected_line);
+    }
+
+    // The sources of the configuration, and the origin of each value
+    const auto startup_path = fs::canonical(startup.path());
+    for (const auto& expected_line :
+         std::vector<std::string>{"    env.cfg (" + (startup_path / "server_environment.cfg").string() + ") = loaded",
+                                  "    ecf.cfg (" + (startup_path / (prefix + "ecf.cfg")).string() + ") = absent"}) {
+        BOOST_CHECK_MESSAGE(std::find(lines.begin(), lines.end(), expected_line) != lines.end(),
+                            "Missing independently expected log entry: " << expected_line);
+    }
+    const std::string origin = environment_overrides ? "environment" : "env.cfg";
+    for (const auto& [key, expected] :
+         std::vector<std::pair<std::string, std::string>>{{"Host", "internal"},
+                                                          {"Port", "commandline"},
+                                                          {"ECF_HOME", origin},
+                                                          {"ECF_CHECKINTERVAL", origin},
+                                                          {"ECF_CHECKMODE", "env.cfg"},
+                                                          {"Job scheduling interval", "commandline"},
+                                                          {"Job generation", "commandline"},
+                                                          {"--dis_job_gen", "commandline"},
+                                                          {"--http", "defaults"}}) {
+        BOOST_CHECK_MESSAGE(origins[key] == expected,
+                            "Expected '" << key << "' from " << expected << ", found '" << origins[key] << "'");
     }
     BOOST_CHECK_EQUAL(ecf::test::foolproof::read_file_bytes(config.path()), config_text);
 }

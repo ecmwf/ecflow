@@ -102,12 +102,23 @@ ServerOptions::ServerOptions(const CommandLine& cl) {
                        "  (These will be self signed certificates, rather than a certificate authority).\n"
 #endif
                        "\n"
-                       "These defaults along with several other can be specified in the file\n"
-                       "server_environment.cfg. The file should be placed in the current working\n"
-                       "directory. It can be found in ecFlow source tree under Server/ directory.\n"
-                       "Please read this file to see the available options.\n"
-                       "Note: Environment variables _override_ any settings made in the\n"
-                       "server_environment.cfg file.")(
+                       "These settings, and others, can also be given by configuration files,\n"
+                       "read from the current working directory when the server starts:\n"
+                       "  - <host>.<port>.ecf.cfg:\n"
+                       "      JSON, named after the host and port of the server, e.g.\n"
+                       "      machine1.3141.ecf.cfg; the preferred way to configure the server\n"
+                       "  - server_environment.cfg:\n"
+                       "      one 'NAME = value' setting per line\n"
+                       "\n"
+                       "Each setting takes the value of the origin of highest precedence;\n"
+                       "from lowest to highest:\n"
+                       "  1. built-in defaults\n"
+                       "  2. server_environment.cfg\n"
+                       "  3. <host>.<port>.ecf.cfg\n"
+                       "  4. environment variables\n"
+                       "  5. command-line options\n"
+                       "\n"
+                       "The start-up log records the files read, and the source of each value.")(
         "port",
         po::value<int>(),
         "<int> <Allowed range 1024-49151> The socket/port the server is listening too. default = 3141\n"
@@ -141,62 +152,14 @@ ServerOptions::ServerOptions(const CommandLine& cl) {
     }
 }
 
-void ServerOptions::apply(ServerEnvironment* env) const {
-    if (vm_.count("debug")) {
-        env->debug_ = true;
+std::map<std::string, std::string> ServerOptions::options() const {
+    std::map<std::string, std::string> options;
+    for (const auto& [name, value] : vm_) {
+        // The numeric options hold the integer parsed; the switches, no value
+        const auto* number = boost::any_cast<int>(&value.value());
+        options.emplace(name, number ? std::to_string(*number) : std::string{});
     }
-
-    if (vm_.count("http")) {
-        if (env->debug_) {
-            std::cout << "ServerOptions:: Deploying HTTP Server\n";
-        }
-        env->protocol_ = ecf::Protocol::Http;
-    }
-
-    if (vm_.count("port")) {
-        if (env->debug_) {
-            std::cout << "ServerOptions:: The port number set to '" << vm_["port"].as<int>() << "'\n";
-        }
-        env->serverPort_ = vm_["port"].as<int>();
-    }
-    if (vm_.count("ecfinterval")) {
-        if (env->debug_) {
-            std::cout << "ServerOptions: The ecfinterval set to '" << vm_["ecfinterval"].as<int>() << "'\n";
-        }
-        env->submitJobsInterval_ = vm_["ecfinterval"].as<int>();
-    }
-    if (vm_.count("v6")) {
-        if (env->debug_) {
-            std::cout << "ServerOptions: The tcp protocol set to v6\n";
-        }
-        env->tcp_protocol_ = boost::asio::ip::tcp::v6();
-    }
-    if (vm_.count("dis_job_gen")) {
-        if (env->debug_) {
-            std::cout << "ServerOptions: The dis_job_gen is set\n";
-        }
-        env->jobGeneration_ = false;
-    }
-#ifdef ECF_OPENSSL
-    if (auto ecf_ssl = getenv("ECF_SSL"); vm_.count("ssl") || ecf_ssl) {
-        if (env->debug_) {
-            const auto option =
-                ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_shared();
-            std::cout << "SSL enabled: " << option.describe(vm_.count("ssl") > 0) << '\n';
-        }
-
-        if (ecf_ssl) {
-            env->enable_ssl_if_defined();
-        }
-        else {
-            env->enable_ssl();
-        }
-
-        if (env->debug_) {
-            std::cout << env->openssl().info() << '\n';
-        }
-    }
-#endif
+    return options;
 }
 
 bool ServerOptions::help_option() const {

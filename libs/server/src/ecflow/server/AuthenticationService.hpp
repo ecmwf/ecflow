@@ -5,6 +5,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Identity.hpp"
@@ -29,9 +30,6 @@ public:
     void set_passwd_file(const std::string& passwd_file) { ecf_passwd_file_ = passwd_file; }
     void set_custom_passwd_file(const std::string& custom_passwd_file) { ecf_passwd_custom_file_ = custom_passwd_file; }
 
-    void retrieve_passwd_file();
-    void retrieve_custom_passwd_file();
-
     ///
     /// @brief Reloads the originally selected regular password file without changing active credentials on failure.
     ///
@@ -50,8 +48,15 @@ public:
     ///
     bool reload_custom_passwd_file(std::string& error);
 
-    static inline std::string_view default_passwd_file() { return "ecf.passwd"; }
-    static inline std::string_view default_custom_passwd_file() { return "ecf.custom_passwd"; }
+    ///
+    /// @brief Describes the password files and the users they list, without any password.
+    ///
+    /// Each file is named by its absolute path, as loaded or absent, followed by the users of the loaded files, each
+    /// with the files listing it, e.g. `mamb = ECF_PASSWD, ECF_CUSTOM_PASSWD`.
+    ///
+    /// @return The lines, indented to be placed under a title.
+    ///
+    [[nodiscard]] std::vector<std::string> describe() const;
 
 private:
     bool debug_{false};
@@ -61,6 +66,8 @@ private:
 
     mutable PasswdFile passwd_file_;
     mutable PasswdFile passwd_custom_file_;
+    mutable bool passwd_loaded_{false};        ///< Whether the password file was loaded
+    mutable bool passwd_custom_loaded_{false}; ///< Whether the custom password file was loaded
 };
 
 } // namespace ecf

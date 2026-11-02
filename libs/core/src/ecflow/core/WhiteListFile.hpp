@@ -54,7 +54,30 @@ public:
     bool verify_write_access(const std::string& user, const std::string& path) const;
     bool verify_write_access(const std::string& user, const std::vector<std::string>& paths) const;
 
-    std::string dump_valid_users() const;
+    ///
+    /// @brief Describes the access granted by the loaded whitelist, one rule per user.
+    ///
+    /// Each rule is `<user> = <access>`, where the access is `read/write` or `read`, each optionally followed by the
+    /// paths it is limited to, e.g. `alice = read/write /a,/b; read /c`. The user `*` stands for all users. The rules
+    /// are ordered by user; the write access granted to the server user is marked `(server user)`.
+    ///
+    /// @return The rules; a whitelist without users is described as `* = read/write (no users specified)`.
+    ///
+    [[nodiscard]] std::vector<std::string> access_rules() const;
+
+    ///
+    /// @brief Describes the access granted by the loaded whitelist, as text.
+    ///
+    /// @return The rules given by access_rules(), one per line.
+    ///
+    [[nodiscard]] std::string dump_valid_users() const;
+
+    ///
+    /// @brief Returns the path of the loaded whitelist file.
+    ///
+    /// @return The path, as given to load(); empty before loading.
+    ///
+    [[nodiscard]] const std::string& path() const { return white_list_file_; }
 
     // Parse the file if any errors found return false and errorMsg
     // The parser expects version number  4.4.5
@@ -91,6 +114,7 @@ private:
     bool all_users_have_read_access_{false};
     bool all_users_have_write_access_{false};
     std::string white_list_file_;
+    std::string server_user_; ///< The server user, when granted write access by allow_write_access_for_server_user()
     mymap users_with_read_access_;  // user,paths
     mymap users_with_write_access_; // user,paths
 };

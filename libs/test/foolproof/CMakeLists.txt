@@ -48,6 +48,7 @@ ecflow_add_test(
     # Helpers shared by the server start-up tests
     ServerStartup.hpp
     # Test sources
+    TestFoolproof.ServerConfigurationFile.cpp
     TestFoolproof.ServerObservability.cpp
     TestFoolproof.ServerOptions.cpp
     TestFoolproof.ServerPaths.cpp

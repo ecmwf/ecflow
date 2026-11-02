@@ -435,14 +435,24 @@ bool BaseServer::reloadPasswdFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
         std::cout << "   BaseServer::reloadPasswdFile" << std::endl;
     }
-    return authentication().reload_passwd_file(errorMsg);
+    // The authentication in force is logged after each successful reload
+    if (!authentication().reload_passwd_file(errorMsg)) {
+        return false;
+    }
+    serverEnv_.log_authentication();
+    return true;
 }
 
 bool BaseServer::reloadCustomPasswdFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
         std::cout << "   BaseServer::reloadCustomPasswdFile " << std::endl;
     }
-    return authentication().reload_custom_passwd_file(errorMsg);
+    // The authentication in force is logged after each successful reload
+    if (!authentication().reload_custom_passwd_file(errorMsg)) {
+        return false;
+    }
+    serverEnv_.log_authentication();
+    return true;
 }
 
 void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,

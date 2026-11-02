@@ -5,6 +5,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <optional>
 #include <regex>
 #include <utility>
 #include <vector>
@@ -25,6 +27,7 @@ void WhiteListFile::swap(WhiteListFile& other) noexcept {
     std::swap(all_users_have_read_access_, other.all_users_have_read_access_);
     std::swap(all_users_have_write_access_, other.all_users_have_write_access_);
     white_list_file_.swap(other.white_list_file_);
+    server_user_.swap(other.server_user_);
     users_with_read_access_.swap(other.users_with_read_access_);
     users_with_write_access_.swap(other.users_with_write_access_);
 }
@@ -308,7 +311,8 @@ bool load_whitelist_file(const std::string& file, std::vector<std::string>& line
 
 bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
 
-    white_list_file_             = file;
+    white_list_file_ = file;
+    server_user_.clear();
     all_users_have_read_access_  = false;
     all_users_have_write_access_ = false;
     users_with_read_access_.clear();
@@ -382,38 +386,62 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
     return true;
 }
 
-std::string WhiteListFile::dump_valid_users() const {
-    std::ostringstream ss;
-    ss << "ECF_LISTS = '" << white_list_file_ << "'\n";
-    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
-        ss << " No users specified. Everyone has read/write access\n";
+std::vector<std::string> WhiteListFile::access_rules() const {
+    if (!all_users_have_read_access_ && !all_users_have_write_access_ && users_with_read_access_.empty() &&
+        users_with_write_access_.empty()) {
+        return {"* = read/write (no users specified)"};
     }
-    if (all_users_have_read_access_) {
-        ss << " All users have read access\n";
+
+    // The paths each user may write and read; empty paths stand for all suites. Access for all users, granted
+    // without paths, is held by flags rather than by the maps
+    std::map<std::string, std::pair<std::optional<std::vector<std::string>>, std::optional<std::vector<std::string>>>>
+        users;
+    for (const auto& [user, paths] : users_with_write_access_) {
+        users[user].first = paths;
+    }
+    for (const auto& [user, paths] : users_with_read_access_) {
+        users[user].second = paths;
     }
     if (all_users_have_write_access_) {
-        ss << " All users have write access\n";
+        users["*"].first = std::vector<std::string>{};
+    }
+    if (all_users_have_read_access_) {
+        users["*"].second = std::vector<std::string>{};
     }
 
-    mymap::const_iterator i;
-    for (i = users_with_read_access_.begin(); i != users_with_read_access_.end(); ++i) {
-        ss << " User: " << (*i).first << " ";
-        const std::vector<std::string>& paths = (*i).second;
-        for (const auto& path : paths) {
-            ss << path << ",";
+    auto describe = [](const char* access, const std::vector<std::string>& paths) {
+        std::string text = access;
+        for (size_t i = 0; i < paths.size(); ++i) {
+            text += (i == 0 ? " " : ",") + paths[i];
         }
-        ss << " has read access\n";
-    }
-    for (i = users_with_write_access_.begin(); i != users_with_write_access_.end(); ++i) {
-        ss << " User: " << (*i).first << " ";
-        const std::vector<std::string>& paths = (*i).second;
-        for (const auto& path : paths) {
-            ss << path << ",";
-        }
-        ss << " has read/write access\n";
-    }
+        return text;
+    };
 
-    return ss.str();
+    std::vector<std::string> rules;
+    for (const auto& [user, access] : users) {
+        const auto& [write, read] = access;
+        std::string rule          = user + " = ";
+        if (write) {
+            rule += describe("read/write", *write);
+        }
+        // Write access implies read access to the same paths, and to every path when given without paths
+        if (read && (!write || (!write->empty() && *read != *write))) {
+            rule += (write ? "; " : "") + describe("read", *read);
+        }
+        if (write && user == server_user_) {
+            rule += " (server user)";
+        }
+        rules.push_back(rule);
+    }
+    return rules;
+}
+
+std::string WhiteListFile::dump_valid_users() const {
+    std::string text;
+    for (const auto& rule : access_rules()) {
+        text += rule + "\n";
+    }
+    return text;
 }
 
 bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
@@ -689,5 +717,6 @@ void WhiteListFile::allow_write_access_for_server_user() {
     auto it = users_with_write_access_.find(user);
     if (it == users_with_write_access_.end()) {
         users_with_write_access_.insert(std::make_pair(user, std::vector<std::string>()));
+        server_user_ = user;
     }
 }

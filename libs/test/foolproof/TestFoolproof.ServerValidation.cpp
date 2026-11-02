@@ -127,14 +127,14 @@ BOOST_AUTO_TEST_CASE(test_server_validation_empty_required_settings) {
                                    "ECF_URL",
                                    "ECF_MICRODEF"}) {
         BOOST_TEST_CONTEXT("Empty config setting: " << name) {
-            check_rejected_initialisation(name + " =\n", {}, {name, "must not be empty"});
+            check_rejected_initialisation(name + " =\n", {}, {name, "invalid value ''", "expected a non-empty value"});
         }
     }
 
     for (const std::string name :
          {"ECF_HOME", "ECF_LOG", "ECF_CHECK", "ECF_CHECKOLD", "ECF_PASSWD", "ECF_CUSTOM_PASSWD", "ECF_LISTS"}) {
         BOOST_TEST_CONTEXT("Empty environment setting: " << name) {
-            check_rejected_initialisation("", {{name, ""}}, {name, "must not be empty"});
+            check_rejected_initialisation("", {{name, ""}}, {name, "invalid value ''", "expected a non-empty value"});
         }
     }
 }
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_server_validation_integer_inputs) {
 }
 
 ///
-/// @brief Verifies failure diagnostics for numeric ranges after parsing succeeds.
+/// @brief Verifies that values outside their ranges stop startup when read, before the log is created.
 ///
 BOOST_AUTO_TEST_CASE(test_server_validation_numeric_ranges) {
     ECF_NAME_THIS_TEST();
@@ -172,34 +172,21 @@ BOOST_AUTO_TEST_CASE(test_server_validation_numeric_ranges) {
         BOOST_TEST_CONTEXT("Scheduling interval: " << interval) {
             check_rejected_initialisation("ECF_INTERVAL = " + std::to_string(interval) + "\n",
                                           {},
-                                          {"ECF_INTERVAL", std::to_string(interval)},
-                                          false);
+                                          {"ECF_INTERVAL", std::to_string(interval), "expected a value in [1, 60]"});
         }
     }
 
-    check_rejected_initialisation("ECF_PRUNE_NODE_LOG = -1\n", {}, {"ECF_PRUNE_NODE_LOG", "-1"}, false);
+    check_rejected_initialisation(
+        "ECF_PRUNE_NODE_LOG = -1\n", {}, {"ECF_PRUNE_NODE_LOG", "-1", "expected a value in [0, 2147483647]"});
 
-    for (const int threshold : {-1, 0}) {
-        BOOST_TEST_CONTEXT("Task threshold: " << threshold) {
-            check_rejected_initialisation("ECF_TASK_THRESHOLD = " + std::to_string(threshold) + "\n",
-                                          {},
-                                          {"ECF_TASK_THRESHOLD", std::to_string(threshold), "positive integer"});
-            check_rejected_initialisation("",
-                                          {{"ECF_TASK_THRESHOLD", std::to_string(threshold)}},
-                                          {"ECF_TASK_THRESHOLD", std::to_string(threshold), "positive integer"});
-        }
-    }
-
-    for (const int interval : {-1, 0}) {
-        BOOST_TEST_CONTEXT("Checkpoint interval: " << interval) {
-            check_rejected_initialisation("ECF_CHECKINTERVAL = " + std::to_string(interval) + "\n",
-                                          {},
-                                          {"ECF_CHECKINTERVAL", std::to_string(interval), "positive integer"},
-                                          false);
-            check_rejected_initialisation("",
-                                          {{"ECF_CHECKINTERVAL", std::to_string(interval)}},
-                                          {"ECF_CHECKINTERVAL", std::to_string(interval), "positive integer"},
-                                          false);
+    for (const std::string name : {"ECF_TASK_THRESHOLD", "ECF_CHECKINTERVAL"}) {
+        for (const int value : {-1, 0}) {
+            BOOST_TEST_CONTEXT(name << ": " << value) {
+                const std::vector<std::string> fragments = {
+                    name, "'" + std::to_string(value) + "'", "expected a value in [1, 2147483647]"};
+                check_rejected_initialisation(name + " = " + std::to_string(value) + "\n", {}, fragments);
+                check_rejected_initialisation("", {{name, std::to_string(value)}}, fragments);
+            }
         }
     }
 }
@@ -217,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_server_validation_check_mode) {
                                           {"server_environment.cfg",
                                            "ECF_CHECKMODE",
                                            "'" + mode + "'",
-                                           "CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS"});
+                                           "expected one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS"});
         }
     }
 }

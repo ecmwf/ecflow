@@ -9,6 +9,7 @@
 #include <limits>
 #include <list>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -26,6 +27,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/User.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -122,6 +124,84 @@ std::vector<std::string> last_startup_lines() {
 }
 
 ///
+/// @brief Returns the entries of a section of the runtime configuration of the last start-up written to the log.
+///
+/// @param[in] section The title of the section, e.g. "Sources:"
+/// @return The entries of the section, without their indentation; empty when the section is not found.
+///
+std::vector<std::string> runtime_configuration_section(const std::string& section) {
+    const auto startup = last_startup_lines();
+    auto line          = std::find(startup.begin(), startup.end(), "  " + section);
+    if (line == startup.end()) {
+        return {};
+    }
+    std::vector<std::string> entries;
+    for (++line; line != startup.end() && ecf::algorithm::starts_with(*line, "    "); ++line) {
+        entries.push_back(line->substr(4));
+    }
+    return entries;
+}
+
+///
+/// @brief Returns the values of the runtime configuration of the last start-up, without their origins.
+///
+/// @return The entries of the section "Values:", each as `Key = value`.
+///
+std::vector<std::string> logged_values() {
+    auto entries = runtime_configuration_section("Values:");
+    for (auto& entry : entries) {
+        entry = entry.substr(0, entry.rfind(" @ "));
+    }
+    return entries;
+}
+
+///
+/// @brief Returns the origin of a value of the runtime configuration of the last start-up.
+///
+/// @param[in] key The key of the entry, e.g. "ECF_HOME" or "--http"
+/// @return The origin, after ` @ `; empty when the entry is not found.
+///
+std::string logged_origin(const std::string& key) {
+    for (const auto& entry : runtime_configuration_section("Values:")) {
+        if (ecf::algorithm::starts_with(entry, key + " = ")) {
+            return entry.substr(entry.rfind(" @ ") + 3);
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Checks that the values of the runtime configuration of the last start-up hold the given entry.
+///
+/// @param[in] entry The entry, as `Key = value`, without its origin
+///
+void check_logged_value(const std::string& entry) {
+    const auto values = logged_values();
+    BOOST_CHECK_MESSAGE(std::find(values.begin(), values.end(), entry) != values.end(),
+                        "Expected '" << entry << "' in the runtime configuration");
+}
+
+///
+/// @brief Returns the entries of the last block with the given title written to the log.
+///
+/// @param[in] title The title of the block, e.g. "Authorisation:"
+/// @return The lines following the last line holding the title and indented, without their first indentation level;
+/// empty when the log holds no such block.
+///
+std::vector<std::string> last_block(const std::string& title) {
+    const auto startup = last_startup_lines();
+    const auto found   = std::find(startup.rbegin(), startup.rend(), title);
+    if (found == startup.rend()) {
+        return {};
+    }
+    std::vector<std::string> block;
+    for (auto line = found.base(); line != startup.end() && ecf::algorithm::starts_with(*line, "  "); ++line) {
+        block.push_back(line->substr(2));
+    }
+    return block;
+}
+
+///
 /// @brief Returns the value of the given server variable.
 ///
 /// @param[in] serverEnv The server environment providing the variables
@@ -145,19 +225,18 @@ std::string server_variable(const ServerEnvironment& serverEnv, const std::strin
 /// @param[in] serverEnv The server environment that wrote the log
 /// @param[in] connection The expected value of the Connection entry
 /// @param[in] ssl_certificate The expected value of the SSL certificate entry; empty when SSL is not enabled
-/// @return The lines of the block, starting with its title.
+/// @return The entries of the section "Values:", each as `Key = value`, without the switches that follow them.
 ///
 std::vector<std::string> expected_runtime_configuration(const ServerEnvironment& serverEnv,
                                                         const std::string& connection,
                                                         const std::string& ssl_certificate) {
-    auto entry    = [](const std::string& key, const std::string& value) { return "  " + key + " = " + value; };
+    auto entry    = [](const std::string& key, const std::string& value) { return key + " = " + value; };
     auto variable = [&](const std::string& name) { return entry(name, server_variable(serverEnv, name)); };
     auto command  = [&](const std::string& name) {
         return entry(name, ecf::mask_credentials(server_variable(serverEnv, name)));
     };
 
-    std::vector<std::string> block = {"Runtime Configuration",
-                                      entry("Host", serverEnv.hostPort().first),
+    std::vector<std::string> block = {entry("Host", serverEnv.hostPort().first),
                                       entry("Port", serverEnv.the_port()),
                                       entry("Connection", connection)};
     if (!ssl_certificate.empty()) {
@@ -201,15 +280,17 @@ std::vector<std::string> expected_runtime_configuration(const ServerEnvironment&
 void check_runtime_configuration(const ServerEnvironment& serverEnv,
                                  const std::string& connection,
                                  const std::string& ssl_certificate = {}) {
-    auto startup  = last_startup_lines();
-    auto expected = expected_runtime_configuration(serverEnv, connection, ssl_certificate);
+    const auto startup = last_startup_lines();
+    BOOST_REQUIRE_MESSAGE(startup.size() > 3, "Expected 'Started at', the version line and the runtime configuration");
+    BOOST_CHECK_EQUAL(startup[2], "Runtime Configuration:");
+    BOOST_CHECK_EQUAL(startup[3], "  Sources:");
+    BOOST_CHECK_EQUAL(runtime_configuration_section("Sources:").size(), 5U);
 
-    BOOST_REQUIRE_MESSAGE(startup.size() >= 2 + expected.size(),
-                          "Expected 'Started at', the version line and "
-                              << expected.size() << " lines of runtime configuration, but found " << startup.size()
-                              << " lines");
-    std::vector<std::string> actual(startup.begin() + 2, startup.begin() + 2 + expected.size());
-    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    // The values come first, followed by the switches
+    const auto expected = expected_runtime_configuration(serverEnv, connection, ssl_certificate);
+    const auto values   = logged_values();
+    BOOST_REQUIRE_EQUAL(values.size(), expected.size() + 4);
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.begin() + expected.size(), expected.begin(), expected.end());
 }
 
 ///
@@ -349,21 +430,33 @@ void check_server_checkpoint_interval(std::optional<int> configured_interval, st
         interval_override.emplace("ECF_CHECKINTERVAL", std::to_string(*environment_interval));
     }
 
-    const auto expected = environment_interval.value_or(configured_interval.value_or(CheckPt::default_interval()));
     const std::vector<std::string> args = {"ServerEnvironment"};
+
+    // The first invalid value read is refused, even when overridden: the configuration file, then the environment
+    std::optional<int> refused;
+    if (configured_interval && *configured_interval <= 0) {
+        refused = configured_interval;
+    }
+    else if (environment_interval && *environment_interval <= 0) {
+        refused = environment_interval;
+    }
+    if (refused) {
+        BOOST_CHECK_EXCEPTION(
+            ServerEnvironment(args, config.path().string()), ServerEnvironmentException, [&](const auto& error) {
+                const std::string message = error.what();
+                BOOST_TEST_INFO("message: " << message);
+                return message.find("ECF_CHECKINTERVAL: invalid value '" + std::to_string(*refused) +
+                                    "': expected a value in [1, 2147483647]") != std::string::npos;
+            });
+        BOOST_CHECK(!Log::instance());
+        return;
+    }
+
+    const auto expected = environment_interval.value_or(configured_interval.value_or(CheckPt::default_interval()));
     ServerEnvironment serverEnv(args, config.path().string());
     BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), expected);
     std::string error;
-    const bool valid = serverEnv.valid(error);
-    BOOST_CHECK_EQUAL(valid, expected > 0);
-    if (expected > 0) {
-        BOOST_CHECK_MESSAGE(error.empty(), error);
-    }
-    else {
-        BOOST_CHECK_MESSAGE(error.find("ECF_CHECKINTERVAL") != std::string::npos, error);
-        BOOST_CHECK_MESSAGE(error.find("positive integer") != std::string::npos, error);
-        BOOST_CHECK_MESSAGE(error.find(std::to_string(expected)) != std::string::npos, error);
-    }
+    BOOST_CHECK_MESSAGE(serverEnv.valid(error), error);
 }
 
 ///
@@ -474,6 +567,37 @@ void check_server_precedence(const std::string& content,
         BOOST_CHECK_MESSAGE(error.find(expected_error) != std::string::npos, error);
     }
     check(serverEnv, directory.path());
+}
+
+///
+/// @brief Checks that the server refuses its settings at construction, before any startup side effect.
+///
+/// @param[in] content Configuration-file content
+/// @param[in] environment Explicit environment overrides
+/// @param[in] args Command-line tokens including the executable name
+/// @param[in] expected_error Diagnostic fragment required in the refusal
+///
+void check_server_refused(const std::string& content,
+                          const std::vector<std::pair<std::string, std::string>>& environment,
+                          const std::vector<std::string>& args,
+                          const std::string& expected_error) {
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    std::list<WithTestEnvironmentVariable> overrides;
+    for (const auto& [name, value] : environment) {
+        overrides.emplace_back(name, value);
+    }
+    WithTestFile config(NamedTestFile{(directory.path() / "server_environment.cfg").string()}, content);
+    fs::current_path(directory.path());
+
+    const auto start = [&args] { ServerEnvironment serverEnv(args); };
+    BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+        const std::string message = error.what();
+        BOOST_TEST_INFO("message: " << message);
+        return message.find(expected_error) != std::string::npos;
+    });
+    BOOST_CHECK(fs::current_path() == directory.path());
+    BOOST_CHECK(!Log::instance());
 }
 
 ///
@@ -595,6 +719,103 @@ void check_server_filename_resolution(const std::string& form) {
     }
 }
 
+///
+/// @brief Describes the start-up directory of a server with a configuration file `<host>.<port>.ecf.cfg`.
+///
+struct WithConfigurationFile
+{
+    std::optional<std::string> env_cfg;                             ///< Content of server_environment.cfg, if any
+    std::string port;                                               ///< Port in the name of the configuration file
+    std::string ecf_cfg;                                            ///< Content of the configuration file
+    std::vector<std::pair<std::string, std::string>> environment{}; ///< Environment overrides
+    std::vector<std::string> args{"ServerEnvironment"};             ///< Command-line tokens
+};
+
+///
+/// @brief Returns the name of the configuration file of this host for the given port.
+///
+/// @param[in] port The port
+/// @return The name, `<host>.<port>.ecf.cfg`.
+///
+std::string configuration_file(const std::string& port) {
+    return Host{}.name() + "." + port + ".ecf.cfg";
+}
+
+///
+/// @brief Returns a configuration document holding the given server variables and options.
+///
+/// @param[in] variables The members of `/ecflow/server/variables`, as JSON text, e.g. `"ECF_URL": "x"`
+/// @param[in] options The other members of `/ecflow/server`, as JSON text, e.g. `"http": true`
+/// @return The document.
+///
+std::string configuration_document(const std::string& variables, const std::string& options = {}) {
+    return R"({"version": 1, "ecflow": {"server": {"variables": {)" + variables + "}" +
+           (options.empty() ? "" : ", " + options) + "}}}";
+}
+
+///
+/// @brief Creates the start-up directory described, and changes into it.
+///
+/// @param[in] directory The start-up directory
+/// @param[in] startup The start-up files, environment and arguments
+/// @param[out] overrides Receives the environment overrides, restored on destruction
+///
+void prepare_configuration_file(const fs::path& directory,
+                                const WithConfigurationFile& startup,
+                                std::list<WithTestEnvironmentVariable>& overrides) {
+    for (const auto& [name, value] : startup.environment) {
+        overrides.emplace_back(name, value);
+    }
+    if (startup.env_cfg) {
+        std::ofstream(directory / "server_environment.cfg") << *startup.env_cfg;
+    }
+    std::ofstream(directory / configuration_file(startup.port)) << startup.ecf_cfg;
+    fs::current_path(directory);
+}
+
+///
+/// @brief Checks a server started with a configuration file.
+///
+/// @tparam Check Callable accepting the server environment
+/// @param[in] startup The start-up files, environment and arguments
+/// @param[in] check Assertions to run after construction and validation
+///
+template <typename Check>
+void check_server_with_file(const WithConfigurationFile& startup, Check check) {
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    std::list<WithTestEnvironmentVariable> overrides;
+    prepare_configuration_file(directory.path(), startup, overrides);
+
+    ServerEnvironment serverEnv(startup.args);
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    check(serverEnv);
+}
+
+///
+/// @brief Checks that a server started with a configuration file is refused before any start-up side effect.
+///
+/// @param[in] startup The start-up files, environment and arguments
+/// @param[in] expected_error The diagnostic, after the name of the configuration file and `: `
+///
+void check_server_refused_with_file(const WithConfigurationFile& startup, const std::string& expected_error) {
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    std::list<WithTestEnvironmentVariable> overrides;
+    prepare_configuration_file(directory.path(), startup, overrides);
+
+    const auto expected = configuration_file(startup.port) + ": " + expected_error;
+    const auto start    = [&startup] { ServerEnvironment serverEnv(startup.args); };
+    BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+        const std::string message = error.what();
+        BOOST_TEST_INFO("message: " << message);
+        return message.find(expected) != std::string::npos;
+    });
+    BOOST_CHECK(fs::current_path() == directory.path());
+    BOOST_CHECK(!Log::instance());
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -636,25 +857,25 @@ BOOST_AUTO_TEST_CASE(test_server_home_resolution_with_explicit_checkpoints) {
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     ECF_NAME_THIS_TEST();
 
-    // ecflow server interval is valid for range [1-60]
+    // ecflow server interval is valid for range [1-60], and refused at construction otherwise
     std::string port = ecf::string_constants::default_port_number;
     for (int i = -10; i < 70; ++i) {
-        std::string errorMsg;
         std::string argument          = "--ecfinterval=" + ecf::convert_to<std::string>(i);
         std::vector<std::string> args = {"ServerEnvironment", argument};
-        ServerEnvironment serverEnv(args);
-        bool valid = serverEnv.valid(errorMsg);
         if (i > 0 && i < 61) {
-            BOOST_REQUIRE_MESSAGE(valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
+            std::string errorMsg;
+            ServerEnvironment serverEnv(args);
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(errorMsg),
+                                  "Server environment ecfinterval valid range is [1-60] " << errorMsg);
             BOOST_CHECK_MESSAGE(serverEnv.submitJobsInterval() == i,
                                 "Expected submit jobs interval of " << i << " but found "
                                                                     << serverEnv.submitJobsInterval());
+            port = serverEnv.the_port();
         }
         else {
-            BOOST_CHECK_MESSAGE(!valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
+            const auto start = [&args] { ServerEnvironment serverEnv(args); };
+            BOOST_CHECK_THROW(start(), ServerEnvironmentException);
         }
-
-        port = serverEnv.the_port();
     }
 
     Host h;
@@ -668,30 +889,16 @@ BOOST_AUTO_TEST_CASE(test_server_environment_port) {
     //  o the Well Known Ports, (require root permission)      0 -1023\n";
     //  o the Registered Ports,                             1024 -49151\n";
     //  o Dynamic and/or Private Ports.                    49151 -65535\n\n";
-    //  Please set in the range 1024-49151 via argument or \n";
-    Host h;
-    {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=0"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
+    // A port outside 1024-49150 is refused at construction
+    for (const std::string port : {"0", "1000", "49151"}) {
+        BOOST_TEST_CONTEXT("--port=" << port) {
+            std::vector<std::string> args = {"ServerEnvironment", "--port=" + port};
+            const auto start              = [&args] { ServerEnvironment serverEnv(args); };
+            BOOST_CHECK_THROW(start(), ServerEnvironmentException);
+        }
     }
     {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=1000"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
-    }
-    {
-        std::string errorMsg;
-        std::vector<std::string> args = {"ServerEnvironment", "--port=49151"};
-        ServerEnvironment serverEnv(args);
-        BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
-        fs::remove(h.ecf_log_file(serverEnv.the_port()));
-    }
-    {
+        Host h;
         std::string errorMsg;
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
         ServerEnvironment serverEnv(args);
@@ -818,13 +1025,11 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_non_default_runtime_configurat
     check_runtime_configuration(serverEnv, "TCP/IP v4");
 
     // The values are checked independently of the server environment that wrote them
-    auto startup = last_startup_lines();
-    for (const auto* line : {"  Job generation = disabled",
-                             "  ECF_CHECKINTERVAL = 300",
-                             "  ECF_CHECKMODE = CHECK_ALWAYS",
-                             "  ECF_PRUNE_NODE_LOG = 7"}) {
-        BOOST_CHECK_MESSAGE(std::find(startup.begin(), startup.end(), line) != startup.end(),
-                            "Expected '" << line << "' in the runtime configuration");
+    for (const auto* entry : {"Job generation = disabled",
+                              "ECF_CHECKINTERVAL = 300",
+                              "ECF_CHECKMODE = CHECK_ALWAYS",
+                              "ECF_PRUNE_NODE_LOG = 7"}) {
+        check_logged_value(entry);
     }
 
     remove_log_file(serverEnv);
@@ -843,9 +1048,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_masks_credentials_in_runtime_config
     BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
 
     auto startup = last_startup_lines();
-    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_JOB_CMD = submit --token *** %ECF_JOB%") !=
-                startup.end());
-    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_URL = https://user:***@host/") != startup.end());
+    check_logged_value("ECF_JOB_CMD = submit --token *** %ECF_JOB%");
+    check_logged_value("ECF_URL = https://user:***@host/");
     for (const auto& line : startup) {
         BOOST_CHECK_MESSAGE(line.find("s3cr3t") == std::string::npos, "Unmasked credential in: " << line);
     }
@@ -987,7 +1191,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             if (ecf::environment::has("ECF_PORT")) {
                 port = ecf::environment::get("ECF_PORT");
             }
-            std::string expected = host.prefix_host_and_port(port, AuthenticationService::default_passwd_file());
+            std::string expected = host.prefix_host_and_port(port, Ecf::PASSWD_FILE());
 
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_PASSWD expected " << expected << " but found " << p.second);
@@ -1057,6 +1261,43 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_shipped_values_are_applied) {
 
     BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 121);
     BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), 31);
+}
+
+///
+/// @brief Verifies that the help describes the configuration files and the precedence of the origins.
+///
+BOOST_AUTO_TEST_CASE(test_server_help_describes_configuration_files) {
+    ECF_NAME_THIS_TEST();
+
+    std::ostringstream output;
+    auto* const original = std::cout.rdbuf(output.rdbuf());
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::cout.rdbuf(original);
+    };
+    ServerEnvironment serverEnv({"ServerEnvironment", "--help"});
+    std::cout.rdbuf(original);
+
+    const auto help = output.str();
+    for (const auto* fragment : {"<host>.<port>.ecf.cfg:",
+                                 "the preferred way to configure the server",
+                                 "server_environment.cfg:",
+                                 "built-in defaults",
+                                 "environment variables",
+                                 "command-line options",
+                                 "the source of each value"}) {
+        BOOST_CHECK_MESSAGE(help.find(fragment) != std::string::npos, "Expected '" << fragment << "' in:\n" << help);
+    }
+
+    // The origins are listed from lowest to highest precedence
+    const auto position = [&help](const char* origin) { return help.find(origin); };
+    BOOST_CHECK(position("  1. built-in defaults") < position("  2. server_environment.cfg"));
+    BOOST_CHECK(position("  2. server_environment.cfg") < position("  3. <host>.<port>.ecf.cfg"));
+    BOOST_CHECK(position("  3. <host>.<port>.ecf.cfg") < position("  4. environment variables"));
+    BOOST_CHECK(position("  4. environment variables") < position("  5. command-line options"));
+    BOOST_CHECK(position("  5. command-line options") != std::string::npos);
+
+    // The file is not part of an installation
+    BOOST_CHECK_MESSAGE(help.find("ecFlow source tree") == std::string::npos, help);
 }
 
 ///
@@ -1251,8 +1492,8 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_check_modes_reject_invalid_values) 
              "TYPO", "check_on_time", "UNDEFINED", "CHECK_NEVER_EXTRA", "0", "", "   ", "\"CHECK_ON_TIME\""}) {
         BOOST_TEST_CONTEXT("Invalid checkpoint mode: '" << value << "'") {
             const auto parsed_value   = value.find_first_not_of(' ') == std::string::npos ? std::string{} : value;
-            const auto expected_error = "Invalid ECF_CHECKMODE value '" + parsed_value +
-                                        "'. Expected CHECK_NEVER, CHECK_ON_TIME or CHECK_ALWAYS.";
+            const auto expected_error = "ECF_CHECKMODE: invalid value '" + parsed_value +
+                                        "': expected one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS";
             check_server_config_parse_error("ECF_CHECKMODE = " + value + "\n", expected_error);
         }
     }
@@ -1423,8 +1664,7 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_ports) {
                 BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), (startup / (prefix + "ecf.check")).string());
                 BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), (startup / (prefix + "ecf.check.b")).string());
                 BOOST_CHECK(fs::is_regular_file(startup / (prefix + "ecf.log")));
-                const auto lines = last_startup_lines();
-                BOOST_CHECK(std::find(lines.begin(), lines.end(), "  Port = " + port) != lines.end());
+                check_logged_value("Port = " + port);
             });
         }
     }
@@ -1502,10 +1742,7 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_numeric_settings) {
                                            : name == "ECF_PRUNE_NODE_LOG" ? serverEnv.ecf_prune_node_log()
                                                                           : JobProfiler::task_threshold();
                         BOOST_CHECK_EQUAL(actual, expected);
-                        const auto lines = last_startup_lines();
-                        BOOST_CHECK(std::find(lines.begin(),
-                                              lines.end(),
-                                              "  " + name + " = " + std::to_string(expected)) != lines.end());
+                        check_logged_value(name + " = " + std::to_string(expected));
                     });
             }
         }
@@ -1728,15 +1965,20 @@ BOOST_AUTO_TEST_CASE(test_server_validation_port_boundaries) {
                     args.emplace_back("--port=" + std::to_string(port));
                 }
 
-                check_server_precedence(
-                    content,
-                    environment,
-                    args,
-                    [&](const auto& serverEnv, const auto&) {
-                        BOOST_CHECK_EQUAL(serverEnv.port(), port);
-                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
-                    },
-                    port == 1023 || port == 49151 ? "Server port " + std::to_string(port) + " not set correctly" : "");
+                // Every origin is checked when read
+                if (port == 1023 || port == 49151) {
+                    const auto name = source == "cli" ? "Invalid server command line: --port" : "ECF_PORT";
+                    check_server_refused(content,
+                                         environment,
+                                         args,
+                                         name + std::string(": invalid value '") + std::to_string(port) +
+                                             "': expected a value in [1024, 49150]");
+                    continue;
+                }
+                check_server_precedence(content, environment, args, [&](const auto& serverEnv, const auto&) {
+                    BOOST_CHECK_EQUAL(serverEnv.port(), port);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_PORT"), std::to_string(port));
+                });
             }
         }
     }
@@ -1757,18 +1999,20 @@ BOOST_AUTO_TEST_CASE(test_server_validation_scheduling_boundaries) {
                     args.emplace_back("--ecfinterval=" + std::to_string(interval));
                 }
 
-                check_server_precedence(
-                    content,
-                    {},
-                    args,
-                    [&](const auto& serverEnv, const auto&) {
-                        BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
-                        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
-                    },
-                    interval == 0 || interval == 61
-                        ? "ECF_INTERVAL (job scheduling interval) must be in the range [1-60] seconds, but found " +
-                              std::to_string(interval)
-                        : "");
+                // Every origin is checked when read
+                if (interval == 0 || interval == 61) {
+                    const auto name = from_cli ? "Invalid server command line: --ecfinterval" : "ECF_INTERVAL";
+                    check_server_refused(content,
+                                         {},
+                                         args,
+                                         name + std::string(": invalid value '") + std::to_string(interval) +
+                                             "': expected a value in [1, 60]");
+                    continue;
+                }
+                check_server_precedence(content, {}, args, [&](const auto& serverEnv, const auto&) {
+                    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), interval);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_INTERVAL"), std::to_string(interval));
+                });
             }
         }
     }
@@ -1789,11 +2033,16 @@ BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
                     environment.emplace_back("ECF_PRUNE_NODE_LOG", std::to_string(days));
                 }
 
+                if (days < 0) {
+                    check_server_refused(content,
+                                         environment,
+                                         {"ServerEnvironment"},
+                                         "ECF_PRUNE_NODE_LOG: invalid value '" + std::to_string(days) +
+                                             "': expected a value in [0, 2147483647]");
+                    continue;
+                }
                 check_server_precedence(
-                    content,
-                    environment,
-                    {"ServerEnvironment"},
-                    [&](const auto& serverEnv, const auto& startup) {
+                    content, environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto& startup) {
                         BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), days);
                         // An entry from 2016 survives only when pruning is disabled (zero days)
                         if (days == 0 || days == 1) {
@@ -1818,8 +2067,7 @@ BOOST_AUTO_TEST_CASE(test_server_validation_pruning_boundaries) {
                                 BOOST_CHECK_EQUAL(entries.count("/retained"), 0);
                             }
                         }
-                    },
-                    days < 0 ? "ECF_PRUNE_NODE_LOG must be a non-negative integer" : "");
+                    });
             }
         }
     }
@@ -1851,9 +2099,8 @@ BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_boundaries) {
                 else {
                     BOOST_CHECK_EXCEPTION(run(), ServerEnvironmentException, [&](const auto& error) {
                         const std::string message = error.what();
-                        return message.find("ECF_TASK_THRESHOLD") != std::string::npos &&
-                               message.find(std::to_string(threshold)) != std::string::npos &&
-                               message.find("positive integer") != std::string::npos;
+                        return message.find("ECF_TASK_THRESHOLD: invalid value '" + std::to_string(threshold) +
+                                            "': expected a value in [1, 2147483647]") != std::string::npos;
                     });
                 }
             }
@@ -1862,41 +2109,35 @@ BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_boundaries) {
 }
 
 ///
-/// @brief Verifies that positive environment thresholds replace non-positive config values before validation.
+/// @brief Verifies that a non-positive configured threshold is refused, even when the environment overrides it.
 ///
-BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_effective_value) {
+BOOST_AUTO_TEST_CASE(test_server_validation_task_threshold_refused_despite_override) {
     ECF_NAME_THIS_TEST();
 
     for (const int configured : {-1, 0}) {
         BOOST_TEST_CONTEXT("Configured threshold: " << configured) {
-            check_server_precedence(
-                "ECF_TASK_THRESHOLD = " + std::to_string(configured) + "\n",
-                {{"ECF_TASK_THRESHOLD", "137"}},
-                {"ServerEnvironment"},
-                [](const auto&, const auto&) { BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), 137); });
+            check_server_refused("ECF_TASK_THRESHOLD = " + std::to_string(configured) + "\n",
+                                 {{"ECF_TASK_THRESHOLD", "137"}},
+                                 {"ServerEnvironment"},
+                                 "ECF_TASK_THRESHOLD: invalid value '" + std::to_string(configured) +
+                                     "': expected a value in [1, 2147483647]");
         }
     }
 }
 
 ///
-/// @brief Verifies that supported non-empty environment values replace empty configuration paths before validation.
+/// @brief Verifies that an empty configured path is refused, even when the environment overrides it.
 ///
-BOOST_AUTO_TEST_CASE(test_server_validation_empty_config_with_environment_override) {
+BOOST_AUTO_TEST_CASE(test_server_validation_empty_config_refused_despite_override) {
     ECF_NAME_THIS_TEST();
 
     for (const std::string name :
          {"ECF_HOME", "ECF_LOG", "ECF_CHECK", "ECF_CHECKOLD", "ECF_PASSWD", "ECF_CUSTOM_PASSWD", "ECF_LISTS"}) {
         BOOST_TEST_CONTEXT("Overridden empty config setting: " << name) {
-            const auto selected = name == "ECF_HOME" ? "environment home" : "selected.file";
-            check_server_precedence(name + " =\n",
-                                    {{name, selected}},
-                                    {"ServerEnvironment"},
-                                    [&](const auto& serverEnv, const auto& startup) {
-                                        const bool anchored = name == "ECF_HOME" || name == "ECF_LOG" ||
-                                                              name == "ECF_CHECK" || name == "ECF_CHECKOLD";
-                                        const auto expected = anchored ? (startup / selected).string() : selected;
-                                        BOOST_CHECK_EQUAL(server_variable(serverEnv, name), expected);
-                                    });
+            check_server_refused(name + " =\n",
+                                 {{name, name == "ECF_HOME" ? "environment home" : "selected.file"}},
+                                 {"ServerEnvironment"},
+                                 name + ": invalid value '': expected a non-empty value");
         }
     }
 }
@@ -2128,6 +2369,164 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_http_when_requested) {
     remove_log_file(serverEnv);
 }
 
+//
+// Inputs not accepted in server_environment.cfg: environment variables and command-line options only
+//
+
+///
+/// @brief Verifies that server_environment.cfg refuses the inputs that only other sources provide.
+///
+BOOST_AUTO_TEST_CASE(test_server_config_file_rejects_inputs_of_other_sources) {
+    ECF_NAME_THIS_TEST();
+    for (const std::string name : {"ECF_HOST", "ECF_SSL", "ECF_DEBUG_SERVER"}) {
+        BOOST_TEST_CONTEXT("Setting: " << name) {
+            check_server_config_parse_error(name + " = 1\n", name);
+        }
+    }
+}
+
+///
+/// @brief Verifies that debug output is enabled by `--debug`, or by the presence of ECF_DEBUG_SERVER.
+///
+/// The value of ECF_DEBUG_SERVER is not interpreted: defining the variable, even as `0` or empty, enables debug.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_debug) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        std::optional<std::string> environment;
+        bool option;
+        bool expected;
+    };
+    for (const auto& c : std::vector<Case>{{std::nullopt, false, false},
+                                           {"1", false, true},
+                                           {"0", false, true},
+                                           {"", false, true},
+                                           {std::nullopt, true, true},
+                                           {"0", true, true}}) {
+        BOOST_TEST_CONTEXT("ECF_DEBUG_SERVER: " << c.environment.value_or("(unset)") << ", --debug: " << c.option) {
+            std::vector<std::pair<std::string, std::string>> environment;
+            if (c.environment) {
+                environment.emplace_back("ECF_DEBUG_SERVER", *c.environment);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.option) {
+                args.emplace_back("--debug");
+            }
+            check_server_precedence("", environment, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_CHECK_EQUAL(serverEnv.debug(), c.expected);
+                check_logged_value(std::string("ECF_DEBUG_SERVER = ") + (c.expected ? "enabled" : "disabled"));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that job generation is enabled by default, and disabled only by `--dis_job_gen`.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_job_generation) {
+    ECF_NAME_THIS_TEST();
+    for (const bool option : {false, true}) {
+        BOOST_TEST_CONTEXT("--dis_job_gen: " << option) {
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (option) {
+                args.emplace_back("--dis_job_gen");
+            }
+            check_server_precedence("", {}, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_CHECK_EQUAL(serverEnv.jobGeneration(), !option);
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that the server uses TCP over IPv4 by default, and IPv6 only with `--v6`, with or without HTTP.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_tcp_protocol) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        bool v6;
+        bool http;
+        ecf::Protocol expected_protocol;
+    };
+    for (const auto& c : std::vector<Case>{{false, false, ecf::Protocol::Plain},
+                                           {true, false, ecf::Protocol::Plain},
+                                           {false, true, ecf::Protocol::Http},
+                                           {true, true, ecf::Protocol::Http}}) {
+        BOOST_TEST_CONTEXT("--v6: " << c.v6 << ", --http: " << c.http) {
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.v6) {
+                args.emplace_back("--v6");
+            }
+            if (c.http) {
+                args.emplace_back("--http");
+            }
+            check_server_precedence("", {}, args, [&](const auto& serverEnv, const auto&) {
+                const auto expected_tcp = c.v6 ? boost::asio::ip::tcp::v6() : boost::asio::ip::tcp::v4();
+                BOOST_CHECK(serverEnv.tcp_protocol() == expected_tcp);
+                BOOST_CHECK_MESSAGE(serverEnv.protocol() == c.expected_protocol,
+                                    "Expected protocol " << ecf::to_ui_designation(c.expected_protocol) << " but found "
+                                                         << ecf::to_ui_designation(serverEnv.protocol()));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that the host is always the name of the machine, whatever ECF_HOST holds in the environment.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_host_ignores_environment) {
+    ECF_NAME_THIS_TEST();
+    const auto machine = Host{}.name();
+    for (const std::optional<std::string>& value :
+         {std::optional<std::string>{}, std::optional<std::string>{"other.host"}}) {
+        BOOST_TEST_CONTEXT("ECF_HOST: " << value.value_or("(unset)")) {
+            std::optional<WithoutTestEnvironmentVariable> unset;
+            std::vector<std::pair<std::string, std::string>> environment;
+            if (value) {
+                environment.emplace_back("ECF_HOST", *value);
+            }
+            else {
+                unset.emplace("ECF_HOST");
+            }
+            check_server_precedence(
+                "", environment, {"ServerEnvironment"}, [&](const auto& serverEnv, const auto& startup) {
+                    BOOST_CHECK_EQUAL(serverEnv.hostPort().first, machine);
+                    BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_HOST"), machine);
+                    BOOST_CHECK(fs::is_regular_file(startup / (machine + ".3141.ecf.log")));
+                });
+        }
+    }
+}
+
+#ifndef ECF_OPENSSL
+///
+/// @brief Verifies that a server built without SSL support refuses ECF_SSL, before creating its log.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_refuses_ssl_without_support) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    for (const std::string value : {"", "1"}) {
+        BOOST_TEST_CONTEXT("ECF_SSL='" << value << "'") {
+            WithTestEnvironmentVariable ecf_ssl("ECF_SSL", value);
+            const auto start = [] { ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"}); };
+            BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+                const std::string message = error.what();
+                BOOST_TEST_INFO("message: " << message);
+                return message.find("Environment variable ECF_SSL: invalid value '" + value +
+                                    "': this server was built without SSL support") != std::string::npos;
+            });
+            BOOST_CHECK(!Log::instance());
+        }
+    }
+}
+#endif
+
 #ifdef ECF_OPENSSL
 
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_runtime_configuration_for_ssl_connection) {
@@ -2192,16 +2591,13 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_promoted_to_https_when_
 BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_not_enabled) {
     ECF_NAME_THIS_TEST();
 
-    // With ECF_SSL undefined, enabling SSL is a no-operation, and the protocol must not be promoted.
-    // This is the outcome reached whenever SSL is requested but no certificate is found.
+    // With neither ECF_SSL nor --ssl, SSL remains disabled, and the protocol is not promoted
 
     WithoutTestEnvironmentVariable no_ecf_ssl(ecf::environment::ECF_SSL);
 
     {
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
         ServerEnvironment serverEnv(args);
-
-        serverEnv.enable_ssl_if_defined();
 
         BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
         BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Plain,
@@ -2214,8 +2610,6 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
         std::vector<std::string> args = {"ServerEnvironment", "--port=3144", "--http"};
         ServerEnvironment serverEnv(args);
 
-        serverEnv.enable_ssl_if_defined();
-
         BOOST_REQUIRE_MESSAGE(!serverEnv.ssl(), "Expected SSL to remain disabled");
         BOOST_CHECK_MESSAGE(serverEnv.protocol() == ecf::Protocol::Http,
                             "Expected protocol to remain HTTP but found "
@@ -2225,7 +2619,623 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
     }
 }
 
+///
+/// @brief Verifies how ECF_SSL and `--ssl` select the certificate, and how SSL promotes the protocol.
+///
+/// Notes:
+///
+///   - ECF_SSL, when defined, decides the lookup order, also when `--ssl` is given:
+///     - `1` or empty: shared certificate first, server-specific certificate as fallback;
+///     - any other value: server-specific certificate first, shared certificate as fallback.
+///   - `--ssl` alone looks for the shared certificate first.
+///   - SSL promotes TCP/IP to SSL, and HTTP to HTTPS.
+///
+BOOST_AUTO_TEST_CASE(test_server_precedence_ssl) {
+    ECF_NAME_THIS_TEST();
+    const auto specific_name = Host{}.name() + ".3141";
+    struct Case
+    {
+        std::optional<std::string> ecf_ssl;
+        bool ssl_option;
+        bool http_option;
+        bool shared_crt;
+        bool specific_crt;
+        bool expected_shared;
+        ecf::Protocol expected_protocol;
+    };
+    const std::vector<Case> cases = {// ECF_SSL alone
+                                     {"1", false, false, true, true, true, ecf::Protocol::Ssl},
+                                     {"", false, false, true, true, true, ecf::Protocol::Ssl},
+                                     {"1", false, false, false, true, false, ecf::Protocol::Ssl},
+                                     {specific_name, false, false, true, true, false, ecf::Protocol::Ssl},
+                                     {specific_name, false, false, true, false, true, ecf::Protocol::Ssl},
+                                     {"1", false, true, true, true, true, ecf::Protocol::Https},
+                                     // --ssl alone
+                                     {std::nullopt, true, false, true, true, true, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, false, false, true, false, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, true, true, true, true, ecf::Protocol::Https},
+                                     // ECF_SSL with --ssl
+                                     {specific_name, true, false, true, true, false, ecf::Protocol::Ssl},
+                                     {"1", true, true, true, true, true, ecf::Protocol::Https}};
+
+    for (const auto& c : cases) {
+        BOOST_TEST_CONTEXT("ECF_SSL: " << c.ecf_ssl.value_or("(unset)") << ", --ssl: " << c.ssl_option
+                                       << ", --http: " << c.http_option << ", shared: " << c.shared_crt
+                                       << ", specific: " << c.specific_crt) {
+            auto certificates = ecf::test::scaffold::MakeDirectory{}.create();
+            std::list<WithTestFile> crts;
+            if (c.shared_crt) {
+                crts.emplace_back(NamedTestFile{(certificates.path() / "server.crt").string()});
+            }
+            if (c.specific_crt) {
+                crts.emplace_back(NamedTestFile{(certificates.path() / (specific_name + ".crt")).string()});
+            }
+            std::vector<std::pair<std::string, std::string>> environment = {
+                {"ECF_SSL_DIR", certificates.path().string()}};
+            if (c.ecf_ssl) {
+                environment.emplace_back("ECF_SSL", *c.ecf_ssl);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (c.ssl_option) {
+                args.emplace_back("--ssl");
+            }
+            if (c.http_option) {
+                args.emplace_back("--http");
+            }
+            check_server_precedence("", environment, args, [&](const auto& serverEnv, const auto&) {
+                BOOST_REQUIRE(serverEnv.ssl());
+                BOOST_REQUIRE(serverEnv.openssl().certificate());
+                BOOST_CHECK_EQUAL(serverEnv.openssl().certificate()->shared(), c.expected_shared);
+                BOOST_CHECK_MESSAGE(serverEnv.protocol() == c.expected_protocol,
+                                    "Expected protocol " << ecf::to_ui_designation(c.expected_protocol) << " but found "
+                                                         << ecf::to_ui_designation(serverEnv.protocol()));
+            });
+        }
+    }
+}
+
+///
+/// @brief Verifies that start-up stops when SSL is requested, by ECF_SSL or `--ssl`, and no certificate exists.
+///
+BOOST_AUTO_TEST_CASE(test_server_ssl_without_certificate_stops_startup) {
+    ECF_NAME_THIS_TEST();
+    struct Case
+    {
+        std::optional<std::string> ecf_ssl;
+        bool ssl_option;
+    };
+    for (const auto& [ecf_ssl, ssl_option] : std::vector<Case>{{"1", false}, {std::nullopt, true}, {"1", true}}) {
+        BOOST_TEST_CONTEXT("ECF_SSL: " << ecf_ssl.value_or("(unset)") << ", --ssl: " << ssl_option) {
+            auto certificates = ecf::test::scaffold::MakeDirectory{}.create();
+            std::vector<std::pair<std::string, std::string>> environment = {
+                {"ECF_SSL_DIR", certificates.path().string()}};
+            if (ecf_ssl) {
+                environment.emplace_back("ECF_SSL", *ecf_ssl);
+            }
+            std::vector<std::string> args = {"ServerEnvironment"};
+            if (ssl_option) {
+                args.emplace_back("--ssl");
+            }
+            BOOST_CHECK_EXCEPTION(
+                check_server_precedence("",
+                                        environment,
+                                        args,
+                                        [](const auto&, const auto&) {
+                                            BOOST_FAIL("Start-up without a certificate must not be accepted");
+                                        }),
+                std::runtime_error,
+                [](const std::runtime_error& error) {
+                    return std::string(error.what()).find("Unable to find certificate file") != std::string::npos;
+                });
+        }
+    }
+}
+
 #endif
+
+//
+// Configuration file <host>.<port>.ecf.cfg
+//
+
+///
+/// @brief Verifies that only the configuration file named after the effective port is read.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_named_after_the_port) {
+    ECF_NAME_THIS_TEST();
+
+    // Each origin decides the port in turn: the default, server_environment.cfg, the environment, the command line
+    struct Case
+    {
+        std::optional<std::string> env_cfg;
+        std::vector<std::pair<std::string, std::string>> environment;
+        std::vector<std::string> args;
+        std::string port;
+    };
+    const std::vector<Case> cases{
+        {std::nullopt, {}, {"ServerEnvironment"}, "3141"},
+        {"ECF_PORT = 3142\n", {}, {"ServerEnvironment"}, "3142"},
+        {"ECF_PORT = 3142\n", {{"ECF_PORT", "3143"}}, {"ServerEnvironment"}, "3143"},
+        {"ECF_PORT = 3142\n", {{"ECF_PORT", "3143"}}, {"ServerEnvironment", "--port=3144"}, "3144"},
+    };
+    for (const auto& c : cases) {
+        BOOST_TEST_CONTEXT("Expected port " << c.port) {
+            auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+            IsolatedServerStartup isolation;
+            std::list<WithTestEnvironmentVariable> overrides;
+            // A file for every port, each with its own check point interval
+            for (const std::string port : {"3141", "3142", "3143", "3144"}) {
+                std::ofstream(directory.path() / configuration_file(port))
+                    << configuration_document(R"("ECF_CHECKINTERVAL": )" + port);
+            }
+            prepare_configuration_file(
+                directory.path(),
+                WithConfigurationFile{c.env_cfg,
+                                      c.port,
+                                      configuration_document(R"("ECF_CHECKINTERVAL": 1)" + c.port),
+                                      c.environment,
+                                      c.args},
+                overrides);
+
+            ServerEnvironment serverEnv(c.args);
+            BOOST_CHECK_EQUAL(serverEnv.the_port(), c.port);
+            BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), std::stoi("1" + c.port));
+        }
+    }
+}
+
+///
+/// @brief Verifies that, without a configuration file, the settings come from the other origins as before.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_absent) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    // A file for another port is not read, even when invalid
+    std::ofstream(directory.path() / configuration_file("3141")) << "not JSON";
+    std::ofstream(directory.path() / "server_environment.cfg") << "ECF_CHECKINTERVAL = 200\n";
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 200);
+    BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), Ecf::SUBMIT_INTERVAL());
+}
+
+///
+/// @brief Verifies that the configuration file sets variables and options of every type, without
+/// server_environment.cfg.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_alone) {
+    ECF_NAME_THIS_TEST();
+
+    const auto host = Host{}.name();
+    WithConfigurationFile startup{std::nullopt,
+                                  "3141",
+                                  configuration_document(R"("ECF_HOST": ")" + host + R"(",
+                                                            "ECF_PORT": 3141,
+                                                            "ECF_CHECKINTERVAL": 200,
+                                                            "ECF_CHECKMODE": "CHECK_ALWAYS",
+                                                            "ECF_INTERVAL": 30,
+                                                            "ECF_PRUNE_NODE_LOG": 7,
+                                                            "ECF_JOB_CMD": "submit %ECF_JOB%",
+                                                            "ECF_URL": "file/url")",
+                                                         R"("http": true, "ipv6": true, "job_generation": false)")};
+    check_server_with_file(startup, [&](const ServerEnvironment& serverEnv) {
+        BOOST_CHECK_EQUAL(serverEnv.port(), 3141);
+        BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 200);
+        BOOST_CHECK(serverEnv.checkMode() == ecf::CheckPt::ALWAYS);
+        BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 30);
+        BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), 7);
+        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_JOB_CMD"), "submit %ECF_JOB%");
+        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_URL"), "file/url");
+        BOOST_CHECK(serverEnv.protocol() == ecf::Protocol::Http);
+        BOOST_CHECK(serverEnv.tcp_protocol() == boost::asio::ip::tcp::v6());
+        BOOST_CHECK(!serverEnv.jobGeneration());
+    });
+}
+
+///
+/// @brief Verifies that the configuration file overrides server_environment.cfg, and is overridden by the
+/// environment and the command line.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_precedence) {
+    ECF_NAME_THIS_TEST();
+
+    WithConfigurationFile startup{"ECF_CHECKINTERVAL = 100\nECF_PRUNE_NODE_LOG = 5\nECF_URL = cfg/url\n",
+                                  "3144",
+                                  configuration_document(R"("ECF_CHECKINTERVAL": 200,
+                                                            "ECF_TASK_THRESHOLD": 300,
+                                                            "ECF_INTERVAL": 30,
+                                                            "ECF_URL": "file/url")"),
+                                  {{"ECF_TASK_THRESHOLD", "400"}},
+                                  {"ServerEnvironment", "--port=3144", "--ecfinterval=20"}};
+    check_server_with_file(startup, [](const ServerEnvironment& serverEnv) {
+        BOOST_CHECK_EQUAL(serverEnv.checkPtInterval(), 200);  // file over server_environment.cfg
+        BOOST_CHECK_EQUAL(serverEnv.ecf_prune_node_log(), 5); // server_environment.cfg only
+        BOOST_CHECK_EQUAL(server_variable(serverEnv, "ECF_URL"), "file/url");
+        BOOST_CHECK_EQUAL(JobProfiler::task_threshold(), 400U); // environment over file
+        BOOST_CHECK_EQUAL(serverEnv.submitJobsInterval(), 20);  // command line over file
+    });
+}
+
+///
+/// @brief Verifies that the configuration file refuses a host or a port other than those of its name.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_host_and_port_consistency) {
+    ECF_NAME_THIS_TEST();
+
+    const auto host = Host{}.name();
+    const std::vector<std::string> args{"ServerEnvironment", "--port=3144"};
+    check_server_refused_with_file(
+        {std::nullopt, "3144", configuration_document(R"("ECF_PORT": 3145)"), {}, args},
+        "/ecflow/server/variables/ECF_PORT: invalid value 3145: expected the port of the file name, 3144");
+    check_server_refused_with_file(
+        {std::nullopt, "3144", configuration_document(R"("ECF_HOST": "other.host")"), {}, args},
+        "/ecflow/server/variables/ECF_HOST: invalid value 'other.host': expected the host "
+        "of the file name, '" +
+            host + "'");
+
+    // Consistent values are accepted
+    check_server_with_file(
+        {std::nullopt, "3144", configuration_document(R"("ECF_HOST": ")" + host + R"(", "ECF_PORT": 3144)"), {}, args},
+        [](const ServerEnvironment& serverEnv) { BOOST_CHECK_EQUAL(serverEnv.port(), 3144); });
+}
+
+///
+/// @brief Verifies that an invalid configuration file stops start-up, naming the file, the entry and the cause.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_refused) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::string> args{"ServerEnvironment", "--port=3144"};
+    const std::vector<std::pair<std::string, std::string>> cases{
+        {R"({"version": })", "parse error at line 1, column 13: syntax error"},
+        {R"({"ecflow": {}})", "missing the version of the format"},
+        {configuration_document(R"("ECF_UNKNOWN": 1)"), "/ecflow/server/variables/ECF_UNKNOWN: unknown setting"},
+        {configuration_document(R"("ECF_CHECKINTERVAL": "200")"),
+         "/ecflow/server/variables/ECF_CHECKINTERVAL: expected an integer, not a string"},
+        {configuration_document(R"("ECF_PORT": 80)"),
+         "/ecflow/server/variables/ECF_PORT: invalid value 80: expected a value in [1024, 49150]"},
+        {configuration_document(R"("ECF_HOME": "")"),
+         "/ecflow/server/variables/ECF_HOME: invalid value '': expected a non-empty value"},
+    };
+    for (const auto& [content, expected] : cases) {
+        BOOST_TEST_CONTEXT("content: " << content) {
+            check_server_refused_with_file({std::nullopt, "3144", content, {}, args}, expected);
+        }
+    }
+
+    // An invalid value is refused even when the environment overrides it
+    check_server_refused_with_file(
+        {std::nullopt,
+         "3144",
+         configuration_document(R"("ECF_TASK_THRESHOLD": 0)"),
+         {{"ECF_TASK_THRESHOLD", "10"}},
+         args},
+        "/ecflow/server/variables/ECF_TASK_THRESHOLD: invalid value 0: expected a value in [1, 2147483647]");
+}
+
+///
+/// @brief Verifies that a configuration file path that is not a readable regular file stops start-up.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_not_a_regular_file) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    const auto file = configuration_file("3144");
+    fs::create_directory(directory.path() / file);
+    fs::current_path(directory.path());
+
+    const auto start = [] { ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"}); };
+    BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+        const std::string message = error.what();
+        BOOST_TEST_INFO("message: " << message);
+        return message.find("Configuration file '" + file + "' is not a readable regular file") != std::string::npos;
+    });
+    BOOST_CHECK(!Log::instance());
+}
+
+///
+/// @brief Verifies that a configuration file that cannot be inspected stops start-up, rather than counting as absent.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_cannot_be_inspected) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory      = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto locked   = directory.path() / "locked";
+    const auto log_path = directory.path() / "server.log";
+    const auto file     = configuration_file("3144");
+    fs::create_directories(locked);
+    IsolatedServerStartup isolation;
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::error_code error;
+        fs::permissions(locked, fs::perms::owner_all, fs::perm_options::replace, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore directory permissions: " << error.message());
+    };
+
+    // The server starts in a directory it cannot search, so the file in it cannot be inspected
+    fs::current_path(locked);
+    fs::permissions(locked, fs::perms::none, fs::perm_options::replace);
+    std::error_code status_error;
+    [[maybe_unused]] const auto status = fs::symlink_status(file, status_error);
+    if (status_error != std::errc::permission_denied) {
+        ecf::test::scaffold::skip_unenforced_permissions("the uninspectable configuration file case");
+        return;
+    }
+
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", log_path.string());
+    const auto start = [&directory] {
+        ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"},
+                                    (directory.path() / "missing.server_environment.cfg").string());
+    };
+    BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+        const std::string message = error.what();
+        BOOST_TEST_INFO("message: " << message);
+        return message.find("Configuration file '" + file + "' cannot be inspected") != std::string::npos;
+    });
+    BOOST_CHECK(!Log::instance());
+    BOOST_CHECK(!fs::exists(log_path));
+}
+
+///
+/// @brief Verifies that the runtime configuration lists its sources, naming each configuration file by absolute path.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_sources) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::string> args{"ServerEnvironment", "--port=3144"};
+
+    // Neither file
+    {
+        auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+        IsolatedServerStartup isolation;
+        fs::current_path(directory.path());
+        const auto startup = fs::current_path();
+
+        ServerEnvironment serverEnv(args);
+        BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+        const std::vector<std::string> expected{
+            "defaults = loaded",
+            "env.cfg (" + (startup / "server_environment.cfg").string() + ") = absent",
+            "ecf.cfg (" + (startup / configuration_file("3144")).string() + ") = absent",
+            "environment = loaded",
+            "commandline = loaded"};
+        const auto actual = runtime_configuration_section("Sources:");
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+
+    // Both files
+    check_server_with_file({"ECF_CHECKINTERVAL = 100\n", "3144", configuration_document(R"("ECF_URL": "x")"), {}, args},
+                           [](const ServerEnvironment&) {
+                               const auto startup = fs::current_path();
+                               const std::vector<std::string> expected{
+                                   "defaults = loaded",
+                                   "env.cfg (" + (startup / "server_environment.cfg").string() + ") = loaded",
+                                   "ecf.cfg (" + (startup / configuration_file("3144")).string() + ") = loaded",
+                                   "environment = loaded",
+                                   "commandline = loaded"};
+                               const auto actual = runtime_configuration_section("Sources:");
+                               BOOST_CHECK_EQUAL_COLLECTIONS(
+                                   actual.begin(), actual.end(), expected.begin(), expected.end());
+                           });
+}
+
+///
+/// @brief Verifies that the runtime configuration states the origin of each value, and the value of each switch.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_origins) {
+    ECF_NAME_THIS_TEST();
+
+    WithConfigurationFile startup{
+        "ECF_CHECKINTERVAL = 100\nECF_URL = cfg/url\n",
+        "3144",
+        configuration_document(R"("ECF_URL": "file/url", "ECF_CHECKMODE": "CHECK_NEVER")", R"("ipv6": true)"),
+        {{"ECF_PRUNE_NODE_LOG", "7"}},
+        {"ServerEnvironment", "--port=3144", "--ecfinterval=11", "--dis_job_gen"}};
+    check_server_with_file(startup, [](const ServerEnvironment&) {
+        for (const auto& [key, origin] :
+             std::vector<std::pair<std::string, std::string>>{{"Host", "internal"},
+                                                              {"Port", "commandline"},
+                                                              {"Connection", "internal"},
+                                                              {"ECF_HOME", "defaults"},
+                                                              {"ECF_LOG", "defaults"},
+                                                              {"ECF_CHECKINTERVAL", "env.cfg"},
+                                                              {"ECF_CHECKMODE", "ecf.cfg"},
+                                                              {"ECF_PRUNE_NODE_LOG", "environment"},
+                                                              {"ECF_URL", "ecf.cfg"},
+                                                              {"ECF_MICRO", "defaults"},
+                                                              {"Job scheduling interval", "commandline"},
+                                                              {"Job generation", "commandline"},
+                                                              {"Checkpoint save time alarm", "internal"},
+                                                              {"--http", "defaults"},
+                                                              {"--v6", "ecf.cfg"},
+                                                              {"--dis_job_gen", "commandline"},
+                                                              {"--ssl", "defaults"}}) {
+            BOOST_CHECK_MESSAGE(logged_origin(key) == origin,
+                                "Expected '" << key << "' from " << origin << ", found " << logged_origin(key));
+        }
+
+        // The switches follow the other values, each true when given
+        const auto values = logged_values();
+        const std::vector<std::string> switches{
+            "--http = false", "--v6 = true", "--dis_job_gen = true", "--ssl = false"};
+        BOOST_REQUIRE_GE(values.size(), switches.size());
+        BOOST_CHECK_EQUAL_COLLECTIONS(values.end() - switches.size(), values.end(), switches.begin(), switches.end());
+    });
+}
+
+///
+/// @brief Verifies that the dump of the server environment holds the content of the log, and the authentication and
+/// authorisation only once loaded.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_dump_matches_log) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    std::ofstream(directory.path() / (Host{}.name() + ".3144.ecf.lists")) << "4.5.0\nalice\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    auto dump = serverEnv.dump();
+    BOOST_CHECK_MESSAGE(ecf::algorithm::starts_with(dump, "Runtime Configuration:\n"), dump);
+    BOOST_CHECK_MESSAGE(dump.find("Authentication:") == std::string::npos, dump);
+    BOOST_CHECK_MESSAGE(dump.find("Authorisation:") == std::string::npos, dump);
+
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    dump = serverEnv.dump();
+
+    // The log holds the same lines, from the runtime configuration on
+    auto startup = last_startup_lines();
+    std::string logged;
+    for (auto line = startup.begin() + 2; line != startup.end(); ++line) {
+        logged += *line + "\n";
+    }
+    BOOST_CHECK_EQUAL(dump, logged);
+}
+
+///
+/// @brief Verifies that, when debugging, the standard output holds the same start-up lines as the log.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_debug_output_matches_log) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    std::ostringstream output;
+    auto* const original = std::cout.rdbuf(output.rdbuf());
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::cout.rdbuf(original);
+    };
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144", "--debug"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    std::cout.rdbuf(original);
+
+    // Every start-up line of the log is shown, in the same order, from the start time on
+    const auto startup = last_startup_lines();
+    std::string logged;
+    for (const auto& line : startup) {
+        logged += line + "\n";
+    }
+    BOOST_CHECK_MESSAGE(output.str().find(logged) != std::string::npos,
+                        "Expected the log lines\n"
+                            << logged << "in the output\n"
+                            << output.str());
+    BOOST_CHECK(ecf::algorithm::starts_with(logged, "Started at "));
+}
+
+///
+/// @brief Verifies that the log states the authentication in force: the password files, and the users they list.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authentication) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto host   = Host{}.name();
+    const auto passwd = fs::current_path() / (host + ".3144.ecf.passwd");
+    std::ofstream(passwd) << "4.5.0\nalice " << host << " 3144 secret_a\nbob " << host << " 3144 secret_b\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    const std::vector<std::string> expected{
+        "ECF_PASSWD (" + passwd.string() + ") = loaded",
+        "ECF_CUSTOM_PASSWD (" + (fs::current_path() / (host + ".3144.ecf.custom_passwd")).string() + ") = absent",
+        "Users:",
+        "  alice = ECF_PASSWD",
+        "  bob = ECF_PASSWD"};
+    const auto actual = last_block("Authentication:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+
+    // No password is ever logged
+    for (const auto& line : last_startup_lines()) {
+        BOOST_CHECK_MESSAGE(line.find("secret_") == std::string::npos, "Password in: " << line);
+    }
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force once the whitelist is loaded, one rule per user.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_from_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto lists = fs::current_path() / (Host{}.name() + ".3144.ecf.lists");
+    std::ofstream(lists) << "4.5.0\nalice\n-bob\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    // The server user is granted write access, as it is not listed with it
+    std::vector<std::string> users{
+        "  alice = read/write", "  bob = read", "  " + get_login_name() + " = read/write (server user)"};
+    std::sort(users.begin(), users.end());
+    std::vector<std::string> expected{"Mode = whitelist", "ECF_LISTS (" + lists.string() + ") = loaded", "Users:"};
+    expected.insert(expected.end(), users.begin(), users.end());
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force without a whitelist: the permissions of the nodes.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    const std::vector<std::string> expected{
+        "Mode = nodes",
+        "ECF_LISTS (" + (fs::current_path() / (Host{}.name() + ".3144.ecf.lists")).string() + ") = absent"};
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force after the whitelist is reloaded.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_after_reload) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto lists = fs::current_path() / (Host{}.name() + ".3144.ecf.lists");
+    std::ofstream(lists) << "4.5.0\nalice\n" << get_login_name() << "\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    std::ofstream(lists) << "4.5.0\n-carol\n" << get_login_name() << "\n";
+    BOOST_REQUIRE_MESSAGE(serverEnv.reloadWhiteListFile(error), error);
+
+    std::vector<std::string> users{"  carol = read", "  " + get_login_name() + " = read/write"};
+    std::sort(users.begin(), users.end());
+    std::vector<std::string> expected{"Mode = whitelist", "ECF_LISTS (" + lists.string() + ") = loaded", "Users:"};
+    expected.insert(expected.end(), users.begin(), users.end());
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

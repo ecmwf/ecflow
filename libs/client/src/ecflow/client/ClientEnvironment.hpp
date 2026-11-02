@@ -4,6 +4,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"

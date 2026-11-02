@@ -95,7 +95,7 @@ Server initialisation
 
 Command-line syntax is parsed before server settings are loaded. ``--help`` (``-h``)
 and ``--version`` (``-v``) print the requested information and exit successfully
-without reading the configuration file, parsing environment settings, accessing
+without reading the configuration files, parsing environment settings, accessing
 ``ECF_HOME``, loading security files, enabling SSL, creating logs or opening a listener.
 This also applies when server settings are invalid. Invalid command-line syntax,
 missing or invalid numeric arguments, and repeated numeric options still fail;
@@ -107,7 +107,7 @@ selecting one of the supplied values.
 
 For a normal start, ``ecflow_server`` performs the following steps in order:
 
-#. **Read the configuration file.** The server reads :ref:`server_environment.cfg`
+#. **Read** ``server_environment.cfg``. The server reads :ref:`server_environment.cfg`
    from the directory in which the process starts, before changing to ``ECF_HOME``.
    The filename is fixed, and no environment variable or command-line option allows
    selecting another file.
@@ -115,12 +115,21 @@ For a normal start, ``ecflow_server`` performs the following steps in order:
    the diagnostic identifies the configuration file and the original parsing error.
    An unknown or obsolete setting is a parsing error.
 
-#. **Apply overrides.** Environment variables override settings in the configuration file.
-   Command-line options override the corresponding environment settings; for example,
+#. **Read the environment variables and the command-line options.** Each value, from the configuration
+   file, the environment or the command line, is checked when it is read; an invalid value stops
+   initialisation, before the log is created. See :ref:`server_configuration` for the accepted values.
+
+#. **Read the server configuration file.** The port selected by the previous steps, and the host
+   name of the machine, name the file :ref:`server_configuration_file`, read from the directory in
+   which the process starts, when it exists. An invalid file stops initialisation, before the log
+   is created.
+
+#. **Apply overrides.** Each origin overrides the settings of the origins before it; for example,
    ``--port`` overrides ``ECF_PORT``. The precedence, from lowest to highest, is:
 
    - built-in defaults;
    - settings in ``server_environment.cfg``;
+   - settings in ``<host>.<port>.ecf.cfg``;
    - environment variables;
    - command-line options, where available.
 

@@ -189,6 +189,10 @@ void Openssl::enable_based_on_envvar(std::string host, const std::string& port) 
     }
 }
 
+void Openssl::enable(std::string host, const std::string& port, const Option& option) {
+    enable_or_throw(std::move(host), port, option);
+}
+
 void Openssl::enable_prefer_specific(std::string host, const std::string& port) {
     enable_or_throw(std::move(host), port, Option::make_option_specific());
 }

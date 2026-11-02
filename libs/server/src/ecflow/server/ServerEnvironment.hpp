@@ -12,7 +12,9 @@
 /// with the log file name from the server environment
 ///
 
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/asio.hpp>
@@ -22,6 +24,7 @@
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/core/cfg/Configuration.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
 #ifdef ECF_OPENSSL
@@ -31,6 +34,8 @@
 // Added ServerEvinronmentException so that it can be in the same scope as server
 // in ServerMain. Previously we had a separate try block
 // Also distinguish between server and environment errors
+class ServerOptions;
+
 class ServerEnvironmentException : public std::runtime_error {
 public:
     explicit ServerEnvironmentException(const std::string& msg)
@@ -58,7 +63,8 @@ public:
     ///
     /// @brief Validates the effective server configuration and loads optional security files.
     ///
-    /// The checkpoint interval must be positive after configuration and environment overrides have been applied.
+    /// The settings are checked by the server catalogue at construction; this checks the server host, the log and
+    /// the security files.
     ///
     /// @param[in,out] errorMsg Receives diagnostic details for an invalid configuration or security file
     /// @return True if the configuration and optional security files are valid; false otherwise.
@@ -78,29 +84,6 @@ public:
     ecf::Openssl& openssl() { return ssl_; }
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
-
-    ///
-    /// @brief Enables SSL according to ECF_SSL when the variable is set.
-    ///
-    /// Empty or "1" searches `server.crt` first, then `<host>.<port>.crt`;
-    /// any other value searches `<host>.<port>.crt` first, then `server.crt`.
-    ///
-    /// @throws std::runtime_error if ECF_SSL is set but neither certificate file exists.
-    ///
-    void enable_ssl_if_defined() {
-        ssl_.enable_based_on_envvar(serverHost_, the_port());
-        update_protocol_after_ssl();
-    }
-
-    ///
-    /// @brief Enables SSL preferring the shared certificate, independently of ECF_SSL.
-    ///
-    /// @throws std::runtime_error if neither the shared nor the server-specific certificate file exists.
-    ///
-    void enable_ssl() {
-        ssl_.enable_prefer_shared(serverHost_, the_port());
-        update_protocol_after_ssl();
-    }
 #endif
 
     ecf::Protocol protocol() const { return protocol_; }
@@ -218,50 +201,83 @@ public:
     bool debug() const { return debug_; }
     void set_debug(bool f) { debug_ = f; }
 
+    ///
+    /// @brief Describes the server environment, as written to the log.
+    ///
+    /// @return The runtime configuration, followed by the authentication and the authorisation once loaded by valid().
+    ///
     std::string dump() const;
+
+    ///
+    /// @brief Logs the authentication in force: the password files, and the users they list.
+    ///
+    /// The same lines are written to the standard output when debugging.
+    ///
+    void log_authentication() const;
 
     static std::vector<std::string> expected_variables();
 
 private:
     ///
-    /// @brief Selects startup settings and validates required strings and the effective profiling threshold.
+    /// @brief Selects the startup settings from the built-in defaults, the configuration file, the environment and
+    /// the command line.
     ///
     /// Command-line syntax is parsed first. Help and version requests return without reading configuration
-    /// or environment settings, applying transport options or accessing runtime files.
+    /// or environment settings, applying transport options or accessing runtime files. Each value is checked by
+    /// the server catalogue when it is read.
     ///
-    /// @param[in] cl Command-line tokens, applied after configuration and environment settings
+    /// @param[in] cl Command-line tokens, overriding configuration and environment settings
     /// @param[in] path_to_config_file Optional configuration path resolved before changing directory
-    /// @throws ServerEnvironmentException if parsing, required-setting validation or server-home access fails.
+    /// @throws ServerEnvironmentException if reading a setting or server-home access fails.
     /// @throws std::exception if command-line parsing or runtime file setup fails.
     ///
     void init(const CommandLine& cl, const std::string& path_to_config_file);
 
     ///
-    /// @brief Reads configuration settings and applies built-in defaults for unspecified options.
+    /// @brief Takes the settings from their effective values, and resolves a relative server home.
     ///
-    /// A missing or empty configuration file uses the built-in defaults. An existing file must be readable
-    /// and regular. File-access and parsing failures stop initialisation
-    /// before environment overrides or startup side effects are applied.
-    /// An explicitly specified checkpoint mode must match one of the supported names.
+    /// A relative server home becomes an absolute path against the startup directory, in normal form, without dot
+    /// segments or a trailing separator. An absolute server home is preserved.
     ///
-    /// @param[in,out] log_file_name Receives the configured log filename or its built-in default
-    /// @param[in] path_to_config_file Configuration path, relative to the startup directory or absolute
-    /// @throws ServerEnvironmentException if file access, parsing or checkpoint-mode validation fails, including the
-    /// path and cause.
-    ///
-    void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);
-
-    ///
-    /// @brief Applies environment overrides and resolves a relative server home against the startup directory.
-    ///
-    /// A relative server home becomes an absolute path in normal form, without dot segments or a trailing separator.
-    /// Absolute server-home paths are preserved. An empty value is left for startup validation to reject.
-    ///
-    /// @param[in,out] log_file_name Configured log filename, replaced when ECF_LOG is set in the environment
-    /// @throws ServerEnvironmentException if a numeric environment setting cannot be parsed.
+    /// @param[in] configuration The configuration of the server, every value of which is valid
+    /// @param[out] log_file_name Receives the log filename
     /// @throws std::filesystem::filesystem_error if the current directory cannot be determined.
     ///
-    void read_environment_variables(std::string& log_file_name);
+    void resolve(const ecf::cfg::Configuration& configuration, std::string& log_file_name);
+
+    ///
+    /// @brief Reads the configuration of the server from all its origins.
+    ///
+    /// The port given by the built-in defaults, `server_environment.cfg`, the environment and the command line names
+    /// the configuration file, `<host>.<port>.ecf.cfg`, looked for in the current directory. When the file exists,
+    /// its layer is placed above `server_environment.cfg`, and below the environment.
+    ///
+    /// The sources, each loaded or absent, the origin of the effective value of each setting, and the value of each
+    /// switch are recorded, to be logged once the log exists.
+    ///
+    /// @param[in] options The parsed command line
+    /// @param[in] path_to_config_file The path of `server_environment.cfg`
+    /// @return The configuration, every value of which is valid.
+    /// @throws ecf::cfg::ConfigurationError if an origin is refused, or the configuration file defines a host or a
+    /// port other than those of its name.
+    ///
+    ecf::cfg::Configuration read_configuration(const ServerOptions& options, const std::string& path_to_config_file);
+
+#ifdef ECF_OPENSSL
+    ///
+    /// @brief Enables SSL when ECF_SSL has a value or the SSL option is set, and promotes the protocol accordingly.
+    ///
+    /// The certificate lookup order is the following:
+    ///
+    ///   - ECF_SSL empty or "1":   `server.crt` first, then `<host>.<port>.crt`;
+    ///   - ECF_SSL with any other value:   `<host>.<port>.crt` first, then `server.crt`;
+    ///   - the SSL option alone:   as ECF_SSL empty.
+    ///
+    /// @param[in] configuration The configuration of the server, every value of which is valid
+    /// @throws std::runtime_error if SSL is requested but neither certificate file exists.
+    ///
+    void select_ssl(const ecf::cfg::Configuration& configuration);
+#endif
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
@@ -275,6 +291,42 @@ private:
     /// @throws std::filesystem::filesystem_error if filesystem inspection fails.
     ///
     bool load_whitelist_file(std::string& err) const;
+
+    ///
+    /// @brief Logs the authorisation in force: its mode, the whitelist file, and the access of each user.
+    ///
+    /// The mode is `whitelist` once a whitelist file is loaded, and `nodes` otherwise, i.e. the permissions of the
+    /// nodes apply.
+    ///
+    void log_authorisation() const;
+
+    ///
+    /// @brief Returns the runtime configuration: the sources read, and each value with its source.
+    ///
+    /// @return The lines, starting with the title `Runtime Configuration:`.
+    ///
+    [[nodiscard]] std::vector<std::string> runtime_configuration_lines() const;
+
+    ///
+    /// @brief Returns the authentication in force: the password files, and the users they list.
+    ///
+    /// @return The lines, starting with the title `Authentication:`.
+    ///
+    [[nodiscard]] std::vector<std::string> authentication_lines() const;
+
+    ///
+    /// @brief Returns the authorisation in force: its mode, the whitelist file, and the access of each user.
+    ///
+    /// @return The lines, starting with the title `Authorisation:`.
+    ///
+    [[nodiscard]] std::vector<std::string> authorisation_lines() const;
+
+    ///
+    /// @brief Writes lines to the log, and to the standard output when debugging.
+    ///
+    /// @param[in] lines The lines
+    ///
+    void report(const std::vector<std::string>& lines) const;
 
 #ifdef ECF_OPENSSL
     ///
@@ -319,8 +371,12 @@ private:
     std::string ecf_cmd_;
     std::string ecf_micro_;
     std::string ecf_white_list_file_;
+    std::vector<std::pair<std::string, std::string>> configuration_sources_; ///< Source, "loaded" or "absent"
+    std::map<std::string, std::string> configuration_origins_;               ///< Origin of each value, by name
+    std::vector<std::pair<std::string, bool>> configuration_switches_;       ///< Value of each switch, e.g. --http
     mutable WhiteListFile white_list_file_;
 
+    mutable bool access_loaded_{false}; ///< Whether valid() loaded the authentication and authorisation
     mutable ecf::AuthenticationService authentication_service_;
     mutable ecf::AuthorisationService authorisation_service_;
 
@@ -329,5 +385,4 @@ private:
 #endif
 
     boost::asio::ip::tcp tcp_protocol_; // defaults to IPv4 TCP protocol
-    friend class ServerOptions;
 };

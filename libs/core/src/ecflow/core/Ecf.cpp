@@ -18,10 +18,25 @@ const char* Ecf::CLIENT_NAME() {
     static const char* CLIENT_NAME = "ecflow_client";
     return CLIENT_NAME;
 }
+const std::string& Ecf::HOME() {
+    static const std::string HOME = ".";
+    return HOME;
+}
+int Ecf::PORT() {
+    return 3141;
+}
+const std::string& Ecf::CHECK_MODE() {
+    static const std::string CHECK_MODE = "CHECK_ON_TIME";
+    return CHECK_MODE;
+}
 
 const std::string& Ecf::LOG_FILE() {
     static const std::string LOG_FILE = "ecf.log";
     return LOG_FILE;
+}
+const std::string& Ecf::CONFIG_FILE() {
+    static const std::string CONFIG_FILE = "ecf.cfg";
+    return CONFIG_FILE;
 }
 const std::string& Ecf::CHECKPT() {
     static const std::string CHECKPT = "ecf.check";
@@ -50,6 +65,23 @@ const std::string& Ecf::STATUS_CMD() {
 const std::string& Ecf::CHECK_CMD() {
     static const std::string CHECK_CMD = "ps --pid %ECF_RID% -f";
     return CHECK_CMD;
+}
+const std::string& Ecf::PASSWD_FILE() {
+    static const std::string PASSWD_FILE = "ecf.passwd";
+    return PASSWD_FILE;
+}
+const std::string& Ecf::CUSTOM_PASSWD_FILE() {
+    static const std::string CUSTOM_PASSWD_FILE = "ecf.custom_passwd";
+    return CUSTOM_PASSWD_FILE;
+}
+int Ecf::SUBMIT_INTERVAL() {
+    return 60;
+}
+int Ecf::TASK_THRESHOLD() {
+    return 4000;
+}
+int Ecf::PRUNE_NODE_LOG() {
+    return 30;
 }
 
 //-remote has been removed from firefox, since version 39

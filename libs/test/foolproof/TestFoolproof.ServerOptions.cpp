@@ -149,8 +149,8 @@ void check_server_cli_exit(std::vector<std::string> options,
                             "CLI request created an unexpected runtime file: " << entry.path());
     }
 
-    // Start-up announcements (AuthenticationService and ServerOptions) prove that the request went past the CLI
-    BOOST_CHECK(output.find(" file located at '") == std::string::npos);
+    // Start-up announcements (authentication and ServerOptions) prove that the request went past the CLI
+    BOOST_CHECK(output.find("Authentication:") == std::string::npos);
     BOOST_CHECK(output.find("SSL enabled:") == std::string::npos);
 
     const auto error = ecf::test::foolproof::probe_no_listener(port.value());

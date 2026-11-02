@@ -3,6 +3,7 @@
 
 #include "ecflow/node/JobProfiler.hpp"
 
+#include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Task.hpp"
@@ -13,13 +14,9 @@ using namespace ecf;
 //   - sleep(1) in EcfFile , i.e when creating the job output
 //
 
-static size_t task_threshold_ = 4000;
+static size_t task_threshold_ = Ecf::TASK_THRESHOLD();
 
 namespace ecf {
-
-int JobProfiler::task_threshold_default() {
-    return 4000;
-}
 
 // =================================================================================
 JobProfiler::JobProfiler(Task* node, JobsParam& jobsParam, size_t threshold)
