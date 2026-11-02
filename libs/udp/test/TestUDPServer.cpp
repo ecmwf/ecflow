@@ -1,12 +1,44 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <chrono>
+#include <signal.h>
+#include <thread>
+
 #include <boost/test/unit_test.hpp>
 
 #include "TestSupport.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 namespace ut = boost::unit_test;
+
+namespace {
+
+///
+/// @brief Pauses a process, and resumes it after a delay, or at the latest on destruction.
+///
+class PausedProcess {
+public:
+    PausedProcess(int pid, std::chrono::milliseconds delay)
+        : pid_{pid} {
+        BOOST_REQUIRE_MESSAGE(::kill(pid_, SIGSTOP) == 0, "pause process " << pid_);
+        resume_ = std::thread([this, delay] {
+            std::this_thread::sleep_for(delay);
+            ::kill(pid_, SIGCONT);
+        });
+    }
+
+    PausedProcess(const PausedProcess&)            = delete;
+    PausedProcess& operator=(const PausedProcess&) = delete;
+
+    ~PausedProcess() { resume_.join(); }
+
+private:
+    int pid_;
+    std::thread resume_;
+};
+
+} // namespace
 
 BOOST_FIXTURE_TEST_SUITE(S_UDP, ecf::test::EnableServersFixture)
 
@@ -54,6 +86,17 @@ BOOST_AUTO_TEST_CASE(can_update_events) {
         event = ecflow_server.get_event("/s1/f2/f3/t4", "event_at_t4");
         BOOST_TEST(!event.value());
     }
+}
+
+BOOST_AUTO_TEST_CASE(can_update_events_when_request_is_handled_late) {
+    ECF_NAME_THIS_TEST();
+
+    // The request waits in the socket buffer of the paused ecFlow UDP server
+    PausedProcess paused(ecflow_udp.pid(), std::chrono::seconds(2));
+
+    ecflow_udp.set_event("/s1/f2", "event_at_f2");
+    auto event = ecflow_server.get_event("/s1/f2", "event_at_f2");
+    BOOST_TEST(event.value());
 }
 
 BOOST_AUTO_TEST_CASE(can_update_labels) {
