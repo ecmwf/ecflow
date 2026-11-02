@@ -54,6 +54,7 @@ public:
 
     const hostname_t& host() const { return host_; }
     uint16_t port() const { return port_; }
+    int pid() const { return server_.pid(); }
 
 private:
     hostname_t host_;
@@ -176,8 +177,9 @@ public:
  */
 class MockUDPServer : public BaseMockServer<MockUDPServer> {
 public:
-    explicit MockUDPServer(port_t port, port_t ecflow_port)
-        : BaseMockServer<MockUDPServer>("localhost", port, ecflow_port) {}
+    MockUDPServer(port_t port, const MockServer& ecflow)
+        : BaseMockServer<MockUDPServer>("localhost", port, ecflow.port()),
+          ecflow_{ecflow} {}
 
     void update_label(const std::string& path, const std::string& name, const std::string& value) {
         ECF_TEST_DBG("   MOCK: Updating label  " << name << ", at node " << path << ", to value: " << value
@@ -204,9 +206,39 @@ public:
         send(request);
     }
 
+    ///
+    /// @brief Sends the request, and waits until the ecFlow UDP server has handled it.
+    ///
+    /// @param[in] request The request, sent as is (valid or not)
+    ///
     void send(const std::string& request) {
         ECF_TEST_DBG("   MOCK: UDP Client sending request: " << request);
         sendRequest(port(), request);
+        synchronise();
+    }
+
+    ///
+    /// @brief Waits until the ecFlow UDP server has handled every request sent before.
+    ///
+    /// Updates the label `/s1:barrier` to a new value, and waits until the ecFlow server shows it. Since the ecFlow
+    /// UDP server handles requests in order, all requests sent before have been handled by then. The update is sent
+    /// again periodically, as a request sent before the ecFlow UDP server is listening is lost.
+    ///
+    void synchronise() {
+        const auto value   = "barrier_" + std::to_string(++barriers_);
+        const auto request = format_request("/s1", "alter_label", "barrier", value);
+
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (std::chrono::steady_clock::now() < deadline) {
+            sendRequest(port(), request);
+            for (int i = 0; i < 5; ++i) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                if (ecflow_.get_label("/s1", "barrier").new_value() == value) {
+                    return;
+                }
+            }
+        }
+        BOOST_REQUIRE_MESSAGE(false, "ecFlow UDP server did not handle the requests within 10 seconds");
     }
 
 private:
@@ -234,10 +266,10 @@ private:
         ECF_TEST_DBG("   Creating ecflow_udp client connected to " << host << ":" << port);
         ecf::UDPClient client(host, std::to_string(port));
         client.send(request);
-
-        // Wait for request to flow...
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
+    const MockServer& ecflow_;
+    int barriers_ = 0;
 
 public:
     static constexpr const char* designation = "ecFlow UDP";
@@ -252,9 +284,7 @@ public:
             invoke_command,
             {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
 
-        // Wait for server to start...
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-
+        // The caller waits for the server to be ready, with synchronise()
         return server;
     }
 
@@ -276,9 +306,11 @@ struct EnableServersFixture
           ecflow_udp_port{
               scaffold::MakePort{}.with(scaffold::AutomaticPortValue{3199, scaffold::Transport::UDP}).create()},
           ecflow_server(as_port(ecflow_server_port)),
-          ecflow_udp(as_port(ecflow_udp_port), as_port(ecflow_server_port)) {
+          ecflow_udp(as_port(ecflow_udp_port), ecflow_server) {
         // Load 'reference' suite for tests...
         ecflow_server.load_definition(fs::absolute("data/reference.def").string());
+        // ... and wait for the ecFlow UDP server to be ready
+        ecflow_udp.synchronise();
     }
     ~EnableServersFixture() = default;
 

@@ -4,6 +4,7 @@
 #
 
 suite s1
+  label barrier ""
   family f2
     event event_at_f2
     label label_at_f2 ""
