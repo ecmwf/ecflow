@@ -273,17 +273,13 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_check_mode) {
 BOOST_AUTO_TEST_CASE(test_server_catalogue_refuses_empty_text) {
     ECF_NAME_THIS_TEST();
 
-    // Every text setting, except ECF_SSL, is required to be non-empty
+    // Every text setting, except ECF_SSL, is required to be non-empty; ECF_SSL depends on the build, and is
+    // verified by test_server_catalogue_ssl_requires_support
     for (const auto& setting : server_catalogue().settings()) {
-        if (setting.type() != Type::Text) {
+        if (setting.type() != Type::Text || setting.key() == Key("ecflow.server.variables@ECF_SSL")) {
             continue;
         }
-        if (setting.key() == Key("ecflow.server.variables@ECF_SSL")) {
-            check_accepted(setting.key().key(), "", value_of<std::string>(""));
-        }
-        else {
-            check_refused(setting.key().key(), "");
-        }
+        check_refused(setting.key().key(), "");
     }
 }
 

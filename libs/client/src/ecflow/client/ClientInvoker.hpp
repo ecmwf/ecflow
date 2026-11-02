@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <optional>
 
 #include "ecflow/base/Cmd.hpp"

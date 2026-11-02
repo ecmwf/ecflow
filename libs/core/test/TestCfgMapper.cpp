@@ -147,7 +147,15 @@ BOOST_AUTO_TEST_CASE(test_map_only_the_settings_present) {
 BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
     ECF_NAME_THIS_TEST();
 
-    // Every setting of the server can be set in the file (R10)
+    // Every setting of the server can be set in the file (R10); without SSL support, the file can only leave SSL
+    // disabled, hence omits ECF_SSL
+#ifdef ECF_OPENSSL
+    const std::string ssl_variable = R"("ECF_SSL": "",)";
+    const std::string ssl_option   = "true";
+#else
+    const std::string ssl_variable;
+    const std::string ssl_option = "false";
+#endif
     const auto tree = JsonReader().read(R"({
         "version": 1,
         "ecflow": {
@@ -174,13 +182,13 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
                     "ECF_URL_CMD": "url",
                     "ECF_URL_BASE": "base",
                     "ECF_URL": "url",
-                    "ECF_MICRODEF": "@",
-                    "ECF_SSL": "",
-                    "ECF_DEBUG_SERVER": true
+                    "ECF_MICRODEF": "@",)" + ssl_variable +
+                                            R"("ECF_DEBUG_SERVER": true
                 },
                 "http": true,
                 "ipv6": true,
-                "ssl": true,
+                "ssl": )" + ssl_option +
+                                            R"(,
                 "job_generation": false
             }
         }
@@ -189,8 +197,12 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
 
     const auto& catalogue = ecf::cfg::server_catalogue();
     const auto layer      = Mapper(catalogue).map(tree, layers::ecf_cfg, origin);
-    BOOST_CHECK_EQUAL(layer.entries.size(), catalogue.settings().size());
+    const auto omitted    = ssl_variable.empty() ? 1U : 0U;
+    BOOST_CHECK_EQUAL(layer.entries.size(), catalogue.settings().size() - omitted);
     for (const auto& setting : catalogue.settings()) {
+        if (ssl_variable.empty() && setting.key() == Key("ecflow.server.variables@ECF_SSL")) {
+            continue;
+        }
         BOOST_TEST_CONTEXT("key: " << setting.key().key()) {
             BOOST_CHECK(layer.entries.count(setting.key()) == 1);
         }
