@@ -102,12 +102,23 @@ ServerOptions::ServerOptions(const CommandLine& cl) {
                        "  (These will be self signed certificates, rather than a certificate authority).\n"
 #endif
                        "\n"
-                       "These defaults along with several other can be specified in the file\n"
-                       "server_environment.cfg. The file should be placed in the current working\n"
-                       "directory. It can be found in ecFlow source tree under Server/ directory.\n"
-                       "Please read this file to see the available options.\n"
-                       "Note: Environment variables _override_ any settings made in the\n"
-                       "server_environment.cfg file.")(
+                       "These settings, and others, can also be given by configuration files,\n"
+                       "read from the current working directory when the server starts:\n"
+                       "  - <host>.<port>.ecf.cfg:\n"
+                       "      JSON, named after the host and port of the server, e.g.\n"
+                       "      machine1.3141.ecf.cfg; the preferred way to configure the server\n"
+                       "  - server_environment.cfg:\n"
+                       "      one 'NAME = value' setting per line\n"
+                       "\n"
+                       "Each setting takes the value of the origin of highest precedence;\n"
+                       "from lowest to highest:\n"
+                       "  1. built-in defaults\n"
+                       "  2. server_environment.cfg\n"
+                       "  3. <host>.<port>.ecf.cfg\n"
+                       "  4. environment variables\n"
+                       "  5. command-line options\n"
+                       "\n"
+                       "The start-up log records the files read, and the source of each value.")(
         "port",
         po::value<int>(),
         "<int> <Allowed range 1024-49151> The socket/port the server is listening too. default = 3141\n"

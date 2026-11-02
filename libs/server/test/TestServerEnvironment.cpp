@@ -1264,6 +1264,43 @@ BOOST_AUTO_TEST_CASE(test_server_config_file_shipped_values_are_applied) {
 }
 
 ///
+/// @brief Verifies that the help describes the configuration files and the precedence of the origins.
+///
+BOOST_AUTO_TEST_CASE(test_server_help_describes_configuration_files) {
+    ECF_NAME_THIS_TEST();
+
+    std::ostringstream output;
+    auto* const original = std::cout.rdbuf(output.rdbuf());
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::cout.rdbuf(original);
+    };
+    ServerEnvironment serverEnv({"ServerEnvironment", "--help"});
+    std::cout.rdbuf(original);
+
+    const auto help = output.str();
+    for (const auto* fragment : {"<host>.<port>.ecf.cfg:",
+                                 "the preferred way to configure the server",
+                                 "server_environment.cfg:",
+                                 "built-in defaults",
+                                 "environment variables",
+                                 "command-line options",
+                                 "the source of each value"}) {
+        BOOST_CHECK_MESSAGE(help.find(fragment) != std::string::npos, "Expected '" << fragment << "' in:\n" << help);
+    }
+
+    // The origins are listed from lowest to highest precedence
+    const auto position = [&help](const char* origin) { return help.find(origin); };
+    BOOST_CHECK(position("  1. built-in defaults") < position("  2. server_environment.cfg"));
+    BOOST_CHECK(position("  2. server_environment.cfg") < position("  3. <host>.<port>.ecf.cfg"));
+    BOOST_CHECK(position("  3. <host>.<port>.ecf.cfg") < position("  4. environment variables"));
+    BOOST_CHECK(position("  4. environment variables") < position("  5. command-line options"));
+    BOOST_CHECK(position("  5. command-line options") != std::string::npos);
+
+    // The file is not part of an installation
+    BOOST_CHECK_MESSAGE(help.find("ecFlow source tree") == std::string::npos, help);
+}
+
+///
 /// @brief Verifies that help and version requests read no configuration, environment setting or runtime file.
 ///
 BOOST_AUTO_TEST_CASE(test_server_information_options_bypass_settings) {
