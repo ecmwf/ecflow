@@ -4,6 +4,7 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 
 #include <iostream>
+#include <map>
 #include <optional>
 #include <vector>
 
@@ -59,11 +60,6 @@ static std::string the_connection(ecf::Protocol protocol, const boost::asio::ip:
             return "HTTP over " + transport + " with SSL";
     }
     return transport;
-}
-
-// Logs one entry of the runtime configuration block
-static void log_entry(const std::string& key, const std::string& value) {
-    LOG(Log::MSG, "  " << key << " = " << value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,20 +183,36 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
     LOG(Log::MSG, Version::description());
 
-    // Runtime configuration: the connection, locations, scheduling and check-pointing settings, and commands of
-    // the server, one entry per line. Commands and URLs are set by the operator, and may hold credentials, which
-    // are masked.
-    LOG(Log::MSG, "Runtime Configuration");
-    log_entry("Host", hostPort().first);
-    log_entry("Port", hostPort().second);
-    log_entry("Connection", the_connection(protocol_, tcp_protocol_));
+    // Runtime configuration: the sources read, then the connection, locations, scheduling and check-pointing
+    // settings, commands and switches of the server, one entry per line, each with the source of its value. Commands
+    // and URLs are set by the operator, and may hold credentials, which are masked.
+    LOG(Log::MSG, "Runtime Configuration:");
+    LOG(Log::MSG, "  Sources:");
+    for (const auto& source : configuration_sources_) {
+        LOG(Log::MSG, "    " << source.first << " = " << source.second);
+    }
+
+    // A value derived by the server, rather than read from a source, is internal; it is given no name
+    auto origin = [this](const std::string& name) {
+        const auto found = configuration_origins_.find(name);
+        return found == configuration_origins_.end() ? std::string("internal") : found->second;
+    };
+    auto entry = [&origin](const std::string& key, const std::string& value, const std::string& name) {
+        LOG(Log::MSG, "    " << key << " = " << value << " @ " << origin(name));
+    };
+
+    LOG(Log::MSG, "  Values:");
+    entry("Host", hostPort().first, {});
+    entry("Port", hostPort().second, "ECF_PORT");
+    entry("Connection", the_connection(protocol_, tcp_protocol_), {});
 
 #ifdef ECF_OPENSSL
     // Record the certificate in use, and warn when it is not the one requested first
     if (ssl_.enabled()) {
-        log_entry("SSL certificate",
-                  ssl_.certificate()->crt_file().string() + " (" +
-                      (ssl_.certificate()->shared() ? "shared" : "server-specific") + ")");
+        entry("SSL certificate",
+              ssl_.certificate()->crt_file().string() + " (" +
+                  (ssl_.certificate()->shared() ? "shared" : "server-specific") + ")",
+              configuration_origins_.count("ECF_SSL") ? "ECF_SSL" : "--ssl");
         if (const auto& missing = ssl_.fallback_from()) {
             LOG(Log::WAR,
                 "SSL certificate '" << missing->string() << "' not found; using the "
@@ -210,29 +222,32 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
 #endif
 
-    log_entry("ECF_HOME", ecfHome_);
-    log_entry("ECF_LOG", Log::instance()->path());
-    log_entry("ECF_CHECK", ecf_checkpt_file_);
-    log_entry("ECF_CHECKOLD", ecf_backup_checkpt_file_);
-    log_entry("ECF_LISTS", ecf_white_list_file_);
-    log_entry("ECF_PASSWD", authentication_service_.passwd_file());
-    log_entry("ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file());
-    log_entry("ECF_CHECKINTERVAL", std::to_string(checkPtInterval_));
-    log_entry("ECF_CHECKMODE", the_check_mode(checkMode_));
-    log_entry("ECF_PRUNE_NODE_LOG", std::to_string(ecf_prune_node_log_));
-    log_entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold()));
-    log_entry("ECF_DEBUG_SERVER", debug_ ? "enabled" : "disabled");
-    log_entry("ECF_JOB_CMD", ecf::mask_credentials(ecf_cmd_));
-    log_entry("ECF_KILL_CMD", ecf::mask_credentials(killCmd_));
-    log_entry("ECF_STATUS_CMD", ecf::mask_credentials(statusCmd_));
-    log_entry("ECF_CHECK_CMD", ecf::mask_credentials(checkCmd_));
-    log_entry("ECF_URL_CMD", ecf::mask_credentials(urlCmd_));
-    log_entry("ECF_URL_BASE", ecf::mask_credentials(urlBase_));
-    log_entry("ECF_URL", ecf::mask_credentials(url_));
-    log_entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_));
-    log_entry("Job scheduling interval", std::to_string(submitJobsInterval_));
-    log_entry("Job generation", jobGeneration_ ? "enabled" : "disabled");
-    log_entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_));
+    entry("ECF_HOME", ecfHome_, "ECF_HOME");
+    entry("ECF_LOG", Log::instance()->path(), "ECF_LOG");
+    entry("ECF_CHECK", ecf_checkpt_file_, "ECF_CHECK");
+    entry("ECF_CHECKOLD", ecf_backup_checkpt_file_, "ECF_CHECKOLD");
+    entry("ECF_LISTS", ecf_white_list_file_, "ECF_LISTS");
+    entry("ECF_PASSWD", authentication_service_.passwd_file(), "ECF_PASSWD");
+    entry("ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file(), "ECF_CUSTOM_PASSWD");
+    entry("ECF_CHECKINTERVAL", std::to_string(checkPtInterval_), "ECF_CHECKINTERVAL");
+    entry("ECF_CHECKMODE", the_check_mode(checkMode_), "ECF_CHECKMODE");
+    entry("ECF_PRUNE_NODE_LOG", std::to_string(ecf_prune_node_log_), "ECF_PRUNE_NODE_LOG");
+    entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold()), "ECF_TASK_THRESHOLD");
+    entry("ECF_DEBUG_SERVER", debug_ ? "enabled" : "disabled", "ECF_DEBUG_SERVER");
+    entry("ECF_JOB_CMD", ecf::mask_credentials(ecf_cmd_), "ECF_JOB_CMD");
+    entry("ECF_KILL_CMD", ecf::mask_credentials(killCmd_), "ECF_KILL_CMD");
+    entry("ECF_STATUS_CMD", ecf::mask_credentials(statusCmd_), "ECF_STATUS_CMD");
+    entry("ECF_CHECK_CMD", ecf::mask_credentials(checkCmd_), "ECF_CHECK_CMD");
+    entry("ECF_URL_CMD", ecf::mask_credentials(urlCmd_), "ECF_URL_CMD");
+    entry("ECF_URL_BASE", ecf::mask_credentials(urlBase_), "ECF_URL_BASE");
+    entry("ECF_URL", ecf::mask_credentials(url_), "ECF_URL");
+    entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_), "ECF_MICRODEF");
+    entry("Job scheduling interval", std::to_string(submitJobsInterval_), "ECF_INTERVAL");
+    entry("Job generation", jobGeneration_ ? "enabled" : "disabled", "--dis_job_gen");
+    entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_), {});
+    for (const auto& [name, value] : configuration_switches_) {
+        entry(name, value ? "true" : "false", name);
+    }
 }
 
 ServerEnvironment::~ServerEnvironment() {
@@ -457,7 +472,7 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
 }
 
 ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOptions& options,
-                                                              const std::string& path_to_config_file) const {
+                                                              const std::string& path_to_config_file) {
     const auto& catalogue = ecf::cfg::server_catalogue();
     auto variable = [](const char* name) { return ecf::cfg::Key::for_variable("ecflow.server.variables", name); };
 
@@ -471,7 +486,43 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
     const auto port = std::to_string(std::get<std::int64_t>(*configuration.get(variable("ECF_PORT"))));
     const auto file = host_name_.prefix_host_and_port(port, Ecf::CONFIG_FILE());
     std::error_code error;
-    if (!fs::exists(fs::symlink_status(file, error))) {
+    const bool env_cfg_found = fs::exists(fs::status(path_to_config_file, error));
+    const bool ecf_cfg_found = fs::exists(fs::symlink_status(file, error));
+
+    // The paths are logged after the change to ECF_HOME, and so are made absolute
+    const auto env_cfg_path = fs::absolute(path_to_config_file).lexically_normal().string();
+    const auto ecf_cfg_path = fs::absolute(file).lexically_normal().string();
+    configuration_sources_  = {{"defaults", "loaded"},
+                               {"env.cfg (" + env_cfg_path + ")", env_cfg_found ? "loaded" : "absent"},
+                               {"ecf.cfg (" + ecf_cfg_path + ")", ecf_cfg_found ? "loaded" : "absent"},
+                               {"environment", "loaded"},
+                               {"commandline", "loaded"}};
+
+    // Each setting is traced to the source of its effective value; a switch is true when it differs from its default
+    auto trace = [&](const ecf::cfg::Configuration& traced) {
+        const std::map<std::string, std::string> origins{{std::string(ecf::cfg::layers::defaults), "defaults"},
+                                                         {std::string(ecf::cfg::layers::env_cfg), "env.cfg"},
+                                                         {std::string(ecf::cfg::layers::ecf_cfg), "ecf.cfg"},
+                                                         {std::string(ecf::cfg::layers::env), "environment"},
+                                                         {std::string(ecf::cfg::layers::cli), "commandline"}};
+        configuration_origins_.clear();
+        configuration_switches_.clear();
+        for (const auto& setting : catalogue.settings()) {
+            const auto& key         = setting.key();
+            const auto source       = traced.source(key);
+            const auto& switch_name = setting.names().cli;
+            const auto name = key.is_variable() ? std::string(key.components().second) : "--" + switch_name.value();
+            if (source) {
+                configuration_origins_.emplace(name, origins.at(*source));
+            }
+            if (!key.is_variable()) {
+                configuration_switches_.emplace_back(name, traced.get(key) != setting.default_value());
+            }
+        }
+    };
+
+    if (!ecf_cfg_found) {
+        trace(configuration);
         return configuration;
     }
 
@@ -494,8 +545,10 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
         }
     }
 
-    return ecf::cfg::Configuration(
+    ecf::cfg::Configuration result(
         {std::move(defaults), std::move(env_cfg), std::move(ecf_cfg), std::move(env), std::move(cli)});
+    trace(result);
+    return result;
 }
 
 #ifdef ECF_OPENSSL

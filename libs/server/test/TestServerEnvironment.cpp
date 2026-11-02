@@ -122,6 +122,64 @@ std::vector<std::string> last_startup_lines() {
 }
 
 ///
+/// @brief Returns the entries of a section of the runtime configuration of the last start-up written to the log.
+///
+/// @param[in] section The title of the section, e.g. "Sources:"
+/// @return The entries of the section, without their indentation; empty when the section is not found.
+///
+std::vector<std::string> runtime_configuration_section(const std::string& section) {
+    const auto startup = last_startup_lines();
+    auto line          = std::find(startup.begin(), startup.end(), "  " + section);
+    if (line == startup.end()) {
+        return {};
+    }
+    std::vector<std::string> entries;
+    for (++line; line != startup.end() && ecf::algorithm::starts_with(*line, "    "); ++line) {
+        entries.push_back(line->substr(4));
+    }
+    return entries;
+}
+
+///
+/// @brief Returns the values of the runtime configuration of the last start-up, without their origins.
+///
+/// @return The entries of the section "Values:", each as `Key = value`.
+///
+std::vector<std::string> logged_values() {
+    auto entries = runtime_configuration_section("Values:");
+    for (auto& entry : entries) {
+        entry = entry.substr(0, entry.rfind(" @ "));
+    }
+    return entries;
+}
+
+///
+/// @brief Returns the origin of a value of the runtime configuration of the last start-up.
+///
+/// @param[in] key The key of the entry, e.g. "ECF_HOME" or "--http"
+/// @return The origin, after ` @ `; empty when the entry is not found.
+///
+std::string logged_origin(const std::string& key) {
+    for (const auto& entry : runtime_configuration_section("Values:")) {
+        if (ecf::algorithm::starts_with(entry, key + " = ")) {
+            return entry.substr(entry.rfind(" @ ") + 3);
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Checks that the values of the runtime configuration of the last start-up hold the given entry.
+///
+/// @param[in] entry The entry, as `Key = value`, without its origin
+///
+void check_logged_value(const std::string& entry) {
+    const auto values = logged_values();
+    BOOST_CHECK_MESSAGE(std::find(values.begin(), values.end(), entry) != values.end(),
+                        "Expected '" << entry << "' in the runtime configuration");
+}
+
+///
 /// @brief Returns the value of the given server variable.
 ///
 /// @param[in] serverEnv The server environment providing the variables
@@ -145,19 +203,18 @@ std::string server_variable(const ServerEnvironment& serverEnv, const std::strin
 /// @param[in] serverEnv The server environment that wrote the log
 /// @param[in] connection The expected value of the Connection entry
 /// @param[in] ssl_certificate The expected value of the SSL certificate entry; empty when SSL is not enabled
-/// @return The lines of the block, starting with its title.
+/// @return The entries of the section "Values:", each as `Key = value`, without the switches that follow them.
 ///
 std::vector<std::string> expected_runtime_configuration(const ServerEnvironment& serverEnv,
                                                         const std::string& connection,
                                                         const std::string& ssl_certificate) {
-    auto entry    = [](const std::string& key, const std::string& value) { return "  " + key + " = " + value; };
+    auto entry    = [](const std::string& key, const std::string& value) { return key + " = " + value; };
     auto variable = [&](const std::string& name) { return entry(name, server_variable(serverEnv, name)); };
     auto command  = [&](const std::string& name) {
         return entry(name, ecf::mask_credentials(server_variable(serverEnv, name)));
     };
 
-    std::vector<std::string> block = {"Runtime Configuration",
-                                      entry("Host", serverEnv.hostPort().first),
+    std::vector<std::string> block = {entry("Host", serverEnv.hostPort().first),
                                       entry("Port", serverEnv.the_port()),
                                       entry("Connection", connection)};
     if (!ssl_certificate.empty()) {
@@ -201,15 +258,17 @@ std::vector<std::string> expected_runtime_configuration(const ServerEnvironment&
 void check_runtime_configuration(const ServerEnvironment& serverEnv,
                                  const std::string& connection,
                                  const std::string& ssl_certificate = {}) {
-    auto startup  = last_startup_lines();
-    auto expected = expected_runtime_configuration(serverEnv, connection, ssl_certificate);
+    const auto startup = last_startup_lines();
+    BOOST_REQUIRE_MESSAGE(startup.size() > 3, "Expected 'Started at', the version line and the runtime configuration");
+    BOOST_CHECK_EQUAL(startup[2], "Runtime Configuration:");
+    BOOST_CHECK_EQUAL(startup[3], "  Sources:");
+    BOOST_CHECK_EQUAL(runtime_configuration_section("Sources:").size(), 5U);
 
-    BOOST_REQUIRE_MESSAGE(startup.size() >= 2 + expected.size(),
-                          "Expected 'Started at', the version line and "
-                              << expected.size() << " lines of runtime configuration, but found " << startup.size()
-                              << " lines");
-    std::vector<std::string> actual(startup.begin() + 2, startup.begin() + 2 + expected.size());
-    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    // The values come first, followed by the switches
+    const auto expected = expected_runtime_configuration(serverEnv, connection, ssl_certificate);
+    const auto values   = logged_values();
+    BOOST_REQUIRE_EQUAL(values.size(), expected.size() + 4);
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.begin() + expected.size(), expected.begin(), expected.end());
 }
 
 ///
@@ -944,13 +1003,11 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_non_default_runtime_configurat
     check_runtime_configuration(serverEnv, "TCP/IP v4");
 
     // The values are checked independently of the server environment that wrote them
-    auto startup = last_startup_lines();
-    for (const auto* line : {"  Job generation = disabled",
-                             "  ECF_CHECKINTERVAL = 300",
-                             "  ECF_CHECKMODE = CHECK_ALWAYS",
-                             "  ECF_PRUNE_NODE_LOG = 7"}) {
-        BOOST_CHECK_MESSAGE(std::find(startup.begin(), startup.end(), line) != startup.end(),
-                            "Expected '" << line << "' in the runtime configuration");
+    for (const auto* entry : {"Job generation = disabled",
+                              "ECF_CHECKINTERVAL = 300",
+                              "ECF_CHECKMODE = CHECK_ALWAYS",
+                              "ECF_PRUNE_NODE_LOG = 7"}) {
+        check_logged_value(entry);
     }
 
     remove_log_file(serverEnv);
@@ -969,9 +1026,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_masks_credentials_in_runtime_config
     BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
 
     auto startup = last_startup_lines();
-    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_JOB_CMD = submit --token *** %ECF_JOB%") !=
-                startup.end());
-    BOOST_CHECK(std::find(startup.begin(), startup.end(), "  ECF_URL = https://user:***@host/") != startup.end());
+    check_logged_value("ECF_JOB_CMD = submit --token *** %ECF_JOB%");
+    check_logged_value("ECF_URL = https://user:***@host/");
     for (const auto& line : startup) {
         BOOST_CHECK_MESSAGE(line.find("s3cr3t") == std::string::npos, "Unmasked credential in: " << line);
     }
@@ -1549,8 +1605,7 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_ports) {
                 BOOST_CHECK_EQUAL(serverEnv.checkPtFilename(), (startup / (prefix + "ecf.check")).string());
                 BOOST_CHECK_EQUAL(serverEnv.oldCheckPtFilename(), (startup / (prefix + "ecf.check.b")).string());
                 BOOST_CHECK(fs::is_regular_file(startup / (prefix + "ecf.log")));
-                const auto lines = last_startup_lines();
-                BOOST_CHECK(std::find(lines.begin(), lines.end(), "  Port = " + port) != lines.end());
+                check_logged_value("Port = " + port);
             });
         }
     }
@@ -1628,10 +1683,7 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_numeric_settings) {
                                            : name == "ECF_PRUNE_NODE_LOG" ? serverEnv.ecf_prune_node_log()
                                                                           : JobProfiler::task_threshold();
                         BOOST_CHECK_EQUAL(actual, expected);
-                        const auto lines = last_startup_lines();
-                        BOOST_CHECK(std::find(lines.begin(),
-                                              lines.end(),
-                                              "  " + name + " = " + std::to_string(expected)) != lines.end());
+                        check_logged_value(name + " = " + std::to_string(expected));
                     });
             }
         }
@@ -2304,9 +2356,7 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_debug) {
             }
             check_server_precedence("", environment, args, [&](const auto& serverEnv, const auto&) {
                 BOOST_CHECK_EQUAL(serverEnv.debug(), c.expected);
-                const auto lines = last_startup_lines();
-                const auto entry = std::string("  ECF_DEBUG_SERVER = ") + (c.expected ? "enabled" : "disabled");
-                BOOST_CHECK(std::find(lines.begin(), lines.end(), entry) != lines.end());
+                check_logged_value(std::string("ECF_DEBUG_SERVER = ") + (c.expected ? "enabled" : "disabled"));
             });
         }
     }
@@ -2800,6 +2850,93 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_not_a_regular_file) {
         return message.find("Configuration file '" + file + "' is not a readable regular file") != std::string::npos;
     });
     BOOST_CHECK(!Log::instance());
+}
+
+///
+/// @brief Verifies that the runtime configuration lists its sources, naming each configuration file by absolute path.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_sources) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::string> args{"ServerEnvironment", "--port=3144"};
+
+    // Neither file
+    {
+        auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+        IsolatedServerStartup isolation;
+        fs::current_path(directory.path());
+        const auto startup = fs::current_path();
+
+        ServerEnvironment serverEnv(args);
+        BOOST_REQUIRE_MESSAGE(Log::instance(), "Log singleton not created");
+        const std::vector<std::string> expected{
+            "defaults = loaded",
+            "env.cfg (" + (startup / "server_environment.cfg").string() + ") = absent",
+            "ecf.cfg (" + (startup / configuration_file("3144")).string() + ") = absent",
+            "environment = loaded",
+            "commandline = loaded"};
+        const auto actual = runtime_configuration_section("Sources:");
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+
+    // Both files
+    check_server_with_file({"ECF_CHECKINTERVAL = 100\n", "3144", configuration_document(R"("ECF_URL": "x")"), {}, args},
+                           [](const ServerEnvironment&) {
+                               const auto startup = fs::current_path();
+                               const std::vector<std::string> expected{
+                                   "defaults = loaded",
+                                   "env.cfg (" + (startup / "server_environment.cfg").string() + ") = loaded",
+                                   "ecf.cfg (" + (startup / configuration_file("3144")).string() + ") = loaded",
+                                   "environment = loaded",
+                                   "commandline = loaded"};
+                               const auto actual = runtime_configuration_section("Sources:");
+                               BOOST_CHECK_EQUAL_COLLECTIONS(
+                                   actual.begin(), actual.end(), expected.begin(), expected.end());
+                           });
+}
+
+///
+/// @brief Verifies that the runtime configuration states the origin of each value, and the value of each switch.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_origins) {
+    ECF_NAME_THIS_TEST();
+
+    WithConfigurationFile startup{
+        "ECF_CHECKINTERVAL = 100\nECF_URL = cfg/url\n",
+        "3144",
+        configuration_document(R"("ECF_URL": "file/url", "ECF_CHECKMODE": "CHECK_NEVER")", R"("ipv6": true)"),
+        {{"ECF_PRUNE_NODE_LOG", "7"}},
+        {"ServerEnvironment", "--port=3144", "--ecfinterval=11", "--dis_job_gen"}};
+    check_server_with_file(startup, [](const ServerEnvironment&) {
+        for (const auto& [key, origin] :
+             std::vector<std::pair<std::string, std::string>>{{"Host", "internal"},
+                                                              {"Port", "commandline"},
+                                                              {"Connection", "internal"},
+                                                              {"ECF_HOME", "defaults"},
+                                                              {"ECF_LOG", "defaults"},
+                                                              {"ECF_CHECKINTERVAL", "env.cfg"},
+                                                              {"ECF_CHECKMODE", "ecf.cfg"},
+                                                              {"ECF_PRUNE_NODE_LOG", "environment"},
+                                                              {"ECF_URL", "ecf.cfg"},
+                                                              {"ECF_MICRO", "defaults"},
+                                                              {"Job scheduling interval", "commandline"},
+                                                              {"Job generation", "commandline"},
+                                                              {"Checkpoint save time alarm", "internal"},
+                                                              {"--http", "defaults"},
+                                                              {"--v6", "ecf.cfg"},
+                                                              {"--dis_job_gen", "commandline"},
+                                                              {"--ssl", "defaults"}}) {
+            BOOST_CHECK_MESSAGE(logged_origin(key) == origin,
+                                "Expected '" << key << "' from " << origin << ", found " << logged_origin(key));
+        }
+
+        // The switches follow the other values, each true when given
+        const auto values = logged_values();
+        const std::vector<std::string> switches{
+            "--http = false", "--v6 = true", "--dis_job_gen = true", "--ssl = false"};
+        BOOST_REQUIRE_GE(values.size(), switches.size());
+        BOOST_CHECK_EQUAL_COLLECTIONS(values.end() - switches.size(), values.end(), switches.begin(), switches.end());
+    });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

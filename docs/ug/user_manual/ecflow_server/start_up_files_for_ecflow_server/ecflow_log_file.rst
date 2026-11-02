@@ -86,15 +86,27 @@ Each time the server starts, it writes the following lines to the log file, befo
   MSG:[12:00:00 18.10.2026]
   MSG:[12:00:00 18.10.2026] Started at 2026-Oct-18 12:00:00 universal time
   MSG:[12:00:00 18.10.2026] Ecflow version(5.20.0) git(1a2b3c4d5e6f) boost(1.92.0) compiler(gcc 14.2.0) serialisation(JSON cereal 1.3.2) openssl(3.0.13) aviso(2.4.2) Compiled on Oct 18 2026 10:00:00
-  MSG:[12:00:00 18.10.2026] Runtime Configuration
-  MSG:[12:00:00 18.10.2026]   Host = myhost
-  MSG:[12:00:00 18.10.2026]   Port = 3141
-  MSG:[12:00:00 18.10.2026]   Connection = TCP/IP v4 with SSL
-  MSG:[12:00:00 18.10.2026]   SSL certificate = /home/user/.ecflowrc/ssl/server.crt (shared)
-  MSG:[12:00:00 18.10.2026]   ECF_HOME = /home/user/ecflow_server
-  MSG:[12:00:00 18.10.2026]   ECF_LOG = myhost.3141.ecf.log
+  MSG:[12:00:00 18.10.2026] Runtime Configuration:
+  MSG:[12:00:00 18.10.2026]   Sources:
+  MSG:[12:00:00 18.10.2026]     defaults = loaded
+  MSG:[12:00:00 18.10.2026]     env.cfg (/path/to/ecf_home/server_environment.cfg) = absent
+  MSG:[12:00:00 18.10.2026]     ecf.cfg (/path/to/ecf_home/myhost.3141.ecf.cfg) = loaded
+  MSG:[12:00:00 18.10.2026]     environment = loaded
+  MSG:[12:00:00 18.10.2026]     commandline = loaded
+  MSG:[12:00:00 18.10.2026]   Values:
+  MSG:[12:00:00 18.10.2026]     Host = myhost @ internal
+  MSG:[12:00:00 18.10.2026]     Port = 3141 @ commandline
+  MSG:[12:00:00 18.10.2026]     Connection = TCP/IP v4 with SSL @ internal
+  MSG:[12:00:00 18.10.2026]     SSL certificate = /home/user/.ecflowrc/ssl/server.crt (shared) @ commandline
+  MSG:[12:00:00 18.10.2026]     ECF_HOME = /path/to/ecf_home @ ecf.cfg
+  MSG:[12:00:00 18.10.2026]     ECF_LOG = myhost.3141.ecf.log @ defaults
   ...
-  MSG:[12:00:00 18.10.2026]   ECF_MICRO = %
+  MSG:[12:00:00 18.10.2026]     ECF_MICRO = % @ defaults
+  ...
+  MSG:[12:00:00 18.10.2026]     --http = false @ defaults
+  MSG:[12:00:00 18.10.2026]     --v6 = false @ defaults
+  MSG:[12:00:00 18.10.2026]     --dis_job_gen = false @ defaults
+  MSG:[12:00:00 18.10.2026]     --ssl = true @ commandline
 
 The lines are:
 
@@ -102,8 +114,11 @@ The lines are:
   without a newline;
 - the start time, in universal time;
 - the version line, which identifies the build of the server, in the format shown by ``--version``;
-- the runtime configuration block, which lists the settings of the server, one indented
-  ``Key = value`` entry per line.
+- the runtime configuration block, with two sections:
+
+  - ``Sources``: the sources of the configuration, in increasing precedence, each ``loaded`` or ``absent``;
+    each configuration file is named by its absolute path;
+  - ``Values``: the settings of the server, one ``Key = value @ source`` entry per line.
 
 Other commands show a version line in the same format, each for a different program:
 
@@ -137,7 +152,18 @@ The version line names:
    * - ``Compiled on``
      - the date and time of the compilation
 
-The runtime configuration block lists, in order:
+The sources are:
+
+- ``defaults``:      the built-in defaults;
+- ``env.cfg``:       the file ``server_environment.cfg``;
+- ``ecf.cfg``:       the file ``<host>.<port>.ecf.cfg``;
+- ``environment``:   the environment variables;
+- ``commandline``:   the command-line options.
+
+The source of each value is one of the sources above, or ``internal`` for a value determined by the server itself,
+e.g. the host name.
+
+The values section lists, in order:
 
 .. list-table::
    :header-rows: 1
@@ -164,6 +190,8 @@ The runtime configuration block lists, in order:
    * - ``Job scheduling interval``, ``Job generation``, ``Checkpoint save time alarm``
      - the job scheduling interval, whether jobs are generated, and the time (in seconds) above which saving the
        checkpoint logs a warning and sets the ``late`` flag of the server
+   * - ``--http``, ``--v6``, ``--dis_job_gen``, ``--ssl``
+     - the command-line switches, each ``true`` when in effect, whichever source sets it
 
 Notes:
 

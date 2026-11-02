@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include <boost/asio.hpp>
 #include <boost/scope_exit.hpp>
@@ -83,6 +86,27 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_alone) {
     BOOST_CHECK_EQUAL(server.find_variable("ECF_LOG"), (startup.path() / "home" / "server.log").string());
     BOOST_CHECK_EQUAL(server.find_variable("ECF_URL"), "file/url");
     BOOST_CHECK(fs::is_regular_file(startup.path() / "home" / "server.log"));
+    BOOST_REQUIRE_EQUAL(process.terminate(), 0);
+
+    // The log names the file loaded, and the file as the source of its values
+    const auto directory = fs::canonical(startup.path());
+    const auto file      = directory / configuration_file(directory, port.value()).filename();
+    std::vector<std::string> lines;
+    std::istringstream log(ecf::test::foolproof::read_file_bytes(startup.path() / "home" / "server.log"));
+    for (std::string line; std::getline(log, line);) {
+        const auto delimiter = line.find("] ");
+        lines.push_back(delimiter == std::string::npos ? line : line.substr(delimiter + 2));
+    }
+    for (const auto& expected_line :
+         std::vector<std::string>{"    env.cfg (" + (directory / "server_environment.cfg").string() + ") = absent",
+                                  "    ecf.cfg (" + file.string() + ") = loaded",
+                                  "    ECF_HOME = " + (startup.path() / "home").string() + " @ ecf.cfg",
+                                  "    ECF_URL = file/url @ ecf.cfg",
+                                  "    Port = " + std::to_string(port.value()) + " @ commandline",
+                                  "    --http = false @ defaults"}) {
+        BOOST_CHECK_MESSAGE(std::find(lines.begin(), lines.end(), expected_line) != lines.end(),
+                            "Missing expected log entry: " << expected_line);
+    }
 }
 
 ///

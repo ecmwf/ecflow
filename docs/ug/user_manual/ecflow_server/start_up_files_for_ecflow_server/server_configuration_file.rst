@@ -26,6 +26,9 @@ For example, a server started with ``--port=3142`` on the machine ``machine1`` r
 The file is optional; without it, the server is configured as described in :ref:`server_configuration`,
 without this origin. The file is read once, at start-up; a change takes effect at the next start of the server.
 
+The start-up lines of the :ref:`log file <ecflow_log_file>` state whether the file was loaded, and which settings
+it provides.
+
 Precedence
 ==========
 

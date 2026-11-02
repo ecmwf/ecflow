@@ -12,7 +12,9 @@
 /// with the log file name from the server environment
 ///
 
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/asio.hpp>
@@ -238,14 +240,16 @@ private:
     /// the configuration file, `<host>.<port>.ecf.cfg`, looked for in the current directory. When the file exists,
     /// its layer is placed above `server_environment.cfg`, and below the environment.
     ///
+    /// The sources, each loaded or absent, the origin of the effective value of each setting, and the value of each
+    /// switch are recorded, to be logged once the log exists.
+    ///
     /// @param[in] options The parsed command line
     /// @param[in] path_to_config_file The path of `server_environment.cfg`
     /// @return The configuration, every value of which is valid.
     /// @throws ecf::cfg::ConfigurationError if an origin is refused, or the configuration file defines a host or a
     /// port other than those of its name.
     ///
-    ecf::cfg::Configuration read_configuration(const ServerOptions& options,
-                                               const std::string& path_to_config_file) const;
+    ecf::cfg::Configuration read_configuration(const ServerOptions& options, const std::string& path_to_config_file);
 
 #ifdef ECF_OPENSSL
     ///
@@ -319,6 +323,9 @@ private:
     std::string ecf_cmd_;
     std::string ecf_micro_;
     std::string ecf_white_list_file_;
+    std::vector<std::pair<std::string, std::string>> configuration_sources_; ///< Source, "loaded" or "absent"
+    std::map<std::string, std::string> configuration_origins_;               ///< Origin of each value, by name
+    std::vector<std::pair<std::string, bool>> configuration_switches_;       ///< Value of each switch, e.g. --http
     mutable WhiteListFile white_list_file_;
 
     mutable ecf::AuthenticationService authentication_service_;
