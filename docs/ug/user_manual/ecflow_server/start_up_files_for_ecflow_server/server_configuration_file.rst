@@ -10,6 +10,11 @@ The configuration file ``<host>.<port>.ecf.cfg`` configures one server, identifi
 It can provide every setting of the server, and can be used together with, or instead of,
 :ref:`server_environment.cfg`.
 
+.. important::
+
+    ``<host>.<port>.ecf.cfg`` is the preferred way to configure the server. It provides every setting in one
+    file, with typed values, and is validated strictly at start-up.
+
 Location and name
 =================
 

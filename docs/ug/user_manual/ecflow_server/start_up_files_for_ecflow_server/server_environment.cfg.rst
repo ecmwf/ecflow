@@ -6,6 +6,11 @@
 server_environment.cfg
 //////////////////////
 
+.. tip::
+
+    The preferred way to configure the server is the configuration file :ref:`server_configuration_file`, which
+    can provide every setting of the server. ``server_environment.cfg`` remains supported; consider moving its
+    settings to ``<host>.<port>.ecf.cfg``.
 
 The file server_environment.cfg can be found in the ecFlow/Server
 folder. Modifying it changes the default environment variables
