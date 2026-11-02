@@ -1440,6 +1440,94 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_change_aviso_sets_and_clears_repeat) {
     BOOST_CHECK(!t->avisos()[0].repeat());
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_change_aviso_repeat_of_active_task_applies_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+
+    const std::string listener = R"(--listener '{ "event": "mars" }')";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", listener)));
+    defs.beginAll();
+
+    // The option set while the task runs is evaluated when the task completes: the task is queued again
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    TestHelper::invokeRequest(&defs,
+                              Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", listener + " --repeat")));
+    t->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+
+    // The option cleared while the task runs is evaluated when the task completes: the task stays complete
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", listener)));
+    t->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(test_alter_cmd_change_aviso_repeat_of_complete_task_keeps_it_complete) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+
+    const std::string listener = R"(--listener '{ "event": "mars" }')";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", listener)));
+    defs.beginAll();
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+    BOOST_REQUIRE_EQUAL(t->state(), NState::COMPLETE);
+
+    // As for a cron, the option is evaluated when the task becomes complete; a complete task stays complete
+    TestHelper::invokeRequest(&defs,
+                              Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", listener + " --repeat")));
+    BOOST_CHECK(t->avisos()[0].repeat());
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+
+    // The option applies at the next completion, once the task is requeued
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new RequeueNodeCmd(t->absNodePath())));
+    BOOST_REQUIRE_EQUAL(t->state(), NState::QUEUED);
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(test_alter_cmd_reload_aviso_keeps_repeat_and_revision) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+
+    const std::string options = R"(--listener '{ "event": "mars" }' --repeat --revision 7)";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", options)));
+    defs.beginAll();
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", "reload")));
+    BOOST_CHECK(t->avisos()[0].repeat());
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 7u);
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

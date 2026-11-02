@@ -132,6 +132,7 @@
         " * Updating an aviso attribute replaces it, starting from the revision given by --revision (0 when",
         "   omitted, i.e. only the notifications published after the update are considered). To continue",
         "   after the last notification consumed, give the current revision of the attribute with --revision.",
+        "   Options not given take their defaults (e.g. --collapse and --repeat are cleared).",
         "",
         " * When changing limit_value, the value (arg4) is expected to be an integer, or the special",
         "   value \"reset\". The special value \"reset\" re-synchronises the limit with the nodes that are",

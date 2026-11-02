@@ -24,6 +24,15 @@ Consider combining the cron attribute together with event and complete attribute
 
 If the task associated with a cron aborts, the :term:`ecflow_server` will not schedule it again.
 
+A node with a :term:`cron` is requeued at the moment it becomes complete, i.e. when:
+
+  - its job completes, including a job started by an interactive run;
+  - it is forced complete (the next time slot of the cron is then skipped).
+
+A node that is already complete (e.g. a node with :code:`defstatus complete`) is not requeued by its cron, and
+stays complete until it is requeued explicitly (e.g. with the Requeue command). A task with an :term:`aviso`
+attribute and the option :code:`--repeat` follows the same rule (see :ref:`text_based_def_aviso_release`).
+
 A :term:`cron` can be parameterised as follows:
 
 .. code-block:: text

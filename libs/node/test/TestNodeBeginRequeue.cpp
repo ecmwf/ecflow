@@ -69,6 +69,22 @@ BOOST_AUTO_TEST_CASE(test_node_begin_requeue_hybrid) {
     BOOST_CHECK_MESSAGE(t3->state() == NState::COMPLETE, "Expected node to be complete");
 }
 
+BOOST_AUTO_TEST_CASE(test_node_already_complete_is_not_requeued_by_its_cron) {
+    ECF_NAME_THIS_TEST();
+
+    defs_ptr the_defs = Defs::create();
+    suite_ptr suite   = the_defs->add_suite("s");
+    task_ptr t        = suite->add_task("t");
+    t->addCron(ecf::CronAttr::create("00:00 23:59 00:01"));
+    t->addDefStatus(DState::COMPLETE);
+
+    // The cron requeues the node only when it becomes complete; a node complete from the start stays complete
+    the_defs->beginAll();
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+    the_defs->requeue();
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
