@@ -161,6 +161,7 @@ class DefsTraverser:
                 + " --auth "
                 + aviso.auth()
                 + (" --collapse" if aviso.collapse() else "")
+                + (" --repeat" if aviso.repeat() else "")
             )
         for mirror in node.mirrors:
             self._writeln(

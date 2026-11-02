@@ -23,6 +23,7 @@ Constructors::
    AvisoAttr(name, listener, url)
    AvisoAttr(name, listener, url, auth=auth)
    AvisoAttr(name, listener, url, auth=auth, collapse=True)
+   AvisoAttr(name, listener, url, auth=auth, repeat=True)
     with:
       string name: The Aviso attribute name
       string listener: The Aviso listener configuration (in JSON format)
@@ -30,6 +31,8 @@ Constructors::
       string auth: The path to the Aviso credentials file (keyword only)
       bool collapse: Whether a release consumes all the notifications received, instead of exactly
                      one (keyword only, default False)
+      bool repeat: Whether the task is requeued automatically each time it completes, and waits for
+                   the next notification (keyword only, default False)
 
 Note: Default values, based on %ECF_AVISO_...% variables, are used when
 the parameters url and auth are not provided
@@ -77,6 +80,12 @@ Returns the Aviso listener configuration
    :module: ecflow
 
 Returns the name of the Aviso attribute
+
+
+.. py:method:: AvisoAttr.repeat(self: ecflow.AvisoAttr) -> bool
+   :module: ecflow
+
+Returns whether the task is requeued automatically each time it completes
 
 
 .. py:method:: AvisoAttr.url(self: ecflow.AvisoAttr) -> str

@@ -105,6 +105,18 @@ def test_create_aviso_with_collapse():
     assert content.count("--collapse") == 1
 
 
+def test_create_aviso_with_repeat():
+    defs = ecf.Defs()
+    suite = defs.add_suite("s")
+    suite.add_task(ecf.Task("a", ecf.AvisoAttr("a", '{ "event": "mars" }', repeat=True)))
+    suite.add_task(ecf.Task("b", ecf.AvisoAttr("b", '{ "event": "mars" }')))
+
+    content = _to_str(defs)
+
+    # The option is printed only for the attribute that sets it
+    assert content.count("--repeat") == 1
+
+
 def test_aviso_generated_variables_are_defined():
     task = ecf.Task("t", ecf.AvisoAttr("a", '{ "event": "mars" }'))
 

@@ -14461,6 +14461,7 @@ class TestAvisoAttr:
         AvisoAttr(name, listener, url)
         AvisoAttr(name, listener, url, auth=auth)        -- auth is keyword-only
         AvisoAttr(name, listener, url, auth=auth, collapse=True)  -- collapse is keyword-only
+        AvisoAttr(name, listener, url, auth=auth, repeat=True)    -- repeat is keyword-only
 
         Default values:
             url     = '%ECF_AVISO_URL%'
@@ -14477,9 +14478,11 @@ class TestAvisoAttr:
         url()       -> str   -- URL of the Aviso server
         auth()      -> str   -- path to authentication credentials
         collapse()  -> bool  -- whether a release consumes all the notifications received
+        repeat()    -> bool  -- whether the task is requeued automatically each time it completes
 
     Operators
-        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, revision=0, auth=A, reason='', collapse=false)'
+        __str__   -- 'AvisoAttr(name=N, listener=L, url=U, revision=0, auth=A, reason='', collapse=false,
+                      repeat=false)'
         __copy__  -- copy.copy() returns a value-equal, identity-distinct instance
         __eq__    -- value-based equality (all fields compared)
         __ne__    -- implicit complement of __eq__
@@ -14561,6 +14564,27 @@ class TestAvisoAttr:
     def test_eq_different_collapse(self):
         """Different collapse makes attributes not equal."""
         assert ecf.AvisoAttr("av", "l", collapse=True) != ecf.AvisoAttr("av", "l")
+
+    def test_ctor_repeat_defaults_to_false(self):
+        """AvisoAttr leaves the task complete on completion by default."""
+        assert ecf.AvisoAttr("av", "l").repeat() is False
+
+    def test_ctor_repeat_keyword_stores_repeat(self):
+        """AvisoAttr(name, listener, repeat=True) stores the repeat option."""
+        assert ecf.AvisoAttr("av", "l", repeat=True).repeat() is True
+
+    def test_ctor_repeat_positional_raises(self):
+        """repeat cannot be given by position."""
+        with pytest.raises(TypeError):
+            ecf.AvisoAttr("av", "l", "http://url", "/auth", False, True)
+
+    def test_eq_different_repeat(self):
+        """Different repeat makes attributes not equal."""
+        assert ecf.AvisoAttr("av", "l", repeat=True) != ecf.AvisoAttr("av", "l")
+
+    def test_str_contains_repeat(self):
+        """str() includes the repeat option."""
+        assert "repeat=true" in str(ecf.AvisoAttr("av", "l", repeat=True))
 
     def test_ctor_auth_positional_raises(self):
         """auth cannot be given by position, so that an Aviso v1 schema is never taken as auth."""
@@ -14664,7 +14688,7 @@ class TestAvisoAttr:
         expected = (
             'AvisoAttr(name=av, listener=\'{"event":"x"}\', '
             "url=%ECF_AVISO_URL%, revision=0, "
-            "auth=%ECF_AVISO_AUTH%, reason='', collapse=false)"
+            "auth=%ECF_AVISO_AUTH%, reason='', collapse=false, repeat=false)"
         )
         assert str(a) == expected
 

@@ -445,6 +445,8 @@ std::string to_python_string(const AvisoAttr& aviso) {
     s += aviso.reason();
     s += ", collapse=";
     s += aviso.collapse() ? "true" : "false";
+    s += ", repeat=";
+    s += aviso.repeat() ? "true" : "false";
     s += ")";
     return s;
 }
