@@ -52,6 +52,7 @@ jobs:
       - uses: ecmwf/ci-infrastructure/actions/pre-commit@main
 
   resolve:
+    name: resolve + wait-build
     needs: ci-approval
     runs-on: ubuntu-latest
     outputs:
@@ -72,6 +73,10 @@ jobs:
           token: ${{ steps.mint.outputs.token }}
           client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
           app-private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
+      - uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
+        with:
+          matrix: ${{ steps.r.outputs.matrix-build }}
+          token: ${{ steps.mint.outputs.token }}
 
   hpc-gate:
     needs: ci-approval
@@ -83,21 +88,6 @@ jobs:
     steps:
       - id: gate
         uses: ecmwf/ci-infrastructure/actions/hpc-gate@main
-
-  wait-build:
-    needs: [ci-approval, resolve]
-    runs-on: ubuntu-latest
-    steps:
-      - id: mint
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-      - uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
-        with:
-          matrix: ${{ needs.resolve.outputs.build-matrix }}
-          token: ${{ steps.mint.outputs.token }}
 
   wait-build-hpc:
     needs: [ci-approval, resolve, hpc-gate]
@@ -116,7 +106,7 @@ jobs:
           token: ${{ steps.mint.outputs.token }}
 
   build:
-    needs: [ci-approval, pre-commit, resolve, wait-build]
+    needs: [ci-approval, pre-commit, resolve]
     name: ${{ matrix.name || matrix.platform }}
     runs-on: ${{ matrix['runs-on'] }}
     container:
@@ -279,7 +269,7 @@ jobs:
   ci-result:
     name: collect results
     if: always()
-    needs: [ci-approval, hpc-gate, pre-commit, resolve, wait-build, build]
+    needs: [ci-approval, hpc-gate, pre-commit, resolve, build]
     runs-on: ubuntu-latest
     permissions:
       statuses: write
