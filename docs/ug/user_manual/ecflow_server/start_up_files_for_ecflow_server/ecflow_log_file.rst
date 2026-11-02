@@ -207,3 +207,60 @@ Notes:
   the rest of the value.
 - The masking is a best effort: a secret not given as the value of a credential name or option is logged as it
   is.
+
+Authentication and authorisation lines
+--------------------------------------
+
+Once the password files and the permissions are loaded at start-up, the server writes the authentication and the
+authorisation in force to the log file:
+
+.. code-block:: text
+
+  MSG:[12:00:00 18.10.2026] Authentication:
+  MSG:[12:00:00 18.10.2026]   ECF_PASSWD (/path/to/ecf_home/myhost.3141.ecf.passwd) = loaded
+  MSG:[12:00:00 18.10.2026]   ECF_CUSTOM_PASSWD (/path/to/ecf_home/myhost.3141.ecf.custom_passwd) = absent
+  MSG:[12:00:00 18.10.2026]   Users:
+  MSG:[12:00:00 18.10.2026]     alice = ECF_PASSWD
+  MSG:[12:00:00 18.10.2026]     bob = ECF_PASSWD
+  MSG:[12:00:00 18.10.2026] Authorisation:
+  MSG:[12:00:00 18.10.2026]   Mode = whitelist
+  MSG:[12:00:00 18.10.2026]   ECF_LISTS (/path/to/ecf_home/myhost.3141.ecf.lists) = loaded
+  MSG:[12:00:00 18.10.2026]   Users:
+  MSG:[12:00:00 18.10.2026]     * = read /open
+  MSG:[12:00:00 18.10.2026]     alice = read/write /a,/b; read /c
+  MSG:[12:00:00 18.10.2026]     bob = read
+  MSG:[12:00:00 18.10.2026]     ecflow = read/write (server user)
+
+Each block is written again after a successful reload:
+
+- ``Authentication``: of a password file, with ``ecflow_client --reloadpasswdfile`` or
+  ``--reloadcustompasswdfile``;
+- ``Authorisation``: of the :ref:`whitelist <ecflow_white_list_file>`, with ``ecflow_client --reloadwsfile``.
+
+The authentication block lists:
+
+- ``ECF_PASSWD``, ``ECF_CUSTOM_PASSWD``: the password files, by absolute path, ``loaded`` or ``absent``; without a
+  file, no password is required;
+- ``Users``: only with a loaded file, each user listed, with the files listing it; passwords are never logged.
+
+The authorisation block lists:
+
+- ``Mode``: the permissions applied:
+
+  - ``whitelist``:   those of the whitelist file;
+  - ``nodes``:       those of the nodes, given by ``ECF_PERMISSIONS``; without a whitelist file, and where no node
+    defines permissions, all users have read/write access.
+
+- ``ECF_LISTS``: the whitelist file, by absolute path, ``loaded`` or ``absent``.
+- ``Users``: only with a whitelist, the access of each user, one ``<user> = <access>`` entry per user, ordered by
+  name.
+
+Notes:
+
+- The access is ``read/write`` or ``read``, each optionally followed by the suites it is limited to.
+- ``*`` stands for all users.
+- ``(server user)`` marks the user running the server, granted read/write access when the whitelist does not grant
+  it, so that the whitelist can always be reloaded.
+- A whitelist without users grants read/write access to all users: ``* = read/write (no users specified)``.
+- With ``--debug``, the start-up lines, from the start time on, and the authentication and authorisation blocks are
+  also written to the standard output, with the same content.

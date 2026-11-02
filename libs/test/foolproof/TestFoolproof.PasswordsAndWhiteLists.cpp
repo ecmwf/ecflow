@@ -3,11 +3,40 @@
 
 #include <fstream>
 #include <regex>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
+
+namespace {
+
+///
+/// @brief Checks that the server log in a directory reports a password file as loaded.
+///
+/// @param[in] directory The directory holding the server log, a file with the extension `.log`
+/// @param[in] name The name of the password file setting, e.g. "ECF_PASSWD"
+/// @param[in] file The name of the password file, relative to the server home
+/// @return True when an authentication entry reports the file as loaded.
+///
+bool logged_as_loaded(const fs::path& directory, const std::string& name, const std::string& file) {
+    for (const auto& entry : fs::directory_iterator(directory)) {
+        if (entry.path().extension() != ".log") {
+            continue;
+        }
+        std::ifstream log(entry.path());
+        for (std::string line; std::getline(log, line);) {
+            if (line.find("  " + name + " (") != std::string::npos &&
+                line.find("/" + file + ") = loaded") != std::string::npos) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -875,10 +904,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_using_just_defaults) {
 
     ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
 
-    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", actual_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", actual_custom_passwd));
 }
 
 BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_default_value) {
@@ -939,10 +966,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_default_
     auto s          = server.get();
     auto [out, err] = s.shutdown();
 
-    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", actual_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", actual_custom_passwd));
 }
 
 BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_default_value) {
@@ -1008,10 +1033,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_default_val
     auto s          = server.get();
     auto [out, err] = s.shutdown();
 
-    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", actual_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", actual_custom_passwd));
 }
 
 BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_specific_value) {
@@ -1072,10 +1095,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_specific
 
     ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
 
-    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", specific_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", specific_custom_passwd));
 }
 
 BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_value) {
@@ -1139,10 +1160,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
     auto s          = server.get();
     auto [out, err] = s.shutdown();
 
-    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", specific_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", specific_custom_passwd));
 }
 
 BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_value_and_then_overriden_by_envvar) {
@@ -1215,10 +1234,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
 
     ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
 
-    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
-    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_PASSWD", specific_passwd));
+    BOOST_CHECK(logged_as_loaded(cwd.path(), "ECF_CUSTOM_PASSWD", specific_custom_passwd));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

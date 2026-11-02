@@ -84,9 +84,6 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
     Ecf::set_server(true);
 
     init(cl, path_to_config_file);
-    if (debug_) {
-        std::cout << dump() << "\n";
-    }
 }
 
 void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_config_file) {
@@ -180,39 +177,16 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
 
     // Init log file:
     LOG(Log::MSG, ""); // previous log may not end in newline
-    LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
-    LOG(Log::MSG, Version::description());
 
-    // Runtime configuration: the sources read, then the connection, locations, scheduling and check-pointing
-    // settings, commands and switches of the server, one entry per line, each with the source of its value. Commands
-    // and URLs are set by the operator, and may hold credentials, which are masked.
-    LOG(Log::MSG, "Runtime Configuration:");
-    LOG(Log::MSG, "  Sources:");
-    for (const auto& source : configuration_sources_) {
-        LOG(Log::MSG, "    " << source.first << " = " << source.second);
-    }
-
-    // A value derived by the server, rather than read from a source, is internal; it is given no name
-    auto origin = [this](const std::string& name) {
-        const auto found = configuration_origins_.find(name);
-        return found == configuration_origins_.end() ? std::string("internal") : found->second;
-    };
-    auto entry = [&origin](const std::string& key, const std::string& value, const std::string& name) {
-        LOG(Log::MSG, "    " << key << " = " << value << " @ " << origin(name));
-    };
-
-    LOG(Log::MSG, "  Values:");
-    entry("Host", hostPort().first, {});
-    entry("Port", hostPort().second, "ECF_PORT");
-    entry("Connection", the_connection(protocol_, tcp_protocol_), {});
+    // The start time, version and runtime configuration, written to the log, and to the standard output when
+    // debugging
+    report(
+        {"Started at " + to_simple_string(Calendar::second_clock_time()) + " universal time", Version::description()});
+    report(runtime_configuration_lines());
 
 #ifdef ECF_OPENSSL
-    // Record the certificate in use, and warn when it is not the one requested first
+    // Warn when the certificate in use is not the one requested first
     if (ssl_.enabled()) {
-        entry("SSL certificate",
-              ssl_.certificate()->crt_file().string() + " (" +
-                  (ssl_.certificate()->shared() ? "shared" : "server-specific") + ")",
-              configuration_origins_.count("ECF_SSL") ? "ECF_SSL" : "--ssl");
         if (const auto& missing = ssl_.fallback_from()) {
             LOG(Log::WAR,
                 "SSL certificate '" << missing->string() << "' not found; using the "
@@ -221,33 +195,6 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         }
     }
 #endif
-
-    entry("ECF_HOME", ecfHome_, "ECF_HOME");
-    entry("ECF_LOG", Log::instance()->path(), "ECF_LOG");
-    entry("ECF_CHECK", ecf_checkpt_file_, "ECF_CHECK");
-    entry("ECF_CHECKOLD", ecf_backup_checkpt_file_, "ECF_CHECKOLD");
-    entry("ECF_LISTS", ecf_white_list_file_, "ECF_LISTS");
-    entry("ECF_PASSWD", authentication_service_.passwd_file(), "ECF_PASSWD");
-    entry("ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file(), "ECF_CUSTOM_PASSWD");
-    entry("ECF_CHECKINTERVAL", std::to_string(checkPtInterval_), "ECF_CHECKINTERVAL");
-    entry("ECF_CHECKMODE", the_check_mode(checkMode_), "ECF_CHECKMODE");
-    entry("ECF_PRUNE_NODE_LOG", std::to_string(ecf_prune_node_log_), "ECF_PRUNE_NODE_LOG");
-    entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold()), "ECF_TASK_THRESHOLD");
-    entry("ECF_DEBUG_SERVER", debug_ ? "enabled" : "disabled", "ECF_DEBUG_SERVER");
-    entry("ECF_JOB_CMD", ecf::mask_credentials(ecf_cmd_), "ECF_JOB_CMD");
-    entry("ECF_KILL_CMD", ecf::mask_credentials(killCmd_), "ECF_KILL_CMD");
-    entry("ECF_STATUS_CMD", ecf::mask_credentials(statusCmd_), "ECF_STATUS_CMD");
-    entry("ECF_CHECK_CMD", ecf::mask_credentials(checkCmd_), "ECF_CHECK_CMD");
-    entry("ECF_URL_CMD", ecf::mask_credentials(urlCmd_), "ECF_URL_CMD");
-    entry("ECF_URL_BASE", ecf::mask_credentials(urlBase_), "ECF_URL_BASE");
-    entry("ECF_URL", ecf::mask_credentials(url_), "ECF_URL");
-    entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_), "ECF_MICRODEF");
-    entry("Job scheduling interval", std::to_string(submitJobsInterval_), "ECF_INTERVAL");
-    entry("Job generation", jobGeneration_ ? "enabled" : "disabled", "--dis_job_gen");
-    entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_), {});
-    for (const auto& [name, value] : configuration_switches_) {
-        entry(name, value ? "true" : "false", name);
-    }
 }
 
 ServerEnvironment::~ServerEnvironment() {
@@ -273,22 +220,22 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
+    // The permissions of the nodes apply, unless replaced by those of a whitelist file
     if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
         authorisation_service_ = result.value();
-        std::cout << "Loaded server permissions based on Nodes\n";
     }
 
     // Check that Authentication information is valid
     if (auto status = authentication_service_.valid(serverHost_, the_port(), errorMsg); !status) {
         return false;
     }
+    access_loaded_ = true;
+    log_authentication();
 
     // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
     // user is free to access the server.
-    if (ecf_white_list_file_.empty()) {
-        return true;
-    }
-    if (!fs::exists(ecf_white_list_file_)) {
+    if (ecf_white_list_file_.empty() || !fs::exists(ecf_white_list_file_)) {
+        log_authorisation();
         return true;
     }
 
@@ -380,10 +327,6 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     WhiteListFile replacement;
     std::string parse_error;
     if (replacement.load(ecf_white_list_file_, parse_error)) {
-        std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
-        if (debug()) {
-            std::cout << replacement.dump_valid_users() << "\n";
-        }
         // If the user accidentally removes the server/user from whitelist,
         // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
@@ -394,13 +337,120 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
         // from a whitelist cannot fail
         white_list_file_.swap(replacement);
         authorisation_service_ = AuthorisationService::load_permissions_from_whitelist(white_list_file_).value();
-        std::cout << "Loaded server permissions based on Whitelist file\n";
+        log_authorisation();
         return true;
     }
     else {
         errorMsg += "Could not load ECF_LISTS file '" + ecf_white_list_file_ + "': " + parse_error;
     }
     return false;
+}
+
+void ServerEnvironment::log_authentication() const {
+    report(authentication_lines());
+}
+
+void ServerEnvironment::log_authorisation() const {
+    report(authorisation_lines());
+}
+
+std::vector<std::string> ServerEnvironment::authentication_lines() const {
+    std::vector<std::string> lines{"Authentication:"};
+    const auto files = authentication_service_.describe();
+    lines.insert(lines.end(), files.begin(), files.end());
+    return lines;
+}
+
+std::vector<std::string> ServerEnvironment::authorisation_lines() const {
+    // The whitelist, once loaded, replaces the permissions of the nodes
+    const bool whitelist = !white_list_file_.path().empty();
+
+    std::vector<std::string> lines{"Authorisation:", std::string("  Mode = ") + (whitelist ? "whitelist" : "nodes")};
+    if (ecf_white_list_file_.empty()) {
+        lines.emplace_back("  ECF_LISTS = not set");
+    }
+    else {
+        lines.push_back("  ECF_LISTS (" + fs::absolute(ecf_white_list_file_).lexically_normal().string() +
+                        ") = " + (whitelist ? "loaded" : "absent"));
+    }
+    if (whitelist) {
+        lines.emplace_back("  Users:");
+        for (const auto& rule : white_list_file_.access_rules()) {
+            lines.push_back("    " + rule);
+        }
+    }
+    return lines;
+}
+
+void ServerEnvironment::report(const std::vector<std::string>& lines) const {
+    for (const auto& line : lines) {
+        LOG(Log::MSG, line);
+        if (debug_) {
+            std::cout << line << "\n";
+        }
+    }
+}
+
+std::vector<std::string> ServerEnvironment::runtime_configuration_lines() const {
+    // The sources read, then the connection, locations, scheduling and check-pointing
+    // settings, commands and switches of the server, one entry per line, each with the source of its value. Commands
+    // and URLs are set by the operator, and may hold credentials, which are masked.
+    std::vector<std::string> lines{"Runtime Configuration:", "  Sources:"};
+    for (const auto& source : configuration_sources_) {
+        lines.push_back("    " + source.first + " = " + source.second);
+    }
+
+    // A value derived by the server, rather than read from a source, is internal; it is given no name
+    auto origin = [this](const std::string& name) {
+        const auto found = configuration_origins_.find(name);
+        return found == configuration_origins_.end() ? std::string("internal") : found->second;
+    };
+    auto entry = [&lines, &origin](const std::string& key, const std::string& value, const std::string& name) {
+        lines.push_back("    " + key + " = " + value + " @ " + origin(name));
+    };
+
+    lines.emplace_back("  Values:");
+    entry("Host", hostPort().first, {});
+    entry("Port", hostPort().second, "ECF_PORT");
+    entry("Connection", the_connection(protocol_, tcp_protocol_), {});
+
+#ifdef ECF_OPENSSL
+    // Record the certificate in use
+    if (ssl_.enabled()) {
+        entry("SSL certificate",
+              ssl_.certificate()->crt_file().string() + " (" +
+                  (ssl_.certificate()->shared() ? "shared" : "server-specific") + ")",
+              configuration_origins_.count("ECF_SSL") ? "ECF_SSL" : "--ssl");
+    }
+#endif
+
+    entry("ECF_HOME", ecfHome_, "ECF_HOME");
+    entry("ECF_LOG", Log::instance()->path(), "ECF_LOG");
+    entry("ECF_CHECK", ecf_checkpt_file_, "ECF_CHECK");
+    entry("ECF_CHECKOLD", ecf_backup_checkpt_file_, "ECF_CHECKOLD");
+    entry("ECF_LISTS", ecf_white_list_file_, "ECF_LISTS");
+    entry("ECF_PASSWD", authentication_service_.passwd_file(), "ECF_PASSWD");
+    entry("ECF_CUSTOM_PASSWD", authentication_service_.custom_passwd_file(), "ECF_CUSTOM_PASSWD");
+    entry("ECF_CHECKINTERVAL", std::to_string(checkPtInterval_), "ECF_CHECKINTERVAL");
+    entry("ECF_CHECKMODE", the_check_mode(checkMode_), "ECF_CHECKMODE");
+    entry("ECF_PRUNE_NODE_LOG", std::to_string(ecf_prune_node_log_), "ECF_PRUNE_NODE_LOG");
+    entry("ECF_TASK_THRESHOLD", std::to_string(JobProfiler::task_threshold()), "ECF_TASK_THRESHOLD");
+    entry("ECF_DEBUG_SERVER", debug_ ? "enabled" : "disabled", "ECF_DEBUG_SERVER");
+    entry("ECF_JOB_CMD", ecf::mask_credentials(ecf_cmd_), "ECF_JOB_CMD");
+    entry("ECF_KILL_CMD", ecf::mask_credentials(killCmd_), "ECF_KILL_CMD");
+    entry("ECF_STATUS_CMD", ecf::mask_credentials(statusCmd_), "ECF_STATUS_CMD");
+    entry("ECF_CHECK_CMD", ecf::mask_credentials(checkCmd_), "ECF_CHECK_CMD");
+    entry("ECF_URL_CMD", ecf::mask_credentials(urlCmd_), "ECF_URL_CMD");
+    entry("ECF_URL_BASE", ecf::mask_credentials(urlBase_), "ECF_URL_BASE");
+    entry("ECF_URL", ecf::mask_credentials(url_), "ECF_URL");
+    entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_), "ECF_MICRODEF");
+    entry("Job scheduling interval", std::to_string(submitJobsInterval_), "ECF_INTERVAL");
+    entry("Job generation", jobGeneration_ ? "enabled" : "disabled", "--dis_job_gen");
+    entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_), {});
+    for (const auto& [name, value] : configuration_switches_) {
+        entry(name, value ? "true" : "false", name);
+    }
+    return lines;
 }
 
 // ============================================================================================
@@ -591,42 +641,18 @@ std::string ServerEnvironment::check_mode_str() const {
 }
 
 std::string ServerEnvironment::dump() const {
-    std::ostringstream ss;
-    ss << "ECF_HOME = '" << ecfHome_ << "'\n";
-    ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
-    ss << "ECF_PORT = '" << serverPort_ << "'\n";
-    ss << "ECF_CHECK = '" << ecf_checkpt_file_ << "'\n";
-    ss << "ECF_CHECKOLD = '" << ecf_backup_checkpt_file_ << "'\n";
-    ss << "ECF_CHECKINTERVAL = '" << checkPtInterval_ << "'\n";
-    ss << "ECF_INTERVAL = '" << submitJobsInterval_ << "'\n";
-    ss << "ECF_CHECKMODE = '" << the_check_mode(checkMode_) << "'\n";
-    ss << "ECF_JOB_CMD = '" << ecf_cmd_ << "'\n";
-    ss << "ECF_KILL_CMD = '" << killCmd_ << "'\n";
-    ss << "ECF_STATUS_CMD = '" << statusCmd_ << "'\n";
-    ss << "ECF_CHECK_CMD = '" << checkCmd_ << "'\n";
-    ss << "ECF_URL_CMD = '" << urlCmd_ << "'\n";
-    ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
-    ss << "ECF_URL = '" << url_ << "'\n";
-    ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";
-    ss << "ECF_PRUNE_NODE_LOG = '" << ecf_prune_node_log_ << "'\n";
-    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
-    ss << "Job generation " << jobGeneration_ << "\n";
-    ss << "Server host name " << serverHost_ << "\n";
-    ss << "ECF_PASSWD = " << authentication_service_.passwd_file() << "\n";
-    ss << "ECF_CUSTOM_PASSWD = " << authentication_service_.custom_passwd_file() << "\n";
-    if (tcp_protocol_.family() == 2 /*PF_INET*/) {
-        ss << "TCP Protocol  v4 \n";
+    // The same content as the log; the authentication and authorisation, once loaded
+    auto lines = runtime_configuration_lines();
+    if (access_loaded_) {
+        for (const auto& section : {authentication_lines(), authorisation_lines()}) {
+            lines.insert(lines.end(), section.begin(), section.end());
+        }
     }
-    else if (tcp_protocol_.family() == 10 /*PF_INET6*/) {
-        ss << "TCP Protocol  v6 \n";
+    std::string text;
+    for (const auto& line : lines) {
+        text += line + "\n";
     }
-
-#ifdef ECF_OPENSSL
-    ss << "ECF_SSL = " << ssl_ << "\n";
-#endif
-
-    ss << white_list_file_.dump_valid_users();
-    return ss.str();
+    return text;
 }
 
 std::vector<std::string> ServerEnvironment::expected_variables() {

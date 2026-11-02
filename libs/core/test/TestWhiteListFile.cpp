@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/User.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
@@ -49,8 +51,8 @@ BOOST_AUTO_TEST_CASE(test_whitelist_swap_loaded_rules) {
     BOOST_CHECK(replacement.verify_write_access("alice", "/anywhere"));
     BOOST_CHECK(replacement.verify_read_access("bob", "/limited"));
     BOOST_CHECK(!replacement.verify_write_access("bob", "/limited"));
-    BOOST_CHECK(active.dump_valid_users().find(second.path().string()) != std::string::npos);
-    BOOST_CHECK(replacement.dump_valid_users().find(first.path().string()) != std::string::npos);
+    BOOST_CHECK_EQUAL(active.path(), second.path().string());
+    BOOST_CHECK_EQUAL(replacement.path(), first.path().string());
 
     active.swap(active);
     BOOST_CHECK(active.verify_write_access("carol", "/private"));
@@ -716,6 +718,103 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
     BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1", std::vector<std::string>()),
                           "Expected user to not have read/write if no paths specified\n"
                               << theFile.dump_valid_users());
+}
+
+///
+/// @brief Returns the access rules of a whitelist with the given content.
+///
+/// @param[in] content The content of the whitelist file
+/// @param[in] with_server_user Whether to grant write access to the server user, as the server does once loaded
+/// @return The rules, one per user.
+///
+std::vector<std::string> access_rules_of(const std::string& content, bool with_server_user = false) {
+    ecf::test::scaffold::WithTestFile file(ecf::test::scaffold::AutomaticTestFile{"rules.lists"}, content);
+    WhiteListFile whitelist;
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(whitelist.load(file.path().string(), error), error);
+    if (with_server_user) {
+        whitelist.allow_write_access_for_server_user();
+    }
+    return whitelist.access_rules();
+}
+
+///
+/// @brief Verifies that each user is described once, with its effective access, ordered by name.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_access_rules_one_per_user) {
+    ECF_NAME_THIS_TEST();
+
+    const auto actual = access_rules_of("4.5.0\nfoo\nmamb\n-spy\n-bar\n");
+    const std::vector<std::string> expected{"bar = read", "foo = read/write", "mamb = read/write", "spy = read"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the paths of a user are described with the access they grant.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_access_rules_with_paths) {
+    ECF_NAME_THIS_TEST();
+
+    const auto actual = access_rules_of("4.5.0\nalice /a,/b\n-alice /c\n-bob /d\ncarol /e\n-carol\n");
+    const std::vector<std::string> expected{
+        "alice = read/write /a,/b; read /c", "bob = read /d", "carol = read/write /e; read"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the rules for all users are described under `*`.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_access_rules_for_all_users) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        const auto actual = access_rules_of("4.5.0\n-*\nalice\n");
+        const std::vector<std::string> expected{"* = read", "alice = read/write"};
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+    {
+        const auto actual = access_rules_of("4.5.0\n*\n");
+        const std::vector<std::string> expected{"* = read/write"};
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+    {
+        const auto actual = access_rules_of("4.5.0\n-* /open\n");
+        const std::vector<std::string> expected{"* = read /open"};
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+}
+
+///
+/// @brief Verifies that a whitelist without users is described as granting read/write access to all users.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_access_rules_without_users) {
+    ECF_NAME_THIS_TEST();
+
+    const auto actual = access_rules_of("4.5.0\n");
+    const std::vector<std::string> expected{"* = read/write (no users specified)"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the write access granted to the server user is marked, and only when it is granted.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_access_rules_with_server_user) {
+    ECF_NAME_THIS_TEST();
+
+    const auto login = get_login_name();
+    {
+        auto actual = access_rules_of("4.5.0\n-zzz_reader\n", true);
+        std::vector<std::string> expected{login + " = read/write (server user)", "zzz_reader = read"};
+        std::sort(actual.begin(), actual.end());
+        std::sort(expected.begin(), expected.end());
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
+    {
+        // A server user listed with write access needs no addition
+        const auto actual = access_rules_of("4.5.0\n" + login + "\n", true);
+        const std::vector<std::string> expected{login + " = read/write"};
+        BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

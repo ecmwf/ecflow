@@ -5,6 +5,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Identity.hpp"
@@ -47,6 +48,16 @@ public:
     ///
     bool reload_custom_passwd_file(std::string& error);
 
+    ///
+    /// @brief Describes the password files and the users they list, without any password.
+    ///
+    /// Each file is named by its absolute path, as loaded or absent, followed by the users of the loaded files, each
+    /// with the files listing it, e.g. `mamb = ECF_PASSWD, ECF_CUSTOM_PASSWD`.
+    ///
+    /// @return The lines, indented to be placed under a title.
+    ///
+    [[nodiscard]] std::vector<std::string> describe() const;
+
 private:
     bool debug_{false};
 
@@ -55,6 +66,8 @@ private:
 
     mutable PasswdFile passwd_file_;
     mutable PasswdFile passwd_custom_file_;
+    mutable bool passwd_loaded_{false};        ///< Whether the password file was loaded
+    mutable bool passwd_custom_loaded_{false}; ///< Whether the custom password file was loaded
 };
 
 } // namespace ecf

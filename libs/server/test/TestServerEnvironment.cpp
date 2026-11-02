@@ -9,6 +9,7 @@
 #include <limits>
 #include <list>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -26,6 +27,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/User.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -177,6 +179,26 @@ void check_logged_value(const std::string& entry) {
     const auto values = logged_values();
     BOOST_CHECK_MESSAGE(std::find(values.begin(), values.end(), entry) != values.end(),
                         "Expected '" << entry << "' in the runtime configuration");
+}
+
+///
+/// @brief Returns the entries of the last block with the given title written to the log.
+///
+/// @param[in] title The title of the block, e.g. "Authorisation:"
+/// @return The lines following the last line holding the title and indented, without their first indentation level;
+/// empty when the log holds no such block.
+///
+std::vector<std::string> last_block(const std::string& title) {
+    const auto startup = last_startup_lines();
+    const auto found   = std::find(startup.rbegin(), startup.rend(), title);
+    if (found == startup.rend()) {
+        return {};
+    }
+    std::vector<std::string> block;
+    for (auto line = found.base(); line != startup.end() && ecf::algorithm::starts_with(*line, "  "); ++line) {
+        block.push_back(line->substr(2));
+    }
+    return block;
 }
 
 ///
@@ -2937,6 +2959,176 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_origins) {
         BOOST_REQUIRE_GE(values.size(), switches.size());
         BOOST_CHECK_EQUAL_COLLECTIONS(values.end() - switches.size(), values.end(), switches.begin(), switches.end());
     });
+}
+
+///
+/// @brief Verifies that the dump of the server environment holds the content of the log, and the authentication and
+/// authorisation only once loaded.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_dump_matches_log) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    std::ofstream(directory.path() / (Host{}.name() + ".3144.ecf.lists")) << "4.5.0\nalice\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    auto dump = serverEnv.dump();
+    BOOST_CHECK_MESSAGE(ecf::algorithm::starts_with(dump, "Runtime Configuration:\n"), dump);
+    BOOST_CHECK_MESSAGE(dump.find("Authentication:") == std::string::npos, dump);
+    BOOST_CHECK_MESSAGE(dump.find("Authorisation:") == std::string::npos, dump);
+
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    dump = serverEnv.dump();
+
+    // The log holds the same lines, from the runtime configuration on
+    auto startup = last_startup_lines();
+    std::string logged;
+    for (auto line = startup.begin() + 2; line != startup.end(); ++line) {
+        logged += *line + "\n";
+    }
+    BOOST_CHECK_EQUAL(dump, logged);
+}
+
+///
+/// @brief Verifies that, when debugging, the standard output holds the same start-up lines as the log.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_debug_output_matches_log) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    std::ostringstream output;
+    auto* const original = std::cout.rdbuf(output.rdbuf());
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::cout.rdbuf(original);
+    };
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144", "--debug"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+    std::cout.rdbuf(original);
+
+    // Every start-up line of the log is shown, in the same order, from the start time on
+    const auto startup = last_startup_lines();
+    std::string logged;
+    for (const auto& line : startup) {
+        logged += line + "\n";
+    }
+    BOOST_CHECK_MESSAGE(output.str().find(logged) != std::string::npos,
+                        "Expected the log lines\n"
+                            << logged << "in the output\n"
+                            << output.str());
+    BOOST_CHECK(ecf::algorithm::starts_with(logged, "Started at "));
+}
+
+///
+/// @brief Verifies that the log states the authentication in force: the password files, and the users they list.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authentication) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto host   = Host{}.name();
+    const auto passwd = fs::current_path() / (host + ".3144.ecf.passwd");
+    std::ofstream(passwd) << "4.5.0\nalice " << host << " 3144 secret_a\nbob " << host << " 3144 secret_b\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    const std::vector<std::string> expected{
+        "ECF_PASSWD (" + passwd.string() + ") = loaded",
+        "ECF_CUSTOM_PASSWD (" + (fs::current_path() / (host + ".3144.ecf.custom_passwd")).string() + ") = absent",
+        "Users:",
+        "  alice = ECF_PASSWD",
+        "  bob = ECF_PASSWD"};
+    const auto actual = last_block("Authentication:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+
+    // No password is ever logged
+    for (const auto& line : last_startup_lines()) {
+        BOOST_CHECK_MESSAGE(line.find("secret_") == std::string::npos, "Password in: " << line);
+    }
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force once the whitelist is loaded, one rule per user.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_from_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto lists = fs::current_path() / (Host{}.name() + ".3144.ecf.lists");
+    std::ofstream(lists) << "4.5.0\nalice\n-bob\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    // The server user is granted write access, as it is not listed with it
+    std::vector<std::string> users{
+        "  alice = read/write", "  bob = read", "  " + get_login_name() + " = read/write (server user)"};
+    std::sort(users.begin(), users.end());
+    std::vector<std::string> expected{"Mode = whitelist", "ECF_LISTS (" + lists.string() + ") = loaded", "Users:"};
+    expected.insert(expected.end(), users.begin(), users.end());
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force without a whitelist: the permissions of the nodes.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    const std::vector<std::string> expected{
+        "Mode = nodes",
+        "ECF_LISTS (" + (fs::current_path() / (Host{}.name() + ".3144.ecf.lists")).string() + ") = absent"};
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the log states the authorisation in force after the whitelist is reloaded.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_after_reload) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+    const auto lists = fs::current_path() / (Host{}.name() + ".3144.ecf.lists");
+    std::ofstream(lists) << "4.5.0\nalice\n" << get_login_name() << "\n";
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    std::ofstream(lists) << "4.5.0\n-carol\n" << get_login_name() << "\n";
+    BOOST_REQUIRE_MESSAGE(serverEnv.reloadWhiteListFile(error), error);
+
+    std::vector<std::string> users{"  carol = read", "  " + get_login_name() + " = read/write"};
+    std::sort(users.begin(), users.end());
+    std::vector<std::string> expected{"Mode = whitelist", "ECF_LISTS (" + lists.string() + ") = loaded", "Users:"};
+    expected.insert(expected.end(), users.begin(), users.end());
+    const auto actual = last_block("Authorisation:");
+    BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

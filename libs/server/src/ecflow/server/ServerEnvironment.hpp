@@ -201,7 +201,19 @@ public:
     bool debug() const { return debug_; }
     void set_debug(bool f) { debug_ = f; }
 
+    ///
+    /// @brief Describes the server environment, as written to the log.
+    ///
+    /// @return The runtime configuration, followed by the authentication and the authorisation once loaded by valid().
+    ///
     std::string dump() const;
+
+    ///
+    /// @brief Logs the authentication in force: the password files, and the users they list.
+    ///
+    /// The same lines are written to the standard output when debugging.
+    ///
+    void log_authentication() const;
 
     static std::vector<std::string> expected_variables();
 
@@ -280,6 +292,42 @@ private:
     ///
     bool load_whitelist_file(std::string& err) const;
 
+    ///
+    /// @brief Logs the authorisation in force: its mode, the whitelist file, and the access of each user.
+    ///
+    /// The mode is `whitelist` once a whitelist file is loaded, and `nodes` otherwise, i.e. the permissions of the
+    /// nodes apply.
+    ///
+    void log_authorisation() const;
+
+    ///
+    /// @brief Returns the runtime configuration: the sources read, and each value with its source.
+    ///
+    /// @return The lines, starting with the title `Runtime Configuration:`.
+    ///
+    [[nodiscard]] std::vector<std::string> runtime_configuration_lines() const;
+
+    ///
+    /// @brief Returns the authentication in force: the password files, and the users they list.
+    ///
+    /// @return The lines, starting with the title `Authentication:`.
+    ///
+    [[nodiscard]] std::vector<std::string> authentication_lines() const;
+
+    ///
+    /// @brief Returns the authorisation in force: its mode, the whitelist file, and the access of each user.
+    ///
+    /// @return The lines, starting with the title `Authorisation:`.
+    ///
+    [[nodiscard]] std::vector<std::string> authorisation_lines() const;
+
+    ///
+    /// @brief Writes lines to the log, and to the standard output when debugging.
+    ///
+    /// @param[in] lines The lines
+    ///
+    void report(const std::vector<std::string>& lines) const;
+
 #ifdef ECF_OPENSSL
     ///
     /// @brief Promotes the protocol to reflect that SSL has been enabled.
@@ -328,6 +376,7 @@ private:
     std::vector<std::pair<std::string, bool>> configuration_switches_;       ///< Value of each switch, e.g. --http
     mutable WhiteListFile white_list_file_;
 
+    mutable bool access_loaded_{false}; ///< Whether valid() loaded the authentication and authorisation
     mutable ecf::AuthenticationService authentication_service_;
     mutable ecf::AuthorisationService authorisation_service_;
 
