@@ -122,6 +122,7 @@ The file is read strictly. Any of the following stops start-up, before the log i
 diagnostic naming the file, the entry as a JSON Pointer, and the reason:
 
 - a path that is not a readable regular file, e.g. a directory;
+- a path that cannot be inspected, e.g. in a start-up directory without search permission;
 - content that is not a single JSON document, or holds a member more than once;
 - a missing or unsupported ``version``;
 - an unknown member;

@@ -2902,6 +2902,48 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_not_a_regular_file) {
 }
 
 ///
+/// @brief Verifies that a configuration file that cannot be inspected stops start-up, rather than counting as absent.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_cannot_be_inspected) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory      = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto locked   = directory.path() / "locked";
+    const auto log_path = directory.path() / "server.log";
+    const auto file     = configuration_file("3144");
+    fs::create_directories(locked);
+    IsolatedServerStartup isolation;
+    BOOST_SCOPE_EXIT_ALL(&) {
+        std::error_code error;
+        fs::permissions(locked, fs::perms::owner_all, fs::perm_options::replace, error);
+        BOOST_CHECK_MESSAGE(!error, "Unable to restore directory permissions: " << error.message());
+    };
+
+    // The server starts in a directory it cannot search, so the file in it cannot be inspected
+    fs::current_path(locked);
+    fs::permissions(locked, fs::perms::none, fs::perm_options::replace);
+    std::error_code status_error;
+    [[maybe_unused]] const auto status = fs::symlink_status(file, status_error);
+    if (status_error != std::errc::permission_denied) {
+        ecf::test::scaffold::skip_unenforced_permissions("the uninspectable configuration file case");
+        return;
+    }
+
+    WithTestEnvironmentVariable ecf_log("ECF_LOG", log_path.string());
+    const auto start = [&directory] {
+        ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"},
+                                    (directory.path() / "missing.server_environment.cfg").string());
+    };
+    BOOST_CHECK_EXCEPTION(start(), ServerEnvironmentException, [&](const auto& error) {
+        const std::string message = error.what();
+        BOOST_TEST_INFO("message: " << message);
+        return message.find("Configuration file '" + file + "' cannot be inspected") != std::string::npos;
+    });
+    BOOST_CHECK(!Log::instance());
+    BOOST_CHECK(!fs::exists(log_path));
+}
+
+///
 /// @brief Verifies that the runtime configuration lists its sources, naming each configuration file by absolute path.
 ///
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_configuration_sources) {

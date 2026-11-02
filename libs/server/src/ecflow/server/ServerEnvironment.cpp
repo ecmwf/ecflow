@@ -535,9 +535,17 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
     ecf::cfg::Configuration configuration({defaults, env_cfg, env, cli});
     const auto port = std::to_string(std::get<std::int64_t>(*configuration.get(variable("ECF_PORT"))));
     const auto file = host_name_.prefix_host_and_port(port, Ecf::CONFIG_FILE());
-    std::error_code error;
-    const bool env_cfg_found = fs::exists(fs::status(path_to_config_file, error));
-    const bool ecf_cfg_found = fs::exists(fs::symlink_status(file, error));
+    // server_environment.cfg was inspected by its reader, which refuses any error other than its absence
+    std::error_code env_cfg_error;
+    const bool env_cfg_found = fs::exists(fs::status(path_to_config_file, env_cfg_error));
+
+    // Only the absence of the file is accepted; any other error inspecting it stops start-up
+    std::error_code ecf_cfg_error;
+    const bool ecf_cfg_found = fs::exists(fs::symlink_status(file, ecf_cfg_error));
+    if (ecf_cfg_error && ecf_cfg_error != std::errc::no_such_file_or_directory) {
+        throw ecf::cfg::ConfigurationError("Configuration file '" + file +
+                                           "' cannot be inspected: " + ecf_cfg_error.message());
+    }
 
     // The paths are logged after the change to ECF_HOME, and so are made absolute
     const auto env_cfg_path = fs::absolute(path_to_config_file).lexically_normal().string();
