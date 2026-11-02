@@ -26,6 +26,8 @@
  *    - string value (enclosed in single quotes), optional (default: empty)
  *  --collapse
  *    - flag, optional: a release consumes all the notifications received, instead of exactly one
+ *  --repeat
+ *    - flag, optional: the task is re-queued automatically each time it completes
  *  --event '<value>'
  *    - JSON value (enclosed in single quotes), optional, state only: the notification that released the node
  *
@@ -49,6 +51,7 @@ public:
     static constexpr const char* option_auth       = "auth";
     static constexpr const char* option_reason     = "reason";
     static constexpr const char* option_collapse   = "collapse";
+    static constexpr const char* option_repeat     = "repeat";
     static constexpr const char* option_event      = "event";
     static constexpr const char* option_free       = "free";
 

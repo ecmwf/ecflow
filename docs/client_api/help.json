@@ -2878,7 +2878,7 @@
         "",
         "Syntax",
         "  aviso --name name --listener 'json'",
-        "    [--url url] [--auth auth] [--collapse]",
+        "    [--url url] [--auth auth] [--collapse] [--repeat]",
         "    [--revision n] [--reason reason] [--event 'json'] [--free]",
         "",
         "Parameters",
@@ -2895,6 +2895,9 @@
         "      Default: %ECF_AVISO_AUTH%.",
         "  --collapse",
         "      Flag -- a release consumes all the notifications received, instead of exactly one.",
+        "  --repeat",
+        "      Flag -- the task is requeued automatically each time it completes, and waits for the next",
+        "      notification; no effect on an alias.",
         "  --revision",
         "      State: sequence number of the last notification that released the node (unsigned integer). Default: 0.",
         "  --reason",
@@ -2914,6 +2917,7 @@
         "Examples",
         "  aviso --name A --listener '{ \"event\": \"mars\", \"request\": { \"class\": \"od\", \"expver\": \"0001\", \"domain\": \"g\", \"stream\": \"enfo\", \"step\": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --auth %ECF_AVISO_AUTH%",
         "  aviso --name B --listener '{ \"event\": \"dissemination\", \"request\": { \"destination\": \"ABC\" } }' --collapse",
+        "  aviso --name C --listener '{ \"event\": \"dissemination\", \"request\": { \"destination\": \"ABC\" } }' --repeat",
         "",
         "See also the mirror attribute, for following the status of a node on a remote ecFlow server instead of an external notification feed."
       ]

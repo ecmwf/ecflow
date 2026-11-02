@@ -72,6 +72,8 @@ Whenever a task assigned an :term:`aviso` attribute is (re)queued, the attribute
 server. The task is held from execution until a notification matching the listener is received. When the
 task completes, the watch stops; when the task is requeued, the watch resumes after the last notification
 that released the task, so that the notifications published in the meantime release the task in turn.
+With the option :code:`--repeat`, the task is requeued automatically each time it completes; see
+:ref:`text_based_def_aviso_release`.
 
 When the attribute cannot watch the Aviso server (for example, because the credentials are not accepted),
 the task remains queued with the flag :code:`remote_error`, and the reason is shown by the attribute; see

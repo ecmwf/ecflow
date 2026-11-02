@@ -1419,6 +1419,27 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_add_aviso_starts_attribute_of_queued_task) {
     t->avisos()[0].finish();
 }
 
+BOOST_AUTO_TEST_CASE(test_alter_cmd_change_aviso_sets_and_clears_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    task_ptr t  = s->add_task("t");
+
+    const std::string listener = R"(--listener '{ "event": "mars" }')";
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::ADD_AVISO, "A", listener)));
+    BOOST_REQUIRE_EQUAL(t->avisos().size(), 1u);
+    BOOST_CHECK(!t->avisos()[0].repeat());
+
+    TestHelper::invokeRequest(&defs,
+                              Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", listener + " --repeat")));
+    BOOST_CHECK(t->avisos()[0].repeat());
+
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t->absNodePath(), AlterCmd::AVISO, "A", listener)));
+    BOOST_CHECK(!t->avisos()[0].repeat());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

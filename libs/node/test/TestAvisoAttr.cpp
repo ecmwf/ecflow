@@ -721,6 +721,142 @@ BOOST_AUTO_TEST_CASE(forcing_a_finished_task_queued_starts_the_aviso_again) {
     t->avisos()[0].finish();
 }
 
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->avisos()[0].repeat());
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // The notification releases the task, which runs and completes
+    backend.state->pending = {notification(1)};
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    // The task is queued again, and the attribute watches again, after the consumed notification
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), 1u);
+
+    BOOST_CHECK(!t->avisos()[0].isFree());
+    backend.state->pending = {notification(2)};
+    BOOST_CHECK_MESSAGE(submits(defs, "/s/t"), "Expected the next notification to release the task again");
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_without_repeat_stays_complete_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(!t->avisos()[0].repeat());
+
+    backend.state->pending = {notification(1)};
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 1);
+    BOOST_CHECK(t->avisos()[0].active().empty());
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_after_interactive_run) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // i.e. `ecflow_client --run /s/t`, without any notification received
+    t->miss_next_time_slot();
+    JobsParam jobsParam(false /* create jobs */);
+    BOOST_REQUIRE(t->run(jobsParam, true /* force */));
+    // Without creating jobs, the run leaves the state untouched; the job submission is simulated
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    // The task is queued again, and no notification was consumed
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 0u);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_cron_is_requeued_on_completion_with_or_without_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    for (const std::string repeat : {"", " --repeat"}) {
+        BOOST_TEST_CONTEXT("aviso options: '" << repeat << "'") {
+            auto defs = load_suite_with_aviso(aviso_variables, repeat + "\n    cron 00:00 23:59 00:01");
+            defs->beginAll();
+            auto t = find(defs, "/s/t");
+
+            // Any time attribute that allows the re-queue re-queues the task; a cron always allows it
+            t->set_state(NState::ACTIVE);
+            t->set_state(NState::COMPLETE);
+            BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+
+            t->avisos()[0].finish();
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(alias_with_repeat_is_not_requeued_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // The option is accepted on an alias, and has no effect, since an alias is never re-queued
+    auto alias = t->isTask()->add_alias_only();
+    alias->addAviso(AvisoAttr{alias.get(),
+                              "B",
+                              R"({ "event": "dissemination" })",
+                              AvisoAttr::default_url,
+                              0,
+                              AvisoAttr::default_auth,
+                              "",
+                              false /* collapse */,
+                              true /* repeat */});
+    BOOST_REQUIRE(alias->avisos()[0].repeat());
+
+    alias->set_state(NState::ACTIVE);
+    alias->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(alias->state(), NState::COMPLETE);
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(server_bootstrap_starts_and_shutdown_finishes_queued_aviso) {
     ECF_NAME_THIS_TEST();
 

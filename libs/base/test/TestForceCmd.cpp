@@ -174,6 +174,33 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_queued_starts_aviso_again) {
     t->avisos()[0].finish();
 }
 
+BOOST_AUTO_TEST_CASE(test_force_cmd_complete_requeues_task_with_aviso_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->add_variable("ECF_AVISO_URL", "http://aviso:8000");
+    s->add_variable("ECF_AVISO_AUTH", "/path/to/auth");
+    task_ptr t = s->add_task("t");
+    t->addAviso(ecf::AvisoAttr{t.get(),
+                               "A",
+                               R"({ "event": "mars" })",
+                               ecf::AvisoAttr::default_url,
+                               0,
+                               ecf::AvisoAttr::default_auth,
+                               "",
+                               false /* collapse */,
+                               true /* repeat */});
+    defs.beginAll();
+
+    // Forcing the task complete re-queues it, and the attribute watches again
+    TestHelper::invokeRequest(&defs, Cmd_ptr(new ForceCmd(t->absNodePath(), "complete", false, false)));
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(t->avisos()[0].active(), R"({ "event": "mars" })");
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(test_force_cmd_recursive) {
     ECF_NAME_THIS_TEST();
 

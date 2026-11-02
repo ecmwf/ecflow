@@ -124,7 +124,8 @@ public:
               revision_t revision,
               auth_t auth,
               const reason_t& reason,
-              bool collapse = false);
+              bool collapse = false,
+              bool repeat   = false);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
@@ -152,6 +153,13 @@ public:
     /// @return True when a release consumes all the notifications received, false when it consumes exactly one.
     ///
     [[nodiscard]] inline bool collapse() const { return collapse_; }
+
+    ///
+    /// @brief Returns whether the task is re-queued automatically each time it completes.
+    ///
+    /// @return True when the task is re-queued on completion, false when it stays complete.
+    ///
+    [[nodiscard]] inline bool repeat() const { return repeat_; }
 
     static constexpr const char* genvar_event_type            = "ECF_AVISO_EVENT_TYPE";
     static constexpr const char* genvar_event_sequence        = "ECF_AVISO_EVENT_SEQUENCE";
@@ -331,6 +339,11 @@ private:
     bool collapse_{false};
 
     ///
+    /// @brief Whether the task is re-queued automatically each time it completes (an alias is never re-queued).
+    ///
+    bool repeat_{false};
+
+    ///
     /// @brief The notification that released the node.
     ///
     /// Set when the node is released (see commit()); persisted, so that the generated variables survive a restart.
@@ -443,6 +456,7 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
         ar & aviso.event_.identifier;
         ar & aviso.event_.payload;
         ar & aviso.free_;
+        ar & aviso.repeat_;
     }
 }
 

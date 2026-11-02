@@ -386,6 +386,18 @@ bool Node::testTimeDependenciesForRequeue() {
         }
     }
 
+    // An Aviso attribute with the option --repeat always allows the re-queue, so that the task waits for the next
+    // notification
+    for (const AvisoAttr& aviso : avisos_) {
+        if (aviso.repeat()) {
+#ifdef DEBUG_REQUEUE
+            LOG(Log::DBG,
+                "   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for aviso -> allow-requeue");
+#endif
+            return true;
+        }
+    }
+
     // When in a CmdContext. If we are *BEFORE* the scheduled time, then *ALLOW* re-queue
     bool cmd_context = CmdContext::in_command();
     if (!times_.empty()) {

@@ -27,7 +27,7 @@ the attribute can be provided in any order.
 
    A server of version 5.20 or later that holds an :term:`aviso` attribute must be used with clients
    (:code:`ecflow_client`, :code:`ecflow_ui` and the Python API) of version 5.20 or later. The server
-   reports the state of the attribute with options unknown to earlier clients (e.g. :code:`--collapse`,
+   reports the state of the attribute with options unknown to earlier clients (e.g. :code:`--collapse`, :code:`--repeat`,
    and :code:`--event` once a notification has released the task), and an earlier client fails to load the
    definition it receives from the server.
 
@@ -44,6 +44,9 @@ the attribute can be provided in any order.
 
     task t3
       aviso --name C --listener '{ "event": "mars", "request": { "class": "od" } }' --collapse
+
+    task t4
+      aviso --name D --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --repeat
 
 The options are the following:
 
@@ -66,6 +69,8 @@ The options are the following:
    * - :code:`--collapse`
      - A release consumes all the notifications received, instead of exactly one; see
        :ref:`text_based_def_aviso_release`.
+   * - :code:`--repeat`
+     - The task is requeued automatically each time it completes; see :ref:`text_based_def_aviso_release`.
 
 The values of :code:`--listener`, :code:`--url` and :code:`--auth` can be composed of
 :term:`variables <variable>`, which are resolved when the node is queued. The variables
@@ -174,6 +179,20 @@ received, and the node is released once, by the latest one.
 Once released, the task behaves as a task released by a time dependency: if the job aborts, the task is
 resubmitted according to :code:`ECF_TRIES` without waiting for another notification, and the next
 notification is waited for only once the task is queued again (e.g. requeued).
+
+When the task completes, it is queued again as follows:
+
+  - without :code:`--repeat`: the task stays complete, until it is requeued (e.g. with the Requeue command,
+    or by a :term:`repeat` of a parent node);
+  - with :code:`--repeat`: the task is requeued automatically, as a task with a :term:`cron`, and waits for
+    the next notification; this also applies when the task is completed by a forced complete, or after an
+    interactive run.
+
+Notes:
+
+  - The notifications published while the job runs release the task once it is queued again.
+  - A :term:`cron` on the same task requeues it in any case, with or without :code:`--repeat`.
+  - On an alias, :code:`--repeat` is accepted and has no effect, since an alias is never requeued.
 
 The revision, the notification that released the node, and whether the task was released and not yet
 queued again, are kept in the :term:`check point` file, so that a server restarted from a check point

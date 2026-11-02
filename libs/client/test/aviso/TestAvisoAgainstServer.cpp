@@ -65,15 +65,18 @@ struct WithLocalAvisoServer
 
 const std::string listener = R"({ "event": "test_event", "request": { "date": "20261006" } })";
 
-defs_ptr
-make_defs(const std::string& url, const fs::path& auth, ecf::AvisoAttr::revision_t revision, bool collapse = false) {
+defs_ptr make_defs(const std::string& url,
+                   const fs::path& auth,
+                   ecf::AvisoAttr::revision_t revision,
+                   bool collapse = false,
+                   bool repeat   = false) {
     defs_ptr defs   = Defs::create();
     suite_ptr suite = defs->add_suite("s");
     suite->addVariable(Variable("ECF_AVISO_URL", url));
     suite->addVariable(Variable("ECF_AVISO_AUTH", auth.string()));
     task_ptr task = suite->add_task("t");
     task->addAviso(
-        ecf::AvisoAttr{nullptr, "A", listener, "%ECF_AVISO_URL%", revision, "%ECF_AVISO_AUTH%", "", collapse});
+        ecf::AvisoAttr{nullptr, "A", listener, "%ECF_AVISO_URL%", revision, "%ECF_AVISO_AUTH%", "", collapse, repeat});
     return defs;
 }
 
@@ -248,6 +251,39 @@ BOOST_AUTO_TEST_CASE(releases_task_once_for_all_notifications_when_collapsing) {
     BOOST_CHECK_EQUAL(revision_of(client), 3u);
 
     BOOST_REQUIRE_MESSAGE(client.requeue("/s/t") == 0, "requeue failed: " << client.errorMsg());
+    BOOST_CHECK(!wait_for_task(client, is_released, 1s));
+
+    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(requeues_task_on_completion_when_repeating) {
+    ECF_NAME_THIS_TEST();
+
+    InvokeServer invokeServer("Client:: ...requeues_task_on_completion_when_repeating", SCPort::next());
+    BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to start on port " << invokeServer.port());
+
+    ClientInvoker client(invokeServer.host(), invokeServer.port());
+    client.set_throw_on_error(false);
+    start(client, make_defs(server.url(), auth.path(), 0, false, true));
+
+    BOOST_REQUIRE(server.wait_for_requests(1, 10s));
+    server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
+    BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released), "Expected the task to be released by notification 1");
+    BOOST_CHECK_EQUAL(revision_of(client), 1u);
+
+    // A notification published while the task runs releases the task again, once it completes and is re-queued
+    server.publish("test_event", R"({ "date": "20261006", "time": "1800" })");
+    BOOST_REQUIRE_MESSAGE(client.force("/s/t", "complete") == 0, "force failed: " << client.errorMsg());
+
+    BOOST_REQUIRE(server.wait_for_requests(2, 10s));
+    BOOST_CHECK_MESSAGE(
+        wait_for_task(client,
+                      [](const Task& task) { return is_released(task) && task.avisos().front().revision() == 2; }),
+        "Expected the re-queued task to be released by notification 2");
+
+    // Once completed again, the task waits for a new notification
+    BOOST_REQUIRE_MESSAGE(client.force("/s/t", "complete") == 0, "force failed: " << client.errorMsg());
+    BOOST_REQUIRE(server.wait_for_requests(3, 10s));
     BOOST_CHECK(!wait_for_task(client, is_released, 1s));
 
     System::destroy();
