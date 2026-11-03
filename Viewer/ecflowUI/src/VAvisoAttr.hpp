@@ -38,6 +38,7 @@ private:
         ReasonIndex   = 6,
         ActiveIndex   = 7,
         CollapseIndex = 8,
+        RepeatIndex   = 9,
     };
 };
 

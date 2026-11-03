@@ -2002,6 +2002,15 @@ BOOST_AUTO_TEST_CASE(test_aviso, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
         return check_for_element(
             "/v1/suites/test/aviso/t/attributes?filter=avisos", "listener", "A", R"('{ "event": "dissemination" }')");
     });
+    BOOST_CHECK(check_for_element("/v1/suites/test/aviso/t/attributes?filter=avisos", "repeat", "A", "false"));
+
+    handle_response(
+        request("put",
+                "/v1/suites/test/aviso/t/attributes",
+                R"({"type":"aviso","name":"A","value":"--listener '{ \"event\": \"dissemination\" }' --repeat"})",
+                API_KEY));
+    wait_until(
+        [] { return check_for_element("/v1/suites/test/aviso/t/attributes?filter=avisos", "repeat", "A", "true"); });
 
     handle_response(request("delete", "/v1/suites/test/aviso/t/attributes", R"({"type":"aviso","name":"A"})", API_KEY),
                     HttpStatusCode::success_no_content);
