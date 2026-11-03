@@ -55,10 +55,12 @@ ecflow_add_test(
     TestFoolproof.ServerRecovery.cpp
     TestFoolproof.ServerReload.cpp
     TestFoolproof.ServerSecurity.cpp
+    TestFoolproof.ServerSsl.cpp
     TestFoolproof.ServerValidation.cpp
   LIBS
     ecflow_all
     test_scaffold
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL> # The SSL tests generate their certificates
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     ${ADDITIONAL_BOOST_COMPONENTS}
   DEPENDS
