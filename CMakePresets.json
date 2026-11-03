@@ -226,6 +226,42 @@
       "cacheVariables": {
         "ENABLE_ALL_TESTS": "ON"
       }
+    },
+    {
+      "name": "release-hpc",
+      "description": "CD v3: the HPC module (v2's ecflow-hpc python313 stage). Compiler, build type, prefix and Boost/Python/pybind11 come from the leg; no linux.gcc.* inheritance (Debian packaging, /usr/include Boost).",
+      "cacheVariables": {
+        "ENABLE_TESTS": "ON",
+        "ENABLE_ALL_TESTS": "ON",
+        "ENABLE_PYTHON": "ON",
+        "ENABLE_SERVER": "ON",
+        "ENABLE_UI": "ON",
+        "ENABLE_AVISO": "OFF",
+        "ENABLE_STATIC_BOOST_LIBS": "ON",
+        "ENABLE_WARNINGS": "ON",
+        "CMAKE_CXX_FLAGS": "-Wno-deprecated-declarations",
+        "CMAKE_PYTHON_INSTALL_TYPE": "local",
+        "INSTALL_LIB_DIR": "lib",
+        "UI_SYSTEM_SERVERS_LIST": "/ec/vol/ecflow_def/servers.list.all"
+      }
+    },
+    {
+      "name": "release-rpm",
+      "description": "CD v3: an rpm built in a *-boost-qt CI image, from the distribution's shared Boost and Qt. Python off: the images carry no pybind11.",
+      "cacheVariables": {
+        "ENABLE_TESTS": "ON",
+        "ENABLE_ALL_TESTS": "ON",
+        "ENABLE_PYTHON": "OFF",
+        "ENABLE_SERVER": "ON",
+        "ENABLE_UI": "ON",
+        "ENABLE_SSL": "ON",
+        "ENABLE_HTTP": "ON",
+        "ENABLE_UDP": "ON",
+        "ENABLE_AVISO": "OFF",
+        "ENABLE_STATIC_BOOST_LIBS": "OFF",
+        "ENABLE_CONFIG_MODE_BOOST": "OFF",
+        "UI_SYSTEM_SERVERS_LIST": "/ec/vol/ecflow_def/servers.list.all"
+      }
     }
   ],
   "buildPresets": [
