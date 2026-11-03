@@ -392,6 +392,112 @@ BOOST_AUTO_TEST_CASE(continues_releasing_once_per_notification_after_server_rest
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(continues_repeating_after_server_restart) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string port = SCPort::next();
+
+    // Each server runs with job generation disabled; the job reports through the child commands
+    auto make_job = [](const InvokeServer& invokeServer) {
+        auto job = std::make_unique<ClientInvoker>(invokeServer.host(), invokeServer.port());
+        job->set_throw_on_error(false);
+        job->taskPath("/s/t");
+        job->set_jobs_password(Submittable::DUMMY_JOBS_PASSWORD());
+        return job;
+    };
+    auto is_queued = [](const Task& task) { return task.state() == NState::QUEUED; };
+
+    {
+        // The first server is released by notification 1, and checkpoints with the task active
+        InvokeServer invokeServer("Client:: ...continues_repeating_after_server_restart",
+                                  port,
+                                  true /* disable_job_generation */,
+                                  true /* remove_checkpt_file_before_server_start */,
+                                  false /* remove_checkpt_file_after_server_exit */);
+        BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to start on port " << port);
+
+        ClientInvoker client(invokeServer.host(), invokeServer.port());
+        client.set_throw_on_error(false);
+        start(client, make_defs(server.url(), auth.path(), 0, false, true));
+
+        BOOST_REQUIRE(server.wait_for_requests(1, 10s));
+        server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
+        server.publish("test_event", R"({ "date": "20261006", "time": "1800" })");
+
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released), "Expected release by notification 1");
+        auto job = make_job(invokeServer);
+        BOOST_REQUIRE_MESSAGE(job->initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) == 0,
+                              "--init failed: " << job->errorMsg());
+
+        BOOST_REQUIRE_MESSAGE(client.haltServer() == 0, "halt failed: " << client.errorMsg());
+        BOOST_REQUIRE_MESSAGE(client.checkPtDefs() == 0, "checkpoint failed: " << client.errorMsg());
+    }
+
+    {
+        // The second server restores the active task, which is queued again on completion, and then released by
+        // notification 2; it checkpoints with the task queued, after a second completion
+        InvokeServer invokeServer("Client:: ...continues_repeating_after_server_restart (2)",
+                                  port,
+                                  true /* disable_job_generation */,
+                                  false /* remove_checkpt_file_before_server_start */,
+                                  false /* remove_checkpt_file_after_server_exit */);
+        BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to restart on port " << port);
+
+        ClientInvoker client(invokeServer.host(), invokeServer.port());
+        client.set_throw_on_error(false);
+        BOOST_REQUIRE_MESSAGE(client.restartServer() == 0, "restart failed: " << client.errorMsg());
+
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, [](const Task& task) { return task.state() == NState::ACTIVE; }),
+                              "Expected the task to be restored active");
+        BOOST_CHECK(client.defs()->findAbsNode("/s/t")->avisos().front().repeat());
+        BOOST_CHECK_EQUAL(revision_of(client), 1u);
+
+        auto job = make_job(invokeServer);
+        BOOST_REQUIRE_MESSAGE(job->completeTask() == 0, "--complete failed: " << job->errorMsg());
+        BOOST_REQUIRE_MESSAGE(
+            wait_for_task(client,
+                          [](const Task& task) { return is_released(task) && task.avisos().front().revision() == 2; }),
+            "Expected the re-queued task to be released by notification 2");
+        BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_sequence), "2");
+
+        BOOST_REQUIRE_MESSAGE(job->initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) == 0,
+                              "--init failed: " << job->errorMsg());
+        BOOST_REQUIRE_MESSAGE(job->completeTask() == 0, "--complete failed: " << job->errorMsg());
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_queued), "Expected the task to be queued again");
+        BOOST_CHECK(!wait_for_task(client, is_released, 1s));
+
+        BOOST_REQUIRE_MESSAGE(client.haltServer() == 0, "halt failed: " << client.errorMsg());
+        BOOST_REQUIRE_MESSAGE(client.checkPtDefs() == 0, "checkpoint failed: " << client.errorMsg());
+    }
+
+    {
+        // The third server restores the queued task, which is released by a new notification only
+        InvokeServer invokeServer("Client:: ...continues_repeating_after_server_restart (3)",
+                                  port,
+                                  true /* disable_job_generation */,
+                                  false /* remove_checkpt_file_before_server_start */,
+                                  true /* remove_checkpt_file_after_server_exit */);
+        BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to restart on port " << port);
+
+        ClientInvoker client(invokeServer.host(), invokeServer.port());
+        client.set_throw_on_error(false);
+        BOOST_REQUIRE_MESSAGE(client.restartServer() == 0, "restart failed: " << client.errorMsg());
+
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_queued), "Expected the task to be restored queued");
+        BOOST_CHECK(client.defs()->findAbsNode("/s/t")->avisos().front().repeat());
+        BOOST_CHECK_EQUAL(revision_of(client), 2u);
+        BOOST_CHECK(!wait_for_task(client, is_released, 1s));
+
+        server.publish("test_event", R"({ "date": "20261006", "time": "2359" })");
+        BOOST_REQUIRE_MESSAGE(
+            wait_for_task(client,
+                          [](const Task& task) { return is_released(task) && task.avisos().front().revision() == 3; }),
+            "Expected the restored task to be released by notification 3");
+    }
+
+    System::destroy();
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
