@@ -21,6 +21,8 @@ VAvisoAttrType::VAvisoAttrType()
     searchKeyToData_["aviso_auth"]     = AuthIndex;
     searchKeyToData_["aviso_reason"]   = ReasonIndex;
     searchKeyToData_["aviso_active"]   = ActiveIndex;
+    searchKeyToData_["aviso_collapse"] = CollapseIndex;
+    searchKeyToData_["aviso_repeat"]   = RepeatIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
 
