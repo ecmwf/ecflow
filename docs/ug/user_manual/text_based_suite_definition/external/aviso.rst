@@ -197,6 +197,22 @@ Notes:
   - A :term:`cron` on the same task requeues it in any case, with or without :code:`--repeat`.
   - On an alias, :code:`--repeat` is accepted and has no effect, since an alias is never requeued.
 
+.. warning::
+
+   A task with :code:`--repeat` never stays complete, as a node with a :term:`cron` (see
+   :ref:`text_based_def_cron`). As a consequence:
+
+     - the enclosing families and suite never reach status *complete*;
+     - a :term:`repeat` on a parent node never advances, since the task never reports its completion to it;
+     - a completion :term:`trigger` on the task, or on an enclosing node, is never satisfied;
+     - a :term:`day` on the task matches only the date fixed when the task was begun or last requeued
+       manually, since a completion does not move it: the task is released on that date only, and then
+       stays queued.
+
+   To process the notifications within a cycle driven by a :term:`repeat` of a parent node, leave out
+   :code:`--repeat`: the task then stays complete until the next increment of the parent :term:`repeat`
+   requeues it.
+
 The revision, the notification that released the node, and whether the task was released and not yet
 queued again, are kept in the :term:`check point` file, so that a server restarted from a check point
 continues with the notifications not yet consumed, and with the resubmissions of an aborted task.
