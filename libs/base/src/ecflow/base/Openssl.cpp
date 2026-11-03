@@ -179,10 +179,6 @@ void Openssl::enable_or_throw(std::string host, const std::string& port, const O
     }
 }
 
-void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
-    enable_or_throw(std::move(host), port, Option::make_option_shared());
-}
-
 void Openssl::enable_based_on_envvar(std::string host, const std::string& port) {
     if (auto option = Option::make_from_envvar(); option.enabled()) {
         enable_or_throw(std::move(host), port, option);

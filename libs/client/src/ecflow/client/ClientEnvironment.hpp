@@ -276,15 +276,6 @@ public:
         ssl_.enable_prefer_specific(host(), port());
     }
 
-    ///
-    /// @brief Tries to enable SSL preferring the server-specific certificate, independently of ECF_SSL.
-    ///
-    /// @return True if either certificate file exists; false if neither exists, leaving SSL disabled.
-    ///
-    bool enable_ssl_no_throw() {
-        protocol_ = ecf::Protocol::Ssl;
-        return ssl_.try_enable_from_option(host(), port(), ecf::Openssl::Option::make_option_specific());
-    }
     void disable_ssl() {
         protocol_ = ecf::Protocol::Plain;
         ssl_.disable();

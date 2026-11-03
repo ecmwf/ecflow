@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(parses_ssl_options_without_conflating_unset_and_empty) {
     auto shared    = MakeTestFile{}.with(SpecificFileLocation{"server.crt", directory}).create();
     WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
     ecf::Openssl ssl;
-    ssl.enable_prefer_shared(somehost, someport);
+    ssl.enable(somehost, someport, ecf::Openssl::Option::make_option_shared());
     {
         WithoutTestEnvironmentVariable no_ssl("ECF_SSL");
         ssl.enable_based_on_envvar(somehost, someport);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(keeps_selected_certificate_directory_when_override_changes)
     ecf::Openssl ssl;
     {
         WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", first.string());
-        ssl.enable_prefer_shared(somehost, someport);
+        ssl.enable(somehost, someport, ecf::Openssl::Option::make_option_shared());
     }
     WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", second.string());
     BOOST_REQUIRE(ssl.certificate().has_value());
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(finds_server_tls_files_with_optional_trailing_separator) {
     for (const auto& path : {directory.path().string(), directory.path().string() + "/"}) {
         WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", path);
         ecf::Openssl server;
-        server.enable_prefer_shared(somehost, someport);
+        server.enable(somehost, someport, ecf::Openssl::Option::make_option_shared());
 
         const auto key_path = (directory.path() / "server.key").string();
         BOOST_CHECK_EXCEPTION(server.init_for_server(), std::runtime_error, [&](const std::runtime_error& error) {
@@ -564,7 +564,9 @@ BOOST_AUTO_TEST_CASE(reports_missing_certificates_without_enabling_ssl) {
             BOOST_CHECK_EQUAL(ui.environment().openssl().info(), "SSL disabled");
 
             ecf::Openssl ssl;
-            BOOST_CHECK_EXCEPTION(ssl.enable_prefer_shared(host, someport), std::runtime_error, matches_shared);
+            BOOST_CHECK_EXCEPTION(ssl.enable(host, someport, ecf::Openssl::Option::make_option_shared()),
+                                  std::runtime_error,
+                                  matches_shared);
             BOOST_CHECK(!ssl.enabled());
             BOOST_CHECK_EQUAL(ssl.selected_crt(), "");
             BOOST_CHECK_EXCEPTION(
@@ -727,7 +729,7 @@ BOOST_AUTO_TEST_CASE(initializes_client_context_again_after_a_new_selection) {
     BOOST_CHECK_NO_THROW(ssl.init_for_client());
 
     // A new selection discards the previous context and is initialized again.
-    ssl.enable_prefer_shared(somehost, someport);
+    ssl.enable(somehost, someport, ecf::Openssl::Option::make_option_shared());
     BOOST_CHECK_EQUAL(ssl.selected_crt(), "server.crt");
     BOOST_CHECK_THROW(ssl.init_for_client(), boost::system::system_error);
 
