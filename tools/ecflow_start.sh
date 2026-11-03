@@ -39,8 +39,21 @@ usage()
     echo "       -H        Halted mode (manual restart), overrides -f option"
     echo "       -v        verbose mode"
     echo "       -s        enable ssl server. Requires client/server built with openssl libs"
+    echo "                 Exports ECF_SSL=X: <host>.<port>.crt first, then server.crt"
     echo "       -h        print this help page"
     echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
+}
+
+# Ping the server. With -s, a server started with ECF_SSL=1 can use server.crt while <host>.<port>.crt
+# also exists, so retry with ECF_SSL=1, and keep ECF_SSL=1 for the requests that follow.
+ping_server()
+{
+    if [ "$ssl" = "true" ]; then
+        ${ECFLOW_BINDIR}/ecflow_client --ping "$@" 2>/dev/null && return 0
+        ECF_SSL=1 ${ECFLOW_BINDIR}/ecflow_client --ping "$@" && export ECF_SSL=1
+    else
+        ${ECFLOW_BINDIR}/ecflow_client --ping "$@"
+    fi
 }
 
 #==========================================================================
@@ -74,7 +87,7 @@ done
 # ================================================================================
 # SSL
 if [ "$ssl" = "true" ]; then
-     export ECF_SSL=1  # required for both client and server
+     export ECF_SSL=X  # required for both client and server; server-specific certificate first
 fi
 
 # =================================================================================
@@ -115,7 +128,7 @@ if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
 THERE=KO
-${ECFLOW_BINDIR}/ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
+ping_server --port=$ECF_PORT --host=$host && THERE=OK
 if [[ $THERE == OK ]]; then
   echo "server is already started"
   res="$(ps -lf -u $USER | grep ecflow_server | grep -v grep)"
@@ -177,7 +190,7 @@ echo
 
 echo "client version is $(${ECFLOW_BINDIR}/ecflow_client --version)"
 echo "Checking if the server is already running on $ECF_HOST and port $ECF_PORT"
-${ECFLOW_BINDIR}/ecflow_client --ping
+ping_server
 if [ $? -eq 0 ]; then
   echo "... The server on $ECF_HOST:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port"
   exit 1
