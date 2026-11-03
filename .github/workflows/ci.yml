@@ -5,7 +5,8 @@ name: CI
 
 on:
   push:
-    branches: [develop, main]
+    # cd-rehearsal/cd-v3: CI for the CD v3 rehearsal branch's pushes (this branch only).
+    branches: [develop, main, 'cd-rehearsal/cd-v3']
     paths-ignore:
       - ".cd/**"
       - ".github/cd-config.yml"
