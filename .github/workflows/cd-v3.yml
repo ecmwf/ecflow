@@ -1,0 +1,219 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# CD v3 dry run (experimental): ecflow's HPC module and Rocky rpms built, tested and
+# install-tested by ci-infrastructure's CD v3 (feature/cd-v3; see docs/configuring/releases.rst
+# there), from .ci/release.toml. Modelled on the eckit-cd-test pilot's cd-v3.yml.
+#
+# Rehearsal only, by construction:
+# - It runs for a same-repo pull request labelled approved-for-cd, nothing else: no tag trigger,
+#   so no tag (an ecflow release or anything else) ever starts it, merged or not.
+# - It has no publish jobs: no upload-nexus, hpc-promote or hpc-sync-tag, and names no publish
+#   credential. The gate's allow-production is off (its default) and its hpc-root the default
+#   dry-run root ($SCRATCH/cd-v3-dry-run), though a rehearsal installs nothing there: the HPC
+#   module is built and install-tested inside its SLURM job and kept as this run's artifact.
+# - v2 (cd.yml, .github/cd-config.yml) is untouched and still makes ecflow's releases.
+#
+# The gate waits for ci.yml to pass on the pull request's head and merge commit.
+#
+# check-cd-workflow (the release gate runs it on this file) holds it to its shape.
+
+name: cd-v3
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-v3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci-approval:
+    if: github.event.label.name == 'approved-for-cd'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: ecmwf/ci-infrastructure/actions/require-ci-approval@feature/cd-v3
+
+  gate:
+    needs: [ci-approval]
+    runs-on: arc-runner-normal
+    container:
+      image: eccr.ecmwf.int/public-ci-images/ubuntu24.04-base:latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      mode: ${{ steps.gate.outputs.mode }}
+      publish: ${{ steps.gate.outputs.publish }}
+      sha: ${{ steps.gate.outputs.sha }}
+      tag: ${{ steps.gate.outputs.tag }}
+      json: ${{ steps.gate.outputs.json }}
+      source-deps: ${{ steps.gate.outputs.source-deps }}
+      provenance: ${{ steps.gate.outputs.provenance }}
+    steps:
+      # The pull request's merge commit.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: gate
+        uses: ecmwf/ci-infrastructure/actions/release-gate@feature/cd-v3
+        env:
+          CD_KILL_SWITCH: ${{ vars.CD_KILL_SWITCH }}
+          CD_KILL_SWITCH_REASON: ${{ vars.CD_KILL_SWITCH_REASON }}
+        with:
+          kinds: release-rpm,release-hpc
+          manifest: .ci/release.toml
+          ci-wait-seconds: ${{ vars.ARTIFACT_WAIT_TIMEOUT || '7200' }}
+          allow-ref: feature/cd-v3
+
+  build-rpm:
+    needs: [ci-approval, gate]
+    if: fromJSON(needs.gate.outputs.json)['release-rpm'].include[0] != null
+    name: build-rpm (${{ matrix._release.leg_id }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.gate.outputs.json)['release-rpm'] }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          persist-credentials: false
+      - id: deps
+        uses: ecmwf/ci-infrastructure/actions/release-source-deps@feature/cd-v3
+        with:
+          deps: ${{ needs.gate.outputs.source-deps }}
+      - id: build
+        uses: ecmwf/ci-infrastructure/actions/run-job-script@feature/cd-v3
+        with:
+          job-script: ${{ matrix.job-script }}
+          matrix-leg: ${{ toJSON(matrix) }}
+          package: ecflow
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: release-${{ matrix._release.job_key }}
+          path: ${{ steps.build.outputs.install-path }}
+          if-no-files-found: error
+          retention-days: 30
+          overwrite: true
+
+  itest-rpm:
+    needs: [ci-approval, gate, build-rpm]
+    name: itest-rpm (${{ matrix._release.leg_id }})
+    runs-on: arc-runner-normal
+    # A clean image of the target distribution.
+    container:
+      image: ${{ matrix['install-test-image'] }}
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.gate.outputs.json)['release-rpm'] }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-${{ matrix._release.job_key }}
+          path: package
+      - uses: ecmwf/ci-infrastructure/actions/install-test-package@feature/cd-v3
+        with:
+          package-dir: package
+          filename: ${{ matrix._release.filename }}
+          prefix: ${{ matrix._release.prefix }}
+          smoke-command: ${{ matrix['install-test-command'] }}
+          leg-id: ${{ matrix._release.leg_id }}
+          image: ${{ matrix['install-test-image'] }}
+          output-dir: itest
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: itest-${{ matrix._release.job_key }}
+          path: itest
+          if-no-files-found: error
+          retention-days: 30
+          overwrite: true
+
+  # The HPC module: built, tested and install-tested (a fresh unpack, modules purged and reloaded,
+  # no LD_LIBRARY_PATH) in one SLURM job; the archive is this run's artifact, installed nowhere.
+  build-hpc:
+    needs: [ci-approval, gate]
+    if: fromJSON(needs.gate.outputs.json)['release-hpc'].include[0] != null
+    name: build-hpc (${{ matrix._release.leg_id }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container }}
+      credentials:
+        username: ${{ secrets.ECCR_PULL_ROBOT_NAME }}
+        password: ${{ secrets.ECCR_PULL_ROBOT_TOKEN }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.gate.outputs.json)['release-hpc'] }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          persist-credentials: false
+      - id: deps
+        uses: ecmwf/ci-infrastructure/actions/release-source-deps@feature/cd-v3
+        with:
+          deps: ${{ needs.gate.outputs.source-deps }}
+      - id: build
+        uses: ecmwf/ci-infrastructure/actions/build-on-hpc@feature/cd-v3
+        with:
+          site: ${{ matrix.site }}
+          job-script: ${{ matrix.job-script }}
+          matrix-leg: ${{ toJSON(matrix) }}
+          # Package, tag, leg and commit: also the SLURM job name.
+          artifact-name: ${{ matrix._release.job_key }}
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+          work-dir: ${{ vars.HPC_CI_WORK_DIR }}
+          remote-work-dir: ${{ vars.HPC_CI_REMOTE_WORK_DIR }}
+          troika-user: ${{ secrets.HPC_CI_SSH_USER }}
+          publish: archive
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: release-${{ matrix._release.job_key }}
+          path: ${{ steps.build.outputs.archive-dir }}
+          if-no-files-found: error
+          retention-days: 30
+          overwrite: true
+
+  record:
+    needs: [ci-approval, gate, build-rpm, itest-rpm, build-hpc]
+    if: ${{ always() && needs.gate.result == 'success' }}
+    runs-on: arc-runner-normal
+    container:
+      image: eccr.ecmwf.int/public-ci-images/ubuntu24.04-base:latest
+    permissions: {}
+    steps:
+      # Every artifact of the run, one directory each (a lone artifact lands directly in the path).
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: artifacts
+      - uses: ecmwf/ci-infrastructure/actions/release-record@feature/cd-v3
+        with:
+          provenance: ${{ needs.gate.outputs.provenance }}
+          legs: ${{ needs.gate.outputs.json }}
+          publish: ${{ needs.gate.outputs.publish }}
+          needs: ${{ toJSON(needs) }}
+          artifacts: artifacts
+          out: record/release-record.json
+      - if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: release-record
+          path: record
+          if-no-files-found: warn
+          retention-days: 90
+          overwrite: true
