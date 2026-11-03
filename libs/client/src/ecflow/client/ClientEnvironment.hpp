@@ -257,13 +257,13 @@ public:
     }
 
     ///
-    /// @brief Enables SSL preferring the shared certificate, independently of ECF_SSL.
+    /// @brief Enables SSL preferring the server-specific certificate, independently of ECF_SSL.
     ///
-    /// @throws std::runtime_error if neither the shared nor the server-specific certificate file exists.
+    /// @throws std::runtime_error if neither the server-specific nor the shared certificate file exists.
     ///
     void enable_ssl() {
         protocol_ = ecf::Protocol::Ssl;
-        ssl_.enable_prefer_shared(host(), port());
+        ssl_.enable_prefer_specific(host(), port());
     }
 
     ///
@@ -276,15 +276,6 @@ public:
         ssl_.enable_prefer_specific(host(), port());
     }
 
-    ///
-    /// @brief Tries to enable SSL preferring the shared certificate, independently of ECF_SSL.
-    ///
-    /// @return True if either certificate file exists; false if neither exists, leaving SSL disabled.
-    ///
-    bool enable_ssl_no_throw() {
-        protocol_ = ecf::Protocol::Ssl;
-        return ssl_.try_enable_from_option(host(), port(), ecf::Openssl::Option::make_option_shared());
-    }
     void disable_ssl() {
         protocol_ = ecf::Protocol::Plain;
         ssl_.disable();

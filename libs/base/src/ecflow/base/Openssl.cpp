@@ -179,10 +179,6 @@ void Openssl::enable_or_throw(std::string host, const std::string& port, const O
     }
 }
 
-void Openssl::enable_prefer_shared(std::string host, const std::string& port) {
-    enable_or_throw(std::move(host), port, Option::make_option_shared());
-}
-
 void Openssl::enable_based_on_envvar(std::string host, const std::string& port) {
     if (auto option = Option::make_from_envvar(); option.enabled()) {
         enable_or_throw(std::move(host), port, option);
@@ -335,9 +331,9 @@ const char* Openssl::ssl_info() {
     return "ecFlow client and server are SSL enabled. To use SSL choose between:\n"
            "  1. export ECF_SSL=X    # recommended: search <host>.<port>.crt, then server.crt\n"
            "  2. export ECF_SSL=1    # shared certificate: search server.crt, then <host>.<port>.crt\n"
-           "  3. use --ssl           # use ECF_SSL if set; otherwise, use shared-first mode\n"
+           "  3. use --ssl           # use ECF_SSL if set; otherwise, as ECF_SSL=X\n"
            "                         # Typically ssl server can be started with ecflow_start.sh -s\n"
-           "  4. Client.enable_ssl() # for python client\n\n"
+           "  4. Client.enable_ssl() # for python client, as --ssl\n\n"
            "ecflow_ui uses the specific-first strategy (ECF_SSL=X) and ignores ECF_SSL.\n"
            "ecFlow expects certificates in $HOME/.ecflowrc/ssl unless ECF_SSL_DIR overrides the directory.\n"
            "Shared certificates should be avoided. Use ECF_SSL=1 only for intentionally shared certificates;\n"

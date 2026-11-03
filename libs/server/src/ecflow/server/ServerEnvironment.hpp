@@ -271,7 +271,7 @@ private:
     ///
     ///   - ECF_SSL empty or "1":   `server.crt` first, then `<host>.<port>.crt`;
     ///   - ECF_SSL with any other value:   `<host>.<port>.crt` first, then `server.crt`;
-    ///   - the SSL option alone:   as ECF_SSL empty.
+    ///   - the SSL option alone:   as ECF_SSL with any other value.
     ///
     /// @param[in] configuration The configuration of the server, every value of which is valid
     /// @throws std::runtime_error if SSL is requested but neither certificate file exists.

@@ -276,19 +276,6 @@ public:
     bool try_enable_from_option(std::string host, const std::string& port, Option option);
 
     ///
-    /// @brief Enables SSL using shared-first certificate selection.
-    ///
-    /// Uses `server.crt` first, falling back to `<host>.<port>.crt` only if the shared file is absent.
-    /// The ECF_SSL environment variable is ignored.
-    ///
-    /// @param[in] host Server hostname; localhost is resolved to the local hostname.
-    /// @param[in] port Server port used to select the certificate.
-    /// @throws std::runtime_error if neither certificate file exists; SSL is left disabled.
-    /// @throws std::filesystem::filesystem_error if certificate lookup or absolute path resolution fails.
-    ///
-    void enable_prefer_shared(std::string host, const std::string& port);
-
-    ///
     /// @brief Enables SSL according to ECF_SSL when the variable is set.
     ///
     /// Certificate lookup order:
@@ -309,7 +296,7 @@ public:
     /// @brief Enables SSL according to an explicit request, independently of ECF_SSL.
     ///
     /// The request is typically made from an ECF_SSL value, by Option::make_from_envvar_value(), or from the `--ssl`
-    /// option, by Option::make_option_shared().
+    /// option, by Option::make_option_specific().
     ///
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.

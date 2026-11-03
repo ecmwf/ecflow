@@ -69,7 +69,7 @@ Secure communication between client and server can be enabled when creating of a
 
 Certificates are loaded from `$HOME/.ecflowrc/ssl/` unless `ECF_SSL_DIR` overrides the directory. A trailing '/' is optional. Loading or verification failures do not trigger fallback.
 
-A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. The behaviour of `Client.enable_ssl()` follows the Client initialisation described above (assuming `ECF_SSL=1` when `ECF_SSL` is not defined).
+A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. The behaviour of `Client.enable_ssl()` follows the Client initialisation described above (assuming `ECF_SSL=X` when `ECF_SSL` is not defined).
 
 
 .. py:method:: Client.alter(*args, **kwargs)

@@ -68,6 +68,35 @@ def test_certificate_selection_strategies(
             assert enable().get_certificate() == expected
 
 
+@pytest.mark.parametrize(
+    "specific,shared", [(True, True), (True, False), (False, True), (False, False)]
+)
+def test_enable_ssl_without_ecf_ssl_prefers_specific_certificate(
+    specific, shared, monkeypatch
+):
+    specific_crt = f"{host}.{port}.crt"
+    monkeypatch.delenv("ECF_SSL", raising=False)
+
+    with ExitStack() as files:
+        if specific:
+            files.enter_context(Test.MockFile(specific_crt))
+        if shared:
+            files.enter_context(Test.MockFile("server.crt"))
+
+        client = ecf.Client(host, port)
+        if not specific and not shared:
+            with pytest.raises(RuntimeError) as error:
+                client.enable_ssl()
+            assert (
+                "(using strategy: server-specific certificate first, shared certificate as fallback)"
+                in str(error.value)
+            )
+        else:
+            client.enable_ssl()
+            expected = specific_crt if specific else "server.crt"
+            assert client.get_certificate() == expected
+
+
 def test_setup_client_without_ssl_and_get_empty_certificate():
     expected_crt = ""
 

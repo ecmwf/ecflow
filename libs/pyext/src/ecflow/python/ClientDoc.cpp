@@ -63,7 +63,7 @@ const char* ClientDoc::class_client() {
            "A trailing '/' is optional. Loading or verification failures do not trigger fallback.\n\n"
            "A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. "
            "The behaviour of `Client.enable_ssl()` follows the Client initialisation described above "
-           "(assuming `ECF_SSL=1` when `ECF_SSL` is not defined).\n"
+           "(assuming `ECF_SSL=X` when `ECF_SSL` is not defined).\n"
            "\n";
 }
 

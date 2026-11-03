@@ -52,9 +52,10 @@ The user can also export the environment variable :code:`ECF_HOSTFILE`, and defi
 For SSL connections, ``ecflow_client`` uses ``$HOME/.ecflowrc/ssl/`` by default.
 ``ECF_SSL_DIR`` selects another directory, with or without a trailing ``/``.
 
-Use ``ECF_SSL=X`` to try the server-specific certificate first, falling back to
-``server.crt`` if it is absent. This is the recommended mode and matches
-certificate selection in :term:`ecflow_ui`.
+Use ``ECF_SSL=X``, or :ref:`--ssl <ssl_cli>` with ``ECF_SSL`` unset, to try the
+server-specific certificate first, falling back to ``server.crt`` if it is
+absent. This is the recommended mode and matches certificate selection in
+:term:`ecflow_ui`.
 
 Shared certificates should be avoided. Use ``ECF_SSL=1`` only for configurations
 that intentionally share a certificate; its existing behaviour is retained for
@@ -69,6 +70,10 @@ compatibility. Certificate selection depends on ``ECF_SSL``:
      - Fallback if absent
 
    * - Any other value, such as ``X``
+     - ``<host>.<port>.crt``
+     - ``server.crt``
+
+   * - Unset, with ``--ssl``
      - ``<host>.<port>.crt``
      - ``server.crt``
 

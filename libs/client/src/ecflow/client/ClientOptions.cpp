@@ -183,7 +183,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     if (auto ecf_ssl = getenv("ECF_SSL"); vm.count("ssl") || ecf_ssl) {
         if (env->debug()) {
             const auto option =
-                ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_shared();
+                ecf_ssl ? ecf::Openssl::Option::make_from_envvar() : ecf::Openssl::Option::make_option_specific();
             std::cout << "  SSL enabled: " << option.describe(vm.count("ssl") > 0) << '\n';
         }
 
