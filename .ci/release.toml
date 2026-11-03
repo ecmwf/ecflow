@@ -30,6 +30,9 @@ license = "Apache-2.0"
 vendor = "ECMWF"
 maintainer = "software@ecmwf.int"
 homepage = "https://github.com/ecmwf/ecflow"
+# A Python 2 FUSE helper (#!/usr/bin/env python2): rpmbuild turns its shebang into a dependency
+# on /usr/bin/python2, which Rocky 9 and 10 do not have.
+exclude = ["bin/ecflow_fuse.py"]
 
 [[deps]]
 repo = "ecmwf/ecbuild"
@@ -101,11 +104,11 @@ channel = "rpm"
 runs-on = "arc-runner-large"
 build-type = "Release"
 options = "release-rpm"
-# As v2's ecflow-ui rpm.
-install-prefix = "/usr"
+# /opt/ecmwf, as eckit: under /usr the rpm would own /usr/lib64/cmake, which cmake-filesystem owns.
+install-prefix = "/opt/ecmwf"
 arch = "x86_64"
 ctest-args = "-L nightly -j 8"
-install-test-command = "/usr/bin/ecflow_client --version"
+install-test-command = "/opt/ecmwf/bin/ecflow_client --version"
 
 # The CI legs' images (:latest; build-meta.json records the tag each build ran in): distribution
 # Boost and Qt, so the rpm's automatic requires resolve in a clean image (Qt5 Charts from EPEL).
