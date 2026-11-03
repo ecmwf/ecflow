@@ -2627,7 +2627,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_protocol_is_unchanged_when_ssl_is_n
 ///   - ECF_SSL, when defined, decides the lookup order, also when `--ssl` is given:
 ///     - `1` or empty: shared certificate first, server-specific certificate as fallback;
 ///     - any other value: server-specific certificate first, shared certificate as fallback.
-///   - `--ssl` alone looks for the shared certificate first.
+///   - `--ssl` alone looks for the server-specific certificate first, as any other value of ECF_SSL.
 ///   - SSL promotes TCP/IP to SSL, and HTTP to HTTPS.
 ///
 BOOST_AUTO_TEST_CASE(test_server_precedence_ssl) {
@@ -2651,9 +2651,10 @@ BOOST_AUTO_TEST_CASE(test_server_precedence_ssl) {
                                      {specific_name, false, false, true, false, true, ecf::Protocol::Ssl},
                                      {"1", false, true, true, true, true, ecf::Protocol::Https},
                                      // --ssl alone
-                                     {std::nullopt, true, false, true, true, true, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, false, true, true, false, ecf::Protocol::Ssl},
                                      {std::nullopt, true, false, false, true, false, ecf::Protocol::Ssl},
-                                     {std::nullopt, true, true, true, true, true, ecf::Protocol::Https},
+                                     {std::nullopt, true, false, true, false, true, ecf::Protocol::Ssl},
+                                     {std::nullopt, true, true, true, true, false, ecf::Protocol::Https},
                                      // ECF_SSL with --ssl
                                      {specific_name, true, false, true, true, false, ecf::Protocol::Ssl},
                                      {"1", true, true, true, true, true, ecf::Protocol::Https}};

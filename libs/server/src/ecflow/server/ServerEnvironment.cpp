@@ -619,7 +619,7 @@ void ServerEnvironment::select_ssl(const ecf::cfg::Configuration& configuration)
 
     // ECF_SSL, when it has a value, decides the certificate lookup order, also when the option is set
     const auto request = value ? ecf::Openssl::Option::make_from_envvar_value(std::get<std::string>(*value))
-                               : ecf::Openssl::Option::make_option_shared();
+                               : ecf::Openssl::Option::make_option_specific();
     if (debug_) {
         std::cout << "SSL enabled: " << request.describe(option) << '\n';
     }

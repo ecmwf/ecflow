@@ -939,7 +939,7 @@ Glossary
              |
 
              Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
-             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=1`` is assumed.
+             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=X`` is assumed.
 
              |
 
@@ -1332,7 +1332,7 @@ Glossary
              |
 
              Secure communication can also be activated using the :code:`ecflow_server --ssl ...` option.
-             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=1`` is assumed.
+             When using the ``--ssl`` option, if ``ECF_SSL`` is not explicitly specified, ``ECF_SSL=X`` is assumed.
 
              |
 

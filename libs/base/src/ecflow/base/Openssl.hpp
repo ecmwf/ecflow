@@ -309,7 +309,7 @@ public:
     /// @brief Enables SSL according to an explicit request, independently of ECF_SSL.
     ///
     /// The request is typically made from an ECF_SSL value, by Option::make_from_envvar_value(), or from the `--ssl`
-    /// option, by Option::make_option_shared().
+    /// option, by Option::make_option_specific().
     ///
     /// @param[in] host Server hostname; localhost is resolved to the local hostname.
     /// @param[in] port Server port used to select the certificate.

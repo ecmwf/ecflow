@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -220,7 +221,8 @@ BOOST_AUTO_TEST_CASE(logs_selected_certificate_and_warns_on_fallback_at_start_up
         return std::string{};
     };
 
-    auto check_log = [&](const std::string& ecf_ssl, bool has_shared, bool has_specific) {
+    // An unset ECF_SSL starts the server with --ssl alone
+    auto check_log = [&](const std::optional<std::string>& ecf_ssl, bool has_shared, bool has_specific) {
         auto directory   = MakeDirectory{}.create();
         auto shared_name = has_shared ? std::string("server.crt") : std::string("unused-shared");
         auto shared      = MakeTestFile{}.with(SpecificFileLocation{shared_name, directory}).create();
@@ -229,13 +231,20 @@ BOOST_AUTO_TEST_CASE(logs_selected_certificate_and_warns_on_fallback_at_start_up
         WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
         WithTestEnvironmentVariable ecf_log("ECF_LOG", (directory.path() / "server.log").string());
         WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
-        WithTestEnvironmentVariable ssl_env("ECF_SSL", ecf_ssl);
+        std::optional<WithTestEnvironmentVariable> ssl_env;
+        std::optional<WithoutTestEnvironmentVariable> no_ssl;
+        if (ecf_ssl) {
+            ssl_env.emplace("ECF_SSL", *ecf_ssl);
+        }
+        else {
+            no_ssl.emplace("ECF_SSL");
+        }
 
-        MockServerInvoker server("ecflow_server");
+        MockServerInvoker server(ecf_ssl ? "ecflow_server" : "ecflow_server --ssl");
         BOOST_REQUIRE(server.environment().ssl());
         const auto log = ecf::Log::instance()->contents(-100);
 
-        const bool shared_first    = ecf_ssl.empty() || ecf_ssl == "1";
+        const bool shared_first    = ecf_ssl && (ecf_ssl->empty() || *ecf_ssl == "1");
         const bool shared_selected = has_shared && (shared_first || !has_specific);
         const std::string kind     = shared_selected ? "shared" : "server-specific";
         const auto selected        = (directory.path() / (shared_selected ? "server.crt" : specific_name)).string();
@@ -262,6 +271,85 @@ BOOST_AUTO_TEST_CASE(logs_selected_certificate_and_warns_on_fallback_at_start_up
     check_log("1", false, true);
     check_log("1", true, true);
     check_log("", true, false);
+    // The option alone is specific-first
+    check_log(std::nullopt, true, false);
+    check_log(std::nullopt, true, true);
+    check_log(std::nullopt, false, true);
+}
+
+BOOST_AUTO_TEST_CASE(selects_certificate_for_every_combination_of_ecf_ssl_and_ssl_option) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string specific_stem  = somehost + '.' + someport;
+    const std::string shared_first   = "shared certificate first, server-specific certificate as fallback";
+    const std::string specific_first = "server-specific certificate first, shared certificate as fallback";
+    WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
+
+    for (const bool has_shared : {false, true}) {
+        for (const bool has_specific : {false, true}) {
+            auto directory = MakeDirectory{}.create();
+            WithTestEnvironmentVariable ssl_dir("ECF_SSL_DIR", directory.path().string());
+            auto shared = MakeTestFile{}
+                              .with(SpecificFileLocation{has_shared ? "server.crt" : "unused-shared", directory})
+                              .create();
+            auto specific =
+                MakeTestFile{}
+                    .with(SpecificFileLocation{has_specific ? specific_stem + ".crt" : "unused-specific", directory})
+                    .create();
+
+            for (const auto& ecf_ssl : {std::optional<std::string>{},
+                                        std::optional<std::string>{""},
+                                        std::optional<std::string>{"1"},
+                                        std::optional<std::string>{"X"},
+                                        std::optional<std::string>{specific_stem}}) {
+                std::optional<WithTestEnvironmentVariable> ssl_env;
+                std::optional<WithoutTestEnvironmentVariable> no_ssl;
+                if (ecf_ssl) {
+                    ssl_env.emplace("ECF_SSL", *ecf_ssl);
+                }
+                else {
+                    no_ssl.emplace("ECF_SSL");
+                }
+
+                for (const bool option : {false, true}) {
+                    const auto command = std::string("ecflow_server") + (option ? " --ssl" : "");
+                    const auto context = "ECF_SSL=" + (ecf_ssl ? "'" + *ecf_ssl + "'" : std::string("(unset)")) +
+                                         (option ? " with --ssl" : "") + ", shared=" + std::to_string(has_shared) +
+                                         ", specific=" + std::to_string(has_specific);
+                    BOOST_TEST_CONTEXT(context) {
+                        if (!ecf_ssl && !option) {
+                            MockServerInvoker server(command);
+                            BOOST_CHECK(!server.environment().ssl());
+                            BOOST_CHECK_EQUAL(exported_ecf_ssl(server.environment()), "<not exported>");
+                            continue;
+                        }
+
+                        // ECF_SSL, when set, decides the lookup order; --ssl alone selects specific-first
+                        const bool prefer_shared = ecf_ssl && (ecf_ssl->empty() || *ecf_ssl == "1");
+                        const auto& strategy     = prefer_shared ? shared_first : specific_first;
+                        if (!has_shared && !has_specific) {
+                            BOOST_CHECK_EXCEPTION(
+                                MockServerInvoker{command}, std::runtime_error, [&](const std::runtime_error& error) {
+                                    return std::string(error.what()).find("(using strategy: " + strategy + ")") !=
+                                           std::string::npos;
+                                });
+                            continue;
+                        }
+
+                        // Jobs follow the selected certificate, not the requested order
+                        const bool shared_selected = has_shared && (prefer_shared || !has_specific);
+                        MockServerInvoker server(command);
+                        const ServerEnvironment& env = server.environment();
+                        BOOST_CHECK(env.ssl());
+                        BOOST_CHECK_EQUAL(env.openssl().requested().shared(), prefer_shared);
+                        BOOST_CHECK_EQUAL(env.openssl().selected_crt(),
+                                          shared_selected ? std::string("server.crt") : specific_stem + ".crt");
+                        BOOST_CHECK_EQUAL(exported_ecf_ssl(env), shared_selected ? std::string("1") : specific_stem);
+                    }
+                }
+            }
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -278,11 +366,9 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(std::to_string(env.port()), someport);
     BOOST_CHECK(env.ssl());
     BOOST_REQUIRE(env.openssl().certificate());
-    BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), "1");
-
-    // Note:
-    //   When only using the command line option, if both shared and specific certificates are available,
-    //   there is no way to select the specific certificate.
+    BOOST_CHECK_EQUAL(env.openssl().certificate()->to_envvar_value(), somehost + '.' + someport);
+    // Jobs follow the selected (specific) certificate.
+    BOOST_CHECK_EQUAL(exported_ecf_ssl(env), somehost + '.' + someport);
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -354,7 +440,7 @@ BOOST_AUTO_TEST_CASE(reports_ssl_enable_source_strategy_and_selected_certificate
         }
     };
 
-    check_output(true, "via --ssl, ECF_SSL unset", shared_first);
+    check_output(true, "via --ssl, ECF_SSL unset", specific_first);
     for (const auto* value : {"", "1", "X"}) {
         WithTestEnvironmentVariable ssl_env("ECF_SSL", value);
         const auto& strategy = std::string(value).empty() || std::string(value) == "1" ? shared_first : specific_first;
