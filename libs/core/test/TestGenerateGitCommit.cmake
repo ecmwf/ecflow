@@ -22,8 +22,8 @@ file(MAKE_DIRECTORY "${WORK_DIR}")
 
 set(header "${WORK_DIR}/ecflow_git_commit.h")
 
-# Runs the script and stores the recorded commit in the variable named by out; the header of a previous run is
-# removed first, unless KEEP_HEADER is set
+# Runs the script and stores the recorded commit in the variable named by out, and the output of the script in
+# generate_output; the header of a previous run is removed first, unless KEEP_HEADER is set
 function(generate out source_dir)
   if(NOT KEEP_HEADER)
     file(REMOVE "${header}")
@@ -34,6 +34,7 @@ function(generate out source_dir)
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output)
+  set(generate_output "${output}" PARENT_SCOPE)
   if(NOT result EQUAL 0)
     message(SEND_ERROR "GenerateGitCommit.cmake failed (${result}): ${output}")
     set(${out} "<failed>" PARENT_SCOPE)
@@ -72,6 +73,9 @@ endmacro()
 file(MAKE_DIRECTORY "${WORK_DIR}/tarball")
 generate(commit "${WORK_DIR}/tarball")
 expect("source tree without git" "${commit}" "none")
+if(NOT generate_output STREQUAL "")
+  message(SEND_ERROR "FAIL source tree without git: expected no message, found '${generate_output}'")
+endif()
 
 # A commit given by the packager is recorded, shortened to 12 characters, without asking git
 generate(commit "${WORK_DIR}/tarball" -DCOMMIT=0123456789abcdef0123456789abcdef01234567)
@@ -125,6 +129,16 @@ if(GIT_EXECUTABLE)
   generate(commit "${WORK_DIR}/repo")
   unset(KEEP_HEADER)
   expect("repository with uncommitted changes" "${commit}" "${head}-dirty")
+
+  # A .git that git cannot read (e.g. a submodule mounted without its parent repository) records 'none', and the
+  # message names the setting that reports the commit
+  file(MAKE_DIRECTORY "${WORK_DIR}/orphan")
+  file(WRITE "${WORK_DIR}/orphan/.git" "gitdir: ../missing/.git/modules/orphan\n")
+  generate(commit "${WORK_DIR}/orphan")
+  expect("unreadable .git" "${commit}" "none")
+  if(NOT generate_output MATCHES "git\\(none\\)" OR NOT generate_output MATCHES "ECFLOW_GIT_COMMIT")
+    message(SEND_ERROR "FAIL unreadable .git: expected the message to name git(none) and ECFLOW_GIT_COMMIT, found '${generate_output}'")
+  endif()
 
   # A commit given by the packager takes precedence over the repository
   generate(commit "${WORK_DIR}/repo" -DCOMMIT=0123456789abcdef0123456789abcdef01234567)

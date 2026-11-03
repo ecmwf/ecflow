@@ -176,7 +176,15 @@ fi
 
 version=$(package_version)
 
-(cd "${SOURCE}" && cmake --preset "${PRESET}" -B "${BUILD_DIR}" -DCUSTOM_DEBIAN_PACKAGE_VERSION="${version}")
+# The commit given is also reported in the version description of the binaries, since git may not be able to read
+# the sources (e.g. a submodule mounted without its parent repository)
+COMMIT_ARGS=()
+if [[ -n "${REVISION}" ]]; then
+    COMMIT_ARGS=(-DECFLOW_GIT_COMMIT="${REVISION}")
+fi
+
+(cd "${SOURCE}" && cmake --preset "${PRESET}" -B "${BUILD_DIR}" -DCUSTOM_DEBIAN_PACKAGE_VERSION="${version}" \
+    ${COMMIT_ARGS[@]+"${COMMIT_ARGS[@]}"})
 
 cmake --build "${BUILD_DIR}" --parallel "${JOBS}" --target all
 
