@@ -374,13 +374,25 @@ bool Node::testTimeDependenciesForRequeue() {
     LOG(Log::DBG, "Node::testTimeDependenciesForRequeue() " << debugNodePath() << " calendar " << calendar.toString());
 #endif
 
-    // When we have a mixture of cron *with* other time based attributes
-    // The cron *takes* priority.  Crons should always return true, for checkForRequeue
+    // The node is re-queued when any of its time attributes allows it (i.e. the attributes are ORed).
+    // A cron always allows the re-queue, so it is checked first, and the remaining attributes are then not evaluated.
     for (const CronAttr& cron : crons_) {
         if (cron.checkForRequeue(calendar)) { // will always return true
 #ifdef DEBUG_REQUEUE
             LOG(Log::DBG,
                 "   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for cron -> allow-requeue");
+#endif
+            return true;
+        }
+    }
+
+    // An Aviso attribute with the option --repeat always allows the re-queue, so that the task waits for the next
+    // notification
+    for (const AvisoAttr& aviso : avisos_) {
+        if (aviso.repeat()) {
+#ifdef DEBUG_REQUEUE
+            LOG(Log::DBG,
+                "   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for aviso -> allow-requeue");
 #endif
             return true;
         }

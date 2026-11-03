@@ -582,7 +582,7 @@ the listener, the credentials file and the behaviour of the attribute.
 .. code-block:: shell
 
     aviso --name name --listener 'json'
-      [--url url] [--auth auth] [--collapse]
+      [--url url] [--auth auth] [--collapse] [--repeat]
       [--revision n] [--reason reason] [--event 'json'] [--free]
 
 **Parameters**
@@ -604,6 +604,10 @@ the listener, the credentials file and the behaviour of the attribute.
 
    --collapse
       Flag — a release consumes all the notifications received, instead of exactly one.
+
+   --repeat
+      Flag — the task is requeued automatically each time it completes, and waits for the next notification;
+      no effect on an alias.
 
    --revision
       State: sequence number of the last notification that released the node (unsigned integer).
@@ -631,6 +635,7 @@ be used with clients of version 5.20 or later.
 
     aviso --name A --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --auth %ECF_AVISO_AUTH%
     aviso --name B --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --collapse
+    aviso --name C --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --repeat
 
 **Notes**
 
@@ -1774,7 +1779,7 @@ The formal grammar of a definition file is as follows.
     queue           : "queue" >> identifier >> +string
     generic         : "generic" >> identifier >> *string
     aviso           : "aviso" >> "--name" >> identifier >> "--listener" >> "'" >> jsonstring >> "'"
-                    : >> *( "--url" >> string | "--auth" >> string | "--collapse"
+                    : >> *( "--url" >> string | "--auth" >> string | "--collapse" | "--repeat"
                     :     | "--revision" >> unsigned_int | "--reason" >> string | "--event" >> "'" >> jsonstring >> "'" )
     mirror          : "mirror" >> "--name" >> identifier >> "--remote_path" >> string
                     : >> *( "--remote_host" >> string | "--remote_port" >> string | "--polling" >> string

@@ -13,7 +13,7 @@
 
 VAvisoAttrType::VAvisoAttrType()
     : VAttributeType("aviso") {
-    dataCount_                         = 9;
+    dataCount_                         = 10;
     searchKeyToData_["aviso_name"]     = NameIndex;
     searchKeyToData_["aviso_listener"] = ListenerIndex;
     searchKeyToData_["aviso_url"]      = UrlIndex;
@@ -21,6 +21,8 @@ VAvisoAttrType::VAvisoAttrType()
     searchKeyToData_["aviso_auth"]     = AuthIndex;
     searchKeyToData_["aviso_reason"]   = ReasonIndex;
     searchKeyToData_["aviso_active"]   = ActiveIndex;
+    searchKeyToData_["aviso_collapse"] = CollapseIndex;
+    searchKeyToData_["aviso_repeat"]   = RepeatIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
 
@@ -32,7 +34,8 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
         t += "<b>URL:</b> " + d[UrlIndex] + "<br>";
         t += "<b>Revision:</b> " + d[RevisionIndex] + "<br>";
         t += "<b>Auth:</b> " + d[AuthIndex] + "<br>";
-        t += "<b>Collapse:</b> " + d[CollapseIndex];
+        t += "<b>Collapse:</b> " + d[CollapseIndex] + "<br>";
+        t += "<b>Repeat:</b> " + d[RepeatIndex];
         if (auto& cfg = d[ActiveIndex]; !cfg.isEmpty()) {
             t += "<br><b>Active:</b> <span style=\"color:green\">" + cfg + "</span>";
         }
@@ -62,15 +65,16 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
         }
     }
 
-    data << qName_                                    // TypeIndex
-         << QString::fromStdString(aviso.name())      // NameIndex
-         << QString::fromStdString(val)               // ListenerIndex
-         << QString::fromStdString(aviso.url())       // UrlIndex
-         << QString::number(aviso.revision())         // Revision Index
-         << QString::fromStdString(aviso.auth())      // AuthIndex
-         << QString::fromStdString(aviso.reason())    // ReasonIndex
-         << QString::fromStdString(aviso.active())    // ActiveIndex
-         << QString(aviso.collapse() ? "yes" : "no"); // CollapseIndex
+    data << qName_                                   // TypeIndex
+         << QString::fromStdString(aviso.name())     // NameIndex
+         << QString::fromStdString(val)              // ListenerIndex
+         << QString::fromStdString(aviso.url())      // UrlIndex
+         << QString::number(aviso.revision())        // Revision Index
+         << QString::fromStdString(aviso.auth())     // AuthIndex
+         << QString::fromStdString(aviso.reason())   // ReasonIndex
+         << QString::fromStdString(aviso.active())   // ActiveIndex
+         << QString(aviso.collapse() ? "yes" : "no") // CollapseIndex
+         << QString(aviso.repeat() ? "yes" : "no");  // RepeatIndex
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {

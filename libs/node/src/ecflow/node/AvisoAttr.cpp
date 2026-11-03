@@ -89,7 +89,8 @@ AvisoAttr::AvisoAttr(Node* parent,
                      revision_t revision,
                      auth_t auth,
                      const reason_t& reason,
-                     bool collapse)
+                     bool collapse,
+                     bool repeat)
     : parent_{parent},
       parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
@@ -97,6 +98,7 @@ AvisoAttr::AvisoAttr(Node* parent,
       url_{std::move(url)},
       auth_{std::move(auth)},
       collapse_{collapse},
+      repeat_{repeat},
       reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision} {
     if (!ecf::algorithm::is_valid_name(name_)) {
@@ -422,7 +424,8 @@ void AvisoAttr::state_changed(const std::vector<AvisoAttr>& avisos, NState::Stat
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
            lhs.revision() == rhs.revision() && lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason() &&
-           lhs.collapse() == rhs.collapse() && lhs.event() == rhs.event() && lhs.isSetFree() == rhs.isSetFree();
+           lhs.collapse() == rhs.collapse() && lhs.repeat() == rhs.repeat() && lhs.event() == rhs.event() &&
+           lhs.isSetFree() == rhs.isSetFree();
 }
 
 std::string to_python_string(const AvisoAttr& aviso) {
@@ -442,6 +445,8 @@ std::string to_python_string(const AvisoAttr& aviso) {
     s += aviso.reason();
     s += ", collapse=";
     s += aviso.collapse() ? "true" : "false";
+    s += ", repeat=";
+    s += aviso.repeat() ? "true" : "false";
     s += ")";
     return s;
 }

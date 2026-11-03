@@ -95,6 +95,22 @@
             "aviso_auth" : {
                 "type" : "string",
                 "label" : "Aviso authentication"
+            },
+            "aviso_collapse" : {
+                "type" : "combo",
+                "label" : "Aviso collapse",
+                "values" : "any|yes|no",
+                "labels" : "Any|Yes|No",
+                "default" : "any",
+                "ignoreIfAny" : "true"
+            },
+            "aviso_repeat" : {
+                "type" : "combo",
+                "label" : "Aviso repeat",
+                "values" : "any|yes|no",
+                "labels" : "Any|Yes|No",
+                "default" : "any",
+                "ignoreIfAny" : "true"
             }
         },
         "meter" : {

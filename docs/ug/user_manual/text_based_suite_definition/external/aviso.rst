@@ -27,7 +27,7 @@ the attribute can be provided in any order.
 
    A server of version 5.20 or later that holds an :term:`aviso` attribute must be used with clients
    (:code:`ecflow_client`, :code:`ecflow_ui` and the Python API) of version 5.20 or later. The server
-   reports the state of the attribute with options unknown to earlier clients (e.g. :code:`--collapse`,
+   reports the state of the attribute with options unknown to earlier clients (e.g. :code:`--collapse`, :code:`--repeat`,
    and :code:`--event` once a notification has released the task), and an earlier client fails to load the
    definition it receives from the server.
 
@@ -44,6 +44,9 @@ the attribute can be provided in any order.
 
     task t3
       aviso --name C --listener '{ "event": "mars", "request": { "class": "od" } }' --collapse
+
+    task t4
+      aviso --name D --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --repeat
 
 The options are the following:
 
@@ -66,6 +69,8 @@ The options are the following:
    * - :code:`--collapse`
      - A release consumes all the notifications received, instead of exactly one; see
        :ref:`text_based_def_aviso_release`.
+   * - :code:`--repeat`
+     - The task is requeued automatically each time it completes; see :ref:`text_based_def_aviso_release`.
 
 The values of :code:`--listener`, :code:`--url` and :code:`--auth` can be composed of
 :term:`variables <variable>`, which are resolved when the node is queued. The variables
@@ -175,6 +180,39 @@ Once released, the task behaves as a task released by a time dependency: if the 
 resubmitted according to :code:`ECF_TRIES` without waiting for another notification, and the next
 notification is waited for only once the task is queued again (e.g. requeued).
 
+When the task completes, it is queued again as follows:
+
+  - without :code:`--repeat`: the task stays complete, until it is requeued (e.g. with the Requeue command,
+    or by a :term:`repeat` of a parent node);
+  - with :code:`--repeat`: the task is requeued automatically, as a task with a :term:`cron`, and waits for
+    the next notification; this also applies when the task is completed by a forced complete, or after an
+    interactive run.
+
+Notes:
+
+  - As for a :term:`cron`, the task is requeued at the moment it becomes complete; a task that is already
+    complete (e.g. when :code:`--repeat` is set by the Alter command) stays complete until it is requeued
+    explicitly (see :ref:`text_based_def_cron` and :ref:`text_based_def_aviso_alter`).
+  - The notifications published while the job runs release the task once it is queued again.
+  - A :term:`cron` on the same task requeues it in any case, with or without :code:`--repeat`.
+  - On an alias, :code:`--repeat` is accepted and has no effect, since an alias is never requeued.
+
+.. warning::
+
+   A task with :code:`--repeat` never stays complete, as a node with a :term:`cron` (see
+   :ref:`text_based_def_cron`). As a consequence:
+
+     - the enclosing families and suite never reach status *complete*;
+     - a :term:`repeat` on a parent node never advances, since the task never reports its completion to it;
+     - a completion :term:`trigger` on the task, or on an enclosing node, is never satisfied;
+     - a :term:`day` on the task matches only the date fixed when the task was begun or last requeued
+       manually, since a completion does not move it: the task is released on that date only, and then
+       stays queued.
+
+   To process the notifications within a cycle driven by a :term:`repeat` of a parent node, leave out
+   :code:`--repeat`: the task then stays complete until the next increment of the parent :term:`repeat`
+   requeues it.
+
 The revision, the notification that released the node, and whether the task was released and not yet
 queued again, are kept in the :term:`check point` file, so that a server restarted from a check point
 continues with the notifications not yet consumed, and with the resubmissions of an aborted task.
@@ -232,6 +270,45 @@ double quotes); in a task script, enclose them in single quotes:
    :code:`file:///path/with%20space`) is therefore read as a variable reference, and the job generation fails;
    such notifications cannot be processed through the generated variables.
 
+.. _text_based_def_aviso_alter:
+
+Changing the attribute
+======================
+
+The Alter command (:code:`ecflow_client --alter`) changes an :term:`aviso` attribute as follows:
+
+  - :code:`add aviso <name> "<options>"`: adds the attribute; it starts watching at once when the node is
+    queued, and otherwise when the node is next queued.
+  - :code:`change aviso <name> "<options>"`: replaces the attribute with one built from the given options
+    only (see below).
+  - :code:`change aviso <name> reload`: stops and starts the watch again, so that the configuration (e.g.
+    updated variables) is evaluated again; the options and the revision are kept.
+  - :code:`delete aviso <name>`: stops the watch, and clears the flag :code:`remote_error` set by the
+    attribute.
+
+A change with options replaces the attribute, and does not merge the options with the previous ones:
+
+  - an option not given takes its default; e.g. a change without :code:`--repeat` clears the option;
+  - the revision is the one given by :code:`--revision`, or 0 when the option is omitted; in that case, only
+    the notifications published after the change are considered;
+  - the notification that released the node (see :ref:`text_based_def_aviso_variables`) and the release state
+    are cleared;
+  - the new attribute starts watching at once when the node is queued, and otherwise when the node is next
+    queued.
+
+To continue after the notification that last released the node, give the current revision of the attribute
+(as shown in the definition, e.g. by :code:`ecflow_client --get`) with :code:`--revision`:
+
+.. code-block:: shell
+
+   ecflow_client --alter=change aviso <name> "--listener '<json>' --revision <revision>" /path/to/node
+
+Notes:
+
+  - The option :code:`--repeat` is evaluated when the task completes: a change made while the task is
+    submitted or active applies at that completion; a change made while the task is complete applies at the
+    next completion, after the task is requeued.
+
 .. _text_based_def_aviso_errors:
 
 Errors
@@ -271,12 +348,4 @@ is created again.
 
       ecflow_client --alter=change aviso <name> reload /path/to/node
 
-   Changing the attribute with a list of options (e.g. a different listener) replaces it, and the new
-   attribute starts from the revision given by :code:`--revision`, or 0 when the option is omitted; in that
-   case, only the notifications published after the change are considered. To continue after the
-   notification that last released the node, give the current revision of the attribute (as shown in the
-   definition, e.g. by :code:`ecflow_client --get`) with :code:`--revision`:
-
-   .. code-block:: shell
-
-      ecflow_client --alter=change aviso <name> "--listener '<json>' --revision <revision>" /path/to/node
+   See :ref:`text_based_def_aviso_alter` for the other changes of the attribute.

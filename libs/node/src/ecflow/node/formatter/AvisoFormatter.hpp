@@ -36,6 +36,9 @@ struct Formatter<AvisoAttr, Stream>
         if (item.collapse()) {
             output << " --collapse";
         }
+        if (item.repeat()) {
+            output << " --repeat";
+        }
     }
 };
 

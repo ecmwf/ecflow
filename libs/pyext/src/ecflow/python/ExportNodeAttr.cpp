@@ -495,14 +495,16 @@ void CronAttr_set_time_series(ecf::CronAttr* self, const std::string& ts) {
 /// @param url The Aviso server URL (defaults to `AvisoAttr::default_url`).
 /// @param auth The path to the credentials file (defaults to `AvisoAttr::default_auth`).
 /// @param collapse Whether a release consumes all the notifications received, instead of exactly one.
+/// @param repeat Whether the task is requeued automatically each time it completes.
 /// @return The newly created AvisoAttr.
 ///
 ecf::AvisoAttr AvisoAttr_make(const std::string& name,
                               const std::string& listener,
                               const std::string& url,
                               const std::string& auth,
-                              bool collapse) {
-    return ecf::AvisoAttr(nullptr, name, listener, url, 0, auth, "", collapse);
+                              bool collapse,
+                              bool repeat) {
+    return ecf::AvisoAttr(nullptr, name, listener, url, 0, auth, "", collapse, repeat);
 }
 
 ///
@@ -1496,7 +1498,8 @@ void export_NodeAttr(py::module& m) {
              py::arg("url") = ecf::AvisoAttr::default_url,
              py::kw_only(),
              py::arg("auth")     = ecf::AvisoAttr::default_auth,
-             py::arg("collapse") = false)
+             py::arg("collapse") = false,
+             py::arg("repeat")   = false)
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("__str__", &AvisoAttr_str)
@@ -1519,7 +1522,10 @@ void export_NodeAttr(py::module& m) {
              "Returns the path to Authentication credentials used to contact the Aviso server")
         .def("collapse",
              &ecf::AvisoAttr::collapse,
-             "Returns whether a release consumes all the notifications received, instead of exactly one");
+             "Returns whether a release consumes all the notifications received, instead of exactly one")
+        .def("repeat",
+             &ecf::AvisoAttr::repeat,
+             "Returns whether the task is requeued automatically each time it completes");
 
     py::class_<ecf::MirrorAttr>(m, "MirrorAttr", py::dynamic_attr(), NodeAttrDoc::mirror_doc())
 

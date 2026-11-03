@@ -12,6 +12,7 @@
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
@@ -141,6 +142,45 @@ node_ptr find(const defs_ptr& defs, const std::string& path) {
     auto node = defs->findAbsNode(path);
     BOOST_REQUIRE_MESSAGE(node, "Node not found: " << path);
     return node;
+}
+
+///
+/// @brief Loads a suite with a task `t`, whose clock starts at the given time.
+///
+defs_ptr load_suite_with_clock(const boost::posix_time::ptime& start) {
+    defs_ptr defs = Defs::create();
+    auto suite    = defs->add_suite("s");
+    suite->addClock(ClockAttr(start));
+    suite->addVariable(Variable("ECF_AVISO_URL", "http://aviso:8000"));
+    suite->addVariable(Variable("ECF_AVISO_AUTH", "/path/to/auth"));
+    suite->add_task("t");
+    return defs;
+}
+
+boost::posix_time::time_duration hours(int h) {
+    return boost::posix_time::hours(h);
+}
+
+///
+/// @brief Simulates the job of the task, which starts and completes (i.e. the child commands, in a command context).
+///
+void run_job(Submittable& task) {
+    ecf::CmdContext context;
+    task.init("1234");
+    task.complete();
+}
+
+///
+/// @brief Advances the calendar, hour by hour, until the given time, and returns whether the task was submitted.
+///
+bool submits_before(const defs_ptr& defs, const std::string& path, const boost::posix_time::ptime& until) {
+    while (defs->suites()[0]->calendar().suiteTime() < until) {
+        if (submits(defs, path)) {
+            return true;
+        }
+        defs->updateCalendar(ecf::CalendarUpdateParams(boost::posix_time::hours(1)));
+    }
+    return false;
 }
 
 } // namespace
@@ -717,6 +757,249 @@ BOOST_AUTO_TEST_CASE(forcing_a_finished_task_queued_starts_the_aviso_again) {
     BOOST_CHECK(!t->avisos()[0].isFree());
     backend.state->pending.emplace_back(notification(2));
     BOOST_CHECK(t->avisos()[0].isFree());
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(t->avisos()[0].repeat());
+    BOOST_REQUIRE_EQUAL(backend.state->subscriptions, 1);
+
+    // The notification releases the task, which runs and completes
+    backend.state->pending = {notification(1)};
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    // The task is queued again, and the attribute watches again, after the consumed notification
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+    BOOST_REQUIRE(backend.state->subscribed.has_value());
+    BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), 1u);
+
+    BOOST_CHECK(!t->avisos()[0].isFree());
+    backend.state->pending = {notification(2)};
+    BOOST_CHECK_MESSAGE(submits(defs, "/s/t"), "Expected the next notification to release the task again");
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_when_its_job_completes) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t")->isSubmittable();
+    BOOST_REQUIRE(t);
+
+    for (std::uint64_t sequence = 1; sequence <= 2; ++sequence) {
+        // The notification releases the task, whose job starts and completes (i.e. the child commands)
+        backend.state->pending = {notification(sequence)};
+        BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected notification " << sequence << " to release the task");
+        t->init("1234");
+        BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), std::to_string(sequence));
+        t->complete();
+
+        // The task is queued again, and the attribute watches again, after the consumed notification
+        BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+        BOOST_CHECK_EQUAL(t->avisos()[0].revision(), sequence);
+        BOOST_CHECK_EQUAL(backend.state->subscriptions, static_cast<int>(sequence) + 1);
+        BOOST_REQUIRE(backend.state->subscribed.has_value());
+        BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), sequence);
+        BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), std::to_string(sequence));
+    }
+
+    // Without a new notification, the task is not released
+    backend.state->pending = {};
+    BOOST_CHECK(!submits(defs, "/s/t"));
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_and_day_is_released_on_the_first_matching_day_only) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    // Monday, 10:00
+    auto defs = load_suite_with_clock(boost::posix_time::ptime(boost::gregorian::date(2015, 6, 8), hours(10)));
+    auto t    = find(defs, "/s/t")->isSubmittable();
+    t->addDay(DayAttr(DayAttr::MONDAY));
+    t->addAviso(AvisoAttr{t, "A", R"({ "event": "mars" })", "%ECF_AVISO_URL%", 0, "%ECF_AVISO_AUTH%", "", false, true});
+    defs->beginAll();
+
+    // On the Monday, the day is not expired by the completion, and each notification releases the task
+    for (std::uint64_t sequence = 1; sequence <= 2; ++sequence) {
+        backend.state->pending = {notification(sequence)};
+        BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected notification " << sequence << " to release the task");
+        run_job(*t);
+        BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+        BOOST_CHECK_EQUAL(t->avisos()[0].revision(), sequence);
+        defs->updateCalendar(CalendarUpdateParams(hours(1)));
+    }
+
+    // As for a cron, the day matches only the date fixed when the task was begun, which a completion does not move
+    // (only a manual requeue, or the increment of a parent repeat, does): the task is not released on the next Monday,
+    // and stays queued
+    BOOST_REQUIRE(
+        !submits_before(defs, "/s/t", boost::posix_time::ptime(boost::gregorian::date(2015, 6, 9), hours(0))));
+    backend.state->pending = {notification(3)};
+    BOOST_CHECK(!submits_before(defs, "/s/t", boost::posix_time::ptime(boost::gregorian::date(2015, 6, 16), hours(0))));
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 2u);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_and_time_is_released_once_per_time_slot) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    // Monday, 08:00
+    auto defs = load_suite_with_clock(boost::posix_time::ptime(boost::gregorian::date(2015, 6, 8), hours(8)));
+    auto t    = find(defs, "/s/t")->isSubmittable();
+    t->addTime(TimeAttr(TimeSlot(10, 0)));
+    t->addAviso(AvisoAttr{t, "A", R"({ "event": "mars" })", "%ECF_AVISO_URL%", 0, "%ECF_AVISO_AUTH%", "", false, true});
+    defs->beginAll();
+
+    // The notification waits for the time slot, at 10:00
+    backend.state->pending = {notification(1)};
+    BOOST_CHECK(!submits_before(defs, "/s/t", boost::posix_time::ptime(boost::gregorian::date(2015, 6, 8), hours(10))));
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected notification 1 to release the task at 10:00");
+    run_job(*t);
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 1u);
+
+    // The notifications received later wait for the next time slot, on the next day, where the oldest releases the
+    // task
+    backend.state->pending = {notification(2), notification(3)};
+    defs->updateCalendar(CalendarUpdateParams(hours(1)));
+    BOOST_CHECK(!submits_before(defs, "/s/t", boost::posix_time::ptime(boost::gregorian::date(2015, 6, 9), hours(10))));
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"),
+                          "Expected notification 2 to release the task at 10:00 on the next day");
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 2u);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_without_repeat_stays_complete_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+    BOOST_REQUIRE(!t->avisos()[0].repeat());
+
+    backend.state->pending = {notification(1)};
+    BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected the notification to release the task");
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    BOOST_CHECK_EQUAL(t->state(), NState::COMPLETE);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 1);
+    BOOST_CHECK(t->avisos()[0].active().empty());
+}
+
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_after_interactive_run) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // i.e. `ecflow_client --run /s/t`, without any notification received
+    t->miss_next_time_slot();
+    JobsParam jobsParam(false /* create jobs */);
+    BOOST_REQUIRE(t->run(jobsParam, true /* force */));
+    // Without creating jobs, the run leaves the state untouched; the job submission is simulated
+    t->set_state(NState::SUBMITTED);
+    t->set_state(NState::ACTIVE);
+    t->set_state(NState::COMPLETE);
+
+    // The task is queued again, and no notification was consumed
+    BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(t->avisos()[0].revision(), 0u);
+    BOOST_CHECK_EQUAL(backend.state->subscriptions, 2);
+
+    t->avisos()[0].finish();
+}
+
+BOOST_AUTO_TEST_CASE(task_with_cron_is_requeued_on_completion_with_or_without_repeat) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    for (const std::string repeat : {"", " --repeat"}) {
+        BOOST_TEST_CONTEXT("aviso options: '" << repeat << "'") {
+            auto defs = load_suite_with_aviso(aviso_variables, repeat + "\n    cron 00:00 23:59 00:01");
+            defs->beginAll();
+            auto t = find(defs, "/s/t");
+
+            // Any time attribute that allows the re-queue re-queues the task; a cron always allows it
+            t->set_state(NState::ACTIVE);
+            t->set_state(NState::COMPLETE);
+            BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+
+            t->avisos()[0].finish();
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(alias_with_repeat_is_not_requeued_on_completion) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables);
+    defs->beginAll();
+    auto t = find(defs, "/s/t");
+
+    // The option is accepted on an alias, and has no effect, since an alias is never re-queued
+    auto alias = t->isTask()->add_alias_only();
+    alias->addAviso(AvisoAttr{alias.get(),
+                              "B",
+                              R"({ "event": "dissemination" })",
+                              AvisoAttr::default_url,
+                              0,
+                              AvisoAttr::default_auth,
+                              "",
+                              false /* collapse */,
+                              true /* repeat */});
+    BOOST_REQUIRE(alias->avisos()[0].repeat());
+
+    alias->set_state(NState::ACTIVE);
+    alias->set_state(NState::COMPLETE);
+    BOOST_CHECK_EQUAL(alias->state(), NState::COMPLETE);
 
     t->avisos()[0].finish();
 }

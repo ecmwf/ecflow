@@ -66,6 +66,7 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     description.add_options()(option_auth, po::value<std::string>()->default_value(ecf::AvisoAttr::default_auth));
     description.add_options()(option_reason, po::value<std::string>()->default_value(""));
     description.add_options()(option_collapse, po::bool_switch()->default_value(false));
+    description.add_options()(option_repeat, po::bool_switch()->default_value(false));
     description.add_options()(option_event, po::value<std::string>());
     description.add_options()(option_free, po::bool_switch()->default_value(false));
 
@@ -92,8 +93,9 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     auto auth     = get_option_value<ecf::AvisoAttr::auth_t>(vm, option_auth, line);
     auto reason   = get_option_value<ecf::AvisoAttr::reason_t>(vm, option_reason, line);
     auto collapse = get_option_value<bool>(vm, option_collapse, line);
+    auto repeat   = get_option_value<bool>(vm, option_repeat, line);
 
-    auto aviso = ecf::AvisoAttr{parent, name, listener, url, revision, auth, reason, collapse};
+    auto aviso = ecf::AvisoAttr{parent, name, listener, url, revision, auth, reason, collapse, repeat};
     if (vm.count(option_event)) {
         aviso.set_event(ecf::AvisoEvent::from_option(vm[option_event].as<std::string>()));
     }

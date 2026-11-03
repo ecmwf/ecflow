@@ -301,6 +301,104 @@ BOOST_AUTO_TEST_CASE(can_serialise_collapse_option) {
     BOOST_CHECK(restored == original);
 }
 
+BOOST_AUTO_TEST_CASE(can_parse_and_print_repeat_option) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          task t1
+            aviso --name A --listener '{ "event": "mars" }' --repeat
+          task t2
+            aviso --name B --listener '{ "event": "mars" }'
+        endsuite
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+
+    std::string errorMsg, warningMsg;
+    BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+
+    BOOST_CHECK(defs.suites()[0]->taskVec()[0]->avisos()[0].repeat());
+    BOOST_CHECK(!defs.suites()[0]->taskVec()[1]->avisos()[0].repeat());
+
+    // The option is printed only when set, and survives a print/parse round trip
+    std::string printed = ecf::as_string(defs, PrintStyle::DEFS);
+    auto first          = printed.find("--repeat");
+    BOOST_REQUIRE(first != std::string::npos);
+    BOOST_CHECK(printed.find("--repeat", first + 1) == std::string::npos);
+
+    Defs reparsed;
+    DefsStructureParser reparser(&reparsed, printed, true);
+    BOOST_REQUIRE_MESSAGE(reparser.doParse(errorMsg, warningMsg), "Failed to re-parse: " << errorMsg);
+    BOOST_CHECK(reparsed.suites()[0]->taskVec()[0]->avisos()[0].repeat());
+    BOOST_CHECK(!reparsed.suites()[0]->taskVec()[1]->avisos()[0].repeat());
+}
+
+BOOST_AUTO_TEST_CASE(writes_repeat_option_in_checkpoints) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          task t1
+            aviso --name A --listener '{ "event": "mars" }' --revision 42 --repeat
+          task t2
+            aviso --name B --listener '{ "event": "mars" }' --revision 7
+        endsuite
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+    std::string errorMsg, warningMsg;
+    BOOST_REQUIRE_MESSAGE(parser.doParse(errorMsg, warningMsg), "Failed to parse definition: " << errorMsg);
+
+    // The option and the revision survive a checkpoint and its restore
+    std::string checkpoint = ecf::as_string(defs, PrintStyle::MIGRATE);
+    Defs restored;
+    DefsStructureParser reparser(&restored, checkpoint, true);
+    BOOST_REQUIRE_MESSAGE(reparser.doParse(errorMsg, warningMsg), "Failed to parse checkpoint: " << errorMsg);
+
+    const auto& with = restored.suites()[0]->taskVec()[0]->avisos()[0];
+    BOOST_CHECK(with.repeat());
+    BOOST_CHECK_EQUAL(with.revision(), 42u);
+    const auto& without = restored.suites()[0]->taskVec()[1]->avisos()[0];
+    BOOST_CHECK(!without.repeat());
+    BOOST_CHECK_EQUAL(without.revision(), 7u);
+}
+
+BOOST_AUTO_TEST_CASE(can_serialise_repeat_option) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    AvisoAttr original{
+        nullptr, "A", R"({ "event": "mars" })", "http://host:port", 42, "/path/to/auth", "", false, true};
+
+    std::string data;
+    ecf::save_as_string(data, original);
+
+    AvisoAttr restored;
+    ecf::restore_from_string(data, restored);
+
+    BOOST_CHECK(restored.repeat());
+    BOOST_CHECK(restored == original);
+}
+
+BOOST_AUTO_TEST_CASE(attributes_differing_in_repeat_are_not_equal) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    AvisoAttr with{nullptr, "A", R"({ "event": "mars" })", "http://host:port", 0, "/path/to/auth", "", false, true};
+    AvisoAttr without{nullptr, "A", R"({ "event": "mars" })", "http://host:port", 0, "/path/to/auth", "", false};
+
+    BOOST_CHECK(!(with == without));
+}
+
 BOOST_AUTO_TEST_CASE(deserialises_aviso_written_by_ecflow_5_19_without_collapse) {
     ECF_NAME_THIS_TEST();
 
@@ -317,8 +415,9 @@ BOOST_AUTO_TEST_CASE(deserialises_aviso_written_by_ecflow_5_19_without_collapse)
     AvisoAttr restored;
     ecf::restore_from_string(data, restored);
 
-    // The archive of ecFlow 5.19.x has no class version (i.e. version 0), no collapse option and no event
+    // The archive of ecFlow 5.19.x has no class version (i.e. version 0), no collapse or repeat option and no event
     BOOST_CHECK(!restored.collapse());
+    BOOST_CHECK(!restored.repeat());
     BOOST_CHECK(restored.event().empty());
 }
 

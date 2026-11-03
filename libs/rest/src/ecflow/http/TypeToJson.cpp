@@ -368,6 +368,7 @@ void to_json(ojson& j, const ecf::AvisoAttr& a) {
     j["listener"] = a.listener();
     j["url"]      = a.url();
     j["collapse"] = a.collapse();
+    j["repeat"]   = a.repeat();
 }
 
 void to_json(ojson& j, const ecf::MirrorAttr& a) {
