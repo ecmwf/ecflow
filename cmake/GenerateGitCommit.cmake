@@ -58,7 +58,10 @@ elseif(GIT_EXECUTABLE AND EXISTS "${SOURCE_DIR}/.git")
       string(APPEND commit "-dirty")
     endif()
   else()
-    message(STATUS "GenerateGitCommit.cmake: no git commit found in ${SOURCE_DIR}, recording 'none' (${error})")
+    # The sources hold a .git that git cannot read (e.g. a submodule copied, or mounted, without its parent
+    # repository): say what is reported instead, and how to report the commit
+    message(STATUS "ecFlow: the git commit of the sources in ${SOURCE_DIR} cannot be determined, and the version "
+                   "reports git(none); set ECFLOW_GIT_COMMIT to the commit to report it (git: ${error})")
   endif()
 endif()
 
