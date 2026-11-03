@@ -68,6 +68,13 @@ void Log::cache_time_stamp() {
     logImpl_->create_time_stamp();
 }
 
+void Log::cache_time_stamp(const std::string& time_stamp) {
+    std::scoped_lock lock(mx_);
+
+    create_logimpl();
+    logImpl_->set_time_stamp(time_stamp);
+}
+
 const std::string& Log::get_cached_time_stamp() const {
     std::scoped_lock lock(mx_);
 
@@ -219,15 +226,16 @@ void log_assert(char const* expr, char const* file, long line, const std::string
     }
 }
 
-// returns vec = MSG, LOG, ERR, WAR, DBG, OTH
+// returns vec = MSG, LOG, ERR, WAR, DBG, OTH, EXT
 void Log::get_log_types(std::vector<std::string>& vec) {
-    vec.reserve(6);
+    vec.reserve(7);
     vec.emplace_back("MSG");
     vec.emplace_back("LOG");
     vec.emplace_back("ERR");
     vec.emplace_back("WAR");
     vec.emplace_back("DBG");
     vec.emplace_back("OTH");
+    vec.emplace_back("EXT");
 }
 
 // *** LogFlusher
@@ -276,6 +284,9 @@ static void append_log_type(std::string& str, Log::LogType lt) {
         case Log::OTH:
             str.append("OTH:");
             break;
+        case Log::EXT:
+            str.append("EXT:");
+            break;
         default:
             assert(false);
             break;
@@ -287,14 +298,19 @@ bool LogImpl::log(Log::LogType lt, const std::string& message) {
 
     // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
     // XXX:[HH:MM:SS D.M.YYYY] --<user_cmd> [+additional information]
-    if (time_stamp_.empty() || lt == Log::ERR || lt == Log::WAR || lt == Log::DBG) {
-        create_time_stamp();
-    }
-
     // re-use memory allocated to log_type_and_time_stamp_
     log_type_and_time_stamp_.clear();
     append_log_type(log_type_and_time_stamp_, lt);
-    log_type_and_time_stamp_ += time_stamp_;
+    if (lt == Log::EXT) {
+        // Extra information is stamped with the time of the event it records, leaving the request time cached
+        log_type_and_time_stamp_ += TimeStamp::now();
+    }
+    else {
+        if (time_stamp_.empty() || lt == Log::ERR || lt == Log::WAR || lt == Log::DBG) {
+            create_time_stamp();
+        }
+        log_type_and_time_stamp_ += time_stamp_;
+    }
 
     if (message.find("\n") == std::string::npos) {
         // If message has no \n then write in one go

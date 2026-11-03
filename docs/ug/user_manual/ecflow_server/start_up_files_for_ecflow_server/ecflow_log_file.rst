@@ -38,6 +38,10 @@ which can be set before the ecFlow server starts.
 | DBG  | Debugging message, by default these are not visible they must |
 |      | be turned on by a privileged user.                            |
 +------+---------------------------------------------------------------+
+| EXT  | Extra information, written only when enabled by the server    |
+|      | configuration. Each line carries the time at which it is      |
+|      | written.                                                      |
++------+---------------------------------------------------------------+
 |others| There could be a keyboard echo in the log file if ecFlow is   |
 |      | running interactively; these lines should be ignored by       |
 |      | programs processing the log file.                             |

@@ -62,7 +62,8 @@ public:
         ERR, ///< An error, including a refused request
         WAR, ///< A warning
         DBG, ///< Debug output
-        OTH  ///< Anything else
+        OTH, ///< Anything else
+        EXT  ///< Extra information, written only when enabled by the server configuration
     };
 
     ///
@@ -115,7 +116,7 @@ public:
     /// and DBG records carry the *current time*, and that refresh also replaces the cached stamp, so the MSG, LOG
     /// and OTH records that follow within the same request carry the time of the error rather than that of the
     /// request. The cache is also filled with the current time when it is empty, that is, for the first record
-    /// after the file is opened.
+    /// after the file is opened. EXT records carry the *current time*, but leave the cached stamp unchanged.
     ///
     /// Consequently a MSG, LOG or OTH record written outside the paths that refresh the cache (see
     /// cache_time_stamp()) is stamped with the time of the last request or scheduler tick, however long ago that
@@ -146,6 +147,17 @@ public:
     /// If the file is closed it is opened first.
     ///
     void cache_time_stamp();
+
+    ///
+    /// @brief Sets the time stamp reused by subsequent MSG, LOG and OTH records to the given one.
+    ///
+    /// Intended for tests, which need a known request time, independent of the clock.
+    ///
+    /// If the file is closed it is opened first.
+    ///
+    /// @param[in] time_stamp The time stamp, formatted as `[HH:MM:SS D.M.YYYY] ` (see TimeStamp::now()).
+    ///
+    void cache_time_stamp(const std::string& time_stamp);
 
     ///
     /// @brief Returns the time stamp last set by cache_time_stamp().
@@ -284,7 +296,8 @@ public:
 /// of the file.
 ///
 /// @invariant Between create_time_stamp() calls, every record written with MSG, LOG or OTH carries the same time
-///            stamp; writing an ERR, WAR or DBG record counts as a create_time_stamp() call.
+///            stamp; writing an ERR, WAR or DBG record counts as a create_time_stamp() call, while writing an EXT
+///            record does not.
 /// @see Log
 ///
 class LogImpl {
@@ -310,7 +323,8 @@ public:
     ///
     /// The time stamp is refreshed to the current time for ERR, WAR and DBG, and when none has been cached yet;
     /// otherwise the cached one is reused, whatever its age. A refresh replaces the cache, so it also affects the
-    /// MSG, LOG and OTH records written afterwards.
+    /// MSG, LOG and OTH records written afterwards. EXT records carry the current time, without using or replacing
+    /// the cache.
     ///
     /// A message without newlines is written as a single record, `XXX:[stamp] <message>`. A message with newlines
     /// is split at every newline, using ecf::algorithm::split_at, and each piece is written as a separate record
@@ -331,6 +345,13 @@ public:
     /// @brief Sets the cached time stamp to the current time.
     ///
     void create_time_stamp();
+
+    ///
+    /// @brief Sets the cached time stamp to the given one.
+    ///
+    /// @param[in] time_stamp The time stamp, formatted as `[HH:MM:SS D.M.YYYY] `.
+    ///
+    void set_time_stamp(const std::string& time_stamp) { time_stamp_ = time_stamp; }
 
     ///
     /// @brief Returns the cached time stamp, as written in the records.
