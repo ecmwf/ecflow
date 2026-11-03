@@ -1,0 +1,134 @@
+# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+# SPDX-License-Identifier: Apache-2.0
+
+# CD v3 (experimental, ci-infrastructure feature/cd-v3), dry run only: the release manifest that
+# .github/workflows/cd-v3.yml gives the release gate. See
+# https://github.com/ecmwf/ci-infrastructure/blob/feature/cd-v3/docs/configuring/releases.rst
+#
+# A file of its own, not tables in .ci/manifest.toml: CI (ci.yml, ci-infrastructure@main) parses
+# that manifest strictly and does not know [release] or release-ref yet. Fold it in once main does.
+#
+# What it builds, for a pull request labelled approved-for-cd only (a rehearsal: nothing is
+# published or installed):
+# - release-hpc: v2's ecflow-hpc first stage (Python 3.13 + UI, GNU 8.5), one stage. The other
+#   Python versions (v2's later stages, `--component python` into the same prefix) and the ag
+#   build (v2's ecflow-hpc-ag) come with CD v3 stages and an ag release kind.
+# - release-rpm: the whole of ecflow but Python, in the *-boost-qt CI images, on Rocky 8/9/10.
+#   v2's rpm is ecflow-ui (UI only) on Rocky 8: a second package name per repo, which v3 lacks.
+#   Not yet: Fedora (install-test-package assumes EPEL), .deb (v3 builds no .deb), conda, tarball.
+
+[package]
+name = "ecflow"
+repo = "ecmwf/ecflow"
+visibility = "public"
+compiler-inputs = ["cxx-compiler"]
+
+[release]
+package-name = "ecflow"
+summary = "ecFlow: workflow manager (CD v3 dry run)"
+license = "Apache-2.0"
+vendor = "ECMWF"
+maintainer = "software@ecmwf.int"
+homepage = "https://github.com/ecmwf/ecflow"
+
+[[deps]]
+repo = "ecmwf/ecbuild"
+package = "ecbuild"
+ref = "develop"
+compiler-inputs = []
+# Releases build against this tag, fetched as source (v2 loaded the ecbuild/new module).
+release-ref = "3.16.0"
+
+[[deps]]
+repo = "ecmwf/stack-dependencies"
+package = "pybind11"
+ref = "master"
+compiler-inputs = ["cxx-compiler"]
+# Releases take it from the environment: on HPC the Python module's own (the leg's pybind11-dir);
+# the rpm builds no Python.
+release-ref = false
+
+# What the release kinds build: no deps of its own, so a release gets exactly the [[deps]]
+# with a string release-ref.
+[packages.ecflow-release]
+compiler-inputs = ["cxx-compiler"]
+
+[matrix.release-hpc]
+packages = ["ecflow-release"]
+publishes = false
+execution = "hpc-atos"
+container-credentials = true
+
+# v2's ecflow-hpc stage python313: GNU 8.5 (gcc/old), Boost 1.87.0 (static), Python 3.13.13-01
+# and its pybind11 (3.0.4), Qt 6.6.1. Built for <root>/ecflow/<version> (v2: not compiler
+# specific), root the gate's hpc-root, $SCRATCH/cd-v3-dry-run by default; tests and the install
+# test run in the same SLURM job.
+[[matrix.release-hpc.include]]
+job-script = "./.ci/hpc/build.sh.j2"
+channel = "hpc-module"
+platform = "hpc-atos-gnu"
+cxx-compiler = "g++-8"
+c-compiler-binary = "gcc"
+cxx-compiler-binary = "g++"
+runs-on = "hpc-submit"
+container = "eccr.ecmwf.int/private-ci-images/ubuntu24.04-internal-tools:latest"
+# v2's site for ecflow-hpc (its default); a mapped cluster, should a release ever sync from it.
+site = "aa-batch"
+modules = ["load prgenv/gnu", "unload gcc", "load gcc/old", "load boost/1.87.0", "load ninja", "load python3/3.13.13-01", "load qt/6.6.1", "load cmake/new"]
+boost-root = "/usr/local/apps/boost/1.87.0/GNU/$(gcc -dumpfullversion | cut -d. -f1,2)"
+python-root = "/usr/local/apps/python3/3.13.13-01"
+pybind11-dir = "/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11"
+ntasks = 1
+cpus-per-task = 64
+mem = "64GB"
+ssdtmp = "30G"
+time = "02:00:00"
+build-type = "Release"
+options = "release-hpc"
+ctest-args = "-L nightly -j 8"
+install-prefix = "{root}/{package}/{version}"
+# Run in the unpacked prefix, with the leg's modules reloaded: the client, and the Python module
+# from this prefix under the module's Python.
+install-test-command = "bin/ecflow_client --version && PYTHONPATH=\"$PWD/lib/python3.13/site-packages\" python3 -c 'import ecflow; print(ecflow.__file__)'"
+
+[matrix.release-rpm]
+packages = ["ecflow-release"]
+publishes = false
+
+[matrix.release-rpm.defaults]
+job-script = "./.ci/runner/build.sh.j2"
+channel = "rpm"
+runs-on = "arc-runner-large"
+build-type = "Release"
+options = "release-rpm"
+# As v2's ecflow-ui rpm.
+install-prefix = "/usr"
+arch = "x86_64"
+ctest-args = "-L nightly -j 8"
+install-test-command = "/usr/bin/ecflow_client --version"
+
+# The CI legs' images (:latest; build-meta.json records the tag each build ran in): distribution
+# Boost and Qt, so the rpm's automatic requires resolve in a clean image (Qt5 Charts from EPEL).
+[[matrix.release-rpm.include]]
+platform = "rocky-8"
+cxx-compiler = "g++-8"
+c-compiler = "gcc-8"
+container = "eccr.ecmwf.int/public-ci-images/rocky8-gcc8-gfortran8-boost-qt5:latest"
+nexus-target = "rocky-8"
+install-test-image = "eccr.ecmwf.int/docker-hub-proxy/rockylinux/rockylinux:8"
+
+[[matrix.release-rpm.include]]
+platform = "rocky-9"
+cxx-compiler = "g++-11"
+c-compiler = "gcc-11"
+container = "eccr.ecmwf.int/public-ci-images/rocky9-gcc11-gfortran11-boost-qt5:latest"
+nexus-target = "rocky-9"
+install-test-image = "eccr.ecmwf.int/docker-hub-proxy/rockylinux/rockylinux:9"
+
+[[matrix.release-rpm.include]]
+platform = "rocky-10"
+cxx-compiler = "g++-14"
+c-compiler = "gcc-14"
+container = "eccr.ecmwf.int/public-ci-images/rocky10-gcc14-gfortran14-boost-qt6:latest"
+nexus-target = "rocky-10"
+install-test-image = "eccr.ecmwf.int/docker-hub-proxy/rockylinux/rockylinux:10"
