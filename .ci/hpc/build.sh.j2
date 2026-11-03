@@ -2,9 +2,10 @@
 SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 SPDX-License-Identifier: Apache-2.0
 #}
-{% extends "ci-infrastructure/cmake-atos.sh.j2" %}
-{% block preflight %}
-{{ super() }}
+{# cmake-all-lanes: cmake-atos.sh.j2 for CI, and the release overlay for a CD v3 release leg. #}
+{% extends "ci-infrastructure/cmake-all-lanes.sh.j2" %}
+{# set_environment, not preflight: a release owns preflight. #}
+{% block set_environment %}
 # Boost and Python come from cluster modules (Boost.Python is linked against a
 # specific interpreter); pybind11 still comes from stack-deps.
 #

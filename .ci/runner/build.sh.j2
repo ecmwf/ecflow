@@ -1,6 +1,7 @@
 {# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
    SPDX-License-Identifier: Apache-2.0 #}
-{% extends "ci-infrastructure/cmake-runner.sh.j2" %}
+{# cmake-all-lanes: cmake-runner.sh.j2 for CI, and the release overlay for a CD v3 release leg. #}
+{% extends "ci-infrastructure/cmake-all-lanes.sh.j2" %}
 {# boost-root is the Homebrew prefix on macOS; cmake/Dependencies.cmake sets
    Boost_NO_SYSTEM_PATHS, so it is always passed. #}
 {% block cmake_args %}
