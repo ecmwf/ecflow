@@ -6,23 +6,25 @@
 # there), from .ci/release.toml. Modelled on the eckit-cd-test pilot's cd-v3.yml.
 #
 # Rehearsal only, by construction:
-# - It runs for a same-repo pull request labelled approved-for-cd, nothing else: no tag trigger,
-#   so no tag (an ecflow release or anything else) ever starts it, merged or not.
+# - It runs for a push to the branch cd-rehearsal/cd-v3, nothing else: no tag or pull request
+#   trigger, so no tag (an ecflow release or anything else) ever starts it, merged or not. The
+#   gate itself refuses any branch outside cd-rehearsal/ and the default branch.
 # - It has no publish jobs: no upload-nexus, hpc-promote or hpc-sync-tag, and names no publish
 #   credential. The gate's allow-production is off (its default) and its hpc-root the default
 #   dry-run root ($SCRATCH/cd-v3-dry-run), though a rehearsal installs nothing there: the HPC
 #   module is built and install-tested inside its SLURM job and kept as this run's artifact.
 # - v2 (cd.yml, .github/cd-config.yml) is untouched and still makes ecflow's releases.
 #
-# The gate waits for ci.yml to pass on the pull request's head and merge commit.
+# The gate waits for ci.yml to pass on exactly the pushed commit: ci.yml runs on pushes to this
+# branch (on this branch only), or dispatch it: gh workflow run ci.yml --ref cd-rehearsal/cd-v3.
 #
 # check-cd-workflow (the release gate runs it on this file) holds it to its shape.
 
 name: cd-v3
 
 on:
-  pull_request:
-    types: [labeled]
+  push:
+    branches: ['cd-rehearsal/cd-v3']
 
 permissions:
   contents: read
@@ -33,7 +35,7 @@ concurrency:
 
 jobs:
   ci-approval:
-    if: github.event.label.name == 'approved-for-cd'
+    if: ${{ !github.event.deleted }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -57,7 +59,7 @@ jobs:
       source-deps: ${{ steps.gate.outputs.source-deps }}
       provenance: ${{ steps.gate.outputs.provenance }}
     steps:
-      # The pull request's merge commit.
+      # The pushed commit.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.sha }}
