@@ -753,6 +753,42 @@ BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_on_completion) {
     t->avisos()[0].finish();
 }
 
+BOOST_AUTO_TEST_CASE(task_with_repeat_is_requeued_when_its_job_completes) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    WithFakeBackend backend;
+
+    auto defs = load_suite_with_aviso(aviso_variables, " --repeat");
+    defs->beginAll();
+    auto t = find(defs, "/s/t")->isSubmittable();
+    BOOST_REQUIRE(t);
+
+    for (std::uint64_t sequence = 1; sequence <= 2; ++sequence) {
+        // The notification releases the task, whose job starts and completes (i.e. the child commands)
+        backend.state->pending = {notification(sequence)};
+        BOOST_REQUIRE_MESSAGE(submits(defs, "/s/t"), "Expected notification " << sequence << " to release the task");
+        t->init("1234");
+        BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), std::to_string(sequence));
+        t->complete();
+
+        // The task is queued again, and the attribute watches again, after the consumed notification
+        BOOST_CHECK_EQUAL(t->state(), NState::QUEUED);
+        BOOST_CHECK_EQUAL(t->avisos()[0].revision(), sequence);
+        BOOST_CHECK_EQUAL(backend.state->subscriptions, static_cast<int>(sequence) + 1);
+        BOOST_REQUIRE(backend.state->subscribed.has_value());
+        BOOST_CHECK_EQUAL(backend.state->subscribed->revision(), sequence);
+        BOOST_CHECK_EQUAL(t->findGenVariable(AvisoAttr::genvar_event_sequence).value(), std::to_string(sequence));
+    }
+
+    // Without a new notification, the task is not released
+    backend.state->pending = {};
+    BOOST_CHECK(!submits(defs, "/s/t"));
+
+    t->avisos()[0].finish();
+}
+
 BOOST_AUTO_TEST_CASE(task_without_repeat_stays_complete_on_completion) {
     ECF_NAME_THIS_TEST();
 

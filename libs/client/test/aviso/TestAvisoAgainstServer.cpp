@@ -289,6 +289,49 @@ BOOST_AUTO_TEST_CASE(requeues_task_on_completion_when_repeating) {
     System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE(requeues_task_when_its_job_completes_when_repeating) {
+    ECF_NAME_THIS_TEST();
+
+    InvokeServer invokeServer("Client:: ...requeues_task_when_its_job_completes_when_repeating",
+                              SCPort::next(),
+                              true /* disable_job_generation */);
+    BOOST_REQUIRE_MESSAGE(invokeServer.server_started(), "Server failed to start on port " << invokeServer.port());
+
+    ClientInvoker client(invokeServer.host(), invokeServer.port());
+    client.set_throw_on_error(false);
+    start(client, make_defs(server.url(), auth.path(), 0, false, true));
+
+    // The job reports to the server through the child commands
+    ClientInvoker job(invokeServer.host(), invokeServer.port());
+    job.set_throw_on_error(false);
+    job.taskPath("/s/t");
+    job.set_jobs_password(Submittable::DUMMY_JOBS_PASSWORD());
+
+    for (ecf::AvisoAttr::revision_t expected = 1; expected <= 2; ++expected) {
+        BOOST_REQUIRE(server.wait_for_requests(expected, 10s));
+        server.publish("test_event", R"({ "date": "20261006", "time": "1200" })");
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, is_released),
+                              "Expected the task to be released by notification " << expected);
+        BOOST_CHECK_EQUAL(revision_of(client), expected);
+        BOOST_CHECK_EQUAL(genvar_of(client, ecf::AvisoAttr::genvar_event_sequence), std::to_string(expected));
+
+        BOOST_REQUIRE_MESSAGE(job.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) == 0,
+                              "--init failed: " << job.errorMsg());
+        BOOST_REQUIRE_MESSAGE(job.completeTask() == 0, "--complete failed: " << job.errorMsg());
+
+        // The task is queued again, keeping the consumed notification
+        BOOST_REQUIRE_MESSAGE(wait_for_task(client, [](const Task& task) { return task.state() == NState::QUEUED; }),
+                              "Expected the task to be queued again after notification " << expected);
+        BOOST_CHECK_EQUAL(revision_of(client), expected);
+    }
+
+    // Without a new notification, the task is not released
+    BOOST_REQUIRE(server.wait_for_requests(3, 10s));
+    BOOST_CHECK(!wait_for_task(client, is_released, 1s));
+
+    System::destroy();
+}
+
 BOOST_AUTO_TEST_CASE(continues_releasing_once_per_notification_after_server_restart) {
     ECF_NAME_THIS_TEST();
 
