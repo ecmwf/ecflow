@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
 #include <cassert>
 #include <stdexcept>
+#include <string_view>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -11,6 +13,7 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
@@ -1295,7 +1298,7 @@ search_user_edit_variables(const std::string& name, std::string& value, const Na
 }
 
 // #define DEBUG_S 1
-bool Node::variableSubstitution(std::string& cmd) const {
+bool Node::variableSubstitution(std::string& cmd, SubstitutionRecord* record) const {
     char micro = '%';
     std::string micro_char;
     findParentUserVariableValue(ecf::environment::ECF_MICRO, micro_char);
@@ -1304,10 +1307,27 @@ bool Node::variableSubstitution(std::string& cmd) const {
     }
 
     NameValueMap user_edit_variables;
-    return variable_substitution(cmd, user_edit_variables, micro);
+    return variable_substitution(cmd, user_edit_variables, micro, record);
 }
 
-bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit_variables, char micro) const {
+bool Node::variable_substitution(std::string& cmd,
+                                 const NameValueMap& user_edit_variables,
+                                 char micro,
+                                 SubstitutionRecord* record) const {
+    if (record) {
+        // The masked command is rendered separately, so that the command itself is substituted as without a record
+        record->variables.clear();
+        record->masked_command = cmd;
+        substitute_variables(record->masked_command, user_edit_variables, micro, nullptr, true);
+    }
+    return substitute_variables(cmd, user_edit_variables, micro, record, false);
+}
+
+bool Node::substitute_variables(std::string& cmd,
+                                const NameValueMap& user_edit_variables,
+                                char micro,
+                                SubstitutionRecord* record,
+                                bool mask) const {
     // scan the command for variables, and substitute
     // edit cmd "/home/ma/map/sms/smsfectch -F %ECF_FILES% -I %ECF_INCLUDE%"
     // We can also have
@@ -1358,6 +1378,20 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         }
 
         std::string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
+
+        // Replace the reference by the value used, recording the variable once, and masking it when requested
+        auto replace_reference = [&](const std::string& name, const std::string& value) {
+            constexpr std::string_view masked_value = "***";
+            const bool credential                   = (record || mask) && ecf::is_credential_name(name);
+            if (record) {
+                auto& variables = record->variables;
+                if (std::none_of(variables.begin(), variables.end(), [&](const auto& v) { return v.first == name; })) {
+                    variables.emplace_back(name, credential ? std::string(masked_value) : value);
+                }
+            }
+            cmd.replace(
+                firstPercentPos, secondPercentPos - firstPercentPos + 1, mask && credential ? masked_value : value);
+        };
         // cout << percentVar << "\n";
 #ifdef DEBUG_S
         cout << "   Found percentVar " << percentVar << "\n";
@@ -1398,11 +1432,11 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         // Note: When a variable is found, it can have an empty value  which is still valid
         std::string varValue;
         if (!user_edit_variables.empty() && search_user_edit_variables(percentVar, varValue, user_edit_variables)) {
-            cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+            replace_reference(percentVar, varValue);
         }
         else if (generated_variable && firstColon == std::string::npos &&
                  find_parent_gen_variable_value(percentVar, varValue)) {
-            cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+            replace_reference(percentVar, varValue);
         }
         else {
             if (firstColon != std::string::npos) {
@@ -1410,7 +1444,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                 if (is_a_alias && findParentVariableValue(percentVar, varValue)) {
                     // For alias, we could have added variables with %A:0%, %A:1%.
                     // Aliases allow variables with ':' in the name.
-                    cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+                    replace_reference(percentVar, varValue);
                 }
                 else {
                     // ':' is not a valid in variables, hence split, and search, if search fails use replacement
@@ -1423,13 +1457,13 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
 #ifdef DEBUG_S
                         cout << "   user var value = " << varValue << "\n";
 #endif
-                        cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+                        replace_reference(var, varValue);
                     }
                     else if (generated_variable && find_parent_gen_variable_value(var, varValue)) {
 #ifdef DEBUG_S
                         cout << "   generated var value = " << varValue << "\n";
 #endif
-                        cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+                        replace_reference(var, varValue);
                     }
                     else if (findParentVariableValue(var, varValue)) {
                         // Note: variable can exist, but have an empty value
@@ -1437,14 +1471,14 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                         cout << "   var value = " << varValue << "\n";
 #endif
                         // replace the "%VAR:fred --f%" with var
-                        cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+                        replace_reference(var, varValue);
                     }
                     else {
                         std::string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
 #ifdef DEBUG_S
                         cout << "  substitute value = " << substitute << "\n";
 #endif
-                        cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, substitute);
+                        replace_reference(var, substitute);
                     }
 #ifdef DEBUG_S
                     cout << "   cmd = " << cmd << "\n";
@@ -1453,7 +1487,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             }
             else if (findParentVariableValue(percentVar, varValue)) {
                 // No ':' search user variables, repeat, and then generated variables.
-                cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
+                replace_reference(percentVar, varValue);
             }
             else {
                 // Cannot find in user variables, or node variable, hence cannot go any further

@@ -18,6 +18,9 @@
 
 #include <iosfwd>
 #include <limits>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
@@ -246,12 +249,56 @@ public:
     void setRepeatToLastValue();
     virtual void setRepeatToLastValueHierarchically() { setRepeatToLastValue(); }
 
-    /// find all %VAR% and replaces with variable values, returns false on the
-    /// first variable that cannot be found, cmd will be left half processed.
-    /// Will search for ECF_MICRO, if not found assumes % as the micro char
-    bool variableSubstitution(std::string& cmd) const;
+    ///
+    /// @brief Records a variable substitution, for the log: the variables used, and the command with its credentials
+    /// masked.
+    ///
+    /// Every value of a variable whose name is a credential name (see ecf::is_credential_name()) is replaced by
+    /// `***`, both in the variables and in the masked command.
+    ///
+    struct SubstitutionRecord
+    {
+        /// The name and the value used of each variable substituted, in the order of first use, once each; for
+        /// `%NAME:default%`, the value of NAME when defined, and the default otherwise
+        std::vector<std::pair<std::string, std::string>> variables;
+        /// The command as substituted, with `***` in place of the value of each variable with a credential name,
+        /// whether referenced directly or through the value of another variable
+        std::string masked_command;
+    };
 
-    bool variable_substitution(std::string& cmd, const NameValueMap& user_edit_variables, char micro = '%') const;
+    ///
+    /// @brief Replaces every variable reference of a command, e.g. `%VAR%`, by the value of the variable.
+    ///
+    /// The micro character is the value of ECF_MICRO, looked up from this node upwards, or `%` when ECF_MICRO is
+    /// not defined or is not a single character. See variable_substitution().
+    ///
+    /// @param[in,out] cmd The command; on return, the command as substituted, or as partially substituted on failure
+    /// @param[out] record When given, receives the variables used and the masked command; @p cmd is the same with or
+    ///                    without it
+    /// @return true when every reference was substituted; false at the first variable that cannot be found, or when
+    ///         the references are nested too deeply, e.g. a variable referring to itself.
+    ///
+    bool variableSubstitution(std::string& cmd, SubstitutionRecord* record = nullptr) const;
+
+    ///
+    /// @brief Replaces every variable reference of a command, e.g. `%VAR%`, by the value of the variable.
+    ///
+    /// The value of a variable is searched first in @p user_edit_variables, then from this node upwards. A reference
+    /// may be nested in the value of another variable, and `%NAME:default%` gives a default for an undefined `NAME`;
+    /// a doubled micro character is replaced by a single one.
+    ///
+    /// @param[in,out] cmd The command; on return, the command as substituted, or as partially substituted on failure
+    /// @param[in] user_edit_variables Variables given by the user, which take precedence over those of the nodes
+    /// @param[in] micro The character delimiting the references
+    /// @param[out] record When given, receives the variables used and the masked command; @p cmd is the same with or
+    ///                    without it
+    /// @return true when every reference was substituted; false at the first variable that cannot be found, or when
+    ///         the references are nested too deeply, e.g. a variable referring to itself.
+    ///
+    bool variable_substitution(std::string& cmd,
+                               const NameValueMap& user_edit_variables,
+                               char micro                 = '%',
+                               SubstitutionRecord* record = nullptr) const;
 
     /// Find all %VAR% and add to the list, there can be more than one. i.e %ECF_FILES% -I %ECF_INCLUDE%"
     bool find_all_used_variables(std::string& cmd, NameValueMap& used_variables, char micro = '%') const;
@@ -979,6 +1026,13 @@ private:
     friend class VariableHelper;
     friend class AstParentVariable;
     bool update_variable(const std::string& name, const std::string& value);
+
+    // The substitution of variable_substitution(); with mask, the value of a credential variable is replaced by ***
+    bool substitute_variables(std::string& cmd,
+                              const NameValueMap& user_edit_variables,
+                              char micro,
+                              SubstitutionRecord* record,
+                              bool mask) const;
 
 private:
     void add_trigger_expression(const Expression&);  // Can throw std::runtime_error
