@@ -388,6 +388,19 @@ std::vector<Setting> server_settings() {
             },
             {},
             always(false)),
+
+        // <host>.<port>.ecf.cfg only
+
+        Setting(
+            Key::for_option("ecflow.server.log.commands.enabled"),
+            Type::Boolean,
+            Value{false},
+            Names{
+                std::nullopt,                          // env_cfg
+                "/ecflow/server/log/commands/enabled", // ecf_cfg
+                std::nullopt,                          // env
+                std::nullopt                           // cli
+            }),
     };
     // clang-format on
 }

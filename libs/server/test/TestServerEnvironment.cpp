@@ -265,6 +265,7 @@ std::vector<std::string> expected_runtime_configuration(const ServerEnvironment&
         command("ECF_MICRO"),
         entry("Job scheduling interval", std::to_string(serverEnv.submitJobsInterval())),
         entry("Job generation", serverEnv.jobGeneration() ? "enabled" : "disabled"),
+        entry("Log of commands", serverEnv.log_commands() ? "enabled" : "disabled"),
         entry("Checkpoint save time alarm", std::to_string(serverEnv.checkpt_save_time_alarm()))};
     block.insert(block.end(), settings.begin(), settings.end());
     return block;
@@ -2885,6 +2886,31 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_host_and_port_consistency) {
 }
 
 ///
+/// @brief Verifies that the log of commands is disabled by default, and enabled only by the configuration file.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_enables_the_log_of_commands) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::string> args{"ServerEnvironment", "--port=3144"};
+    check_server_with_file({std::nullopt, "3144", configuration_document({}), {}, args},
+                           [](const ServerEnvironment& serverEnv) {
+                               BOOST_CHECK(!serverEnv.log_commands());
+                               check_logged_value("Log of commands = disabled");
+                               BOOST_CHECK_EQUAL(logged_origin("Log of commands"), "defaults");
+                           });
+    for (const bool enabled : {true, false}) {
+        const auto options = std::string(R"("log": {"commands": {"enabled": )") + (enabled ? "true" : "false") + "}}";
+        check_server_with_file({std::nullopt, "3144", configuration_document({}, options), {}, args},
+                               [enabled](const ServerEnvironment& serverEnv) {
+                                   BOOST_CHECK_EQUAL(serverEnv.log_commands(), enabled);
+                                   check_logged_value(std::string("Log of commands = ") +
+                                                      (enabled ? "enabled" : "disabled"));
+                                   BOOST_CHECK_EQUAL(logged_origin("Log of commands"), "ecf.cfg");
+                               });
+    }
+}
+
+///
 /// @brief Verifies that an invalid configuration file stops start-up, naming the file, the entry and the cause.
 ///
 BOOST_AUTO_TEST_CASE(test_server_configuration_file_refused) {
@@ -2901,6 +2927,8 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_refused) {
          "/ecflow/server/variables/ECF_PORT: invalid value 80: expected a value in [1024, 49150]"},
         {configuration_document(R"("ECF_HOME": "")"),
          "/ecflow/server/variables/ECF_HOME: invalid value '': expected a non-empty value"},
+        {configuration_document({}, R"("log": {"commands": {"enabled": "yes"}})"),
+         "/ecflow/server/log/commands/enabled: expected a boolean, not a string"},
     };
     for (const auto& [content, expected] : cases) {
         BOOST_TEST_CONTEXT("content: " << content) {

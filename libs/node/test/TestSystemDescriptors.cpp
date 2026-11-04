@@ -144,7 +144,7 @@ private:
 ///
 void spawn_and_wait(const std::string& cmd) {
     std::string errorMsg;
-    BOOST_REQUIRE_MESSAGE(System::instance()->spawn(System::ECF_STATUS_CMD, cmd, "", errorMsg),
+    BOOST_REQUIRE_MESSAGE(System::instance()->spawn(System::ECF_STATUS_CMD, cmd, cmd, {}, "", errorMsg),
                           "System::instance()->spawn() failed: " << errorMsg);
     while (System::instance()->process() != 0) {
         // The child sends SIGCHLD when it terminates, which the parent catches while unblocked

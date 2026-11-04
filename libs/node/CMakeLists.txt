@@ -50,6 +50,7 @@ set(test_srcs
   test/TestSpecificIssues.cpp
   test/TestSystem.cpp
   test/TestSystemDescriptors.cpp
+  test/TestSystemLogCommands.cpp
   test/TestTaskScriptGenerator.cpp
   test/TestTimeDependencies.cpp
   test/TestVariableGeneration.cpp

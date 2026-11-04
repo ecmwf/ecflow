@@ -787,6 +787,7 @@ void Submittable::kill(const std::string& zombie_pid) {
     get_flag().clear(ecf::Flag::KILLED);
 
     std::string ecf_kill_cmd;
+    bool given_rid = false; // whether %ECF_RID% is replaced by the given process id
     if (zombie_pid.empty()) {
         if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
             return;
@@ -825,10 +826,15 @@ void Submittable::kill(const std::string& zombie_pid) {
         }
 
         // replace %ECF_RID% with the input args
+        given_rid = ecf_kill_cmd.find("%ECF_RID%") != std::string::npos;
         ecf::algorithm::replace(ecf_kill_cmd, "%ECF_RID%", zombie_pid);
     }
 
-    if (!variableSubstitution(ecf_kill_cmd)) {
+    // The substitution record is requested whatever the configuration of System: the command is logged only as
+    // rendered with its credential variables masked, and that rendering is kept with the process for the records
+    // written at its termination; the variables used are logged only when System is configured to log commands
+    SubstitutionRecord record;
+    if (!variableSubstitution(ecf_kill_cmd, &record)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
         throw std::runtime_error(MESSAGE("Submittable::kill: Variable substitution failed for ECF_KILL_CMD("
                                          << ecf_kill_cmd << ") on task " << absNodePath() << "\n"));
@@ -839,7 +845,12 @@ void Submittable::kill(const std::string& zombie_pid) {
     // Done as two separate steps as kill command is not blocking on the server
     //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), errorMsg)) {
+    if (given_rid) {
+        // The process id given replaced %ECF_RID% before the substitution, and is recorded as its value
+        record.variables.emplace_back(ecf::environment::ECF_RID, zombie_pid);
+    }
+    if (!System::instance()->spawn(
+            System::ECF_KILL_CMD, ecf_kill_cmd, record.masked_command, record.variables, absNodePath(), errorMsg)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
@@ -884,7 +895,11 @@ void Submittable::status() {
             MESSAGE("Submittable::status: ECF_STATUS_CMD not defined, for task " << absNodePath() << "\n"));
     }
 
-    if (!variableSubstitution(ecf_status_cmd)) {
+    // The substitution record is requested whatever the configuration of System: the command is logged only as
+    // rendered with its credential variables masked, and that rendering is kept with the process for the records
+    // written at its termination; the variables used are logged only when System is configured to log commands
+    SubstitutionRecord record;
+    if (!variableSubstitution(ecf_status_cmd, &record)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(MESSAGE("Submittable::status: Variable substitution failed for ECF_STATUS_CMD("
                                          << ecf_status_cmd << ") on task " << absNodePath() << "\n"));
@@ -893,7 +908,8 @@ void Submittable::status() {
     // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
     // SPAWN process, attach signal to monitor process. returns true
     std::string errorMsg;
-    if (!System::instance()->spawn(System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), errorMsg)) {
+    if (!System::instance()->spawn(
+            System::ECF_STATUS_CMD, ecf_status_cmd, record.masked_command, record.variables, absNodePath(), errorMsg)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
@@ -912,7 +928,11 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
         return false;
     }
 
-    if (!variableSubstitution(ecf_job_cmd)) {
+    // The substitution record is requested whatever the configuration of System: the command is logged only as
+    // rendered with its credential variables masked, and that rendering is kept with the process for the records
+    // written at its termination; the variables used are logged only when System is configured to log commands
+    SubstitutionRecord record;
+    if (!variableSubstitution(ecf_job_cmd, &record)) {
         jobsParam.errorMsg() +=
             "Submittable::createChildProcess: Variable substitution failed for ECF_JOB_CMD(" + ecf_job_cmd + ") :";
         return false;
@@ -924,7 +944,12 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
     if (jobsParam.spawnJobs()) {
 
         // SPAWN process, attach signal to monitor process. returns true
-        return System::instance()->spawn(System::ECF_JOB_CMD, ecf_job_cmd, absNodePath(), jobsParam.errorMsg());
+        return System::instance()->spawn(System::ECF_JOB_CMD,
+                                         ecf_job_cmd,
+                                         record.masked_command,
+                                         record.variables,
+                                         absNodePath(),
+                                         jobsParam.errorMsg());
     }
 
     // Test path ONLY

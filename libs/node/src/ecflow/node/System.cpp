@@ -15,7 +15,10 @@
     #include <fcntl.h>
 #endif
 
+#include <nlohmann/json.hpp>
+
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/Submittable.hpp"
@@ -39,14 +42,20 @@ namespace ecf {
 struct Process
 {
 public:
-    Process(const std::string& absPath, const std::string& cmdToSpawn, System::CmdType cmd_type, pid_t pid)
+    Process(const std::string& absPath,
+            const std::string& cmdToSpawn,
+            const std::string& cmdToLog,
+            System::CmdType cmd_type,
+            pid_t pid)
         : absNodePath_(absPath),
           cmd_(cmdToSpawn),
+          logged_cmd_(cmdToLog),
           cmd_type_(cmd_type),
           pid_(pid) {}
 
-    std::string absNodePath_;     // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
+    std::string absNodePath_;     // Path of the node of the command
     std::string cmd_;             // the command that was spawned
+    std::string logged_cmd_;      // the command as rendered for the log, with its credentials masked
     System::CmdType cmd_type_;    // Type of command
     sig_atomic_t have_status_{0}; // Nonzero if this process has stopped or terminated.  */
     pid_t pid_;                   // The process ID of this child.
@@ -91,8 +100,47 @@ void System::destroy() {
 System::System()  = default;
 System::~System() = default;
 
+namespace {
+
+// The text with its line breaks written as \n, so that it is written as a single record of the log
+std::string on_one_line(const std::string& text) {
+    std::string line;
+    line.reserve(text.size());
+    for (char c : text) {
+        if (c == '\n') {
+            line += "\\n";
+        }
+        else if (c == '\r') {
+            line += "\\r";
+        }
+        else {
+            line += c;
+        }
+    }
+    return line;
+}
+
+// The variables as a JSON object, in the order given, so that the boundaries of each name and value are explicit;
+// each value is masked by the fixed rules, line breaks are escaped, and bytes that are not UTF-8 are replaced
+std::string as_json(const System::Context& context) {
+    auto object = nlohmann::ordered_json::object();
+    for (const auto& [name, value] : context) {
+        object[name] = mask_credentials(value);
+    }
+    return object.dump(-1, ' ', false, nlohmann::ordered_json::error_handler_t::replace);
+}
+
+// The prefix of every record of a spawned command, e.g. "ECF_JOB_CMD spawn pid(48213) path(/s/f/t)"
+std::string record_prefix(const std::string& cmd_type, const char* event, pid_t pid, const std::string& absPath) {
+    return cmd_type + " " + event + " pid(" + std::to_string(pid) + ") path(" + absPath + ")";
+}
+
+} // namespace
+
 bool System::spawn(System::CmdType cmd_type,
                    const std::string& cmdToSpawn,
+                   const std::string& cmdToLog,
+                   const Context& context,
                    const std::string& absPath,
                    std::string& errorMsg) {
 #ifdef DEBUG_FORK
@@ -101,7 +149,8 @@ bool System::spawn(System::CmdType cmd_type,
 #endif
 
     std::string msg;
-    if (sys(cmd_type, cmdToSpawn, absPath, msg)) {
+    pid_t child_pid = 0;
+    if (sys(cmd_type, cmdToSpawn, cmdToLog, absPath, child_pid, msg)) {
         std::ostringstream ss;
         ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
         if (!absPath.empty()) {
@@ -113,12 +162,24 @@ bool System::spawn(System::CmdType cmd_type,
 #endif
         return false;
     }
+
+    if (configuration_.log_commands) {
+        // The command and the context are masked as rendered by the caller, and further by the fixed rules, for the
+        // credentials written literally
+        const auto prefix = record_prefix(System::cmd_type(cmd_type), "spawn", child_pid, absPath);
+        LOG(Log::EXT, prefix << " cmd[ " << on_one_line(mask_credentials(cmdToLog)) << " ]");
+
+        LOG(Log::EXT,
+            record_prefix(System::cmd_type(cmd_type), "context", child_pid, absPath) << " " << as_json(context));
+    }
     return true;
 }
 
 int System::sys(System::CmdType cmd_type,
                 const std::string& cmdToSpawn,
+                const std::string& cmdToLog,
                 const std::string& absPath,
+                pid_t& spawned_pid,
                 std::string& errorMsg) {
 #ifdef DEBUG_FORK
     LogToCout logToCoutAsWell;
@@ -168,7 +229,8 @@ int System::sys(System::CmdType cmd_type,
     }
 
     // Store the process pid, so that we can wait for it. ho ho.
-    processVec_.emplace_back(absPath, cmdToSpawn, cmd_type, child_pid);
+    processVec_.emplace_back(absPath, cmdToSpawn, cmdToLog, cmd_type, child_pid);
+    spawned_pid = child_pid;
 
 #ifdef DEBUG_FORK
     // LogToCout logToCoutAsWell;
@@ -268,6 +330,13 @@ void System::processTerminatedChildren() {
             // exit status is one of mutually exclusive [ WIFEXITED | WIFSIGNALED | WIFSTOPPED | WIFCONTINUED ]
             if (WIFEXITED((*i).status_)) {
 
+                if (configuration_.log_commands) {
+                    // Stamped with the time at which the server handles the termination
+                    LOG(Log::EXT,
+                        record_prefix(System::cmd_type((*i).cmd_type_), "exit", (*i).pid_, (*i).absNodePath_)
+                            << " status(" << WEXITSTATUS((*i).status_) << ")");
+                }
+
                 // *Normal* termination via exit
                 if (WEXITSTATUS((*i).status_)) {
                     // exit is non zero.
@@ -290,6 +359,13 @@ void System::processTerminatedChildren() {
                 processVec_.erase(i--);
             }
             else if (WIFSIGNALED((*i).status_)) {
+
+                if (configuration_.log_commands) {
+                    // Stamped with the time at which the server handles the termination
+                    LOG(Log::EXT,
+                        record_prefix(System::cmd_type((*i).cmd_type_), "signal", (*i).pid_, (*i).absNodePath_)
+                            << " signal(" << WTERMSIG((*i).status_) << ")");
+                }
 
                 // *abnormal* child process terminated by a signal
                 died((*i).absNodePath_,

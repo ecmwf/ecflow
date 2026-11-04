@@ -194,6 +194,9 @@ The values section lists, in order:
    * - ``Job scheduling interval``, ``Job generation``, ``Checkpoint save time alarm``
      - the job scheduling interval, whether jobs are generated, and the time (in seconds) above which saving the
        checkpoint logs a warning and sets the ``late`` flag of the server
+   * - ``Log of commands``
+     - whether the spawned commands are recorded, see :ref:`ecflow_log_file_commands`; its source is named
+       ``/ecflow/server/log/commands/enabled`` when given in ``<host>.<port>.ecf.cfg``
    * - ``--http``, ``--v6``, ``--dis_job_gen``, ``--ssl``
      - the command-line switches, each ``true`` when in effect, whichever source sets it
 
@@ -268,3 +271,63 @@ Notes:
 - A whitelist without users grants read/write access to all users: ``* = read/write (no users specified)``.
 - With ``--debug``, the start-up lines, from the start time on, and the authentication and authorisation blocks are
   also written to the standard output, with the same content.
+
+.. _ecflow_log_file_commands:
+
+Records of the spawned commands
+-------------------------------
+
+The server spawns three commands for a task: ``ECF_JOB_CMD`` to submit it, ``ECF_KILL_CMD`` to kill it, and
+``ECF_STATUS_CMD`` to query its status. When enabled in :ref:`server_configuration_file`, by
+``/ecflow/server/log/commands/enabled``, the server records each of them in ``EXT`` lines:
+
+.. code-block:: text
+
+    EXT:[08:02:11 3.11.2026] ECF_JOB_CMD spawn pid(48213) path(/s/f/t) cmd[ troika submit --password *** hpc /home/s/f/t.job1 ]
+    EXT:[08:02:11 3.11.2026] ECF_JOB_CMD context pid(48213) path(/s/f/t) {"ECF_JOB":"/home/s/f/t.job1","HOST":"hpc","DB_PASSWORD":"***"}
+    EXT:[08:02:13 3.11.2026] ECF_JOB_CMD exit pid(48213) path(/s/f/t) status(0)
+
+The records are:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Record
+     - Written
+     - Content
+   * - ``spawn``
+     - once the command is spawned
+     - the command, as run
+   * - ``context``
+     - right after the ``spawn`` record
+     - each variable substituted to render the command, once each, in the order of first use, as a JSON object
+       of names and values
+   * - ``exit``
+     - once the server handles the termination of the command
+     - the exit status of the command
+   * - ``signal``
+     - once the server handles the termination of the command by a signal
+     - the number of the signal
+
+Notes:
+
+- The records of a command are identified by its kind, its process id and the path of its task.
+- Each record carries the time at which it is written: the termination is recorded when the server handles it,
+  at the next job scheduling, which may be some time after the command ended.
+- The ``context`` record holds the variables used directly in the command, those used through the value of
+  another variable, and the value actually used for ``%NAME:default%``: that of ``NAME`` when defined, the default
+  otherwise. For a kill given a process id, ``ECF_RID`` holds that process id.
+- Line breaks in a command or a value are written as ``\n``, so that each record is a single line.
+- In the ``context`` record, each value is a JSON string: a value holding spaces or ``=``, e.g.
+  ``"OPTS":"-q nf VAR=1"``, is one value; quotes and backslashes are escaped, and bytes that are not valid UTF-8
+  are replaced by ``U+FFFD``.
+- The existing ``ERR`` and ``WAR`` lines of a failed or stopped command are written as before.
+- Without the setting, no ``EXT`` line is written.
+
+Credentials are never written in these records:
+
+- the value of a variable with a credential name is replaced by ``***``, wherever the variable is used in the
+  command, directly or through the value of another variable, and in the ``context`` record;
+- the parts of the command and of each value that look like a credential are replaced by ``***``, as in the
+  start-up lines;
+- ``ECF_PASS``, which identifies a task, and ``USER`` are not credential names.

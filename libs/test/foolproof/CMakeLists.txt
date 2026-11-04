@@ -49,6 +49,7 @@ ecflow_add_test(
     ServerStartup.hpp
     # Test sources
     TestFoolproof.ServerConfigurationFile.cpp
+    TestFoolproof.ServerLogCommands.cpp
     TestFoolproof.ServerObservability.cpp
     TestFoolproof.ServerOptions.cpp
     TestFoolproof.ServerPaths.cpp

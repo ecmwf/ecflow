@@ -55,7 +55,8 @@ The file is a JSON document, holding an object with the following members:
 - ``ecflow``: an object holding a ``server`` object, which holds:
 
   - ``variables``: an object holding the server variables, each under its name, e.g. ``ECF_HOME``;
-  - ``http``, ``ipv6``, ``ssl``, ``job_generation``: the options of the server, as booleans.
+  - ``http``, ``ipv6``, ``ssl``, ``job_generation``: the options of the server, as booleans;
+  - ``log``: the extra information written to the :ref:`log file <ecflow_log_file>`, available only in this file.
 
 For example:
 
@@ -98,6 +99,27 @@ The options correspond to the command-line options as follows:
    * - ``job_generation``
      - ``--dis_job_gen``
      - ``false`` disables job generation, for testing only
+
+The ``log`` member holds:
+
+- ``commands``: an object holding ``enabled``, a boolean, ``false`` by default; ``true`` records the spawn, the
+  context and the termination of ``ECF_JOB_CMD``, ``ECF_KILL_CMD`` and ``ECF_STATUS_CMD``, see
+  :ref:`ecflow_log_file_commands`.
+
+For example:
+
+.. code-block:: json
+
+    {
+      "version": 1,
+      "ecflow": {
+        "server": {
+          "log": {
+            "commands": { "enabled": true }
+          }
+        }
+      }
+    }
 
 The settings, their defaults and their accepted values are listed in :ref:`server_configuration`.
 
