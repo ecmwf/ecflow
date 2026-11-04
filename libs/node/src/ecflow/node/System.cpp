@@ -152,7 +152,8 @@ bool System::spawn(System::CmdType cmd_type,
     pid_t child_pid = 0;
     if (sys(cmd_type, cmdToSpawn, cmdToLog, absPath, child_pid, msg)) {
         std::ostringstream ss;
-        ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
+        // The command is reported as rendered for the log, so that no credential reaches the log or the client
+        ss << "Child process creation failed( " << msg << ") for command " << mask_credentials(cmdToLog);
         if (!absPath.empty()) {
             ss << " at path(" << absPath << ")";
         }
@@ -337,14 +338,15 @@ void System::processTerminatedChildren() {
                             << " status(" << WEXITSTATUS((*i).status_) << ")");
                 }
 
-                // *Normal* termination via exit
+                // *Normal* termination via exit; every record of the process, and the abort reason derived from it,
+                // holds the command as rendered for the log, so that no credential is written
                 if (WEXITSTATUS((*i).status_)) {
                     // exit is non zero.
                     died((*i).absNodePath_,
                          (*i).cmd_type_,
                          MESSAGE(System::cmd_type((*i).cmd_type_)
                                  << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") exited with status "
-                                 << WEXITSTATUS((*i).status_) << " [ " << (*i).cmd_ << " ]"));
+                                 << WEXITSTATUS((*i).status_) << " [ " << mask_credentials((*i).logged_cmd_) << " ]"));
                 }
                 else {
                     // exit(0) child terminated normally
@@ -372,7 +374,7 @@ void System::processTerminatedChildren() {
                      (*i).cmd_type_,
                      MESSAGE(System::cmd_type((*i).cmd_type_)
                              << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") died of signal "
-                             << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]"));
+                             << WTERMSIG((*i).status_) << " [ " << mask_credentials((*i).logged_cmd_) << " ]"));
 
                 // remove the process since it has terminated
                 processVec_.erase(i--);
@@ -381,14 +383,14 @@ void System::processTerminatedChildren() {
 
                 LOG(Log::WAR,
                     System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") STOPPED? [ " << (*i).absNodePath_
-                                                     << " ] [ " << (*i).cmd_ << " ]");
+                                                     << " ] [ " << mask_credentials((*i).logged_cmd_) << " ]");
             }
             else {
 
                 // Can only be WIFCONTINUED. (XSI extension to POSIX)
                 LOG(Log::WAR,
                     System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") CONTINUED? [ " << (*i).absNodePath_
-                                                     << " ] [ " << (*i).cmd_ << " ]");
+                                                     << " ] [ " << mask_credentials((*i).logged_cmd_) << " ]");
             }
         }
         else {

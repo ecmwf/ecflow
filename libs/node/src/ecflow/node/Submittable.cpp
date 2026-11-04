@@ -12,6 +12,7 @@
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Passwd.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
@@ -836,8 +837,10 @@ void Submittable::kill(const std::string& zombie_pid) {
     SubstitutionRecord record;
     if (!variableSubstitution(ecf_kill_cmd, &record)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
+        // The command is reported as partially rendered with its credentials masked
         throw std::runtime_error(MESSAGE("Submittable::kill: Variable substitution failed for ECF_KILL_CMD("
-                                         << ecf_kill_cmd << ") on task " << absNodePath() << "\n"));
+                                         << ecf::mask_credentials(record.masked_command) << ") on task "
+                                         << absNodePath() << "\n"));
     }
 
     // Please note: this is *non-blocking* the output of the command(ECF_KILL_CMD) should be written to %ECF_JOB%.kill
@@ -901,8 +904,10 @@ void Submittable::status() {
     SubstitutionRecord record;
     if (!variableSubstitution(ecf_status_cmd, &record)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
+        // The command is reported as partially rendered with its credentials masked
         throw std::runtime_error(MESSAGE("Submittable::status: Variable substitution failed for ECF_STATUS_CMD("
-                                         << ecf_status_cmd << ") on task " << absNodePath() << "\n"));
+                                         << ecf::mask_credentials(record.masked_command) << ") on task "
+                                         << absNodePath() << "\n"));
     }
 
     // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
@@ -933,8 +938,9 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
     // written at its termination; the variables used are logged only when System is configured to log commands
     SubstitutionRecord record;
     if (!variableSubstitution(ecf_job_cmd, &record)) {
-        jobsParam.errorMsg() +=
-            "Submittable::createChildProcess: Variable substitution failed for ECF_JOB_CMD(" + ecf_job_cmd + ") :";
+        // The command is reported as partially rendered with its credentials masked
+        jobsParam.errorMsg() += "Submittable::createChildProcess: Variable substitution failed for ECF_JOB_CMD(" +
+                                ecf::mask_credentials(record.masked_command) + ") :";
         return false;
     }
 
@@ -961,7 +967,9 @@ void Submittable::set_aborted_only(const std::string& reason) {
     std::cout << "Submittable::set_aborted_only\n";
 #endif
 
-    abr_             = reason;
+    // The reason is kept in the definition and the checkpoint, and shown by the clients, hence any credential
+    // written literally in it is masked by the fixed rules
+    abr_             = ecf::mask_credentials(reason);
     state_change_no_ = Ecf::incr_state_change_no();
 
     // Do not use "\n" | ';' in abr_, as this can mess up, --migrate output

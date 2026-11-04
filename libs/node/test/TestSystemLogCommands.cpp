@@ -16,6 +16,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
@@ -87,6 +88,13 @@ public:
         BOOST_REQUIRE_MESSAGE(File::open(log_path_, contents), "Could not open the log " << log_path_);
         return contents;
     }
+
+    ///
+    /// @brief Returns the Defs given to System, in which a failed command looks up the node of its path.
+    ///
+    /// @return The Defs.
+    ///
+    const defs_ptr& defs() const { return defs_; }
 
 private:
     ecf::test::scaffold::Directory directory_;
@@ -468,6 +476,148 @@ BOOST_AUTO_TEST_CASE(test_system_logs_the_last_value_of_a_name_given_twice) {
     const auto records = without_pids(log.ext_records());
     BOOST_REQUIRE_EQUAL(records.size(), 3U);
     BOOST_CHECK_EQUAL(records[1], R"(ECF_KILL_CMD context pid(N) path(/s/t) {"ECF_RID":"4242","QUEUE":"nf"})");
+}
+
+//
+// The records and messages holding a command, existing before the log of commands, are masked whatever the setting
+//
+
+BOOST_AUTO_TEST_CASE(test_system_masks_the_command_of_a_failed_command_and_the_abort_reason) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool log_commands : {false, true}) {
+        BOOST_TEST_CONTEXT("log_commands: " << log_commands) {
+            WithSystemLog log(log_commands);
+            task_ptr t = log.defs()->add_suite("s")->add_task("t");
+
+            // The command to log masks the credential variable; the credential written literally is masked by the
+            // fixed rules
+            std::string errorMsg;
+            BOOST_REQUIRE(System::instance()->spawn(System::ECF_JOB_CMD,
+                                                    "true abc123 --password literal && exit 3",
+                                                    "true *** --password literal && exit 3",
+                                                    {},
+                                                    "/s/t",
+                                                    errorMsg));
+            wait_for_children();
+
+            const auto expected = "exited with status 3 [ true *** --password *** && exit 3 ]";
+            BOOST_CHECK_MESSAGE(log.contents().find(expected) != std::string::npos, log.contents());
+            BOOST_CHECK_EQUAL(t->state(), NState::ABORTED);
+            BOOST_CHECK_MESSAGE(t->abortedReason().find(expected) != std::string::npos, t->abortedReason());
+            for (const auto* secret : {"abc123", "literal"}) {
+                BOOST_CHECK_MESSAGE(log.contents().find(secret) == std::string::npos,
+                                    "Found '" << secret << "' in the log");
+                BOOST_CHECK_MESSAGE(t->abortedReason().find(secret) == std::string::npos,
+                                    "Found '" << secret << "' in the abort reason");
+            }
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_system_masks_the_command_of_a_command_killed_by_a_signal) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool log_commands : {false, true}) {
+        BOOST_TEST_CONTEXT("log_commands: " << log_commands) {
+            WithSystemLog log(log_commands);
+            task_ptr t = log.defs()->add_suite("s")->add_task("t");
+
+            std::string errorMsg;
+            BOOST_REQUIRE(System::instance()->spawn(System::ECF_JOB_CMD,
+                                                    "true abc123 --password literal && kill -9 $$",
+                                                    "true *** --password literal && kill -9 $$",
+                                                    {},
+                                                    "/s/t",
+                                                    errorMsg));
+            wait_for_children();
+
+            const auto expected = "died of signal 9 [ true *** --password *** && kill -9 $$ ]";
+            BOOST_CHECK_MESSAGE(log.contents().find(expected) != std::string::npos, log.contents());
+            BOOST_CHECK_MESSAGE(t->abortedReason().find(expected) != std::string::npos, t->abortedReason());
+            for (const auto* secret : {"abc123", "literal"}) {
+                BOOST_CHECK_MESSAGE(log.contents().find(secret) == std::string::npos,
+                                    "Found '" << secret << "' in the log");
+            }
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_system_keeps_a_failed_command_without_credentials_unchanged) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool log_commands : {false, true}) {
+        BOOST_TEST_CONTEXT("log_commands: " << log_commands) {
+            WithSystemLog log(log_commands);
+            spawn(System::ECF_JOB_CMD, "test -n 'a=b' && exit 3");
+            wait_for_children();
+
+            BOOST_CHECK_MESSAGE(log.contents().find("exited with status 3 [ test -n 'a=b' && exit 3 ]") !=
+                                    std::string::npos,
+                                log.contents());
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_submittable_masks_the_command_of_a_failed_substitution) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool log_commands : {false, true}) {
+        BOOST_TEST_CONTEXT("log_commands: " << log_commands) {
+            WithSystemLog log(log_commands);
+            Defs defs;
+            suite_ptr s = defs.add_suite("s");
+            task_ptr t  = s->add_task("t");
+            s->addVariable(Variable::new_variable("API_TOKEN", "abc123"));
+            s->addVariable(Variable::new_variable("ECF_NO_SCRIPT", "1"));
+            for (const auto* name : {"ECF_KILL_CMD", "ECF_STATUS_CMD", "ECF_JOB_CMD"}) {
+                t->addVariable(Variable::new_variable(name, "true %API_TOKEN% --password literal %UNDEFINED%"));
+            }
+            const std::string expected = "(true *** --password *** %UNDEFINED%)";
+
+            // The kill and the status commands report the failure to the client
+            try {
+                t->kill("4242");
+                BOOST_ERROR("Submittable::kill() did not throw");
+            }
+            catch (const std::runtime_error& e) {
+                BOOST_CHECK_MESSAGE(std::string(e.what()).find(expected) != std::string::npos, e.what());
+            }
+            t->set_state(NState::SUBMITTED);
+            try {
+                t->status();
+                BOOST_ERROR("Submittable::status() did not throw");
+            }
+            catch (const std::runtime_error& e) {
+                BOOST_CHECK_MESSAGE(std::string(e.what()).find(expected) != std::string::npos, e.what());
+            }
+
+            // The job command reports the failure to the job generation, which writes it to the log
+            t->set_state(NState::QUEUED);
+            JobsParam jobsParam;
+            BOOST_CHECK(!t->submitJob(jobsParam));
+            BOOST_CHECK_MESSAGE(jobsParam.errorMsg().find(expected) != std::string::npos, jobsParam.errorMsg());
+
+            BOOST_CHECK_EQUAL(System::instance()->process(), 0);
+            for (const auto* secret : {"abc123", "literal"}) {
+                BOOST_CHECK(jobsParam.errorMsg().find(secret) == std::string::npos);
+                BOOST_CHECK(t->abortedReason().find(secret) == std::string::npos);
+            }
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_submittable_masks_the_abort_reason_by_the_fixed_rules) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    task_ptr t = defs.add_suite("s")->add_task("t");
+
+    t->aborted("curl https://user:pw@host --token literal failed");
+    BOOST_CHECK_EQUAL(t->abortedReason(), "curl https://user:***@host --token *** failed");
+
+    t->aborted("job killed by the batch system");
+    BOOST_CHECK_EQUAL(t->abortedReason(), "job killed by the batch system");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

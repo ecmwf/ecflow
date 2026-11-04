@@ -262,7 +262,8 @@ public:
         /// `%NAME:default%`, the value of NAME when defined, and the default otherwise
         std::vector<std::pair<std::string, std::string>> variables;
         /// The command as substituted, with `***` in place of the value of each variable with a credential name,
-        /// whether referenced directly or through the value of another variable
+        /// whether referenced directly or through the value of another variable; when the substitution fails, the
+        /// command as partially substituted, likewise masked
         std::string masked_command;
     };
 

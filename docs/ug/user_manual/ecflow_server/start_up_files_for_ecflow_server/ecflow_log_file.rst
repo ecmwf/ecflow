@@ -321,7 +321,8 @@ Notes:
 - In the ``context`` record, each value is a JSON string: a value holding spaces or ``=``, e.g.
   ``"OPTS":"-q nf VAR=1"``, is one value; quotes and backslashes are escaped, and bytes that are not valid UTF-8
   are replaced by ``U+FFFD``.
-- The existing ``ERR`` and ``WAR`` lines of a failed or stopped command are written as before.
+- The ``ERR`` and ``WAR`` lines of a failed or stopped command are written as before, with the command masked as
+  described below.
 - Without the setting, no ``EXT`` line is written.
 
 Credentials are never written in these records:
@@ -331,3 +332,12 @@ Credentials are never written in these records:
 - the parts of the command and of each value that look like a credential are replaced by ``***``, as in the
   start-up lines;
 - ``ECF_PASS``, which identifies a task, and ``USER`` are not credential names.
+
+Commands written elsewhere are masked in the same way, whether the setting is enabled or not:
+
+- the ``ERR`` line of a command that exits with a nonzero status or dies of a signal;
+- the ``WAR`` line of a command that is stopped or continued;
+- the error of a command that cannot be started, or whose variables cannot be substituted, written to the log or
+  returned to the client;
+- the abort reason of a task, kept in the definition and the checkpoint and shown by the clients; any other part of
+  the reason that looks like a credential is replaced by ``***`` as well.
