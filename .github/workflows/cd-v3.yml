@@ -72,7 +72,8 @@ jobs:
         with:
           kinds: release-rpm,release-hpc
           manifest: .ci/release.toml
-          ci-wait-seconds: ${{ vars.ARTIFACT_WAIT_TIMEOUT || '7200' }}
+          # 6 hours: ecflow's CI (the Atos Intel leg above all) can take over 4.
+          ci-wait-seconds: '21600'
           allow-ref: feature/cd-v3
 
   build-rpm:
