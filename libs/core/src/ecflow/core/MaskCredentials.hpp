@@ -16,8 +16,9 @@ namespace ecf {
 ///   - the value of a credential name, given as `name=value` (in a URL query, the value ends at the next `&`);
 ///   - the value of a credential option, given as `-name value` or `--name value`.
 ///
-/// A credential name has a part, split at `_`, `-` or `.`, equal to `password`, `passwd`, `token`, `secret` or
-/// `key`, in any case (e.g. `API_KEY`, `db_passwd`, `access-token`, but not `keyfile` or `monkey`).
+/// A credential name has a part, split at `_`, `-`, `.` or `:`, equal to `password`, `passwd`, `token`, `secret` or
+/// `key`, in any case (e.g. `API_KEY`, `db_passwd`, `access-token`, the alias variable `API_TOKEN:0`, but not
+/// `keyfile` or `monkey`).
 ///
 /// A value is a complete shell word: quoted segments, escaped characters and their combinations, e.g.
 /// `"a b"'c'd\ e`; an unterminated quote extends the value to the end. The masking is a best effort: a secret
@@ -27,5 +28,18 @@ namespace ecf {
 /// @return The masked value; the value itself when nothing looks like a credential.
 ///
 std::string mask_credentials(std::string_view value);
+
+///
+/// @brief Returns whether the given name is a credential name, whose value is masked wherever it is logged.
+///
+/// A credential name has a part, split at `_`, `-`, `.` or `:`, equal to `password`, `passwd`, `token`, `secret` or
+/// `key`, in any case (e.g. `API_KEY`, `db_passwd`, `access-token`, the alias variable `API_TOKEN:0`, but not
+/// `keyfile` or `monkey`).
+/// `ECF_PASS`, which identifies a task, and `USER` are not credential names.
+///
+/// @param[in] name The name of a variable, a key or an option, without leading dashes.
+/// @return True when the name is a credential name.
+///
+bool is_credential_name(std::string_view name);
 
 } // namespace ecf

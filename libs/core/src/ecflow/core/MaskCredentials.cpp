@@ -27,13 +27,14 @@ bool is_space(char c) {
     return std::isspace(static_cast<unsigned char>(c)) != 0;
 }
 
-// True when one of the parts of the name, split at '_', '-' or '.', is a credential word (in any case)
+} // namespace
+
 bool is_credential_name(std::string_view name) {
     static const std::array<std::string_view, 5> words = {"password", "passwd", "token", "secret", "key"};
 
     std::size_t start = 0;
     while (start <= name.size()) {
-        auto end = name.find_first_of("_-.", start);
+        auto end = name.find_first_of("_-.:", start);
         if (end == std::string_view::npos) {
             end = name.size();
         }
@@ -49,6 +50,8 @@ bool is_credential_name(std::string_view name) {
     }
     return false;
 }
+
+namespace {
 
 // The password of each URL: scheme://user:password@host
 void find_url_passwords(std::string_view value, std::vector<Span>& spans) {

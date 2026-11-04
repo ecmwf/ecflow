@@ -8,6 +8,7 @@
 #include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
+using ecf::is_credential_name;
 using ecf::mask_credentials;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
@@ -118,6 +119,27 @@ BOOST_AUTO_TEST_CASE(test_mask_credentials_handles_long_values) {
         words += "argument ";
     }
     BOOST_CHECK_EQUAL(mask_credentials(words + "--token abc"), words + "--token ***");
+}
+
+BOOST_AUTO_TEST_CASE(test_is_credential_name_accepts_a_credential_part_in_any_case) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto* name : {"PASSWORD", "db_passwd", "API_TOKEN", "my-Secret", "api.key", "KEY", "API_TOKEN:0"}) {
+        BOOST_TEST_CONTEXT("Name: " << name) {
+            BOOST_CHECK(is_credential_name(name));
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_is_credential_name_rejects_other_names) {
+    ECF_NAME_THIS_TEST();
+
+    // ECF_PASS identifies the task, and is not a credential; user names are kept
+    for (const auto* name : {"ECF_PASS", "USER", "HOST", "keyfile", "MONKEY", "ssh_keys_dir", "", "A:0", "TOKENS:0"}) {
+        BOOST_TEST_CONTEXT("Name: " << name) {
+            BOOST_CHECK(!is_credential_name(name));
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
