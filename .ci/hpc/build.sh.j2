@@ -55,7 +55,7 @@ boost_root="{{ boost_root }}"
 } %}
 {% block build %}
 {{ super() -}}
-{% if release %}
+{% if release | default(none) %}
 {% for module in extra_pythons | default([]) %}
 {% set stage = ci_python_stages[module] %}
 {% set root = "/usr/local/apps/" ~ module %}
