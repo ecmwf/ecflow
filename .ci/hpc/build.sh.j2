@@ -33,3 +33,68 @@ boost_root="{{ boost_root }}"
   -DECFLOW_PYEXT_TEST_LD_LIBRARY_PATH={{ pyext_test_ld_library_path }} \
 {% endif %}
 {% endblock %}
+{#
+  A release leg's `extra-pythons`: v2's later ecflow-hpc stages. After the main build, each one is
+  a build of its own against another Python module, as v2 does it: configured afresh with the UI
+  off, built, tested, and only its `python` component installed, into the same staging tree. The
+  release then installs the main build, archives the lot and install-tests it, every Python's
+  ecflow.so included. In a subshell, so the module swap ends with it.
+
+  Per module, what v2's stage passes beyond the common flags: the module whose pybind11 it builds
+  with, and whether it names the Python headers and library itself. Two deliberate changes:
+  python312 builds with Python 3.13's pybind11 (3.0.4), as v2's own comment says it must, against
+  pybind11 3.0.1's py::dynamic_attr bug (v2's value is 3.12.9-01's); and python310's Boost headers
+  are GNU 8.5's, as for the others ($boost_root; v2 names GNU/12.2's include dir there).
+  A module missing here fails the render.
+#}
+{% set ci_python_stages = {
+  "python3/3.12.9-01": {"pybind11": "python3/3.13.13-01", "explicit": false},
+  "python3/3.11.8-01": {"pybind11": "python3/3.11.8-01", "explicit": true},
+  "python3/3.10.10-01": {"pybind11": "python3/3.10.10-01", "explicit": true},
+  "python3/3.8.8-01": {"pybind11": "python3/3.10.10-01", "explicit": true},
+} %}
+{% block build %}
+{{ super() -}}
+{% if release %}
+{% for module in extra_pythons | default([]) %}
+{% set stage = ci_python_stages[module] %}
+{% set root = "/usr/local/apps/" ~ module %}
+{% set version = (module.split("/")[1].split("."))[:2] | join(".") %}
+{% set pybind11_version = (stage.pybind11.split("/")[1].split("."))[:2] | join(".") %}
+
+# --- Python {{ version }} ({{ module }}): the python component only ---
+(
+  module unload qt python3
+  module load {{ module | sh }}
+  module list 2>&1
+  ci_py_build="$build-python{{ version }}"
+  rm -rf "$ci_py_build"
+  # shellcheck disable=SC2086
+  cmake --preset {{ options | sh }} -S "$CI_SOURCE_DIR" -B "$ci_py_build" $gen_flag \
+    -DCMAKE_BUILD_TYPE={{ build_type | sh }} \
+    -DCMAKE_C_COMPILER="$(command -v {{ c_compiler_binary | sh }})" \
+    -DCMAKE_CXX_COMPILER="$(command -v {{ cxx_compiler_binary | sh }})" \
+    -DENABLE_AVISO=OFF \
+    -DENABLE_UI=OFF \
+    -DBoost_ROOT="$boost_root" \
+    -DBoost_INCLUDE_DIR="$boost_root/include" \
+    -DPython3_ROOT_DIR={{ root | sh }} \
+    -DPython3_EXECUTABLE={{ (root ~ "/bin/python3") | sh }} \
+{% if stage.explicit %}
+    -DPython3_INCLUDE_DIRS={{ (root ~ "/include/python" ~ version) | sh }} \
+    -DPython3_LIBRARIES={{ (root ~ "/lib64/libpython" ~ version ~ ".so") | sh }} \
+    -DPython3_LIBRARY_DIRS={{ (root ~ "/lib64") | sh }} \
+{% endif %}
+    -Dpybind11_DIR={{ ("/usr/local/apps/" ~ stage.pybind11 ~ "/lib/python" ~ pybind11_version ~ "/site-packages/pybind11/share/cmake/pybind11") | sh }} \
+    -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
+    -DCMAKE_INSTALL_PREFIX="$release_prefix"
+  cmake --build "$ci_py_build" --parallel "$jobs"
+{% if tests %}
+  ctest --test-dir "$ci_py_build" --output-on-failure {{ ctest_args }}
+{% endif %}
+  DESTDIR="$install_root" cmake --install "$ci_py_build" --component python
+  rm -rf "$ci_py_build"
+)
+{% endfor %}
+{% endif %}
+{% endblock %}
