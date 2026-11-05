@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -10,6 +12,7 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -491,6 +494,138 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
 
     std::string expected = "ECFLOW-999 1> ECFLOW-999 2>&1";
     BOOST_CHECK_MESSAGE(cmd == expected, "variable substitution failed expected " << expected << " but found " << cmd);
+}
+
+namespace {
+
+using Variables = std::vector<std::pair<std::string, std::string>>;
+
+// Substitute cmd with and without a record; check that both give the same command, and return the record
+Node::SubstitutionRecord substitute_with_record(const Node& node, const std::string& cmd, bool expected_ok = true) {
+    std::string without = cmd;
+    BOOST_CHECK_EQUAL(node.variableSubstitution(without), expected_ok);
+
+    std::string with = cmd;
+    Node::SubstitutionRecord record;
+    BOOST_CHECK_EQUAL(node.variableSubstitution(with, &record), expected_ok);
+    BOOST_CHECK_EQUAL(with, without);
+    return record;
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_records_direct_and_nested_references) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("HOST", "hpc"));
+    s->addVariable(Variable::new_variable("OPTS", "-q %QUEUE%"));
+    s->addVariable(Variable::new_variable("QUEUE", "nf"));
+
+    auto record = substitute_with_record(*s, "submit %OPTS% %HOST% %HOST%");
+    BOOST_CHECK(record.variables == (Variables{{"OPTS", "-q %QUEUE%"}, {"QUEUE", "nf"}, {"HOST", "hpc"}}));
+    BOOST_CHECK_EQUAL(record.masked_command, "submit -q nf hpc hpc");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_records_the_value_used_of_a_default_reference) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("QUEUE", "nf"));
+
+    auto record = substitute_with_record(*s, "submit %QUEUE:np% %HOST:localhost%");
+    BOOST_CHECK(record.variables == (Variables{{"QUEUE", "nf"}, {"HOST", "localhost"}}));
+    BOOST_CHECK_EQUAL(record.masked_command, "submit nf localhost");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_records_generated_and_alias_variables) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("ECF_HOME", "/home"));
+    task_ptr t = s->add_task("t");
+    defs.beginAll();
+    t->update_generated_variables();
+
+    auto record = substitute_with_record(*t, "submit %ECF_NAME% %ECF_PASS%");
+    BOOST_REQUIRE_EQUAL(record.variables.size(), 2u);
+    BOOST_CHECK_EQUAL(record.variables[0].first, "ECF_NAME");
+    BOOST_CHECK_EQUAL(record.variables[0].second, "/suite/t");
+    BOOST_CHECK_EQUAL(record.variables[1].first, "ECF_PASS");
+    BOOST_CHECK_NE(record.variables[1].second, "***");
+
+    alias_ptr a = t->add_alias_only();
+    a->add_alias_variable("A:0", "zero");
+    record = substitute_with_record(*a, "run %A:0%");
+    BOOST_CHECK(record.variables == (Variables{{"A:0", "zero"}}));
+    BOOST_CHECK_EQUAL(record.masked_command, "run zero");
+
+    // The name of an alias variable may hold a ':', which separates the parts of a credential name as well
+    a->add_alias_variable("API_TOKEN:0", "abc123");
+    std::string cmd = "run %API_TOKEN:0%";
+    BOOST_CHECK(a->variableSubstitution(cmd));
+    BOOST_CHECK_EQUAL(cmd, "run abc123");
+    record = substitute_with_record(*a, "run %API_TOKEN:0%");
+    BOOST_CHECK(record.variables == (Variables{{"API_TOKEN:0", "***"}}));
+    BOOST_CHECK_EQUAL(record.masked_command, "run ***");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_records_with_double_micro) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("API_TOKEN", "abc123"));
+
+    auto record = substitute_with_record(*s, "date +%%Y%%m && curl -H 'Bearer %API_TOKEN%'");
+    BOOST_CHECK_EQUAL(record.masked_command, "date +%Y%m && curl -H 'Bearer ***'");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_records_a_partial_substitution) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("API_TOKEN", "abc123"));
+
+    auto record = substitute_with_record(*s, "submit %API_TOKEN% %UNDEFINED%", false);
+    BOOST_CHECK_EQUAL(record.masked_command, "submit *** %UNDEFINED%");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_masks_a_credential_variable) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("API_TOKEN", "abc123"));
+    s->addVariable(Variable::new_variable("AUTH", "Bearer %API_TOKEN%"));
+    s->addVariable(Variable::new_variable("DB_PASSWORD", "s3cr3t"));
+
+    // Directly, through another variable, and as %NAME:default% with NAME defined and undefined
+    auto record = substitute_with_record(*s, "submit %API_TOKEN% -H '%AUTH%' %DB_PASSWORD:x% %MY_SECRET:fallback%");
+    BOOST_CHECK_EQUAL(record.masked_command, "submit *** -H 'Bearer ***' *** ***");
+    BOOST_CHECK(
+        record.variables ==
+        (Variables{
+            {"API_TOKEN", "***"}, {"AUTH", "Bearer %API_TOKEN%"}, {"DB_PASSWORD", "***"}, {"MY_SECRET", "***"}}));
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_masks_only_the_substituted_credential) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    suite_ptr s = defs.add_suite("suite");
+    s->addVariable(Variable::new_variable("DB_PASSWORD", "1"));
+    s->addVariable(Variable::new_variable("USER", "alice"));
+    s->addVariable(Variable::new_variable("JOB", "/x/t.job1"));
+
+    // Text equal to the value of a credential is kept; the values of ECF_PASS and USER are not credentials
+    auto record = substitute_with_record(*s, "submit -u %USER% --pw %DB_PASSWORD% %JOB%");
+    BOOST_CHECK_EQUAL(record.masked_command, "submit -u alice --pw *** /x/t.job1");
+    BOOST_CHECK(record.variables == (Variables{{"USER", "alice"}, {"DB_PASSWORD", "***"}, {"JOB", "/x/t.job1"}}));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

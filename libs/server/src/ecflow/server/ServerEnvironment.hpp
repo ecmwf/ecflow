@@ -100,6 +100,14 @@ public:
     /// for test/debug we can elect to disable, it.
     bool jobGeneration() const { return jobGeneration_; }
 
+    ///
+    /// @brief Returns whether the spawned commands are recorded in the log, as set by
+    /// `/ecflow/server/log/commands/enabled` in `<host>.<port>.ecf.cfg`.
+    ///
+    /// @return True when the spawn, context and termination records of the commands are written; false by default.
+    ///
+    bool log_commands() const { return log_commands_; }
+
     /// Whenever we save the checkpt, we time how long this takes.
     /// For very large definition the time can be significant and start to interfere with
     /// the scheduling. (i.e since write to disk is blocking).
@@ -353,6 +361,7 @@ private:
     int ecf_prune_node_log_;
     int ecf_task_threshold_; ///< Effective signed millisecond threshold, validated before updating the profiler.
     bool jobGeneration_;     // used in debug/test mode only
+    bool log_commands_{false};
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

@@ -189,7 +189,8 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
                 "ipv6": true,
                 "ssl": )" + ssl_option +
                                             R"(,
-                "job_generation": false
+                "job_generation": false,
+                "log": {"commands": {"enabled": true}}
             }
         }
     })",

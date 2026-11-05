@@ -13,7 +13,8 @@ namespace ecf::cfg {
 /// The catalogue describes every input of the server available in develop, under keys of the form:
 ///
 ///   - `ecflow.server.variables@<NAME>`:  an input with an `ECF_` name, e.g. `ecflow.server.variables@ECF_PORT`;
-///   - `ecflow.server.<path>`:            an input available only on the command line, e.g. `ecflow.server.http`.
+///   - `ecflow.server.<path>`:            any other input, e.g. `ecflow.server.http`, a command-line switch, or
+///                                        `ecflow.server.log.commands.enabled`, set only in `<host>.<port>.ecf.cfg`.
 ///
 /// Notes:
 ///

@@ -7,11 +7,9 @@ ecFlow log file
 ///////////////
 
 
-If this file exists at the beginning of ecFlow execution, it is appended
-to. Otherwise, it is created. The location and name of the log file can
-be configured using the environment variable
-`ECF_LOG <https://confluence.ecmwf.int/display/ECFLOW/ECFLOW+Server+environment+variables>`__,
-which can be set before the ecFlow server starts.
+If this file exists when the server starts, it is appended to; otherwise, it is created. The location and name
+of the log file are set by ``ECF_LOG``, before the server starts; see :ref:`server_configuration` for the ways to
+set it.
 
 +------+---------------------------------------------------------------+
 |      | Meaning                                                       |
@@ -37,6 +35,10 @@ which can be set before the ecFlow server starts.
 +------+---------------------------------------------------------------+
 | DBG  | Debugging message, by default these are not visible they must |
 |      | be turned on by a privileged user.                            |
++------+---------------------------------------------------------------+
+| EXT  | Extra information, written only when enabled by the server    |
+|      | configuration. Each line carries the time at which it is      |
+|      | written.                                                      |
 +------+---------------------------------------------------------------+
 |others| There could be a keyboard echo in the log file if ecFlow is   |
 |      | running interactively; these lines should be ignored by       |
@@ -65,16 +67,13 @@ may differ.
 
 .. note::
 
-  The log file is not removed so it needs to be managed. We
-  tend to compress and archive our log files each day using an ecFlow
-  controlled script.
+  The log file is never removed by the server, and needs to be managed. At ECMWF, the log files are compressed
+  and archived each day by a script controlled by ecFlow.
 
-The log file grows over time and **should** be managed. You can
-manipulate the log files using the client command --log. Type::
+The log file grows over time and **should** be managed. The client command :ref:`--log <log_cli>` gets, clears,
+flushes, or creates a new log file; for details, run::
 
   ecflow_client --help log
-
-for details. This allows you to get, clear, flush, or create a new log file.
 
 Start-up lines
 --------------
@@ -190,23 +189,73 @@ The values section lists, in order:
    * - ``Job scheduling interval``, ``Job generation``, ``Checkpoint save time alarm``
      - the job scheduling interval, whether jobs are generated, and the time (in seconds) above which saving the
        checkpoint logs a warning and sets the ``late`` flag of the server
+   * - ``Log of commands``
+     - whether the spawned commands are recorded, see :ref:`ecflow_log_file_commands`; its source is named
+       ``/ecflow/server/log/commands/enabled`` when given in ``<host>.<port>.ecf.cfg``
    * - ``--http``, ``--v6``, ``--dis_job_gen``, ``--ssl``
      - the command-line switches, each ``true`` when in effect, whichever source sets it
 
-Notes:
+.. _ecflow_log_file_masking:
 
-- Any part of a command or URL that looks like a credential is replaced by ``***``:
+Masking of credentials
+----------------------
 
-  - the password of a URL: ``https://user:***@host``;
-  - the value of a credential name: ``API_TOKEN=***``, or ``?access_token=***&x=1`` in a URL query;
-  - the value of a credential option: ``--password ***``.
+Commands and URLs often carry credentials, and the server takes care not to write them to the log file: any part
+of a command or URL that looks like a credential is replaced by ``***``. The masking applies to the start-up lines,
+to the :ref:`records of the spawned commands <ecflow_log_file_commands>` and to the other lines and messages that
+hold a command, and to the abort reason of a task.
 
-- A credential name has a part, split at ``_``, ``-`` or ``.``, equal to ``password``, ``passwd``, ``token``,
-  ``secret`` or ``key``, in any case: ``API_KEY`` and ``db_passwd`` are credential names, ``keyfile`` is not.
-- A value is a complete shell word, quoted segments and escaped characters included; an unterminated quote masks
-  the rest of the value.
-- The masking is a best effort: a secret not given as the value of a credential name or option is logged as it
-  is.
+.. warning::
+
+    The masking protects the log file and the abort reason only. The values of credentials remain visible in the
+    job file and the job output, which hold the commands and scripts with the values substituted; in the variables
+    shown by the clients, such as ``ecflow_client --get``, ``ecflow_client --query variable`` and the variables
+    panel of ecflow_ui; and in the suite definition and the checkpoint file, which hold the variables as defined.
+    Protect these with the permissions of the files and the access control of the server, see :ref:`security`.
+
+The following table shows the parts that are masked, each with an example as written and as logged:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Part
+     - Written
+     - Logged
+   * - the password of a URL
+     - ``https://user:s3cr3t@host:8080/path``
+     - ``https://user:***@host:8080/path``
+   * - the value of a credential name
+     - ``API_KEY=abc123``
+     - ``API_KEY=***``
+   * - the value of a credential name in a URL query
+     - ``https://host/x?access_token=abc&y=1``
+     - ``https://host/x?access_token=***&y=1``
+   * - the value of a credential option, as the next word or after ``=``
+     - ``--token abc``, ``--password=abc``
+     - ``--token ***``, ``--password=***``
+   * - the credential of an HTTP authorization scheme, the word after ``Bearer`` or ``Basic``, in any case
+     - ``-H 'Authorization: Bearer abc123'``
+     - ``-H 'Authorization: Bearer ***'``
+
+A *credential name* is a name with a part, when split at ``_``, ``-``, ``.`` or ``:``, equal to ``password``,
+``passwd``, ``token``, ``secret`` or ``key``, in any case. ``API_KEY``, ``db_passwd``, ``api.key``, ``--api-token``
+and the alias variable ``API_TOKEN:0`` are therefore credential names, while ``keyfile``, ``MONKEY`` and
+``DB_PASS`` are not. Likewise, a *credential option*
+is an option, ``-name`` or ``--name``, whose name is a credential name.
+
+The value masked is always a complete shell word, quoted segments and escaped characters included, so that
+``PASSWORD='a b' submit`` is logged as ``PASSWORD=*** submit``; an unterminated quote masks the rest of the value.
+
+These rules are a best effort, and a secret that is not given as the value of a credential name or option, nor
+after an authorization scheme, is logged as it is. In the records of the spawned commands, the server goes one step further and also masks the value
+of every variable with a credential name, wherever the variable is used (see :ref:`ecflow_log_file_commands`).
+
+.. tip::
+
+    Name every variable that holds a secret with a credential name, e.g. ``DB_PASSWORD`` rather than ``DB_PASS``:
+    its value is then masked in the records of the spawned commands wherever the variable is used, directly or
+    through the value of another variable. A secret held by a variable with any other name is logged as it is,
+    unless it is written as the value of a credential name or option, or after an authorization scheme.
 
 Authentication and authorisation lines
 --------------------------------------
@@ -264,3 +313,100 @@ Notes:
 - A whitelist without users grants read/write access to all users: ``* = read/write (no users specified)``.
 - With ``--debug``, the start-up lines, from the start time on, and the authentication and authorisation blocks are
   also written to the standard output, with the same content.
+
+.. _ecflow_log_file_commands:
+
+Records of the spawned commands
+-------------------------------
+
+The server spawns three commands for a task: ``ECF_JOB_CMD`` to submit it, ``ECF_KILL_CMD`` to kill it, and
+``ECF_STATUS_CMD`` to query its status. When enabled in :ref:`server_configuration_file`, by
+``/ecflow/server/log/commands/enabled``, the server records each of these commands in ``EXT`` lines, such as:
+
+.. code-block:: text
+
+    EXT:[08:57:49 05.11.2026] ECF_JOB_CMD spawn pid(9371) path(/demo/t1) cmd[ troika --token *** submit -u ops hpc /home/ops/ecflow/demo/t1.job1 /home/ops/ecflow/demo/t1.1 ]
+    EXT:[08:57:49 05.11.2026] ECF_JOB_CMD context pid(9371) path(/demo/t1) {"TROIKA_OPTS":"--token ***","TROIKA_TOKEN":"***","USER":"ops","SCHOST":"hpc","ECF_JOB":"/home/ops/ecflow/demo/t1.job1","ECF_JOBOUT":"/home/ops/ecflow/demo/t1.1"}
+    EXT:[08:57:50 05.11.2026] ECF_JOB_CMD exit pid(9371) path(/demo/t1) status(0)
+    EXT:[08:57:50 05.11.2026] ECF_JOB_CMD signal pid(9373) path(/demo/t3) signal(9)
+
+These lines are taken from the recipe :ref:`how_to_log_the_commands_spawned_by_the_server`, which also shows the
+records of a kill, of a status query, of a failed submission and of a secret left unmasked. The option ``--token``
+is an example of an option whose value is masked, not an option of ``troika``.
+
+Each command gives a ``spawn`` and a ``context`` record when it is spawned, followed by an ``exit`` or a ``signal``
+record when it terminates:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Record
+     - Written
+     - Content
+   * - ``spawn``
+     - once the command is spawned
+     - the command as rendered, with the value of each variable with a credential name, and every part that looks
+       like a credential, replaced by ``***``; it therefore differs from the command run when a credential is masked
+   * - ``context``
+     - right after the ``spawn`` record
+     - each variable substituted to render the command, once each, in the order of first use, as a JSON object
+       of names and values
+   * - ``exit``
+     - once the server handles the termination of the command
+     - the exit status of the command
+   * - ``signal``
+     - once the server handles the termination of the command by a signal
+     - the number of the signal
+
+Reading the records
+~~~~~~~~~~~~~~~~~~~
+
+All the records of a command carry its kind, its process id and the path of its task. Filter on the path to select
+the records of a task, e.g. ``grep 'path(/demo/t1)'``, and add the kind and the process id to select those of a
+single command, e.g. ``grep 'ECF_JOB_CMD [a-z]* pid(9371) '``. Such filtering is useful because the records of
+commands running at the same time might be interleaved in the log.
+
+Each record carries the time at which it is written, which is not always the time of the event. The termination of
+a command is recorded when the server handles it, at the end of the next job scheduling, and after any records
+written in the meantime. This is usually within ``ECF_INTERVAL`` seconds of the end of the command, but can be
+later, e.g. when the server is busy or halted.
+
+The ``context`` record holds the variables used directly in the command and those used through the value of
+another variable. For ``%NAME:default%``, it holds the value actually used: that of ``NAME`` when defined, and the
+default otherwise. For a kill given a process id, ``ECF_RID`` holds that process id. Since each value is a JSON
+string, a value holding spaces or ``=``, such as ``"OPTS":"-q nf VAR=1"``, reads unambiguously as one value; quotes
+and backslashes are escaped, and bytes that are not valid UTF-8 are replaced by ``U+FFFD``. Line breaks, in a
+command or in a value, are written as ``\n``, so that each record remains a single line.
+
+ecflow_ui lists the ``EXT`` lines in its log views, e.g. the History panel, without a type (similar to ``OTH``
+lines); the :ref:`timeline` and the :ref:`server_load_panel` do not use them.
+
+Enabling the records
+~~~~~~~~~~~~~~~~~~~~
+
+The setting is available only in ``<host>.<port>.ecf.cfg``, and no environment variable or command-line option
+sets it (see :ref:`server_configuration`). It is read once, at start-up, so a change takes effect only when the
+server is restarted. The start-up line ``Log of commands`` states the setting in force and its origin, e.g.
+``Log of commands = enabled @ ecf.cfg``.
+
+Without the setting, no ``EXT`` line is written. With it, each spawned command adds three lines to the log, and
+the ``context`` line grows with the number and the size of the variables used; take this additional volume into
+account when managing the log file.
+
+Credentials in the records
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The records mask the credentials that the server can recognise. The value of a variable with a credential name is
+replaced by ``***`` wherever the variable is used, directly in the command or through the value of another
+variable, and in the ``context`` record. On top of that, the parts of the command and of each value that look like
+a credential are replaced by ``***``, as described in :ref:`ecflow_log_file_masking`. A secret held by a variable
+with any other name, and not written as the value of a credential name or option, nor after an authorization
+scheme, is written as it is.
+``ECF_PASS``, which identifies a task, and ``USER`` are not credential names.
+
+The commands written elsewhere are masked in the same way, whether the setting is enabled or not, and these lines
+are otherwise written as before. This covers the ``ERR`` line of a command that exits with a nonzero status or dies
+of a signal, the ``WAR`` line of a command that is stopped or continued, and the error of a command that cannot be
+started, or whose variables cannot be substituted, whether written to the log or returned to the client. It also
+covers the abort reason of a task, which is kept in the definition and the checkpoint and shown by the clients;
+any other part of the reason that looks like a credential is replaced by ``***`` as well.

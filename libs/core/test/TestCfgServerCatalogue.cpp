@@ -139,6 +139,11 @@ std::vector<Expected> expected_settings() {
          Type::Boolean,
          boolean(true),
          Names{std::nullopt, "/ecflow/server/job_generation", std::nullopt, "dis_job_gen"}},
+        // Configuration file only
+        {"ecflow.server.log.commands.enabled",
+         Type::Boolean,
+         boolean(false),
+         Names{std::nullopt, "/ecflow/server/log/commands/enabled", std::nullopt, std::nullopt}},
     };
 }
 
@@ -294,6 +299,17 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_switches) {
     check_accepted("ecflow.server.http", "", value_of(true));
     check_accepted("ecflow.server.ipv6", "", value_of(true));
     check_accepted("ecflow.server.job_generation", "", value_of(false));
+}
+
+BOOST_AUTO_TEST_CASE(test_server_catalogue_log_commands) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string key = "ecflow.server.log.commands.enabled";
+    check_accepted(key, "true", value_of(true));
+    check_accepted(key, "false", value_of(false));
+    for (const std::string text : {"", "1", "yes", "True"}) {
+        check_refused(key, text);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_catalogue_ssl_requires_support) {

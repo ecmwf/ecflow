@@ -227,6 +227,13 @@ Settings
      - no
      - ``--dis_job_gen``
      - switch: disables job generation, for testing only
+   * - Log of commands
+     - disabled
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/log/commands/enabled``: ``true`` records the spawned
+       commands in the log, see :ref:`ecflow_log_file_commands`
 
 Notes:
 

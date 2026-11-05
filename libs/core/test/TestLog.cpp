@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
+#include <regex>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -321,6 +324,48 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
     fs::remove(Log::instance()->path());
 
     // Explicitly destroy log. To keep valgrind happy
+    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE(test_log_types_include_ext) {
+    ECF_NAME_THIS_TEST();
+
+    std::vector<std::string> types;
+    Log::get_log_types(types);
+    BOOST_CHECK_EQUAL(types.size(), 7u);
+    BOOST_CHECK(std::find(types.begin(), types.end(), "EXT") != types.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_log_ext_record_carries_the_current_time_and_keeps_the_cached_time_stamp) {
+    std::string path = getLogPath();
+    ECF_NAME_THIS_TEST(<< ", using log file:" << path);
+
+    fs::remove(path);
+    BOOST_REQUIRE_MESSAGE(!fs::exists(path), "log file not deleted " << path);
+    Log::create(path);
+
+    // The time stamp of a request, reused by the MSG, LOG and OTH records that follow; set in the past, so that it
+    // differs from the current time without depending on the clock
+    const std::string cached = "[00:00:00 1.1.2000] ";
+    Log::instance()->cache_time_stamp(cached);
+
+    LOG(Log::EXT, "extra information");
+    BOOST_CHECK_EQUAL(Log::instance()->get_cached_time_stamp(), cached);
+
+    LOG(Log::MSG, "request");
+    Log::instance()->flush_only();
+
+    std::vector<std::string> lines;
+    BOOST_REQUIRE(File::splitFileIntoLines(path, lines));
+    BOOST_REQUIRE_GE(lines.size(), 2u);
+    const auto& ext = lines[lines.size() - 2];
+    // The EXT record carries the current time, not the cached one
+    const std::regex record(R"(EXT:\[\d{2}:\d{2}:\d{2} \d{1,2}\.\d{1,2}\.\d{4}\] extra information)");
+    BOOST_CHECK_MESSAGE(std::regex_match(ext, record), "unexpected EXT record: " << ext);
+    BOOST_CHECK_MESSAGE(ext.find(cached) == std::string::npos, "EXT record with the cached time stamp: " << ext);
+    BOOST_CHECK_EQUAL(lines.back(), "MSG:" + cached + "request");
+
+    fs::remove(path);
     Log::destroy();
 }
 

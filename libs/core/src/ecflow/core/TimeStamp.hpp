@@ -23,12 +23,12 @@ namespace TimeStamp {
 std::string now();
 
 ///
-/// @brief Append a timestamp of the current time to \p buffer.
+/// @brief Replace the content of \p buffer with a timestamp of the current time.
 ///
 /// Format: `"[HH:MM:SS D.M.YYYY] "` (e.g. `"[05:26:20 29.10.2014] "` or `"[05:26:20 17.1.2023] "`).
 /// Note that day and month have no leading zeros.
 ///
-/// @param buffer The string to which the formatted timestamp is appended.
+/// @param[out] buffer The string that receives the formatted timestamp; its previous content is discarded.
 ///
 void now(std::string& buffer);
 

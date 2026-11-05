@@ -140,3 +140,9 @@ The table below shows a list of ecFlow variables.
 
        Where ECF_URL_BASE is the base web address and ECF_URL the specific page.
        Notice that `ECF_URL_BASE` and `ECF_URL` themselves are not suite definition variables, but can be defined in the suite definition file.
+
+.. note::
+
+    The server can record each spawn of :code:`ECF_JOB_CMD`, :code:`ECF_KILL_CMD` and :code:`ECF_STATUS_CMD`, the
+    variables used to render the command, and its termination, in the log file, with credentials masked; see
+    :ref:`ecflow_log_file_commands`.

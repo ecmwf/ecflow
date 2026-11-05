@@ -39,6 +39,11 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
     // Must be set before checkpt file is loaded.
     defs_->ecf_prune_node_log(serverEnv.ecf_prune_node_log());
 
+    // System is configured once, before any command can be spawned
+    System::Configuration system_configuration;
+    system_configuration.log_commands = serverEnv.log_commands();
+    System::instance()->set_configuration(system_configuration);
+
     LogFlusher logFlusher;
 
     // Register to handle the signals.

@@ -94,7 +94,7 @@ milliseconds time_closing_in_child(bool allow_close_range) {
 milliseconds time_spawn() {
     const auto start = std::chrono::steady_clock::now();
     std::string errorMsg;
-    BOOST_REQUIRE_MESSAGE(System::instance()->spawn(System::ECF_STATUS_CMD, "true", "", errorMsg),
+    BOOST_REQUIRE_MESSAGE(System::instance()->spawn(System::ECF_STATUS_CMD, "true", "true", {}, "", errorMsg),
                           "System::instance()->spawn() failed: " << errorMsg);
     while (System::instance()->process() != 0) {
         Signal unblock_on_destruction_then_reblock;

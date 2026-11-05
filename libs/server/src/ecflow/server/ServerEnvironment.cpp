@@ -446,6 +446,7 @@ std::vector<std::string> ServerEnvironment::runtime_configuration_lines() const 
     entry("ECF_MICRO", ecf::mask_credentials(ecf_micro_), "ECF_MICRODEF");
     entry("Job scheduling interval", std::to_string(submitJobsInterval_), "ECF_INTERVAL");
     entry("Job generation", jobGeneration_ ? "enabled" : "disabled", "--dis_job_gen");
+    entry("Log of commands", log_commands_ ? "enabled" : "disabled", "/ecflow/server/log/commands/enabled");
     entry("Checkpoint save time alarm", std::to_string(checkpt_save_time_alarm_), {});
     for (const auto& [name, value] : configuration_switches_) {
         entry(name, value ? "true" : "false", name);
@@ -488,6 +489,7 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     ecf_prune_node_log_      = integer("ECF_PRUNE_NODE_LOG");
     debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
     jobGeneration_           = option("ecflow.server.job_generation");
+    log_commands_            = option("ecflow.server.log.commands.enabled");
     if (option("ecflow.server.http")) {
         protocol_ = ecf::Protocol::Http;
     }
@@ -569,11 +571,22 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
             const auto& key         = setting.key();
             const auto source       = traced.source(key);
             const auto& switch_name = setting.names().cli;
-            const auto name = key.is_variable() ? std::string(key.components().second) : "--" + switch_name.value();
+            // A variable is named as such, a switch by its option, and an option set only in <host>.<port>.ecf.cfg by
+            // its path in the file
+            std::string name;
+            if (key.is_variable()) {
+                name = std::string(key.components().second);
+            }
+            else if (switch_name) {
+                name = "--" + *switch_name;
+            }
+            else {
+                name = setting.names().ecf_cfg.value();
+            }
             if (source) {
                 configuration_origins_.emplace(name, origins.at(*source));
             }
-            if (!key.is_variable()) {
+            if (!key.is_variable() && switch_name) {
                 configuration_switches_.emplace_back(name, traced.get(key) != setting.default_value());
             }
         }
