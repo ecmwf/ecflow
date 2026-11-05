@@ -73,6 +73,7 @@ set(test_srcs
   test/TestRealCalendar.cpp
   test/TestResources.cpp
   test/TestResult.cpp
+  test/TestScaffoldProvisioning.cpp
   test/TestSanitizerAS.cpp
   test/TestSanitizerUB.cpp
   test/TestSerialisation.cpp

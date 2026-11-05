@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
@@ -287,16 +288,32 @@ public:
             return std::to_string(pid);
         }
 
+        // A directory removed and created again under the same name can leave getcwd() failing on some file
+        // systems (e.g. the virtiofs bind mounts of Docker Desktop on macOS), so no name is ever reused.
+        static std::string get_sequence_number() {
+            static std::atomic<unsigned long> counter{0};
+            return std::to_string(counter++);
+        }
+
     public:
+        ///
+        /// @brief Generates the relative path of a new test working directory.
+        ///
+        /// The path combines the build type, compiler, architecture, current test name, process ID, and a sequence
+        /// number incremented at every call, so that each directory created by a process has its own name.
+        ///
+        /// @return The path, relative to the current working directory.
+        ///
         static std::string generate_relative_path() {
             const std::string compiler     = get_compiler();
             const std::string architecture = get_architecture();
             const std::string build_type   = get_build_type();
             const std::string test_name    = get_test_name();
             const std::string pid          = get_pid();
+            const std::string sequence     = get_sequence_number();
 
             return "data/ECF_HOME__b_" + build_type + "__c_" + compiler + "__a_" + architecture + "__t_" + test_name +
-                   "__p_" + pid + "__";
+                   "__p_" + pid + "__n_" + sequence + "__";
         }
     };
 
