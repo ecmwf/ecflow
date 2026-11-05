@@ -233,6 +233,9 @@ The following table shows the parts that are masked, each with an example as wri
    * - the value of a credential option, as the next word or after ``=``
      - ``--token abc``, ``--password=abc``
      - ``--token ***``, ``--password=***``
+   * - the credential of an HTTP authorization scheme, the word after ``Bearer`` or ``Basic``, in any case
+     - ``-H 'Authorization: Bearer abc123'``
+     - ``-H 'Authorization: Bearer ***'``
 
 A *credential name* is a name with a part, when split at ``_``, ``-``, ``.`` or ``:``, equal to ``password``,
 ``passwd``, ``token``, ``secret`` or ``key``, in any case. ``API_KEY``, ``db_passwd``, ``api.key``, ``--api-token``
@@ -243,8 +246,8 @@ is an option, ``-name`` or ``--name``, whose name is a credential name.
 The value masked is always a complete shell word, quoted segments and escaped characters included, so that
 ``PASSWORD='a b' submit`` is logged as ``PASSWORD=*** submit``; an unterminated quote masks the rest of the value.
 
-These rules are a best effort, and a secret that is not given as the value of a credential name or option is
-logged as it is. In the records of the spawned commands, the server goes one step further and also masks the value
+These rules are a best effort, and a secret that is not given as the value of a credential name or option, nor
+after an authorization scheme, is logged as it is. In the records of the spawned commands, the server goes one step further and also masks the value
 of every variable with a credential name, wherever the variable is used (see :ref:`ecflow_log_file_commands`).
 
 .. tip::
@@ -252,7 +255,7 @@ of every variable with a credential name, wherever the variable is used (see :re
     Name every variable that holds a secret with a credential name, e.g. ``DB_PASSWORD`` rather than ``DB_PASS``:
     its value is then masked in the records of the spawned commands wherever the variable is used, directly or
     through the value of another variable. A secret held by a variable with any other name is logged as it is,
-    unless it is written as the value of a credential name or option.
+    unless it is written as the value of a credential name or option, or after an authorization scheme.
 
 Authentication and authorisation lines
 --------------------------------------
@@ -397,7 +400,8 @@ The records mask the credentials that the server can recognise. The value of a v
 replaced by ``***`` wherever the variable is used, directly in the command or through the value of another
 variable, and in the ``context`` record. On top of that, the parts of the command and of each value that look like
 a credential are replaced by ``***``, as described in :ref:`ecflow_log_file_masking`. A secret held by a variable
-with any other name, and not written as the value of a credential name or option, is written as it is.
+with any other name, and not written as the value of a credential name or option, nor after an authorization
+scheme, is written as it is.
 ``ECF_PASS``, which identifies a task, and ``USER`` are not credential names.
 
 The commands written elsewhere are masked in the same way, whether the setting is enabled or not, and these lines

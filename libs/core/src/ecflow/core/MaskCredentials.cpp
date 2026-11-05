@@ -53,6 +53,54 @@ bool is_credential_name(std::string_view name) {
 
 namespace {
 
+// The credential of each HTTP authorization scheme, e.g. `Authorization: Bearer abc123`: the word following `Bearer`
+// or `Basic`, in any case, up to a space or a quote, so that a credential in a quoted header is masked as well
+void find_authorization_credentials(std::string_view value, std::vector<Span>& spans) {
+    static const std::array<std::string_view, 2> schemes = {"bearer", "basic"};
+
+    auto starts_a_word = [&value](std::size_t i) {
+        if (i == 0) {
+            return true;
+        }
+        char c = value[i - 1];
+        return is_space(c) || c == '\'' || c == '"' || c == ':' || c == '=';
+    };
+
+    std::size_t i = 0;
+    while (i < value.size()) {
+        bool found = false;
+        if (starts_a_word(i)) {
+            for (auto scheme : schemes) {
+                auto end = i + scheme.size();
+                if (end < value.size() && is_space(value[end]) &&
+                    std::equal(
+                        scheme.begin(),
+                        scheme.end(),
+                        value.begin() + i,
+                        [](char a, char b) { return a == std::tolower(static_cast<unsigned char>(b)); })) {
+                    auto first = end;
+                    while (first < value.size() && is_space(value[first])) {
+                        ++first;
+                    }
+                    auto last = first;
+                    while (last < value.size() && !is_space(value[last]) && value[last] != '\'' && value[last] != '"') {
+                        ++last;
+                    }
+                    if (last > first) {
+                        spans.emplace_back(first, last);
+                    }
+                    i     = std::max(last, end);
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            ++i;
+        }
+    }
+}
+
 // The password of each URL: scheme://user:password@host
 void find_url_passwords(std::string_view value, std::vector<Span>& spans) {
     for (auto scheme_end = value.find("://"); scheme_end != std::string_view::npos;
@@ -188,6 +236,7 @@ std::string mask_credentials(std::string_view value) {
     std::vector<Span> spans;
 
     find_url_passwords(value, spans);
+    find_authorization_credentials(value, spans);
 
     auto words = split_words(value);
     for (std::size_t w = 0; w < words.size(); ++w) {

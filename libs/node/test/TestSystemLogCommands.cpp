@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_submittable_logs_no_credential_value) {
     BOOST_CHECK_EQUAL(records[0],
                       "ECF_KILL_CMD spawn pid(N) path(/s/t) cmd[ true *** 'Bearer ***' *** *** --token *** 4242 ]");
     BOOST_CHECK_EQUAL(records[1],
-                      R"(ECF_KILL_CMD context pid(N) path(/s/t) {"API_TOKEN":"***","AUTH":"Bearer %API_TOKEN%",)"
+                      R"(ECF_KILL_CMD context pid(N) path(/s/t) {"API_TOKEN":"***","AUTH":"Bearer ***",)"
                       R"("DB_PASSWORD":"***","MY_SECRET":"***","ECF_RID":"4242"})");
     for (const auto* secret : {"abc123", "s3cr3t", "fallback", "literal"}) {
         BOOST_CHECK_MESSAGE(log.contents().find(secret) == std::string::npos, "Found '" << secret << "' in the log");
@@ -605,6 +605,39 @@ BOOST_AUTO_TEST_CASE(test_submittable_masks_the_command_of_a_failed_substitution
             }
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_submittable_masks_the_credential_of_an_authorization_scheme) {
+    ECF_NAME_THIS_TEST();
+
+    WithSystemLog log(true);
+    auto output = ecf::test::scaffold::MakeDirectory{}.create();
+    Defs defs;
+    suite_ptr s = defs.add_suite("s");
+    task_ptr t  = s->add_task("t");
+    // AUTH and PLAIN are not credential names: the value of AUTH is masked by the fixed rules, that of PLAIN is not
+    s->addVariable(Variable::new_variable("AUTH", "Bearer abc123"));
+    s->addVariable(Variable::new_variable("PLAIN", "plain-secret"));
+    t->addVariable(Variable::new_variable(
+        "ECF_KILL_CMD", "echo %AUTH% %PLAIN% > " + (output.path() / "kill.out").string() + "; exit 3 # %ECF_RID%"));
+
+    t->kill("4242");
+    wait_for_children();
+
+    // The command runs with the value
+    std::string run;
+    BOOST_REQUIRE(File::open((output.path() / "kill.out").string(), run));
+    BOOST_CHECK_EQUAL(run, "Bearer abc123 plain-secret\n");
+
+    const auto records = without_pids(log.ext_records());
+    BOOST_REQUIRE_EQUAL(records.size(), 3U);
+    BOOST_CHECK(records[0].find("cmd[ echo Bearer *** plain-secret > ") != std::string::npos);
+    BOOST_CHECK(records[1].find(R"("AUTH":"Bearer ***","PLAIN":"plain-secret")") != std::string::npos);
+    BOOST_CHECK(log.contents().find("exited with status 3 [ echo Bearer *** plain-secret > ") != std::string::npos);
+    BOOST_CHECK_MESSAGE(log.contents().find("abc123") == std::string::npos, "Found 'abc123' in the log");
+
+    t->aborted("submit failed: Authorization: Bearer abc123");
+    BOOST_CHECK_EQUAL(t->abortedReason(), "submit failed: Authorization: Bearer ***");
 }
 
 BOOST_AUTO_TEST_CASE(test_submittable_masks_the_abort_reason_by_the_fixed_rules) {

@@ -50,6 +50,26 @@ BOOST_AUTO_TEST_CASE(test_mask_credentials_masks_the_value_of_a_named_option) {
     BOOST_CHECK_EQUAL(mask_credentials("submit -secret \"a b\" x"), "submit -secret *** x");
 }
 
+BOOST_AUTO_TEST_CASE(test_mask_credentials_masks_the_credential_of_an_authorization_scheme) {
+    ECF_NAME_THIS_TEST();
+
+    // The credential follows the scheme Bearer or Basic, in any case, quoted or not
+    BOOST_CHECK_EQUAL(mask_credentials("Bearer abc123"), "Bearer ***");
+    BOOST_CHECK_EQUAL(mask_credentials("submit Bearer abc123 %ECF_JOB%"), "submit Bearer *** %ECF_JOB%");
+    BOOST_CHECK_EQUAL(mask_credentials("curl -H 'Authorization: Bearer abc123' https://host/x"),
+                      "curl -H 'Authorization: Bearer ***' https://host/x");
+    BOOST_CHECK_EQUAL(mask_credentials(R"(curl -H "Authorization: basic dXNlcjpwYXNz" host)"),
+                      R"(curl -H "Authorization: basic ***" host)");
+    BOOST_CHECK_EQUAL(mask_credentials("AUTH='BEARER abc123'"), "AUTH='BEARER ***'");
+    BOOST_CHECK_EQUAL(mask_credentials("Bearer   abc123"), "Bearer   ***");
+
+    // A scheme without a credential, or a word that merely starts or ends like a scheme, is kept
+    BOOST_CHECK_EQUAL(mask_credentials("submit Bearer"), "submit Bearer");
+    BOOST_CHECK_EQUAL(mask_credentials("Bearers abc"), "Bearers abc");
+    BOOST_CHECK_EQUAL(mask_credentials("basically fine"), "basically fine");
+    BOOST_CHECK_EQUAL(mask_credentials("x-basic abc"), "x-basic abc");
+}
+
 BOOST_AUTO_TEST_CASE(test_mask_credentials_ignores_the_case_of_the_name) {
     ECF_NAME_THIS_TEST();
 
@@ -98,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_mask_credentials_masks_each_named_key_of_a_query) {
 BOOST_AUTO_TEST_CASE(test_mask_credentials_matches_whole_parts_of_the_name) {
     ECF_NAME_THIS_TEST();
 
-    // A name is a credential name when one of its parts, split at '_', '-' or '.', is a credential word
+    // A name is a credential name when one of its parts, split at '_', '-', '.' or ':', is a credential word
     BOOST_CHECK_EQUAL(mask_credentials("keyfile=/etc/x"), "keyfile=/etc/x");
     BOOST_CHECK_EQUAL(mask_credentials("MONKEY=3"), "MONKEY=3");
     BOOST_CHECK_EQUAL(mask_credentials("ssh_keys_dir=/x"), "ssh_keys_dir=/x");
