@@ -10,9 +10,10 @@
 #
 # What it builds, for a pull request labelled approved-for-cd only (a rehearsal: nothing is
 # published or installed):
-# - release-hpc: v2's ecflow-hpc first stage (Python 3.13 + UI, GNU 8.5), one stage. The other
-#   Python versions (v2's later stages, `--component python` into the same prefix) and the ag
-#   build (v2's ecflow-hpc-ag) come with CD v3 stages and an ag release kind.
+# - release-hpc: v2's ecflow-hpc, all five stages (GNU 8.5): Python 3.13 + UI, then the python
+#   component for Python 3.12, 3.11, 3.10 and 3.8 into the same prefix (the leg's extra-pythons,
+#   built by .ci/hpc/build.sh.j2). Not yet: the ag build (v2's ecflow-hpc-ag), which needs an ag
+#   cluster in CD v3 (an HPC prefix is one namespace there, aa and ag alike).
 # - release-rpm: the whole of ecflow but Python, in the *-boost-qt CI images, on Rocky 8/9/10.
 #   v2's rpm is ecflow-ui (UI only) on Rocky 8: a second package name per repo, which v3 lacks.
 #   Not yet: Fedora (install-test-package assumes EPEL), .deb (v3 builds no .deb), conda, tarball.
@@ -85,7 +86,8 @@ ntasks = 1
 cpus-per-task = 64
 mem = "64GB"
 ssdtmp = "30G"
-time = "02:00:00"
+# Five builds and test runs in one job (v2's stages): about 15 minutes each.
+time = "03:00:00"
 build-type = "Release"
 options = "release-hpc"
 ctest-args = "-L nightly -j 8"
@@ -93,6 +95,11 @@ install-prefix = "{root}/{package}/{version}"
 # Run in the unpacked prefix, with the leg's modules reloaded: the client, and the Python module
 # from this prefix under the module's Python.
 install-test-command = "bin/ecflow_client --version && PYTHONPATH=\"$PWD/lib/python3.13/site-packages\" python3 -c 'import ecflow; print(ecflow.__file__)'"
+
+# v2's ecflow-hpc stages python312, python311, python310 and python38, by Python module: each a
+# build of its own with the UI off, tested, and only its python component installed into the
+# prefix. .ci/hpc/build.sh.j2 knows each module's pybind11 and Python3_* flags (v2's).
+extra-pythons = ["python3/3.12.9-01", "python3/3.11.8-01", "python3/3.10.10-01", "python3/3.8.8-01"]
 
 [matrix.release-rpm]
 packages = ["ecflow-release"]
