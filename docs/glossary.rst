@@ -340,7 +340,7 @@ Glossary
                              include file the effect is retained for the rest of the job (or until
                              set again). It should be noted that the ecfmicro directive specified in
                              the :term:`ecf script` file, does **not** effect the variable substitution
-                             for :term:`ECF_JOB_CMD`, ECF_KILL_CMD or :term:`ECF_STATUS_CMD` variables. They still use
+                             for :term:`ECF_JOB_CMD`, :term:`ECF_KILL_CMD` or :term:`ECF_STATUS_CMD` variables. They still use
                              :term:`ECF_MICRO`. If no ecfmicro directive exists, we default to using
                              :term:`ECF_MICRO` from the :term:`suite definition`
       ====================== ============================================================================
@@ -507,6 +507,8 @@ Glossary
 
       If the job also sends an abort, zombies can be created. If ECF_JOB_CMD command fails, and the task is in a submitted state, then the task is set to the aborted state. However if the task was active or complete, then we do NOT abort the task. Instead the zombie flag is set. (since ecFlow 4.17.1)
 
+      The server can record each command spawned, the variables used to render it and its termination in the log file, with credentials masked; see :ref:`ecflow_log_file_commands`.
+
    ECF_JOBOUT
       This is a generated :term:`variable`. This variable defines the path name for the job output file. The variable is composed as following.
 
@@ -517,6 +519,13 @@ Glossary
       otherwise::
 
          ECF_HOME/ECF_NAME.ECF_TRYNO
+
+   ECF_KILL_CMD
+      User defined :term:`variable` defining the command run by :ref:`ecflow_client --kill <kill_cli>` to kill the job of a :term:`task`.
+
+      The command typically refers to the remote id of the job, ``ECF_RID``, and writes its output to ``%ECF_JOB%.kill``, shown by ``ecflow_client --file=<path> kill``.
+
+      The server can record each command spawned, the variables used to render it and its termination in the log file, with credentials masked; see :ref:`ecflow_log_file_commands`.
 
    ECF_LISTS
       This is the server variable. The variable specifies the path to the White list file. This file controls who has read/write access to the server via the :term:`user command`\ s.
@@ -715,6 +724,8 @@ Glossary
 
          ecflow_client --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat
          ecflow_client --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
+
+      The server can record each command spawned, the variables used to render it and its termination in the log file, with credentials masked; see :ref:`ecflow_log_file_commands`.
 
    ECF_TIMEOUT
       ECF_TIMEOUT is an environment variable, used by the :term:`ecflow_client`, and specifies how much time

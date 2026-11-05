@@ -23,6 +23,10 @@ suites. We use the ecFlow white list file to limit access in operations.
 For additional security you may choose, to have blacklist files. i.e.
 password-based authentication.
 
+The server masks credentials in the commands, URLs and abort reasons it writes to the log file; the values of
+credentials remain visible elsewhere, e.g. in job files and in the variables shown by the clients. See
+:ref:`ecflow_log_file_masking`.
+
 .. toctree::
     :maxdepth: 1
 

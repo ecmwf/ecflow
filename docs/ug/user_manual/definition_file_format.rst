@@ -332,7 +332,7 @@ Tasks hold attributes, but no child nodes (with the exception of aliases).
    ``endfamily``/``endsuite``".
 
 When generating ``STATE``/``MIGRATE``/``NET`` output the header line may carry ``try:``, ``passwd:``, ``rid:``,
-an abort reason, and the common :ref:`state-node`.
+an abort reason (with credentials masked, see :ref:`ecflow_log_file_masking`), and the common :ref:`state-node`.
 
 A task may also be followed by :ref:`state-alias` blocks.
 
