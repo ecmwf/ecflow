@@ -92,9 +92,10 @@ build-type = "Release"
 options = "release-hpc"
 ctest-args = "-L nightly -j 8"
 install-prefix = "{root}/{package}/{version}"
-# Run in the unpacked prefix, with the leg's modules reloaded: the client, and the Python module
-# from this prefix under the module's Python.
-install-test-command = "bin/ecflow_client --version && PYTHONPATH=\"$PWD/lib/python3.13/site-packages\" python3 -c 'import ecflow; print(ecflow.__file__)'"
+# Run in the unpacked prefix, with the leg's modules reloaded: the client, then the Python module
+# from this prefix under each Python it is built for (python-root's and the extra-pythons below;
+# keep the three in step), every one loaded in turn.
+install-test-command = "bin/ecflow_client --version && for py in python3/3.13.13-01 python3/3.12.9-01 python3/3.11.8-01 python3/3.10.10-01 python3/3.8.8-01; do v=\"${py#python3/}\"; v=\"${v%.*}\"; (module unload python3 && module load \"$py\" && PYTHONPATH=\"$PWD/lib/python$v/site-packages\" python3 -c 'import sys, ecflow; print(sys.version.split()[0], ecflow.__file__)') || exit 1; done"
 
 # v2's ecflow-hpc stages python312, python311, python310 and python38, by Python module: each a
 # build of its own with the UI off, tested, and only its python component installed into the
