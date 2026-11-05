@@ -8,8 +8,8 @@
 # A file of its own, not tables in .ci/manifest.toml: CI (ci.yml, ci-infrastructure@main) parses
 # that manifest strictly and does not know [release] or release-ref yet. Fold it in once main does.
 #
-# What it builds, for a pull request labelled approved-for-cd only (a rehearsal: nothing is
-# published or installed):
+# What it builds, for a push to cd-rehearsal/cd-v3 only (a rehearsal: nothing is published or
+# installed):
 # - release-hpc: v2's ecflow-hpc, all five stages (GNU 8.5): Python 3.13 + UI, then the python
 #   component for Python 3.12, 3.11, 3.10 and 3.8 into the same prefix (the leg's extra-pythons,
 #   built by .ci/hpc/build.sh.j2). Not yet: the ag build (v2's ecflow-hpc-ag), which needs an ag
