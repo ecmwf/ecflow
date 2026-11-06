@@ -343,7 +343,6 @@
    </property>
   </action>
   <zorder>buttonBox</zorder>
-  <zorder></zorder>
  </widget>
  <customwidgets>
   <customwidget>
