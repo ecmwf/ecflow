@@ -366,7 +366,8 @@ BOOST_AUTO_TEST_CASE(test_setting_refuses_name_in_file_other_than_its_path) {
                                    "ecflow.server.variables@ECF_PORT",
                                    ""}) {
         BOOST_TEST_CONTEXT("name: '" << name << "'") {
-            check_error([&] { Setting(port_key, Type::Integer, std::nullopt, Names{std::nullopt, name}); },
+            const Names names{std::nullopt, name, std::nullopt, std::nullopt};
+            check_error([&] { Setting(port_key, Type::Integer, std::nullopt, names); },
                         "/ecflow/server/variables/ECF_PORT");
         }
     }
