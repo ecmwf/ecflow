@@ -311,7 +311,7 @@ if(ENABLE_UI)
 
     # Attempt to find Qt6 optional components
 
-    find_package(Qt6${_qt6_optional_component})
+    find_package(Qt6${_qt6_optional_component} QUIET)
 
     ecbuild_info( " * Qt6_FOUND           : ${Qt6_FOUND}" )
     ecbuild_info( " * Qt6_VERSION         : ${Qt6_VERSION}" )
