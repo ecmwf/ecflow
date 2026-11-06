@@ -56,7 +56,6 @@ public:
     }
 
     [[nodiscard]] const fs::path& path() const { return location_; }
-    [[nodiscard]] fs::path filename() const { return location_.filename(); }
 
 private:
     fs::path location_;
@@ -99,11 +98,6 @@ public:
         return *this;
     }
 
-    MakeTestFile& with(const std::string& content) {
-        content_ = content;
-        return *this;
-    }
-
     template <typename Content>
     MakeTestFile& with(const Content& content) {
         content_ = content.data();
@@ -121,8 +115,6 @@ public:
 
         return File{actual_location};
     }
-
-    const fs::path& path() const { return location_; }
 
 private:
     fs::path location_;

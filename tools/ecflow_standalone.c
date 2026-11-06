@@ -74,7 +74,7 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
     #define FALSE 0
 #endif
 
-const int32_t MAXLEN = 1024; /* Maximum line length */
+enum { MAXLEN = 1024 }; /* Maximum line length */
 
 char* nameof(char* name) {
     char* s;
