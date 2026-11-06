@@ -96,3 +96,5 @@ Animation* AnimationHandler::find(Animation::Type type, bool makeIt) {
 
     return nullptr;
 }
+
+#include "moc_Animation.cpp"

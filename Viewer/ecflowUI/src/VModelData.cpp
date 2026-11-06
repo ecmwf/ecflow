@@ -1540,3 +1540,5 @@ VNode* VTableModelData::nodeAt(int totalRow) {
 
     return nullptr;
 }
+
+#include "moc_VModelData.cpp"

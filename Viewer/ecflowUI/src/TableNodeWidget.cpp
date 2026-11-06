@@ -262,3 +262,5 @@ void TableNodeWidget::readSettings(VComboSettings* vs) {
         acAutoScroll_->setChecked(b);
     }
 }
+
+#include "moc_TableNodeWidget.cpp"

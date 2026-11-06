@@ -798,3 +798,5 @@ void InfoPanel::readSettingsForDialog() {
     actionFrozen_->setChecked(vs.getAsBool("frozen", frozen()));
     detachedAction_->setChecked(vs.getAsBool("detached", detached()));
 }
+
+#include "moc_InfoPanel.cpp"

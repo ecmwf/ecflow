@@ -181,3 +181,5 @@ void AbstractSearchLine::showEvent(QShowEvent* event) {
     // refreshSearch();
     Q_EMIT visibilityChanged();
 }
+
+#include "moc_AbstractSearchLine.cpp"

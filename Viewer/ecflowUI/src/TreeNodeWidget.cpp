@@ -321,3 +321,5 @@ void TreeNodeWidget::readSettings(VComboSettings* vs) {
 
     DashboardWidget::readSettings(vs);
 }
+
+#include "moc_TreeNodeWidget.cpp"

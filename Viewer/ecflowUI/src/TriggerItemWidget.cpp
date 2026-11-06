@@ -493,3 +493,5 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");
+
+#include "moc_TriggerItemWidget.cpp"

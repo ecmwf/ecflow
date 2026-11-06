@@ -161,3 +161,5 @@ void TriggerGraphWidget::readSettings(VComboSettings* vs) {
 
     vs->endGroup();
 }
+
+#include "moc_TriggerGraphWidget.cpp"

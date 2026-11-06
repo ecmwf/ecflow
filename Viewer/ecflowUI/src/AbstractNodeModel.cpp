@@ -145,3 +145,5 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info, int /*column*/) const
 
     return {};
 }
+
+#include "moc_AbstractNodeModel.cpp"
