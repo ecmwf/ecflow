@@ -132,24 +132,23 @@ container = "eccr.ecmwf.int/public-ci-images/rolling-arch-gcc-gfortran-boost-qt6
 upstream-platform = "ubuntu-26.04"
 upstream-cxx-compiler = "g++-15"
 
-# Off: the self-hosted macOS builders may trust the compromised eMudhra CAs (Oct 2026).
-# [[matrix.build.include]]
-# platform = "macos-13-arm"
-# cxx-compiler = "clang++"
-# c-compiler = "clang"
-# runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
-# boost-root = "/opt/homebrew"
-# upstream-platform = "macos-13-arm"
-# upstream-cxx-compiler = "clang++"
+[[matrix.build.include]]
+platform = "macos-13-arm"
+cxx-compiler = "clang++"
+c-compiler = "clang"
+runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
+boost-root = "/opt/homebrew"
+upstream-platform = "macos-13-arm"
+upstream-cxx-compiler = "clang++"
 
-# [[matrix.build.include]]
-# platform = "macos-13-x86"
-# cxx-compiler = "clang++"
-# c-compiler = "clang"
-# runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
-# boost-root = "/usr/local"
-# upstream-platform = "macos-13-x86"
-# upstream-cxx-compiler = "clang++"
+[[matrix.build.include]]
+platform = "macos-13-x86"
+cxx-compiler = "clang++"
+c-compiler = "clang"
+runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
+boost-root = "/usr/local"
+upstream-platform = "macos-13-x86"
+upstream-cxx-compiler = "clang++"
 
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]
