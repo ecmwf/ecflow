@@ -95,7 +95,7 @@ py::object py_id(const py::object& self) {
 
 ssize_t py_hash(const py::object& self) {
     return py::hash(py_id(self));
-};
+}
 
 void py_finalize_enum(py::module& m, const char* class_name) {
     py::object cls = m.attr(class_name);
