@@ -16,6 +16,9 @@ boost_root="{{ boost_root }}"
   echo "no boost build for this toolchain at $boost_root" >&2
   exit 1
 }
+# The Boost module also exports BOOST_ROOT, which find_package ignores with a CMP0144
+# warning; -DBoost_ROOT below already names the same root.
+unset BOOST_ROOT
 {% endblock %}
 {% block cmake_args %}
   -DENABLE_AVISO=OFF \
