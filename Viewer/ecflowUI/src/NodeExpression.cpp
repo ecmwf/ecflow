@@ -585,31 +585,26 @@ bool TypeNodeCondition::execute(VItem* item) {
                 UiLog().dbg() << "   NODE";
 #endif
                 return true;
-                break;
             case NodeExpressionParser::SUITE:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   SUITE";
 #endif
                 return (item->isSuite() != nullptr);
-                break;
             case NodeExpressionParser::TASK:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   TASK";
 #endif
                 return (item->isTask() != nullptr);
-                break;
             case NodeExpressionParser::FAMILY:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   FAMILY";
 #endif
                 return (item->isFamily() != nullptr);
-                break;
             case NodeExpressionParser::ALIAS:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   ALIAS";
 #endif
                 return (item->isAlias() != nullptr);
-                break;
             default:
                 break;
         }

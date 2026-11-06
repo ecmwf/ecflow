@@ -371,7 +371,6 @@ ServerItem* ServerList::add(const std::string& name,
     std::string errStr;
     if (!checkItemToAdd(name, host, port, true, errStr)) {
         throw std::runtime_error(errStr);
-        return nullptr;
     }
 
     auto* item = new ServerItem(name, host, port, user, favourite, protocol);

@@ -721,19 +721,14 @@ void ServerHandler::run(VTask_ptr task) {
     switch (task->type()) {
         case VTask::ScriptTask:
             return script(task);
-            break;
         case VTask::JobTask:
             return job(task);
-            break;
         case VTask::OutputTask:
             return jobout(task);
-            break;
         case VTask::ManualTask:
             return manual(task);
-            break;
         case VTask::JobStatusFileTask:
             return jobstatus(task);
-            break;
         case VTask::HistoryTask:
         case VTask::MessageTask:
         case VTask::StatsTask:

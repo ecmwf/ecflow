@@ -1445,8 +1445,6 @@ QString TreeNodeViewDelegate::formatTime(int timeInSec) const {
     else {
         return t.toString("m:ss");
     }
-
-    return {};
 }
 
 QColor TreeNodeViewDelegate::interpolate(QColor c1, QColor c2, float r) const {

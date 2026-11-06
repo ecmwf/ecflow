@@ -92,7 +92,6 @@ void TimelineDelegate::updateSettings() {
 QSize TimelineDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QSize size = QStyledItemDelegate::sizeHint(option, index);
     return {size.width(), fm_.height() + topPadding_ + bottomPadding_};
-    return size;
 }
 
 void TimelineDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {

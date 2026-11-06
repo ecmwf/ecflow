@@ -175,10 +175,8 @@ QVariant SuiteModel::data(const QModelIndex& index, int role) const {
         switch (index.column()) {
             case 0:
                 return QString::fromStdString(data_->items().at(row).name());
-                break;
             case 1:
                 return (data_->items().at(row).loaded()) ? "loaded" : "not loaded";
-                break;
             case 2: {
                 if (data_->items().at(row).loaded()) {
                     Q_ASSERT(server_);
@@ -193,7 +191,7 @@ QVariant SuiteModel::data(const QModelIndex& index, int role) const {
                 else {
                     return {};
                 }
-            } break;
+            }
             default:
                 break;
         }

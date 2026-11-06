@@ -114,7 +114,6 @@ std::string VItemPathParser::parent() const {
     switch (itemType_) {
         case ServerType:
             return {};
-            break;
         case NodeType: {
             std::size_t pos = node_.find_last_of("/");
             if (pos != std::string::npos) {
@@ -129,7 +128,6 @@ std::string VItemPathParser::parent() const {
         } break;
         case AttributeType:
             return encodeWithServer(server_, node_, "node");
-            break;
         default:
             break;
     }

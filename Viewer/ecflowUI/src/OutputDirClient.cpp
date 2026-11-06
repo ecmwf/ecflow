@@ -74,8 +74,6 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err) {
 
                 return;
             }
-
-            break;
         case QAbstractSocket::UnknownSocketError:
             if (soc_->state() != QAbstractSocket::ConnectedState) {
                 break;

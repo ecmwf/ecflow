@@ -72,8 +72,6 @@ bool LogLoadRequestSortModel::lessThan(const QModelIndex& left, const QModelInde
             return leftData < rightData;
         }
     }
-
-    return false;
 }
 
 //=====================================================
@@ -196,10 +194,8 @@ QVariant LogLoadRequestModel::data(const QModelIndex& index, int role) const {
         switch (index.column()) {
             case 0:
                 return data_[row].name_;
-                break;
             case 1:
                 return formatPrecentage(data_[row].percentage_);
-                break;
             default:
                 break;
         }
@@ -215,10 +211,8 @@ QVariant LogLoadRequestModel::data(const QModelIndex& index, int role) const {
         switch (index.column()) {
             case 0:
                 return data_[row].name_;
-                break;
             case 1:
                 return data_[row].percentage_;
-                break;
             default:
                 break;
         }

@@ -30,8 +30,6 @@ QString NodeQueryAttrGroup::query() const {
     else {
         return "(" + lst.join(" and ") + ")";
     }
-
-    return {};
 }
 
 bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const {
@@ -144,8 +142,6 @@ QString NodeQuery::query() const {
     else {
         return s2;
     }
-
-    return {};
 }
 
 QString NodeQuery::nodeQueryPart() const {

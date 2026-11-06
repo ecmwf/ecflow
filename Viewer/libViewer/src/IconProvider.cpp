@@ -56,7 +56,6 @@ QPixmap IconItem::pixmap(int size) {
         pixmaps_[size] = pix;
         return pix;
     }
-    return {};
 }
 
 QPixmap IconItem::pixmapToHeight(int size) {
@@ -82,7 +81,6 @@ QPixmap IconItem::pixmapToHeight(int size) {
         pixmapsByHeight_[size] = pix;
         return pix;
     }
-    return {};
 }
 
 QPixmap IconItem::unknown(int size) {

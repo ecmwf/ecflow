@@ -55,8 +55,6 @@ QString CommandOutput::statusStr() const {
         default:
             return {};
     }
-
-    return {};
 }
 
 QColor CommandOutput::statusColour() const {
@@ -74,8 +72,6 @@ QColor CommandOutput::statusColour() const {
         default:
             return blackColour;
     }
-
-    return blackColour;
 }
 
 //===============================================

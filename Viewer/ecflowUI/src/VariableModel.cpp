@@ -267,8 +267,6 @@ QModelIndex VariableModel::index(int row, int column, const QModelIndex& parent)
     else {
         return createIndex(row, column, (parent.row() + 1) * 1000);
     }
-
-    return {};
 }
 
 QModelIndex VariableModel::parent(const QModelIndex& child) const {
@@ -583,7 +581,6 @@ bool VariableSortModel::lessThan(const QModelIndex& sourceLeft, const QModelInde
         return varModel_->data(sourceLeft, Qt::DisplayRole).toString() <
                varModel_->data(sourceRight, Qt::DisplayRole).toString();
     }
-    return true;
 }
 
 bool VariableSortModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {

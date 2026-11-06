@@ -305,8 +305,6 @@ bool MenuHandler::addItemToMenu(MenuItem* item, const std::string& menuName) {
         UiLog().err() << "Could not find menu called " << menuName << " to add item " << item->name() << " to.";
         return false;
     }
-
-    return false;
 }
 
 MenuItem* MenuHandler::invokeMenu(const std::string& menuName,
