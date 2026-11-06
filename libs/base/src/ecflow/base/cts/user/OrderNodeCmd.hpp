@@ -18,6 +18,7 @@ public:
     NOrder::Order option() const { return option_; }
 
     bool isWrite() const override { return true; }
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

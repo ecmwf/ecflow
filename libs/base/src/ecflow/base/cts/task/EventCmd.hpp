@@ -23,6 +23,7 @@ public:
     const std::string& name() const { return name_; }
     bool value() const { return value_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

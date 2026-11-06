@@ -95,6 +95,7 @@ public:
     explicit ScriptProvider(InfoPresenter* owner);
 
 protected:
+    using InfoProvider::visit;
     void visit(VInfoNode* info) override;
 };
 

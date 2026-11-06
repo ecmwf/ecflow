@@ -41,6 +41,7 @@ public:
     explicit OutputFileProvider(InfoPresenter* owner);
     ~OutputFileProvider();
 
+    using InfoProvider::visit;
     void visit(VInfoNode*) override;
     void clear() override;
 

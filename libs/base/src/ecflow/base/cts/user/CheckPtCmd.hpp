@@ -18,6 +18,7 @@ public:
     int check_pt_interval() const { return check_pt_interval_; }
     int check_pt_save_time_alarm() const { return check_pt_save_time_alarm_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

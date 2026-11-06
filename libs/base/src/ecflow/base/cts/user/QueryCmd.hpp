@@ -50,6 +50,7 @@ public:
     ///
     /// @param[out] os the string the command is appended to
     ///
+    using UserCmd::print;
     void print(std::string& os) const override;
 
     ///

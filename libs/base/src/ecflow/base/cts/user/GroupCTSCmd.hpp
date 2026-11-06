@@ -50,6 +50,7 @@ public:
 
     void set_client_handle(int client_handle) const override; // used in group sync with client register
 
+    using UserCmd::print;
     void print(std::string&) const override;
     std::string print_short() const override;
     bool equals(ClientToServerCmd*) const override;

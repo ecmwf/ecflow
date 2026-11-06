@@ -17,6 +17,7 @@ public:
     bool show_cmd() const override { return true; }
     PrintStyle::Type_t show_style() const override { return style_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

@@ -19,6 +19,7 @@ public:
     bool handleRequestIsTestable() const override { return false; }
     bool isWrite() const override { return true; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

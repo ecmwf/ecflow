@@ -30,6 +30,7 @@ public:
     const std::string& step() const { return step_; }
     const std::string& path_to_node_with_queue() const { return path_to_node_with_queue_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 
