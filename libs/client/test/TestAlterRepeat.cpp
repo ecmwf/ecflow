@@ -31,7 +31,7 @@ int alter(ClientInvoker& client, const std::string& value, const std::string& pa
     return client.invoke(args);
 }
 
-const Repeat& repeat_of(ClientInvoker& client, const std::string& path) {
+Repeat repeat_of(ClientInvoker& client, const std::string& path) {
     BOOST_REQUIRE_MESSAGE(client.sync_local() == 0, "sync failed\n" << client.errorMsg());
     auto node = client.defs()->findAbsNode(path);
     BOOST_REQUIRE(node);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(help_examples_of_change_repeat) {
     // The examples of --help alter, in an order valid for the same Repeat
     BOOST_REQUIRE_MESSAGE(alter(client, "--begin 20260101 --end 20261231", "/s/f") == 0, client.errorMsg());
     {
-        const auto& rep = repeat_of(client, "/s/f");
+        const auto rep = repeat_of(client, "/s/f");
         BOOST_CHECK_EQUAL(rep.start(), 20260101);
         BOOST_CHECK_EQUAL(rep.end(), 20261231);
         BOOST_CHECK_EQUAL(rep.value(), 20260101); // clamped into the new range
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(help_examples_of_change_repeat) {
 
     BOOST_REQUIRE_MESSAGE(alter(client, "--step 7", "/s/f") == 0, client.errorMsg());
     {
-        const auto& rep = repeat_of(client, "/s/f");
+        const auto rep = repeat_of(client, "/s/f");
         BOOST_CHECK_EQUAL(rep.step(), 7);
         BOOST_CHECK_EQUAL(rep.value(), 20260115); // 14 days after the begin, on the new grid
     }
