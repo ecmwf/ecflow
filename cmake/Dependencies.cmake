@@ -305,7 +305,7 @@ if(ENABLE_UI)
   set(_qt6_required_components Widgets Gui Network Svg Core5Compat)
   set(_qt6_optional_component Charts)
 
-  find_package(Qt6 COMPONENTS ${_qt6_required_components})
+  find_package(Qt6 QUIET COMPONENTS ${_qt6_required_components})
 
   if( Qt6_FOUND )
 
