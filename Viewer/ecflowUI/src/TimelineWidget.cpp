@@ -60,7 +60,7 @@ TimelineWidget::TimelineWidget(QWidget* /*parent*/)
       detached_(false) {
     ui_->setupUi(this);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     ui_->fromTimeEdit->setTimeZone(QTimeZone::utc());
     ui_->toTimeEdit->setTimeZone(QTimeZone::utc());
 #else

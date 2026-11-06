@@ -639,7 +639,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
             const char* format = majorTick < 60 ? "H:mm:ss" : "H:mm";
 
             QString s;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
             s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, QTimeZone::utc()).toString(format);
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
             s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString(format);
@@ -925,7 +925,7 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
             const char* format = majorTick < 60 ? "H:mm:ss" : "H:mm";
 
             QString s;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
             s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, QTimeZone::utc()).toString(format);
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
             s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString(format);
