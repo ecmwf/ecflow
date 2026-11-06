@@ -3,6 +3,7 @@
 
 #include "LogLoadData.hpp"
 
+#include <limits>
 #include <stdexcept>
 
 #include <QDateTime>
@@ -870,7 +871,7 @@ void LogLoadData::computeInitialStat() {
 }
 
 void LogLoadData::computeStat() {
-    size_t endIndex = (time_.empty()) ? -1 : (time_.size() - 1);
+    size_t endIndex = (time_.empty()) ? std::numeric_limits<std::size_t>::max() : (time_.size() - 1);
     computeStat(0, endIndex);
 }
 
@@ -989,7 +990,7 @@ void LogLoadData::loadMultiLogFile(const std::string& logFile,
         loadedAt_    = QDateTime::currentDateTime();
     }
 
-    loadLogFileCore(logFile, -1, suites, true, logConsumer);
+    loadLogFileCore(logFile, std::numeric_limits<std::size_t>::max(), suites, true, logConsumer);
 
     if (last) {
         loadStatus_ = LoadDone;

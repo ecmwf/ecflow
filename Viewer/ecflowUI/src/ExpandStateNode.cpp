@@ -3,6 +3,8 @@
 
 #include "ExpandStateNode.hpp"
 
+#include <limits>
+
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
@@ -119,7 +121,7 @@ ExpandStateNode* ExpandStateNode::findChild(const std::string& theName) const {
 
 // Find a child with the given name. Returns its position as well.
 ExpandStateNode* ExpandStateNode::findChild(const std::string& theName, std::size_t& pos) const {
-    pos             = -1;
+    pos             = std::numeric_limits<std::size_t>::max();
     std::size_t num = children_.size();
     for (std::size_t i = 0; i < num; i++) {
         // A child can be NULL temporarily
@@ -173,7 +175,7 @@ bool ExpandStateNode::adjustContents(const VNode* node) {
         // vnode children
         std::vector<ExpandStateNode*> chVec;
         for (std::size_t i = 0; i < numNode; i++) {
-            std::size_t chPos = -1;
+            std::size_t chPos = std::numeric_limits<std::size_t>::max();
             if (ExpandStateNode* chExpand = findChild(node->childAt(i)->strName(), chPos)) {
                 chVec.push_back(chExpand);
                 children_[chPos] = nullptr;

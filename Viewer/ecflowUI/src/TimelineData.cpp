@@ -235,7 +235,7 @@ void TimelineData::loadMultiLogFile(const std::string& logFile,
         loadedAt_    = QDateTime::currentDateTime();
     }
 
-    loadLogFileCore(logFile, -1, suites, true);
+    loadLogFileCore(logFile, std::numeric_limits<std::size_t>::max(), suites, true);
 
     if (last) {
         sortByPath();

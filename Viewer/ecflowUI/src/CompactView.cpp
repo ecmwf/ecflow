@@ -931,7 +931,7 @@ int CompactView::itemAtCoordinate(const QPoint& coordinate) const {
                 viewItemCoordinate += rowHeight(viewItemIndex, 1, itemsInRow);
                 if (viewItemCoordinate > coordinate.y()) {
                     viewItemIndex = itemAtRowCoordinate(viewItemIndex, itemsInRow, coordinate.x() + translation());
-                    return (viewItemIndex >= itemCount ? -1 : viewItemIndex);
+                    return (viewItemIndex >= itemCount ? -1 : static_cast<int>(viewItemIndex));
                 }
             }
         }
