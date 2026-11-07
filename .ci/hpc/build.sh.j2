@@ -19,6 +19,25 @@ boost_root="{{ boost_root }}"
 # The Boost module also exports BOOST_ROOT, which find_package ignores with a CMP0144
 # warning; -DBoost_ROOT below already names the same root.
 unset BOOST_ROOT
+
+# The test port locks must be shared by every job on the node, but TMPDIR and /tmp
+# are private to each job; hence a per-node directory on the shared scratch. Jobs are
+# limited to 1 hour, so older lock files are leftovers of killed jobs.
+# Where no lock file can be created, every lock attempt fails, and the C++ port search
+# never ends.
+[ -n "$SCRATCH" ] || {
+  echo "SCRATCH is not set, so the test port locks have no shared directory" >&2
+  exit 1
+}
+export ECF_PORT_LOCK_DIR="$SCRATCH/github-ci/ecflow-port-locks/$(hostname -s)"
+mkdir -p "$ECF_PORT_LOCK_DIR" &&
+  lock_probe=$(mktemp "$ECF_PORT_LOCK_DIR/probe.XXXXXX") &&
+  rm -f "$lock_probe" || {
+  echo "cannot create lock files in the test port lock directory $ECF_PORT_LOCK_DIR" >&2
+  exit 1
+}
+find "$ECF_PORT_LOCK_DIR" -name '*.lock' -mmin +120 -delete
+echo "Using: ECF_PORT_LOCK_DIR=$ECF_PORT_LOCK_DIR"
 {% endblock %}
 {% block cmake_args %}
   -DENABLE_AVISO=OFF \
