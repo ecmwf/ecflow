@@ -141,6 +141,7 @@ set(u_tests
 set(s_tests
   s_TestClientApi
   s_TestPythonChildApi
+  s_TestServerPortReservation
   s_TestSslSetup
 )
 
