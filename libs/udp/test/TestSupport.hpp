@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <thread>
 
@@ -22,6 +23,20 @@
 #include "ecflow/udp/UDPClient.hpp"
 
 namespace ecf::test {
+
+///
+/// @brief Names the file receiving the output of a server launched by the current test case.
+///
+/// The name includes the test case, so that each test case keeps the output of its own servers for diagnosis; each
+/// run overwrites the output of the previous one.
+///
+/// @param[in] program The name of the server program
+/// @return The file name, relative to the working directory of the test.
+///
+inline fs::path server_output_file(const std::string& program) {
+    const std::string test = boost::unit_test::framework::current_test_case().p_name;
+    return program + "." + test + ".out";
+}
 
 template <typename SERVER>
 class BaseMockServer {
@@ -73,6 +88,7 @@ public:
 
     void load_definition(const std::string& defs) const {
         ClientInvoker client(ecf::string_constants::localhost, port());
+        bound_replies(client);
         try {
             BOOST_REQUIRE_MESSAGE(fs::exists(defs), "definitions file doesn't exist at: " + defs);
             auto error = client.loadDefs(defs);
@@ -114,9 +130,20 @@ public:
     }
 
 private:
+    ///
+    /// @brief Bounds each connect, send and receive of the given client to 30 seconds.
+    ///
+    /// A server that stops answering then fails the test within a few minutes (the client retries the request),
+    /// instead of after 10 minutes for each phase of the sync and load requests.
+    ///
+    /// @param[in,out] client The client to configure
+    ///
+    static void bound_replies(ClientInvoker& client) { client.set_connect_timeout(std::chrono::seconds(30)); }
+
     node_ptr get_node_at(const std::string& path) const {
         ECF_TEST_DBG("   Creating ecflow_client connected to " << host() << ":" << port());
         ClientInvoker client(ecf::string_constants::localhost, port());
+        bound_replies(client);
 
         // load all definitions
         std::shared_ptr<Defs> defs = nullptr;
@@ -151,7 +178,11 @@ public:
 
         ECF_TEST_DBG("Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
 
-        auto server = ecf::test::scaffold::Process(invoke_command, {"--port", std::to_string(port), "-d"});
+        // The output goes to a file, kept after the test for diagnosis: a pipe would block the server once full
+        auto server = ecf::test::scaffold::Process(invoke_command,
+                                                   {"--port", std::to_string(port), "-d"},
+                                                   fs::current_path(),
+                                                   server_output_file("ecflow_server"));
 
         ClientInvoker client(ecf::string_constants::localhost, port);
         if (!client.wait_for_server_reply(5)) {
@@ -186,6 +217,17 @@ public:
                                                  << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_label", name, value);
         send(request);
+    }
+
+    ///
+    /// @brief Sends a request to update a label, without waiting for the ecFlow UDP server to handle it.
+    ///
+    /// @param[in] path The path of the node holding the label
+    /// @param[in] name The name of the label
+    /// @param[in] value The new value of the label
+    ///
+    void submit_label_update(const std::string& path, const std::string& name, const std::string& value) {
+        sendRequest(port(), format_request(path, "alter_label", name, value));
     }
 
     void update_meter(const std::string& path, const std::string& name, int value) {
@@ -280,9 +322,12 @@ public:
 
         ECF_TEST_DBG("   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
 
+        // The output goes to a file, kept after the test for diagnosis: a pipe would block the server once full
         auto server = ecf::test::scaffold::Process(
             invoke_command,
-            {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
+            {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"},
+            fs::current_path(),
+            server_output_file("ecflow_udp"));
 
         // The caller waits for the server to be ready, with synchronise()
         return server;

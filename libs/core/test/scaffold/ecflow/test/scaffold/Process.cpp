@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cerrno>
 #include <csignal>
+#include <fcntl.h>
 #include <mutex>
 #include <optional>
 #include <sstream>
@@ -71,13 +72,17 @@ struct ProcessLifecycle
     std::mutex wait_mutex;
     std::mutex status_mutex;
     std::optional<int> exit_status;
+    bool output_to_file{false}; ///< True when the output goes to a file, and no pipe is there to read
 };
 
 #if BOOST_PROCESS_VERSION == 1
 
 struct Process::Impl : ProcessLifecycle
 {
-    Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
+    Impl(std::string_view executable,
+         const std::vector<std::string>& args,
+         const fs::path& cwd,
+         const std::optional<fs::path>& output)
         : out_{},
           err_{},
           handle_{} {
@@ -86,7 +91,15 @@ struct Process::Impl : ProcessLifecycle
         auto argv = std::vector<std::string>{args.begin(), args.end()};
 
         // Start the process
-        handle_ = bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+        if (output) {
+            handle_ = bp::child{
+                exe, bp::args(argv), (bp::std_out & bp::std_err) > output->string(), bp::start_dir(cwd.string())};
+            output_to_file = true;
+        }
+        else {
+            handle_ =
+                bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+        }
         process_id = handle_.id();
     }
     ~Impl() = default;
@@ -116,6 +129,9 @@ struct Process::Impl : ProcessLifecycle
     }
 
     std::string read_stdout() {
+        if (output_to_file) {
+            return {};
+        }
         std::ostringstream ss;
         while (out_.good() && out_.peek() != EOF) {
             char c = out_.get();
@@ -125,6 +141,9 @@ struct Process::Impl : ProcessLifecycle
     }
 
     std::string read_stderr() {
+        if (output_to_file) {
+            return {};
+        }
         std::ostringstream ss;
         while (err_.good() && err_.peek() != EOF) {
             char c = err_.get();
@@ -143,19 +162,49 @@ struct Process::Impl : ProcessLifecycle
 
 struct Process::Impl : ProcessLifecycle
 {
-    Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
+    Impl(std::string_view executable,
+         const std::vector<std::string>& args,
+         const fs::path& cwd,
+         const std::optional<fs::path>& output)
         : ctx_{},
           stdout_pipe_{ctx_},
           stderr_pipe_{ctx_},
           start_dir_{cwd.c_str()},
-          handle_{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}} {
+          handle_{launch(executable, args, output)} {
         process_id = handle_.id();
+    }
+
+    bp::process
+    launch(std::string_view executable, const std::vector<std::string>& args, const std::optional<fs::path>& output) {
+        if (!output) {
+            return bp::process{
+                ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}};
+        }
+
+        // A single file description serves both outputs, so that they share one offset and never overwrite each other
+        int fd = ::open(output->c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+        if (fd == -1) {
+            throw std::system_error(errno, std::generic_category(), "open(2) failed for " + output->string());
+        }
+        output_to_file = true;
+        try {
+            auto process = bp::process{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, fd, fd}};
+            ::close(fd);
+            return process;
+        }
+        catch (...) {
+            ::close(fd);
+            throw;
+        }
     }
     ~Impl() = default;
 
     int wait_native() { return handle_.wait(); }
 
     std::string read_stdout() {
+        if (output_to_file) {
+            return {};
+        }
         std::string stdout_buffer;
         boost::system::error_code ec;
         ba::read(stdout_pipe_, ba::dynamic_buffer(stdout_buffer), ec);
@@ -164,6 +213,9 @@ struct Process::Impl : ProcessLifecycle
     }
 
     std::string read_stderr() {
+        if (output_to_file) {
+            return {};
+        }
         std::string stderr_buffer;
         boost::system::error_code ec;
         ba::read(stderr_pipe_, ba::dynamic_buffer(stderr_buffer), ec);
@@ -193,7 +245,11 @@ Process::Process(Process&& rhs)
 }
 
 Process::Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd)
-    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd)} {
+    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd, std::nullopt)} {
+}
+
+Process::Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd, const fs::path& output)
+    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd, output)} {
 }
 
 Process& Process::operator=(Process&& rhs) {

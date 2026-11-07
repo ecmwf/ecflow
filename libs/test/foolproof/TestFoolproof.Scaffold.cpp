@@ -4,8 +4,10 @@
 #include <cerrno>
 #include <chrono>
 #include <csignal>
+#include <fstream>
 #include <functional>
 #include <future>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -275,6 +277,57 @@ BOOST_AUTO_TEST_CASE(test_setting_environment_variables) {
     }
     retrieved = EnvironmentVariable::get_environment_variable(name);
     BOOST_CHECK(!retrieved.has_value());
+}
+
+///
+/// @brief Verifies that a child whose output goes to a file runs to completion, however much it writes.
+///
+/// The child writes far more than a pipe holds to each output in turn, without anyone reading; the file is truncated
+/// at launch, and receives both outputs in full. The wait is bounded, so that a blocked child fails the test.
+///
+BOOST_AUTO_TEST_CASE(test_process_output_to_file) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    auto cwd    = MakeDirectory{}.create();
+    auto output = cwd.path() / "child.out";
+    {
+        std::ofstream previous(output);
+        previous << "previous content, longer than nothing\n";
+    }
+
+    // 1 MiB on stdout, then 1 MiB on stderr
+    const std::string command = "head -c 1048576 /dev/zero | tr '\\0' x; head -c 1048576 /dev/zero | tr '\\0' y >&2";
+    Process process("/bin/sh", {"-c", command}, cwd.path(), output);
+    auto completion = std::async(std::launch::async, [&process] { return process.wait(); });
+    if (completion.wait_for(std::chrono::seconds(30)) != std::future_status::ready) {
+        process.terminate();
+        BOOST_FAIL("child writing to a file did not finish");
+    }
+    BOOST_CHECK_EQUAL(completion.get(), 0);
+
+    std::ifstream file(output);
+    const std::string content{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    BOOST_CHECK(content == std::string(1048576, 'x') + std::string(1048576, 'y'));
+    BOOST_CHECK_EQUAL(process.read_stdout(), "");
+    BOOST_CHECK_EQUAL(process.read_stderr(), "");
+}
+
+///
+/// @brief Verifies that a launch whose output file cannot be opened fails with an exception.
+///
+/// Both backends open the file before starting the child, so the failed launch starts no child.
+///
+BOOST_AUTO_TEST_CASE(test_process_output_to_unwritable_file) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    auto cwd    = MakeDirectory{}.create();
+    auto output = cwd.path() / "missing" / "child.out";
+    BOOST_CHECK_THROW(Process("/bin/sh", {"-c", "exit 0"}, cwd.path(), output), std::exception);
+    BOOST_CHECK(!fs::exists(output));
 }
 
 BOOST_AUTO_TEST_CASE(test_creating_working_directory) {

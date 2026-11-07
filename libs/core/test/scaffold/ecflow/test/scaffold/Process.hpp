@@ -37,6 +37,20 @@ public:
     ///
     Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd = fs::current_path());
 
+    ///
+    /// @brief Launches the given executable as an owned child, writing its standard output and error to a file.
+    ///
+    /// Use it for a long-lived child whose output is not read while it runs: a captured output that nobody reads
+    /// blocks the child as soon as the pipe is full, which on Linux can be after as little as 4 KiB.
+    ///
+    /// @param[in] executable Path of the program to run
+    /// @param[in] args Command-line arguments, without the program name
+    /// @param[in] cwd Working directory of the child
+    /// @param[in] output File receiving both the standard output and error, created or truncated at launch
+    /// @throws std::exception if the output file cannot be opened, or the child cannot be launched.
+    ///
+    Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd, const fs::path& output);
+
     Process(const Process& rhs)            = delete;
     Process& operator=(const Process& rhs) = delete;
 
@@ -97,7 +111,7 @@ public:
     ///
     /// Requires an owned child; call it after wait() or terminate(), since it blocks while the child runs.
     ///
-    /// @return The output not yet read.
+    /// @return The output not yet read; empty when the output is written to a file.
     ///
     std::string read_stdout() const;
 
@@ -106,7 +120,7 @@ public:
     ///
     /// Requires an owned child; call it after wait() or terminate(), since it blocks while the child runs.
     ///
-    /// @return The output not yet read.
+    /// @return The output not yet read; empty when the output is written to a file.
     ///
     std::string read_stderr() const;
 
