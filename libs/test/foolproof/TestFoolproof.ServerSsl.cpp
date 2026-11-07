@@ -67,10 +67,13 @@ void write_certificate(const fs::path& directory, const std::string& stem, const
     X509_gmtime_adj(X509_get_notBefore(certificate.get()), 0);
     X509_gmtime_adj(X509_get_notAfter(certificate.get()), 24 * 60 * 60);
     X509_set_pubkey(certificate.get(), key.get());
-    X509_NAME* name = X509_get_subject_name(certificate.get());
+    // A separate name, since OpenSSL 4.0 returns the certificate's own names as const
+    std::unique_ptr<X509_NAME, decltype(&X509_NAME_free)> name(X509_NAME_new(), &X509_NAME_free);
+    check(name != nullptr, "create a certificate name");
     X509_NAME_add_entry_by_txt(
-        name, "CN", MBSTRING_ASC, reinterpret_cast<const unsigned char*>(stem.c_str()), -1, -1, 0);
-    X509_set_issuer_name(certificate.get(), name);
+        name.get(), "CN", MBSTRING_ASC, reinterpret_cast<const unsigned char*>(stem.c_str()), -1, -1, 0);
+    X509_set_subject_name(certificate.get(), name.get());
+    X509_set_issuer_name(certificate.get(), name.get());
     check(X509_sign(certificate.get(), key.get(), EVP_sha256()) > 0, "sign the certificate");
 
     auto write = [&check](const fs::path& path, auto&& writer) {
