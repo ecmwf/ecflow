@@ -140,6 +140,7 @@ runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-arm64"]
 boost-root = "/opt/homebrew"
 upstream-platform = "macos-13-arm"
 upstream-cxx-compiler = "clang++"
+venv-python = "3.15"
 
 [[matrix.build.include]]
 platform = "macos-13-x86"
@@ -149,6 +150,7 @@ runs-on = ["self-hosted", "platform-builder-macosx-13.4.1-x86_64"]
 boost-root = "/usr/local"
 upstream-platform = "macos-13-x86"
 upstream-cxx-compiler = "clang++"
+venv-python = "3.15"
 
 [matrix.build]
 triggers = ["upstream-change", "rebuild-request"]

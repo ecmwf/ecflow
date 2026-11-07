@@ -1,11 +1,26 @@
 {# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
    SPDX-License-Identifier: Apache-2.0 #}
 {% extends "ci-infrastructure/cmake-runner.sh.j2" %}
+{# venv-python builds and tests against a venv of that installed Python (e.g. the
+   Homebrew one), with the test requirements installed, for runners whose own
+   Python lacks pytest (the self-hosted macOS ones). Not python-version: that one
+   renames the artifact, and get_python_via_uv would download a uv-managed Python. #}
+{% block set_environment %}
+{% if leg.get("venv-python") %}
+UV_PYTHON_PREFERENCE=only-system uv venv --clear --python {{ leg.get("venv-python") | sh }} "${TMPDIR:-/tmp}/ci-python"
+. "${TMPDIR:-/tmp}/ci-python/bin/activate"
+uv pip install -r "$CI_SOURCE_DIR/libs/pyext/test/requirements-test.txt"
+{% endif %}
+{% endblock %}
 {# boost-root is the Homebrew prefix on macOS; cmake/Dependencies.cmake sets
-   Boost_NO_SYSTEM_PATHS, so it is always passed. #}
+   Boost_NO_SYSTEM_PATHS, so it is always passed. With venv-python, the venv's
+   interpreter is named, rather than left to the FindPython search. #}
 {% block cmake_args %}
   -DENABLE_CONFIG_MODE_BOOST=OFF \
   -DENABLE_STATIC_BOOST_LIBS=OFF \
   -DENABLE_AVISO=OFF \
   -DBoost_ROOT={{ (leg.get("boost-root") or "/usr") | sh }} \
+{% if leg.get("venv-python") %}
+  -DPython3_EXECUTABLE="$VIRTUAL_ENV/bin/python" \
+{% endif %}
 {% endblock %}
