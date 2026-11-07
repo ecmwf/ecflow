@@ -585,31 +585,26 @@ bool TypeNodeCondition::execute(VItem* item) {
                 UiLog().dbg() << "   NODE";
 #endif
                 return true;
-                break;
             case NodeExpressionParser::SUITE:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   SUITE";
 #endif
                 return (item->isSuite() != nullptr);
-                break;
             case NodeExpressionParser::TASK:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   TASK";
 #endif
                 return (item->isTask() != nullptr);
-                break;
             case NodeExpressionParser::FAMILY:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   FAMILY";
 #endif
                 return (item->isFamily() != nullptr);
-                break;
             case NodeExpressionParser::ALIAS:
 #ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   ALIAS";
 #endif
                 return (item->isAlias() != nullptr);
-                break;
             default:
                 break;
         }
@@ -1001,7 +996,7 @@ bool AttributeStateCondition::execute(VItem* item) {
 
 IsoDateCondition::IsoDateCondition(QString dateStr) {
     QDateTime d = QDateTime::fromString(dateStr, Qt::ISODate);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     d.setTimeZone(QTimeZone::utc());
 #else
     d.setTimeSpec(Qt::UTC);
@@ -1013,7 +1008,7 @@ IsoDateCondition::IsoDateCondition(QString dateStr) {
 
 std::string IsoDateCondition::print() {
     if (secsSinceEpoch_ > 0)
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_ * 1000, QTimeZone::utc())
             .toString(Qt::ISODate)
             .toStdString();

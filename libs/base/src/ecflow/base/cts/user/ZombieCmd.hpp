@@ -23,6 +23,7 @@ public:
     const std::string& process_or_remote_id() const { return process_id_; }
     const std::string& password() const { return password_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

@@ -21,6 +21,7 @@ public:
 
     const std::vector<Variable>& variables_to_add() const { return var_to_add_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

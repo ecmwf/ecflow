@@ -199,14 +199,12 @@ QVariant LogModel::data(const QModelIndex& index, int role) const {
                     default:
                         return {};
                 }
-            } break;
+            }
             case 1:
                 return data_.date(row).toString("hh:mm:ss dd.M.yyyy");
                 ;
-                break;
             case 2:
                 return data_.entry(row);
-                break;
             default:
                 break;
         }

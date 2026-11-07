@@ -624,7 +624,6 @@ bool VNode::pathEndMatch(const std::string& relPath) const {
     else {
         return (pPath.substr(pPath.size() - relPath.size(), std::string::npos) == relPath);
     }
-    return false;
 }
 
 bool VNode::sameContents(VItem* item) const {

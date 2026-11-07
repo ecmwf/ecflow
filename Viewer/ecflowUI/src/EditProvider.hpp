@@ -15,6 +15,7 @@ public:
         : InfoProvider(owner, VTask::OutputTask),
           preproc_(false) {}
 
+    using InfoProvider::visit;
     void visit(VInfoNode*) override;
     void submit(const std::vector<std::string>& txt, bool alias);
 

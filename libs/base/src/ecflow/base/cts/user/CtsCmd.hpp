@@ -46,6 +46,7 @@ public:
 
     Api api() const { return api_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

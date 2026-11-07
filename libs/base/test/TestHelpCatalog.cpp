@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(test_definition_item_lookup_never_resolves_a_colliding_comm
     // "event"/"label"/"meter"/"queue"/"complete" are both task commands and definition-item
     // attribute names; the two lookup families must stay independent so that a name collision
     // never lets one resolve the other's entry.
-    for (const std::string& name : {"event", "label", "meter", "queue", "complete"}) {
+    for (const std::string name : {"event", "label", "meter", "queue", "complete"}) {
         const nlohmann::json* command = ecf::HelpCatalog::find_command(name);
         BOOST_REQUIRE_MESSAGE(command != nullptr, "expected '" << name << "' to still be a command");
         BOOST_CHECK_EQUAL(command->at("kind").get<std::string>(), "task");

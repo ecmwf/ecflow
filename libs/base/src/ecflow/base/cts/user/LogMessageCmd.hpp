@@ -14,6 +14,7 @@ public:
 
     const std::string& msg() const { return msg_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

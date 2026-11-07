@@ -116,16 +116,6 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw) {
 
     menu->addAction(actionBreadcrumbs);
 
-#if 0
-    QMenu *menuState=menu->addMenu(tr("Status"));
-	menuState->setTearOffEnabled(true);
-
-	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
-                    //VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
-                     VParamFilterMenu::ShowMode,VParamFilterMenu::ColourDecor);
-
-#endif
     // Sets the menu on the toolbutton
     tw->optionsTb()->setMenu(menu);
 
@@ -262,3 +252,5 @@ void TableNodeWidget::readSettings(VComboSettings* vs) {
         acAutoScroll_->setChecked(b);
     }
 }
+
+#include "moc_TableNodeWidget.cpp"

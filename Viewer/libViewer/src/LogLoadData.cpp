@@ -3,6 +3,7 @@
 
 #include "LogLoadData.hpp"
 
+#include <limits>
 #include <stdexcept>
 
 #include <QDateTime>
@@ -485,7 +486,7 @@ qint64 LogLoadData::period() const {
 }
 
 QDateTime LogLoadData::startTime() const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], QTimeZone::utc());
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], Qt::UTC);
@@ -495,8 +496,8 @@ QDateTime LogLoadData::startTime() const {
 }
 
 QDateTime LogLoadData::endTime() const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], QTimeZone::utc());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_.back(), QTimeZone::utc());
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[time_.size() - 1], Qt::UTC);
 #else
@@ -820,7 +821,7 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     QString s = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
 
     QDateTime dt = QDateTime::fromString(s, "HH:mm:ss d.M.yyyy");
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     dt.setTimeZone(QTimeZone::utc());
 #else
     dt.setTimeSpec(Qt::UTC);
@@ -870,7 +871,7 @@ void LogLoadData::computeInitialStat() {
 }
 
 void LogLoadData::computeStat() {
-    size_t endIndex = (time_.empty()) ? -1 : (time_.size() - 1);
+    size_t endIndex = (time_.empty()) ? std::numeric_limits<std::size_t>::max() : (time_.size() - 1);
     computeStat(0, endIndex);
 }
 
@@ -989,7 +990,7 @@ void LogLoadData::loadMultiLogFile(const std::string& logFile,
         loadedAt_    = QDateTime::currentDateTime();
     }
 
-    loadLogFileCore(logFile, -1, suites, true, logConsumer);
+    loadLogFileCore(logFile, std::numeric_limits<std::size_t>::max(), suites, true, logConsumer);
 
     if (last) {
         loadStatus_ = LoadDone;

@@ -79,13 +79,10 @@ QVariant ChangeNotifyModel::data(const QModelIndex& index, int role) const {
         switch (index.column()) {
             case 0:
                 return QString::fromStdString(item->serverName());
-                break;
             case 1:
                 return QString::fromStdString(item->path());
-                break;
             case 2:
                 return item->time();
-                break;
             default:
                 break;
         }
@@ -154,8 +151,6 @@ VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const {
     else {
         return VInfoNode::create(vnode);
     }
-
-    return res;
 }
 
 void ChangeNotifyModel::slotBeginAppendRow() {

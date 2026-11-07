@@ -45,8 +45,6 @@ bool NodeQueryResultItem::updateNode() {
         path_.clear();
         return (node_ != nullptr);
     }
-
-    return false;
 }
 
 QString NodeQueryResultItem::serverStr() const {

@@ -40,6 +40,7 @@ public:
     const std::string& drop_user() const { return drop_user_; }
 
     bool cmd_updates_defs() const override;
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

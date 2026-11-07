@@ -160,3 +160,5 @@ void NodeWidget::updateActionState(VInfo_ptr /*info*/) {
          }
      }*/
 }
+
+#include "moc_NodeWidget.cpp"

@@ -19,6 +19,7 @@ public:
 
     const std::string& expression() const { return expression_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

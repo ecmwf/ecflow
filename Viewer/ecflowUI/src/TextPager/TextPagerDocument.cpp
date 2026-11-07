@@ -1360,7 +1360,6 @@ QString TextPagerDocument::swapFileName(Chunk* chunk) {
        << QCoreApplication::applicationPid();
     return file;
 #endif
-    return QString();
 }
 
 //===========================================================================
@@ -1500,7 +1499,6 @@ QString TextDocumentPrivate::chunkData(const Chunk* chunk, int chunkPos) const {
         //return data;
     }
 #endif
-    return QString();
 }
 
 int TextDocumentPrivate::chunkIndex(const Chunk* c) const {

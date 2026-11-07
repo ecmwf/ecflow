@@ -19,6 +19,7 @@ public:
     time_duration_t timeout() const override { return std::chrono::seconds{120}; }
     bool handleRequestIsTestable() const override { return false; }
     bool isWrite() const override { return true; }
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

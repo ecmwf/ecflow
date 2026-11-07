@@ -32,6 +32,7 @@ public:
     int client_handle() const { return client_handle_; }
 
     void set_client_handle(int client_handle) const override { client_handle_ = client_handle; } // used by group_cmd
+    using UserCmd::print;
     void print(std::string&) const override;
     std::string print_short() const override;
     void print_only(std::string&) const override;

@@ -67,6 +67,7 @@ public:
     void setMatchMode(const StringMatchMode& m) { matchMode_ = m; }
     void setCaseSensitive(bool b) { caseSensitive_ = b; }
 
+    using NodeQueryOption::query;
     QString query() const override;
     void load(VSettings*) override;
     void save(VSettings*) override;
@@ -88,6 +89,7 @@ public:
 
     void swap(const NodeQueryOption*) override;
 
+    using NodeQueryOption::query;
     QString query(QString op) const override;
     void load(VSettings*) override;
     void save(VSettings*) override;
@@ -112,6 +114,7 @@ public:
 
     void swap(const NodeQueryOption*) override;
 
+    using NodeQueryOption::query;
     QString query() const override;
     void load(VSettings*) override;
     void save(VSettings*) override;
@@ -136,6 +139,7 @@ public:
 
     void swap(const NodeQueryOption*) override;
 
+    using NodeQueryOption::query;
     QString query() const override;
     QString sqlQuery() const override;
     void load(VSettings*) override;

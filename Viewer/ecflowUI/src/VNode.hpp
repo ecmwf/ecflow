@@ -319,6 +319,7 @@ public:
     std::string flagsAsStr() const override;
     bool isFlagSet(ecf::Flag::Type f) const override;
 
+    using VNode::why;
     void why(std::vector<std::string>& theReasonWhy) const override;
     QString logOrCheckpointError() const;
 

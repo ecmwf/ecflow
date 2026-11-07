@@ -1333,3 +1333,5 @@ void TriggerGraphView::readSettings(VComboSettings* vs) {
     edgeInfo_->readSettings(vs);
     vs->endGroup();
 }
+
+#include "moc_TriggerGraphView.cpp"

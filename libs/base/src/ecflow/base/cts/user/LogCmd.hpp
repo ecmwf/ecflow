@@ -21,6 +21,7 @@ public:
     int get_last_n_lines() const { return get_last_n_lines_; }
     const std::string& new_path() const { return new_path_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

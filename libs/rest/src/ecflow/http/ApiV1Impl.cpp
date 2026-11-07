@@ -1049,7 +1049,7 @@ ojson update_node_attribute_by_user(const httplib::Request& request) {
     }
     else if (type == "limit") {
         const std::string name = payload.at("name");
-        const static std::vector<std::string> keys{"max", "value"};
+        static const std::vector<std::string> keys{"max", "value"};
         std::string value;
         try {
             value = json_type_to_string(payload.at("value"));

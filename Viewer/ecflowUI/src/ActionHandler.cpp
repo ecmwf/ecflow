@@ -391,3 +391,5 @@ bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     return (msgBox.exec() == QMessageBox::Ok);
 }
+
+#include "moc_ActionHandler.cpp"

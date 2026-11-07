@@ -165,8 +165,6 @@ QVariant OutputModel::headerData(const int section, const Qt::Orientation orient
         default:
             return {};
     }
-
-    return {};
 }
 
 QModelIndex OutputModel::index(int row, int column, const QModelIndex& parent) const {
@@ -301,8 +299,6 @@ QString OutputModel::formatSize(unsigned int size) const {
     else {
         return QString::number(static_cast<float>(size) / (1024. * 1024. * 1024.), 'f', 1) + " GB";
     }
-
-    return {};
 }
 
 QString OutputModel::formatDate(QDateTime dt) const {

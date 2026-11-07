@@ -53,7 +53,7 @@ public:
     static unsigned int fromQDateTime(QDateTime dt) { return dt.toMSecsSinceEpoch() / 1000; }
 
     static QDateTime toQDateTime(unsigned int t) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t) * 1000, QTimeZone::utc());
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t) * 1000, Qt::UTC);

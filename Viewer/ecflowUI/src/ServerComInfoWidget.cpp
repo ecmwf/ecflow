@@ -670,8 +670,6 @@ QString ServerRefreshInfoWidget::formatPeriodTime(int timeInSec) const {
     else {
         return QString::number(s) + "s";
     }
-
-    return QString();
 }
 
 void ServerRefreshInfoWidget::determinePeriodText() {

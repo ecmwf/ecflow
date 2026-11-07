@@ -20,6 +20,7 @@ class LogProvider : public QObject, public InfoProvider {
 public:
     explicit LogProvider(InfoPresenter* owner, QObject* parent = nullptr);
 
+    using InfoProvider::visit;
     void visit(VInfoServer*) override;
     void clear() override;
     void setAutoUpdate(bool) override;

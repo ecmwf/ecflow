@@ -115,3 +115,5 @@ void DashboardWidget::writeSettings(VComboSettings* vs) {
 void DashboardWidget::readSettings(VComboSettings* vs) {
     setDetached(vs->getAsBool("detached", detached()));
 }
+
+#include "moc_DashboardWidget.cpp"

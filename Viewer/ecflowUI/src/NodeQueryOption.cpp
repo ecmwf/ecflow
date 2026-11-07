@@ -342,7 +342,7 @@ void NodeQueryPeriodOption::clear() {
     periodUnits_.clear();
     fromDate_ = QDateTime();
     toDate_   = QDateTime();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     fromDate_.setTimeZone(QTimeZone::utc());
     toDate_.setTimeZone(QTimeZone::utc());
 #else
@@ -510,13 +510,13 @@ void NodeQueryPeriodOption::load(VSettings* vs) {
         QString to   = QString::fromStdString(vs->get("to", fromDate_.toString(Qt::ISODate).toStdString()));
 
         fromDate_ = QDateTime::fromString(from, Qt::ISODate);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         fromDate_.setTimeZone(QTimeZone::utc());
 #else
         fromDate_.setTimeSpec(Qt::UTC);
 #endif
         toDate_ = QDateTime::fromString(to, Qt::ISODate);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
         toDate_.setTimeZone(QTimeZone::utc());
 #else
         toDate_.setTimeSpec(Qt::UTC);

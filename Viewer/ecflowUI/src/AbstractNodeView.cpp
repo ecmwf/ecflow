@@ -1349,3 +1349,5 @@ void AbstractNodeView::currentChanged(const QModelIndex& current, const QModelIn
         update(current);
     }
 }
+
+#include "moc_AbstractNodeView.cpp"

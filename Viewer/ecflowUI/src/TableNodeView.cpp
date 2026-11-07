@@ -606,11 +606,6 @@ void TableNodeHeader::slotSectionResized(int /*i*/) {
 
 QSize TableNodeHeader::sizeHint() const {
     return QHeaderView::sizeHint();
-
-    QSize s = size();
-    // s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
-    // s.setHeight(2*35);
-    return s;
 }
 
 void TableNodeHeader::setModel(QAbstractItemModel* model) {

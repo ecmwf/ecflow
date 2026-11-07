@@ -226,8 +226,6 @@ std::string SCPort::find_available_port(const std::string& port) {
             EcfPortLock::try_port_lock(selected_port);
         }
     }
-
-    throw std::runtime_error("Unable to find an available port");
 }
 
 } // namespace ecf

@@ -1345,5 +1345,4 @@ int TreeNodeModel::serverConnectId(ConnectState::State st) const {
         default:
             return 0;
     }
-    return 0;
 }

@@ -19,6 +19,7 @@ public:
 
     bool isWrite() const override { return true; }
     time_duration_t timeout() const override { return std::chrono::seconds{300}; }
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

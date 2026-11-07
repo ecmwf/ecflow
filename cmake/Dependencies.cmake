@@ -305,13 +305,13 @@ if(ENABLE_UI)
   set(_qt6_required_components Widgets Gui Network Svg Core5Compat)
   set(_qt6_optional_component Charts)
 
-  find_package(Qt6 COMPONENTS ${_qt6_required_components})
+  find_package(Qt6 QUIET COMPONENTS ${_qt6_required_components})
 
   if( Qt6_FOUND )
 
     # Attempt to find Qt6 optional components
 
-    find_package(Qt6${_qt6_optional_component})
+    find_package(Qt6${_qt6_optional_component} QUIET)
 
     ecbuild_info( " * Qt6_FOUND           : ${Qt6_FOUND}" )
     ecbuild_info( " * Qt6_VERSION         : ${Qt6_VERSION}" )
@@ -420,6 +420,5 @@ find_package(ClangFormat)
 if (CLANGFORMAT_FOUND)
   ecbuild_info("Found Clang-Format at ${CLANGFORMAT_EXE} [${CLANGFORMAT_VERSION}]")
 else()
-  ecbuild_info("Clang-Format not found")
-  ecbuild_info("    WARNING: No formatting targets will be defined!")
+  ecbuild_info("Formatting targets disabled (Clang-Format not found)")
 endif ()

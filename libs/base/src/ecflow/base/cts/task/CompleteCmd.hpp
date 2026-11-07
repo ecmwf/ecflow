@@ -20,6 +20,7 @@ public:
 
     const std::vector<std::string>& variables_to_delete() const { return var_to_del_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

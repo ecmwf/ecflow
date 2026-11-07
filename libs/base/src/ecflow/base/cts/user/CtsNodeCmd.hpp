@@ -34,6 +34,7 @@ public:
     [[deprecated]] const std::string& absNodePath() const { return absNodePath_; }
     const std::string& pathToNode() const { return absNodePath_; }
 
+    using UserCmd::print;
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

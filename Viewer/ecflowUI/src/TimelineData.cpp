@@ -235,7 +235,7 @@ void TimelineData::loadMultiLogFile(const std::string& logFile,
         loadedAt_    = QDateTime::currentDateTime();
     }
 
-    loadLogFileCore(logFile, -1, suites, true);
+    loadLogFileCore(logFile, std::numeric_limits<std::size_t>::max(), suites, true);
 
     if (last) {
         sortByPath();
@@ -426,7 +426,7 @@ bool TimelineData::parseLine(const std::string& line,
     // Convert status time into secs
     QDateTime dt = QDateTime::fromString(QString::fromStdString(time_stamp), "hh:mm:ss d.M.yyyy");
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
     dt.setTimeZone(QTimeZone::utc());
 #else
     dt.setTimeSpec(Qt::UTC);

@@ -142,8 +142,6 @@ const std::string& VariableModelData::name(int index) const {
     else {
         return genVars_.at(index - vars_.size()).name();
     }
-
-    return defaultStr;
 }
 
 const std::string& VariableModelData::value(int index) const {
@@ -157,8 +155,6 @@ const std::string& VariableModelData::value(int index) const {
     else {
         return genVars_.at(index - vars_.size()).value();
     }
-
-    return defaultStr;
 }
 
 const std::string& VariableModelData::value(const std::string& n, bool& hasIt) const {

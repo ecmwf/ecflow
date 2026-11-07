@@ -43,8 +43,6 @@ QString VFileInfo::formatSize(unsigned int size) {
     else {
         return QString::number(static_cast<float>(size) / (1024. * 1024. * 1024.), 'f', 1) + " GB";
     }
-
-    return {};
 }
 
 QString VFileInfo::formatDate(const std::time_t& t) {

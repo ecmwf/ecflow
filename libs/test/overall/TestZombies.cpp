@@ -1136,7 +1136,6 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait) {
         }
         sleep(2);
     }
-    return 0;
 }
 
 BOOST_AUTO_TEST_CASE(test_zombie_kill) {

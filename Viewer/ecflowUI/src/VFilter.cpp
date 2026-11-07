@@ -644,8 +644,6 @@ int TableNodeFilter::indexOf(const VNode* node) const {
             assert(0);
             return -1;
     }
-
-    return -1;
 }
 
 VNode* TableNodeFilter::nodeAt(int index) const {
@@ -660,8 +658,6 @@ VNode* TableNodeFilter::nodeAt(int index) const {
             assert(0);
             return nullptr;
     }
-
-    return nullptr;
 }
 
 bool TableNodeFilter::update() {

@@ -8,7 +8,6 @@
 
 class NodeStateFilter;
 class TableNodeSortModel;
-class VParamFilterMenu;
 class VSettings;
 
 class UserCancelledOperation : public std::runtime_error {
@@ -47,6 +46,5 @@ protected:
 
 private:
     TableNodeSortModel* sortModel_;
-    VParamFilterMenu* stateFilterMenu_;
     QAction* acAutoScroll_;
 };

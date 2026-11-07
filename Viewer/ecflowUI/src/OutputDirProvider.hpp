@@ -84,6 +84,7 @@ public:
     OutputDirProvider(const OutputDirProvider&)            = delete;
     OutputDirProvider& operator=(const OutputDirProvider&) = delete;
 
+    using InfoProvider::visit;
     void visit(VInfoNode*) override;
     void clear() override;
 

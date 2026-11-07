@@ -17,6 +17,7 @@ public:
 
     const std::string& reason() const { return reason_; }
 
+    using TaskCmd::print;
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 

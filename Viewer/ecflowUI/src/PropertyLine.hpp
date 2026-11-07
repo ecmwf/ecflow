@@ -188,6 +188,8 @@ public:
     QVariant currentValue() override;
     bool canExpand() const override { return true; }
 
+public:
+    using PropertyLine::slotReset;
 public Q_SLOTS:
     void slotEdited(QString);
     void slotReset(QVariant) override;
@@ -213,6 +215,8 @@ public:
     bool applyChange() override;
     QVariant currentValue() override;
 
+public:
+    using PropertyLine::slotReset;
 private Q_SLOTS:
     void slotEdit(bool);
     void slotReset(QVariant) override;
@@ -240,6 +244,8 @@ public:
     bool applyChange() override;
     QVariant currentValue() override;
 
+public:
+    using PropertyLine::slotReset;
 private Q_SLOTS:
     void slotEdit(bool);
     void slotReset(QVariant) override;
@@ -272,6 +278,8 @@ public:
     bool applyChange() override;
     QVariant currentValue() override;
 
+public:
+    using PropertyLine::slotReset;
 public Q_SLOTS:
     void slotEdited(QString);
     void slotReset(QVariant) override;
@@ -297,6 +305,8 @@ public:
     bool applyChange() override;
     QVariant currentValue() override;
 
+public:
+    using PropertyLine::slotReset;
 public Q_SLOTS:
     void slotStateChanged(int);
     void slotReset(QVariant) override;
@@ -322,6 +332,8 @@ public:
     bool applyChange() override;
     QVariant currentValue() override;
 
+public:
+    using PropertyLine::slotReset;
 public Q_SLOTS:
     void slotCurrentChanged(int);
     void slotReset(QVariant) override;
@@ -348,6 +360,8 @@ public:
     QVariant currentValue() override;
     bool canExpand() const override { return true; }
 
+public:
+    using PropertyLine::slotReset;
 public Q_SLOTS:
     void slotSelectionChanged();
     void slotReset(QVariant) override;

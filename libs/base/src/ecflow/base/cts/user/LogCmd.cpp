@@ -128,7 +128,6 @@ bool LogCmd::isWrite() const {
         default:
             throw std::runtime_error("LogCmd::isWrite: Unrecognised log api command,");
     }
-    return false;
 }
 
 STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {

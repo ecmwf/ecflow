@@ -1238,7 +1238,6 @@ py::object Node_getattr(node_ptr self, const std::string& attr) {
                                      << attr
                                      << "' does not exist *OR* child node, variable, meter, event or limit on node "
                                      << self->absNodePath()));
-    return py::object();
 }
 
 ///

@@ -225,7 +225,8 @@ BOOST_AUTO_TEST_CASE(test_locking_known_udp_ports) {
 
     // A UDP reservation skips the occupied port, while a TCP reservation of the same number is unaffected
     auto port_a = MakePort{}.with(AutomaticPortValue{24447, Transport::UDP}).create();
-    BOOST_CHECK_THROW(MakePort{}.with(SpecificPortValue{24447, Transport::UDP}).create(), MakePort::UnableToLockPort);
+    BOOST_CHECK_THROW(static_cast<void>(MakePort{}.with(SpecificPortValue{24447, Transport::UDP}).create()),
+                      MakePort::UnableToLockPort);
     auto port_b = MakePort{}.with(SpecificPortValue{24447, Transport::TCP}).create();
 
     BOOST_TEST_MESSAGE("Acquired UDP port: " << port_a.value() << " at " << port_a.lock_location());
