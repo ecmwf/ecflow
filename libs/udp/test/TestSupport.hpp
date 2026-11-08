@@ -178,7 +178,7 @@ public:
 
         ECF_TEST_DBG("Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
 
-        // The output goes to a file, kept after the test for diagnosis: a pipe would block the server once full
+        // The output goes to a file, so that it is kept after the test for diagnosis
         auto server = ecf::test::scaffold::Process(invoke_command,
                                                    {"--port", std::to_string(port), "-d"},
                                                    fs::current_path(),
@@ -322,7 +322,7 @@ public:
 
         ECF_TEST_DBG("   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
 
-        // The output goes to a file, kept after the test for diagnosis: a pipe would block the server once full
+        // The output goes to a file, so that it is kept after the test for diagnosis
         auto server = ecf::test::scaffold::Process(
             invoke_command,
             {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"},

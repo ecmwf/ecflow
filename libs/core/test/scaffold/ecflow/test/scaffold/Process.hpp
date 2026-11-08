@@ -30,6 +30,9 @@ public:
     ///
     /// @brief Launches the given executable as an owned child, capturing its standard output and error.
     ///
+    /// The output is read while the child runs and this object exists, so that the child never blocks on a full pipe,
+    /// and is held in memory until read_stdout() and read_stderr() return it.
+    ///
     /// @param[in] executable Path of the program to run
     /// @param[in] args Command-line arguments, without the program name
     /// @param[in] cwd Working directory of the child
@@ -40,8 +43,8 @@ public:
     ///
     /// @brief Launches the given executable as an owned child, writing its standard output and error to a file.
     ///
-    /// Use it for a long-lived child whose output is not read while it runs: a captured output that nobody reads
-    /// blocks the child as soon as the pipe is full, which on Linux can be after as little as 4 KiB.
+    /// Use it for a long-lived child whose output is kept for diagnosis, rather than held in memory until the child
+    /// exits.
     ///
     /// @param[in] executable Path of the program to run
     /// @param[in] args Command-line arguments, without the program name
@@ -125,7 +128,8 @@ public:
     std::string read_stderr() const;
 
     ///
-    /// @brief Releases the object without terminating or reaping the child; call terminate() or wait() first.
+    /// @brief Releases the object without terminating or reaping the child, and stops reading its captured output,
+    /// so that a child still writing to it fails with a broken pipe; call terminate() or wait() first.
     ///
     ~Process();
 
