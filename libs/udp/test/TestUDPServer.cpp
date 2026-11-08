@@ -99,6 +99,28 @@ BOOST_AUTO_TEST_CASE(can_update_events_when_request_is_handled_late) {
     BOOST_TEST(event.value());
 }
 
+BOOST_AUTO_TEST_CASE(servers_keep_answering_after_much_output) {
+    ECF_NAME_THIS_TEST();
+
+    // Every request makes the servers write output (ecflow_server -d, ecflow_udp --verbose), about 200 bytes each:
+    // the requests below produce several times what a pipe holds, so a server whose output is not consumed while
+    // it runs stops answering
+    for (int i = 0; i < 400; ++i) {
+        auto label = ecflow_server.get_label("/s1/f2", "label_at_f2");
+        BOOST_REQUIRE_EQUAL(label.new_value(), "");
+    }
+    for (int batch = 0; batch < 8; ++batch) {
+        for (int i = 0; i < 50; ++i) {
+            ecflow_udp.submit_label_update("/s1/f2", "label_at_f2", "value_" + std::to_string(batch * 50 + i));
+        }
+        ecflow_udp.synchronise();
+    }
+
+    ecflow_udp.update_label("/s1/f2", "label_at_f2", "final");
+    auto label = ecflow_server.get_label("/s1/f2", "label_at_f2");
+    BOOST_TEST(label.new_value() == "final");
+}
+
 BOOST_AUTO_TEST_CASE(can_update_labels) {
     ECF_NAME_THIS_TEST();
 

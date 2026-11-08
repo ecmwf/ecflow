@@ -3,15 +3,20 @@
 
 #include "Process.hpp"
 
-#include <cassert>
+#include <array>
+#include <atomic>
 #include <cerrno>
+#include <condition_variable>
 #include <csignal>
+#include <fcntl.h>
 #include <mutex>
 #include <optional>
-#include <sstream>
+#include <poll.h>
 #include <stdexcept>
 #include <system_error>
+#include <thread>
 #include <unistd.h>
+#include <utility>
 
 #include <boost/version.hpp>
 #include <sys/wait.h>
@@ -58,6 +63,93 @@ void wait_for_exit_without_reaping(int process_id) {
     }
 }
 
+///
+/// @brief Reads a pipe continuously on a background thread, so that the writing child never blocks on a full pipe.
+///
+/// A child blocks as soon as it writes more than the pipe holds, which on Linux can be as little as 8 KiB once the
+/// user's pipes exceed fs.pipe-user-pages-soft. Reading only after the child has exited would then never end.
+///
+/// @invariant The thread is the only reader of the pipe; it stops at the end of the stream, or on destruction.
+///
+class PipeDrain {
+public:
+    explicit PipeDrain(int fd)
+        : fd_{fd},
+          reader_{[this] { run(); }} {}
+
+    PipeDrain(const PipeDrain&)            = delete;
+    PipeDrain& operator=(const PipeDrain&) = delete;
+
+    ~PipeDrain() {
+        stop_ = true;
+        reader_.join();
+    }
+
+    // Waits until the writers close the pipe, and returns the data not yet taken
+    std::string take() {
+        std::unique_lock<std::mutex> lock(mutex_);
+        closed_.wait(lock, [this] { return eof_; });
+        return std::exchange(buffer_, {});
+    }
+
+private:
+    void run() {
+        try {
+            read_until_end(true);
+        }
+        catch (...) {
+            // An exception escaping the thread would terminate the test program (e.g. std::bad_alloc while storing
+            // the output): the output stored so far is kept, and the rest is read and discarded, so that the child
+            // still never blocks on the pipe
+            try {
+                read_until_end(false);
+            }
+            catch (...) {
+            }
+        }
+        {
+            std::scoped_lock lock(mutex_);
+            eof_ = true;
+        }
+        closed_.notify_all();
+    }
+
+    void read_until_end(bool store) {
+        std::array<char, 65536> chunk{};
+        while (!stop_) {
+            pollfd request{fd_, POLLIN, 0};
+            // A bounded poll, so that destruction stops the thread even while a writer keeps the pipe open
+            int ready = ::poll(&request, 1, 100);
+            if (ready == 0 || (ready < 0 && errno == EINTR)) {
+                continue;
+            }
+            if (ready < 0) {
+                break;
+            }
+            ssize_t count = ::read(fd_, chunk.data(), chunk.size());
+            if (count > 0) {
+                if (store) {
+                    std::scoped_lock lock(mutex_);
+                    buffer_.append(chunk.data(), static_cast<std::size_t>(count));
+                }
+                continue;
+            }
+            if (count < 0 && (errno == EINTR || errno == EAGAIN)) {
+                continue;
+            }
+            break; // End of the stream, or an error
+        }
+    }
+
+    int fd_;
+    std::atomic<bool> stop_{false};
+    std::mutex mutex_;
+    std::condition_variable closed_;
+    bool eof_{false};
+    std::string buffer_;
+    std::thread reader_; // Last, so that it starts once every other member is ready
+};
+
 } // namespace
 
 ///
@@ -71,13 +163,17 @@ struct ProcessLifecycle
     std::mutex wait_mutex;
     std::mutex status_mutex;
     std::optional<int> exit_status;
+    bool output_to_file{false}; ///< True when the output goes to a file, and no pipe is there to read
 };
 
 #if BOOST_PROCESS_VERSION == 1
 
 struct Process::Impl : ProcessLifecycle
 {
-    Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
+    Impl(std::string_view executable,
+         const std::vector<std::string>& args,
+         const fs::path& cwd,
+         const std::optional<fs::path>& output)
         : out_{},
           err_{},
           handle_{} {
@@ -86,7 +182,17 @@ struct Process::Impl : ProcessLifecycle
         auto argv = std::vector<std::string>{args.begin(), args.end()};
 
         // Start the process
-        handle_ = bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+        if (output) {
+            handle_ = bp::child{
+                exe, bp::args(argv), (bp::std_out & bp::std_err) > output->string(), bp::start_dir(cwd.string())};
+            output_to_file = true;
+        }
+        else {
+            handle_ =
+                bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+            out_drain_.emplace(out_.pipe().native_source());
+            err_drain_.emplace(err_.pipe().native_source());
+        }
         process_id = handle_.id();
     }
     ~Impl() = default;
@@ -115,61 +221,70 @@ struct Process::Impl : ProcessLifecycle
         return status;
     }
 
-    std::string read_stdout() {
-        std::ostringstream ss;
-        while (out_.good() && out_.peek() != EOF) {
-            char c = out_.get();
-            ss << c;
-        }
-        return ss.str();
-    }
+    std::string read_stdout() { return output_to_file ? std::string{} : out_drain_->take(); }
 
-    std::string read_stderr() {
-        std::ostringstream ss;
-        while (err_.good() && err_.peek() != EOF) {
-            char c = err_.get();
-            ss << c;
-        }
-        return ss.str();
-    }
+    std::string read_stderr() { return output_to_file ? std::string{} : err_drain_->take(); }
 
     bp::ipstream out_;
     bp::ipstream err_;
 
     bp::child handle_;
+
+    // Declared last, so that the readers stop before the pipes close
+    std::optional<PipeDrain> out_drain_;
+    std::optional<PipeDrain> err_drain_;
 };
 
 #elif BOOST_PROCESS_VERSION == 2
 
 struct Process::Impl : ProcessLifecycle
 {
-    Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
+    Impl(std::string_view executable,
+         const std::vector<std::string>& args,
+         const fs::path& cwd,
+         const std::optional<fs::path>& output)
         : ctx_{},
           stdout_pipe_{ctx_},
           stderr_pipe_{ctx_},
           start_dir_{cwd.c_str()},
-          handle_{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}} {
+          handle_{launch(executable, args, output)} {
         process_id = handle_.id();
+        if (!output_to_file) {
+            out_drain_.emplace(stdout_pipe_.native_handle());
+            err_drain_.emplace(stderr_pipe_.native_handle());
+        }
+    }
+
+    bp::process
+    launch(std::string_view executable, const std::vector<std::string>& args, const std::optional<fs::path>& output) {
+        if (!output) {
+            return bp::process{
+                ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}};
+        }
+
+        // A single file description serves both outputs, so that they share one offset and never overwrite each other
+        int fd = ::open(output->c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+        if (fd == -1) {
+            throw std::system_error(errno, std::generic_category(), "open(2) failed for " + output->string());
+        }
+        output_to_file = true;
+        try {
+            auto process = bp::process{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, fd, fd}};
+            ::close(fd);
+            return process;
+        }
+        catch (...) {
+            ::close(fd);
+            throw;
+        }
     }
     ~Impl() = default;
 
     int wait_native() { return handle_.wait(); }
 
-    std::string read_stdout() {
-        std::string stdout_buffer;
-        boost::system::error_code ec;
-        ba::read(stdout_pipe_, ba::dynamic_buffer(stdout_buffer), ec);
-        assert(ec == boost::asio::error::eof);
-        return stdout_buffer;
-    }
+    std::string read_stdout() { return output_to_file ? std::string{} : out_drain_->take(); }
 
-    std::string read_stderr() {
-        std::string stderr_buffer;
-        boost::system::error_code ec;
-        ba::read(stderr_pipe_, ba::dynamic_buffer(stderr_buffer), ec);
-        assert(ec == boost::asio::error::eof);
-        return stderr_buffer;
-    }
+    std::string read_stderr() { return output_to_file ? std::string{} : err_drain_->take(); }
 
     ba::io_context ctx_;
     ba::readable_pipe stdout_pipe_;
@@ -177,6 +292,10 @@ struct Process::Impl : ProcessLifecycle
     bp::process_start_dir start_dir_;
 
     bp::process handle_;
+
+    // Declared last, so that the readers stop before the pipes close
+    std::optional<PipeDrain> out_drain_;
+    std::optional<PipeDrain> err_drain_;
 };
 
 #else
@@ -193,7 +312,11 @@ Process::Process(Process&& rhs)
 }
 
 Process::Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd)
-    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd)} {
+    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd, std::nullopt)} {
+}
+
+Process::Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd, const fs::path& output)
+    : impl_{std::make_unique<Impl>(executable.c_str(), args, cwd, output)} {
 }
 
 Process& Process::operator=(Process&& rhs) {

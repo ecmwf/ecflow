@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
+import socket
 from socket import gethostname
+import subprocess
 import os, sys, fnmatch
+import datetime
 import time
-import fcntl
-import datetime, time
 import shutil  # used to remove directory tree
 import platform  # for python version info
 import inspect
@@ -137,6 +138,11 @@ def clean_up_data(port):
         print("   Remove Failed")
 
 
+# Test ports stay below the ephemeral range of Linux (32768-60999), from which
+# outgoing connections take their source port
+max_test_port = 32768
+
+
 class Protocol(Enum):
     CUSTOM = 1  # uses custom TCP/IP access (default)
     HTTP = 2  # uses HTTP access
@@ -144,12 +150,14 @@ class Protocol(Enum):
 
 # =======================================================================================
 class EcfPortLock(object):
-    """allow debug and release version of python tests to run at the same
-    time, buy generating a unique port each time"""
+    """Reserves a port for a test server, with the lock scheme of the C++ test
+    scaffold: a <port>.lock file, shared by the test runs that use the same lock
+    directory, followed by a bind probe, which also detects servers started by test
+    runs using another lock directory."""
 
-    def __init__(self, protocol):
+    def __init__(self):
         print("   EcfPortLock:__init__")
-        self._protocol = protocol
+        self.lock_file_fp = None
 
     def at_time(self):
         return datetime.datetime.fromtimestamp(time.time()).strftime("%H:%M:%S")
@@ -163,48 +171,57 @@ class EcfPortLock(object):
         )
         port = seed_port
         while 1:
-            # port must be free for at least 15 seconds
-            if self._timed_free_port(port, 3):
-                print(
-                    "   *FOUND* free server port " + str(port) + " : " + self.at_time()
+            if port >= max_test_port:
+                raise RuntimeError(
+                    "No free test port from "
+                    + str(seed_port)
+                    + " up to the ephemeral range at "
+                    + str(max_test_port)
                 )
-                if self.do_lock(port):
+            # The lock is taken before probing, so that no test run using the same
+            # lock directory can claim the port in between; a port bound by any
+            # other process is rejected, releasing its lock
+            if self.do_lock(port):
+                if self.is_port_free(port):
+                    print(
+                        "   *FOUND* free server port "
+                        + str(port)
+                        + " : "
+                        + self.at_time()
+                    )
                     break
-            else:
                 print(
                     "   *Server* port "
                     + str(port)
-                    + " busy( by  ping), trying next port "
+                    + " busy (bind probe), trying next port "
                     + self.at_time()
                 )
+                self.remove(port)
             port = port + 1
 
         return str(port)
 
-    def _timed_free_port(self, port, wait_time=10):
-        count = 0
-        while count < wait_time:
-            if self._free_port(port):
-                count = count + 1
-                time.sleep(1)
-            else:
+    @staticmethod
+    def is_port_free(port):
+        """Checks whether the given TCP port can be bound, as the ecFlow server binds
+        it (IPv4, SO_REUSEADDR), whichever protocol a server already listening on it
+        uses"""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            try:
+                probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                probe.bind(("", int(port)))
+                return True
+            except OSError:
                 return False
-        return self._free_port(port)
-
-    def _free_port(self, port):
-        try:
-            ci = ecf.Client()
-            if self._protocol == Protocol.HTTP:
-                ci.enable_http()
-            ci.set_host_port("localhost", str(port))
-            ci.ping()
-            return False
-        except RuntimeError as e:
-            return True
 
     def do_lock(self, port):
+        """Creates the lock file of the given port atomically (O_CREAT | O_EXCL), as
+        the C++ test scaffold does, so that the lock holds across processes and on
+        shared file systems without fcntl locks"""
         file = self._lock_file(port)
-        if os.path.exists(file):
+        try:
+            fd = os.open(file, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        except FileExistsError:
             print(
                 "   *LOCKED* lock file exists "
                 + file
@@ -212,34 +229,38 @@ class EcfPortLock(object):
                 + self.at_time()
             )
             return False
+        except OSError as e:
+            # Every port would fail alike (e.g. a missing lock directory), so the
+            # search stops here
+            raise RuntimeError("Could not create lock file " + file + ": " + str(e))
+        fp = None
         try:
-            fp = open(file, "w")
+            fp = os.fdopen(fd, "w")
+            fp.write(self._describe_current_test())
+            fp.flush()
+        except BaseException:
+            # A lock that cannot be described is not kept, so that the port stays
+            # usable by later test runs; closing may fail again (e.g. on a full file
+            # system), which must not keep the lock either
             try:
-                self.lock_time = self.at_time()
-                fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                self.lock_file_fp = fp
-                fp.write(self._describe_current_test())
-                fp.flush()
-                print("   *LOCKED* file " + file + " : " + self.lock_time)
-                return True
-            except IOError:
-                print(
-                    "   Could *NOT* lock file "
-                    + file
-                    + " trying next port : "
-                    + self.at_time()
-                )
-                return False
-        except IOError as e:
-            print(
-                "   Could not open file "
-                + file
-                + " for write trying next port : "
-                + self.at_time()
-            )
-            return False
+                if fp is not None:
+                    fp.close()
+                else:
+                    os.close(fd)
+            except OSError:
+                pass
+            os.remove(file)
+            raise
+        self.lock_time = self.at_time()
+        self.lock_file_fp = fp
+        print("   *LOCKED* file " + file + " : " + self.lock_time)
+        return True
 
     def remove(self, port):
+        """Releases the lock file of the given port; a lock already released is
+        ignored, so that cleanup paths may release it unconditionally"""
+        if self.lock_file_fp is None:
+            return
         file = self._lock_file(port)
         print(
             "   Remove lock file : "
@@ -250,6 +271,7 @@ class EcfPortLock(object):
             + self.at_time()
         )
         self.lock_file_fp.close()
+        self.lock_file_fp = None
         os.remove(file)
 
     @staticmethod
@@ -289,16 +311,20 @@ class Server(object):
     """TestServer: allow debug and release version of python tests to run at the same
     time, by generating a unique port each time"""
 
+    # Upper bound, in seconds, of the wait for a started server to answer
+    start_timeout = 60
+
     def __init__(self, protocol=Protocol.CUSTOM):
         print("Server:__init__: Starting server")
         self._protocol = protocol
+        self._process = None
         if not debugging():
             seed_port = int(os.getenv("ECF_FREE_PORT", "3153"))
             if sys.version_info[0] == 3:  # python3 can run at same time
                 seed_port = int(os.getenv("ECF_FREE_PORT", "3154"))
             if ecf.debug_build():
                 seed_port = seed_port + 1
-            self.lock_file = EcfPortLock(self._protocol)
+            self.lock_file = EcfPortLock()
             self.the_port = self.lock_file.find_free_port(seed_port)
         else:
             self.the_port = "3152"
@@ -318,71 +344,158 @@ class Server(object):
 
     def __enter__(self):
         try:
-            print(
-                "Server:__enter__: About to ping localhost: "
-                + self.the_port
-                + " : "
-                + self.at_time()
-            )
-            self.ci.ping()
-            print(
-                "   ------- Server all ready running on port "
-                + self.the_port
-                + " *UNEXPECTED* -- : "
-                + self.at_time()
-            )
-            sys.exit(1)
-        except RuntimeError as e:
-            while 1:
-                # Only worth doing this test, if the server is running
-                # ON HPUX, having only one connection attempt, sometimes fails
-                # ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
-                # ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
-                self.ci = ecf.Client("localhost", self.the_port)
-                if self._protocol == Protocol.HTTP:
-                    self.ci.enable_http()
-
-                print(
-                    "   ------- Server *NOT* running on port "
-                    + self.the_port
-                    + " as *EXPECTED* ------ "
-                )
-                print(
-                    "   ------- Start the server on port "
-                    + self.the_port
-                    + " ---------"
-                )
-                if not debugging():
-                    clean_up_server(str(self.the_port))
-                    clean_up_data(str(self.the_port))
-
-                server_exe = ecf.File.find_server()
-                assert len(server_exe) != 0, "Could not locate the server executable"
-
-                server_exe += " --port=" + self.the_port + " --ecfinterval=4"
-                if self._protocol == Protocol.HTTP:
-                    server_exe += " --http"
-                server_exe += " &"
-                print("   TestClient.py: Starting server " + server_exe)
-                os.system(server_exe)
-
-                print("   Allow time for server to start " + self.at_time())
-                if self.ci.wait_for_server_reply():
-                    print("   Server has started " + self.at_time())
-                    break
-                else:
-                    print(
-                        "   Server failed to start after 60 second, trying next port !!!!!! "
-                        + self.at_time()
+            while not self._start_own_server():
+                # Another server answers on the port: a test run using another lock
+                # directory started it in between, so the port is released and the
+                # next one is tried
+                if debugging():
+                    raise RuntimeError(
+                        "Another server answers on the debugging port " + self.the_port
                     )
-                    self.the_port = self.lock_file.find_free_port(
-                        int(self.the_port) + 1
-                    )
+                self.lock_file.remove(self.the_port)
+                self.the_port = self.lock_file.find_free_port(int(self.the_port) + 1)
+        except BaseException:
+            # __exit__ is not called when __enter__ fails, so the server process and
+            # the port reservation are released here
+            self._stop_own_process(kill=True)
+            if not debugging():
+                self.lock_file.remove(self.the_port)
+            raise
 
         print("   Run the tests, leaving Server:__enter__:")
 
         # return the Client, that can call to the server
         return [self.ci, self._protocol]
+
+    def _make_client(self):
+        ci = ecf.Client("localhost", self.the_port)
+        if self._protocol == Protocol.HTTP:
+            ci.enable_http()
+        return ci
+
+    def _start_own_server(self):
+        """Starts a server on the reserved port, and returns whether the server
+        answering on it is the one started; otherwise the started server is stopped"""
+        self.ci = self._make_client()
+
+        print("   ------- Start the server on port " + self.the_port + " ---------")
+        if not debugging():
+            clean_up_server(str(self.the_port))
+            clean_up_data(str(self.the_port))
+
+        server_exe = ecf.File.find_server()
+        assert len(server_exe) != 0, "Could not locate the server executable"
+
+        command = [server_exe, "--port=" + self.the_port, "--ecfinterval=4"]
+        if self._protocol == Protocol.HTTP:
+            command.append("--http")
+        print("   TestClient.py: Starting server " + " ".join(command))
+        self._process = subprocess.Popen(command)
+
+        print("   Allow time for server to start " + self.at_time())
+        if self._wait_for_own_server():
+            print("   Server has started " + self.at_time())
+            return True
+
+        print(
+            "   Server "
+            + str(self._process.pid)
+            + " is not the one answering on port "
+            + self.the_port
+            + ", trying next port !!!!!! "
+            + self.at_time()
+        )
+        # The process started is not listening on the port: either it failed to bind
+        # and exited, or it keeps running without a listening socket (as
+        # ecflow_server --http does when its port is taken), so it is killed outright
+        self._stop_own_process(kill=True)
+        return False
+
+    def _make_probe(self, protocol):
+        ci = ecf.Client("localhost", self.the_port)
+        if protocol == Protocol.HTTP:
+            ci.enable_http()
+        ci.set_connection_attempts(1)
+        ci.set_retry_connection_period(0)
+        return ci
+
+    def _wait_for_own_server(self):
+        """Waits for a server to answer on the port, and returns whether it is the
+        process started; stops waiting as soon as that process exits, or as soon as
+        a server of the other protocol answers (which cannot be the own server).
+        Raises RuntimeError when no server answers within start_timeout seconds, or
+        when the process exits while no other server listens on the port (the
+        process then failed for a reason that another port would not change)."""
+        other_protocol = (
+            Protocol.CUSTOM if self._protocol == Protocol.HTTP else Protocol.HTTP
+        )
+        probe = self._make_probe(self._protocol)
+        other_probe = self._make_probe(other_protocol)
+        deadline = time.monotonic() + self.start_timeout
+        while time.monotonic() < deadline:
+            if self._process.poll() is not None:
+                if self._port_has_listener():
+                    return False
+                raise RuntimeError(
+                    "Server on port "
+                    + self.the_port
+                    + " exited with code "
+                    + str(self._process.returncode)
+                )
+            try:
+                probe.ping()
+            except RuntimeError:
+                try:
+                    other_probe.ping()
+                    return False
+                except RuntimeError:
+                    time.sleep(0.2)
+                    continue
+            return self._answering_server_is_own()
+        raise RuntimeError(
+            "No server answered on port "
+            + self.the_port
+            + " within "
+            + str(self.start_timeout)
+            + " s"
+        )
+
+    def _port_has_listener(self):
+        """Checks whether any process accepts connections on the port"""
+        try:
+            with socket.create_connection(("localhost", int(self.the_port)), timeout=5):
+                return True
+        except OSError:
+            return False
+
+    def _answering_server_is_own(self):
+        """Checks, through its ECF_PID, that the server answering on the port is the
+        process started"""
+        if self._process.poll() is not None:
+            return False
+        try:
+            ci = self._make_client()
+            ci.sync_local()
+            variables = {v.name(): v.value() for v in ci.get_defs().server_variables}
+        except RuntimeError as e:
+            print("   Could not query the server variables: " + str(e))
+            return False
+        return variables.get("ECF_PID") == str(self._process.pid)
+
+    def _stop_own_process(self, kill=False):
+        """Waits for the server process to exit, killing it when it does not (or
+        immediately, when asked); ecflow_server ignores SIGTERM, so only SIGKILL
+        stops it"""
+        if self._process is None:
+            return
+        if kill:
+            self._process.kill()
+        try:
+            self._process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            self._process.kill()
+            self._process.wait()
+        self._process = None
 
     def __exit__(self, exctype, value, tb):
         print(
@@ -393,9 +506,20 @@ class Server(object):
         print("   value:", value)
         print("   tb:", tb)
         print("   Terminate server " + self.at_time())
-        self.ci.terminate_server()
-        print("   Terminate server OK " + self.at_time())
-        self.lock_file.remove(self.the_port)
+        terminated = False
+        try:
+            # The server is terminated only while it is still the one answering on
+            # the port, never a server that another test run started there since
+            if self._process is not None and self._answering_server_is_own():
+                self.ci.terminate_server()
+                terminated = True
+                print("   Terminate server OK " + self.at_time())
+            else:
+                print("   Server is no longer the one answering, not terminated")
+        finally:
+            self._stop_own_process(kill=not terminated)
+            if not debugging():
+                self.lock_file.remove(self.the_port)
 
         # Do not clean up data, if an assert was raised. This allow debug
         if exctype is None:

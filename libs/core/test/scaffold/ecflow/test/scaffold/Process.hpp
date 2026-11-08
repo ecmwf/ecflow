@@ -30,12 +30,29 @@ public:
     ///
     /// @brief Launches the given executable as an owned child, capturing its standard output and error.
     ///
+    /// The output is read while the child runs and this object exists, so that the child never blocks on a full pipe,
+    /// and is held in memory until read_stdout() and read_stderr() return it.
+    ///
     /// @param[in] executable Path of the program to run
     /// @param[in] args Command-line arguments, without the program name
     /// @param[in] cwd Working directory of the child
     /// @throws std::exception if the child cannot be launched.
     ///
     Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd = fs::current_path());
+
+    ///
+    /// @brief Launches the given executable as an owned child, writing its standard output and error to a file.
+    ///
+    /// Use it for a long-lived child whose output is kept for diagnosis, rather than held in memory until the child
+    /// exits.
+    ///
+    /// @param[in] executable Path of the program to run
+    /// @param[in] args Command-line arguments, without the program name
+    /// @param[in] cwd Working directory of the child
+    /// @param[in] output File receiving both the standard output and error, created or truncated at launch
+    /// @throws std::exception if the output file cannot be opened, or the child cannot be launched.
+    ///
+    Process(const fs::path& executable, std::vector<std::string> args, fs::path cwd, const fs::path& output);
 
     Process(const Process& rhs)            = delete;
     Process& operator=(const Process& rhs) = delete;
@@ -97,7 +114,7 @@ public:
     ///
     /// Requires an owned child; call it after wait() or terminate(), since it blocks while the child runs.
     ///
-    /// @return The output not yet read.
+    /// @return The output not yet read; empty when the output is written to a file.
     ///
     std::string read_stdout() const;
 
@@ -106,12 +123,13 @@ public:
     ///
     /// Requires an owned child; call it after wait() or terminate(), since it blocks while the child runs.
     ///
-    /// @return The output not yet read.
+    /// @return The output not yet read; empty when the output is written to a file.
     ///
     std::string read_stderr() const;
 
     ///
-    /// @brief Releases the object without terminating or reaping the child; call terminate() or wait() first.
+    /// @brief Releases the object without terminating or reaping the child, and stops reading its captured output,
+    /// so that a child still writing to it fails with a broken pipe; call terminate() or wait() first.
     ///
     ~Process();
 
