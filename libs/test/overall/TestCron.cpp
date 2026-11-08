@@ -63,45 +63,39 @@ static void wait_for_cron(int max_time_to_wait, const std::string& path) {
 BOOST_AUTO_TEST_CASE(test_cron_time_series) {
     ECF_NAME_THIS_TEST();
 
+    // Each poll of the test server (every TestFixture::job_submission_interval() seconds) advances the calendar by
+    // one minute, and a cron time slot is taken only when the task is queued at that minute: a run still going at
+    // the next slot misses it. The time series spans hours, so that a missed slot only delays the next run. The job
+    // sleeps longer than the polls of one step, as a job on a loaded system can take, and must still complete the
+    // expected number of times.
+    const int job_duration = 2 * TestFixture::job_submission_interval() + 1; // seconds
+
     DurationTimer timer;
     TestClean clean_at_start_and_end;
 
-    // SLOW SYSTEMS
-    // for each time attribute leave GAP of 3 * job submission interval
-    // on slow systems submitted->active->complete > TestFixture::job_submission_interval()
-    // Also the task duration must be greater than job_submission_interval,  otherwise
-    // we will get multiple invocation for the same time step
-
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_cron_time_series
-    //   edit SLEEPTIME 1
+    //   edit SLEEPTIME 7 # with the usual 3-second poll
     //   edit ECF_INCLUDE $ECF_HOME/includes
-    //   clock real <todays date>
+    //   clock real 21.6.2010 +36000
     //   family family
-    //     task t1
-    //       cron <start> <finish> <incr>
+    //     task t
+    //       cron 10:01 22:01 00:02
+    //       verify complete:3
     //   endfamily
     // endsuite
     Defs theDefs;
     std::string path;
     {
-        // Initialise clock with todays date and time, then create a cron attribute
-        // with a time series, so that task runs 3 times
-
-        // Note: we do not use:
-        //    auto theLocalTime = Calendar::second_clock_time();
-        // Because this can fail with:
-        //    Test:: ...test_cron_time_series unknown location(0): fatal error in
-        //             "test_cron_time_series": std::out_of_range:
-        //             TimeSeries::TimeSeries: Invalid time series: Start time(23:58) is greater than end time(00:02)
-        // i.e
-        // if the test is started at 23:58, then adding the end time of by doing start_time + 5 will fail the check
+        // The clock starts at a fixed 10:00, rather than the current time, so that the whole time series lies
+        // within one day (a series cannot end before it starts, as it would if started at 23:58)
         auto theLocalTime =
             boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
         auto time1 = theLocalTime + boost::posix_time::minutes(1);
-        auto time2 = theLocalTime + boost::posix_time::minutes(5);
+        auto time2 = theLocalTime + boost::posix_time::hours(12) + boost::posix_time::minutes(1);
 
         suite_ptr suite = theDefs.add_suite("test_cron_time_series");
+        suite->addVariable(Variable("SLEEPTIME", std::to_string(job_duration)));
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
 
@@ -120,15 +114,13 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
     // The test harness will create corresponding directory structure
     // and populate with standard ecf files.
     ServerTestHarness serverTestHarness;
-    serverTestHarness.add_default_sleep_time(
-        false); // avoid missing time steps due to submit->active->complete > job submission interval
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_cron_time_series.def"),
                           1 /* timeout ignored*/,
                           false /*waitForTestCompletion*/);
 
     // crons are *infinite*, just wait for cron to complete 3 times
-    wait_for_cron(40, path);
+    wait_for_cron(180, path);
 
     std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
               << ")\n";
