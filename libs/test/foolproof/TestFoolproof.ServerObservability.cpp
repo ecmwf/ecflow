@@ -241,6 +241,47 @@ void check_failed_start_cleanup(const std::string& stage) {
     }
 }
 
+///
+/// @brief Verifies that a server whose port is taken exits with a diagnostic naming the port.
+///
+/// @param[in] http Whether the server is started with the HTTP protocol
+///
+void check_port_in_use(bool http) {
+    using namespace ecf::test::scaffold;
+
+    auto startup    = MakeDirectory{}.create();
+    const auto home = startup.path() / "home";
+    fs::create_directories(home);
+
+    ecf::test::foolproof::ClearedServerEnvironment cleared;
+    WithTestEnvironmentVariable ecf_home("ECF_HOME", home.string());
+
+    auto port = ecf::test::foolproof::reserve_port();
+
+    // The listener binds the address bound by the server, so that the server cannot bind it
+    boost::asio::io_context io;
+    boost::asio::ip::tcp::acceptor occupant(io);
+    const boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(),
+                                                  static_cast<unsigned short>(port.value()));
+    occupant.open(endpoint.protocol());
+    // As the server does, so that connections of earlier tests in TIME_WAIT do not prevent the bind
+    occupant.set_option(boost::asio::socket_base::reuse_address(true));
+    occupant.bind(endpoint);
+    occupant.listen();
+
+    std::vector<std::string> options = {"--port=" + std::to_string(port.value())};
+    if (http) {
+        options.emplace_back("--http");
+    }
+
+    Process process(ecf::test::foolproof::ecflow_server_executable(), options, startup.path());
+    const auto [exited, status, output] = ecf::test::foolproof::wait_for_exit(process);
+    BOOST_REQUIRE_MESSAGE(exited, "Server kept running on a port in use: " << output);
+    BOOST_CHECK_EQUAL(status, 1);
+    BOOST_CHECK_MESSAGE(output.find("port " + std::to_string(port.value())) != std::string::npos, output);
+    BOOST_CHECK_MESSAGE(output.find("already in use") != std::string::npos, output);
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
@@ -269,6 +310,19 @@ BOOST_AUTO_TEST_CASE(test_server_observability_failed_start_diagnostics_and_clea
     for (const std::string stage : {"cli", "config", "home", "security", "checkpoint"}) {
         BOOST_TEST_CONTEXT("Failed startup stage: " << stage) {
             check_failed_start_cleanup(stage);
+        }
+    }
+}
+
+///
+/// @brief Verifies that a server of either protocol exits when its port is taken, naming the port and the cause.
+///
+BOOST_AUTO_TEST_CASE(test_server_observability_port_in_use) {
+    ECF_NAME_THIS_TEST();
+
+    for (const bool http : {false, true}) {
+        BOOST_TEST_CONTEXT("HTTP: " << http) {
+            check_port_in_use(http);
         }
     }
 }
