@@ -593,6 +593,7 @@ set(srcs
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
+  server/src/ecflow/server/ListeningSocket.hpp
   server/src/ecflow/server/NodeTreeTraverser.hpp
   server/src/ecflow/server/PeriodicScheduler.hpp
   server/src/ecflow/server/Server.hpp
@@ -608,6 +609,7 @@ set(srcs
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp
+  server/src/ecflow/server/ListeningSocket.cpp
   server/src/ecflow/server/NodeTreeTraverser.cpp
   server/src/ecflow/server/PeriodicScheduler.cpp
   server/src/ecflow/server/Server.cpp

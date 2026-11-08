@@ -14,6 +14,7 @@
 import multiprocessing
 import os
 import signal
+import socket
 import subprocess
 import time
 
@@ -217,16 +218,33 @@ def test_start_moves_on_when_another_server_holds_the_port(
         other.wait()
 
 
-def test_start_fails_when_the_server_exits(lock_dir, tmp_path, monkeypatch):
+def test_start_fails_when_the_server_exits(lock_dir, tmp_path, monkeypatch, capsys):
     # A server that exits while no other server holds the port fails the start, as
-    # another port would not change the outcome
+    # another port would not change the outcome; the diagnostics show the exit code
+    # and the end of the server log, which holds the cause
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.chdir(work)
     failing = tmp_path / "failing_server"
-    failing.write_text("#!/bin/sh\nexit 3\n")
+    failing.write_text(
+        "#!/bin/sh\n"
+        + "port=${1#--port=}\n"
+        + 'echo "Could not bind port $port: Address already in use" >> "./'
+        + socket.gethostname()
+        + '.$port.ecf.log"\n'
+        + "exit 3\n"
+    )
     failing.chmod(0o755)
     monkeypatch.setattr(ecf.File, "find_server", staticmethod(lambda: str(failing)))
-    with pytest.raises(RuntimeError, match="exited with code 3"):
+    with pytest.raises(RuntimeError, match="exited with code 3") as failure:
         with Test.Server(CUSTOM):
             pass
+    port = str(failure.value).split()[3]
+    out = capsys.readouterr().out
+    assert "Start diagnostics for port " + port in out
+    assert ": exited with code 3" in out
+    assert "listener on the port: no" in out
+    assert "Could not bind port " + port + ": Address already in use" in out
     assert list(lock_dir.iterdir()) == []
 
 
@@ -271,9 +289,12 @@ def test_unusable_lock_directory_fails_immediately(tmp_path, monkeypatch):
         Test.Server(CUSTOM)
 
 
-def test_start_fails_when_the_server_never_answers(lock_dir, tmp_path, monkeypatch):
+def test_start_fails_when_the_server_never_answers(
+    lock_dir, tmp_path, monkeypatch, capsys
+):
     # A server that keeps running without ever answering fails the start, instead of
-    # the reservation moving on from port to port
+    # the reservation moving on from port to port; the diagnostics show that the
+    # process was running without a listener, and why the probes failed
     pid_file = tmp_path / "silent.pid"
     silent = tmp_path / "silent_server"
     silent.write_text("#!/bin/sh\necho $$ > " + str(pid_file) + "\nexec sleep 600\n")
@@ -283,7 +304,18 @@ def test_start_fails_when_the_server_never_answers(lock_dir, tmp_path, monkeypat
     with pytest.raises(RuntimeError, match="No server answered"):
         with Test.Server(CUSTOM):
             pass
-    assert not process_exists(int(pid_file.read_text()))
+    pid = int(pid_file.read_text())
+    out = capsys.readouterr().out
+    assert "process " + str(pid) + ": running" in out
+    assert "listener on the port: no" in out
+    assert "last CUSTOM error: " in out
+    assert "last HTTP error: " in out
+    if os.path.exists("/proc/net/tcp"):
+        assert "      State: " in out
+        assert "      thread " + str(pid) + ": wchan=" in out
+    else:
+        assert "process details: not available on this platform" in out
+    assert not process_exists(pid)
     assert list(lock_dir.iterdir()) == []
 
 
@@ -296,4 +328,28 @@ def test_failed_lock_write_releases_the_port(lock_dir, monkeypatch):
     monkeypatch.setattr(Test.EcfPortLock, "_describe_current_test", staticmethod(fail))
     with pytest.raises(OSError, match="No space left"):
         Test.Server(CUSTOM)
+    assert list(lock_dir.iterdir()) == []
+
+
+def test_listening_processes_names_the_owner(lock_dir):
+    # The start diagnostics name the process listening on the port, where /proc
+    # tells it (Linux), and report the lookup as unavailable elsewhere
+    reservation = Test.EcfPortLock()
+    port = int(reservation.find_free_port(seed_port))
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+            # As the bind probe does, so that earlier connections in TIME_WAIT on
+            # the port do not prevent the bind
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listener.bind(("", port))
+            listener.listen()
+            listeners = Test.listening_processes(port)
+            if os.path.exists("/proc/net/tcp"):
+                assert [x for x in listeners if x.startswith("pid " + str(os.getpid()))]
+            else:
+                assert listeners is None
+        if os.path.exists("/proc/net/tcp"):
+            assert Test.listening_processes(port) == []
+    finally:
+        reservation.remove(port)
     assert list(lock_dir.iterdir()) == []

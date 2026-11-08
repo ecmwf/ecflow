@@ -138,6 +138,91 @@ def clean_up_data(port):
         print("   Remove Failed")
 
 
+def listening_processes(port):
+    """Describes each socket listening on the TCP port, with the process that owns
+    it, as read from /proc; returns None where /proc is not available (macOS). A
+    socket owned by a process of another user is described by its inode only."""
+    if not os.path.exists("/proc/net/tcp"):
+        return None
+    inodes = []
+    for table in ("/proc/net/tcp", "/proc/net/tcp6"):
+        try:
+            with open(table) as file:
+                rows = file.read().splitlines()[1:]
+        except OSError:
+            continue
+        for row in rows:
+            fields = row.split()
+            # local address (hex address:port), state (0A = LISTEN), socket inode
+            if fields[3] == "0A" and int(fields[1].rsplit(":", 1)[1], 16) == port:
+                inodes.append(fields[9])
+    owners = {}
+    if inodes:
+        for pid in filter(str.isdigit, os.listdir("/proc")):
+            try:
+                for fd in os.listdir("/proc/" + pid + "/fd"):
+                    link = os.readlink("/proc/" + pid + "/fd/" + fd)
+                    if link.startswith("socket:[") and link[8:-1] in inodes:
+                        with open("/proc/" + pid + "/cmdline", "rb") as file:
+                            command = (
+                                file.read()
+                                .replace(b"\0", b" ")
+                                .decode(errors="replace")
+                            )
+                        owners[link[8:-1]] = "pid " + pid + " (" + command.strip() + ")"
+            except OSError:
+                continue
+    return [owners.get(inode, "socket inode " + inode) for inode in inodes]
+
+
+def process_details(pid):
+    """Describes where a process is, as read from /proc: its state, and for each
+    thread the kernel function it waits in and its current system call (number and
+    arguments), followed by its open files and sockets; returns None where /proc is
+    not available (macOS)"""
+    base = "/proc/" + str(pid)
+    if not os.path.isdir(base):
+        return None
+
+    def read(path):
+        try:
+            with open(path, errors="replace") as file:
+                return file.read().strip()
+        except OSError as e:
+            return "(" + e.strerror + ")"
+
+    details = []
+    for line in read(base + "/status").splitlines():
+        if line.startswith(("State:", "Threads:")):
+            details.append(" ".join(line.split()))
+    try:
+        tasks = sorted(os.listdir(base + "/task"), key=int)
+    except OSError:
+        tasks = []
+    for tid in tasks:
+        task = base + "/task/" + tid
+        details.append(
+            "thread "
+            + tid
+            + ": wchan="
+            + read(task + "/wchan")
+            + ", syscall="
+            + read(task + "/syscall")
+        )
+    try:
+        fds = sorted(os.listdir(base + "/fd"), key=int)
+    except OSError:
+        fds = []
+    targets = []
+    for fd in fds:
+        try:
+            targets.append(fd + "=" + os.readlink(base + "/fd/" + fd))
+        except OSError:
+            continue
+    details.append("open files: " + ", ".join(targets))
+    return details
+
+
 # Test ports stay below the ephemeral range of Linux (32768-60999), from which
 # outgoing connections take their source port
 max_test_port = 32768
@@ -405,9 +490,8 @@ class Server(object):
             + ", trying next port !!!!!! "
             + self.at_time()
         )
-        # The process started is not listening on the port: either it failed to bind
-        # and exited, or it keeps running without a listening socket (as
-        # ecflow_server --http does when its port is taken), so it is killed outright
+        # Another server answers on the port, so the process started could not listen
+        # on it: it has exited, or is about to exit, and is killed outright
         self._stop_own_process(kill=True)
         return False
 
@@ -431,34 +515,92 @@ class Server(object):
         )
         probe = self._make_probe(self._protocol)
         other_probe = self._make_probe(other_protocol)
+        attempts = {"count": 0, "last": None, "errors": {}}
         deadline = time.monotonic() + self.start_timeout
         while time.monotonic() < deadline:
             if self._process.poll() is not None:
                 if self._port_has_listener():
                     return False
-                raise RuntimeError(
+                reason = (
                     "Server on port "
                     + self.the_port
                     + " exited with code "
                     + str(self._process.returncode)
                 )
+                self._print_start_diagnostics(reason, attempts)
+                raise RuntimeError(reason)
+            attempts["count"] += 1
+            attempts["last"] = self.at_time()
             try:
                 probe.ping()
-            except RuntimeError:
+            except RuntimeError as e:
+                attempts["errors"][self._protocol.name] = str(e)
                 try:
                     other_probe.ping()
                     return False
-                except RuntimeError:
+                except RuntimeError as e:
+                    attempts["errors"][other_protocol.name] = str(e)
                     time.sleep(0.2)
                     continue
             return self._answering_server_is_own()
-        raise RuntimeError(
+        reason = (
             "No server answered on port "
             + self.the_port
             + " within "
             + str(self.start_timeout)
             + " s"
         )
+        self._print_start_diagnostics(reason, attempts)
+        raise RuntimeError(reason)
+
+    def _print_start_diagnostics(self, reason, attempts):
+        """Prints what is known about a failed start, before the server log and the
+        process are gone: the process state, the probes made, the listeners on the
+        port and the end of the server log"""
+        print("   Start diagnostics for port " + self.the_port + ": " + reason)
+        code = self._process.poll()
+        print(
+            "      process "
+            + str(self._process.pid)
+            + ": "
+            + ("running" if code is None else "exited with code " + str(code))
+        )
+        print(
+            "      probes: "
+            + str(attempts["count"])
+            + ", the last at "
+            + str(attempts["last"])
+        )
+        for protocol, error in sorted(attempts["errors"].items()):
+            print("      last " + protocol + " error: " + error.strip())
+        if code is None:
+            details = process_details(self._process.pid)
+            if details is None:
+                print("      process details: not available on this platform")
+            else:
+                for detail in details:
+                    print("      " + detail)
+        print(
+            "      listener on the port: "
+            + ("yes" if self._port_has_listener() else "no")
+        )
+        listeners = listening_processes(int(self.the_port))
+        if listeners is None:
+            print("      listening processes: not available on this platform")
+        else:
+            print("      listening processes: " + (", ".join(listeners) or "none"))
+        log_file = log_file_path(self.the_port)
+        try:
+            with open(log_file, errors="replace") as file:
+                tail = file.readlines()[-20:]
+        except OSError as e:
+            print("      server log " + log_file + ": " + str(e))
+        else:
+            print(
+                "      server log " + log_file + ", last " + str(len(tail)) + " lines:"
+            )
+            for line in tail:
+                print("         " + line.rstrip())
 
     def _port_has_listener(self):
         """Checks whether any process accepts connections on the port"""
@@ -480,7 +622,18 @@ class Server(object):
         except RuntimeError as e:
             print("   Could not query the server variables: " + str(e))
             return False
-        return variables.get("ECF_PID") == str(self._process.pid)
+        answering = variables.get("ECF_PID")
+        if answering != str(self._process.pid):
+            print(
+                "   The server answering on port "
+                + self.the_port
+                + " has ECF_PID "
+                + str(answering)
+                + ", not "
+                + str(self._process.pid)
+            )
+            return False
+        return True
 
     def _stop_own_process(self, kill=False):
         """Waits for the server process to exit, killing it when it does not (or

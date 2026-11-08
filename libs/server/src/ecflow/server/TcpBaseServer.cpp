@@ -44,6 +44,7 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/ListeningSocket.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 
 using boost::asio::ip::tcp;
@@ -55,12 +56,8 @@ TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_context& io, Se
       io_(io),
       serverEnv_(serverEnv),
       acceptor_(io) {
-    // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
-    boost::asio::ip::tcp::endpoint endpoint(serverEnv.tcp_protocol(), serverEnv.port());
-    acceptor_.open(endpoint.protocol());
-    acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-    acceptor_.bind(endpoint);
-    acceptor_.listen(); // address is use error, when it comes, bombs out here
+    // A port that cannot be listened on (for example, already in use) stops the server
+    ecf::open_listening_socket(acceptor_, boost::asio::ip::tcp::endpoint(serverEnv.tcp_protocol(), serverEnv.port()));
 }
 
 void TcpBaseServer::handle_request() {

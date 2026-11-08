@@ -9,6 +9,7 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/ecflow_version.h"
+#include "ecflow/server/ListeningSocket.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 
 inline void log_error(char const* where, boost::beast::error_code ec) {
@@ -246,37 +247,8 @@ HttpServer::HttpServer(BaseServer* server, boost::asio::io_context& io, ServerEn
     : server_{server},
       io_{io},
       acceptor_{io} {
-    boost::beast::error_code ec;
-
-    boost::asio::ip::tcp::endpoint endpoint(env.tcp_protocol(), env.port());
-
-    // Open the acceptor
-    acceptor_.open(endpoint.protocol(), ec);
-    if (ec) {
-        log_error("HttpServer::open", ec);
-        return;
-    }
-
-    // Allow address reuse
-    acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
-    if (ec) {
-        log_error("HttpServer::set_option", ec);
-        return;
-    }
-
-    // Bind to the server address
-    acceptor_.bind(endpoint, ec);
-    if (ec) {
-        log_error("HttpServer::bind", ec);
-        return;
-    }
-
-    // Start listening for connections
-    acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
-    if (ec) {
-        log_error("HttpServer::listen", ec);
-        return;
-    }
+    // A port that cannot be listened on stops the server, as for the TCP/IP server
+    ecf::open_listening_socket(acceptor_, boost::asio::ip::tcp::endpoint(env.tcp_protocol(), env.port()));
 
     do_accept();
 }
