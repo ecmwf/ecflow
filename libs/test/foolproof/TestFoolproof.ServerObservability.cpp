@@ -279,7 +279,9 @@ void check_port_in_use(bool http) {
     BOOST_REQUIRE_MESSAGE(exited, "Server kept running on a port in use: " << output);
     BOOST_CHECK_EQUAL(status, 1);
     BOOST_CHECK_MESSAGE(output.find("port " + std::to_string(port.value())) != std::string::npos, output);
-    BOOST_CHECK_MESSAGE(output.find("already in use") != std::string::npos, output);
+    // The cause is the C library text: "Address already in use" (glibc, macOS) or "Address in use" (musl)
+    const auto cause = boost::system::error_code(boost::asio::error::address_in_use).message();
+    BOOST_CHECK_MESSAGE(output.find(cause) != std::string::npos, output);
 }
 
 } // namespace
