@@ -11,18 +11,16 @@ workflow manager, wrapping the C++ `ClientInvoker` through
 
 ## Installation
 
-```toml
-[dependencies]
-ecflow = "5.19"
+```sh
+cargo add ecflow
 ```
 
 To track development instead, depend on the repository. The build then uses
 the checked-out ecFlow sources rather than the release matching the crate
 version:
 
-```toml
-[dependencies]
-ecflow = { git = "https://github.com/ecmwf/ecflow", branch = "develop" }
+```sh
+cargo add --git https://github.com/ecmwf/ecflow --branch develop ecflow
 ```
 
 ## Usage
