@@ -27,19 +27,17 @@ The crates are in the ``rust`` directory of the ecFlow repository:
 - **ecflow**, the safe API
 - **ecflow-sys**, the bridge to the C++ library, on which ``ecflow`` depends
 
-Add ``ecflow`` to the dependencies in ``Cargo.toml``:
+Add ``ecflow`` to the dependencies of the project:
 
-.. code-block:: toml
+.. code-block:: shell
 
-  [dependencies]
-  ecflow = "5.19"
+  cargo add ecflow
 
 Alternatively, take the crate from the ecFlow repository, at a branch, tag or revision:
 
-.. code-block:: toml
+.. code-block:: shell
 
-  [dependencies]
-  ecflow = { git = "https://github.com/ecmwf/ecflow", branch = "develop" }
+  cargo add --git https://github.com/ecmwf/ecflow --branch develop ecflow
 
 The build script of ``ecflow-sys`` builds the ecFlow C++ client library with CMake and links it statically, so the
 build needs CMake, a C++17 compiler, Git and Boost, as described in :ref:`build_from_source`. ecFlow's CMake does not
@@ -55,10 +53,9 @@ clones the ecFlow release with the same version as the crate.
 By default, the crate is built with OpenSSL support, based on the ``ssl`` feature. To build without OpenSSL,
 disable the default features:
 
-.. code-block:: toml
+.. code-block:: shell
 
-  [dependencies]
-  ecflow = { version = "5.19", default-features = false }
+  cargo add ecflow --no-default-features
 
 Build Environment Variables
 ===========================
