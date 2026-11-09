@@ -131,7 +131,8 @@ function sha256_of() { # file
 }
 
 function is_provisioned() { # root
-    [[ -f "$1/include/aviso_ffi/aviso.hpp" ]] && compgen -G "$1/lib/libaviso_ffi.*" >/dev/null
+    [[ -f "$1/include/aviso_ffi/aviso.hpp" && -f "$1/lib/libaviso_ffi.a" ]] \
+        && compgen -G "$1/lib/libaviso_ffi.[sd][oy]*" >/dev/null
 }
 
 # ---------------------------------------------------------------------------
@@ -194,9 +195,6 @@ fi
 
 tar -xzf "${WORK_DIR}/${ARCHIVE}" -C "${WORK_DIR}" --no-same-owner
 is_provisioned "${WORK_DIR}/${NAME}" || die "${ARCHIVE} does not hold include/aviso_ffi/aviso.hpp and lib/libaviso_ffi.*"
-
-# The static library is not used by ecFlow, and is by far the largest file of the release
-rm -f "${WORK_DIR}/${NAME}/lib/libaviso_ffi.a"
 
 rm -rf "${ROOT}"
 mv "${WORK_DIR}/${NAME}" "${ROOT}"

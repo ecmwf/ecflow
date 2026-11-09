@@ -98,6 +98,7 @@ option( ENABLE_HTTP                "Enable Rest API/HTTP server"                
 option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server"           ON )
 option( ENABLE_UDP                 "Enable UDP server"                                   ON )
 option( ENABLE_AVISO               "Enable Aviso notifications (requires libaviso_ffi)"  ON )
+option( ENABLE_STATIC_AVISO_LIBS   "Use static Aviso client library linkage"             OFF )
 option( ENABLE_DOCS                "Enable Documentation"                                OFF )
 option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                               OFF )
 
@@ -194,6 +195,7 @@ ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
 ecbuild_info( "ENABLE_AVISO               : ${ENABLE_AVISO}" )
+ecbuild_info( "ENABLE_STATIC_AVISO_LIBS   : ${ENABLE_STATIC_AVISO_LIBS}" )
 ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
 
 

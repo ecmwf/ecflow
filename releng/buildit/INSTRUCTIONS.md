@@ -82,9 +82,12 @@ Notes:
 
 - The destination directory defaults to `${TMPDIR:-/tmp}/aviso-ffi`.
 - A release already unpacked in the destination directory is reused, without being downloaded again.
-- The static library of the release is discarded, as ecFlow only links the shared library.
-- The installed `ecflow_server` finds the shared library through its run path, set to the directory where the library
-  was found at build time; the destination directory must therefore be kept for as long as the installation is used.
+- The release holds both the shared and the static library; ecFlow links the shared library, unless configured with
+  `ENABLE_STATIC_AVISO_LIBS=ON`.
+- When linked with the shared library, the installed `ecflow_server` finds it through its run path, set to the
+  directory where the library was found at build time; the destination directory must therefore be kept for as long
+  as the installation is used. When linked with the static library, the installed `ecflow_server` does not depend on
+  the destination directory.
 
 The release defaults to the version pinned in the script, and is selected with `--version`. Only releases with a known
 checksum are accepted, unless the expected checksum is given with `--sha256`. Run `./provision_aviso.sh --help` for the
