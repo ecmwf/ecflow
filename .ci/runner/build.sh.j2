@@ -3,7 +3,8 @@
 {% extends "ci-infrastructure/cmake-runner.sh.j2" %}
 {# Aviso support is built on the Linux legs only, against the Aviso client
    library provisioned by releng/buildit/provision_aviso.sh; the self-hosted
-   macOS legs keep it disabled. #}
+   macOS legs keep it disabled. The library is linked statically, so that the
+   installed server does not depend on the job's temporary directory. #}
 {% set aviso = not leg.get("platform", "").startswith("macos") %}
 {# venv-python builds and tests against a venv of that installed Python (e.g. the
    Homebrew one), with the test requirements installed, for runners whose own
@@ -27,6 +28,7 @@ AVISO_FFI_ROOT="$(bash "$CI_SOURCE_DIR/releng/buildit/provision_aviso.sh" --dest
   -DENABLE_STATIC_BOOST_LIBS=OFF \
 {% if aviso %}
   -DENABLE_AVISO=ON \
+  -DENABLE_STATIC_AVISO_LIBS=ON \
   -DAVISO_FFI_ROOT="$AVISO_FFI_ROOT" \
 {% else %}
   -DENABLE_AVISO=OFF \

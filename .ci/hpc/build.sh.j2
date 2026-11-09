@@ -4,7 +4,9 @@ SPDX-License-Identifier: Apache-2.0
 #}
 {% extends "ci-infrastructure/cmake-atos.sh.j2" %}
 {# Aviso support is built against the Aviso client library provisioned by
-   releng/buildit/provision_aviso.sh, into the node-local TMPDIR of the job. #}
+   releng/buildit/provision_aviso.sh, into the node-local TMPDIR of the job.
+   The library is linked statically, so that the installed server does not
+   depend on that directory. #}
 {% block set_environment %}
 AVISO_FFI_ROOT="$(bash "$CI_SOURCE_DIR/releng/buildit/provision_aviso.sh" --dest "${TMPDIR:-/tmp}/aviso-ffi")"
 {% endblock %}
@@ -46,6 +48,7 @@ echo "Using: ECF_PORT_LOCK_DIR=$ECF_PORT_LOCK_DIR"
 {% endblock %}
 {% block cmake_args %}
   -DENABLE_AVISO=ON \
+  -DENABLE_STATIC_AVISO_LIBS=ON \
   -DAVISO_FFI_ROOT="$AVISO_FFI_ROOT" \
   -DBoost_ROOT="$boost_root" \
   -DBoost_INCLUDE_DIR="$boost_root/include" \
