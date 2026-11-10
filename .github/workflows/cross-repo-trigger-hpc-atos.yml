@@ -101,7 +101,7 @@ on:
         default: ''
         type: string
 concurrency:
-  group: cross-repo-trigger-hpc-atos-ecflow-${{ github.ref }}
+  group: cross-repo-trigger-hpc-atos-ecflow-${{ inputs.from-repo }}-${{ inputs.from-sha }}
   cancel-in-progress: false
 env:
   ARTIFACT_POLL_INTERVAL: ${{ vars.ARTIFACT_POLL_INTERVAL || '60' }}
