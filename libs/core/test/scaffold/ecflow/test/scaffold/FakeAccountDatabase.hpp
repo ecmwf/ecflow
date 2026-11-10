@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <map>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -46,17 +47,30 @@ public:
         return *this;
     }
 
+    ///
+    /// @brief Makes every later lookup fail, as when the account database cannot be reached.
+    ///
+    /// @return This database, to chain calls.
+    ///
+    FakeAccountDatabase& fail_lookups() {
+        failing_ = true;
+        return *this;
+    }
+
     std::optional<ecf::os::Account> find_user(const std::string& name) const override {
+        throw_if_failing(name);
         auto found = users_.find(name);
         return found == users_.end() ? std::nullopt : std::optional<ecf::os::Account>(found->second);
     }
 
     std::optional<ecf::os::Group> find_group(const std::string& name) const override {
+        throw_if_failing(name);
         auto found = groups_.find(name);
         return found == groups_.end() ? std::nullopt : std::optional<ecf::os::Group>(found->second);
     }
 
     std::vector<gid_t> groups_of(const ecf::os::Account& account) const override {
+        throw_if_failing(account.name);
         std::vector<gid_t> groups{account.gid};
         if (auto found = supplementary_.find(account.name); found != supplementary_.end()) {
             for (auto gid : found->second) {
@@ -69,6 +83,13 @@ public:
     }
 
 private:
+    void throw_if_failing(const std::string& name) const {
+        if (failing_) {
+            throw std::runtime_error("Could not look up '" + name + "': the account database is unavailable");
+        }
+    }
+
+    bool failing_{false};
     std::map<std::string, ecf::os::Account> users_;
     std::map<std::string, ecf::os::Group> groups_;
     std::map<std::string, std::vector<gid_t>> supplementary_;

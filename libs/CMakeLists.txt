@@ -601,6 +601,7 @@ set(srcs
   # Server -- Headers
   server/src/ecflow/server/AuthenticationService.hpp
   server/src/ecflow/server/AuthorisationService.hpp
+  server/src/ecflow/server/OwnershipPolicy.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -617,6 +618,7 @@ set(srcs
   # Server -- Sources
   server/src/ecflow/server/AuthenticationService.cpp
   server/src/ecflow/server/AuthorisationService.cpp
+  server/src/ecflow/server/OwnershipPolicy.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

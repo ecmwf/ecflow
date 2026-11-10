@@ -99,6 +99,8 @@ public:
     ecf::AuthorisationService& authorisation() override { return serverEnv_.authorisation(); }
     const ecf::AuthorisationService& authorisation() const override { return serverEnv_.authorisation(); }
 
+    const ecf::OwnershipPolicy& ownership() const override { return ownership_; }
+
     bool lock(const std::string& user) override;
     void unlock() override;
     const std::string& lockedUser() const override;
@@ -133,4 +135,5 @@ protected:
 
     ServerEnvironment& serverEnv_;
     std::string userWhoHasLock_;
+    ecf::OwnershipPolicy ownership_;
 };

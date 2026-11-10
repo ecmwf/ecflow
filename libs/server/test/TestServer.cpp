@@ -3,14 +3,21 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <pwd.h>
+#include <stdexcept>
+#include <string>
+#include <unistd.h>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -94,6 +101,26 @@ void test_the_server(const std::string& port) {
                                   << interval << " defs server variables, should be in sync with server");
         BOOST_REQUIRE_MESSAGE(theServer.poll_interval() == 12,
                               "Expected poll interval 12 but found " << theServer.poll_interval());
+
+        // The ownership rules use the OS account database, and take the effective user as the server account
+        {
+            auto defs    = Defs::create(); // kept alive: the suite refers back to it
+            auto suite   = defs->add_suite("s");
+            auto refusal = [&](const std::string& name) {
+                try {
+                    theServer.ownership().check_create(Identity::make_user(name, ""), *suite, OwnerAttr::create(name));
+                }
+                catch (const std::runtime_error& e) {
+                    return std::string(e.what());
+                }
+                return std::string();
+            };
+            BOOST_CHECK_MESSAGE(refusal("root").find("superuser") != std::string::npos, refusal("root"));
+            if (const passwd* pw = ::getpwuid(::geteuid()); pw != nullptr && pw->pw_uid != 0) {
+                BOOST_CHECK_MESSAGE(refusal(pw->pw_name).find("server account") != std::string::npos,
+                                    refusal(pw->pw_name));
+            }
+        }
 
         // The protocol resolved by the environment must be the one reported by the statistics, since that is
         // what users are shown to confirm how the server is being reached.

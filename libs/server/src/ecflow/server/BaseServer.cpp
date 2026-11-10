@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <unistd.h>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Chrono.hpp"
@@ -31,7 +32,8 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
       traverser_(this, io, serverEnv),
       checkPtSaver_(this, io, &serverEnv),
       serverState_(SState::HALTED),
-      serverEnv_(serverEnv) {
+      serverEnv_(serverEnv),
+      ownership_(std::make_shared<ecf::os::SystemAccountDatabase>(), ::geteuid()) {
     if (serverEnv_.debug()) {
         std::cout << "-->Server::server starting server on port " << serverEnv.port() << std::endl;
     }
