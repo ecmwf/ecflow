@@ -111,6 +111,17 @@ public:
     void remove_archived_files();     // used in delete
     std::string archive_path() const; // can throw if ECF_HOME not defined
 
+    ///
+    /// @brief Returns the path of the archive file of a node.
+    ///
+    /// @param[in] ecf_home The ECF_HOME of the node.
+    /// @param[in] abs_node_path The absolute path of the node.
+    /// @param[in] defs The definitions holding the node, providing the server port; may be null (default port).
+    /// @return The path of the archive file.
+    ///
+    static std::string
+    make_archive_path(const std::string& ecf_home, const std::string& abs_node_path, const Defs* defs);
+
     boost::posix_time::time_duration sum_runtime() override;
 
 private:

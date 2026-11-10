@@ -17,6 +17,7 @@
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
@@ -123,10 +124,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         throw std::runtime_error(errorMsg);
     }
 
-    // If the source node or *any* of its children are archived restore them first.
-    // Must be done in a top down manner.
-    restore(sourceNode->isNodeContainer());
-
     // Check to see if dest node is on the same server
     std::string host, port, destPath;
     node_ptr destNode = defs->findAbsNode(dest_);
@@ -159,6 +156,17 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
         // dest_ is on another server.
     }
+
+    // Until the ownership rules apply to moved definitions, Owners cannot be moved to another server. This is
+    // checked before any archived node is restored, so that a refused plug leaves the source unchanged.
+    if (!destNode.get() && ecf::ownership::contains_owner_including_archives(*sourceNode)) {
+        throw std::runtime_error("Plug command failed. Owner attributes are not yet supported in loaded, replaced or "
+                                 "moved definitions");
+    }
+
+    // If the source node or *any* of its children are archived restore them first.
+    // Must be done in a top down manner.
+    restore(sourceNode->isNodeContainer());
 
     if (!destNode.get()) {
 

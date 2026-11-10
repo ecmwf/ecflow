@@ -56,4 +56,17 @@ bool contains_owner(const Node& node);
 ///
 bool contains_owner(const Defs& defs);
 
+///
+/// @brief Checks whether a node of the server, or any node below it, holds an Owner attribute, including the nodes
+///        held in archive files.
+///
+/// @details The archive files of archived nodes below @p node (at any depth) are read, without restoring them, so
+///          that the server tree and its archive files are left unchanged.
+///
+/// @param[in] node The root of the subtree to inspect, in the server definitions.
+/// @return true if @p node or any of its descendants, archived or not, has an Owner; false otherwise.
+/// @throws std::runtime_error if an archive file cannot be read.
+///
+bool contains_owner_including_archives(const Node& node);
+
 } // namespace ecf::ownership

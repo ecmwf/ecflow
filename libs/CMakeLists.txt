@@ -174,6 +174,7 @@ set(srcs
   base/src/ecflow/base/cts/user/OrderNodeCmd.hpp
   base/src/ecflow/base/cts/user/PathsCmd.hpp
   base/src/ecflow/base/cts/user/PlugCmd.hpp
+  base/src/ecflow/base/cts/user/OwnershipCmd.hpp
   base/src/ecflow/base/cts/user/QueryCmd.hpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
   base/src/ecflow/base/cts/user/RequeueNodeCmd.hpp
@@ -257,6 +258,7 @@ set(srcs
   base/src/ecflow/base/cts/user/OrderNodeCmd.cpp
   base/src/ecflow/base/cts/user/PathsCmd.cpp
   base/src/ecflow/base/cts/user/PlugCmd.cpp
+  base/src/ecflow/base/cts/user/OwnershipCmd.cpp
   base/src/ecflow/base/cts/user/QueryCmd.cpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.cpp
   base/src/ecflow/base/cts/user/RequeueNodeCmd.cpp

@@ -32,6 +32,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"    // required to enforce cereal registration
 #include "ecflow/base/cts/user/MoveCmd.hpp"          // required to enforce cereal registration
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"     // required to enforce cereal registration
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"     // required to enforce cereal registration
 #include "ecflow/base/cts/user/PathsCmd.hpp"         // required to enforce cereal registration
 #include "ecflow/base/cts/user/PlugCmd.hpp"          // required to enforce cereal registration
 #include "ecflow/base/cts/user/QueryCmd.hpp"         // required to enforce cereal registration
