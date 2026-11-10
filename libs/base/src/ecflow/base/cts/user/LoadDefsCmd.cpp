@@ -16,6 +16,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
@@ -128,6 +129,12 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
             throw std::runtime_error(
                 MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
+        }
+
+        // Owners can only be set through the rules of the ownership policy, not yet available here
+        if (ecf::ownership::contains_owner(*defs)) {
+            throw std::runtime_error("LoadDefsCmd::doHandleRequest : Owner attributes are not yet supported in loaded, "
+                                     "replaced or moved definitions");
         }
 
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server

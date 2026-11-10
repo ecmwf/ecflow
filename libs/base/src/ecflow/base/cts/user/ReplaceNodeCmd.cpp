@@ -12,6 +12,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
@@ -127,6 +128,12 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
         throw std::runtime_error(
             MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
+    }
+
+    // Owners can only be set through the rules of the ownership policy, not yet available here
+    if (ecf::ownership::contains_owner(*client_defs)) {
+        throw std::runtime_error("ReplaceNodeCmd::doHandleRequest : Owner attributes are not yet supported in loaded, "
+                                 "replaced or moved definitions");
     }
 
     if (force_) {

@@ -460,6 +460,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
+  node/src/ecflow/node/Ownership.hpp
   node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
@@ -495,6 +496,7 @@ set(srcs
   node/src/ecflow/node/parser/InlimitParser.hpp
   node/src/ecflow/node/parser/LabelParser.hpp
   node/src/ecflow/node/parser/LateParser.hpp
+  node/src/ecflow/node/parser/OwnerParser.hpp
   node/src/ecflow/node/parser/LimitParser.hpp
   node/src/ecflow/node/parser/MeterParser.hpp
   node/src/ecflow/node/parser/MirrorParser.hpp
@@ -546,6 +548,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
+  node/src/ecflow/node/Ownership.cpp
   node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
@@ -576,6 +579,7 @@ set(srcs
   node/src/ecflow/node/parser/InlimitParser.cpp
   node/src/ecflow/node/parser/LabelParser.cpp
   node/src/ecflow/node/parser/LateParser.cpp
+  node/src/ecflow/node/parser/OwnerParser.cpp
   node/src/ecflow/node/parser/LimitParser.cpp
   node/src/ecflow/node/parser/MeterParser.cpp
   node/src/ecflow/node/parser/MirrorParser.cpp

@@ -1,0 +1,12 @@
+# Owner on a suite, a family and a task; a task without Owner inherits it
+suite s_owner
+   owner alice
+   family f
+      defstatus complete
+      owner charlie:ops
+      task t1
+         owner bob # a comment after the value
+      task t2
+   endfamily
+   task t3
+endsuite

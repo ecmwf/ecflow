@@ -10,6 +10,7 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -115,6 +116,12 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     node_ptr src_node = Node::create(src_node_, error_msg);
     if (!error_msg.empty() || !src_node) {
         throw std::runtime_error("Plug(Move) command failed. Error in source:\n" + error_msg);
+    }
+
+    // Owners can only be set through the rules of the ownership policy, not yet available here
+    if (ecf::ownership::contains_owner(*src_node)) {
+        throw std::runtime_error("Plug(Move) command failed. Owner attributes are not yet supported in loaded, "
+                                 "replaced or moved definitions");
     }
 
     // destNode can be NULL when we are moving a suite

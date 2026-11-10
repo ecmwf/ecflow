@@ -34,6 +34,7 @@ struct NodeStats
     size_t days_{0};
 
     size_t late_{0};
+    size_t owners_{0};
     size_t zombies_{0};
     size_t verifys_{0};
     size_t queues_{0};

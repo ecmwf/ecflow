@@ -9,6 +9,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
@@ -1205,6 +1206,17 @@ struct Writer<Event, Stream>
 };
 
 template <typename Stream>
+struct Writer<OwnerAttr, Stream>
+{
+    static void write(Stream& output, const OwnerAttr& item, FormatContext& ctx) {
+        Indent l1(ctx);
+        output << l1;
+        item.write(output.buf);
+        output << "\n";
+    }
+};
+
+template <typename Stream>
 struct Writer<GenericAttr, Stream>
 {
     static void write(Stream& output, const GenericAttr& item, FormatContext& ctx) {
@@ -1987,6 +1999,10 @@ struct Writer<Node, Stream>
 
         Writer<DState::State, Stream>::write(output, item.defStatus(), ctx);
         // Notice: if item.defStatus() != DState::default_state(), the above does not generate any output line
+
+        if (const auto* owner = item.get_owner(); owner) {
+            Writer<OwnerAttr, Stream>::write(output, *owner, ctx);
+        }
 
         if (auto late = item.get_late(); late) {
             Writer<LateAttr, Stream>::write(output, *late, ctx);

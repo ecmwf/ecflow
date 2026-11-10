@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
@@ -429,6 +430,17 @@ void Node::changeDefstatus(const std::string& theState) {
 
     // Updates state_change_no on the defStatus
     d_st_.setState(DState::toState(theState));
+}
+
+void Node::changeOwner(const ecf::OwnerAttr& owner) {
+    if (!owner_) {
+        throw std::runtime_error("Change Owner failed: The node has no Owner attribute, see node " + debugNodePath());
+    }
+    if (owner.user().empty()) {
+        throw std::runtime_error("Change Owner failed: The Owner is empty, see node " + debugNodePath());
+    }
+    owner_           = std::make_unique<ecf::OwnerAttr>(owner);
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::changeLate(const ecf::LateAttr& late) {

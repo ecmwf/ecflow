@@ -42,6 +42,7 @@ set(test_srcs
   test/TestNode_main.cpp # test entry point
   test/TestOperations.cpp
   test/TestOrder.cpp
+  test/TestOwner.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp
@@ -94,6 +95,7 @@ set(test_srcs
   test/parser/TestMigration.cpp
   test/parser/TestMirrorAttr.cpp
   test/parser/TestMultiStatementParsing.cpp
+  test/parser/TestOwnerPersistence.cpp
   test/parser/TestParser.cpp
   test/parser/TestParser_main.cpp # test entry point
   test/parser/TestRepeatPersistence.cpp
