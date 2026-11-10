@@ -2286,6 +2286,12 @@ private:
             output << " server_state:";
             output << SState::to_string(item.server_state().get_state());
         }
+        // The server Owner is configuration: only transported to clients by full synchronisations
+        if (const auto* server_owner = item.server_state().server_owner();
+            server_owner && ctx.style.is_one_of<PrintStyle::NET>()) {
+            output << " server_owner:";
+            output << server_owner->value();
+        }
 
         // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
         output << " cal_count:";

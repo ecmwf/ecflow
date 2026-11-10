@@ -43,6 +43,7 @@ set(test_srcs
   test/TestOperations.cpp
   test/TestOrder.cpp
   test/TestOwner.cpp
+  test/TestOwnerResolution.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp

@@ -10,6 +10,24 @@
 
 namespace ecf::ownership {
 
+std::string ResolvedOwner::origin_path() const {
+    return origin ? origin->absNodePath() : std::string("server");
+}
+
+std::optional<ResolvedOwner> resolve(const Node& node) {
+    for (const Node* current = &node; current; current = current->parent()) {
+        if (const auto* owner = current->get_owner(); owner) {
+            return ResolvedOwner{*owner, current};
+        }
+    }
+    if (const Defs* defs = node.defs(); defs) {
+        if (const auto* server_owner = defs->server_state().server_owner(); server_owner) {
+            return ResolvedOwner{*server_owner, nullptr};
+        }
+    }
+    return std::nullopt;
+}
+
 bool contains_owner(const Node& node) {
     if (node.get_owner()) {
         return true;
