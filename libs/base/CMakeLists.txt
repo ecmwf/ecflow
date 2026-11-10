@@ -23,7 +23,7 @@ set(test_srcs
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
   test/TestOwnershipCmd.cpp
-  test/TestOwnershipGate.cpp
+  test/TestOwnershipChangeSet.cpp
   test/TestOwnershipPolicy.cpp
   test/TestPermissions.cpp
   test/TestProgramOptions.cpp

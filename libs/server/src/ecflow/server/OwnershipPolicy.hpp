@@ -9,6 +9,7 @@
 
 #include "ecflow/core/os/AccountDatabase.hpp"
 #include "ecflow/core/os/OwnerEligibility.hpp"
+#include "ecflow/node/Ownership.hpp"
 
 class Node;
 
@@ -25,6 +26,9 @@ class OwnerAttr;
 ///          - create: only the user named in the new Owner, on a node (not an alias) without Owner;
 ///          - update: only the user of the current Owner, to any eligible user;
 ///          - delete: only the user of the current Owner.
+///          Commands bringing definitions in or taking them out (load, replace, plug) are checked as a whole:
+///          every Owner they add must name the requester, even when identical to the existing one, and every Owner
+///          they remove must belong to the requester.
 ///          Every Owner introduced must name an eligible account (see os::OwnerEligibility). Requesters are compared
 ///          literally, by user name, with the user of an Owner.
 ///
@@ -72,13 +76,25 @@ public:
     ///
     void check_delete(const Identity& requester, const Node& node) const;
 
+    ///
+    /// @brief Checks that the requester may make all the changes of a command bringing definitions in or taking
+    ///        them out.
+    ///
+    /// @param[in] requester The identity attached to the command.
+    /// @param[in] changes The Owners added and removed by the command.
+    /// @param[in] command The command, as named to users (e.g. "load").
+    /// @throws std::runtime_error with the reason of the first change refused, if any change is refused, including
+    ///         when the account database cannot be queried.
+    ///
+    void check_change_set(const Identity& requester, const ownership::ChangeSet& changes, const char* command) const;
+
 private:
     void check_requester_is_current_owner(const Identity& requester, const Node& node, const char* operation) const;
 
     /// Extension point for administrators, allowed to manage any Owner (question Q1, deferred): none for now
     [[nodiscard]] bool is_administrator(const Identity&) const { return false; }
 
-    void check_eligible(const OwnerAttr& value, const Node& node, const char* operation) const;
+    void check_eligible(const OwnerAttr& value, const std::string& path, const char* operation) const;
 
     std::shared_ptr<const os::AccountDatabase> accounts_;
     uid_t server_uid_;

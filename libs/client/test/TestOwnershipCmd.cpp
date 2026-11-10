@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <functional>
 #include <string>
 #include <unistd.h>
 #include <vector>
@@ -9,6 +10,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Filesystem.hpp"
@@ -48,6 +50,30 @@ std::string server_defs(ClientInvoker& client) {
     client.set_user_name(get_login_name());
     BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
     return ecf::as_string(*client.defs(), PrintStyle::DEFS);
+}
+
+/// Definitions with suite s, family f and task t; the family has the given Owner, if any
+defs_ptr make_defs(const std::string& f_owner = "") {
+    defs_ptr defs = Defs::create();
+    family_ptr f  = defs->add_suite("s")->add_family("f");
+    f->add_task("t");
+    if (!f_owner.empty()) {
+        f->addOwner(OwnerAttr::create(f_owner));
+    }
+    return defs;
+}
+
+/// Runs a command as the given user, expecting it to be refused for the expected reason, without any change
+void check_refused(ClientInvoker& client,
+                   const std::string& user,
+                   const std::function<int()>& command,
+                   const std::string& expected_in_reason) {
+    const std::string before = server_defs(client);
+    client.set_user_name(user);
+    BOOST_CHECK_MESSAGE(command() == 1, "Expected " << user << " to be refused");
+    BOOST_CHECK_MESSAGE(client.errorMsg().find(expected_in_reason) != std::string::npos,
+                        "Unexpected error: " << client.errorMsg());
+    BOOST_CHECK_EQUAL(server_defs(client), before);
 }
 
 /// Runs an ownership operation as the given user, expecting it to be refused for the expected reason
@@ -102,9 +128,7 @@ BOOST_AUTO_TEST_CASE(test_ownership_against_server) {
         ClientInvoker client(invokeServer.host(), invokeServer.port());
         client.set_throw_on_error(false);
 
-        defs_ptr defs = Defs::create();
-        defs->add_suite("s")->add_family("f")->add_task("t");
-        BOOST_REQUIRE_MESSAGE(client.load(defs) == 0, client.errorMsg());
+        BOOST_REQUIRE_MESSAGE(client.load(make_defs()) == 0, client.errorMsg());
 
         // read, by anyone with read access
         for (const auto& user : {login, reader}) {
@@ -123,6 +147,16 @@ BOOST_AUTO_TEST_CASE(test_ownership_against_server) {
         check_refused(client, reader, "create", "/s", reader, "Command not accepted");
         // nothing to update or delete
         check_refused(client, writer, "delete", "/s", "", "has no Owner");
+        // loaded and replaced definitions are checked as a whole: an Owner naming another user, an Owner that is
+        // not an account, or a requester without write access (stopped first, by the existing authorisation)
+        check_refused(client, login, [&] { return client.load(make_defs(writer), true); }, "naming themselves");
+        check_refused(client, writer, [&] { return client.load(make_defs(writer), true); }, "unknown user");
+        check_refused(client, reader, [&] { return client.load(make_defs(reader), true); }, "Command not accepted");
+        check_refused(client, login, [&] { return client.replace_1("/s/f", make_defs(writer)); }, "naming themselves");
+        check_refused(client, writer, [&] { return client.replace_1("/s/f", make_defs(writer)); }, "unknown user");
+        check_refused(
+            client, reader, [&] { return client.replace_1("/s/f", make_defs(reader)); }, "Command not accepted");
+
         // the server Owner is configuration (checked by the client)
         client.set_user_name(login);
         BOOST_CHECK(client.ownership("delete", "/") == 1);

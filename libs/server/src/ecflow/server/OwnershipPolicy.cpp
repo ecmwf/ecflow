@@ -17,9 +17,12 @@ namespace ecf {
 
 namespace {
 
+[[noreturn]] void refuse(const char* operation, const std::string& path, const std::string& reason) {
+    throw std::runtime_error(std::string("Ownership ") + operation + " refused on " + path + ": " + reason);
+}
+
 [[noreturn]] void refuse(const char* operation, const Node& node, const std::string& reason) {
-    throw std::runtime_error(std::string("Ownership ") + operation + " refused on " + node.absNodePath() + ": " +
-                             reason);
+    refuse(operation, node.absNodePath(), reason);
 }
 
 } // namespace
@@ -48,29 +51,62 @@ void OwnershipPolicy::check_create(const Identity& requester, const Node& node, 
                "users can only create an Owner naming themselves, but '" + requester.username().value() +
                    "' requested '" + value.value() + "'");
     }
-    check_eligible(value, node, "create");
+    check_eligible(value, node.absNodePath(), "create");
 }
 
 void OwnershipPolicy::check_update(const Identity& requester, const Node& node, const OwnerAttr& value) const {
     check_requester_is_current_owner(requester, node, "update");
-    check_eligible(value, node, "update");
+    check_eligible(value, node.absNodePath(), "update");
 }
 
 void OwnershipPolicy::check_delete(const Identity& requester, const Node& node) const {
     check_requester_is_current_owner(requester, node, "delete");
 }
 
-void OwnershipPolicy::check_eligible(const OwnerAttr& value, const Node& node, const char* operation) const {
+void OwnershipPolicy::check_eligible(const OwnerAttr& value, const std::string& path, const char* operation) const {
     std::optional<Result<os::OsIdentity>> eligible;
     try {
         eligible.emplace(os::OwnerEligibility(*accounts_, server_uid_).check(value.user(), value.group()));
     }
     catch (const std::exception& e) {
         // Fail closed, with the context of the operation
-        refuse(operation, node, "could not check the Owner '" + value.value() + "': " + e.what());
+        refuse(operation, path, "could not check the Owner '" + value.value() + "': " + e.what());
     }
     if (!eligible->ok()) {
-        refuse(operation, node, eligible->reason());
+        refuse(operation, path, eligible->reason());
+    }
+}
+
+void OwnershipPolicy::check_change_set(const Identity& requester,
+                                       const ownership::ChangeSet& changes,
+                                       const char* command) const {
+    if (changes.added.empty() && changes.removed.empty()) {
+        return; // no Owner involved: nothing to check, whoever the requester
+    }
+    if (!requester.is_user()) {
+        refuse(command,
+               changes.added.empty() ? changes.removed.front().path : changes.added.front().path,
+               "only users can manage Owners");
+    }
+    const std::string& user = requester.username().value();
+    if (!is_administrator(requester)) {
+        for (const auto& removal : changes.removed) {
+            if (removal.owner.user() != user) {
+                refuse(command,
+                       removal.path,
+                       "only the current owner '" + removal.owner.user() + "' can remove or replace its Owner, not '" +
+                           user + "'");
+            }
+        }
+    }
+    for (const auto& addition : changes.added) {
+        if (!is_administrator(requester) && addition.owner.user() != user) {
+            refuse(command,
+                   addition.path,
+                   "users can only bring in Owners naming themselves, but '" + user + "' brings in '" +
+                       addition.owner.value() + "'");
+        }
+        check_eligible(addition.owner, addition.path, command);
     }
 }
 

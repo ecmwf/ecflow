@@ -1228,7 +1228,14 @@ void NodeContainer::restore() {
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 
-    fs::remove(the_archive_path); // remove the file, could still throw
+    // The node is restored: a file that cannot be removed is left behind (any later archive overwrites it)
+    std::error_code ec;
+    fs::remove(the_archive_path, ec);
+    if (ec) {
+        ecf::log(Log::WAR,
+                 MESSAGE("NodeContainer::restore() Node " << absNodePath() << " restored, but could not remove "
+                                                          << the_archive_path << " : " << ec.message()));
+    }
 }
 
 bool NodeContainer::has_archive() const {

@@ -100,14 +100,6 @@ bool MoveCmd::check_source() const {
 STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     Defs* defs = as->defs().get();
 
-    Lock lock(user(), as);
-    if (!lock.ok()) {
-        std::string errorMsg = "Plug(Move) command failed. User ";
-        errorMsg += as->lockedUser();
-        errorMsg += " already has an exclusive lock";
-        throw std::runtime_error(errorMsg);
-    }
-
     if (!check_source()) {
         throw std::runtime_error("Plug(Move) command failed. No source specified");
     }
@@ -116,12 +108,6 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     node_ptr src_node = Node::create(src_node_, error_msg);
     if (!error_msg.empty() || !src_node) {
         throw std::runtime_error("Plug(Move) command failed. Error in source:\n" + error_msg);
-    }
-
-    // Owners can only be set through the rules of the ownership policy, not yet available here
-    if (ecf::ownership::contains_owner(*src_node)) {
-        throw std::runtime_error("Plug(Move) command failed. Owner attributes are not yet supported in loaded, "
-                                 "replaced or moved definitions");
     }
 
     // destNode can be NULL when we are moving a suite
@@ -140,6 +126,26 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
         if (!src_node->isSuite()) {
             throw std::runtime_error("::Destination path can only be empty when moving a whole suite to a new server");
         }
+    }
+
+    // The Owners brought in are checked, as for the forwarded user, before any change
+    {
+        std::string parent_path;
+        if (destNode) {
+            const Node* parent = destNode->isTask() ? destNode->parent() : destNode.get();
+            parent_path        = parent->absNodePath();
+        }
+        as->ownership().check_change_set(
+            identity(), ecf::ownership::change_set_for_move_in(*src_node, parent_path), "plug");
+    }
+
+    // The checks above only read the definitions: the server is locked (and so halted) only for the move itself
+    Lock lock(user(), as);
+    if (!lock.ok()) {
+        std::string errorMsg = "Plug(Move) command failed. User ";
+        errorMsg += as->lockedUser();
+        errorMsg += " already has an exclusive lock";
+        throw std::runtime_error(errorMsg);
     }
 
     if (destNode.get()) {

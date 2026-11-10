@@ -131,11 +131,9 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
                 MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
         }
 
-        // Owners can only be set through the rules of the ownership policy, not yet available here
-        if (ecf::ownership::contains_owner(*defs)) {
-            throw std::runtime_error("LoadDefsCmd::doHandleRequest : Owner attributes are not yet supported in loaded, "
-                                     "replaced or moved definitions");
-        }
+        // The Owners brought in, and those of the suites replaced, are checked as a whole, before any change
+        const auto changes = ecf::ownership::change_set_for_load(*as->defs(), *defs, force_);
+        as->ownership().check_change_set(identity(), changes, "load");
 
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
         ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
@@ -145,6 +143,7 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         // *NOTE* Externs are not persisted. Hence calling check() will report
         // all errors, references are not resolved.
         as->updateDefs(defs, force_);
+        ecf::ownership::log_removals(changes, identity().username().value(), "load");
 
         LOG_ASSERT(defs->suites().size() == 0, "Expected suites to be transferred to server defs");
     }
