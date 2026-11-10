@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -29,8 +30,10 @@
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace ecf;
+using ecf::test::scaffold::WithTestEnvironmentVariable;
 
 namespace {
 
@@ -46,7 +49,9 @@ struct InheritableDescriptors
     InheritableDescriptors() {
         // A file or socket left by an interrupted run would make open or bind fail
         fs::remove(opened_.file);
-        fs::remove(opened_.socket);
+        if (!opened_.socket.empty()) {
+            fs::remove(opened_.socket);
+        }
 
         int pipe_ends[2];
         BOOST_REQUIRE(::pipe(pipe_ends) == 0);
@@ -63,11 +68,26 @@ struct InheritableDescriptors
         int listener = ::socket(AF_UNIX, SOCK_STREAM, 0);
         BOOST_REQUIRE(listener >= 0);
         sockaddr_un address{};
-        address.sun_family = AF_UNIX;
+        address.sun_family     = AF_UNIX;
+        socklen_t address_size = sizeof(address);
+#if defined(__linux__)
+        // The listening socket is bound in the abstract namespace: its name occupies no file, so the address
+        // depends on neither the length of the temporary directory of the system nor the file system that holds
+        // it. An interactive session on Atos sets a temporary directory long enough that a path under it leaves
+        // no room in the 108 bytes of sun_path, and the file system that holds it may carry no socket file.
+        const std::string name = socket_name();
+        BOOST_REQUIRE(name.size() + 1 <= sizeof(address.sun_path));
+        address.sun_path[0] = '\0';
+        std::memcpy(address.sun_path + 1, name.c_str(), name.size());
+        address_size = static_cast<socklen_t>(offsetof(sockaddr_un, sun_path) + 1 + name.size());
+        BOOST_REQUIRE_MESSAGE(::bind(listener, reinterpret_cast<sockaddr*>(&address), address_size) == 0,
+                              "Could not bind the abstract socket " << name << ": " << std::strerror(errno));
+#else
         BOOST_REQUIRE(opened_.socket.size() < sizeof(address.sun_path));
         std::snprintf(address.sun_path, sizeof(address.sun_path), "%s", opened_.socket.c_str());
-        BOOST_REQUIRE_MESSAGE(::bind(listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == 0,
+        BOOST_REQUIRE_MESSAGE(::bind(listener, reinterpret_cast<sockaddr*>(&address), address_size) == 0,
                               "Could not bind " << opened_.socket << ": " << std::strerror(errno));
+#endif
         BOOST_REQUIRE(::listen(listener, 1) == 0);
         add(listener, true);
 
@@ -110,8 +130,8 @@ private:
     }
 
     // What the fixture opened and created, released by a member, so that it is released even when the constructor
-    // fails; the paths are unique to the process, in the temporary directory of the system, so that concurrent runs,
-    // and the file system of the working directory, do not interfere
+    // fails; the paths are unique to the process, so that concurrent runs, and the file system of the working
+    // directory, do not interfere
     struct Opened
     {
         Opened()                         = default;
@@ -123,16 +143,43 @@ private:
             }
             std::error_code ignored;
             fs::remove(file, ignored);
-            fs::remove(socket, ignored);
+            if (!socket.empty()) {
+                fs::remove(socket, ignored);
+            }
         }
 
-        std::string file   = unique_path("file");
-        std::string socket = unique_path("socket");
+        std::string file = unique_path("file");
+        // Empty where the listening socket is bound in the abstract namespace, that is, where it occupies no file
+        std::string socket = socket_file();
         std::vector<int> descriptors;
     };
 
     static std::string unique_path(const std::string& kind) {
         return (fs::temp_directory_path() / ("ecflow_descriptors_" + std::to_string(::getpid()) + "." + kind)).string();
+    }
+
+    ///
+    /// @brief Provides the name of the listening socket, unique to the process.
+    ///
+    /// @return The socket name, without a directory and without a terminating null character.
+    ///
+    static std::string socket_name() { return "ecflow_descriptors_" + std::to_string(::getpid()) + ".socket"; }
+
+    ///
+    /// @brief Provides the file the listening socket is bound to, or an empty path where it occupies no file.
+    ///
+    /// On Linux the socket is bound in the abstract namespace, which names no file: the address then depends on
+    /// neither the length of the temporary directory of the system nor the file system that holds it. Elsewhere
+    /// the socket is a file under the temporary directory of the system, as before.
+    ///
+    /// @return The absolute path of the socket file, or an empty path on Linux.
+    ///
+    static std::string socket_file() {
+#if defined(__linux__)
+        return {};
+#else
+        return (fs::temp_directory_path() / socket_name()).string();
+#endif
     }
 
     Opened opened_;
@@ -404,6 +451,28 @@ BOOST_AUTO_TEST_CASE(test_close_descriptors_by_default) {
                         "Expected the descriptors to be closed by " << (expected ? "close_range" : "the loop"));
     BOOST_TEST_MESSAGE("The descriptors were closed by "
                        << ((observed & closed_by_syscall) ? "the close_range system call" : "the loop"));
+}
+
+///
+/// Binds the listening socket of the fixture independently of the temporary directory of the system, whose path in
+/// some environments (an interactive Atos session) leaves too little room in the 108 bytes of sun_path.
+///
+BOOST_AUTO_TEST_CASE(test_listening_socket_independent_of_the_temporary_directory) {
+    ECF_NAME_THIS_TEST();
+
+#if defined(__linux__)
+    // A temporary directory longer than the path of the listening socket file may be
+    const fs::path long_tmpdir = fs::temp_directory_path() / std::string(128, 'x');
+    fs::create_directories(long_tmpdir);
+    {
+        const WithTestEnvironmentVariable tmpdir("TMPDIR", long_tmpdir.string());
+        InheritableDescriptors descriptors;
+        BOOST_CHECK(!descriptors.all().empty());
+    }
+    fs::remove_all(long_tmpdir);
+#else
+    BOOST_TEST_MESSAGE("Skipped: elsewhere the listening socket is a file under the temporary directory");
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()
