@@ -370,6 +370,9 @@ set(srcs
   core/src/ecflow/core/cfg/Mapper.hpp
   core/src/ecflow/core/cfg/Reader.hpp
   core/src/ecflow/core/cfg/ServerCatalogue.hpp
+  core/src/ecflow/core/os/AccountDatabase.hpp
+  core/src/ecflow/core/os/AccountLookup.hpp
+  core/src/ecflow/core/os/OwnerEligibility.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   core/src/ecflow/core/resources/Machine.hpp
   # Core -- Sources
@@ -417,6 +420,8 @@ set(srcs
   core/src/ecflow/core/cfg/Mapper.cpp
   core/src/ecflow/core/cfg/Reader.cpp
   core/src/ecflow/core/cfg/ServerCatalogue.cpp
+  core/src/ecflow/core/os/AccountDatabase.cpp
+  core/src/ecflow/core/os/OwnerEligibility.cpp
   core/src/ecflow/core/resources/Machine.cpp
 
   # Node -- Headers

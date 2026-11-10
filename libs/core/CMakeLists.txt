@@ -16,6 +16,7 @@ ecflow_add_library(
   TYPE STATIC
   SOURCES
     test/scaffold/ecflow/test/scaffold/EcfPortLock.hpp
+    test/scaffold/ecflow/test/scaffold/FakeAccountDatabase.hpp
     test/scaffold/ecflow/test/scaffold/LockFile.hpp
     test/scaffold/ecflow/test/scaffold/Naming.hpp
     test/scaffold/ecflow/test/scaffold/Process.hpp
@@ -35,6 +36,7 @@ set(test_srcs
   # Headers
   test/TestVersioning.hpp
   # Sources
+  test/TestAccountDatabase.cpp
   test/TestBase64.cpp
   test/TestCalendar.cpp
   test/TestCereal.cpp
