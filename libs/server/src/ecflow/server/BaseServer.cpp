@@ -69,6 +69,10 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
     stats().ECF_HOME_                = serverEnv.ecf_home();
     stats().ECF_CHECK_               = serverEnv.checkPtFilename();
     stats().ECF_LOG_                 = Log::instance()->path();
+    if (serverEnv.ownership().enabled) {
+        stats().ownership_ = serverEnv.ownership().summary();
+    }
+    ownership_.set_enabled(serverEnv.ownership().enabled);
 
     // Update log file:
     ecf::log(Log::MSG, "Server initial state is HALTED");
@@ -79,6 +83,9 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
 
         // No check pt files loaded, update defs, with server state
         update_defs_server_state(); // works on def_
+    }
+    if (auto warning = ecf::owners_without_ownership_warning(*defs_, serverEnv.ownership()); warning) {
+        ecf::log(Log::WAR, *warning);
     }
 
     /// Setup globals used to detect incremental changes to the definition
@@ -254,6 +261,14 @@ void BaseServer::update_defs_server_state() {
     // let the defs store the job submission interval, & whether we want job generation.testing can disable this
     defs_->server_state().jobSubmissionInterval(serverEnv_.submitJobsInterval());
     defs_->server_state().jobGeneration(serverEnv_.jobGeneration());
+
+    // The server Owner is configuration, never restored from a checkpoint
+    if (const auto& server_owner = serverEnv_.ownership().server_owner; server_owner) {
+        defs_->server_state().set_server_owner(*server_owner);
+    }
+    else {
+        defs_->server_state().clear_server_owner();
+    }
     LOG_ASSERT(defs_->server_state().jobSubmissionInterval() != 0, "");
 
     // Since we have reloaded Defs, make sure clients, re-sync by resetting change and modify numbers on server

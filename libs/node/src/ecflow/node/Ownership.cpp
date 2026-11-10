@@ -105,13 +105,21 @@ void collect_including_archives(const Node& node,
         container->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
     }
     const std::string path = NodeContainer::make_archive_path(ecf_home, container->absNodePath(), server_defs);
-    if (!fs::exists(path)) {
+    std::string error;
+    std::error_code access;
+    const bool exists = fs::exists(path, access);
+    if (access) {
+        error = access.message(); // e.g. a directory that cannot be traversed: handled as an unreadable archive
+    }
+    else if (!exists) {
         return;
     }
     defs_ptr archive = Defs::create();
     node_ptr archived;
-    std::string error;
     try {
+        if (!error.empty()) {
+            throw std::runtime_error(error);
+        }
         archive->restore(path);
         archived = archive->findAbsNode(container->absNodePath());
         if (!archived || !archived->isNodeContainer()) {
@@ -212,6 +220,10 @@ ChangeSet change_set_for_move_out(const Node& moved) {
     ChangeSet changes;
     changes.removed = collect_from_server(moved, Unreadable::FAIL);
     return changes;
+}
+
+std::vector<OwnerAtPath> owners_including_archives(const Node& node) {
+    return collect_from_server(node, Unreadable::SKIP);
 }
 
 void log_removals(const ChangeSet& change_set, const std::string& requester, const std::string& command) {

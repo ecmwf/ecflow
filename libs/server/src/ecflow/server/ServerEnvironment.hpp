@@ -27,6 +27,7 @@
 #include "ecflow/core/cfg/Configuration.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
+#include "ecflow/server/OwnershipStartup.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
@@ -71,6 +72,32 @@ public:
     /// @throws std::filesystem::filesystem_error if a security-file path cannot be inspected.
     ///
     bool valid(std::string& errorMsg) const;
+
+    ///
+    /// @brief Validates as valid(std::string&), with the given account database and privileges for the ownership
+    ///        checks; used by tests.
+    ///
+    /// @param[in,out] errorMsg Receives diagnostic details for an invalid configuration or security file
+    /// @param[in] accounts The account database
+    /// @param[in,out] privileges The privileges of the server process
+    /// @return True if the configuration and optional security files are valid; false otherwise.
+    /// @throws std::filesystem::filesystem_error if a security-file path cannot be inspected.
+    ///
+    bool valid(std::string& errorMsg, const ecf::os::AccountDatabase& accounts, ecf::os::Privileges& privileges) const;
+
+    ///
+    /// @brief Returns the ownership settings, as configured.
+    ///
+    /// @return The settings.
+    ///
+    const ecf::OwnershipSettings& ownership_settings() const { return ownership_settings_; }
+
+    ///
+    /// @brief Returns the status of ownership, as established by valid().
+    ///
+    /// @return The status; disabled before valid() succeeds.
+    ///
+    const ecf::OwnershipStatus& ownership() const { return ownership_; }
 
     /// return the directory path associated with smshome
     /// but can be overridden by the environment variable ECF_HOME
@@ -385,6 +412,8 @@ private:
     std::vector<std::pair<std::string, bool>> configuration_switches_;       ///< Value of each switch, e.g. --http
     mutable WhiteListFile white_list_file_;
 
+    ecf::OwnershipSettings ownership_settings_;
+    mutable ecf::OwnershipStatus ownership_;
     mutable bool access_loaded_{false}; ///< Whether valid() loaded the authentication and authorisation
     mutable ecf::AuthenticationService authentication_service_;
     mutable ecf::AuthorisationService authorisation_service_;

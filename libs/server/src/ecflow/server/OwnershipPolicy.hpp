@@ -88,6 +88,36 @@ public:
     ///
     void check_change_set(const Identity& requester, const ownership::ChangeSet& changes, const char* command) const;
 
+    ///
+    /// @brief Sets whether ownership is enabled on the server.
+    ///
+    /// @details The rules are the same in both modes. When ownership is disabled (the default), the Owners brought
+    ///          in are reported (see report_addition()), as the commands of their nodes run as the server account.
+    ///
+    /// @param[in] enabled Whether ownership is enabled.
+    ///
+    void set_enabled(bool enabled) { enabled_ = enabled; }
+
+    ///
+    /// @brief Reports an Owner brought in, by a warning in the server log when ownership is disabled (R11).
+    ///
+    /// @details Called by the commands once their change is made, so that only Owners actually introduced are
+    ///          reported. Does nothing when ownership is enabled.
+    ///
+    /// @param[in] value The Owner brought in.
+    /// @param[in] path The path of the node holding it.
+    /// @param[in] operation The operation, as named to users (e.g. "create").
+    ///
+    void report_addition(const OwnerAttr& value, const std::string& path, const char* operation) const;
+
+    ///
+    /// @brief Reports the Owners brought in by a command, as report_addition() does for each of them.
+    ///
+    /// @param[in] changes The Owners added and removed by the command, once its change is made.
+    /// @param[in] command The command, as named to users (e.g. "load").
+    ///
+    void report_additions(const ownership::ChangeSet& changes, const char* command) const;
+
 private:
     void check_requester_is_current_owner(const Identity& requester, const Node& node, const char* operation) const;
 
@@ -98,6 +128,7 @@ private:
 
     std::shared_ptr<const os::AccountDatabase> accounts_;
     uid_t server_uid_;
+    bool enabled_{false};
 };
 
 } // namespace ecf

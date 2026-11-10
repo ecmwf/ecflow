@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <fstream>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -11,6 +13,7 @@
 #include "MockServer.hpp"
 #include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Identity.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -19,6 +22,7 @@
 #include "ecflow/server/OwnershipPolicy.hpp"
 #include "ecflow/test/scaffold/FakeAccountDatabase.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
 using ecf::test::scaffold::FakeAccountDatabase;
@@ -140,6 +144,45 @@ BOOST_AUTO_TEST_CASE(test_create) {
         // An Owner above does not prevent another one further down
         check_allowed([&] { p.check_create(user("alice"), *x.t, OwnerAttr::create("alice")); });
     });
+}
+
+BOOST_AUTO_TEST_CASE(test_owners_introduced_while_disabled_are_reported) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string log_path = "test_owners_introduced_while_disabled_are_reported.log";
+    auto log_content           = [&log_path] {
+        Log::instance()->flush();
+        std::ifstream in(log_path);
+        return std::string{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+    };
+
+    for (bool enabled : {false, true}) {
+        BOOST_TEST_CONTEXT("ownership " << (enabled ? "enabled" : "disabled")) {
+            ecf::test::scaffold::TestLog test_log{log_path};
+            Fixture x;
+            x.server.set_ownership_enabled(enabled);
+            const auto& p = x.policy();
+
+            // The checks report nothing: the commands report what they brought in, once their change is made
+            p.check_create(user("alice"), *x.f, OwnerAttr::create("alice"));
+            x.t->addOwner(OwnerAttr::create("alice"));
+            p.check_update(user("alice"), *x.t, OwnerAttr::create("bob"));
+            BOOST_CHECK_MESSAGE(log_content().find("Ownership is disabled") == std::string::npos, log_content());
+
+            p.report_addition(OwnerAttr::create("alice"), "/s/f", "create");
+            ownership::ChangeSet changes;
+            changes.added.push_back({"/s/f/t", OwnerAttr::create("bob")});
+            p.report_additions(changes, "load");
+
+            const auto log = log_content();
+            const std::string create =
+                "Ownership is disabled, but create brings in the Owner 'alice' of /s/f: its commands run as the server "
+                "account";
+            const std::string load = "Ownership is disabled, but load brings in the Owner 'bob' of /s/f/t";
+            BOOST_CHECK_MESSAGE((log.find(create) != std::string::npos) == !enabled, log);
+            BOOST_CHECK_MESSAGE((log.find(load) != std::string::npos) == !enabled, log);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_update) {

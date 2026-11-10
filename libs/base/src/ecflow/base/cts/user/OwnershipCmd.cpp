@@ -197,12 +197,14 @@ STC_Cmd_ptr OwnershipCmd::doHandleRequest(AbstractServer* as) const {
             const auto owner = OwnerAttr::create(value_);
             policy.check_create(identity(), *node, owner);
             node->addOwner(owner);
+            policy.report_addition(owner, node->absNodePath(), "create");
             break;
         }
         case Op::UPDATE: {
             const auto owner = OwnerAttr::create(value_);
             policy.check_update(identity(), *node, owner);
             node->changeOwner(owner);
+            policy.report_addition(owner, node->absNodePath(), "update");
             break;
         }
         case Op::DELETE: {

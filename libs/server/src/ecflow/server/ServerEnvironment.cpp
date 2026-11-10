@@ -204,6 +204,14 @@ ServerEnvironment::~ServerEnvironment() {
 }
 
 bool ServerEnvironment::valid(std::string& errorMsg) const {
+    ecf::os::SystemAccountDatabase accounts;
+    ecf::os::SystemPrivileges privileges;
+    return valid(errorMsg, accounts, privileges);
+}
+
+bool ServerEnvironment::valid(std::string& errorMsg,
+                              const ecf::os::AccountDatabase& accounts,
+                              ecf::os::Privileges& privileges) const {
     /// This must be called *AFTER* the constructor
     //   cout << "*****************************************************************************\n";
     //   cout << "ServerEnvironment::valid\n";
@@ -220,6 +228,27 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
+
+    // Ownership is checked before anything else is loaded, and before the server listens
+    try {
+        ownership_ = ecf::check_ownership_at_startup(
+            ownership_settings_, accounts, privileges, ecf::ownership_available_in_build);
+    }
+    catch (const std::exception& e) {
+        errorMsg = e.what();
+        return false;
+    }
+    if (ownership_.enabled) {
+        report({"Ownership:",
+                "  " + ownership_.summary(),
+                "  PATH of the owner processes = " + ownership_settings_.path,
+                "  Further environment variables = " +
+                    (ownership_settings_.environment.empty() ? std::string("none") : ownership_settings_.environment)});
+        for (const auto& warning : ownership_.warnings) {
+            LOG(Log::WAR, warning);
+        }
+    }
+
     // The permissions of the nodes apply, unless replaced by those of a whitelist file
     if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
         authorisation_service_ = result.value();
@@ -496,6 +525,14 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     if (option("ecflow.server.ipv6")) {
         tcp_protocol_ = boost::asio::ip::tcp::v6();
     }
+    auto ownership_text = [&configuration](const char* path) {
+        const auto found = configuration.get(ecf::cfg::Key::for_option(path));
+        return found ? std::optional<std::string>(std::get<std::string>(*found)) : std::nullopt;
+    };
+    ownership_settings_.owner       = ownership_text("ecflow.server.ownership.owner");
+    ownership_settings_.path        = ownership_text("ecflow.server.ownership.path").value_or("");
+    ownership_settings_.environment = ownership_text("ecflow.server.ownership.environment").value_or("");
+
     authentication_service_.set_passwd_file(text("ECF_PASSWD"));
     authentication_service_.set_custom_passwd_file(text("ECF_CUSTOM_PASSWD"));
 
@@ -586,7 +623,7 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
             if (source) {
                 configuration_origins_.emplace(name, origins.at(*source));
             }
-            if (!key.is_variable() && switch_name) {
+            if (!key.is_variable() && switch_name && setting.type() == ecf::cfg::Type::Boolean) {
                 configuration_switches_.emplace_back(name, traced.get(key) != setting.default_value());
             }
         }

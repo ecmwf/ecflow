@@ -375,6 +375,7 @@ set(srcs
   core/src/ecflow/core/os/AccountDatabase.hpp
   core/src/ecflow/core/os/AccountLookup.hpp
   core/src/ecflow/core/os/OwnerEligibility.hpp
+  core/src/ecflow/core/os/Privileges.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   core/src/ecflow/core/resources/Machine.hpp
   # Core -- Sources
@@ -424,6 +425,7 @@ set(srcs
   core/src/ecflow/core/cfg/ServerCatalogue.cpp
   core/src/ecflow/core/os/AccountDatabase.cpp
   core/src/ecflow/core/os/OwnerEligibility.cpp
+  core/src/ecflow/core/os/Privileges.cpp
   core/src/ecflow/core/resources/Machine.cpp
 
   # Node -- Headers
@@ -604,6 +606,7 @@ set(srcs
   server/src/ecflow/server/AuthenticationService.hpp
   server/src/ecflow/server/AuthorisationService.hpp
   server/src/ecflow/server/OwnershipPolicy.hpp
+  server/src/ecflow/server/OwnershipStartup.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -621,6 +624,7 @@ set(srcs
   server/src/ecflow/server/AuthenticationService.cpp
   server/src/ecflow/server/AuthorisationService.cpp
   server/src/ecflow/server/OwnershipPolicy.cpp
+  server/src/ecflow/server/OwnershipStartup.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

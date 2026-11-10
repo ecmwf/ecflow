@@ -17,6 +17,7 @@ ecflow_add_library(
   SOURCES
     test/scaffold/ecflow/test/scaffold/EcfPortLock.hpp
     test/scaffold/ecflow/test/scaffold/FakeAccountDatabase.hpp
+    test/scaffold/ecflow/test/scaffold/FakePrivileges.hpp
     test/scaffold/ecflow/test/scaffold/LockFile.hpp
     test/scaffold/ecflow/test/scaffold/Naming.hpp
     test/scaffold/ecflow/test/scaffold/Process.hpp
@@ -71,6 +72,7 @@ set(test_srcs
   test/TestPasswdFile.cpp
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
+  test/TestPrivileges.cpp
   test/TestPTree.cpp
   test/TestRealCalendar.cpp
   test/TestResources.cpp

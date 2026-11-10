@@ -147,6 +147,7 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     }
     // The tree is changed from here on, even if a later check reports an error: the removals have taken effect
     ecf::ownership::log_removals(changes, identity().username().value(), "replace");
+    as->ownership().report_additions(changes, "replace");
 
     // ECFLOW-835, flag node as changed, before check for trigger expressions.
     add_node_for_edit_history(defs, pathToNode_);

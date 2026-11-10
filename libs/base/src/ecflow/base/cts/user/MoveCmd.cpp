@@ -129,15 +129,13 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     // The Owners brought in are checked, as for the forwarded user, before any change
-    {
-        std::string parent_path;
-        if (destNode) {
-            const Node* parent = destNode->isTask() ? destNode->parent() : destNode.get();
-            parent_path        = parent->absNodePath();
-        }
-        as->ownership().check_change_set(
-            identity(), ecf::ownership::change_set_for_move_in(*src_node, parent_path), "plug");
+    std::string parent_path;
+    if (destNode) {
+        const Node* parent = destNode->isTask() ? destNode->parent() : destNode.get();
+        parent_path        = parent->absNodePath();
     }
+    const auto changes = ecf::ownership::change_set_for_move_in(*src_node, parent_path);
+    as->ownership().check_change_set(identity(), changes, "plug");
 
     // The checks above only read the definitions: the server is locked (and so halted) only for the move itself
     Lock lock(user(), as);
@@ -193,6 +191,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     defs->set_most_significant_state();
+    as->ownership().report_additions(changes, "plug");
 
     // Ownership for src_node has been passed on.
     return PreAllocatedReply::ok_cmd();

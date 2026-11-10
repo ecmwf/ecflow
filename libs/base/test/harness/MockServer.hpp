@@ -87,6 +87,13 @@ public:
         ownership_ = ecf::OwnershipPolicy(std::move(accounts), server_uid);
     }
 
+    ///
+    /// @brief Sets whether ownership is enabled in the ownership rules (disabled by default, as in a server).
+    ///
+    /// @param[in] enabled Whether ownership is enabled.
+    ///
+    void set_ownership_enabled(bool enabled) { ownership_.set_enabled(enabled); }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }

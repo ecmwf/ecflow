@@ -32,6 +32,8 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/test/scaffold/FakeAccountDatabase.hpp"
+#include "ecflow/test/scaffold/FakePrivileges.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
@@ -68,12 +70,33 @@ public:
         : original_path_{fs::current_path()},
           original_threshold_{JobProfiler::task_threshold()},
           original_server_{Ecf::server()} {
-        for (const auto* name :
-             {"ECF_HOME",           "ECF_PORT",          "ECF_LOG",          "ECF_CHECK",         "ECF_CHECKOLD",
-              "ECF_PASSWD",         "ECF_CUSTOM_PASSWD", "ECF_LISTS",        "ECF_CHECKINTERVAL", "ECF_PRUNE_NODE_LOG",
-              "ECF_TASK_THRESHOLD", "ECF_SSL",           "ECF_DEBUG_SERVER", "ECF_INTERVAL",      "ECF_CHECKMODE",
-              "ECF_JOB_CMD",        "ECF_KILL_CMD",      "ECF_STATUS_CMD",   "ECF_CHECK_CMD",     "ECF_URL_CMD",
-              "ECF_URL_BASE",       "ECF_URL",           "ECF_MICRODEF",     "ECF_MICRO"}) {
+        for (const auto* name : {"ECF_HOME",
+                                 "ECF_PORT",
+                                 "ECF_LOG",
+                                 "ECF_CHECK",
+                                 "ECF_CHECKOLD",
+                                 "ECF_PASSWD",
+                                 "ECF_CUSTOM_PASSWD",
+                                 "ECF_LISTS",
+                                 "ECF_CHECKINTERVAL",
+                                 "ECF_PRUNE_NODE_LOG",
+                                 "ECF_TASK_THRESHOLD",
+                                 "ECF_SSL",
+                                 "ECF_DEBUG_SERVER",
+                                 "ECF_INTERVAL",
+                                 "ECF_CHECKMODE",
+                                 "ECF_JOB_CMD",
+                                 "ECF_KILL_CMD",
+                                 "ECF_STATUS_CMD",
+                                 "ECF_CHECK_CMD",
+                                 "ECF_URL_CMD",
+                                 "ECF_URL_BASE",
+                                 "ECF_URL",
+                                 "ECF_MICRODEF",
+                                 "ECF_MICRO",
+                                 "ECF_OWNERSHIP_OWNER",
+                                 "ECF_OWNERSHIP_PATH",
+                                 "ECF_OWNERSHIP_ENVIRONMENT"}) {
             cleared_.emplace_back(name);
         }
     }
@@ -3264,6 +3287,120 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_after_reload) {
     expected.insert(expected.end(), users.begin(), users.end());
     const auto actual = last_block("Authorisation:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+namespace {
+
+///
+/// @brief Creates a server environment for the start-up described, without validating it.
+///
+/// @tparam Check Callable accepting the server environment
+/// @param[in] startup The start-up files, environment and arguments
+/// @param[in] check Assertions to run after construction
+///
+template <typename Check>
+void check_server_constructed_with_file(const WithConfigurationFile& startup, Check check) {
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    std::list<WithTestEnvironmentVariable> overrides;
+    prepare_configuration_file(directory.path(), startup, overrides);
+
+    ServerEnvironment serverEnv(startup.args);
+    check(serverEnv);
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(test_ownership_settings_default) {
+    ECF_NAME_THIS_TEST();
+
+    // Without a server Owner, ownership is disabled, and the start-up is unchanged
+    WithConfigurationFile startup{std::nullopt, "3141", configuration_document("")};
+    check_server_with_file(startup, [](const ServerEnvironment& serverEnv) {
+        BOOST_CHECK(!serverEnv.ownership_settings().owner);
+        BOOST_CHECK_EQUAL(serverEnv.ownership_settings().path, "/usr/local/bin:/usr/bin:/bin");
+        BOOST_CHECK(serverEnv.ownership_settings().environment.empty());
+        BOOST_CHECK(!serverEnv.ownership().enabled);
+        BOOST_CHECK(!serverEnv.ownership().server_owner);
+        const auto dump = serverEnv.dump();
+        BOOST_CHECK_MESSAGE(
+            dump.find("Ownership") == std::string::npos && dump.find("--ownership") == std::string::npos, dump);
+    });
+}
+
+BOOST_AUTO_TEST_CASE(test_ownership_settings_from_each_source) {
+    ECF_NAME_THIS_TEST();
+
+    const std::string file_settings =
+        R"("ownership": {"owner": "from-file", "path": "/file/bin", "environment": "FILE_A,FILE_B"})";
+    {
+        // The configuration file
+        WithConfigurationFile startup{std::nullopt, "3141", configuration_document("", file_settings)};
+        check_server_constructed_with_file(startup, [](const ServerEnvironment& serverEnv) {
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().owner.value_or(""), "from-file");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().path, "/file/bin");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().environment, "FILE_A,FILE_B");
+        });
+    }
+    {
+        // The environment, over the configuration file
+        WithConfigurationFile startup{std::nullopt,
+                                      "3141",
+                                      configuration_document("", file_settings),
+                                      {{"ECF_OWNERSHIP_OWNER", "from-env"},
+                                       {"ECF_OWNERSHIP_PATH", "/env/bin"},
+                                       {"ECF_OWNERSHIP_ENVIRONMENT", "ENV_A"}}};
+        check_server_constructed_with_file(startup, [](const ServerEnvironment& serverEnv) {
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().owner.value_or(""), "from-env");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().path, "/env/bin");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().environment, "ENV_A");
+        });
+    }
+    {
+        // The command line, over the environment
+        WithConfigurationFile startup{std::nullopt,
+                                      "3141",
+                                      configuration_document("", file_settings),
+                                      {{"ECF_OWNERSHIP_OWNER", "from-env"}},
+                                      {"ServerEnvironment",
+                                       "--ownership_owner=from-cli",
+                                       "--ownership_path=/cli/bin",
+                                       "--ownership_environment=CLI_A"}};
+        check_server_constructed_with_file(startup, [](const ServerEnvironment& serverEnv) {
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().owner.value_or(""), "from-cli");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().path, "/cli/bin");
+            BOOST_CHECK_EQUAL(serverEnv.ownership_settings().environment, "CLI_A");
+        });
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_ownership_refused_or_enabled_at_validation) {
+    ECF_NAME_THIS_TEST();
+
+    // The checks are made by valid(), before the server listens; see T_OwnershipStartup for each of them
+    WithConfigurationFile startup{
+        std::nullopt, "3141", configuration_document(""), {{"ECF_OWNERSHIP_OWNER", "ecflow-default"}}};
+    check_server_constructed_with_file(startup, [](const ServerEnvironment& serverEnv) {
+        ecf::test::scaffold::FakeAccountDatabase accounts;
+        accounts.add_group("users", 100).add_user("ecflow-default", 1000, 100);
+        ecf::test::scaffold::FakePrivileges privileges;
+        privileges.uid              = 500;
+        privileges.has_capabilities = true;
+
+        std::string error;
+#ifdef ECF_OWNERSHIP_UNDER_TEST
+        BOOST_REQUIRE_MESSAGE(serverEnv.valid(error, accounts, privileges), error);
+        BOOST_CHECK(serverEnv.ownership().enabled);
+        BOOST_REQUIRE(serverEnv.ownership().server_owner);
+        BOOST_CHECK_EQUAL(serverEnv.ownership().server_owner->value(), "ecflow-default");
+#else
+        // Gate: no distributed build can enable ownership before it is complete
+        BOOST_CHECK(!serverEnv.valid(error, accounts, privileges));
+        BOOST_CHECK_MESSAGE(error.find("cannot be enabled in this build") != std::string::npos, error);
+        BOOST_CHECK(!serverEnv.ownership().enabled);
+        BOOST_CHECK(privileges.trials.empty());
+#endif
+    });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

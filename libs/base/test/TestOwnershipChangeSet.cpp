@@ -20,6 +20,7 @@
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -71,6 +72,7 @@ struct Fixture
     std::string text() const { return ecf::as_string(*defs, PrintStyle::DEFS); }
 
     std::string log() const {
+        Log::instance()->flush();
         std::ifstream in(log_path);
         std::stringstream ss;
         ss << in.rdbuf();
@@ -140,6 +142,54 @@ BOOST_AUTO_TEST_CASE(test_load_of_a_new_suite) {
     x.run(by_alice, "alice");
     BOOST_REQUIRE(owner_of(*x.defs, "/n/g"));
     BOOST_CHECK_EQUAL(owner_of(*x.defs, "/n/g")->value(), "alice:users");
+}
+
+BOOST_AUTO_TEST_CASE(test_owners_brought_in_while_ownership_is_disabled_are_reported) {
+    ECF_NAME_THIS_TEST();
+
+    auto make = [](const std::string& suite) {
+        defs_ptr defs = Defs::create();
+        defs->add_suite(suite)->addOwner(OwnerAttr::create("alice"));
+        return defs;
+    };
+    const std::string warning = "Ownership is disabled, but load brings in the Owner 'alice' of /";
+
+    {
+        // Disabled, as a server without server Owner: a load after start-up is reported, a refused one is not
+        Fixture x("test_owners_brought_in_while_ownership_is_disabled_are_reported");
+        LoadDefsCmd by_bob(make("refused"), false);
+        x.check_refused(by_bob, "bob", "naming themselves");
+        // permitted by the ownership rules, but refused by the load itself (the suite exists, and --force is not
+        // given): nothing is brought in
+        LoadDefsCmd duplicate(make("s"), false);
+        x.check_refused(duplicate, "alice", "already exists");
+        LoadDefsCmd by_alice(make("n"), false);
+        x.run(by_alice, "alice");
+        BOOST_CHECK_MESSAGE(x.log().find(warning + "n: its commands run as the server account") != std::string::npos,
+                            x.log());
+        BOOST_CHECK_MESSAGE(x.log().find(warning + "s:") == std::string::npos, x.log());
+
+        // a load failing part way keeps the suites absorbed before the failure: their Owners are reported
+        defs_ptr partial = Defs::create();
+        partial->add_suite("m")->addOwner(OwnerAttr::create("alice"));
+        partial->add_suite("s")->addOwner(OwnerAttr::create("alice"));
+        LoadDefsCmd partially(partial, false);
+        partially.setup_user_authentification("alice", "");
+        partially.set_identity(Identity::make_user("alice", ""));
+        BOOST_CHECK_THROW(partially.handleRequest(&x.server), std::runtime_error);
+        BOOST_REQUIRE(x.defs->findSuite("m"));
+        BOOST_CHECK_MESSAGE(x.log().find(warning + "m: its commands run as the server account") != std::string::npos,
+                            x.log());
+        BOOST_CHECK_MESSAGE(x.log().find(warning + "s:") == std::string::npos, x.log());
+        BOOST_CHECK_MESSAGE(x.log().find(warning + "refused") == std::string::npos, x.log());
+    }
+    {
+        Fixture x("test_owners_brought_in_while_ownership_is_enabled");
+        x.server.set_ownership_enabled(true);
+        LoadDefsCmd by_alice(make("n"), false);
+        x.run(by_alice, "alice");
+        BOOST_CHECK_MESSAGE(x.log().find("Ownership is disabled") == std::string::npos, x.log());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_load_checks_every_owner) {

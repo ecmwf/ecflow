@@ -130,6 +130,19 @@ ServerOptions::ServerOptions(const CommandLine& cl) {
 #endif
             ("http", "Enable server/client HTTP communication")(
                 "dis_job_gen", "Disable job generation. For DEBUG/Test only.")("debug,d", "Enable debug output.")(
+                "ownership_owner",
+                po::value<std::string>(),
+                "<user[:group]> The server Owner: enables ownership, i.e. running the commands of each node as its "
+                "owner (only in builds configured for testing it, until ownership is complete). Overrides the "
+                "environment variable ECF_OWNERSHIP_OWNER")(
+                "ownership_path",
+                po::value<std::string>(),
+                "<path> The PATH of the processes run as owners. Overrides the environment variable "
+                "ECF_OWNERSHIP_PATH")(
+                "ownership_environment",
+                po::value<std::string>(),
+                "<names> The comma-separated names of further environment variables passed to the processes run as "
+                "owners. Overrides the environment variable ECF_OWNERSHIP_ENVIRONMENT")(
                 "version,v",
                 "Show ecflow version number,boost library version, compiler used and compilation date, then exit");
 
@@ -155,9 +168,10 @@ ServerOptions::ServerOptions(const CommandLine& cl) {
 std::map<std::string, std::string> ServerOptions::options() const {
     std::map<std::string, std::string> options;
     for (const auto& [name, value] : vm_) {
-        // The numeric options hold the integer parsed; the switches, no value
+        // The numeric options hold the integer parsed; the text options, their text; the switches, no value
         const auto* number = boost::any_cast<int>(&value.value());
-        options.emplace(name, number ? std::to_string(*number) : std::string{});
+        const auto* text   = boost::any_cast<std::string>(&value.value());
+        options.emplace(name, number ? std::to_string(*number) : (text ? *text : std::string{}));
     }
     return options;
 }

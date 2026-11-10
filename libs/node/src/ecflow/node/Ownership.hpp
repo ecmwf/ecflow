@@ -119,6 +119,17 @@ ChangeSet change_set_for_move_in(const Node& moved, const std::string& parent_pa
 ChangeSet change_set_for_move_out(const Node& moved);
 
 ///
+/// @brief Returns the Owners of a subtree of the server, archived nodes included.
+///
+/// @details The archive files of archived nodes are read, without restoring them. An archive file that cannot be
+///          read is skipped, with a warning in the server log.
+///
+/// @param[in] node The root of the subtree, in the server definitions.
+/// @return The Owners of the subtree, with their paths.
+///
+std::vector<OwnerAtPath> owners_including_archives(const Node& node);
+
+///
 /// @brief Records in the server log the Owners whose removal took effect.
 ///
 /// @param[in] change_set The changes made by the command.

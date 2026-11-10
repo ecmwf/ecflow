@@ -116,6 +116,10 @@ option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                      
 #
 option( ENABLE_ASIO_SELECT_REACTOR "Use the Boost.Asio 'select' fallback reactor"        OFF )
 
+# Ownership (running the commands of each node as its owner) is being implemented: until it is complete, only test
+# builds can enable it. Never set for release or CI builds.
+option( ENABLE_OWNERSHIP_UNDER_TEST "Allow enabling ownership, for testing only"           OFF )
+
 # =========================================================================================
 # Sanity check options
 # =========================================================================================
@@ -195,6 +199,7 @@ ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
 ecbuild_info( "ENABLE_AVISO               : ${ENABLE_AVISO}" )
 ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
+ecbuild_info( "ENABLE_OWNERSHIP_UNDER_TEST: ${ENABLE_OWNERSHIP_UNDER_TEST}" )
 
 
 if (ENABLE_UI)

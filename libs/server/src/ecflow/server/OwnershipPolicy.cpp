@@ -11,6 +11,7 @@
 
 #include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Identity.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Node.hpp"
 
 namespace ecf {
@@ -107,6 +108,20 @@ void OwnershipPolicy::check_change_set(const Identity& requester,
                        addition.owner.value() + "'");
         }
         check_eligible(addition.owner, addition.path, command);
+    }
+}
+
+void OwnershipPolicy::report_additions(const ownership::ChangeSet& changes, const char* command) const {
+    for (const auto& addition : changes.added) {
+        report_addition(addition.owner, addition.path, command);
+    }
+}
+
+void OwnershipPolicy::report_addition(const OwnerAttr& value, const std::string& path, const char* operation) const {
+    if (!enabled_) {
+        ecf::log(Log::WAR,
+                 std::string("Ownership is disabled, but ") + operation + " brings in the Owner '" + value.value() +
+                     "' of " + path + ": its commands run as the server account");
     }
 }
 
