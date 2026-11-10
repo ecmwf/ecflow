@@ -34,6 +34,7 @@ set(test_srcs
   test/TestSNewsCmd.cpp
   test/TestSSyncCmd.cpp
   test/TestSSyncCmdOrder.cpp
+  test/TestSSyncCmdOwner.cpp
   test/TestSSyncCmd_CH1.cpp
   test/TestStatsCmd.cpp
 )

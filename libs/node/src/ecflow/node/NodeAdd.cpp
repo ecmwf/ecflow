@@ -461,6 +461,7 @@ void Node::addOwner(const ecf::OwnerAttr& owner) {
     }
     owner_           = std::make_unique<ecf::OwnerAttr>(owner);
     state_change_no_ = Ecf::incr_state_change_no();
+    owner_change_no_ = state_change_no_;
 }
 
 void Node::addLate(const ecf::LateAttr& l) {

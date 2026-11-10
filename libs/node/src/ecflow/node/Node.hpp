@@ -769,6 +769,7 @@ public:
     void set_memento(const NodeInLimitMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeVariableMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeLateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeOwnerMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeTodayMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeTimeMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeDayMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -1172,6 +1173,7 @@ private:
     unsigned int state_change_no_{
         0}; // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
     unsigned int variable_change_no_{0};  // *not* persisted, placed here rather than Variable, to save memory
+    unsigned int owner_change_no_{0};     // *not* persisted, last addition, change or removal of the Owner
     unsigned int suspended_change_no_{0}; // *not* persisted,
 
 #ifdef DEBUG_JOB_SUBMISSION_INTERVAL

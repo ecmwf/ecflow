@@ -456,6 +456,7 @@ void Node::deleteOwner() {
     }
     owner_.reset(nullptr);
     state_change_no_ = Ecf::incr_state_change_no();
+    owner_change_no_ = state_change_no_;
 }
 
 void Node::deleteLate() {

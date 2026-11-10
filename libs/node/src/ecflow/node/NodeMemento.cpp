@@ -14,6 +14,7 @@ void Node::clear() {
     // n.b. CompoundMemento relies on clearing all attributes with state
 
     late_.reset(nullptr);
+    owner_.reset(nullptr);
     c_expr_.reset(nullptr);
     t_expr_.reset(nullptr);
 
@@ -168,6 +169,12 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         }
         if (late_) {
             comp->add(std::make_shared<NodeLateMemento>(*late_));
+        }
+        if (owner_) {
+            comp->add(std::make_shared<NodeOwnerMemento>(*owner_));
+        }
+        else if (owner_change_no_ > client_state_change_no) {
+            comp->add(std::make_shared<NodeOwnerMemento>()); // the Owner was removed since the last synchronisation
         }
 
         comp->add(std::make_shared<FlagMemento>(flag_));
@@ -780,6 +787,26 @@ void Node::set_memento(const NodeLateMemento* memento, std::vector<ecf::Aspect::
 
     // Otherwise, add a new late
     addLate(memento->late_);
+}
+
+void Node::set_memento(const NodeOwnerMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
+
+#ifdef DEBUG_MEMENTO
+    std::cout << "Node::set_memento(const NodeOwnerMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+    if (aspect_only) {
+        // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+        aspects.push_back(ecf::Aspect::OWNER);
+        return;
+    }
+
+    if (memento->present_) {
+        owner_ = std::make_unique<ecf::OwnerAttr>(memento->owner_);
+    }
+    else {
+        owner_.reset(nullptr);
+    }
 }
 
 void Node::set_memento(const NodeTodayMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
