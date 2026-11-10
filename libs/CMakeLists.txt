@@ -81,6 +81,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.hpp
   attribute/src/ecflow/attribute/LateAttr.hpp
   attribute/src/ecflow/attribute/NodeAttr.hpp
+  attribute/src/ecflow/attribute/OwnerAttr.hpp
   attribute/src/ecflow/attribute/QueueAttr.hpp
   attribute/src/ecflow/attribute/RepeatAttr.hpp
   attribute/src/ecflow/attribute/RepeatRange.hpp
@@ -100,6 +101,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.cpp
   attribute/src/ecflow/attribute/LateAttr.cpp
   attribute/src/ecflow/attribute/NodeAttr.cpp
+  attribute/src/ecflow/attribute/OwnerAttr.cpp
   attribute/src/ecflow/attribute/QueueAttr.cpp
   attribute/src/ecflow/attribute/RepeatAttr.cpp
   attribute/src/ecflow/attribute/TimeAttr.cpp
