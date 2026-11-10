@@ -4,5 +4,6 @@
 if (ENABLE_SERVER)
   add_subdirectory(foolproof)
   add_subdirectory(overall)
+  add_subdirectory(ownership)
 endif ()
 add_subdirectory(simulator)
