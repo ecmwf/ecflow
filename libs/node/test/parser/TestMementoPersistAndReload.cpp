@@ -7,6 +7,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
+#include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -509,6 +511,50 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
         PersistHelper helper;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "NodeZombieMemento failed: " << helper.errorMsg());
+    }
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        node_ptr t      = suite->add_task("t1");
+
+        NodeOwnerMemento memento(ecf::OwnerAttr::create("alice:ops"));
+        t->set_memento(&memento, aspects, aspect_only); // add owner
+        BOOST_REQUIRE(t->get_owner() != nullptr);
+        BOOST_CHECK_EQUAL(t->get_owner()->value(), "alice:ops");
+
+        PersistHelper helper;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeOwnerMemento failed: " << helper.errorMsg());
+
+        NodeOwnerMemento memento1(ecf::OwnerAttr::create("bob")); // change owner
+        t->set_memento(&memento1, aspects, aspect_only);
+        BOOST_CHECK_EQUAL(t->get_owner()->value(), "bob");
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeOwnerMemento failed: " << helper.errorMsg());
+
+        // The memento itself survives a round trip through its serialised form
+        std::string archive;
+        {
+            std::shared_ptr<Memento> saved = std::make_shared<NodeOwnerMemento>(ecf::OwnerAttr::create("charlie"));
+            ecf::save_as_string(archive, saved);
+        }
+        std::shared_ptr<Memento> restored;
+        ecf::restore_from_string(archive, restored);
+        BOOST_REQUIRE(restored);
+        std::vector<ecf::Aspect::Type> restored_aspects;
+        t->set_memento(dynamic_cast<NodeOwnerMemento*>(restored.get()), restored_aspects, true);
+        BOOST_CHECK(restored_aspects == std::vector<ecf::Aspect::Type>{ecf::Aspect::OWNER});
+
+        // A memento without Owner (removed Owner) survives the round trip, and removes the Owner
+        {
+            std::shared_ptr<Memento> saved = std::make_shared<NodeOwnerMemento>();
+            ecf::save_as_string(archive, saved);
+        }
+        restored.reset();
+        ecf::restore_from_string(archive, restored);
+        BOOST_REQUIRE(restored);
+        t->set_memento(dynamic_cast<NodeOwnerMemento*>(restored.get()), restored_aspects, false);
+        BOOST_CHECK(t->get_owner() == nullptr);
     }
 }
 

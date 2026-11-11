@@ -193,7 +193,8 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
                 "ssl": )" + ssl_option +
                                             R"(,
                 "job_generation": false,
-                "log": {"commands": {"enabled": true}}
+                "log": {"commands": {"enabled": true}},
+                "ownership": {"owner": "ecflow-default:ecflow", "path": "/usr/bin:/bin", "environment": "http_proxy"}
             }
         }
     })",

@@ -9,6 +9,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -91,6 +92,7 @@ Node::Node(const Node& rhs)
       dates_(rhs.dates_),
       days_(rhs.days_),
       late_((rhs.late_) ? new ecf::LateAttr(*rhs.late_) : nullptr),
+      owner_((rhs.owner_) ? new ecf::OwnerAttr(*rhs.owner_) : nullptr),
       misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : nullptr),
       repeat_(rhs.repeat_),
       inLimitMgr_(rhs.inLimitMgr_),
@@ -159,6 +161,7 @@ void Node::delete_attributes() {
     c_expr_.reset(nullptr);
     t_expr_.reset(nullptr);
     late_.reset(nullptr);
+    owner_.reset(nullptr);
     misc_attrs_.reset(nullptr);
 }
 
@@ -209,6 +212,9 @@ Node& Node::operator=(const Node& rhs) {
         }
         if (rhs.late_) {
             late_ = std::make_unique<ecf::LateAttr>(*rhs.late_);
+        }
+        if (rhs.owner_) {
+            owner_ = std::make_unique<ecf::OwnerAttr>(*rhs.owner_);
         }
         if (rhs.misc_attrs_) {
             misc_attrs_ = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
@@ -2213,6 +2219,25 @@ bool Node::operator==(const Node& rhs) const {
         return false;
     }
 
+    if ((owner_ && !rhs.owner_) || (!owner_ && rhs.owner_)) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator== (( owner_ && !rhs.owner_) || ( !owner_ && rhs.owner_)) " << debugNodePath()
+                      << "\n";
+        }
+#endif
+        return false;
+    }
+    if (owner_ && rhs.owner_ && !(*owner_ == *rhs.owner_)) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator== ( owner_ && rhs.owner_ && !(*owner_ == *(rhs.owner_))) " << debugNodePath()
+                      << "\n";
+        }
+#endif
+        return false;
+    }
+
     if ((late_ && !rhs.late_) || (!late_ && rhs.late_)) {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
@@ -2906,6 +2931,9 @@ void Node::stats(NodeStats& stats) const {
     if (late_) {
         stats.late_++;
     }
+    if (owner_) {
+        stats.owners_++;
+    }
     if (misc_attrs_) {
         stats.verifys_ += misc_attrs_->verifys().size();
         stats.zombies_ += misc_attrs_->zombies().size();
@@ -3033,6 +3061,7 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, auto_cancel_, [this]() { return auto_cancel_.get(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, auto_archive_, [this]() { return auto_archive_.get(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this]() { return auto_restore_.get(); }); // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, owner_, [this]() { return owner_.get(); });               // conditionally save
 
     if (Archive::is_loading::value) {
         if (auto_restore_) {

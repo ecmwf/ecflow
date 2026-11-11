@@ -1,0 +1,6 @@
+# The Owner value must be user[:group] with portable names
+suite s
+   family f
+      owner 1000
+   endfamily
+endsuite

@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <string>
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/cts/task/AbortCmd.hpp"
@@ -14,6 +17,7 @@
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
@@ -1455,6 +1459,92 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_queue) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(T_Ownership) // --ownership (OwnershipCmd)
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_handle_ownership) {
+    ECF_NAME_THIS_TEST();
+
+    using Command = OwnershipCmd;
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--ownership", "create", "/s/f", "alice:ops");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK(command.op() == OwnershipCmd::Op::CREATE);
+            BOOST_CHECK_EQUAL(command.path(), "/s/f");
+            BOOST_CHECK_EQUAL(command.value(), "alice:ops");
+            BOOST_CHECK(command.isWrite());
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--ownership=read", "/");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK(command.op() == OwnershipCmd::Op::READ);
+            BOOST_CHECK_EQUAL(command.path(), "/");
+            BOOST_CHECK(command.value().empty());
+            BOOST_CHECK(!command.isWrite());
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--ownership", "update", "/s", "bob");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK(command.op() == OwnershipCmd::Op::UPDATE);
+            BOOST_CHECK_EQUAL(command.value(), "bob");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--ownership", "delete", "/s");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK(command.op() == OwnershipCmd::Op::DELETE);
+            BOOST_CHECK_EQUAL(command.path(), "/s");
+        });
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_ownership_rejects_invalid_arguments) {
+    ECF_NAME_THIS_TEST();
+
+    ClientEnvironment environment(false);
+    for (const auto& args : std::vector<std::vector<std::string>>{
+             {"--ownership"},                                 // no operation
+             {"--ownership", "change", "/s", "alice"},        // unknown operation
+             {"--ownership", "create", "/s"},                 // missing value
+             {"--ownership", "update", "/s"},                 // missing value
+             {"--ownership", "create", "/s", "alice", "bob"}, // too many arguments
+             {"--ownership", "read", "/s", "alice"},          // unexpected value
+             {"--ownership", "delete", "/s", "alice"},        // unexpected value
+             {"--ownership", "read"},                         // missing path
+             {"--ownership", "read", "s"},                    // relative path
+             {"--ownership", "create", "/s", "alice:"},       // malformed value
+             {"--ownership", "create", "/s", "1000"},         // numeric user
+             {"--ownership", "create", "/", "alice"},         // the server Owner is configuration
+             {"--ownership", "delete", "/"}}) {
+        std::vector<std::string> argv{"ecflow_client"};
+        argv.insert(argv.end(), args.begin(), args.end());
+        CommandLine cl(argv);
+        std::cout << "Testing command line: " << cl.original() << std::endl;
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::exception);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_ownership_within_group) {
+    ECF_NAME_THIS_TEST();
+
+    using Command = GroupCTSCmd;
+    auto cl = CommandLine::make_command_line("ecflow_client", "--group=ownership create /s alice; ownership read /s");
+    test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+        BOOST_REQUIRE_EQUAL(command.cmdVec().size(), 2u);
+        auto create = dynamic_cast<OwnershipCmd*>(command.cmdVec().front().get());
+        auto read   = dynamic_cast<OwnershipCmd*>(command.cmdVec().back().get());
+        BOOST_REQUIRE(create && read);
+        BOOST_CHECK(create->op() == OwnershipCmd::Op::CREATE);
+        BOOST_CHECK_EQUAL(create->value(), "alice");
+        BOOST_CHECK(read->op() == OwnershipCmd::Op::READ);
+        BOOST_CHECK(command.isWrite());
+    });
+}
+
+BOOST_AUTO_TEST_SUITE_END() // T_Ownership
 
 BOOST_AUTO_TEST_SUITE(T_Query) // --query (QueryCmd)
 

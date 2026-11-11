@@ -6,6 +6,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
@@ -447,6 +448,15 @@ void Node::delete_zombie(Child::ZombieType zt) {
         misc_attrs_->delete_zombie(zt);
         delete_misc_attrs_if_empty();
     }
+}
+
+void Node::deleteOwner() {
+    if (!owner_) {
+        throw std::runtime_error("Delete Owner failed: The node has no Owner attribute, see node " + debugNodePath());
+    }
+    owner_.reset(nullptr);
+    state_change_no_ = Ecf::incr_state_change_no();
+    owner_change_no_ = state_change_no_;
 }
 
 void Node::deleteLate() {

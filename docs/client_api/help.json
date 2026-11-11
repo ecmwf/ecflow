@@ -1360,6 +1360,73 @@
       ]
     },
     {
+      "name": "ownership",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "OwnershipCmd",
+      "summary": "Create, read, update or delete the Owner of a node",
+      "description": [
+        "Create, read, update or delete the Owner of a node",
+        "",
+        "The Owner of a node (user[:group]) is the identity under which the server runs the commands of the",
+        "node (ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD, ECF_FETCH, ECF_SCRIPT_CMD) and accesses its files,",
+        "when ownership is enabled. A node without Owner inherits the Owner of its closest ancestor, otherwise",
+        "the server Owner. Reading requires read access; the other operations require write access, and:",
+        "  - create: only the user named in the new Owner, on a node without Owner (users can only claim",
+        "            ownership for themselves);",
+        "  - update: only the user of the current Owner, who may hand the node over to another user;",
+        "  - delete: only the user of the current Owner; the node then inherits the closest Owner again.",
+        "Every Owner introduced must name an existing account, other than the superuser and the server account;",
+        "with a group, the user must belong to it. The server Owner is configuration: '/' accepts 'read' only.",
+        "",
+        "Argument(s):",
+        "",
+        "    operation: [ create | read | update | delete ]",
+        "",
+        "    path: path",
+        "        # The absolute path of the node, or '/' for the server Owner (read only).",
+        "",
+        "    value: user[:group]",
+        "        # The new Owner; required for create and update, rejected for read and delete.",
+        "",
+        "read prints, one per line: owner=<the node's own Owner>, effective=<the effective Owner> and",
+        "origin=<the node holding it, or 'server'>; 'none' when there is none. On '/', only effective and origin.",
+        "",
+        "This command can fail because:",
+        "- The node path does not exist in the server",
+        "- The operation is not allowed for the requester, or the Owner is not acceptable",
+        "- The server does not support ownership (older servers)",
+        "",
+        "Usage:",
+        "",
+        "    --ownership create /suite alice      # alice claims the suite",
+        "    --ownership read /suite/family/task  # owner=none, effective=alice, origin=/suite",
+        "    --ownership update /suite bob:ops    # alice hands the suite over to bob, group ops",
+        "    --ownership delete /suite            # bob removes the Owner",
+        "    --ownership read /                   # the server Owner"
+      ],
+      "arguments": [
+        {
+          "name": "operation",
+          "type": "string",
+          "optional": false,
+          "description": "One of create, read, update, delete"
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "optional": false,
+          "description": "The absolute path of the node, or '/'"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "optional": true,
+          "description": "The Owner, as user[:group], for create and update"
+        }
+      ]
+    },
+    {
       "name": "ping",
       "kind": "user",
       "visibility": "public",
@@ -3390,6 +3457,35 @@
         "Examples",
         "  mirror --name operationsX --remote_path /s1/f1/t1 --ssl",
         "  mirror --name operationsY --remote_path /s1/f1/t2 --remote_host %ECF_MIRROR_REMOTE_HOST% --polling 20 --remote_port %ECF_MIRROR_REMOTE_PORT% --ssl"
+      ]
+    },
+    {
+      "name": "owner",
+      "kind": "attribute",
+      "attaches_to": "Node (Suite, Family and Task)",
+      "summary": "The identity under which the server runs the commands of the node and accesses its files.",
+      "description": [
+        "The identity under which the server runs the commands of the node and accesses its files, when ownership is enabled on the server.",
+        "",
+        "A node without Owner inherits the Owner of its closest ancestor, otherwise the server Owner. An alias cannot have an Owner: it inherits that of its task.",
+        "",
+        "Syntax",
+        "  owner user[:group]",
+        "",
+        "Parameters",
+        "  user",
+        "      An account name (not a numeric id), in the portable POSIX syntax.",
+        "  group",
+        "      A group the user belongs to; by default, the primary group of the user.",
+        "",
+        "Semantics",
+        "  At most one owner is allowed per node. The server checks the account (never the superuser nor the",
+        "  server account) when an Owner is introduced, and again when it is used. Use",
+        "  'ecflow_client --ownership' to manage Owners on a running server.",
+        "",
+        "Examples",
+        "  owner alice",
+        "  owner alice:ops"
       ]
     },
     {

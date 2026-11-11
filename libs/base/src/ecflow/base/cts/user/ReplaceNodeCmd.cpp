@@ -12,6 +12,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
@@ -129,6 +130,10 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
             MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
     }
 
+    // The Owners brought in, and those of the subtree replaced, are checked as a whole, before any change
+    const auto changes = ecf::ownership::change_set_for_replace(*defs, pathToNode_, *client_defs, createNodesAsNeeded_);
+    as->ownership().check_change_set(identity(), changes, "replace");
+
     if (force_) {
         node_ptr node = defs->findAbsNode(pathToNode_);
         as->zombie_ctrl().add_user_zombies(node.get(), CtsApi::replace_arg());
@@ -140,6 +145,9 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     if (!client_node_to_add) {
         throw std::runtime_error(errorMsg);
     }
+    // The tree is changed from here on, even if a later check reports an error: the removals have taken effect
+    ecf::ownership::log_removals(changes, identity().username().value(), "replace");
+    as->ownership().report_additions(changes, "replace");
 
     // ECFLOW-835, flag node as changed, before check for trigger expressions.
     add_node_for_edit_history(defs, pathToNode_);

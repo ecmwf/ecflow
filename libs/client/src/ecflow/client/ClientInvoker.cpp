@@ -34,6 +34,7 @@
 #include "ecflow/base/cts/user/LogCmd.hpp"
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -309,6 +310,29 @@ int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) co
     return 1;
 }
 
+namespace {
+
+/// Replaces the generic error of a server unable to decode a command it does not support (an older server) by an
+/// explicit message, for the commands that know their minimum server version
+void explain_unsupported_command(const Cmd_ptr& cts_cmd, ServerReply& reply) {
+    auto mentions_ownership = [](const Cmd_ptr& cmd) {
+        return dynamic_cast<const OwnershipCmd*>(cmd.get()) != nullptr;
+    };
+    bool concerned = mentions_ownership(cts_cmd);
+    if (auto group = dynamic_cast<const GroupCTSCmd*>(cts_cmd.get()); group) {
+        for (const auto& cmd : group->cmdVec()) {
+            concerned = concerned || mentions_ownership(cmd);
+        }
+    }
+    if (concerned) {
+        if (auto explained = OwnershipCmd::explain_unsupported(reply.error_msg()); explained) {
+            reply.set_error_msg(*explained);
+        }
+    }
+}
+
+} // namespace
+
 int ClientInvoker::invoke(const CommandLine& cl) const {
     // Enable logging of request, and allow logging of round trip time.
     // RequestLogger must be placed *before* RoundTripRecorder.
@@ -339,6 +363,9 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+    if (res == 1) {
+        explain_unsupported_command(cts_cmd, server_reply_);
+    }
 
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
@@ -373,6 +400,9 @@ int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
+    if (res == 1) {
+        explain_unsupported_command(cts_cmd, server_reply_);
+    }
 
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
@@ -1612,6 +1642,33 @@ int ClientInvoker::query(const std::string& query_type,
     }
     return invoke(
         std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path(), evaluate));
+}
+
+int ClientInvoker::ownership(const std::string& op, const std::string& path, const std::string& value) const {
+    if (testInterface_) {
+        return invoke(CtsApi::ownership(op, path, value));
+    }
+
+    server_reply_.clear_for_invoke(cli());
+    Cmd_ptr cts_cmd;
+    try {
+        auto the_op = OwnershipCmd::to_op(op);
+        if (!the_op) {
+            throw std::runtime_error(
+                "ClientInvoker::ownership: expected an operation, one of [create | read | update | "
+                "delete], but found '" +
+                op + "'");
+        }
+        cts_cmd = std::make_shared<OwnershipCmd>(*the_op, path, value);
+    }
+    catch (std::exception& e) {
+        server_reply_.set_error_msg(e.what());
+        if (on_error_throw_exception_) {
+            throw std::runtime_error(server_reply_.error_msg());
+        }
+        return 1;
+    }
+    return invoke(cts_cmd);
 }
 
 // ======================================================================================================

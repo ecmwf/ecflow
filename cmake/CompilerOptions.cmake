@@ -174,3 +174,11 @@ endif()
 if (NOT HAVE_MALLINFO AND NOT HAVE_MALLINFO2)
   message(STATUS "Neither 'mallinfo' nor 'mallinfo2' are available, memory usage information will not be available")
 endif()
+
+# =========================================================================================
+# Ownership, for testing only (see ENABLE_OWNERSHIP_UNDER_TEST)
+# =========================================================================================
+
+if( ENABLE_OWNERSHIP_UNDER_TEST )
+  add_definitions( -DECF_OWNERSHIP_UNDER_TEST=1 )
+endif()

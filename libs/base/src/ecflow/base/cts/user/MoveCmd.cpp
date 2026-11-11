@@ -10,6 +10,7 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -99,14 +100,6 @@ bool MoveCmd::check_source() const {
 STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     Defs* defs = as->defs().get();
 
-    Lock lock(user(), as);
-    if (!lock.ok()) {
-        std::string errorMsg = "Plug(Move) command failed. User ";
-        errorMsg += as->lockedUser();
-        errorMsg += " already has an exclusive lock";
-        throw std::runtime_error(errorMsg);
-    }
-
     if (!check_source()) {
         throw std::runtime_error("Plug(Move) command failed. No source specified");
     }
@@ -133,6 +126,24 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
         if (!src_node->isSuite()) {
             throw std::runtime_error("::Destination path can only be empty when moving a whole suite to a new server");
         }
+    }
+
+    // The Owners brought in are checked, as for the forwarded user, before any change
+    std::string parent_path;
+    if (destNode) {
+        const Node* parent = destNode->isTask() ? destNode->parent() : destNode.get();
+        parent_path        = parent->absNodePath();
+    }
+    const auto changes = ecf::ownership::change_set_for_move_in(*src_node, parent_path);
+    as->ownership().check_change_set(identity(), changes, "plug");
+
+    // The checks above only read the definitions: the server is locked (and so halted) only for the move itself
+    Lock lock(user(), as);
+    if (!lock.ok()) {
+        std::string errorMsg = "Plug(Move) command failed. User ";
+        errorMsg += as->lockedUser();
+        errorMsg += " already has an exclusive lock";
+        throw std::runtime_error(errorMsg);
     }
 
     if (destNode.get()) {
@@ -180,6 +191,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     defs->set_most_significant_state();
+    as->ownership().report_additions(changes, "plug");
 
     // Ownership for src_node has been passed on.
     return PreAllocatedReply::ok_cmd();

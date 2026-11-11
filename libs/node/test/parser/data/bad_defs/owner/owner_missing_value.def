@@ -1,0 +1,5 @@
+# The Owner keyword requires a value
+suite s
+   task t
+      owner
+endsuite

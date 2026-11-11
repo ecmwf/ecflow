@@ -1160,6 +1160,19 @@ std::vector<std::string> CtsApi::query(const std::string& query_type,
     }
     return retVec;
 }
+std::vector<std::string> CtsApi::ownership(const std::string& op, const std::string& path, const std::string& value) {
+    std::vector<std::string> retVec;
+    retVec.reserve(3);
+    retVec.push_back(std::string("--") + ownershipArg() + "=" + op);
+    retVec.push_back(path);
+    if (!value.empty()) {
+        retVec.push_back(value);
+    }
+    return retVec;
+}
+const char* CtsApi::ownershipArg() {
+    return "ownership";
+}
 const char* CtsApi::queryArg() {
     return "query";
 }

@@ -60,6 +60,7 @@ PROTOCOL_ANCHORS = {
     "log": "LogCmd",
     "msg": "LogMessageCmd",
     "order": "OrderNodeCmd",
+    "ownership": "OwnershipCmd",
     "plug": "PlugCmd",
     "query": "QueryCmd",
     "replace": "ReplaceNodeCmd",

@@ -30,6 +30,7 @@
 #include "ecflow/base/cts/user/LogCmd.hpp"
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -229,6 +230,9 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("event", "/suiteName/t1", "event", "")));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", true)));
+    // Only reads: the other operations are refused for the requester of these tests (see the test below)
+    cmd_vec.push_back(Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::READ, "/")));
+    cmd_vec.push_back(Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::READ, "/suiteName/t1")));
 
     std::shared_ptr<GroupCTSCmd> theGroupCmd = std::make_shared<GroupCTSCmd>();
     theGroupCmd->addChild(Cmd_ptr(new ServerVersionCmd()));
@@ -448,6 +452,35 @@ BOOST_AUTO_TEST_CASE(test_all_request_persistence_text) {
                                                                // at end of scope
 
     test_persistence(fixtureDefsFile());
+}
+
+BOOST_AUTO_TEST_CASE(test_ownership_request_persistence) {
+    ECF_NAME_THIS_TEST();
+
+    // Test: every operation of an OwnershipCmd survives a round trip through the wire format, and requests differing
+    // by operation, path or value differ.
+    std::vector<Cmd_ptr> cmds = {Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::CREATE, "/suiteName", "alice:ops")),
+                                 Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::READ, "/")),
+                                 Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::READ, "/suiteName")),
+                                 Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::UPDATE, "/suiteName", "alice")),
+                                 Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::UPDATE, "/suiteName", "bob")),
+                                 Cmd_ptr(new OwnershipCmd(OwnershipCmd::Op::DELETE, "/suiteName"))};
+    for (std::size_t i = 0; i < cmds.size(); ++i) {
+        ClientToServerRequest request;
+        request.set_cmd(cmds[i]);
+        std::string text;
+        ecf::save_as_string(text, request);
+        ClientToServerRequest restored;
+        ecf::restore_from_string(text, restored);
+        BOOST_CHECK_MESSAGE(restored == request, "expected the request to survive a round trip: " << text);
+        for (std::size_t j = 0; j < cmds.size(); ++j) {
+            if (i != j) {
+                ClientToServerRequest other;
+                other.set_cmd(cmds[j]);
+                BOOST_CHECK_MESSAGE(!(restored == other), "expected requests " << i << " and " << j << " to differ");
+            }
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_query_evaluate_request_persistence) {

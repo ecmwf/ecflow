@@ -55,6 +55,7 @@ namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
+class OwnerAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -504,6 +505,14 @@ public:
     const ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
     ecf::AutoArchiveAttr* get_autoarchive() { return auto_archive_.get(); }
     const ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
+
+    ///
+    /// @brief Returns the Owner attribute of this node, if any.
+    ///
+    /// @return The Owner held by this node, or nullptr when the node has none (it then inherits the Owner of an
+    ///         ancestor, if any).
+    ///
+    const ecf::OwnerAttr* get_owner() const { return owner_.get(); }
     ecf::Flag& get_flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
 
@@ -621,6 +630,15 @@ public:
     void add_autoarchive(const ecf::AutoArchiveAttr&);
     void add_autorestore(const ecf::AutoRestoreAttr&);
     void addLate(const ecf::LateAttr&);
+
+    ///
+    /// @brief Adds the Owner attribute to this node.
+    ///
+    /// @param[in] owner The Owner to add.
+    /// @throws std::runtime_error if @p owner is empty, if the node already has an Owner, or if the node is an
+    ///         alias (aliases inherit the Owner of their task).
+    ///
+    void addOwner(const ecf::OwnerAttr& owner);
     void addRepeat(Repeat&&);             // will throw std::runtime_error if duplicate
     void addRepeat(const Repeat&);        // will throw std::runtime_error if duplicate
     void addZombie(const ZombieAttr&);    // will throw std::runtime_error if duplicate
@@ -666,6 +684,13 @@ public:
     void deleteInlimit(const std::string& name);
     void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
     void deleteLate();
+
+    ///
+    /// @brief Removes the Owner attribute of this node.
+    ///
+    /// @throws std::runtime_error if the node has no Owner.
+    ///
+    void deleteOwner();
     void deleteAutoCancel();
     void deleteAutoRestore();
     void deleteAutoArchive();
@@ -704,6 +729,14 @@ public:
     void reset_limit_value(const std::string& name);
     void changeDefstatus(const std::string& state);
     void changeLate(const ecf::LateAttr&);
+
+    ///
+    /// @brief Replaces the Owner attribute of this node.
+    ///
+    /// @param[in] owner The new Owner.
+    /// @throws std::runtime_error if the node has no Owner, or if @p owner is empty.
+    ///
+    void changeOwner(const ecf::OwnerAttr& owner);
     void change_time(const std::string&, const std::string&);
     void change_today(const std::string&, const std::string&);
 
@@ -736,6 +769,7 @@ public:
     void set_memento(const NodeInLimitMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeVariableMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeLateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeOwnerMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeTodayMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeTimeMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeDayMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -1122,6 +1156,7 @@ private:
     std::vector<DayAttr> days_;
 
     std::unique_ptr<ecf::LateAttr> late_;   // Can only have one late attribute per node
+    std::unique_ptr<ecf::OwnerAttr> owner_; // Can only have one owner attribute per node
     std::unique_ptr<MiscAttrs> misc_attrs_; // VerifyAttr(used for statistics and test verification) & Zombies
     Repeat repeat_;                         // each node can only have one repeat. By value, since has pimpl
 
@@ -1138,6 +1173,7 @@ private:
     unsigned int state_change_no_{
         0}; // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
     unsigned int variable_change_no_{0};  // *not* persisted, placed here rather than Variable, to save memory
+    unsigned int owner_change_no_{0};     // *not* persisted, last addition, change or removal of the Owner
     unsigned int suspended_change_no_{0}; // *not* persisted,
 
 #ifdef DEBUG_JOB_SUBMISSION_INTERVAL

@@ -78,6 +78,12 @@ void Defs::copy_defs_state_only(const defs_ptr& server_defs) {
     server_state().set_state(server_defs->server_state().get_state());
     server_state().set_user_variables(server_defs->server_state().user_variables());
     server_state().set_server_variables(server_defs->server_state().server_variables());
+    if (const auto* server_owner = server_defs->server_state().server_owner(); server_owner) {
+        server_state().set_server_owner(*server_owner);
+    }
+    else {
+        server_state().clear_server_owner();
+    }
 }
 
 Defs& Defs::operator=(const Defs& rhs) {
@@ -733,6 +739,11 @@ void Defs::read_state(const std::string& line, const std::vector<std::string>& l
             auto mc = Extract::value<Defs::modify_change_no_t>(
                 token, "Defs::read_state: invalid state_change specified : " + line);
             set_modify_change_no(mc);
+        }
+        else if (line_token_i.rfind("server_owner:", 0) == 0) {
+            // The value may itself contain ':' (user:group)
+            server_state().set_server_owner(
+                ecf::OwnerAttr::create(line_token_i.substr(std::string("server_owner:").size())));
         }
         else if (line_token_i.find("server_state:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token)) {

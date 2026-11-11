@@ -81,6 +81,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.hpp
   attribute/src/ecflow/attribute/LateAttr.hpp
   attribute/src/ecflow/attribute/NodeAttr.hpp
+  attribute/src/ecflow/attribute/OwnerAttr.hpp
   attribute/src/ecflow/attribute/QueueAttr.hpp
   attribute/src/ecflow/attribute/RepeatAttr.hpp
   attribute/src/ecflow/attribute/RepeatRange.hpp
@@ -100,6 +101,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.cpp
   attribute/src/ecflow/attribute/LateAttr.cpp
   attribute/src/ecflow/attribute/NodeAttr.cpp
+  attribute/src/ecflow/attribute/OwnerAttr.cpp
   attribute/src/ecflow/attribute/QueueAttr.cpp
   attribute/src/ecflow/attribute/RepeatAttr.cpp
   attribute/src/ecflow/attribute/TimeAttr.cpp
@@ -172,6 +174,7 @@ set(srcs
   base/src/ecflow/base/cts/user/OrderNodeCmd.hpp
   base/src/ecflow/base/cts/user/PathsCmd.hpp
   base/src/ecflow/base/cts/user/PlugCmd.hpp
+  base/src/ecflow/base/cts/user/OwnershipCmd.hpp
   base/src/ecflow/base/cts/user/QueryCmd.hpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
   base/src/ecflow/base/cts/user/RequeueNodeCmd.hpp
@@ -255,6 +258,7 @@ set(srcs
   base/src/ecflow/base/cts/user/OrderNodeCmd.cpp
   base/src/ecflow/base/cts/user/PathsCmd.cpp
   base/src/ecflow/base/cts/user/PlugCmd.cpp
+  base/src/ecflow/base/cts/user/OwnershipCmd.cpp
   base/src/ecflow/base/cts/user/QueryCmd.cpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.cpp
   base/src/ecflow/base/cts/user/RequeueNodeCmd.cpp
@@ -368,6 +372,10 @@ set(srcs
   core/src/ecflow/core/cfg/Mapper.hpp
   core/src/ecflow/core/cfg/Reader.hpp
   core/src/ecflow/core/cfg/ServerCatalogue.hpp
+  core/src/ecflow/core/os/AccountDatabase.hpp
+  core/src/ecflow/core/os/AccountLookup.hpp
+  core/src/ecflow/core/os/OwnerEligibility.hpp
+  core/src/ecflow/core/os/Privileges.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   core/src/ecflow/core/resources/Machine.hpp
   # Core -- Sources
@@ -415,6 +423,9 @@ set(srcs
   core/src/ecflow/core/cfg/Mapper.cpp
   core/src/ecflow/core/cfg/Reader.cpp
   core/src/ecflow/core/cfg/ServerCatalogue.cpp
+  core/src/ecflow/core/os/AccountDatabase.cpp
+  core/src/ecflow/core/os/OwnerEligibility.cpp
+  core/src/ecflow/core/os/Privileges.cpp
   core/src/ecflow/core/resources/Machine.cpp
 
   # Node -- Headers
@@ -458,6 +469,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
+  node/src/ecflow/node/Ownership.hpp
   node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
@@ -493,6 +505,7 @@ set(srcs
   node/src/ecflow/node/parser/InlimitParser.hpp
   node/src/ecflow/node/parser/LabelParser.hpp
   node/src/ecflow/node/parser/LateParser.hpp
+  node/src/ecflow/node/parser/OwnerParser.hpp
   node/src/ecflow/node/parser/LimitParser.hpp
   node/src/ecflow/node/parser/MeterParser.hpp
   node/src/ecflow/node/parser/MirrorParser.hpp
@@ -544,6 +557,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
+  node/src/ecflow/node/Ownership.cpp
   node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
@@ -574,6 +588,7 @@ set(srcs
   node/src/ecflow/node/parser/InlimitParser.cpp
   node/src/ecflow/node/parser/LabelParser.cpp
   node/src/ecflow/node/parser/LateParser.cpp
+  node/src/ecflow/node/parser/OwnerParser.cpp
   node/src/ecflow/node/parser/LimitParser.cpp
   node/src/ecflow/node/parser/MeterParser.cpp
   node/src/ecflow/node/parser/MirrorParser.cpp
@@ -590,6 +605,8 @@ set(srcs
   # Server -- Headers
   server/src/ecflow/server/AuthenticationService.hpp
   server/src/ecflow/server/AuthorisationService.hpp
+  server/src/ecflow/server/OwnershipPolicy.hpp
+  server/src/ecflow/server/OwnershipStartup.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -606,6 +623,8 @@ set(srcs
   # Server -- Sources
   server/src/ecflow/server/AuthenticationService.cpp
   server/src/ecflow/server/AuthorisationService.cpp
+  server/src/ecflow/server/OwnershipPolicy.cpp
+  server/src/ecflow/server/OwnershipStartup.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp
