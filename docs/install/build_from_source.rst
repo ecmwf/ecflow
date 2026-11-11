@@ -203,6 +203,10 @@ The following table shows an overview of useful CMake options.
      - location of the Aviso client library, i.e. the directory of an unpacked aviso-ffi release (containing
        ``include/aviso_ffi/`` and ``lib/``); can also be given as an environment variable
      -
+   * - ENABLE_STATIC_AVISO_LIBS
+     - allow using the static or the shared Aviso client library (shared is used by default); the static library
+       is linked into the ecFlow server, which then does not depend on the shared library at run time
+     - OFF
    * - CMAKE_PREFIX_PATH
      - use to provide a path to dependent libraries that are installed in non-system locations.For example, if you have installed Qt in a non-system location, you should set the path in this variable.
      -
