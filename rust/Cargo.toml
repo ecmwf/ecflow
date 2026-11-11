@@ -6,7 +6,7 @@ resolver = "2"
 members = ["crates/ecflow-sys", "crates/ecflow"]
 
 [workspace.package]
-version = "5.19.0"
+version = "5.20.0"
 edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/ecmwf/ecflow"
@@ -17,8 +17,8 @@ categories = ["science"]
 
 [workspace.dependencies]
 # Internal
-ecflow-sys = { version = "5.19", path = "crates/ecflow-sys" }
-ecflow = { version = "5.19", path = "crates/ecflow" }
+ecflow-sys = { version = "5.20", path = "crates/ecflow-sys" }
+ecflow = { version = "5.20", path = "crates/ecflow" }
 
 # Build tools
 bindman = "0.2"

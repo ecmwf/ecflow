@@ -7,6 +7,7 @@ Release notes
 .. toctree::
     :maxdepth: 1
 
+    version_5.20
     version_5.19
     version_5.18
     version_5.17
