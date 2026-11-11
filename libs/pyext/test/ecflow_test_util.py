@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import socket
+import errno
+import tempfile
 from socket import gethostname
 import subprocess
 import os, sys, fnmatch
@@ -236,9 +238,9 @@ class Protocol(Enum):
 # =======================================================================================
 class EcfPortLock(object):
     """Reserves a port for a test server, with the lock scheme of the C++ test
-    scaffold: a <port>.lock file, shared by the test runs that use the same lock
-    directory, followed by a bind probe, which also detects servers started by test
-    runs using another lock directory."""
+    scaffold: a <port>.lock file in a host-wide directory shared by Python test
+    runs of the same user, followed by a bind probe. ECF_PORT_LOCK_DIR overrides
+    the directory when the test environment provides an explicit shared path."""
 
     def __init__(self):
         print("   EcfPortLock:__init__")
@@ -382,11 +384,18 @@ class EcfPortLock(object):
             lock_file = os.environ["ECF_PORT_LOCK_DIR"] + "/" + str(port) + ".lock"
             # print("     EcfPortLock::_lock_file ECF_PORT_LOCK_DIR: " + lock_file)
             return lock_file
-        if os.path.exists(ecf.File.source_dir()):
-            lock_file = ecf.File.source_dir() + "/" + str(port) + ".lock"
-            return lock_file
-        lock_file = os.getcwd() + "/" + str(port) + ".lock"
-        return lock_file
+        # Job-specific TMPDIR and source checkouts do not coordinate CI jobs
+        # running on the same host. /var/tmp is stable across those jobs.
+        directory = "/var/tmp/ecflow-test-port-locks-" + str(os.getuid())
+        os.makedirs(directory, mode=0o700, exist_ok=True)
+        info = os.stat(directory)
+        if (
+            os.path.islink(directory)
+            or info.st_uid != os.getuid()
+            or info.st_mode & 0o022
+        ):
+            raise RuntimeError("Unsafe test port lock directory: " + directory)
+        return directory + "/" + str(port) + ".lock"
 
 
 # ===============================================================================
@@ -403,6 +412,7 @@ class Server(object):
         print("Server:__init__: Starting server")
         self._protocol = protocol
         self._process = None
+        self._server_stderr = None
         if not debugging():
             seed_port = int(os.getenv("ECF_FREE_PORT", "3153"))
             if sys.version_info[0] == 3:  # python3 can run at same time
@@ -430,9 +440,8 @@ class Server(object):
     def __enter__(self):
         try:
             while not self._start_own_server():
-                # Another server answers on the port: a test run using another lock
-                # directory started it in between, so the port is released and the
-                # next one is tried
+                # An uncoordinated process claimed the port after the bind probe.
+                # Cooperating Python tests cannot race here: their locks are shared.
                 if debugging():
                     raise RuntimeError(
                         "Another server answers on the debugging port " + self.the_port
@@ -475,7 +484,13 @@ class Server(object):
         if self._protocol == Protocol.HTTP:
             command.append("--http")
         print("   TestClient.py: Starting server " + " ".join(command))
-        self._process = subprocess.Popen(command)
+        self._server_stderr = tempfile.TemporaryFile(mode="w+t")
+        try:
+            self._process = subprocess.Popen(command, stderr=self._server_stderr)
+        except BaseException:
+            self._server_stderr.close()
+            self._server_stderr = None
+            raise
 
         print("   Allow time for server to start " + self.at_time())
         if self._wait_for_own_server():
@@ -521,6 +536,13 @@ class Server(object):
             if self._process.poll() is not None:
                 if self._port_has_listener():
                     return False
+                if self._failed_to_listen_on_reserved_port():
+                    print(
+                        "   Server could not listen on port "
+                        + self.the_port
+                        + ": address in use; trying another port"
+                    )
+                    return False
                 reason = (
                     "Server on port "
                     + self.the_port
@@ -553,6 +575,15 @@ class Server(object):
         self._print_start_diagnostics(reason, attempts)
         raise RuntimeError(reason)
 
+    def _failed_to_listen_on_reserved_port(self):
+        """Distinguishes a port race from unrelated server startup failures."""
+        self._server_stderr.seek(0)
+        output = self._server_stderr.read()
+        cause = os.strerror(errno.EADDRINUSE)
+        return (
+            "Could not listen on port " + self.the_port + ": " + cause
+        ) in output or ("Could not bind port " + self.the_port + ": " + cause) in output
+
     def _print_start_diagnostics(self, reason, attempts):
         """Prints what is known about a failed start, before the server log and the
         process are gone: the process state, the probes made, the listeners on the
@@ -573,6 +604,9 @@ class Server(object):
         )
         for protocol, error in sorted(attempts["errors"].items()):
             print("      last " + protocol + " error: " + error.strip())
+        if code is not None and self._server_stderr is not None:
+            self._server_stderr.seek(0)
+            print("      server stderr: " + self._server_stderr.read().strip())
         if code is None:
             details = process_details(self._process.pid)
             if details is None:
@@ -640,6 +674,9 @@ class Server(object):
         immediately, when asked); ecflow_server ignores SIGTERM, so only SIGKILL
         stops it"""
         if self._process is None:
+            if self._server_stderr is not None:
+                self._server_stderr.close()
+                self._server_stderr = None
             return
         if kill:
             self._process.kill()
@@ -649,6 +686,8 @@ class Server(object):
             self._process.kill()
             self._process.wait()
         self._process = None
+        self._server_stderr.close()
+        self._server_stderr = None
 
     def __exit__(self, exctype, value, tb):
         print(
