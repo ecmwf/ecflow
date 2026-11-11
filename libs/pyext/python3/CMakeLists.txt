@@ -134,7 +134,7 @@ foreach( test ${u_tests} )
 endforeach()
 
 
-if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
+if ( HAVE_TESTS AND ENABLE_ALL_TESTS AND ENABLE_SERVER)
 
   #
   # Python integration tests run the ecflow server, and thus use ECF_SSL_DIR to find the generated SSL certificates.
