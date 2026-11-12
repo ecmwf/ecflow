@@ -149,13 +149,14 @@ def class_lines(name, cls):
 def generate():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     for name in sorted(dir(ecflow)):
-        # Intentionally skip module-level functions for now. The only current
-        # public lowercase member is debug_build(), which we do not publish in
-        # the generated reference yet.
+        # Only classes get reference pages. Constants such as FILE_UNAVAILABLE
+        # and module-level functions are documented elsewhere.
         if name.startswith("_") or not name[0].isupper():
             continue
         cls = getattr(ecflow, name)
         if not isinstance(cls, type):
+            if name in {"UNCLASSIFIED", "FILE_UNAVAILABLE", "EMPTY_CONTENT"} and isinstance(cls, int):
+                continue
             raise SystemExit(f"extract_api.py: unexpected non-class module member: {name}")
         lines = class_lines(name, cls)
         # Strip whitespace at the end of each line, and end the page with exactly one

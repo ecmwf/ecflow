@@ -7,6 +7,7 @@
 #include "ecflow/base/Identification.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/ecflow_version.h"
 #include "ecflow/server/ListeningSocket.hpp"
@@ -123,6 +124,9 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             // Service the inbound request, handling the request will populate the outbound_response_
             // Note:: Handle request will first authenticate
             outbound_response.set_cmd(inbound_request.handleRequest(server));
+        }
+        catch (const ecf::CodedError& e) {
+            outbound_response.set_cmd(PreAllocatedReply::error_cmd(e.what(), e.code()));
         }
         catch (std::exception& e) {
             outbound_response.set_cmd(PreAllocatedReply::error_cmd(e.what()));

@@ -16,6 +16,13 @@ import pytest
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import (
+    CodedError,
+    EmptyContentError,
+    FileHandlingError,
+    GroupError,
+    UNCLASSIFIED,
+    FILE_UNAVAILABLE,
+    EMPTY_CONTENT,
     Defs,
     Suite,
     Family,
@@ -294,6 +301,66 @@ class TestClientApi:
     @pytest.fixture(autouse=True)
     def setup(self, server):
         self.ci, self.protocol = server
+
+    def test_machine_readable_file_error(self):
+        print_test(self.ci, "test_machine_readable_file_error")
+        self.ci.delete_all()
+        defs = create_defs("coded_error", self.ci.get_port(), self.protocol)
+        manual_root = os.path.join(Test.ecf_home(self.ci.get_port()), "coded_error_man_files")
+        os.makedirs(manual_root, exist_ok=True)
+        with open(os.path.join(manual_root, "coded_error.man"), "w"):
+            pass
+        defs.find_suite("coded_error").add_variable("ECF_FILES", manual_root)
+        self.ci.load(defs)
+
+        with pytest.raises(FileHandlingError) as missing:
+            self.ci.get_file("/coded_error/f1/t1", "kill")
+        assert missing.value.code() == FILE_UNAVAILABLE
+        assert "Failed to open the kill output" in missing.value.message()
+        assert "Server reply:" in str(missing.value)
+
+        with pytest.raises(CodedError) as unknown_node:
+            self.ci.get_file("/not_a_node", "jobout")
+        assert unknown_node.value.code() == UNCLASSIFIED
+        assert "Cannot find node" in unknown_node.value.message()
+
+        with pytest.raises(GroupError) as grouped:
+            self.ci.group("file /coded_error/f1/t1 kill; file /not_a_node job")
+        assert [entry[0] for entry in grouped.value.entries()] == [
+            FILE_UNAVAILABLE, UNCLASSIFIED
+        ]
+        assert "Server reply:" in str(grouped.value)
+
+        with pytest.raises(GroupError) as mixed:
+            self.ci.group("stats; file /coded_error/f1/t1 kill")
+        assert [entry[0] for entry in mixed.value.entries()] == [FILE_UNAVAILABLE]
+
+        with pytest.raises(RuntimeError) as rejected_group:
+            self.ci.group("no_such_command")
+        assert not isinstance(rejected_group.value, GroupError)
+
+        self.ci.set_auto_sync(True)
+        try:
+            with pytest.raises(GroupError) as one_failure:
+                self.ci.group("file /coded_error/f1/t1 kill")
+            assert one_failure.value.entries()[0][0] == FILE_UNAVAILABLE
+            assert len(one_failure.value.entries()) == 1
+        finally:
+            self.ci.set_auto_sync(False)
+
+        assert self.ci.server_version()
+        with pytest.raises(FileHandlingError) as repeated:
+            self.ci.get_file("/coded_error/f1/t1", "kill")
+        assert repeated.value.code() == FILE_UNAVAILABLE
+
+        with pytest.raises(EmptyContentError) as empty_manual:
+            self.ci.get_file("/coded_error", "manual")
+        assert empty_manual.value.code() == EMPTY_CONTENT
+        assert "failed to open file" in empty_manual.value.message()
+
+        with pytest.raises(RuntimeError) as invalid_type:
+            self.ci.get_file("/coded_error/f1/t1", "invalid-type")
+        assert not isinstance(invalid_type.value, CodedError)
 
     def test_version(self):
         print_test(self.ci, "test_version")

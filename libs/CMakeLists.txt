@@ -320,8 +320,10 @@ set(srcs
   core/src/ecflow/core/Ecf.hpp
   core/src/ecflow/core/Enumerate.hpp
   core/src/ecflow/core/Environment.hpp
+  core/src/ecflow/core/ErrorCode.hpp
   core/src/ecflow/core/Extract.hpp
   core/src/ecflow/core/File.hpp
+  core/src/ecflow/core/FileFailure.hpp
   core/src/ecflow/core/File_r.hpp
   core/src/ecflow/core/Filesystem.hpp
   core/src/ecflow/core/Host.hpp

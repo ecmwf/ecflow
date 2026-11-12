@@ -121,27 +121,46 @@ public:
                             std::string& errorMsg,
                             bool ignoreBlanksLine = true);
 
-    /// Do a backward search of rootPath + nodePath + fileExtn
-    /// If the task path is of the form /suite/family/family2/task, then we keep
-    /// on consuming the first path token this should leave:
-    ///     <root-path>/suite/family/family2/task.ecf
-    ///     <root-path>/family/family2/task.ecf
-    ///     <root-path>/family2/task.ecf
-    ///      <root-path>/task.ecf
-    /// Returns an empty string if file not found
-    static std::string
-    backwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);
+    ///
+    /// @brief Finds a script or manual by pruning leading node path components.
+    ///
+    /// For /suite/family/task, searches under the root in this order:
+    /// - suite/family/task with the requested extension;
+    /// - family/task with the requested extension;
+    /// - task with the requested extension.
+    ///
+    /// @param[in] rootPath Configured search directory; must be a valid directory.
+    /// @param[in] nodePath Absolute node path; must contain at least one component.
+    /// @param[in] fileExtn Requested extension, including its leading period.
+    /// @param[in,out] all_absent Optional flag cleared if any candidate cannot be proved absent.
+    /// @return First matching path, or an empty string if no candidate is found.
+    /// @throws fs::filesystem_error if checking the final root-level candidate fails.
+    ///
+    static std::string backwardSearch(const std::string& rootPath,
+                                      const std::string& nodePath,
+                                      const std::string& fileExtn,
+                                      bool* all_absent = nullptr);
 
-    /// Do a forward search of rootPath + nodePath + fileExtn
-    /// If the task path is of the form /suite/family/family2/task, then we keep
-    /// on consuming the last path token this should leave:
-    ///     <root-path>/suite/family/family2/task.ecf
-    ///     <root-path>/suite/family/task.ecf
-    ///     <root-path>/suite/task.ecf
-    ///     <root-path>/task.ecf
-    /// Returns an empty string if file not found
-    static std::string
-    forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);
+    ///
+    /// @brief Finds a script or manual by pruning trailing parent components.
+    ///
+    /// For /suite/family/task, searches under the root in this order:
+    /// - suite/family/task with the requested extension;
+    /// - suite/task with the requested extension;
+    /// - task with the requested extension.
+    ///
+    /// @param[in] rootPath Configured search directory; must be a valid directory.
+    /// @param[in] nodePath Absolute node path; must contain at least one component.
+    /// @param[in] fileExtn Requested extension, including its leading period.
+    /// @param[in,out] all_absent Optional flag cleared if any candidate cannot be proved absent.
+    /// @return First matching path, or an empty string if no candidate is found.
+    ///
+    /// Filesystem status errors are recorded in @p all_absent without throwing.
+    ///
+    static std::string forwardSearch(const std::string& rootPath,
+                                     const std::string& nodePath,
+                                     const std::string& fileExtn,
+                                     bool* all_absent = nullptr);
 
     // Remove a directory recursively ****
     static bool removeDir(const fs::path& p);

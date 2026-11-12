@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <algorithm> // for std::transform
+#include <string_view>
+#include <utility>
 
 #include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
@@ -19,6 +22,44 @@
 #include "ecflow/python/PythonUtil.hpp"
 
 namespace {
+
+PyObject* coded_error_type         = nullptr;
+PyObject* file_handling_error_type = nullptr;
+PyObject* empty_content_error_type = nullptr;
+PyObject* group_error_type         = nullptr;
+
+void initialise_coded_error(py::object self, const std::string& description, int code, const std::string& message) {
+    py::reinterpret_borrow<py::object>(PyExc_RuntimeError).attr("__init__")(self, description);
+    self.attr("_code")    = code;
+    self.attr("_message") = message;
+}
+
+template <typename T>
+class BoundException : public py::exception<T> {
+public:
+    using py::exception<T>::exception;
+
+    BoundException& doc(const char* description) {
+        this->attr("__doc__") = description;
+        return *this;
+    }
+
+    template <typename Function, typename... Options>
+    BoundException& def(const char* name, Function&& function, Options&&... options) {
+        // Naming __init__ makes pybind11 treat it as a C++ class constructor.
+        if (std::string_view{name} == "__init__") {
+            this->attr(name) = py::cpp_function(
+                std::forward<Function>(function), py::is_method(*this), std::forward<Options>(options)...);
+        }
+        else {
+            this->attr(name) = py::cpp_function(std::forward<Function>(function),
+                                                py::name(name),
+                                                py::is_method(*this),
+                                                std::forward<Options>(options)...);
+        }
+        return *this;
+    }
+};
 
 /**
  * This class acts as a scope guard, ensuring that the ClientInvoker CLI is set to a desired state within the scope.
@@ -1041,6 +1082,115 @@ void ClientInvoker_enable_ssl(ClientInvoker* self) {
 } // namespace
 
 void export_Client(py::module& m) {
+
+    // Python exceptions retain the C++ hierarchy and expose the raw server value on the exception itself.
+    BoundException<ecf::CodedError>(m, "CodedError", PyExc_RuntimeError)
+        .doc("Server failure with a raw numeric code. Subclasses RuntimeError; code zero is still a failure. "
+             "Construct with (formatted_description, raw_code, unformatted_server_message).")
+        .def(
+            "__init__",
+            [](py::object self, const std::string& description, int code, const std::string& message) {
+                initialise_coded_error(self, description, code, message);
+            },
+            "Create a failure with the formatted description, raw code and unformatted server message.",
+            py::arg("description"),
+            py::arg("code"),
+            py::arg("message") = "")
+        .def(
+            "code",
+            [](py::object self) { return self.attr("_code").cast<int>(); },
+            "Return the raw code, including zero or an unknown value.")
+        .def(
+            "message",
+            [](py::object self) { return self.attr("_message").cast<std::string>(); },
+            "Return the unformatted server diagnostic.")
+        .def("__reduce__", [](py::object self) {
+            return py::make_tuple(py::type::of(self),
+                                  py::make_tuple(py::str(self),
+                                                 self.attr("_code").cast<int>(),
+                                                 self.attr("_message").cast<std::string>()));
+        });
+
+    BoundException<ecf::FileHandlingError>(m, "FileHandlingError", m.attr("CodedError"))
+        .doc("Recognised file failure, including confirmed absence and empty content.")
+        .def(
+            "__init__",
+            [](py::object self, const std::string& description, int code, const std::string& message) {
+                initialise_coded_error(self, description, code, message);
+            },
+            py::arg("description"),
+            py::arg("code")    = static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE),
+            py::arg("message") = "");
+    BoundException<ecf::EmptyContentError>(m, "EmptyContentError", m.attr("FileHandlingError"))
+        .doc("Existing manual with no usable content; code is EMPTY_CONTENT. "
+             "Construct with (formatted_description, unformatted_server_message='').")
+        .def(
+            "__init__",
+            [](py::object self, const std::string& description, const std::string& message) {
+                initialise_coded_error(self, description, static_cast<int>(ecf::ErrorCode::EMPTY_CONTENT), message);
+            },
+            py::arg("description"),
+            py::arg("message") = "")
+        .def("__reduce__", [](py::object self) {
+            return py::make_tuple(py::type::of(self),
+                                  py::make_tuple(py::str(self), self.attr("_message").cast<std::string>()));
+        });
+    BoundException<ecf::GroupError>(m, "GroupError", PyExc_RuntimeError)
+        .doc("Group failure with ordered child (raw code, unformatted message) entries; no group-level code. "
+             "Construct with (formatted_description, ordered_failed_children).")
+        .def(
+            "__init__",
+            [](py::object self, const std::string& description, py::object entries) {
+                py::reinterpret_borrow<py::object>(PyExc_RuntimeError).attr("__init__")(self, description);
+                self.attr("_entries") = std::move(entries);
+            },
+            "Create a group failure from its formatted description and ordered failed children.")
+        .def(
+            "entries",
+            [](py::object self) { return self.attr("_entries").cast<py::object>(); },
+            "Return ordered (raw code, message) pairs for failed children.")
+        .def("__reduce__", [](py::object self) {
+            return py::make_tuple(py::type::of(self),
+                                  py::make_tuple(py::str(self), self.attr("_entries").cast<py::object>()));
+        });
+
+    m.attr("UNCLASSIFIED")     = static_cast<int>(ecf::ErrorCode::UNCLASSIFIED);
+    m.attr("FILE_UNAVAILABLE") = static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE);
+    m.attr("EMPTY_CONTENT")    = static_cast<int>(ecf::ErrorCode::EMPTY_CONTENT);
+    coded_error_type           = m.attr("CodedError").ptr();
+    file_handling_error_type   = m.attr("FileHandlingError").ptr();
+    empty_content_error_type   = m.attr("EmptyContentError").ptr();
+    group_error_type           = m.attr("GroupError").ptr();
+    py::register_exception_translator([](std::exception_ptr error) {
+        try {
+            if (error) {
+                std::rethrow_exception(error);
+            }
+        }
+        catch (const ecf::EmptyContentError& e) {
+            auto empty    = py::reinterpret_borrow<py::object>(empty_content_error_type);
+            auto instance = empty(e.what(), e.message());
+            PyErr_SetObject(empty.ptr(), instance.ptr());
+        }
+        catch (const ecf::FileHandlingError& e) {
+            auto file     = py::reinterpret_borrow<py::object>(file_handling_error_type);
+            auto instance = file(e.what(), e.code(), e.message());
+            PyErr_SetObject(file.ptr(), instance.ptr());
+        }
+        catch (const ecf::CodedError& e) {
+            auto coded    = py::reinterpret_borrow<py::object>(coded_error_type);
+            auto instance = coded(e.what(), e.code(), e.message());
+            PyErr_SetObject(coded.ptr(), instance.ptr());
+        }
+        catch (const ecf::GroupError& e) {
+            auto group    = py::reinterpret_borrow<py::object>(group_error_type);
+            auto instance = group(e.what(), e.entries());
+            PyErr_SetObject(group.ptr(), instance.ptr());
+        }
+        catch (...) {
+            throw; // Delegate unrelated exceptions to pybind11's next translator.
+        }
+    });
 
     static const char* ClientInvoker_version_doc = "Returns the current client version";
 

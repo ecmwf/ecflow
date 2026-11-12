@@ -20,6 +20,7 @@ void ServerReply::clear_for_invoke(bool command_line_interface) {
     host_.clear();
     port_.clear();
     error_msg_.clear();
+    clear_error_codes();
     str_.clear();
     zombies_.clear();
     str_vec_.clear();

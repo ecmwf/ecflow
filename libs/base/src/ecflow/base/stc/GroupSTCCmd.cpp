@@ -5,6 +5,7 @@
 
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -40,6 +41,7 @@ bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const {
 }
 
 bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
+    server_reply.set_group_reply();
     if (debug) {
         std::cout << "  GroupSTCCmd::handle_server_response\n";
     }
@@ -128,6 +130,10 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
 
 void GroupSTCCmd::addChild(const STC_Cmd_ptr& childCmd) {
     LOG_ASSERT(childCmd.get(), ""); // Dont add NULL children
+    if (auto error = std::dynamic_pointer_cast<ErrorCmd>(childCmd)) {
+        cmdVec_.push_back(std::make_shared<ErrorCmd>(*error));
+        return;
+    }
     cmdVec_.push_back(childCmd);
 }
 

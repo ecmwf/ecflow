@@ -15,7 +15,9 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/FileFailure.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Submittable.hpp"
@@ -178,9 +180,13 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 std::string ecf_job_file;
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 if (!File::open(ecf_job_file, fileContents)) {
-                    throw std::runtime_error(MESSAGE("CFileCmd::doHandleRequest: Failed to open the job file('"
-                                                     << ecf_job_file << "') for task " << pathToNode_ << " ("
-                                                     << strerror(errno) << ")"));
+                    auto message =
+                        MESSAGE("CFileCmd::doHandleRequest: Failed to open the job file('"
+                                << ecf_job_file << "') for task " << pathToNode_ << " (" << strerror(errno) << ")");
+                    if (ecf::file_is_absent(ecf_job_file)) {
+                        throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+                    }
+                    throw std::runtime_error(message);
                 }
                 break;
             }
@@ -199,20 +205,25 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 // First try user variable, if defined this has priority ECFLOW-999
                 std::ostringstream ss;
                 std::string user_jobout;
+                bool all_absent = true;
                 if (submittable->findParentUserVariableValue(ecf::environment::ECF_JOBOUT, user_jobout)) {
                     if (File::open(user_jobout, fileContents)) {
                         break;
                     }
+                    all_absent &= ecf::file_is_absent(user_jobout);
                     ss << "Failed to open user specified job-out(ECF_JOBOUT='" << user_jobout << "') ";
                 }
 
                 const Variable& ecf_jobout_gen_var = submittable->findGenVariable(ecf::environment::ECF_JOBOUT);
                 if (!File::open(ecf_jobout_gen_var.value(), fileContents)) {
+                    std::string open_error = strerror(errno);
+                    all_absent &= ecf::file_is_absent(ecf_jobout_gen_var.value());
 
                     // If that fails as a backup, look under ECF_HOME/ECF_NAME.ECF_TRYNO,   ECFLOW-177 preserve old SMS
                     // behaviour
                     std::string ecfhome_jobout;
                     submittable->findParentUserVariableValue(ecf::environment::ECF_HOME, ecfhome_jobout);
+                    const bool home_root_valid = ecf::valid_file_root(ecfhome_jobout);
                     ecfhome_jobout += submittable->absNodePath();
                     ecfhome_jobout += ".";
                     ecfhome_jobout += submittable->tryNo();
@@ -220,10 +231,15 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                     if (ecfhome_jobout != ecf_jobout_gen_var.value()) {
                         // Implies ECF_OUT was specified, hence *ALSO* look in ECF_HOME/ECF_NAME.ECF_TRYNO
                         if (!File::open(ecfhome_jobout, fileContents)) {
+                            open_error = strerror(errno);
+                            all_absent &= ecf::file_is_absent(ecfhome_jobout);
                             ss << "Failed to open the job-out (ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO='"
                                << ecf_jobout_gen_var.value() << "') ";
                             ss << "*AND* (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='" << ecfhome_jobout << "')";
-                            ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
+                            ss << " for task " << pathToNode_ << " (" << open_error << ")";
+                            if (all_absent && home_root_valid) {
+                                throw ecf::FileHandlingError(ss.str(), ecf::ErrorCode::FILE_UNAVAILABLE);
+                            }
                             throw std::runtime_error(ss.str());
                         }
                     }
@@ -231,7 +247,10 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                         // ECF_OUT *not* specified implies ECF_JOBOUT = ECF_HOME/ECF_NAME.ECF_TRYNO
                         ss << "Failed to open the job-out(ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='"
                            << ecf_jobout_gen_var.value() << "') ";
-                        ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
+                        ss << " for task " << pathToNode_ << " (" << open_error << ")";
+                        if (all_absent && home_root_valid) {
+                            throw ecf::FileHandlingError(ss.str(), ecf::ErrorCode::FILE_UNAVAILABLE);
+                        }
                         throw std::runtime_error(ss.str());
                     }
                 }
@@ -244,9 +263,12 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".kill";
                 if (!File::open(file, fileContents)) {
-                    throw std::runtime_error(MESSAGE("CFileCmd::doHandleRequest: Failed to open the kill output file('"
-                                                     << file << "') for task " << pathToNode_ << " (" << strerror(errno)
-                                                     << ")"));
+                    auto message = MESSAGE("CFileCmd::doHandleRequest: Failed to open the kill output file('"
+                                           << file << "') for task " << pathToNode_ << " (" << strerror(errno) << ")");
+                    if (ecf::file_is_absent(file)) {
+                        throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+                    }
+                    throw std::runtime_error(message);
                 }
                 break;
             }
@@ -256,9 +278,12 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".stat";
                 if (!File::open(file, fileContents)) {
-                    throw std::runtime_error(
-                        MESSAGE("CFileCmd::doHandleRequest: Failed to open the status output file('"
-                                << file << "') for task " << pathToNode_ << " (" << strerror(errno) << ")"));
+                    auto message = MESSAGE("CFileCmd::doHandleRequest: Failed to open the status output file('"
+                                           << file << "') for task " << pathToNode_ << " (" << strerror(errno) << ")");
+                    if (ecf::file_is_absent(file)) {
+                        throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+                    }
+                    throw std::runtime_error(message);
                 }
                 break;
             }
@@ -276,13 +301,18 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
             // First look for .man files in ECF_FILES and then ECF_HOME
             std::string ecf_files;
             node->findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_files);
+            const bool invalid_files_root = !ecf_files.empty() && !ecf::valid_file_root(ecf_files);
+            bool found_empty_manual       = false;
+            bool candidates_absent        = true;
             if (!ecf_files.empty() && fs::is_directory(ecf_files)) {
 
-                std::string manFile = File::backwardSearch(ecf_files, node->absNodePath(), File::MAN_EXTN());
+                std::string manFile =
+                    File::backwardSearch(ecf_files, node->absNodePath(), File::MAN_EXTN(), &candidates_absent);
                 if (!manFile.empty()) {
                     EcfFile the_file(node.get(), manFile);
                     the_file.manual(
                         fileContents); // pre-process & extract manual: will throw std::runtime_error for errors
+                    found_empty_manual = fileContents.empty();
                 }
             }
 
@@ -292,10 +322,26 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 node->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
                 if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
 
-                    std::string manFile = File::backwardSearch(ecf_home, node->absNodePath(), File::MAN_EXTN());
+                    std::string manFile =
+                        File::backwardSearch(ecf_home, node->absNodePath(), File::MAN_EXTN(), &candidates_absent);
                     EcfFile the_file(node.get(), manFile);
-                    the_file.manual(
-                        fileContents); // pre-process & extract manual: will throw std::runtime_error for errors
+                    if (manFile.empty()) {
+                        try {
+                            the_file.manual(fileContents); // retain the historical failure text
+                        }
+                        catch (const std::runtime_error& error) {
+                            if (!invalid_files_root && candidates_absent) {
+                                if (found_empty_manual) {
+                                    throw ecf::EmptyContentError(error.what());
+                                }
+                                throw ecf::FileHandlingError(error.what(), ecf::ErrorCode::FILE_UNAVAILABLE);
+                            }
+                            throw;
+                        }
+                    }
+                    else {
+                        the_file.manual(fileContents);
+                    }
                 }
                 else {
                     std::string errorMsg = "Failed to find the manual for Suite/Family  ";
