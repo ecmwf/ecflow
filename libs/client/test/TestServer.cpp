@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
+
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
@@ -12,6 +14,10 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
@@ -19,6 +25,80 @@ using namespace ecf;
 BOOST_AUTO_TEST_SUITE(S_Client)
 
 BOOST_AUTO_TEST_SUITE(T_Server)
+
+BOOST_AUTO_TEST_CASE(test_replace_mirrored_and_local_tasks) {
+    ECF_NAME_THIS_TEST();
+
+    InvokeServer server("Client:: ...test_replace_mirrored_and_local_tasks:", SCPort::next());
+    BOOST_REQUIRE(server.server_started());
+    ClientInvoker client(server.host(), server.port());
+    auto existing = Defs::create();
+    auto suite    = existing->add_suite("replace_mirror");
+    auto remote   = suite->add_task("remote");
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    suite->add_task("local");
+    BOOST_REQUIRE_MESSAGE(client.load(existing) == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.force("/replace_mirror/remote", "active") == 0, client.errorMsg());
+
+    auto incoming    = Defs::create();
+    auto next_suite  = incoming->add_suite("replace_mirror");
+    auto next_remote = next_suite->add_task("remote");
+    next_remote->addMirror(MirrorAttr{next_remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    next_suite->add_task("local");
+    BOOST_REQUIRE_MESSAGE(client.replace_1("/replace_mirror", incoming, false, false) == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
+    BOOST_CHECK(client.defs()->findAbsNode("/replace_mirror/remote")->isMirror());
+
+    BOOST_REQUIRE_MESSAGE(client.force("/replace_mirror/remote", "active") == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.force("/replace_mirror/local", "active") == 0, client.errorMsg());
+    auto replacement = Defs::create();
+    replacement->add_suite("replace_mirror")->add_task("replacement");
+    BOOST_CHECK_EXCEPTION(client.replace_1("/replace_mirror", replacement, false, false),
+                          std::runtime_error,
+                          [](const std::runtime_error& error) {
+                              return std::string(error.what()).find("1 tasks or aliases") != std::string::npos;
+                          });
+    BOOST_REQUIRE_MESSAGE(client.replace_1("/replace_mirror", replacement, false, true) == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.zombieGet() == 0, client.errorMsg());
+    const auto& zombies = client.server_reply().zombies();
+    BOOST_CHECK_EQUAL(
+        std::count_if(zombies.begin(),
+                      zombies.end(),
+                      [](const Zombie& zombie) { return zombie.path_to_task() == "/replace_mirror/local"; }),
+        1);
+    BOOST_CHECK_EQUAL(
+        std::count_if(zombies.begin(),
+                      zombies.end(),
+                      [](const Zombie& zombie) { return zombie.path_to_task() == "/replace_mirror/remote"; }),
+        0);
+}
+
+BOOST_AUTO_TEST_CASE(test_mirror_removal_incrementally_syncs_unknown_state) {
+    ECF_NAME_THIS_TEST();
+
+    InvokeServer server("Client:: ...test_mirror_removal_incrementally_syncs_unknown_state:", SCPort::next());
+    BOOST_REQUIRE(server.server_started());
+    ClientInvoker client(server.host(), server.port());
+    auto existing = Defs::create();
+    auto task     = existing->add_suite("mirror_sync")->add_task("t");
+    task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    BOOST_REQUIRE_MESSAGE(client.load(existing) == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.force("/mirror_sync/t", "active") == 0, client.errorMsg());
+
+    defs_ptr snapshot;
+    BOOST_REQUIRE_MESSAGE(client.sync(snapshot) == 0, client.errorMsg());
+    BOOST_REQUIRE(snapshot->findAbsNode("/mirror_sync/t"));
+    BOOST_CHECK(snapshot->findAbsNode("/mirror_sync/t")->isMirror());
+    BOOST_CHECK_EQUAL(snapshot->findAbsNode("/mirror_sync/t")->state(), NState::ACTIVE);
+
+    BOOST_REQUIRE_MESSAGE(client.alter("/mirror_sync/t", "delete", "mirror", "m") == 0, client.errorMsg());
+    BOOST_REQUIRE_MESSAGE(client.sync(snapshot) == 0, client.errorMsg());
+    auto updated = snapshot->findAbsNode("/mirror_sync/t");
+    BOOST_REQUIRE(updated);
+    BOOST_CHECK(!updated->isMirror());
+    BOOST_CHECK_EQUAL(updated->state(), NState::UNKNOWN);
+    BOOST_CHECK_EQUAL(snapshot->findAbsNode("/mirror_sync")->state(), NState::UNKNOWN);
+}
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
