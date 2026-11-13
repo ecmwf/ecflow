@@ -3,14 +3,19 @@
 
 #pragma once
 
+#include <variant>
+
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/Stats.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
-/// This class is used to hold the replies back from the server
-/// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
-/// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
+///
+/// @brief Retains the most recent server reply and the client state that persists between requests.
+///
+/// The client handle and cached definitions persist; numeric error provenance and grouped failures do not.
+///
 
 class ServerReply {
 public:
@@ -25,9 +30,13 @@ public:
 
     ~ServerReply() = default;
 
-    /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
-    /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-    /// and reset everything else
+    ///
+    /// @brief Clears per-request state while retaining the client handle and cached definitions.
+    ///
+    /// Numeric error presence, raw message and grouped entries are discarded before the next request.
+    ///
+    /// @param[in] command_line_interface Whether the next request originates from the command line.
+    ///
     void clear_for_invoke(bool command_line_interface); // true if calling from command line
 
     /// task based replies
@@ -72,9 +81,112 @@ public:
     const std::string& port() const { return port_; }
 
     bool client_request_failed() const { return !error_msg_.empty(); }
-    void set_error_msg(const std::string& e) { error_msg_ = e; }
+    ///
+    /// @brief Replaces a diagnostic generated locally and clears any earlier server classification.
+    ///
+    /// @param[in] e Formatted diagnostic for the current failure.
+    /// @throws std::bad_alloc if storing the diagnostic fails.
+    ///
+    void set_error_msg(const std::string& e) {
+        clear_error_codes();
+        error_msg_ = e;
+    }
     const std::string& error_msg() const { return error_msg_; }
+
+    ///
+    /// @brief Provides mutable diagnostic text for reply handlers that append server failures.
+    ///
+    /// @return Diagnostic text, valid until the next request or state reset.
+    ///
+    /// Unlike set_error_msg(), appending through this reference retains server error classification.
+    ///
     std::string& get_error_msg() { return error_msg_; }
+
+    ///
+    /// @brief Reports whether a single server error reply supplied a numeric code.
+    ///
+    /// @return True only for a genuine single server ErrorCmd; zero is still present.
+    /// Never throws.
+    ///
+    bool has_error_code() const noexcept { return std::holds_alternative<SingleError>(error_state_); }
+
+    ///
+    /// @brief Returns the raw code of the most recent single server error.
+    ///
+    /// @return Received code, including zero or an unknown future value; inspect has_error_code() first.
+    /// Never throws.
+    ///
+    int error_code() const noexcept {
+        const auto* error = std::get_if<SingleError>(&error_state_);
+        return error ? error->code : 0;
+    }
+
+    ///
+    /// @brief Returns the unformatted diagnostic from a single server ErrorCmd.
+    ///
+    /// @return Raw server text, valid until the next request or state reset.
+    /// Never throws.
+    ///
+    const std::string& raw_error_message() const noexcept {
+        const auto* error = std::get_if<SingleError>(&error_state_);
+        static const std::string empty;
+        return error ? error->message : empty;
+    }
+
+    ///
+    /// @brief Records a genuine single server error reply.
+    ///
+    /// @param[in] code Raw numeric value, including zero or an unknown value.
+    /// @param[in] message Unformatted server diagnostic text.
+    /// @throws std::bad_alloc if storing the diagnostic fails.
+    ///
+    void set_server_error(int code, const std::string& message) { error_state_.emplace<SingleError>(code, message); }
+
+    ///
+    /// @brief Marks the response as a group with individually coded errors.
+    ///
+    /// Never throws.
+    ///
+    void set_group_reply() noexcept { error_state_.emplace<GroupReply>(); }
+
+    ///
+    /// @brief Reports whether the response was a group reply.
+    ///
+    /// @return True for a GroupSTCCmd, including a group without failed children.
+    /// Never throws.
+    ///
+    bool group_reply() const noexcept { return std::holds_alternative<GroupReply>(error_state_); }
+
+    ///
+    /// @brief Appends a failed child independently of a single reply code.
+    ///
+    /// @param[in] code Child's raw numeric code.
+    /// @param[in] message Child's unformatted server diagnostic.
+    /// @throws std::bad_alloc if appending the child fails.
+    /// @throws std::bad_variant_access if set_group_reply() was not called first.
+    ///
+    void add_group_error(int code, const std::string& message) {
+        std::get<GroupReply>(error_state_).entries.emplace_back(code, message);
+    }
+
+    ///
+    /// @brief Returns ordered failed children for non-throwing callers.
+    ///
+    /// @return Failed child code and message entries, valid until the next request or state reset.
+    /// Never throws.
+    ///
+    const std::vector<ecf::GroupError::Entry>& group_errors() const noexcept {
+        const auto* group = std::get_if<GroupReply>(&error_state_);
+        static const GroupErrors empty;
+        return group ? group->entries : empty;
+    }
+
+    ///
+    /// @brief Clears classified reply state after a local failure or before a request.
+    ///
+    /// Never throws.
+    ///
+    void clear_error_codes() noexcept { error_state_.emplace<std::monostate>(); }
 
     const std::vector<Zombie>& zombies() const { return zombies_; }
     void set_zombies(const std::vector<Zombie>& z) { zombies_ = z; }
@@ -140,10 +252,49 @@ public:
 private:
     friend class SSyncCmd;
 
-    std::string host_;                       // clear at the start of invoke
-    std::string port_;                       // clear at the start of invoke
-    std::string str_;                        // clear at the start of invoke
-    std::string error_msg_;                  // clear at the start of invoke
+    ///
+    /// @brief Stores the raw code and diagnostic of one server ErrorCmd.
+    ///
+    /// Code zero is a present, unclassified server failure, not the absence of an error.
+    ///
+    struct SingleError
+    {
+        ///
+        /// @brief Copies a single server failure into the reply state.
+        ///
+        /// @param[in] value Raw numeric code, including zero or an unknown future value.
+        /// @param[in] text Unformatted server diagnostic.
+        /// @throws std::bad_alloc if copying the diagnostic fails.
+        ///
+        SingleError(int value, const std::string& text)
+            : code(value),
+              message(text) {}
+
+        /// Raw numeric classification of the server failure.
+        int code;
+        /// Unformatted server diagnostic of the failure.
+        std::string message;
+    };
+
+    ///
+    /// @brief Ordered raw code and diagnostic pairs for failed group children.
+    ///
+    using GroupErrors = std::vector<ecf::GroupError::Entry>;
+
+    ///
+    /// @brief Marks a group reply and stores its failed children, even when none failed.
+    ///
+    struct GroupReply
+    {
+        /// Failed child replies in their original reply order.
+        GroupErrors entries;
+    };
+
+    std::string host_;      // clear at the start of invoke
+    std::string port_;      // clear at the start of invoke
+    std::string str_;       // clear at the start of invoke
+    std::string error_msg_; // clear at the start of invoke
+    std::variant<std::monostate, SingleError, GroupReply> error_state_;
     std::vector<Zombie> zombies_;            // clear at the start of invoke
     std::vector<std::string> str_vec_;       // clear at the start of invoke
     std::vector<std::string> changed_nodes_; // clear at the start of invoke

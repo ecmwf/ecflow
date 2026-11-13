@@ -354,6 +354,11 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
             }
             // Otherwise, theReturnCmd has been set in the process of checking the precondictions
         }
+        catch (const ecf::CodedError& e) {
+            cmdVec_[i]->cleanup();
+            theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(e.what(), e.code()));
+            continue;
+        }
         catch (std::exception& e) {
             cmdVec_[i]->cleanup(); // recover memory asap, important when cmd has a large number of paths.
             theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(e.what()));

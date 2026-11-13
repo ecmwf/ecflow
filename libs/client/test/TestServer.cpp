@@ -8,10 +8,14 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
@@ -19,6 +23,43 @@ using namespace ecf;
 BOOST_AUTO_TEST_SUITE(S_Client)
 
 BOOST_AUTO_TEST_SUITE(T_Server)
+
+BOOST_AUTO_TEST_CASE(test_file_error_code_state_across_requests) {
+    ECF_NAME_THIS_TEST();
+
+    InvokeServer server("Client:: ...test_file_error_code_state_across_requests:", SCPort::next());
+    BOOST_REQUIRE(server.server_started());
+    ClientInvoker client(server.host(), server.port());
+    auto defs  = Defs::create();
+    auto suite = defs->add_suite("coded_file_state");
+    suite->add_variable("ECF_HOME", fs::current_path().string());
+    suite->add_task("task");
+    BOOST_REQUIRE_EQUAL(client.load(defs), 0);
+
+    client.set_throw_on_error(false);
+    BOOST_CHECK_EQUAL(client.file("/missing_node", "jobout", ""), 1);
+    BOOST_REQUIRE(client.server_reply().has_error_code());
+    BOOST_CHECK_EQUAL(client.server_reply().error_code(), static_cast<int>(ecf::ErrorCode::UNCLASSIFIED));
+
+    BOOST_CHECK_EQUAL(client.file("/coded_file_state/task", "jobout", ""), 1);
+    BOOST_REQUIRE(client.server_reply().has_error_code());
+    BOOST_CHECK_EQUAL(client.server_reply().error_code(), static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE));
+
+    // Constructor failure occurs before invoke() can reset the reply.
+    BOOST_CHECK_EQUAL(client.file("/coded_file_state/task", "invalid-type", ""), 1);
+    BOOST_CHECK(!client.server_reply().has_error_code());
+    BOOST_CHECK_EQUAL(client.pingServer(), 0);
+    BOOST_CHECK(!client.server_reply().has_error_code());
+
+    client.set_throw_on_error(true);
+    try {
+        client.file("/coded_file_state/task", "jobout", "");
+        BOOST_FAIL("Expected missing job output");
+    }
+    catch (const ecf::FileHandlingError& error) {
+        BOOST_CHECK_EQUAL(error.code(), static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE));
+    }
+}
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt

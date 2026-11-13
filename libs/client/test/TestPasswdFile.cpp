@@ -7,6 +7,7 @@
 #include "SCPort.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -177,6 +178,56 @@ BOOST_AUTO_TEST_CASE(test_loading_of_passwd_fail) {
                                                      << theClient.errorMsg());
 
     // Remove the white list file. Comment out for debug
+    fs::remove(passwd_file);
+}
+
+BOOST_AUTO_TEST_CASE(test_group_rejected_as_a_whole_is_a_single_coded_error) {
+    ECF_NAME_THIS_TEST();
+
+    Host the_host;
+    if (!ClientEnvironment::hostSpecified().empty()) {
+        return; // the passwd file of a remote server may not be accessible
+    }
+    std::string port        = SCPort::next();
+    std::string passwd_file = the_host.ecf_passwd_file(port);
+    fs::remove(passwd_file);
+
+    // The client and the server share the file, so the client caches a password the server accepts
+    Add_ECF_PASSWD_env ecf_passwd(passwd_file);
+    std::string errorMsg;
+    BOOST_REQUIRE_MESSAGE(PasswdFile::createWithAccess(passwd_file, the_host.name(), port, "xxxx", errorMsg), errorMsg);
+
+    InvokeServer invokeServer("Client:: ...test_group_rejected_as_a_whole_is_a_single_coded_error", port);
+    BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
+                          "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
+
+    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+    BOOST_REQUIRE_MESSAGE(theClient.reloadpasswdfile() == 0, theClient.errorMsg());
+
+    // With an emptied passwd file reloaded, the server rejects the whole group before any child runs,
+    // replying with a single ErrorCmd rather than a group of child replies
+    BOOST_REQUIRE_MESSAGE(PasswdFile::clear(passwd_file, errorMsg), errorMsg);
+    BOOST_REQUIRE_MESSAGE(theClient.reloadpasswdfile() == 0, theClient.errorMsg());
+
+    const std::string request = "suspend /no_such_suite; resume /no_such_suite";
+    try {
+        theClient.group(request);
+        BOOST_FAIL("Expected the server to reject the whole group");
+    }
+    catch (const ecf::GroupError&) {
+        BOOST_FAIL("A group rejected before its children run is not a GroupError");
+    }
+    catch (const ecf::CodedError& error) {
+        BOOST_CHECK_EQUAL(error.code(), static_cast<int>(ecf::ErrorCode::UNCLASSIFIED));
+        BOOST_CHECK_MESSAGE(error.message().find("Command not accepted") != std::string::npos, error.message());
+    }
+
+    theClient.set_throw_on_error(false);
+    BOOST_CHECK_EQUAL(theClient.group(request), 1);
+    BOOST_CHECK(theClient.server_reply().has_error_code());
+    BOOST_CHECK(!theClient.server_reply().group_reply());
+    BOOST_CHECK(theClient.server_reply().group_errors().empty());
+
     fs::remove(passwd_file);
 }
 

@@ -9,6 +9,7 @@
 
 #include <sys/time.h>
 
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/http/ApiV1Impl.hpp"
 #include "ecflow/http/Client.hpp"
@@ -39,7 +40,19 @@ void set_allowed_methods(httplib::Response& response, const std::string& methods
     response.set_header("Access-Control-Allow-Methods", methods);
 }
 
-void handle_exception(const std::exception& e, const httplib::Request& request, httplib::Response& response) {
+///
+/// @brief Converts a REST request failure into an HTTP response without conflating its two numeric codes.
+///
+/// @param[in] e Failure retaining the existing client-facing diagnostic.
+/// @param[in] request Request whose path, method and optional body appear in the response.
+/// @param[out] response HTTP response with its legacy status in the JSON code field.
+/// @param[in] coded Genuine server classification; null for REST-local or transport failures.
+/// @throws std::bad_alloc if constructing the response fails.
+///
+void handle_exception(const std::exception& e,
+                      const httplib::Request& request,
+                      httplib::Response& response,
+                      const ecf::CodedError* coded = nullptr) {
     // Try to guess a bit more suitable return values
     // based on client output
     // TODO: should this actually be done? e.g., do the status codes *only*
@@ -85,12 +98,18 @@ void handle_exception(const std::exception& e, const httplib::Request& request, 
     else if (err.find("Cannot replace node ") != std::string::npos) {
         status_code = HttpStatusCode::server_error_bad_gateway;
     }
+    if (coded && coded->code() == static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE)) {
+        status_code = HttpStatusCode::client_error_not_found;
+    }
 
     ojson j;
     j["code"]    = status_code;
     j["message"] = err;
-    j["path"]    = request.path;
-    j["method"]  = request.method;
+    if (coded) {
+        j["error_code"] = coded->code();
+    }
+    j["path"]   = request.path;
+    j["method"] = request.method;
     if (request.body.empty() == false) {
         j["body"] = request.body;
     }
@@ -130,6 +149,10 @@ void trycatch(const httplib::Request& request, httplib::Response& response, F f)
     catch (const HttpServerException& e) {
         num_errors++;
         handle_exception(e, request, response);
+    }
+    catch (const ecf::CodedError& e) {
+        num_errors++;
+        handle_exception(e, request, response, &e);
     }
     catch (const std::exception& e) {
         num_errors++;
