@@ -164,7 +164,13 @@ impl Client {
 
     /// Attach the failure class ecFlow diagnosed for the request that just threw.
     fn diagnose<T>(&self, result: std::result::Result<T, Exception>) -> Result<T> {
-        result.map_err(|e| Error::new(Failure::from(self.inner.last_failure()), e.what()))
+        result.map_err(|e| {
+            Error::from_reply(
+                Failure::from(self.inner.last_failure()),
+                e.what(),
+                self.inner.last_server_error(e.what()),
+            )
+        })
     }
 
     // ==================== Connection configuration ====================
@@ -657,6 +663,7 @@ impl Client {
     /// The last `max_lines` lines of a file of the node: its `script`,
     /// `job`, `jobout` (the job's output), `manual`, or the output of its
     /// `kill` or `stat` command.
+    /// A failed server reply exposes its raw code through [`Error::code`].
     pub fn get_file(&mut self, path: &str, file_type: &str, max_lines: u32) -> Result<String> {
         let_cxx_string!(path = path);
         let_cxx_string!(file_type = file_type);

@@ -7,12 +7,14 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ecflow-sys/src/lib.rs.h"
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/base/ServerReply.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Version.hpp"
 
@@ -323,6 +325,31 @@ rust::String Client::get_certificate() const {
 
 ecf::ConnectionFailure Client::last_failure() const {
     return connection_diagnosis().failure;
+}
+
+ServerError Client::last_server_error(rust::Str description) const {
+    ServerError result{};
+    const auto& reply = server_reply();
+    // cxx preserves only what() when crossing C++. A local failure may follow an earlier
+    // coded reply, so never read that reply unless it produced this very exception.
+    if (!reply.diagnosis().ok() || reply.error_msg() != std::string(description)) {
+        return result;
+    }
+    if (reply.has_error_code()) {
+        result.has_code = true;
+        result.code     = reply.error_code();
+        result.message  = rust::String(reply.raw_error_message());
+    }
+    else if (reply.group_reply() && !reply.group_errors().empty()) {
+        result.is_group = true;
+        for (const auto& [code, message] : reply.group_errors()) {
+            ErrorEntry entry;
+            entry.code    = code;
+            entry.message = rust::String(message);
+            result.entries.push_back(std::move(entry));
+        }
+    }
+    return result;
 }
 
 uint64_t Client::round_trip_time() const {

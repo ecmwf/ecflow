@@ -192,6 +192,26 @@ mod ffi {
         value: String,
     }
 
+    /// A failed child of a grouped server reply, in reply order.
+    #[namespace = "ecflow_bridge"]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct ErrorEntry {
+        /// Raw numeric code, including zero and future values.
+        code: i32,
+        /// Unformatted server diagnostic.
+        message: String,
+    }
+
+    /// Machine-readable state of the last matching server exception.
+    #[namespace = "ecflow_bridge"]
+    struct ServerError {
+        has_code: bool,
+        code: i32,
+        message: String,
+        is_group: bool,
+        entries: Vec<ErrorEntry>,
+    }
+
     /// A zombie: a job whose child commands the server does not match to its
     /// task, because the task was requeued, the password or process differ,
     /// or the path is gone.
@@ -302,6 +322,8 @@ mod ffi {
         fn debug(self: Pin<&mut Client>, flag: bool);
         /// The failure class of the most recent request.
         fn last_failure(self: &Client) -> ConnectionFailure;
+        /// Classify only the server reply that produced this exception text.
+        fn last_server_error(self: &Client, description: &str) -> ServerError;
         /// The round trip time of the most recent request, in microseconds.
         fn round_trip_time(self: &Client) -> u64;
 

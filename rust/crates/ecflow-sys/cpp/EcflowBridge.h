@@ -20,6 +20,8 @@ namespace ecflow_bridge {
 
 struct HandleSuites;
 struct NameValue;
+struct ErrorEntry;
+struct ServerError;
 struct Zombie;
 
 /// The print style of definitions written as text; the bridge binds it as an enum of this namespace.
@@ -126,6 +128,9 @@ public:
 
     /// The failure class of the most recent request.
     ecf::ConnectionFailure last_failure() const;
+
+    /// The matching server error, or an empty state for local/transport failures.
+    ServerError last_server_error(rust::Str description) const;
 
     /// The round trip time of the most recent request, in microseconds; the
     /// base method returns a Boost duration, which cxx cannot bind.

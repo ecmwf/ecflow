@@ -43,7 +43,9 @@ BOOST_ROOT=$(brew --prefix boost) cargo build
 ## Crates
 
 - **ecflow**: the safe API. `Client` for user and child commands, `Error` with
-  the failure class ecFlow diagnosed.
+  the diagnosed transport failure and optional server code, unformatted
+  diagnostic or ordered grouped errors. `UNCLASSIFIED` (0) is a server failure,
+  not success; local and transport errors have no server code.
 - **ecflow-sys**: the low-level FFI layer using [CXX](https://cxx.rs/). Builds
   the ecFlow C++ library and exposes the raw bridge.
 
