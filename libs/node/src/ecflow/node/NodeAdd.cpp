@@ -6,6 +6,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
@@ -419,6 +420,15 @@ void Node::addAutoCancel(const ecf::AutoCancelAttr& ac) {
             MESSAGE("Node::addAutoCancel: A node can only have one autocancel, see node " << debugNodePath()));
     }
     auto_cancel_     = std::make_unique<ecf::AutoCancelAttr>(ac);
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::add_permissions(const ecf::Permissions& permissions) {
+    if (permissions_) {
+        throw std::runtime_error(MESSAGE(
+            "Node::add_permissions: A node can only have one permissions attribute, see node " << debugNodePath()));
+    }
+    permissions_     = std::make_unique<ecf::Permissions>(permissions);
     state_change_no_ = Ecf::incr_state_change_no();
 }
 

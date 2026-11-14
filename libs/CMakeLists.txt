@@ -497,6 +497,7 @@ set(srcs
   node/src/ecflow/node/parser/LimitParser.hpp
   node/src/ecflow/node/parser/MeterParser.hpp
   node/src/ecflow/node/parser/MirrorParser.hpp
+  node/src/ecflow/node/parser/PermissionsParser.hpp
   node/src/ecflow/node/parser/Parser.hpp
   node/src/ecflow/node/parser/QueueParser.hpp
   node/src/ecflow/node/parser/RepeatParser.hpp
@@ -577,6 +578,7 @@ set(srcs
   node/src/ecflow/node/parser/LimitParser.cpp
   node/src/ecflow/node/parser/MeterParser.cpp
   node/src/ecflow/node/parser/MirrorParser.cpp
+  node/src/ecflow/node/parser/PermissionsParser.cpp
   node/src/ecflow/node/parser/Parser.cpp
   node/src/ecflow/node/parser/QueueParser.cpp
   node/src/ecflow/node/parser/RepeatParser.cpp

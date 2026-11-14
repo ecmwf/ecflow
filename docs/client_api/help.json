@@ -3393,6 +3393,28 @@
       ]
     },
     {
+      "name": "permissions",
+      "kind": "attribute",
+      "attaches_to": "Node (Suite, Family, Task, and Alias)",
+      "summary": "Grants roles on the node to the users it lists.",
+      "description": [
+        "Grants roles on the node to the users it lists. A node holds at most one permissions attribute.",
+        "",
+        "Syntax",
+        "  permissions <json>",
+        "",
+        "Parameters",
+        "  json",
+        "      A non-empty JSON list of objects, each with exactly the strings \"user\" and",
+        "      \"permissions\": a user name, and the letters of the roles granted (r read,",
+        "      w write, x execute, l log, o owner, p permissions), with s for a sticky entry.",
+        "",
+        "Examples",
+        "  permissions [{\"user\": \"alice\", \"permissions\": \"rwxops\"}, {\"user\": \"bob\", \"permissions\": \"r\"}]",
+        "  permissions [{\"user\":\"carol\",\"permissions\":\"rx\"}]   # carol may read and run"
+      ]
+    },
+    {
       "name": "queue",
       "kind": "attribute",
       "attaches_to": "Node (Suite, Family, Task, and Alias)",

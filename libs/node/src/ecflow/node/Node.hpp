@@ -499,6 +499,13 @@ public:
     const ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
     ecf::AutoCancelAttr* get_autocancel() { return auto_cancel_.get(); }
     const ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
+
+    ///
+    /// @brief Returns the Permissions attribute of the node.
+    ///
+    /// @return The attribute, or nullptr when the node has none; valid until the attribute changes.
+    ///
+    const ecf::Permissions* permissions() const { return permissions_.get(); }
     ecf::AutoArchiveAttr* get_autoarchive() { return auto_archive_.get(); }
     const ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
     ecf::Flag& get_flag() { return flag_; }
@@ -615,6 +622,14 @@ public:
     void addLabel(const Label&);       // will throw std::runtime_error if duplicate
     void add_label(const std::string& name, const std::string& value, const std::string& new_value, bool check = true);
     void addAutoCancel(const ecf::AutoCancelAttr&);
+
+    ///
+    /// @brief Adds the Permissions attribute to the node.
+    ///
+    /// @param permissions The attribute added.
+    /// @throws std::runtime_error when the node already has a Permissions attribute.
+    ///
+    void add_permissions(const ecf::Permissions& permissions);
     void add_autoarchive(const ecf::AutoArchiveAttr&);
     void add_autorestore(const ecf::AutoRestoreAttr&);
     void addLate(const ecf::LateAttr&);
@@ -1130,6 +1145,8 @@ private:
     std::unique_ptr<ecf::AutoCancelAttr> auto_cancel_;   // Can only have 1 auto cancel per node
     std::unique_ptr<ecf::AutoArchiveAttr> auto_archive_; // Can only have 1 auto archive per node
     std::unique_ptr<ecf::AutoRestoreAttr> auto_restore_; // Can only have 1 autorestore per node
+    std::unique_ptr<ecf::Permissions> permissions_;      // Can only have 1 Permissions attribute per node; kept by
+                                                         // clear(), since it has no memento
     void* graphic_ptr_{nullptr};                         // for use with the gui only
 
     unsigned int state_change_no_{

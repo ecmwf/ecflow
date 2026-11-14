@@ -46,7 +46,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Autocancel`, :py:class:`ecflow.Node.add_autocancel`
          * - :ref:`grammar`
-           - :token:`autocancel`
+           - :ref:`autocancel <attr-autocancel>`
 
    aviso
       An aviso is an attribute of a :term:`Task<task>` (or an alias of a task), and creates a
@@ -135,7 +135,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Clock`, :py:class:`ecflow.Suite.add_clock`
          * - :ref:`grammar`
-           - :token:`clock`
+           - :ref:`clock <attr-clock>`
 
    complete
       Is a :term:`node` :term:`status`.
@@ -163,7 +163,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::child_complete <rust_client_child_complete>`
          * - :ref:`grammar`
-           - :token:`complete`
+           - :ref:`complete <attr-complete>`
 
    cron
       A :term:`cron` defines a time dependency for a :term:`node`, similar to :term:`time`,
@@ -188,7 +188,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Cron`, :py:class:`ecflow.Node.add_cron`
          * - :ref:`grammar`
-           - :token:`cron`
+           - :ref:`cron <attr-cron>`
 
    date
       This defines a date dependency for a node.
@@ -208,7 +208,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Date`, :py:class:`ecflow.Node.add_date`
          * - :ref:`grammar`
-           - :token:`date`
+           - :ref:`date <attr-date>`
 
    day
       This defines a day dependency for a  node.
@@ -224,7 +224,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Day`, :py:class:`ecflow.Node.add_day`
          * - :ref:`grammar`
-           - :token:`day`
+           - :ref:`day <attr-day>`
 
    defstatus
       A defstatus is a :term:`node` attribute, that determines the default state assigned to the node
@@ -268,7 +268,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.DState`, :py:class:`ecflow.Node.add_defstatus`
          * - :ref:`grammar`
-           - :token:`defstatus`
+           - :ref:`defstatus <attr-defstatus>`
 
    dependencies
       Dependencies are attributes of node, that can suppress/hold a :term:`task` from taking part in :term:`job creation`.
@@ -1403,7 +1403,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::child_event <rust_client_child_event>`
          * - :ref:`grammar`
-           - :token:`event`
+           - :ref:`event <attr-event>`
 
       Events can be referenced in :term:`trigger` and :term:`complete expression` s.
 
@@ -1423,7 +1423,7 @@ Glossary
       An extern :term:`trigger` reference is considered *unknown* if it is not defined when the
       :term:`trigger` is evaluated.
 
-      See :token:`extern` in grammar.
+      See :ref:`extern <attr-extern>` in grammar.
 
       .. important::
          The use of cross-suite :term:`dependencies` is strongly discouraged.
@@ -1438,7 +1438,7 @@ Glossary
 
       Typically you place tasks that are related to each other inside the same family, analogous to the way you
       create directories to contain related files.
-      For python see :py:class:`ecflow.Family`. For BNF see :token:`family`
+      For python see :py:class:`ecflow.Family`. For BNF see :ref:`family <node-family>`
 
       It serves as an intermediate :term:`node` in a :term:`suite definition`.
 
@@ -1532,7 +1532,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.InLimit`, :py:class:`ecflow.Node.add_inlimit`
          * - :ref:`grammar`
-           - :token:`inlimit`
+           - :ref:`inlimit <attr-inlimit>`
 
    job creation
       Job creation or task invocation can be initiated manually via :term:`ecflow_ui` but also by
@@ -1599,7 +1599,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::child_label <rust_client_child_label>`, :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
-           - :token:`label`
+           - :ref:`label <attr-label>`
 
    late
       Define a tag for a node to be late. A node can only have **one** late attribute. The late attribute only applies to a task. You can define it on a Suite/Family in which case it will be inherited. Any late defined lower down the hierarchy will override the aspect(submitted,active, complete) defined higher up.
@@ -1668,7 +1668,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
-           - :token:`late`
+           - :ref:`late <attr-late>`
 
    limit
       Limits provide simple load management by limiting the number of tasks
@@ -1745,7 +1745,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
-           - :token:`limit`
+           - :ref:`limit <attr-limit>`
 
    manual page
       Manual pages are part of the :term:`ecf script`.
@@ -1800,7 +1800,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::child_meter <rust_client_child_meter>`, :ref:`Client::alter <rust_client_alter>`
          * - :ref:`grammar`
-           - :token:`meter`
+           - :ref:`meter <attr-meter>`
 
       Meters can be referenced in :term:`trigger` and :term:`complete expression` expressions.
 
@@ -1916,6 +1916,39 @@ Glossary
 
          - performing :term:`variable substitution`
 
+   permissions
+      The attribute that grants roles on a :term:`node` to the users it lists, e.g.
+
+      .. code-block:: shell
+
+         permissions [{"user": "alice", "permissions": "rwx"}]
+
+      Each entry names a user and the letters of the roles granted (``r`` read, ``w`` write, ``x`` execute,
+      ``l`` log, ``o`` owner, ``p`` permissions), optionally with ``s`` to make the entry sticky. See
+      :ref:`permissions_attribute`, and :ref:`text_based_def_permissions` for its use in a :term:`suite definition`.
+
+      Rules:
+
+      - `Only one permissions attribute is allowed per node`, on a :term:`suite`, a :term:`family`, a :term:`task`
+        or an alias.
+      - The server can carry one, set in its configuration file, never by a :term:`suite definition`; the
+        attributes of the nodes take effect only when the server has one.
+      - The attribute of a :term:`suite` replaces the server entries; below a suite, the attributes can only
+        restrict the roles inherited.
+
+      .. list-table::
+
+         * - :ref:`ecflow_cli`
+           - :ref:`permissions_cli`
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Permissions`, :py:meth:`ecflow.Node.add_permissions`,
+             :py:meth:`ecflow.Node.delete_permissions`, :py:meth:`ecflow.Client.create_permissions`
+         * - :ref:`rust_api`
+           - :ref:`Client::create_permissions <rust_client_create_permissions>`,
+             :ref:`Client::effective_permissions <rust_client_effective_permissions>`
+         * - :ref:`grammar`
+           - :ref:`permissions <attr-permissions>`
+
    queue
       Queues allows efficiently running jobs that are identical but vary only in the step.
 
@@ -1975,7 +2008,7 @@ Glossary
          * - :ref:`rust_api`
            - :ref:`Client::child_queue <rust_client_child_queue>`
          * - :ref:`grammar`
-           - :token:`queue`
+           - :ref:`queue <attr-queue>`
 
 
    queued
@@ -2119,7 +2152,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Suite`
          * - :ref:`grammar`
-           - :token:`suite`
+           - :ref:`suite <node-suite>`
 
    suite definition
       The suite definition is the hierarchical :term:`node` tree. It describes how your :term:`task`\ s run and interact. It can be built up using:
@@ -2163,7 +2196,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Task`
          * - :ref:`grammar`
-           - :token:`task`
+           - :ref:`task <node-task>`
 
    task command
       Task commands (sometimes called Child commands) are executed within the :term:`ecf script` files.
@@ -2241,7 +2274,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Time`, :py:class:`ecflow.Node.add_time`
          * - :ref:`grammar`
-           - :token:`time`
+           - :ref:`time <attr-time>`
 
    time dependencies
       This includes :term:`time`, :term:`today`, :term:`day`, :term:`date` and :term:`cron`.
@@ -2304,7 +2337,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Today`
          * - :ref:`grammar`
-           - :token:`today`
+           - :ref:`today <attr-today>`
 
    trigger
       Triggers defines a dependency for a :term:`task` or :term:`family`.
@@ -2407,7 +2440,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Expression`, :py:class:`ecflow.Node.add_trigger`
          * - :ref:`grammar`
-           - :token:`trigger`
+           - :ref:`trigger <attr-trigger>`
 
    unknown
       Is a :term:`node` :term:`status`.
@@ -2437,7 +2470,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.Node.add_variable`
          * - :ref:`grammar`
-           - :token:`variable`
+           - :ref:`variable <attr-edit>`
 
    variable inheritance
       When a :term:`variable` is needed at :term:`job creation` time, it is first sought in the :term:`task` itself.
@@ -2516,7 +2549,7 @@ Glossary
          * - :ref:`python_api`
            - :py:class:`ecflow.ZombieAttr`, :py:class:`ecflow.ZombieUserActionType`
          * - :ref:`grammar`
-           - :token:`zombie`
+           - :ref:`zombie <attr-zombie>`
 
       There are several types of zombies see :term:`zombie type` and :py:class:`ecflow.ZombieType`
 

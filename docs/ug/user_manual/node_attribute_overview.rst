@@ -153,6 +153,15 @@ Node attribute overview
      -
      -
      -
+   * - :term:`permissions`
+     -
+     -
+     -
+     -
+     -
+     -
+     - ❎
+     -
    * - :term:`repeat`
      - ❎
      -

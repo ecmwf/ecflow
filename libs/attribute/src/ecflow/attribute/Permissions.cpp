@@ -10,6 +10,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "ecflow/core/Serialization.hpp"
+
 namespace ecf {
 
 namespace {
@@ -284,5 +286,18 @@ std::size_t Permissions::hash() const {
     }
     return seed;
 }
+
+template <class Archive>
+std::string Permissions::save_minimal(const Archive& /*ar*/) const {
+    return to_json();
+}
+
+template <class Archive>
+void Permissions::load_minimal(const Archive& /*ar*/, const std::string& value) {
+    *this = parse_json(value);
+}
+
+template std::string Permissions::save_minimal<cereal::JSONOutputArchive>(const cereal::JSONOutputArchive&) const;
+template void Permissions::load_minimal<cereal::JSONInputArchive>(const cereal::JSONInputArchive&, const std::string&);
 
 } // namespace ecf

@@ -31,5 +31,6 @@ credentials remain visible elsewhere, e.g. in job files and in the variables sho
     :maxdepth: 1
 
     ecflow_white_list_file
+    permissions
     black_list_file
     open_ssl

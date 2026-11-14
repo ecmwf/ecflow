@@ -12,6 +12,10 @@
 #include <string_view>
 #include <vector>
 
+namespace cereal {
+class access;
+}
+
 namespace ecf {
 
 ///
@@ -283,6 +287,14 @@ public:
 
 private:
     std::vector<Entry> entries_;
+
+    // Serialisation as the JSON form, which validates the value when loading
+    Permissions() = default;
+    friend class cereal::access;
+    template <class Archive>
+    std::string save_minimal(const Archive& ar) const;
+    template <class Archive>
+    void load_minimal(const Archive& ar, const std::string& value);
 };
 
 } // namespace ecf

@@ -9,6 +9,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
@@ -980,6 +981,18 @@ struct Writer<AutoArchiveAttr, Stream>
     }
 
     static void writeln(Stream& output, const AutoArchiveAttr& item) { item.write(output.buf); }
+};
+
+template <typename Stream>
+struct Writer<Permissions, Stream>
+{
+    static void write(Stream& output, const Permissions& item, FormatContext& ctx) {
+        Indent l1(ctx);
+        output << l1;
+        output << "permissions ";
+        output << item.to_json();
+        output << "\n";
+    }
 };
 
 template <typename Stream>
@@ -2095,6 +2108,9 @@ struct Writer<Node, Stream>
         }
         if (auto a = item.get_autorestore(); a) {
             Writer<AutoRestoreAttr, Stream>::write(output, *a, ctx);
+        }
+        if (auto a = item.permissions(); a) {
+            Writer<Permissions, Stream>::write(output, *a, ctx);
         }
 
         if (auto a = item.get_misc_attrs(); a) {
