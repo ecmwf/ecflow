@@ -1821,6 +1821,32 @@ Glossary
       synchronized with the :term:`status` of a node on a remote ecFlow server.
       The synchronised status and attributes can be used to trigger the execution of local nodes.
 
+      A directly mirrored task, or a subtree containing a mirrored task or alias, can be
+      replaced without the replace command's :code:`force` argument even when its remote status is active or submitted:
+      it has no locally running job. An active or
+      submitted unmirrored task or alias in the replaced subtree still requires force.
+      Force creates USER zombies only for locally running, unmirrored tasks and aliases,
+      including unmirrored children of a mirrored family or suite. A mirror on a container
+      does not make its children remote mirrors.
+
+      A new mirror cannot be added to an active or submitted task or alias, or to one with
+      a tracked zombie (even if it is now queued). An active or submitted alias, or one
+      with a tracked zombie, also prevents adding a mirror to its parent task.
+      Reconfiguring an existing mirror is
+      permitted. Removing its mirror clears the node's remote-error flag. Removing a
+      mirror from a task or alias resets its status to unknown,
+      but synchronized remote variables and attributes remain. Requeue alone is not
+      sufficient for local scheduling: replace the node from a clean local definition
+      before running it. Replacing a mirrored node with an unmirrored definition makes
+      the replacement an ordinary local node.
+      Explicit local job submission (including run and edited-script submission) is
+      rejected while the task or alias directly carries a mirror, and for an alias
+      whose parent task carries one. Creating a local edited-script alias under a
+      mirrored task is also rejected because it would inherit synchronized remote variables.
+      Before upgrading an existing server where a mirror was attached after a local job
+      started, the server administrator must reset that node: historical job origins are
+      not detected automatically.
+
       .. note::
 
         Synchronised tasks don't need to be provided with :code:`.ecf` files

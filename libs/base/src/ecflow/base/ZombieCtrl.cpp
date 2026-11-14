@@ -404,7 +404,7 @@ void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks, const 
     size_t taskVecSize = tasks.size();
     for (size_t i = 0; i < taskVecSize; i++) {
         Submittable* t = tasks[i];
-        if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+        if (!t->isMirror() && (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED)) {
 
             Zombie& theExistingZombie = find(t);
             if (theExistingZombie.empty()) {

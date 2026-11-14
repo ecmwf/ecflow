@@ -249,6 +249,12 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                     throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: Aliases can only be created for a task. "
                                              "Selected path is a Alias. Please select a Task path");
                 }
+                if (task->isMirror()) {
+                    std::vector<std::string>().swap(user_file_contents_);
+                    throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: Cannot create a local alias under a "
+                                             "mirrored task: " +
+                                             task->absNodePath());
+                }
                 alias_ptr alias = task->add_alias(user_file_contents_, user_variables_);
 
                 if (run_) {

@@ -72,6 +72,11 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
                                                                        << " must be 'begun' first\n"));
         }
 
+        if (node->isSubmittable() && (node->isMirror() || (node->isAlias() && node->parent()->isMirror()))) {
+            ss << "RunNodeCmd failed: Cannot run a local job for a mirrored task or its alias " << paths_[i] << "\n";
+            continue;
+        }
+
         SuiteChangedPtr changed(node.get());
 
         // Please note: that if any tasks under theNode are in
@@ -101,6 +106,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
 
         if (!node->run(jobsParam, force_)) {
             LOG(Log::ERR, "RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
+            if (jobsParam.getErrorMsg().find("mirrored task or alias") != std::string::npos) {
+                ss << "RunNodeCmd failed for " << paths_[i] << ": " << jobsParam.getErrorMsg();
+            }
         }
     }
 

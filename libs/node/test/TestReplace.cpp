@@ -11,6 +11,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
@@ -69,6 +70,148 @@ private:
 BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_Replace)
+
+BOOST_AUTO_TEST_CASE(test_replace_direct_mirrors_without_force) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto state : {NState::ACTIVE, NState::SUBMITTED}) {
+        for (const std::string path : {"/s", "/s/f", "/s/f/t"}) {
+            Defs server;
+            auto suite = server.add_suite("s");
+            auto task  = suite->add_family("f")->add_task("t");
+            auto alias = task->add_alias_only();
+            task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+            alias->addMirror(MirrorAttr{alias.get(), "m", "/remote/a", "host", "3141", "60", false, "", "", false});
+            task->set_state(state);
+            alias->set_state(state);
+
+            auto incoming  = Defs::create();
+            auto new_task  = incoming->add_suite("s")->add_family("f")->add_task("t");
+            auto new_alias = new_task->add_alias_only();
+            new_task->addMirror(
+                MirrorAttr{new_task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+            new_alias->addMirror(
+                MirrorAttr{new_alias.get(), "m", "/remote/a", "host", "3141", "60", false, "", "", false});
+
+            std::string error;
+            BOOST_REQUIRE_MESSAGE(server.replaceChild(path, incoming, false, false, error), path << ": " << error);
+            auto replaced = server.findAbsNode(path);
+            BOOST_REQUIRE(replaced);
+            auto replacement_task  = server.findAbsNode("/s/f/t");
+            auto replacement_alias = server.findAbsNode("/s/f/t/alias0");
+            BOOST_REQUIRE(replacement_task);
+            BOOST_REQUIRE(replacement_alias);
+            BOOST_CHECK(replacement_task->isMirror());
+            BOOST_CHECK(replacement_alias->isMirror());
+            BOOST_CHECK_EQUAL(replacement_task->state(), NState::UNKNOWN);
+            BOOST_CHECK_EQUAL(replacement_alias->state(), NState::QUEUED);
+            BOOST_CHECK_NE(replacement_task.get(), task.get());
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_protects_local_jobs_in_mixed_mirror_tree) {
+    ECF_NAME_THIS_TEST();
+
+    Defs server;
+    auto suite  = server.add_suite("s");
+    auto family = suite->add_family("f");
+    auto remote = family->add_task("remote");
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    remote->set_state(NState::ACTIVE);
+    auto other_remote = family->add_task("other_remote");
+    other_remote->addMirror(
+        MirrorAttr{other_remote.get(), "m", "/remote/other", "host", "3141", "60", false, "", "", false});
+    other_remote->set_state(NState::SUBMITTED);
+    auto local = family->add_task("local");
+    auto alias = local->add_alias_only();
+    local->set_state(NState::ACTIVE);
+    alias->set_state(NState::SUBMITTED);
+
+    auto incoming = Defs::create();
+    incoming->add_suite("s")->add_family("f")->add_task("replacement");
+    std::string error;
+    BOOST_CHECK(!server.replaceChild("/s", incoming, false, false, error));
+    BOOST_CHECK(error.find("2 tasks or aliases") != std::string::npos);
+    BOOST_CHECK(server.findAbsNode("/s/f/local"));
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_mirrored_container_protects_local_children) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool mirror_suite : {false, true}) {
+        Defs server;
+        auto suite     = server.add_suite("s");
+        auto family    = suite->add_family("f");
+        Node* mirrored = mirror_suite ? static_cast<Node*>(suite.get()) : static_cast<Node*>(family.get());
+        mirrored->addMirror(MirrorAttr{mirrored, "m", "/remote/f", "host", "3141", "60", false, "", "", false});
+        auto local = family->add_task("local");
+        auto alias = local->add_alias_only();
+        local->set_state(NState::ACTIVE);
+        alias->set_state(NState::SUBMITTED);
+
+        auto incoming = Defs::create();
+        incoming->add_suite("s")->add_family("f")->add_task("replacement");
+        std::string error;
+        const auto path = mirror_suite ? "/s" : "/s/f";
+        BOOST_CHECK(!server.replaceChild(path, incoming, false, false, error));
+        BOOST_CHECK(error.find("2 tasks or aliases") != std::string::npos);
+        BOOST_CHECK(server.findAbsNode("/s/f/local"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_active_local_alias_requires_force) {
+    ECF_NAME_THIS_TEST();
+
+    Defs server;
+    auto alias = server.add_suite("s")->add_task("t")->add_alias_only();
+    alias->set_state(NState::ACTIVE);
+    auto incoming = Defs::create();
+    incoming->add_suite("s")->add_task("t")->add_alias_only();
+    std::string error;
+    BOOST_CHECK(!server.replaceChild("/s/t", incoming, false, false, error));
+    BOOST_CHECK(error.find("1 tasks or aliases") != std::string::npos);
+    BOOST_CHECK(server.findAbsNode("/s/t/alias0"));
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_mirror_with_unmirrored_definition) {
+    ECF_NAME_THIS_TEST();
+
+    Defs server;
+    auto old = server.add_suite("s")->add_task("t");
+    old->addMirror(MirrorAttr{old.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    old->set_state(NState::ACTIVE);
+    auto incoming = Defs::create();
+    incoming->add_suite("s")->add_task("t");
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(server.replaceChild("/s/t", incoming, false, false, error), error);
+    auto replacement = server.findAbsNode("/s/t");
+    BOOST_REQUIRE(replacement);
+    BOOST_CHECK(!replacement->isMirror());
+    BOOST_CHECK_EQUAL(replacement->state(), NState::UNKNOWN);
+    BOOST_CHECK_NE(replacement.get(), old.get());
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_mirror_in_begun_suite) {
+    ECF_NAME_THIS_TEST();
+
+    Defs server;
+    auto suite = server.add_suite("s");
+    auto old   = suite->add_task("t");
+    server.beginAll();
+    old->addMirror(MirrorAttr{old.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    old->set_state(NState::ACTIVE);
+    auto incoming = Defs::create();
+    incoming->add_suite("s")->add_task("t");
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(server.replaceChild("/s/t", incoming, false, false, error), error);
+    auto replacement = server.findAbsNode("/s/t");
+    BOOST_REQUIRE(replacement);
+    BOOST_CHECK(suite->begun());
+    BOOST_CHECK(!replacement->isMirror());
+    BOOST_CHECK_EQUAL(replacement->state(), NState::QUEUED);
+    BOOST_CHECK_EQUAL(replacement->isSubmittable()->try_no(), 0);
+}
 
 BOOST_AUTO_TEST_CASE(test_replace_add_task) {
     ECF_NAME_THIS_TEST();

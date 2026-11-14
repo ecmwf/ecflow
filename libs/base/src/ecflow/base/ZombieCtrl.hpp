@@ -40,12 +40,28 @@ public:
                             STC_Cmd_ptr& theReply      // Reply varies according to User Action
     );
 
-    /// Find all *Tasks* beneath the input Node, that are in active or submitted states
-    /// We deliberately ignore aliases (This was requested by Axel)
-    /// Then add as 'USER' zombies. This should be called when commands like, delete, requeue,
-    /// run, are using the force option, and will create zombies.
-    void add_user_zombies(Node*, const std::string& user_cmd);
-    void add_user_zombies(const defs_ptr&, const std::string& user_cmd);
+    ///
+    /// @brief Registers USER zombies for active or submitted local tasks and aliases.
+    ///
+    /// Directly mirrored submittables are excluded; unmirrored children of mirrored
+    /// containers remain eligible when they have local jobs.
+    /// @param[in] node Root of the subtree to inspect.
+    /// @param[in] user_cmd Command responsible for the zombie registration.
+    ///
+    void add_user_zombies(Node* node, const std::string& user_cmd);
+
+    ///
+    /// @brief Registers USER zombies for local submittables in all suites.
+    /// @param[in] defs Definitions whose suites are inspected.
+    /// @param[in] user_cmd Command responsible for the zombie registration.
+    ///
+    void add_user_zombies(const defs_ptr& defs, const std::string& user_cmd);
+
+    ///
+    /// @brief Registers USER zombies for active or submitted local submittables.
+    /// @param[in] tasks Candidate tasks and aliases; directly mirrored nodes are excluded.
+    /// @param[in] user_cmd Command responsible for the zombie registration.
+    ///
     void add_user_zombies(const std::vector<Submittable*>& tasks, const std::string& user_cmd);
 
     /// Returns the list of zombies, **updated** with seconds since creation
