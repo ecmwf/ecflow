@@ -15,6 +15,7 @@ set(test_srcs
   test/TestConnectionDiagnosis.cpp
   test/TestConnectionDiagnosisAgainstPeers.cpp
   test/TestDeleteNodeCmd.cpp
+  test/TestMockServerIdentity.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
   test/TestHelpCatalog.cpp

@@ -102,6 +102,7 @@ if (ENABLE_SERVER)
     test/TestConnectionDiagnosisAgainstServer.cpp
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
+    test/TestPermissionsHarness.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp

@@ -70,7 +70,6 @@ std::vector<std::string> get_affected_paths(const COMMAND& command) {
 
 template <typename COMMAND>
 authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractServer& server) {
-    auto base = dynamic_cast<BaseServer*>(&server);
 
     static_assert(std::is_base_of_v<TaskCmd, COMMAND> || std::is_base_of_v<UserCmd, COMMAND>,
                   "The command must be either a TaskCmd or a UserCmd");
@@ -83,7 +82,7 @@ authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractS
     std::vector<std::string> paths = get_affected_paths(command);
 
     const std::string required_permission = command.isWrite() ? "write" : "read";
-    if (base->authorisation().allows(command.identity(), *base, paths, required_permission)) {
+    if (server.authorisation().allows(command.identity(), server, paths, required_permission)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
 

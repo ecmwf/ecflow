@@ -68,6 +68,34 @@ public:
     ecf::AuthenticationService& authentication() override { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const override { return authentication_service_; }
 
+    ///
+    /// @brief Replaces the authorisation service applied to the requests handled.
+    ///
+    /// @param[in] service The service.
+    ///
+    void set_authorisation(ecf::AuthorisationService service) { authorisation_service_ = std::move(service); }
+
+    ///
+    /// @brief Records a synchronisation reply built by the requests handled.
+    ///
+    struct SyncReply
+    {
+        bool full;        ///< True for a full synchronisation
+        std::string user; ///< The user the reply was built for
+    };
+
+    ///
+    /// @brief Returns the synchronisation replies built so far, oldest first.
+    ///
+    /// @return The replies; the reference stays valid for the lifetime of the server.
+    ///
+    const std::vector<SyncReply>& sync_replies() const { return sync_replies_; }
+
+    /// @copydoc AbstractServer::sync_reply_built
+    void sync_reply_built(bool full, const ecf::Identity& identity) override {
+        sync_replies_.push_back(SyncReply{full, identity.username().value()});
+    }
+
     ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
     const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
 
@@ -129,6 +157,7 @@ private:
 
     ecf::AuthenticationService authentication_service_;
     ecf::AuthorisationService authorisation_service_;
+    std::vector<SyncReply> sync_replies_;
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

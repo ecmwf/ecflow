@@ -10,6 +10,7 @@ ecflow_add_library(
   SOURCES
     # Headers
     InvokeServer.hpp
+    PermissionsServer.hpp
     SCPort.hpp
     # Sources
     SCPort.cpp

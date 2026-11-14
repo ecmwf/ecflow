@@ -12,6 +12,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -124,6 +125,13 @@ void CSyncCmd::do_log(AbstractServer* as) const {
     ClientToServerCmd::do_log(as);
 }
 
+STC_Cmd_ptr CSyncCmd::observed(STC_Cmd_ptr reply, AbstractServer* as) const {
+    if (const auto* sync = dynamic_cast<const SSyncCmd*>(reply.get()); sync) {
+        as->sync_reply_built(sync->full_sync(), identity());
+    }
+    return reply;
+}
+
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
     // If no defs not loaded, SSyncCmd and SNewsCmd do nothing. This is a valid state, hence do not error for this
     // request
@@ -146,16 +154,18 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
         }
         case CSyncCmd::SYNC: {
             as->update_stats().sync_++;
-            return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            return observed(
+                PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as), as);
         }
         case CSyncCmd::SYNC_FULL: {
             as->update_stats().sync_full_++;
-            return PreAllocatedReply::sync_full_cmd(client_handle_, as);
+            return observed(PreAllocatedReply::sync_full_cmd(client_handle_, as), as);
         }
         case CSyncCmd::SYNC_CLOCK: {
             as->update_stats().sync_clock_++;
-            return PreAllocatedReply::sync_clock_cmd(
-                client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            return observed(PreAllocatedReply::sync_clock_cmd(
+                                client_handle_, client_state_change_no_, client_modify_change_no_, as),
+                            as);
         }
     }
 

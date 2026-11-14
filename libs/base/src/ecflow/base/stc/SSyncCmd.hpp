@@ -67,6 +67,19 @@ private:
 
 private:
     bool full_defs_{false};
+
+public:
+    ///
+    /// @brief Returns whether the reply is a full synchronisation rather than incremental changes.
+    ///
+    /// A full synchronisation carries either the whole definitions or, for a client handle, the definitions of its
+    /// suites; the client classifies the reply the same way (ServerReply::full_sync).
+    ///
+    /// @return True for a full synchronisation.
+    ///
+    [[nodiscard]] bool full_sync() const { return full_defs_ || !server_defs_.empty(); }
+
+private:
     DefsDelta incremental_changes_;
     std::string server_defs_;                // for returning a subset of the suites
     std::string full_server_defs_as_string_; // semi-persisted, i.e on load & not on saving, used to return cached defs

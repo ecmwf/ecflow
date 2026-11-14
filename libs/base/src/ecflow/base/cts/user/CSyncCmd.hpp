@@ -59,6 +59,9 @@ private:
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
+    // Reports a synchronisation reply to the server, which tests observe (see AbstractServer::sync_reply_built)
+    STC_Cmd_ptr observed(STC_Cmd_ptr reply, AbstractServer* as) const;
+
     Api api_{SYNC};
     mutable int client_handle_{0};
     int client_state_change_no_{0};

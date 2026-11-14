@@ -129,6 +129,16 @@ public:
     virtual ecf::AuthorisationService& authorisation()             = 0;
     virtual const ecf::AuthorisationService& authorisation() const = 0;
 
+    ///
+    /// @brief Observes a synchronisation reply, once built, so that tests can tell its kind and its requester.
+    ///
+    /// The server does nothing; a test server records the replies.
+    ///
+    /// @param[in] full True for a full synchronisation, false for an incremental one
+    /// @param[in] identity The identity the reply was built for
+    ///
+    virtual void sync_reply_built(bool full, const ecf::Identity& identity) {}
+
     /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()
     /// command on the server). If already locked does nothing and return's false
