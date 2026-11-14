@@ -60,7 +60,8 @@ inline std::string encrypted_password(const std::string& password, const std::st
 ///
 /// The server runs in a directory of its own, from a configuration file `<host>.<port>.ecf.cfg` holding the given
 /// server Permissions attribute, if any. Every identity is listed, with its password, in both password files of the
-/// server, which therefore authenticate no other user, the user running the test included. Every request, set-up and
+/// server, which therefore authenticate no other user, the user running the test included (unless the server is
+/// open to the login user). Every request, set-up and
 /// tear-down included, is issued under explicit credentials.
 ///
 /// The environment variables read by servers and clients are cleared for the lifetime of the object, before the port
@@ -77,10 +78,11 @@ public:
     /// @param[in] users Further identities, listed in the password files
     /// @param[in] permissions The server Permissions attribute, as its JSON form; none when empty
     /// @param[in] timeout The time allowed for the server to answer
-    /// @param[in] fixed_port A port to use instead of reserving one, for tests of the harness itself; it is neither
-    /// locked
-    ///            nor released by the harness
+    /// @param[in] fixed_port A port to use instead of reserving one, for tests of the harness itself; the harness
+    ///            neither locks nor releases it
     /// @param[in] executable An executable to launch instead of ecflow_server, for tests of the harness itself
+    /// @param[in] open_to_login_user When true, the server has no password file for users that are not custom, so
+    ///            that the user running the test is authenticated without a password, as the REST service requires
     /// @throws std::runtime_error when the server does not answer within the timeout, or another server answers; the
     ///         process launched, if any, is killed (never sent a request) and the port released.
     /// @throws std::exception when the process cannot be launched, with the same cleanup.
@@ -90,7 +92,8 @@ public:
                       const std::string& permissions,
                       std::chrono::seconds timeout                 = std::chrono::seconds(30),
                       const std::optional<std::string>& fixed_port = std::nullopt,
-                      const std::optional<fs::path>& executable    = std::nullopt)
+                      const std::optional<fs::path>& executable    = std::nullopt,
+                      bool open_to_login_user                      = false)
         : administrator_{std::move(admin)},
           users_{std::move(users)},
           cleared_{cleared_environment()},
@@ -98,7 +101,9 @@ public:
           directory_{scaffold::MakeDirectory{}.create()} {
         try {
             const auto host = Host{}.name();
-            write_passwords(home() / Host{}.prefix_host_and_port(port(), Ecf::PASSWD_FILE()));
+            if (!open_to_login_user) {
+                write_passwords(home() / Host{}.prefix_host_and_port(port(), Ecf::PASSWD_FILE()));
+            }
             write_passwords(home() / Host{}.prefix_host_and_port(port(), Ecf::CUSTOM_PASSWD_FILE()));
             std::ofstream(directory_.path() / (host + "." + port() + ".ecf.cfg"))
                 << R"({"version": 1, "ecflow": {"server": {)"
@@ -262,6 +267,7 @@ private:
                                  "ECF_SSL",
                                  "ECF_USER",
                                  "ECF_HOST",
+                                 "ECF_HOST_PROTOCOL",
                                  "ECF_PASSWORD"}) {
             cleared.emplace_back(name);
         }
