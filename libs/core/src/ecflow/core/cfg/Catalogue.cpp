@@ -4,14 +4,18 @@
 #include "ecflow/core/cfg/Catalogue.hpp"
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <utility>
+
+#include "ecflow/core/cfg/CTree.hpp"
+#include "ecflow/core/cfg/JsonReader.hpp"
 
 namespace ecf::cfg {
 
 namespace {
 
-std::string quoted(std::string_view text) {
+std::string in_quotes(std::string_view text) {
     return "'" + std::string(text) + "'";
 }
 
@@ -23,12 +27,15 @@ const char* type_name(Type type) {
             return "an integer";
         case Type::Text:
             return "a text";
+        case Type::Json:
+            return "a JSON array or object";
     }
     return "a value";
 }
 
 Type type_of(const Value& value) {
-    static constexpr Type types[] = {Type::Boolean, Type::Integer, Type::Text};
+    static constexpr std::array<Type, std::variant_size_v<Value>> types{
+        Type::Boolean, Type::Integer, Type::Text, Type::Json};
     return types[value.index()];
 }
 
@@ -39,7 +46,10 @@ std::string describe(const Value& value) {
     if (const auto* i = std::get_if<std::int64_t>(&value)) {
         return std::to_string(*i);
     }
-    return quoted(std::get<std::string>(value));
+    if (const auto* j = std::get_if<Json>(&value)) {
+        return j->text;
+    }
+    return in_quotes(std::get<std::string>(value));
 }
 
 std::string join(const std::vector<std::string>& texts) {
@@ -60,7 +70,7 @@ std::string path_of(const Key& key) {
 }
 
 InvalidValue::InvalidValue(Key key, std::string value, std::string reason)
-    : ConfigurationError("Invalid value " + value + " for " + quoted(key.key()) + ": " + reason),
+    : ConfigurationError("Invalid value " + value + " for " + in_quotes(key.key()) + ": " + reason),
       key_{std::move(key)},
       value_{std::move(value)},
       reason_{std::move(reason)} {
@@ -136,9 +146,9 @@ Setting::Setting(Key key, Type type, std::optional<Value> default_value, Names n
       check_{std::move(check)},
       parse_{std::move(parse)} {
     if (names_.ecf_cfg && *names_.ecf_cfg != path_of(key_)) {
-        throw ConfigurationError("Configuration setting " + quoted(key_.key()) + " is named " +
-                                 quoted(*names_.ecf_cfg) + " in the configuration file, instead of " +
-                                 quoted(path_of(key_)));
+        throw ConfigurationError("Configuration setting " + in_quotes(key_.key()) + " is named " +
+                                 in_quotes(*names_.ecf_cfg) + " in the configuration file, instead of " +
+                                 in_quotes(path_of(key_)));
     }
     if (default_value_) {
         this->check(*default_value_); // the parameter named check is moved into check_
@@ -146,7 +156,7 @@ Setting::Setting(Key key, Type type, std::optional<Value> default_value, Names n
 }
 
 Value Setting::parse(std::string_view text) const {
-    auto refuse = [this, text](const std::string& reason) { return InvalidValue(key_, quoted(text), reason); };
+    auto refuse = [this, text](const std::string& reason) { return InvalidValue(key_, in_quotes(text), reason); };
 
     Value value;
     if (parse_) {
@@ -179,6 +189,21 @@ Value Setting::parse(std::string_view text) const {
             case Type::Text:
                 value = Value(std::in_place_type<std::string>, text);
                 break;
+            case Type::Json: {
+                std::optional<CTree> tree;
+                try {
+                    tree = JsonReader().read(text, "value");
+                }
+                catch (const ConfigurationError& e) {
+                    throw refuse(std::string("expected a JSON array or object: ") + e.what());
+                }
+                if (!std::holds_alternative<CTree::Sequence>(tree->node()) &&
+                    !std::holds_alternative<CTree::Mapping>(tree->node())) {
+                    throw refuse("expected a JSON array or object");
+                }
+                value = Value(Json{to_compact_json(*tree)});
+                break;
+            }
         }
     }
     try {
@@ -214,7 +239,7 @@ Catalogue::Catalogue(std::vector<Setting> settings)
     const auto same = [](const Setting& lhs, const Setting& rhs) { return lhs.key() == rhs.key(); };
     if (const auto duplicate = std::adjacent_find(settings_.begin(), settings_.end(), same);
         duplicate != settings_.end()) {
-        throw ConfigurationError("Configuration setting " + quoted(duplicate->key().key()) +
+        throw ConfigurationError("Configuration setting " + in_quotes(duplicate->key().key()) +
                                  " is declared more than once");
     }
 
@@ -228,9 +253,9 @@ Catalogue::Catalogue(std::vector<Setting> settings)
         const auto& [outer, outer_key] = paths[i - 1];
         const auto& [inner, inner_key] = paths[i];
         if (inner == outer || inner.rfind(outer + "/", 0) == 0) {
-            throw ConfigurationError("Configuration settings " + quoted(outer_key->key()) + " and " +
-                                     quoted(inner_key->key()) + " are ambiguous: they designate overlapping paths, " +
-                                     quoted(outer) + " and " + quoted(inner));
+            throw ConfigurationError(
+                "Configuration settings " + in_quotes(outer_key->key()) + " and " + in_quotes(inner_key->key()) +
+                " are ambiguous: they designate overlapping paths, " + in_quotes(outer) + " and " + in_quotes(inner));
         }
     }
 }
@@ -264,7 +289,7 @@ Layer defaults_layer(const Catalogue& catalogue) {
 const Setting& Catalogue::get(const Key& key) const {
     const auto* setting = find(key);
     if (!setting) {
-        throw ConfigurationError("Unknown configuration key " + quoted(key.key()));
+        throw ConfigurationError("Unknown configuration key " + in_quotes(key.key()));
     }
     return *setting;
 }

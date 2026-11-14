@@ -17,9 +17,37 @@
 namespace ecf::cfg {
 
 ///
+/// @brief Holds a structured configuration value: a JSON array or object, as compact JSON text.
+///
+/// The text keeps the members of objects in document order, and holds no white space outside strings.
+///
+struct Json
+{
+    std::string text; ///< The compact JSON text, e.g. `[{"user":"alice"}]`
+
+    ///
+    /// @brief Returns whether two values hold the same text.
+    ///
+    /// @param lhs A value.
+    /// @param rhs Another value.
+    /// @return true when the texts are equal.
+    ///
+    friend bool operator==(const Json& lhs, const Json& rhs) { return lhs.text == rhs.text; }
+
+    ///
+    /// @brief Returns whether two values hold different texts.
+    ///
+    /// @param lhs A value.
+    /// @param rhs Another value.
+    /// @return true when the texts differ.
+    ///
+    friend bool operator!=(const Json& lhs, const Json& rhs) { return !(lhs == rhs); }
+};
+
+///
 /// @brief Holds the typed value of a configuration entry.
 ///
-using Value = std::variant<bool, std::int64_t, std::string>;
+using Value = std::variant<bool, std::int64_t, std::string, Json>;
 
 ///
 /// @brief Implementation details of the configuration, used to decide how a value is stored.
@@ -81,6 +109,7 @@ inline constexpr bool is_storable_integer_v = std::is_integral_v<T> && !std::is_
 ///
 ///   - Value:                                                 stored as is;
 ///   - `bool`:                                                `bool`;
+///   - Json:                                                  Json;
 ///   - an integer type accepted by is_storable_integer_v:     `std::int64_t`;
 ///   - a type convertible to `std::string_view`, such as a
 ///     string literal, `const char*`, `std::string` or
@@ -91,8 +120,9 @@ inline constexpr bool is_storable_integer_v = std::is_integral_v<T> && !std::is_
 /// @tparam T The type of the argument, possibly a reference and possibly qualified
 ///
 template <typename T>
-inline constexpr bool is_settable_v = std::is_same_v<bare_t<T>, Value> || std::is_same_v<bare_t<T>, bool> ||
-                                      is_storable_integer_v<bare_t<T>> || std::is_convertible_v<T, std::string_view>;
+inline constexpr bool is_settable_v =
+    std::is_same_v<bare_t<T>, Value> || std::is_same_v<bare_t<T>, bool> || std::is_same_v<bare_t<T>, Json> ||
+    is_storable_integer_v<bare_t<T>> || std::is_convertible_v<T, std::string_view>;
 
 } // namespace detail
 
@@ -260,6 +290,7 @@ public:
     ///
     ///   - Value:                                            stored as is;
     ///   - `bool`:                                           `bool`;
+    ///   - Json:                                             Json, a structured value;
     ///   - an integer type, except the character types and
     ///     the unsigned types of 64 bits or more:            `std::int64_t`;
     ///   - a type convertible to `std::string_view`:        `std::string`; a string literal is never a `bool`.
@@ -275,14 +306,17 @@ public:
     template <typename T>
     void set(std::string_view layer, const Key& key, T&& value) {
         static_assert(detail::is_settable_v<T>,
-                      "A configuration value is a Value, a bool, an integer fitting in std::int64_t (not a "
-                      "character), or text convertible to std::string_view");
+                      "A configuration value is a Value, a bool, a Json, an integer fitting in std::int64_t (not "
+                      "a character), or text convertible to std::string_view");
         using B = detail::bare_t<T>;
         if constexpr (std::is_same_v<B, Value>) {
             store(layer, key, std::forward<T>(value));
         }
         else if constexpr (std::is_same_v<B, bool>) {
             store(layer, key, Value(std::in_place_type<bool>, value));
+        }
+        else if constexpr (std::is_same_v<B, Json>) {
+            store(layer, key, Value(std::in_place_type<Json>, std::forward<T>(value)));
         }
         else if constexpr (detail::is_storable_integer_v<B>) {
             store(layer, key, Value(std::in_place_type<std::int64_t>, static_cast<std::int64_t>(value)));
