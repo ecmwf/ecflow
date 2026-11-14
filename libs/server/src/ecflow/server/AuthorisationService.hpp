@@ -64,8 +64,13 @@ public:
                 const paths_t& paths,
                 const std::string& permission) const;
 
+    ///
+    /// @brief Creates a service that allows every request, used when no white list file is configured.
+    ///
+    /// @return A successful result holding the unrestricted service. Never fails.
+    ///
     [[nodiscard]]
-    static result_t load_permissions_from_nodes();
+    static result_t make_unrestricted();
     static result_t load_permissions_from_whitelist(const WhiteListFile& whitelist);
 
 private:

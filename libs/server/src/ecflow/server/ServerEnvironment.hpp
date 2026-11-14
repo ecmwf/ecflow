@@ -303,8 +303,8 @@ private:
     ///
     /// @brief Logs the authorisation in force: its mode, the whitelist file, and the access of each user.
     ///
-    /// The mode is `whitelist` once a whitelist file is loaded, and `nodes` otherwise, i.e. the permissions of the
-    /// nodes apply.
+    /// The mode is `whitelist` once a whitelist file is loaded, and `unrestricted` otherwise. A server Permissions
+    /// attribute, when configured, takes precedence: the mode in force is then logged in the Permissions summary.
     ///
     void log_authorisation() const;
 

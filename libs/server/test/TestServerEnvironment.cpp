@@ -16,6 +16,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "MockServer.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -31,6 +32,7 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
@@ -3219,7 +3221,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_from_whitelist) 
 }
 
 ///
-/// @brief Verifies that the log states the authorisation in force without a whitelist: the permissions of the nodes.
+/// @brief Verifies that the log states the authorisation in force without a whitelist: no restriction.
 ///
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelist) {
     ECF_NAME_THIS_TEST();
@@ -3233,10 +3235,37 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelis
     BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
 
     const std::vector<std::string> expected{
-        "Mode = nodes",
+        "Mode = unrestricted",
         "ECF_LISTS (" + (fs::current_path() / (Host{}.name() + ".3144.ecf.lists")).string() + ") = absent"};
     const auto actual = last_block("Authorisation:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that, without a whitelist, a variable named PERMISSIONS restricts no user, at server level or on a
+///        node.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_ignores_permissions_variable) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    auto defs = Defs::create();
+    defs->server_state().add_or_update_user_variables("PERMISSIONS", "alice");
+    defs->add_suite("s")->addVariable(Variable("PERMISSIONS", "alice"));
+    MockServer server(defs);
+
+    const auto bob = ecf::Identity::make_user("bob", "");
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "read"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "write"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "/s", "read"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "/s", "write"));
 }
 
 ///

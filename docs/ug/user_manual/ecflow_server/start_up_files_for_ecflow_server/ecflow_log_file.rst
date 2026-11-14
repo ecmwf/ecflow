@@ -297,8 +297,7 @@ The authorisation block lists:
 - ``Mode``: the permissions applied:
 
   - ``whitelist``:   those of the whitelist file;
-  - ``nodes``:       those of the nodes, given by ``ECF_PERMISSIONS``; without a whitelist file, and where no node
-    defines permissions, all users have read/write access.
+  - ``unrestricted``: none; without a whitelist file, all users have read/write access.
 
 - ``ECF_LISTS``: the whitelist file, by absolute path, ``loaded`` or ``absent``.
 - ``Users``: only with a whitelist, the access of each user, one ``<user> = <access>`` entry per user, ordered by

@@ -220,8 +220,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    // The permissions of the nodes apply, unless replaced by those of a whitelist file
-    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
+    // Access is unrestricted, unless restricted by a whitelist file
+    if (auto result = AuthorisationService::make_unrestricted(); result.ok()) {
         authorisation_service_ = result.value();
     }
 
@@ -362,10 +362,11 @@ std::vector<std::string> ServerEnvironment::authentication_lines() const {
 }
 
 std::vector<std::string> ServerEnvironment::authorisation_lines() const {
-    // The whitelist, once loaded, replaces the permissions of the nodes
+    // The whitelist, once loaded, restricts access; without it, access is unrestricted
     const bool whitelist = !white_list_file_.path().empty();
 
-    std::vector<std::string> lines{"Authorisation:", std::string("  Mode = ") + (whitelist ? "whitelist" : "nodes")};
+    std::vector<std::string> lines{"Authorisation:",
+                                   std::string("  Mode = ") + (whitelist ? "whitelist" : "unrestricted")};
     if (ecf_white_list_file_.empty()) {
         lines.emplace_back("  ECF_LISTS = not set");
     }

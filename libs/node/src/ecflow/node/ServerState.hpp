@@ -8,7 +8,6 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
-#include "ecflow/node/Permissions.hpp"
 
 /// This class stores the server state, so that it is accessible by the node tree
 ///
@@ -40,8 +39,6 @@ public:
 
     /// This does compare server variables. Used in testing
     bool compare(const ServerState& rhs) const;
-
-    ecf::Permissions permissions() const { return ecf::Permissions::find_in(user_variables_); }
 
     void sort_variables();
 
