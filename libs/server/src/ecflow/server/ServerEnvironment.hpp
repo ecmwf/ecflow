@@ -13,12 +13,14 @@
 ///
 
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/asio.hpp>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/CommandLine.hpp"
@@ -194,6 +196,13 @@ public:
 
     ecf::AuthenticationService& authentication() { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const { return authentication_service_; }
+
+    ///
+    /// @brief Returns the server Permissions attribute given by the configuration file.
+    ///
+    /// @return The attribute, or nullptr when the configuration file gives none.
+    ///
+    const ecf::Permissions* permissions() const { return permissions_ ? &*permissions_ : nullptr; }
 
     ecf::AuthorisationService& authorisation() { return authorisation_service_; }
     const ecf::AuthorisationService& authorisation() const { return authorisation_service_; }
@@ -388,6 +397,7 @@ private:
     mutable bool access_loaded_{false}; ///< Whether valid() loaded the authentication and authorisation
     mutable ecf::AuthenticationService authentication_service_;
     mutable ecf::AuthorisationService authorisation_service_;
+    std::optional<ecf::Permissions> permissions_; // the server attribute of the configuration file, if any
 
 #ifdef ECF_OPENSSL
     ecf::Openssl ssl_;

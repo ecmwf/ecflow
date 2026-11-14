@@ -18,4 +18,7 @@ public:
     const char* keyword() const override { return "permissions"; }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+
+private:
+    bool server_attribute_read_{false}; // a server attribute was read from the document being parsed
 };

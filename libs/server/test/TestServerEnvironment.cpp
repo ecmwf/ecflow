@@ -3295,6 +3295,51 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_after_reload) {
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
 
+///
+/// @brief Verifies that the server attribute is read from the configuration file, and absent otherwise.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions) {
+    ECF_NAME_THIS_TEST();
+
+    check_server_with_file(
+        WithConfigurationFile{
+            std::nullopt,
+            "3141",
+            configuration_document(
+                "",
+                R"("permissions": [{"user": "bob", "permissions": "r"}, {"user": "alice", "permissions": "rwxlops"}])")},
+        [](const ServerEnvironment& serverEnv) {
+            BOOST_REQUIRE(serverEnv.permissions() != nullptr);
+            BOOST_CHECK_EQUAL(serverEnv.permissions()->to_cli(), "alice:rwxlops,bob:r");
+        });
+
+    check_server_with_file(WithConfigurationFile{std::nullopt, "3141", configuration_document(R"("ECF_URL": "x")")},
+                           [](const ServerEnvironment& serverEnv) { BOOST_CHECK(serverEnv.permissions() == nullptr); });
+}
+
+///
+/// @brief Verifies that an invalid server attribute in the configuration file stops the start-up, naming the setting.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions_refused) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::pair<std::string, std::string>> cases{
+        {R"("permissions": "alice:r")", "/ecflow/server/permissions: expected an array or an object, not a string"},
+        {R"("permissions": [])", "/ecflow/server/permissions: Invalid Permissions: no entry"},
+        {R"("permissions": {"user": "alice", "permissions": "r"})",
+         "/ecflow/server/permissions: Invalid Permissions: the JSON form is not a list"},
+        {R"("permissions": [{"user": "alice", "permissions": "rq"}])",
+         "/ecflow/server/permissions: Invalid Permissions: unknown letter 'q'"},
+        {R"("permissions": [{"user": "*", "permissions": "r"}])", "/ecflow/server/permissions: Invalid Permissions:"},
+    };
+    for (const auto& [options, expected] : cases) {
+        BOOST_TEST_CONTEXT("options: " << options) {
+            check_server_refused_with_file(
+                WithConfigurationFile{std::nullopt, "3141", configuration_document("", options)}, expected);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -4,7 +4,9 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -82,6 +84,25 @@ public:
     bool jobGeneration() const { return jobGeneration_; } // testing may disable job generation
     void jobGeneration(bool f) { jobGeneration_ = f; }
 
+    ///
+    /// @brief Returns the server Permissions attribute.
+    ///
+    /// @return The attribute, or nullptr when the server has none; valid until the attribute changes.
+    ///
+    const ecf::Permissions* permissions() const { return permissions_ ? &*permissions_ : nullptr; }
+
+    ///
+    /// @brief Sets the server Permissions attribute, replacing any previous one.
+    ///
+    /// @param permissions The attribute.
+    ///
+    void set_permissions(const ecf::Permissions& permissions);
+
+    ///
+    /// @brief Removes the server Permissions attribute.
+    ///
+    void clear_permissions();
+
     void set_state(SState::State s);
     SState::State get_state() const { return server_state_; }
     static SState::State default_state() { return SState::RUNNING; }
@@ -114,6 +135,7 @@ private:
 
     std::pair<std::string, std::string> hostPort_; // NOT persisted, set by server hence no need to persist
     bool jobGeneration_{true};                     // NOT persisted, since set in the server
+    std::optional<ecf::Permissions> permissions_;  // persisted last, in the state styles and with cereal
 
 private:
     friend class cereal::access;

@@ -286,6 +286,27 @@ Each block is written again after a successful reload:
   ``--reloadcustompasswdfile``;
 - ``Authorisation``: of the :ref:`whitelist <ecflow_white_list_file>`, with ``ecflow_client --reloadwsfile``.
 
+Once the checkpoint is loaded, at start-up and after ``ecflow_client --restore_from_checkpt``, and after a reload of
+the whitelist, the server also summarises the :ref:`Permissions attributes <permissions_attribute>` in force:
+
+.. code-block:: text
+
+  MSG:[12:00:00 18.10.2026] Permissions:
+  MSG:[12:00:00 18.10.2026]   Source = checkpoint
+  MSG:[12:00:00 18.10.2026]   Users = 3
+  MSG:[12:00:00 18.10.2026]   Sticky users = admin, ops
+  MSG:[12:00:00 18.10.2026]   Nodes with permissions = 12
+
+The block lists:
+
+- ``Source``: where the server attribute in force comes from: ``configuration file``, ``checkpoint`` (which
+  overrides the configuration file), or ``none``;
+- ``Users``: the number of users listed by the server attribute;
+- ``Sticky users``: the users holding a sticky entry in the server attribute, at most ten, or ``none``;
+- ``Nodes with permissions``: the number of nodes carrying an attribute.
+
+The attributes themselves are never logged.
+
 The authentication block lists:
 
 - ``ECF_PASSWD``, ``ECF_CUSTOM_PASSWD``: the password files, by absolute path, ``loaded`` or ``absent``; without a

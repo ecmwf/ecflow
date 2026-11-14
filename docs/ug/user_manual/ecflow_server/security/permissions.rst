@@ -10,8 +10,8 @@ Permissions attribute
   The Permissions attribute is experimental, and its details are subject to change. Users are encouraged to try it
   and provide feedback, but it is **not to be used in production**. The documentation reflects its current operation.
 
-The ``permissions`` attribute lists users and the roles each of them holds. Any node can carry one: suites,
-families, tasks and aliases.
+The ``permissions`` attribute lists users and the roles each of them holds. The server can carry one, configured
+in ``<host>.<port>.ecf.cfg``, and so can any node: suites, families, tasks and aliases.
 
 Roles and flag
 ==============
@@ -73,6 +73,73 @@ Rules:
 - each user is listed at most once;
 - each entry grants at least one role (an entry holding only ``s`` is invalid);
 - an invalid value is rejected wherever it is given, never ignored or replaced.
+
+.. _permissions_attribute_server:
+
+Server attribute
+================
+
+The server attribute is set by the setting ``/ecflow/server/permissions`` of the configuration file
+``<host>.<port>.ecf.cfg`` (see :ref:`server_configuration_file`), in the JSON form:
+
+.. code-block:: json
+
+   {
+     "version": 1,
+     "ecflow": {
+       "server": {
+         "permissions": [{"user": "admin", "permissions": "rwxlops"}, {"user": "ops", "permissions": "rx"}]
+       }
+     }
+   }
+
+At start-up, and with ``ecflow_client --restore_from_checkpt``:
+
+- the configuration file is read first, then the checkpoint;
+- a server attribute in the checkpoint overrides that of the configuration file;
+- a checkpoint carrying a server attribute, while the configuration file sets none, stops the start-up (and makes
+  the restore fail).
+
+An invalid server attribute in the configuration file stops the start-up, before the log file is created. The log
+summarises the attributes in force (see :ref:`ecflow_log_file`). Definitions cannot set the server attribute; it
+appears only in checkpoints and in the definitions sent to clients.
+
+.. _permissions_attribute_compatibility:
+
+Compatibility with other versions
+=================================
+
+The attribute is available from ecFlow 5.20.0:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Situation
+     - Behaviour
+   * - Server 5.20.0 or later, without Permissions attributes
+     - Works with clients of any supported version; its checkpoints can be loaded by older servers.
+   * - Server 5.20.0 or later, with Permissions attributes
+     - Requires clients of version 5.20.0 or later, which the server does not enforce; its checkpoints carry the
+       attributes, which older servers cannot load.
+   * - Downgrade of a server that uses Permissions attributes
+     - Requires removing, by hand, the server attribute from ``<host>.<port>.ecf.cfg``, and every Permissions
+       attribute from the primary and backup checkpoints, before starting the older server.
+
+.. _permissions_attribute_unrestricted:
+
+Making a server unrestricted again
+==================================
+
+A server becomes unrestricted only through its configuration and a restart:
+
+#. stop the server;
+#. remove ``/ecflow/server/permissions`` from ``<host>.<port>.ecf.cfg``;
+#. remove the server attribute and every node attribute (the ``permissions`` lines) from the primary and the backup
+   checkpoints;
+#. start the server.
+
+Otherwise, a checkpoint that still carries a server attribute stops the start-up.
 
 .. _permissions_attribute_users:
 

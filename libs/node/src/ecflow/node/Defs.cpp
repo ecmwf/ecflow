@@ -78,6 +78,12 @@ void Defs::copy_defs_state_only(const defs_ptr& server_defs) {
     server_state().set_state(server_defs->server_state().get_state());
     server_state().set_user_variables(server_defs->server_state().user_variables());
     server_state().set_server_variables(server_defs->server_state().server_variables());
+    if (const auto* permissions = server_defs->server_state().permissions(); permissions) {
+        server_state().set_permissions(*permissions);
+    }
+    else {
+        server_state().clear_permissions();
+    }
 }
 
 Defs& Defs::operator=(const Defs& rhs) {

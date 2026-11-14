@@ -2304,6 +2304,11 @@ private:
             writer_t::write(output, variable, ctx, writer_t::empty, writer_t::server_variable_suffix);
         }
 
+        // Write the server Permissions attribute; read back by PermissionsParser at the top level of a state file
+        if (const auto* permissions = item.server_state().permissions(); permissions) {
+            Writer<Permissions, Stream>::write(output, *permissions, ctx);
+        }
+
         // READ by Defs::read_history()
         // We need to define a separator for the message, will to allow it to be re-read
         // This separator cannot be :

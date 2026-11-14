@@ -8,6 +8,7 @@
 #include <optional>
 #include <vector>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -614,6 +615,18 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
     if (const auto found = ecf_cfg.entries.find(variable("ECF_PORT")); found != ecf_cfg.entries.end()) {
         if (const auto value = std::to_string(std::get<std::int64_t>(found->second)); value != port) {
             throw refuse("ECF_PORT", value, "port", port);
+        }
+    }
+
+    // The server Permissions attribute is checked as the value it stands for
+    permissions_.reset();
+    if (const auto found = ecf_cfg.entries.find(ecf::cfg::Key::for_option("ecflow.server.permissions"));
+        found != ecf_cfg.entries.end()) {
+        try {
+            permissions_ = ecf::Permissions::parse_json(std::get<ecf::cfg::Json>(found->second).text);
+        }
+        catch (const std::runtime_error& e) {
+            throw ecf::cfg::ConfigurationError(file + ": /ecflow/server/permissions: " + e.what());
         }
     }
 

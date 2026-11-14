@@ -401,6 +401,18 @@ std::vector<Setting> server_settings() {
                 std::nullopt,                          // env
                 std::nullopt                           // cli
             }),
+
+        // The server Permissions attribute, as its JSON form; validated by the server
+        Setting(
+            Key::for_option("ecflow.server.permissions"),
+            Type::Json,
+            std::nullopt,
+            Names{
+                std::nullopt,                          // env_cfg
+                "/ecflow/server/permissions",          // ecf_cfg
+                std::nullopt,                          // env
+                std::nullopt                           // cli
+            }),
     };
     // clang-format on
 }

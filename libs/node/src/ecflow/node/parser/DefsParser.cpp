@@ -479,6 +479,7 @@ DefsParser::DefsParser(DefsStructureParser* p)
     addParser(new SuiteParser(p));
     addParser(new VariableParser(p, true));
     addParser(new ExternParser(p));
+    addParser(new PermissionsParser(p)); // the server attribute, in state files only
 
     // for defs stat only
     addParser(new DefsStateParser(p));

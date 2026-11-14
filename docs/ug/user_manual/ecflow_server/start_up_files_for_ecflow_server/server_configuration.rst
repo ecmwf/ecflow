@@ -44,6 +44,7 @@ The values are written as follows:
   command line, a leading ``+`` is also accepted.
 - **Text:** any characters; leading and trailing spaces are removed in ``server_environment.cfg``.
 - **Switch:** a command-line option without a value, e.g. ``--http``; giving it sets the setting.
+- **JSON:** in ``<host>.<port>.ecf.cfg`` only, a JSON array, checked as the value it stands for.
 
 Settings
 ========
@@ -234,6 +235,13 @@ Settings
      - no
      - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/log/commands/enabled``: ``true`` records the spawned
        commands in the log, see :ref:`ecflow_log_file_commands`
+   * - Server Permissions attribute
+     - none
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/permissions``: the JSON form of the server
+       Permissions attribute, see :ref:`permissions_attribute_server`
 
 Notes:
 

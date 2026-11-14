@@ -6,14 +6,17 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Operations.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
@@ -78,6 +81,10 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
         // No check pt files loaded, update defs, with server state
         update_defs_server_state(); // works on def_
     }
+    if (!apply_server_permissions()) {
+        throw ServerEnvironmentException("Cannot start server: " + unconfigured_permissions_message());
+    }
+    log_permissions_summary();
 
     /// Setup globals used to detect incremental changes to the definition
     Ecf::set_server(true);
@@ -340,7 +347,86 @@ void BaseServer::restore_defs_from_checkpt() {
         throw std::runtime_error("Cannot restore from checkpt the server suites must be deleted first");
     }
 
-    loadCheckPtFile();
+    // The server attribute in force afterwards is that of the checkpoint, or else that of the configuration file
+    defs_->server_state().clear_permissions();
+    try {
+        loadCheckPtFile();
+    }
+    catch (...) {
+        // Whatever failed, the configured attribute stays in force
+        (void)apply_server_permissions();
+        throw;
+    }
+    if (!apply_server_permissions()) {
+        // The server stays as configured: without a server attribute, and without the refused definitions
+        discard_failed_restore();
+        update_defs_server_state();
+        (void)apply_server_permissions();
+        throw std::runtime_error("Cannot restore from checkpt: " + unconfigured_permissions_message());
+    }
+    log_permissions_summary();
+}
+
+bool BaseServer::apply_server_permissions() {
+    const auto* configured = serverEnv_.permissions();
+    if (defs_->server_state().permissions()) {
+        if (!configured) {
+            return false;
+        }
+        permissions_source_ = "checkpoint";
+        return true;
+    }
+    if (configured) {
+        defs_->server_state().set_permissions(*configured);
+        permissions_source_ = "configuration file";
+    }
+    else {
+        permissions_source_ = "none";
+    }
+    return true;
+}
+
+std::string BaseServer::unconfigured_permissions_message() const {
+    return "the checkpoint carries a server Permissions attribute, but the configuration file " +
+           ecf::Host{}.prefix_host_and_port(serverEnv_.the_port(), Ecf::CONFIG_FILE()) +
+           " sets none (/ecflow/server/permissions); remove the Permissions attributes from the checkpoint "
+           "files, or configure a server attribute";
+}
+
+void BaseServer::log_permissions_summary() const {
+    // At most this many sticky users are named
+    constexpr std::size_t max_named = 10;
+
+    const auto* server = defs_->server_state().permissions();
+    std::vector<std::string> sticky;
+    if (server) {
+        for (const auto& entry : server->entries()) {
+            if (entry.sticky) {
+                sticky.push_back(entry.user);
+            }
+        }
+    }
+    std::string named;
+    for (std::size_t i = 0; i < sticky.size() && i < max_named; ++i) {
+        named += (i == 0 ? "" : ", ") + sticky[i];
+    }
+    if (sticky.size() > max_named) {
+        named += ", ... (" + std::to_string(sticky.size() - max_named) + " more)";
+    }
+
+    std::size_t nodes = 0;
+    for (const auto* node : ecf::get_all_nodes(static_cast<const Defs&>(*defs_))) {
+        nodes += node->permissions() ? 1 : 0;
+    }
+
+    for (const auto& line :
+         std::vector<std::string>{"Permissions:",
+                                  "  Source = " + permissions_source_,
+                                  "  Users = " + std::to_string(server ? server->entries().size() : 0),
+                                  "  Sticky users = " + (sticky.empty() ? "none" : named),
+                                  "  Nodes with permissions = " + std::to_string(nodes)}) {
+        ecf::log(Log::MSG, line);
+    }
 }
 
 void BaseServer::nodeTreeStateChanged() {
@@ -469,7 +555,11 @@ bool BaseServer::reloadWhiteListFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
         std::cout << "   BaseServer::reloadWhiteListFile" << std::endl;
     }
-    return serverEnv_.reloadWhiteListFile(errorMsg);
+    if (!serverEnv_.reloadWhiteListFile(errorMsg)) {
+        return false;
+    }
+    log_permissions_summary();
+    return true;
 }
 
 bool BaseServer::lock(const std::string& user) {

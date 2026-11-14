@@ -78,6 +78,15 @@ bool ServerState::operator==(const ServerState& rhs) const {
         return false;
     }
 
+    if (permissions_ != rhs.permissions_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "ServerState: permissions_ differ\n";
+        }
+#endif
+        return false;
+    }
+
     return true;
 }
 
@@ -127,6 +136,15 @@ bool ServerState::compare(const ServerState& rhs) const {
 #endif
         return false;
     }
+    if (permissions_ != rhs.permissions_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "ServerState: permissions_ differ\n";
+        }
+#endif
+        return false;
+    }
+
     return true;
 }
 
@@ -408,6 +426,16 @@ void ServerState::set_user_variables(const std::vector<Variable>& e) {
     variable_state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void ServerState::set_permissions(const ecf::Permissions& permissions) {
+    permissions_     = permissions;
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void ServerState::clear_permissions() {
+    permissions_.reset();
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
 void ServerState::set_state(SState::State s) {
     server_state_    = s;
     state_change_no_ = Ecf::incr_state_change_no();
@@ -499,5 +527,23 @@ template <class Archive>
 void ServerState::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(server_state_), CEREAL_NVP(server_variables_));
     CEREAL_OPTIONAL_NVP(ar, user_variables_, [this]() { return !user_variables_.empty(); });
+
+    // Must remain the last member: a reader that does not know it then reads the other members unchanged. The JSON
+    // form is validated when loaded.
+    if constexpr (Archive::is_saving::value) {
+        if (permissions_) {
+            std::string permissions = permissions_->to_json();
+            ar(cereal::make_nvp("permissions_", permissions));
+        }
+    }
+    else {
+        std::string permissions;
+        if (cereal::make_optional_nvp(ar, "permissions_", permissions)) {
+            permissions_ = ecf::Permissions::parse_json(permissions);
+        }
+        else {
+            permissions_.reset();
+        }
+    }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(ServerState);

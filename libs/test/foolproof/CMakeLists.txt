@@ -52,6 +52,7 @@ ecflow_add_test(
     TestFoolproof.ServerLogCommands.cpp
     TestFoolproof.ServerObservability.cpp
     TestFoolproof.ServerOptions.cpp
+    TestFoolproof.ServerPermissions.cpp
     TestFoolproof.ServerPaths.cpp
     TestFoolproof.ServerRecovery.cpp
     TestFoolproof.ServerReload.cpp
