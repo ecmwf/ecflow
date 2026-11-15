@@ -14,6 +14,7 @@ set(test_srcs
   test/TestCopyConstructor.cpp
   test/TestDefStatus.cpp
   test/TestDefs.cpp
+  test/TestEffectivePermissions.cpp
   test/TestEcfFile.cpp
   test/TestEcfFileLocator.cpp
   test/TestEnviromentSubstitution.cpp

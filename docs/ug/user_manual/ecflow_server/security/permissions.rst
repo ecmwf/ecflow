@@ -74,6 +74,81 @@ Rules:
 - each entry grants at least one role (an entry holding only ``s`` is invalid);
 - an invalid value is rejected wherever it is given, never ignored or replaced.
 
+.. _permissions_attribute_effective:
+
+Effective permissions
+=====================
+
+The roles a user holds on a node, its *effective permissions*, follow from the attributes met on the path from the
+server down to the node. They apply only when the server has a Permissions attribute; otherwise, the server is
+authorised as without Permissions (by the white list file, when one is configured, and without restriction
+otherwise).
+
+The rules are:
+
+- **Admission:** a user must be listed by the server attribute, with ``r``; any other user has no roles at all, and
+  can only ``--ping`` the server, whatever the attributes below grant.
+- **Server:** at the server, the user holds the roles of its server entry.
+- **Suites:** the attribute of a suite replaces the server entry of the user: the suite may grant more roles than the
+  server, or fewer. A suite *without* attribute takes the server entries unchanged: this is deliberate, so that a
+  server attribute alone governs every suite that does not say otherwise.
+- **Below suites:** the attribute of a family, task or alias restricts the inherited roles: the user keeps only the
+  roles granted both above and by the attribute. Below a suite, roles can only be removed, never added.
+- **Complete lists:** an attribute lists every user it grants something to; a user it does not list has no roles from
+  that node down.
+- **Sticky entries:** an entry with the flag ``s`` cannot be weakened below it:
+
+  - at the server, the user always holds the roles of that entry, everywhere, added to whatever the attributes below
+    grant;
+  - on a suite, family, task or alias, the roles reached there are locked: the attributes below neither remove nor add
+    roles, even when they do not list the user.
+
+There are no deny entries: roles are removed by omission, or by restriction below a suite.
+
+Removing a user from an attribute also removes that user from every attribute below it, since no attribute may name
+a user absent from above. An attribute left empty by this removal is itself removed, and its node then inherits from
+above: the users of the upper level may then gain access to that branch. Check the attributes below a node before
+removing a user from it.
+
+Examples, for the user ``alice``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 20 20
+
+   * - Server attribute
+     - Attributes below
+     - Node
+     - Effective roles
+   * - ``alice:rwx``
+     - none
+     - ``/s/f/t``
+     - ``rwx``
+   * - ``alice:r``
+     - ``/s``: ``alice:rwx``
+     - ``/s``
+     - ``rwx``
+   * - ``alice:rwx,bob:r``
+     - ``/s``: ``bob:r``
+     - ``/s``
+     - none
+   * - ``alice:rwx``
+     - ``/s``: ``alice:r``; ``/s/f``: ``alice:rwx``
+     - ``/s/f``
+     - ``r``
+   * - ``alice:rxs,bob:r``
+     - ``/s``: ``bob:r``
+     - ``/s``
+     - ``rx`` (sticky at the server)
+   * - ``alice:rwx``
+     - ``/s``: ``alice:rw``; ``/s/f``: ``alice:rwxs``; ``/s/f/t``: ``alice:r``
+     - ``/s/f/t``
+     - ``rw`` (locked at ``/s/f``)
+   * - ``alice:wx``
+     - ``/s``: ``alice:rwx``
+     - ``/s``
+     - none (no ``r`` at the server)
+
 .. _permissions_attribute_server:
 
 Server attribute
