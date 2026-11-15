@@ -1180,7 +1180,7 @@ void NodeContainer::restore_on_begin_or_requeue() {
     }
 }
 
-void NodeContainer::restore() {
+void NodeContainer::restore(bool remove_archive) {
     if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
         throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
                                          << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set"));
@@ -1219,6 +1219,10 @@ void NodeContainer::restore() {
     get_flag().clear(ecf::Flag::ARCHIVED);                     // clear flag archived
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
+
+    if (!remove_archive) {
+        return; // a copy: the archive remains for the original
+    }
 
     std::string msg = " autorestore ";
     msg += debugNodePath(); // inform user via log

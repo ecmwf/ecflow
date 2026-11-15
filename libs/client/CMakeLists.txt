@@ -103,11 +103,13 @@ if (ENABLE_SERVER)
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
     test/TestPermissionsBenchmarkHelpers.cpp
+    test/TestPermissionsAcceptance.cpp
     test/TestPermissionsAuthorisation.cpp
     test/TestPermissionsDenial.cpp
     test/TestPermissionsNodeRoles.cpp
     test/TestPermissionsRoles.cpp
     test/TestPermissionsHarness.cpp
+    test/TestPermissionsLifecycle.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp

@@ -107,7 +107,15 @@ public:
 
     bool has_archive() const override;
     void archive();
-    void restore();
+    ///
+    /// @brief Restores the children of an archived container from its archive file.
+    ///
+    /// @param[in] remove_archive When true (the default), the archive file is removed and the restore is logged;
+    ///            when false, the archive file and the log are left untouched, e.g. to restore a copy of the container
+    ///            while the archive must remain for the original
+    /// @throws std::runtime_error when the container is not archived, has children, or the archive cannot be read.
+    ///
+    void restore(bool remove_archive = true);
     void remove_archived_files();     // used in delete
     std::string archive_path() const; // can throw if ECF_HOME not defined
 

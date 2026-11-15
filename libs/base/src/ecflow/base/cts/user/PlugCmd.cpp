@@ -3,7 +3,12 @@
 
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 
+#include <algorithm>
+#include <memory>
 #include <stdexcept>
+#include <system_error>
+#include <utility>
+#include <vector>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -14,9 +19,13 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
@@ -46,14 +55,80 @@ private:
     AbstractServer* as_;
 };
 
-static void restore(NodeContainer* container) {
-    if (container && container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
-        container->restore();
-        std::vector<family_ptr> family_vec = container->familyVec();
-        for (family_ptr node : family_vec) {
-            restore(node->isNodeContainer());
-        }
+// Restores every archived container of a source, at any depth, top down; the archive files are removed unless they
+// must remain (restoring a copy), and the paths of the archives read are recorded
+void restore(NodeContainer* container, bool remove_archive, std::vector<std::string>& archives) {
+    if (!container) {
+        return;
     }
+    if (container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
+        archives.push_back(container->archive_path());
+        container->restore(remove_archive);
+    }
+    for (const family_ptr& family : container->familyVec()) {
+        restore(family->isNodeContainer(), remove_archive, archives);
+    }
+}
+
+// Returns whether a node, or a node below it, is archived
+bool holds_archives(const Node& node) {
+    if (node.get_flag().is_set(ecf::Flag::ARCHIVED)) {
+        return true;
+    }
+    std::vector<node_ptr> children;
+    node.immediateChildren(children);
+    return std::any_of(children.begin(), children.end(), [](const node_ptr& c) { return holds_archives(*c); });
+}
+
+// Leaves the change numbers of the server untouched while it lives
+class OutsideTheServer {
+public:
+    OutsideTheServer()
+        : was_server_{Ecf::server()} {
+        Ecf::set_server(false);
+    }
+    OutsideTheServer(const OutsideTheServer&)            = delete;
+    OutsideTheServer& operator=(const OutsideTheServer&) = delete;
+    ~OutsideTheServer() { Ecf::set_server(was_server_); }
+
+private:
+    bool was_server_;
+};
+
+///
+/// Builds what a plug to another server sends: a copy of the source, its archived containers restored from their
+/// archive files, which remain. The live source, its archive files and the change numbers of the server are left
+/// untouched, so that a plug refused by the receiving server changes nothing.
+///
+/// @param[in] source The source, in the definitions of this server; it holds archived containers
+/// @param[out] archives The archive files read, to remove once the plug has taken place
+/// @return The scratch definitions holding the copy, at the path of the source, under a shallow copy of its
+///         ancestors (so that the archive paths and ECF_HOME resolve as for the source), and the copy.
+///
+std::pair<defs_ptr, node_ptr> transfer_copy(const Node& source, std::vector<std::string>& archives) {
+    OutsideTheServer outside;
+    node_ptr copy = source.clone();
+
+    // Recreate the ancestors, as NodeContainer::archive() does, with what resolves the archive paths
+    // The scratch server holds what the archive paths need, so that nothing is added to the copy itself
+    auto scratch = Defs::create();
+    scratch->server_state().add_or_update_server_variable(
+        ecf::environment::ECF_PORT, source.defs()->server_state().find_variable(ecf::environment::ECF_PORT));
+    std::string home;
+    if (source.findParentUserVariableValue(ecf::environment::ECF_HOME, home)) {
+        scratch->server_state().add_or_update_server_variable(ecf::environment::ECF_HOME, home);
+    }
+    node_ptr top = copy;
+    for (const Node* parent = source.parent(); parent; parent = parent->parent()) {
+        node_ptr ancestor =
+            parent->isSuite() ? node_ptr(Suite::create(parent->name())) : node_ptr(Family::create(parent->name()));
+        ancestor->isNodeContainer()->addChild(top);
+        top = ancestor;
+    }
+    scratch->addSuite(std::dynamic_pointer_cast<Suite>(top));
+
+    restore(copy->isNodeContainer(), false, archives);
+    return {scratch, copy};
 }
 
 } // namespace
@@ -90,6 +165,33 @@ void PlugCmd::print_only(std::string& os) const {
     os += CtsApi::to_string(CtsApi::plug(source_, dest_));
 }
 
+STC_Cmd_ptr
+PlugCmd::denied_by_receiver(AbstractServer& server, const std::string& host, const std::string& port) const {
+    // Nothing took place: no edit history is recorded, although the lock taken for the plug moved the change numbers
+    use_EditHistoryMgr_ = false;
+    return PreAllocatedReply::denied_cmd(
+        ecf::record_denial(*this, server, "the receiving server " + host + ":" + port + " denied the move"));
+}
+
+std::optional<std::string> PlugCmd::local_destination(const AbstractServer& server) const {
+    const auto defs = server.defs();
+    if (defs->findAbsNode(dest_)) {
+        return dest_;
+    }
+    std::string host, port;
+    if (!ecf::node::extract_host_and_port_from_path(dest_, host, port)) {
+        return std::nullopt;
+    }
+    const auto here = server.hostPort();
+    if ((here.first == host || host == "localhost") && here.second == port) {
+        auto path = ecf::node::remove_host_and_port_from_path(dest_);
+        if (defs->findAbsNode(path)) {
+            return path;
+        }
+    }
+    return std::nullopt;
+}
+
 STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().plug_++;
     Defs* defs = as->defs().get();
@@ -122,10 +224,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         errorMsg += " is a Alias. Alias cannot be moved";
         throw std::runtime_error(errorMsg);
     }
-
-    // If the source node or *any* of its children are archived restore them first.
-    // Must be done in a top down manner.
-    restore(sourceNode->isNodeContainer());
 
     // Check to see if dest node is on the same server
     std::string host, port, destPath;
@@ -172,10 +270,21 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                 }
             }
 
+            // A copy with its archived containers restored: nothing changes here until the plug takes place
+            std::vector<std::string> archives;
             {
-                // MoveCmd should inherit user and passwd, from PlugCmd
-                Cmd_ptr cts_cmd = Cmd_ptr(new MoveCmd(as->hostPort(), sourceNode.get(), destPath));
-                cts_cmd->setup_user_authentification(user(), passwd());
+                // The move is authorised by the receiving server under the identity of the requester, as
+                // authenticated here, custom user or not (R11.9)
+                std::shared_ptr<MoveCmd> move;
+                if (holds_archives(*sourceNode)) {
+                    const auto [scratch, payload] = transfer_copy(*sourceNode, archives);
+                    move                          = std::make_shared<MoveCmd>(as->hostPort(), payload.get(), destPath);
+                }
+                else {
+                    move = std::make_shared<MoveCmd>(as->hostPort(), sourceNode.get(), destPath);
+                }
+                move->setup_user_authentification(identity());
+                Cmd_ptr cts_cmd = move;
 
                 // Server is acting like a client, Send MoveCmd to another server
                 // The source should end up being copied, when sent to remote server
@@ -192,6 +301,9 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                     SslClient theClient(io, openssl.context(), cts_cmd, host, port);
                     io.run();
                     theClient.handle_server_response(server_reply, false /* debug */);
+                    if (server_reply.permission_denied()) {
+                        return denied_by_receiver(*as, host, port);
+                    }
                     if (server_reply.client_request_failed()) {
                         throw std::runtime_error(server_reply.error_msg());
                     }
@@ -201,6 +313,9 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                     Client theClient(io, cts_cmd, host, port);
                     io.run();
                     theClient.handle_server_response(server_reply, false /* debug */);
+                    if (server_reply.permission_denied()) {
+                        return denied_by_receiver(*as, host, port);
+                    }
                     if (server_reply.client_request_failed()) {
                         throw std::runtime_error(server_reply.error_msg());
                     }
@@ -209,8 +324,12 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
             }
 #endif
 
-            // The move command was ok, remove the source node, and delete its memory
+            // The move command was ok, remove the source node, and delete its memory and archives
             sourceNode->remove();
+            for (const auto& archive : archives) {
+                std::error_code error;
+                fs::remove(archive, error);
+            }
 
             // Updated defs state
             defs->set_most_significant_state();
@@ -227,6 +346,23 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
     SuiteChanged1 suiteChanged(destNode->suite());
     SuiteChanged1 suiteChanged1(sourceNode->suite());
 
+    // The destination is checked before the source is restored, so that a refused plug leaves the source unchanged
+    Node* theDestNode = destNode.get();
+    if (sourceNode->parent() != destNode->parent()) {
+        // If the destination is task, replace with its parent
+        if (theDestNode->isTask()) {
+            theDestNode = theDestNode->parent();
+        }
+        std::string errorMsg;
+        if (!theDestNode->isAddChildOk(sourceNode.get(), errorMsg)) {
+            throw std::runtime_error("Plug command failed. " + errorMsg);
+        }
+    }
+
+    // If the source node or *any* of its children are archived restore them first. Must be done in a top down manner.
+    std::vector<std::string> archives;
+    restore(sourceNode->isNodeContainer(), true, archives);
+
     if (sourceNode->parent() == destNode->parent()) {
         Node* parent = sourceNode->parent();
         if (parent) {
@@ -237,19 +373,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
     else {
-
-        // If the destination is task, replace with its parent
-        Node* theDestNode = destNode.get();
-        if (theDestNode->isTask()) {
-            theDestNode = theDestNode->parent();
-        }
-
-        // Before we do remove the source node, check its ok to add it as a child
-        std::string errorMsg;
-        if (!theDestNode->isAddChildOk(sourceNode.get(), errorMsg)) {
-            throw std::runtime_error("Plug command failed. " + errorMsg);
-        }
-
         if (!theDestNode->addChild(sourceNode->remove())) {
             // This should never fail !!!! else we have lost/ and leaked source node !!!!
             throw std::runtime_error("Fatal error plug command failed.");

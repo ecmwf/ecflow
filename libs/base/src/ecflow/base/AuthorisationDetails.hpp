@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include <algorithm>
+#include <type_traits>
+#include <vector>
+
 #include <boost/beast/http/field.hpp>
 
 #include "ecflow/attribute/Permissions.hpp"
@@ -47,87 +51,51 @@
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
 #include "ecflow/server/BaseServer.hpp"
 
 namespace ecf {
 
 namespace implementation {
 
-// The Authoriser struct is a template that provides a static accept() function
-
+///
+/// @brief Holds the authorisation of a command, in a static function accept(command, context).
+///
+/// Every command has its specialisation; the template is declared without definition, so that a command without one
+/// does not build (R5.11).
+///
+/// @tparam COMMAND The type of the command
+///
 template <typename COMMAND>
-struct Authoriser
-{
-};
-
-template <typename COMMAND>
-void accumulate_paths(const COMMAND& command, std::vector<std::string>& paths) {
-    Authoriser<COMMAND>::paths(command, paths);
-}
-
-template <typename COMMAND>
-std::vector<std::string> get_affected_paths(const COMMAND& command) {
-    std::vector<std::string> paths;
-    accumulate_paths(command, paths);
-    return paths;
-}
+struct Authoriser;
 
 ///
-/// @brief Applies the transitional rules of a command: a read requires reading, a change requires writing, at every
-///        path the command addresses.
+/// @brief Allows a task request: task requests are not subject to the authorisation of users (D5.1).
 ///
-/// The rules hold in each mode:
-///
-/// - task requests are not subject to the authorisation of users (D5.1);
-/// - Permissions mode: the role r for a read, w for a change, at each path, as granted by the Permissions attributes;
-///   the white list is not used, and grants nothing, the server user included (D5.17, D11.6);
-/// - white-list mode: read or write access, as granted by the white list;
-/// - unrestricted: every request is allowed.
-///
-/// The per-command rules replace them, command by command (S12 to S14).
-///
-/// @tparam COMMAND The type of the command, a TaskCmd or a UserCmd
+/// @tparam COMMAND The type of the command, a TaskCmd
 /// @param[in] command The command
-/// @param[in] context The context of the request
-/// @return Success when the request is allowed; otherwise a failure holding the reason.
-/// @throws std::exception when the permissions cannot be evaluated; the caller refuses the request (R11.7).
+/// @return Success.
 ///
 template <typename COMMAND>
-authorisation_t allows_as_per_read_write_rules(const COMMAND& command, const RequestContext& context) {
+authorisation_t task_request([[maybe_unused]] const COMMAND& command) {
+    static_assert(std::is_base_of_v<TaskCmd, COMMAND>, "Only task requests are allowed without authorisation");
+    return authorisation_t::success("Authorisation (task) granted");
+}
 
-    static_assert(std::is_base_of_v<TaskCmd, COMMAND> || std::is_base_of_v<UserCmd, COMMAND>,
-                  "The command must be either a TaskCmd or a UserCmd");
-
-    if constexpr (std::is_base_of_v<TaskCmd, COMMAND>) {
-        // No actual verification is done for task commands
-        return authorisation_t::success("Authorisation (task) granted");
+///
+/// @brief Returns whether a node, or any node below it, carries a Permissions attribute.
+///
+/// @param[in] node The node
+/// @return True when an attribute is found.
+///
+inline bool carries_permissions(const Node& node) {
+    if (node.permissions()) {
+        return true;
     }
-
-    auto& server = context.server();
-    switch (authorisation_mode(server)) {
-        case AuthorisationMode::Unrestricted:
-            return authorisation_t::success("Authorisation (user) granted");
-        case AuthorisationMode::Permissions: {
-            const Role role = command.isWrite() ? Role::Write : Role::Read;
-            for (const auto& path : get_affected_paths(command)) {
-                if (!context.roles_at(path).has(role)) {
-                    return authorisation_t::failure("Authorisation (user) failed, due to: Insufficient permissions");
-                }
-            }
-            return authorisation_t::success("Authorisation (user) granted");
-        }
-        case AuthorisationMode::WhiteList:
-            break;
-    }
-
-    std::vector<std::string> paths = get_affected_paths(command);
-
-    const std::string required_permission = command.isWrite() ? "write" : "read";
-    if (server.authorisation().allows(command.identity(), server, paths, required_permission)) {
-        return authorisation_t::success("Authorisation (user) granted");
-    }
-
-    return authorisation_t::failure("Authorisation (user) failed, due to: Insufficient permissions");
+    std::vector<node_ptr> children;
+    node.immediateChildren(children);
+    return std::any_of(
+        children.begin(), children.end(), [](const node_ptr& child) { return carries_permissions(*child); });
 }
 
 template <typename COMMAND>
@@ -254,105 +222,67 @@ template <>
 struct Authoriser<InitCmd>
 {
     static authorisation_t accept(const InitCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const InitCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<CompleteCmd>
 {
     static authorisation_t accept(const CompleteCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const CompleteCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<AbortCmd>
 {
     static authorisation_t accept(const AbortCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const AbortCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<LabelCmd>
 {
     static authorisation_t accept(const LabelCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const LabelCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<MeterCmd>
 {
     static authorisation_t accept(const MeterCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const MeterCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<EventCmd>
 {
     static authorisation_t accept(const EventCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const EventCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<QueueCmd>
 {
     static authorisation_t accept(const QueueCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const QueueCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 template <>
 struct Authoriser<CtsWaitCmd>
 {
     static authorisation_t accept(const CtsWaitCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        return task_request(command);
     }
-
-    static void paths(const CtsWaitCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
 };
 
 // User commands
-
-template <typename COMMAND>
-inline void select_all_paths(const COMMAND& command, std::vector<std::string>& paths) {
-    if (auto&& affected = command.paths(); affected.empty()) {
-        paths.push_back("/");
-    }
-    else {
-        for (auto&& path : affected) {
-            paths.push_back(path);
-        }
-    }
-}
-
-template <typename COMMAND>
-inline void select_root_path([[maybe_unused]] const COMMAND& command, std::vector<std::string>& paths) {
-    paths.push_back("/");
-}
-
-template <typename COMMAND>
-inline void select_node_path(const COMMAND& command, std::vector<std::string>& paths) {
-    paths.push_back(command.pathToNode());
-}
 
 template <>
 struct Authoriser<AlterCmd>
@@ -361,18 +291,15 @@ struct Authoriser<AlterCmd>
         // Attributes and variables, the server variables at "/" included (D2.10, D11.1)
         return require_role(command, context, Role::Write, node_or_server_paths(command.paths()));
     }
-
-    static void paths(const AlterCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
 };
 
 template <>
 struct Authoriser<BeginCmd>
 {
     static authorisation_t accept(const BeginCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        // Beginning suites is an owner operation at server level (D2.10)
+        return require_server_role(command, context, Role::Owner);
     }
-
-    static void paths(const BeginCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -382,8 +309,6 @@ struct Authoriser<CFileCmd>
         // Retrieving files is a read, even when the server runs a command to do so (R11.3, D11.3)
         return require_role(command, context, Role::Read, node_or_server(command.pathToNode()));
     }
-
-    static void paths(const CFileCmd& command, std::vector<std::string>& paths) { select_node_path(command, paths); }
 };
 
 template <>
@@ -393,8 +318,6 @@ struct Authoriser<CheckPtCmd>
         // Checkpoint commands administer the server (D10.1), with or without arguments (R11.3)
         return require_server_role(command, context, Role::Execute);
     }
-
-    static void paths(const CheckPtCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -440,10 +363,6 @@ struct Authoriser<ClientHandleCmd>
         }
         return authorisation_t::success("Authorisation (user) granted");
     }
-
-    static void paths(const ClientHandleCmd& command, std::vector<std::string>& paths) {
-        select_root_path(command, paths);
-    }
 };
 
 template <>
@@ -453,8 +372,6 @@ struct Authoriser<CSyncCmd>
         // Synchronisation reads the server; its content is filtered (D10.1)
         return require_server_role(command, context, Role::Read);
     }
-
-    static void paths(const CSyncCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -493,8 +410,6 @@ struct Authoriser<CtsCmd>
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
     }
-
-    static void paths(const CtsCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -516,31 +431,29 @@ struct Authoriser<CtsNodeCmd>
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
     }
-
-    static void paths(const CtsNodeCmd& command, std::vector<std::string>& paths) {
-        if (auto&& path = command.pathToNode(); path.empty()) {
-            select_root_path(command, paths);
-        }
-        else {
-            paths.push_back(path);
-        }
-    }
 };
 
 template <>
 struct Authoriser<DeleteCmd>
 {
     static authorisation_t accept(const DeleteCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
-    }
-
-    static void paths(const DeleteCmd& command, std::vector<std::string>& paths) {
-        if (auto&& affected = command.paths(); affected.empty()) {
-            paths.push_back("/");
+        // Deleting a node requires w at the node; deleting a suite, or every suite, o at server level (D4.7);
+        // every path is checked (R5.12), as resolved by the server (e.g. "/s/" is the suite s)
+        const auto& paths = command.paths();
+        if (paths.empty()) {
+            return require_server_role(command, context, Role::Owner);
         }
-        else {
-            paths.push_back(affected[0]);
+        const auto defs = context.server().defs();
+        for (const auto& path : paths) {
+            const auto node = defs->findAbsNode(path);
+            if (auto result = (node && node->isSuite())
+                                  ? require_server_role(command, context, Role::Owner)
+                                  : require_role(command, context, Role::Write, {node ? node->absNodePath() : path});
+                !result.ok()) {
+                return result;
+            }
         }
+        return authorisation_t::success("Authorisation (user) granted");
     }
 };
 
@@ -563,10 +476,6 @@ struct Authoriser<EditScriptCmd>
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
     }
-
-    static void paths(const EditScriptCmd& command, std::vector<std::string>& paths) {
-        select_node_path(command, paths);
-    }
 };
 
 template <>
@@ -576,8 +485,6 @@ struct Authoriser<ForceCmd>
         // Forcing a state or an event operates the node (D2.10); "path:event" is checked at the node
         return require_role(command, context, Role::Execute, node_or_server_paths(command.paths()));
     }
-
-    static void paths(const ForceCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
 };
 
 template <>
@@ -587,18 +494,41 @@ struct Authoriser<FreeDepCmd>
         // Every path is checked (R5.12), not the server only
         return require_role(command, context, Role::Execute, node_or_server_paths(command.paths()));
     }
-
-    static void paths(const FreeDepCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
 struct Authoriser<LoadDefsCmd>
 {
     static authorisation_t accept(const LoadDefsCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
-    }
+        // Loading suites, and overwriting them, requires o at server level (D4.5)
+        if (auto result = require_server_role(command, context, Role::Owner); !result.ok()) {
+            return result;
+        }
+        const auto defs = command.definitions();
+        if (!defs) {
+            return authorisation_t::success("Authorisation (user) granted"); // the command reports the error
+        }
 
-    static void paths(const LoadDefsCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+        // Server variables carried by the definitions require w at server level (R11.4)
+        if (!defs->server_state().user_variables().empty()) {
+            if (auto result = require_server_role(command, context, Role::Write); !result.ok()) {
+                return result;
+            }
+        }
+
+        // Attributes carried, or overwritten by --force, require p at the suite (R4.5)
+        const auto server_defs = context.server().defs();
+        for (const auto& suite : defs->suites()) {
+            const auto existing = server_defs->findSuite(suite->name());
+            if (carries_permissions(*suite) || (command.force() && existing && carries_permissions(*existing))) {
+                if (auto result = require_role(command, context, Role::Permissions, {suite->absNodePath()});
+                    !result.ok()) {
+                    return result;
+                }
+            }
+        }
+        return authorisation_t::success("Authorisation (user) granted");
+    }
 };
 
 template <>
@@ -616,8 +546,6 @@ struct Authoriser<LogCmd>
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
     }
-
-    static void paths(const LogCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -627,20 +555,27 @@ struct Authoriser<LogMessageCmd>
         // --msg appends to the server log (D10.6, D2.21)
         return require_server_role(command, context, Role::Write);
     }
-
-    static void paths(const LogMessageCmd& command, std::vector<std::string>& paths) {
-        select_root_path(command, paths);
-    }
 };
 
 template <>
 struct Authoriser<MoveCmd>
 {
     static authorisation_t accept(const MoveCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        // The receiving side of a plug: a whole suite requires o at server level (D4.15), and p when it carries
+        // attributes; a node under a destination requires w and p there (D4.11, R4.5, R11.9)
+        if (command.dest().empty()) {
+            if (auto result = require_server_role(command, context, Role::Owner); !result.ok()) {
+                return result;
+            }
+            std::string error;
+            const auto node = Node::create(command.src_node(), error);
+            if (node && carries_permissions(*node)) {
+                return require_role(command, context, Role::Permissions, {"/" + node->name()});
+            }
+            return authorisation_t::success("Authorisation (user) granted");
+        }
+        return require_roles(command, context, {Role::Write, Role::Permissions}, {command.dest()});
     }
-
-    static void paths(const MoveCmd& command, std::vector<std::string>& paths) { paths.push_back(command.src_path()); }
 };
 
 template <>
@@ -649,10 +584,6 @@ struct Authoriser<OrderNodeCmd>
     static authorisation_t accept(const OrderNodeCmd& command, const RequestContext& context) {
         // Ordering changes the definitions; checked at the node only (D5.19)
         return require_role(command, context, Role::Write, node_or_server(command.pathToNode()));
-    }
-
-    static void paths(const OrderNodeCmd& command, std::vector<std::string>& paths) {
-        select_node_path(command, paths);
     }
 };
 
@@ -691,18 +622,21 @@ struct Authoriser<PathsCmd>
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
     }
-
-    static void paths(const PathsCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
 };
 
 template <>
 struct Authoriser<PlugCmd>
 {
     static authorisation_t accept(const PlugCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
+        // Plugging moves the source under the destination, which changes the attributes applying to it: w and p
+        // at both (D4.11, R4.5); a destination on another server is authorised there, under the identity of the
+        // user (R11.9)
+        std::vector<std::string> targets{command.source()};
+        if (const auto destination = command.local_destination(context.server())) {
+            targets.push_back(*destination);
+        }
+        return require_roles(command, context, {Role::Write, Role::Permissions}, targets);
     }
-
-    static void paths(const PlugCmd& command, std::vector<std::string>& paths) { paths.push_back(command.source()); }
 };
 
 template <>
@@ -712,21 +646,53 @@ struct Authoriser<QueryCmd>
         // A query reads the node holding the attribute, or the server for "/" (D3.1)
         return require_role(command, context, Role::Read, node_or_server(command.path_to_attribute()));
     }
-
-    static void paths(const QueryCmd& command, std::vector<std::string>& paths) {
-        paths.push_back(command.path_to_attribute());
-    }
 };
 
 template <>
 struct Authoriser<ReplaceNodeCmd>
 {
     static authorisation_t accept(const ReplaceNodeCmd& command, const RequestContext& context) {
-        return allows_as_per_read_write_rules(command, context);
-    }
+        const auto server_defs = context.server().defs();
+        const auto defs        = command.client_definitions();
+        const auto client_node = defs ? defs->findAbsNode(command.pathToNode()) : node_ptr{};
+        if (!client_node) {
+            // The command reports the missing or unparsable client definitions; nothing is imported
+            return require_role(command, context, Role::Write, {command.pathToNode()});
+        }
 
-    static void paths(const ReplaceNodeCmd& command, std::vector<std::string>& paths) {
-        select_node_path(command, paths);
+        // The node replaced, or the subtree imported, as Defs::replaceChild determines them: when the node does not
+        // exist and parents are created, the topmost missing ancestor of the client node, or its whole suite
+        const auto path      = client_node->absNodePath();
+        const auto existing  = server_defs->findAbsNode(path);
+        const Node* imported = client_node.get();
+        node_ptr server_parent;
+        if (!existing && command.createNodesAsNeeded()) {
+            for (const Node* parent = imported->parent(); parent != nullptr; parent = parent->parent()) {
+                if ((server_parent = server_defs->findAbsNode(parent->absNodePath()))) {
+                    break;
+                }
+                imported = parent;
+            }
+        }
+
+        // Replacing or creating a suite requires o at server level (D4.5, D4.14); otherwise w at the node replaced,
+        // or at the existing parent of the subtree created (D4.14)
+        const bool suite = existing ? existing->isSuite() != nullptr : imported->isSuite() != nullptr;
+        if (auto result = suite
+                              ? require_server_role(command, context, Role::Owner)
+                              : require_role(command,
+                                             context,
+                                             Role::Write,
+                                             {existing ? path : (server_parent ? server_parent->absNodePath() : path)});
+            !result.ok()) {
+            return result;
+        }
+
+        // Attributes brought, anywhere in the imported subtree, or replaced, require p (R4.5, D4.10)
+        if (carries_permissions(*imported) || (existing && carries_permissions(*existing))) {
+            return require_role(command, context, Role::Permissions, {imported->absNodePath()});
+        }
+        return authorisation_t::success("Authorisation (user) granted");
     }
 };
 
@@ -736,10 +702,6 @@ struct Authoriser<RequeueNodeCmd>
     static authorisation_t accept(const RequeueNodeCmd& command, const RequestContext& context) {
         return require_role(command, context, Role::Execute, node_or_server_paths(command.paths())); // D2.10
     }
-
-    static void paths(const RequeueNodeCmd& command, std::vector<std::string>& paths) {
-        select_all_paths(command, paths);
-    }
 };
 
 template <>
@@ -748,8 +710,6 @@ struct Authoriser<RunNodeCmd>
     static authorisation_t accept(const RunNodeCmd& command, const RequestContext& context) {
         return require_role(command, context, Role::Execute, node_or_server_paths(command.paths())); // D2.10
     }
-
-    static void paths(const RunNodeCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
 };
 
 template <>
@@ -757,10 +717,6 @@ struct Authoriser<ServerVersionCmd>
 {
     static authorisation_t accept(const ServerVersionCmd& command, const RequestContext& context) {
         return require_server_role(command, context, Role::Read); // D10.1
-    }
-
-    static void paths(const ServerVersionCmd& command, std::vector<std::string>& paths) {
-        select_root_path(command, paths);
     }
 };
 
@@ -771,8 +727,6 @@ struct Authoriser<ShowCmd>
         // The client formats the definitions it received; the server is read
         return require_server_role(command, context, Role::Read);
     }
-
-    static void paths(const ShowCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
 };
 
 template <>
@@ -782,64 +736,11 @@ struct Authoriser<ZombieCmd>
         // The zombie actions change the state of the server (D10.6)
         return require_server_role(command, context, Role::Write);
     }
-
-    static void paths(const ZombieCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
-};
-
-template <typename... COMMANDS>
-struct Apply
-{
-    template <typename F>
-    static void to(const Cmd_ptr& cmd, F f) {
-        (
-            [&] {
-                if (const auto* c = dynamic_cast<const COMMANDS*>(cmd.get()); c != nullptr) {
-                    f(*c);
-                }
-            }(),
-            ...);
-    }
 };
 
 template <>
 struct Authoriser<GroupCTSCmd>
 {
-    using Apply_t = Apply<AbortCmd,
-                          AlterCmd,
-                          BeginCmd,
-                          CFileCmd,
-                          CSyncCmd,
-                          CheckPtCmd,
-                          ClientHandleCmd,
-                          CompleteCmd,
-                          CtsCmd,
-                          CtsNodeCmd,
-                          CtsWaitCmd,
-                          DeleteCmd,
-                          EditScriptCmd,
-                          EventCmd,
-                          ForceCmd,
-                          FreeDepCmd,
-                          GroupCTSCmd,
-                          InitCmd,
-                          LabelCmd,
-                          LoadDefsCmd,
-                          LogCmd,
-                          LogMessageCmd,
-                          MeterCmd,
-                          MoveCmd,
-                          OrderNodeCmd,
-                          PathsCmd,
-                          PlugCmd,
-                          QueryCmd,
-                          QueueCmd,
-                          ReplaceNodeCmd,
-                          RequeueNodeCmd,
-                          RunNodeCmd,
-                          ServerVersionCmd,
-                          ShowCmd,
-                          ZombieCmd>;
-
     static authorisation_t accept(const GroupCTSCmd& command, const RequestContext& context) {
         // In Permissions mode, each sub-command is authorised just before it runs (D5.27); see GroupCTSCmd
         if (authorisation_mode(context.server()) == AuthorisationMode::Permissions) {
@@ -854,12 +755,6 @@ struct Authoriser<GroupCTSCmd>
         }
 
         return authorisation_t::success("Authorisation (user) granted (group command)");
-    }
-
-    static void paths(const GroupCTSCmd& command, std::vector<std::string>& paths) {
-        for (auto&& cmd : command.cmdVec()) {
-            Apply_t::to(cmd, [&](auto&& c) { accumulate_paths(c, paths); });
-        }
     }
 };
 

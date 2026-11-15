@@ -20,12 +20,14 @@
 #include "ecflow/base/cts/user/CtsNodeCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
+#include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/GroupSTCCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/User.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
@@ -384,8 +386,8 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_fail_closed_requests) {
 BOOST_AUTO_TEST_CASE(test_permissions_mode_group_fresh_evaluation) {
     ECF_NAME_THIS_TEST();
 
-    // b grants bob rwx; the replacement of b grants bob r only
-    auto defs = make_defs("bob:rwx", "bob:rwx");
+    // b grants bob rwxp (p to replace a node carrying an attribute); the replacement of b grants bob r only
+    auto defs = make_defs("bob:rwxp", "bob:rwxp");
     MockServer server(defs);
     auto replacement = Defs::create();
     replacement->add_suite("s")->add_task("b")->add_permissions(Permissions::parse_cli("bob:r"));
@@ -496,6 +498,34 @@ BOOST_AUTO_TEST_CASE(test_handles_follow_the_authenticated_requester) {
             BOOST_CHECK(dropped->ok());
             BOOST_REQUIRE_EQUAL(handles.size(), 1U);
             BOOST_CHECK_EQUAL(handles.front().user(), "victim");
+        }
+    }
+}
+
+///
+/// @brief Verifies that a command forwarded on behalf of a requester carries the requester's credentials and kind
+///        (R11.9), through serialisation too.
+///
+BOOST_AUTO_TEST_CASE(test_forwarded_identity) {
+    ECF_NAME_THIS_TEST();
+
+    for (const bool custom : {true, false}) {
+        BOOST_TEST_CONTEXT("custom: " << custom) {
+            const auto identity =
+                custom ? ecf::Identity::make_custom_user("bob", "pw") : ecf::Identity::make_user("bob", "pw");
+            MoveCmd move;
+            move.setup_user_authentification(identity);
+            BOOST_CHECK_EQUAL(move.user(), "bob");
+            BOOST_CHECK_EQUAL(move.passwd(), "pw");
+            BOOST_CHECK_EQUAL(move.is_custom_user(), custom);
+            BOOST_CHECK_EQUAL(move.identity().is_custom(), custom);
+
+            std::string data;
+            ecf::save_as_string(data, move);
+            MoveCmd received;
+            ecf::restore_from_string(data, received);
+            BOOST_CHECK_EQUAL(received.user(), "bob");
+            BOOST_CHECK_EQUAL(received.is_custom_user(), custom);
         }
     }
 }

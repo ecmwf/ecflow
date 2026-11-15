@@ -4,6 +4,7 @@
 #include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -116,18 +117,32 @@ ecf::authorisation_t LoadDefsCmd::authorise(const ecf::RequestContext& context) 
     return implementation::do_authorise(*this, context);
 }
 
+defs_ptr LoadDefsCmd::definitions() const {
+    if (!parsed_ && !defs_.empty()) {
+        std::string errMsg, warningMsg;
+        auto defs = Defs::create();
+        if (defs->restore_from_string(defs_, errMsg, warningMsg)) {
+            parsed_ = defs;
+        }
+    }
+    return parsed_;
+}
+
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().load_defs_++;
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
     if (!defs_.empty()) {
 
-        // Parse the string and load the defs file into memory.
+        // Parse the string and load the defs file into memory, unless the authorisation already did
         std::string errMsg, warningMsg;
-        defs_ptr defs = Defs::create();
-        if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
-            throw std::runtime_error(
-                MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
+        defs_ptr defs = std::exchange(parsed_, nullptr);
+        if (!defs) {
+            defs = Defs::create();
+            if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
+                throw std::runtime_error(MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file "
+                                                 << defs_filename_ << " : " << errMsg));
+            }
         }
 
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server

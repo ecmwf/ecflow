@@ -23,6 +23,22 @@ public:
     // Uses by equals only
     const std::string& defs_as_string() const { return defs_; }
 
+    ///
+    /// @brief Returns whether the load may overwrite suites of the same name already loaded (--force).
+    ///
+    /// @return True when existing suites are overwritten.
+    ///
+    bool force() const { return force_; }
+
+    ///
+    /// @brief Returns the definitions the command carries, parsed on first use and kept for the request.
+    ///
+    /// The authorisation reads them before the command runs, which then uses them instead of parsing again.
+    ///
+    /// @return The definitions; nullptr when they cannot be parsed, the command then reporting the error.
+    ///
+    defs_ptr definitions() const;
+
     bool isWrite() const override { return true; }
     time_duration_t timeout() const override { return timeout_for_load_sync_and_get(); }
     using UserCmd::print;
@@ -50,6 +66,7 @@ private:
 
     bool force_{false};
     std::string defs_;
+    mutable defs_ptr parsed_; // the definitions, once parsed; not serialised
     std::string defs_filename_;
 
     friend class cereal::access;

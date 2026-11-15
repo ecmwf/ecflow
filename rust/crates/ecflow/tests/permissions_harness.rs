@@ -230,3 +230,46 @@ fn denial_is_a_permission_denied_failure() {
         "{error}"
     );
 }
+
+/// A7.3: an operator with r at server level and r, but not x, on /sB requeues
+/// the aborted task /sB/t; the request fails as a denial and the task stays
+/// aborted.
+#[test]
+fn acceptance_a7_3_denied_operation() {
+    let _serial = TESTS
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let Some(server) = PermissionsServer::start(
+        ADMIN,
+        &[ALICE],
+        Some(
+            r#"[{"user": "admin", "permissions": "rwxlops"}, {"user": "alice", "permissions": "r"}]"#,
+        ),
+    ) else {
+        return;
+    };
+    let mut admin = server.administrator();
+    admin
+        .load_defs_text(
+            "suite sB\npermissions [{\"user\": \"admin\", \"permissions\": \"rwxlop\"}, {\"user\": \"alice\", \"permissions\": \"r\"}]\n  task t\nendsuite\n",
+            false,
+        )
+        .expect("load");
+    admin
+        .force_state(["/sB/t"], ecflow::NodeState::Aborted, false, false)
+        .expect("abort");
+
+    let error = server
+        .client("alice")
+        .requeue(["/sB/t"], "")
+        .expect_err("the requeue was not denied");
+    assert_eq!(
+        error.failure(),
+        ecflow::Failure::PermissionDenied,
+        "{error}"
+    );
+    assert_eq!(
+        admin.query("state", "/sB/t", "", false).expect("state"),
+        "aborted"
+    );
+}

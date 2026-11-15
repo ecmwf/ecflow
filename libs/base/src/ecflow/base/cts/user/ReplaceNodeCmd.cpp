@@ -4,6 +4,7 @@
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -117,16 +118,31 @@ ecf::authorisation_t ReplaceNodeCmd::authorise(const ecf::RequestContext& contex
     return implementation::do_authorise(*this, context);
 }
 
+defs_ptr ReplaceNodeCmd::client_definitions() const {
+    if (!parsed_ && !clientDefs_.empty()) {
+        std::string errMsg, warningMsg;
+        auto defs = Defs::create();
+        if (defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
+            parsed_ = defs;
+        }
+    }
+    return parsed_;
+}
+
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().replace_++;
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
     Defs* defs = as->defs().get();
 
+    // Parsed by the authorisation, or here
     std::string errMsg, warningMsg;
-    defs_ptr client_defs = Defs::create();
-    if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
-        throw std::runtime_error(
-            MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
+    defs_ptr client_defs = std::exchange(parsed_, nullptr);
+    if (!client_defs) {
+        client_defs = Defs::create();
+        if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
+            throw std::runtime_error(
+                MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
+        }
     }
 
     if (force_) {

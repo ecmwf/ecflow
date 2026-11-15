@@ -289,6 +289,28 @@ The commands below require a role at the server level, or at the node they addre
    * - ``--restore``
      - ``w`` and ``p``
      - the nodes: restored nodes may carry Permissions attributes
+   * - ``--load``, ``--begin``; ``--delete`` of a suite, or of all suites
+     - ``o``
+     - server
+   * - ``--load`` of definitions carrying server variables
+     - ``w`` too
+     - server
+   * - ``--load`` of a suite carrying Permissions attributes, or overwriting (``--force``) one that carries them
+     - ``p`` too
+     - the suite
+   * - ``--replace`` of a node; ``--delete`` of a node below a suite
+     - ``w``
+     - the node (for a node created by ``--replace``, its closest existing ancestor)
+   * - ``--replace`` of a suite, or creating one
+     - ``o``
+     - server
+   * - ``--replace`` bringing or replacing Permissions attributes
+     - ``p`` too
+     - the node
+   * - ``--plug``
+     - ``w`` and ``p``
+     - the source and the destination; for a destination on another server, that server checks the destination
+       under the identity of the user: ``w`` and ``p`` there, or ``o`` (and ``p`` for attributes) for a whole suite
 
 Notes:
 
@@ -298,10 +320,35 @@ Notes:
 - Each command is checked at the nodes it names, not at the nodes it affects below them: ``x`` on a suite allows
   requeueing the whole suite. An event or attribute named as ``path:name`` is checked at the node ``path``.
 - The other commands read with ``r`` and change with ``w`` at the nodes they address.
+- ``--begin``, and ``--delete`` of a suite or of all suites, require ``o`` at server level only, whatever the
+  attributes of the suites: a user holding ``o`` at the server begins and deletes any suite, including the suites
+  that user cannot read. Grant ``o`` only to the administrators of the server.
 - In whitelist mode, the same commands require read access for ``r``, and write access for every other role. Hence
   ``--msg``, ``--log=clear``, ``--log=flush``, ``--check_pt`` without arguments, ``--debug_server_on``,
   ``--debug_server_off``, the zombie actions and ``--checkJobGenOnly`` require write access, and handles are bound
   to their creator as in Permissions mode.
+
+.. _permissions_attribute_internal_clients:
+
+Granting access to internal clients
+===================================
+
+Internal clients (health checks, monitoring) are ecFlow users like any other, and receive no implicit right:
+
+- ``--ping`` needs no role, and suits a health check that only verifies that the server answers;
+- a client reading the server (``--stats``, ``--suites``, ``--news``) needs an entry granting ``r`` in the server
+  attribute; a client acting on suites needs the corresponding roles there;
+- the identity of an internal client is authenticated as any other, e.g. by a custom password file
+  (``ECF_CUSTOM_PASSWD``).
+
+For example, a monitoring client named ``monitor`` reading the server only:
+
+.. code-block:: json
+
+   {"user": "monitor", "permissions": "r"}
+
+The REST API does not support Permissions: granting roles to the user of the REST server does not enable it on a
+server using Permissions.
 
 .. _permissions_attribute_threat_model:
 

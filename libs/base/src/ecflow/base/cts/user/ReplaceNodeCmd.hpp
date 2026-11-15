@@ -17,6 +17,15 @@ public:
     bool createNodesAsNeeded() const { return createNodesAsNeeded_; }
     bool force() const { return force_; }
 
+    ///
+    /// @brief Returns the definitions the command carries, parsed on first use and kept for the request.
+    ///
+    /// The authorisation reads them before the command runs, which then uses them instead of parsing again.
+    ///
+    /// @return The definitions; nullptr when they cannot be parsed, the command then reporting the error.
+    ///
+    defs_ptr client_definitions() const;
+
     bool isWrite() const override { return true; }
     time_duration_t timeout() const override { return std::chrono::seconds{300}; }
     using UserCmd::print;
@@ -39,13 +48,17 @@ private:
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
-    void cleanup() override { std::string{}.swap(clientDefs_); } /// run in the server, after command send to client
+    void cleanup() override { /// run in the server, after command send to client
+        std::string{}.swap(clientDefs_);
+        parsed_.reset();
+    }
 
     bool createNodesAsNeeded_{false};
     bool force_{false};
     std::string pathToNode_;
     std::string path_to_defs_; // Can be empty if defs loaded in memory via python api
     std::string clientDefs_;
+    mutable defs_ptr parsed_; // the client definitions, once parsed; not serialised
 
     friend class cereal::access;
     template <class Archive>

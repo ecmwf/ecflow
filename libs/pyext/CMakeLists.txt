@@ -140,6 +140,7 @@ set(u_tests
 
 set(s_tests
   s_TestClientApi
+  s_TestPermissionsAcceptance
   s_TestPermissionsHarness
   s_TestPythonChildApi
   s_TestServerPortReservation
