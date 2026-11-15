@@ -211,6 +211,13 @@ public:
     [[nodiscard]] bool running() const { return process_ && process_->is_running(); }
 
     ///
+    /// @brief Returns the process id of the server.
+    ///
+    /// @return The process id, or -1 when no process was launched.
+    ///
+    [[nodiscard]] int pid() const { return process_ ? process_->pid() : -1; }
+
+    ///
     /// @brief Returns the port of the server.
     ///
     /// @return The port, which stays reserved until the server is stopped.

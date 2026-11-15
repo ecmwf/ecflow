@@ -102,6 +102,7 @@ if (ENABLE_SERVER)
     test/TestConnectionDiagnosisAgainstServer.cpp
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
+    test/TestPermissionsBenchmarkHelpers.cpp
     test/TestPermissionsHarness.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp
@@ -197,6 +198,33 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
+  )
+
+  #
+  # Benchmark of the Permissions attributes; the results are printed and written to permissions_benchmark.json
+  #
+  ecflow_add_test(
+    TARGET
+      p_permissions
+    LABELS
+      performance
+      manual # run on request, see the parameters in the source
+    SOURCES
+      # Sources
+      test/TestPermissionsBenchmark.cpp
+      test/TestPermissionsBenchmark_main.cpp # test entry point
+    LIBS
+      ecflow_all
+      test_scaffold
+      test_harness.base
+      test_harness.client
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     CONDITION
       ENABLE_TESTS
     FORMAT
