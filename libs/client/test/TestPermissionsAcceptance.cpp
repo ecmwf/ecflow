@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -10,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PermissionsServer.hpp"
+#include "ReadableSet.hpp"
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
@@ -27,7 +29,7 @@ using ecf::test::PermissionsServer;
 
 ///
 /// The acceptance scenarios of the authorisation (A7.3, and the authorisation and scheduling of A7.4; its filtering
-/// assertions belong to the filtering of replies).
+/// assertions belong to the filtering of replies), and of the filtering (A7.1, and the server side of A7.10).
 ///
 
 namespace {
@@ -168,6 +170,110 @@ BOOST_AUTO_TEST_CASE(test_a7_4_trigger_across_teams) {
     BOOST_REQUIRE_MESSAGE(administrator->resume("/sA/t") == 0, administrator->errorMsg());
     BOOST_REQUIRE_MESSAGE(administrator->job_gen("") == 0, administrator->errorMsg());
     BOOST_CHECK_EQUAL(state_of(server, "/sB/t"), "submitted");
+}
+
+///
+/// @brief A7.1 Two teams share a server: a, with r at server level and on sA only, synchronised, stays equal to a
+///        fresh full synchronisation without sB when sB changes; --suites, --stats and --ch_suites name nothing of sB.
+///
+BOOST_AUTO_TEST_CASE(test_a7_1_two_teams_share_a_server) {
+    ECF_NAME_THIS_TEST();
+
+    const Credentials a{"teamA", "a-secret"};
+    const Credentials b{"teamB", "b-secret"};
+    PermissionsServer server(admin,
+                             {a, b},
+                             R"([{"user": "admin", "permissions": "rwxlops"}, {"user": "teamA", "permissions": "r"},)"
+                             R"( {"user": "teamB", "permissions": "r"}])");
+    {
+        auto defs = Defs::create();
+        defs->add_suite("sA")->add_task("t");
+        defs->findSuite("sA")->add_permissions(ecf::Permissions::parse_cli("admin:rwxlop,teamA:r"));
+        defs->add_suite("sB")->add_task("t");
+        defs->findSuite("sB")->add_permissions(ecf::Permissions::parse_cli("admin:rwxlop,teamB:r"));
+        auto client = server.administrator();
+        BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+    }
+
+    auto client_of_a = server.client(a);
+    BOOST_REQUIRE_MESSAGE(client_of_a->ch_register(false, {"sA"}) == 0, client_of_a->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_a->sync_local() == 0, client_of_a->errorMsg());
+    auto plain_client_of_a = server.client(a);
+    BOOST_REQUIRE_MESSAGE(plain_client_of_a->sync_local() == 0, plain_client_of_a->errorMsg());
+
+    // sB changes state
+    auto administrator = server.administrator();
+    BOOST_REQUIRE_MESSAGE(administrator->suspend("/sB/t") == 0, administrator->errorMsg());
+
+    // The news of a may report a change (D5.26); its next synchronisation equals a fresh full one, without sB
+    BOOST_REQUIRE_MESSAGE(plain_client_of_a->news_local() == 0, plain_client_of_a->errorMsg());
+    for (auto* client : {client_of_a.get(), plain_client_of_a.get()}) {
+        BOOST_REQUIRE_MESSAGE(client->sync_local() == 0, client->errorMsg());
+        auto fresh = server.client(a);
+        BOOST_REQUIRE_MESSAGE(fresh->sync_local() == 0, fresh->errorMsg());
+        const auto received = ecf::test::node_paths(*client->defs());
+        const auto expected = ecf::test::node_paths(*fresh->defs());
+        BOOST_CHECK_EQUAL_COLLECTIONS(received.begin(), received.end(), expected.begin(), expected.end());
+        BOOST_CHECK(received == (std::set<std::string>{"/sA", "/sA/t"}));
+    }
+
+    // --suites, --stats and --ch_suites name nothing of sB
+    auto listing = server.client(a);
+    BOOST_REQUIRE_MESSAGE(listing->suites() == 0, listing->errorMsg());
+    BOOST_CHECK(listing->server_reply().get_string_vec() == (std::vector<std::string>{"sA"}));
+    BOOST_REQUIRE_MESSAGE(listing->stats() == 0, listing->errorMsg());
+    const auto& stats = listing->get_string();
+    const auto at     = stats.find("Number of Suites");
+    BOOST_REQUIRE(at != std::string::npos);
+    BOOST_CHECK_MESSAGE(stats.substr(at, stats.find('\n', at) - at).find('1') != std::string::npos, stats);
+    auto client_of_b = server.client(b);
+    BOOST_REQUIRE_MESSAGE(client_of_b->ch_register(false, {"sB"}) == 0, client_of_b->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_a->ch_suites() == 0, client_of_a->errorMsg());
+    const auto& handles = client_of_a->server_reply().get_client_handle_suites();
+    BOOST_REQUIRE_EQUAL(handles.size(), 1U); // the handle of a only
+    BOOST_CHECK_EQUAL(handles.front().first, static_cast<unsigned int>(client_of_a->client_handle()));
+    BOOST_CHECK(handles.front().second == (std::vector<std::string>{"sA"}));
+}
+
+///
+/// @brief A7.10 Read removed during a session (server side): u, synchronised while reading /s/f, loses r on /s/f;
+///        after its next synchronisation its copy equals a fresh full synchronisation, without /s/f, and --file on a
+///        task of /s/f is denied.
+///
+BOOST_AUTO_TEST_CASE(test_a7_10_read_removed_during_a_session) {
+    ECF_NAME_THIS_TEST();
+
+    const Credentials u{"teamU", "u-secret"};
+    PermissionsServer server(
+        admin, {u}, R"([{"user": "admin", "permissions": "rwxlops"}, {"user": "teamU", "permissions": "r"}])");
+    const auto load = [&](bool hidden) {
+        const auto file = server.directory() / "s.def";
+        std::ofstream(file) << "suite s\n  family f\n"
+                            << (hidden ? R"(    permissions [{"user": "admin", "permissions": "rwxlop"}])"
+                                         "\n"
+                                       : "")
+                            << "    task t\n  endfamily\n  family g\n    task t\n  endfamily\nendsuite\n";
+        auto client = server.administrator();
+        BOOST_REQUIRE_MESSAGE(client->loadDefs(file.string(), true) == 0, client->errorMsg());
+    };
+    load(false);
+
+    auto client_of_u = server.client(u);
+    BOOST_REQUIRE_MESSAGE(client_of_u->sync_local() == 0, client_of_u->errorMsg());
+    BOOST_REQUIRE(client_of_u->defs()->findAbsNode("/s/f/t"));
+
+    load(true); // u loses r on /s/f
+    BOOST_REQUIRE_MESSAGE(client_of_u->sync_local() == 0, client_of_u->errorMsg());
+    auto fresh = server.client(u);
+    BOOST_REQUIRE_MESSAGE(fresh->sync_local() == 0, fresh->errorMsg());
+    const auto received = ecf::test::node_paths(*client_of_u->defs());
+    const auto expected = ecf::test::node_paths(*fresh->defs());
+    BOOST_CHECK_EQUAL_COLLECTIONS(received.begin(), received.end(), expected.begin(), expected.end());
+    BOOST_CHECK(received == (std::set<std::string>{"/s", "/s/g", "/s/g/t"}));
+
+    auto file_request = server.client(u);
+    BOOST_CHECK(file_request->file("/s/f/t", "script") != 0);
+    BOOST_CHECK(file_request->server_reply().permission_denied());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
