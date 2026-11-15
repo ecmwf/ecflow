@@ -15,9 +15,12 @@
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -28,8 +31,8 @@ using ecf::test::Credentials;
 using ecf::test::PermissionsServer;
 
 ///
-/// The acceptance scenarios of the authorisation (A7.3, and the authorisation and scheduling of A7.4; its filtering
-/// assertions belong to the filtering of replies), and of the filtering (A7.1, and the server side of A7.10).
+/// The acceptance scenarios of the authorisation and the filtering: A7.3, A7.4 (authorisation, filtering and
+/// scheduling), A7.1, the server side of A7.10, and A7.5 (enabling Permissions by a restart).
 ///
 
 namespace {
@@ -51,6 +54,22 @@ std::vector<std::string> denied_records(const PermissionsServer& server) {
         }
     }
     return records;
+}
+
+///
+/// @brief Returns the definitions of a client copy as text: structure, attributes, states, and the server attribute.
+///
+/// @param[in] defs The copy
+/// @return The text, for comparison with a fresh synchronisation.
+///
+std::string full_text_of(const Defs& defs) {
+    std::string text;
+    defs.write_to_string(text, PrintStyle::DEFS);
+    for (const auto* node : ecf::get_all_nodes(defs)) {
+        text += node->absNodePath() + " " + NState::toString(node->state()) + "\n";
+    }
+    const auto* server = defs.server_state().permissions();
+    return text + "server " + (server ? server->to_cli() : std::string("-"));
 }
 
 } // namespace
@@ -122,8 +141,9 @@ BOOST_AUTO_TEST_CASE(test_a7_3_denied_operation) {
 }
 
 ///
-/// @brief A7.4 Trigger across teams (authorisation and scheduling): B, with r at server level and w on /sB/t but no r
-///        on /sA, adds to /sB/t a trigger on /sA/t; the change succeeds, and /sB/t is submitted once /sA/t completes.
+/// @brief A7.4 Trigger across teams: B, with r at server level and w on /sB/t but no r on /sA, adds to /sB/t a trigger
+///        on /sA/t; the change succeeds, the expression is shown to B as written while /sA is not, and /sB/t is
+///        submitted once /sA/t completes.
 ///
 BOOST_AUTO_TEST_CASE(test_a7_4_trigger_across_teams) {
     ECF_NAME_THIS_TEST();
@@ -158,6 +178,20 @@ BOOST_AUTO_TEST_CASE(test_a7_4_trigger_across_teams) {
     auto client = server.client(b);
     BOOST_CHECK_MESSAGE(client->alter("/sB/t", "change", "trigger", "/sA/t == complete") == 0, client->errorMsg());
     BOOST_CHECK(!client->server_reply().permission_denied());
+
+    // The expression is shown to B as written, and no synchronisation or --get of B holds /sA (D5.20)
+    {
+        auto copy = server.client(b);
+        BOOST_REQUIRE_MESSAGE(copy->sync_local() == 0, copy->errorMsg());
+        BOOST_CHECK(!copy->defs()->findAbsNode("/sA"));
+        const auto task = copy->defs()->findAbsNode("/sB/t");
+        BOOST_REQUIRE(task);
+        BOOST_REQUIRE(task->get_trigger());
+        BOOST_CHECK_EQUAL(task->get_trigger()->expression(), "/sA/t == complete");
+        auto get = server.client(b);
+        BOOST_REQUIRE_MESSAGE(get->getDefs() == 0, get->errorMsg());
+        BOOST_CHECK(!get->defs()->findAbsNode("/sA"));
+    }
 
     // Released, /sB/t waits for /sA/t
     auto administrator = server.administrator();
@@ -274,6 +308,94 @@ BOOST_AUTO_TEST_CASE(test_a7_10_read_removed_during_a_session) {
     auto file_request = server.client(u);
     BOOST_CHECK(file_request->file("/s/f/t", "script") != 0);
     BOOST_CHECK(file_request->server_reply().permission_denied());
+}
+
+///
+/// @brief A7.5 Enabling: a server whose configuration file gains a server attribute restarts from its checkpoint; the
+///        clients reconnect, and each tree, after synchronisation, equals a fresh full synchronisation for its
+///        identity, then and after a change of permissions; the start-up summary names the source of the server
+///        attribute.
+///
+BOOST_AUTO_TEST_CASE(test_a7_5_enabling) {
+    ECF_NAME_THIS_TEST();
+
+    const Credentials a{"teamA", "a-secret"};
+    const Credentials b{"teamB", "b-secret"};
+    std::string checkpoint;
+    std::vector<std::unique_ptr<ClientInvoker>> clients;
+    {
+        // Without a server attribute
+        PermissionsServer before(admin, {a, b}, "");
+        auto defs = Defs::create();
+        defs->add_suite("sA")->add_task("t");
+        defs->add_suite("sB")->add_task("t");
+        auto administrator = before.administrator();
+        BOOST_REQUIRE_MESSAGE(administrator->load(defs) == 0, administrator->errorMsg());
+        for (const auto& user : {a, b}) {
+            clients.push_back(before.client(user));
+            BOOST_REQUIRE_MESSAGE(clients.back()->sync_local() == 0, clients.back()->errorMsg());
+            clients.push_back(before.client(user));
+            BOOST_REQUIRE_MESSAGE(clients.back()->ch_register(false, {"sA"}) == 0, clients.back()->errorMsg());
+            BOOST_REQUIRE_MESSAGE(clients.back()->sync_local() == 0, clients.back()->errorMsg());
+        }
+        BOOST_REQUIRE_MESSAGE(administrator->checkPtDefs() == 0, administrator->errorMsg());
+        std::ifstream file(before.home() / ecf::Host{}.prefix_host_and_port(before.port(), Ecf::CHECKPT()));
+        std::stringstream text;
+        text << file.rdbuf();
+        checkpoint = text.str();
+        BOOST_REQUIRE(checkpoint.find("suite sA") != std::string::npos);
+    }
+
+    // Restarted, from the checkpoint, with a server attribute in the configuration file
+    PermissionsServer after(admin,
+                            {a, b},
+                            R"([{"user": "admin", "permissions": "rwxlops"}, {"user": "teamA", "permissions": "r"},)"
+                            R"( {"user": "teamB", "permissions": "r"}])",
+                            std::chrono::seconds(30),
+                            std::nullopt,
+                            std::nullopt,
+                            false,
+                            {},
+                            [&checkpoint](const fs::path& home, const std::string& port) {
+                                std::ofstream(home / ecf::Host{}.prefix_host_and_port(port, Ecf::CHECKPT()))
+                                    << checkpoint;
+                            });
+    const auto compare = [&](const std::string& step, bool reconnect) {
+        for (std::size_t i = 0; i < clients.size(); ++i) {
+            auto& client     = clients[i];
+            const auto& user = i < 2 ? a : b;
+            client->set_host_port("localhost", after.port());
+            // A handle of the former server means nothing to this one (its number may even name another handle): a
+            // client reconnecting registers again, as ecFlowUI does
+            if (reconnect && client->client_handle() != 0) {
+                BOOST_REQUIRE_MESSAGE(client->ch_register(false, {"sA"}) == 0, client->errorMsg());
+            }
+            BOOST_REQUIRE_MESSAGE(client->sync_local() == 0, client->errorMsg());
+            auto fresh = after.client(user);
+            if (client->client_handle() != 0) {
+                BOOST_REQUIRE_MESSAGE(fresh->ch_register(false, {"sA"}) == 0, fresh->errorMsg());
+            }
+            BOOST_REQUIRE_MESSAGE(fresh->sync_local() == 0, fresh->errorMsg());
+            BOOST_CHECK_MESSAGE(full_text_of(*client->defs()) == full_text_of(*fresh->defs()),
+                                step << ": the copy of " << user.user << " differs from a fresh synchronisation\n"
+                                     << full_text_of(*client->defs()) << "---\n"
+                                     << full_text_of(*fresh->defs()));
+        }
+    };
+    compare("restart", true);
+
+    // The server attribute now applies: b hides sB from a
+    auto administrator = after.administrator();
+    BOOST_REQUIRE_MESSAGE(administrator->permissions("create", "/sB", "admin:rwxlop,teamB:r", false) == 0,
+                          administrator->errorMsg());
+    compare("after a change of permissions", false);
+    BOOST_CHECK(!clients[0]->defs()->findAbsNode("/sB"));
+    BOOST_CHECK(clients[2]->defs()->findAbsNode("/sB"));
+
+    std::ifstream log(after.home() / "server.log");
+    std::stringstream text;
+    text << log.rdbuf();
+    BOOST_CHECK_MESSAGE(text.str().find("Source = configuration file") != std::string::npos, text.str());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
