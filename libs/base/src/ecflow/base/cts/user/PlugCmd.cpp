@@ -25,6 +25,7 @@
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #ifdef ECF_OPENSSL
@@ -325,8 +326,12 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
             }
 #endif
 
-            // The move command was ok, remove the source node, and delete its memory and archives
+            // The move command was ok, remove the source node, and delete its memory and archives; its attributes
+            // leave this server (the receiving server validated and logged them where they go)
+            ecf::PermissionsChange permissions(*defs);
+            permissions.record_removal(*sourceNode);
             sourceNode->remove();
+            permissions.log(identity().username().value() + "@" + hostname());
             for (const auto& archive : archives) {
                 std::error_code error;
                 fs::remove(archive, error);
@@ -360,6 +365,22 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
 
+    // Moving the source under another parent changes the attributes applying to it: they are validated where the
+    // source goes (R4.5), before anything changes
+    ecf::PermissionsChange permissions(*defs);
+    if (sourceNode->parent() != destNode->parent()) {
+        permissions.record_removal(*sourceNode);
+        if (holds_archives(*sourceNode)) {
+            // The archived containers are validated too, on a copy restored from their archives, which remain
+            std::vector<std::string> read;
+            const auto [scratch, copy] = transfer_copy(*sourceNode, read);
+            permissions.validate_move(*copy, sourceNode->parent(), theDestNode);
+        }
+        else {
+            permissions.validate_move(*sourceNode, sourceNode->parent(), theDestNode);
+        }
+    }
+
     // If the source node or *any* of its children are archived restore them first. Must be done in a top down manner.
     std::vector<std::string> archives;
     restore(sourceNode->isNodeContainer(), true, archives);
@@ -379,6 +400,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
             throw std::runtime_error("Fatal error plug command failed.");
         }
     }
+    permissions.log(identity().username().value() + "@" + hostname());
 
     add_node_for_edit_history(destNode);
 

@@ -398,10 +398,15 @@ BOOST_AUTO_TEST_CASE(test_remote_plug) {
                 BOOST_REQUIRE_MESSAGE(archiver->edit_history("/") == 0, archiver->errorMsg());
                 history_before = to_text(archiver->server_reply().get_string_vec());
             }
-            PermissionsServer receiver(admin,
-                                       {mover},
-                                       R"([{"user": "admin", "permissions": "rwxlops"}, {"user": ")" + mover.user +
-                                           R"(", "permissions": ")" + c.receiver_roles + R"("}])");
+            // The receiving server lists every user named by the attribute of guarded (D2.15), with r only, except the
+            // mover, with the roles of the case
+            std::string listed = R"([{"user": "admin", "permissions": "rwxlops"})";
+            for (const auto& roles : role_sets) {
+                const auto name = user(roles).user;
+                listed += R"(, {"user": ")" + name + R"(", "permissions": ")" +
+                          (name == mover.user ? c.receiver_roles : std::string("r")) + R"("})";
+            }
+            PermissionsServer receiver(admin, {mover}, listed + "]");
             auto setup = receiver.administrator();
             auto empty = Defs::create();
             empty->add_suite("s2"); // receives the family f

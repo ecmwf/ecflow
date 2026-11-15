@@ -10,7 +10,11 @@
 #include <string>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/ArchivedNodes.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -442,6 +446,7 @@ bool PermissionsChange::holds_p(const std::vector<EffectivePermissions::State>& 
 void PermissionsChange::transfer(const Node& node,
                                  const std::string& path,
                                  const std::vector<EffectivePermissions::State>& parent,
+                                 const std::vector<EffectivePermissions::State>* old_parent,
                                  bool parent_held_p,
                                  bool suite) {
     transferred_.insert(path);
@@ -467,9 +472,21 @@ void PermissionsChange::transfer(const Node& node,
         here.push_back(walkers_[i].descend(parent[i], attribute));
     }
 
-    // No lockout (D4.6): compared with the node at the same path, or, for a new node, with the node above it
+    // No lockout (D4.6): compared with the node itself where it was (a move: its effective permissions there, its
+    // archived descendants included), or with the node at the same path, or, for a new node, with the node above it
     const auto existing = defs_.findAbsNode(path);
-    const bool held_p   = existing ? holds_p(states_at(existing.get())) : parent_held_p;
+    std::vector<EffectivePermissions::State> old_here;
+    bool held_p = parent_held_p;
+    if (old_parent) {
+        old_here.reserve(walkers_.size());
+        for (std::size_t i = 0; i < walkers_.size(); ++i) {
+            old_here.push_back(walkers_[i].descend((*old_parent)[i], attribute));
+        }
+        held_p = holds_p(old_here);
+    }
+    else if (existing) {
+        held_p = holds_p(states_at(existing.get()));
+    }
     if (held_p && !holds_p(here)) {
         throw std::runtime_error("The change would leave nobody able to change the Permissions attribute of " + path);
     }
@@ -487,12 +504,19 @@ void PermissionsChange::transfer(const Node& node,
     std::vector<node_ptr> children;
     node.immediateChildren(children);
     for (const auto& child : children) {
-        transfer(*child, path + "/" + child->name(), here, held_p, false);
+        transfer(*child, path + "/" + child->name(), here, old_parent ? &old_here : nullptr, held_p, false);
     }
 }
 
 void PermissionsChange::validate_transfer(const Node& subtree, const Node* parent) {
-    records_.clear();
+    validate_transfer(subtree, parent, nullptr, false);
+}
+
+void PermissionsChange::validate_move(const Node& subtree, const Node* from, const Node* to) {
+    validate_transfer(subtree, to, from, true);
+}
+
+void PermissionsChange::validate_transfer(const Node& subtree, const Node* parent, const Node* from, bool moved) {
     transferred_.clear();
     changed_.clear();
     candidate_.clear();
@@ -528,7 +552,13 @@ void PermissionsChange::validate_transfer(const Node& subtree, const Node* paren
         });
     }
     const auto states = states_at(parent);
-    transfer(subtree, root, states, holds_p(states), parent == nullptr);
+    if (moved) {
+        const auto old_states = states_at(from);
+        transfer(subtree, root, states, &old_states, holds_p(states), parent == nullptr);
+    }
+    else {
+        transfer(subtree, root, states, nullptr, holds_p(states), parent == nullptr);
+    }
 
     // The attributes of the nodes replaced, archived ones included, that are absent from the subtree
     if (replaced_) {
@@ -540,6 +570,19 @@ void PermissionsChange::validate_transfer(const Node& subtree, const Node* paren
     }
     replaced_.reset();
     replaced_index_.clear();
+}
+
+void PermissionsChange::record_removal(const Node& subtree) {
+    if (!server_after()) {
+        // Without a server attribute, no node carries one (D2.20); the archives are not read
+        return;
+    }
+    for_each_node(subtree, [this](const Node& node) {
+        if (node.permissions()) {
+            records_.push_back(
+                PermissionsChangeRecord{node.absNodePath(), value_of(node.permissions()), std::nullopt, false});
+        }
+    });
 }
 
 void PermissionsChange::log(const std::string& requester) const {

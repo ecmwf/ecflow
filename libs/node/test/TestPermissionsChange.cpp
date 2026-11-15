@@ -244,6 +244,44 @@ BOOST_AUTO_TEST_CASE(test_several_requests) {
 }
 
 ///
+/// @brief Verifies the lockout check of a move (D4.6), on the subtree moved and on a copy of it (as for archived
+///        descendants): a node is compared with itself where it was, so that a descendant already without any holder
+///        of p does not block the move, and a descendant that had one must keep one.
+///
+BOOST_AUTO_TEST_CASE(test_move_compares_with_the_former_place) {
+    ECF_NAME_THIS_TEST();
+
+    // z, below lk, has no holder of p already (as a restore can leave it, D3.5); k, below h, has carol with p
+    auto defs      = make("alice:rwxp,carol:rwxp",
+                     "suite pub\n" + attribute("alice:rwxp,carol:rwxp") + "  family lk\n    family z\n" +
+                         attribute("carol:r") + "    endfamily\n  endfamily\n  family h\n    family k\n" +
+                         attribute("carol:rwxp") + "    endfamily\n  endfamily\n  family g\n" +
+                         attribute("alice:rwxp,carol:r") + "  endfamily\nendsuite\n");
+    const auto pub = defs->findAbsNode("/pub");
+    const auto g   = defs->findAbsNode("/pub/g");
+    for (const bool copy : {false, true}) {
+        BOOST_TEST_CONTEXT((copy ? "a copy" : "the subtree")) {
+            for (const auto* name : {"lk", "h"}) {
+                const auto node    = defs->findAbsNode(std::string("/pub/") + name);
+                const auto subtree = copy ? node->clone() : node;
+                PermissionsChange pipeline(*defs);
+                if (std::string(name) == "lk") {
+                    BOOST_CHECK_NO_THROW(pipeline.validate_move(*subtree, pub.get(), g.get()));
+                }
+                else {
+                    BOOST_CHECK_EXCEPTION(pipeline.validate_move(*subtree, pub.get(), g.get()),
+                                          std::runtime_error,
+                                          [](const std::runtime_error& e) {
+                                              return std::string(e.what()).find(
+                                                         "Permissions attribute of /pub/g/h/k") != std::string::npos;
+                                          });
+                }
+            }
+        }
+    }
+}
+
+///
 /// @brief Verifies that node attributes require a server attribute (D2.20), while removing one does not.
 ///
 BOOST_AUTO_TEST_CASE(test_node_attributes_need_a_server_attribute) {
@@ -259,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_node_attributes_need_a_server_attribute) {
 }
 
 ///
-/// @brief Verifies the validation of the subtrees brought by load and replace on a server without a server
+/// @brief Verifies the validation of the subtrees brought by load, replace and plug on a server without a server
 ///        attribute (D2.20): the first node carrying an attribute, in the order of a walk of the tree (aliases
 ///        included), is named at the path where it would go; subtrees without attributes are accepted, recording
 ///        nothing.
@@ -270,6 +308,7 @@ BOOST_AUTO_TEST_CASE(test_transfers_without_server_attribute) {
     auto defs = Defs::create();
     auto s    = defs->add_suite("s");
     s->add_family("f")->add_task("t");
+    auto g = s->add_family("g");
 
     const auto attribute = Permissions::parse_cli("alice:rwxp");
     const auto refusal   = [](const std::string& path) {
@@ -317,10 +356,19 @@ BOOST_AUTO_TEST_CASE(test_transfers_without_server_attribute) {
     f->add_task("t")->add_permissions(attribute);
     PermissionsChange replace(*defs);
     BOOST_CHECK_EQUAL(error_of([&] { replace.validate_transfer(*f, s.get()); }), refusal("/s/f/t"));
+
+    // A move names the node where it goes, not where it is
+    const auto moved = defs->findAbsNode("/s/f")->clone();
+    moved->isNodeContainer()->findTask("t")->add_permissions(attribute);
+    PermissionsChange move(*defs);
+    BOOST_CHECK_EQUAL(error_of([&] { move.validate_move(*moved, s.get(), g.get()); }), refusal("/s/g/f/t"));
+    moved->isNodeContainer()->findTask("t")->set_permissions(nullptr);
+    BOOST_CHECK_EQUAL(error_of([&] { move.validate_move(*moved, s.get(), g.get()); }), "");
+    BOOST_CHECK(move.changes().empty());
 }
 
 ///
-/// @brief Verifies that on a server without a server attribute, replacing nodes reads no archive (NP7):
+/// @brief Verifies that on a server without a server attribute, replacing and deleting nodes read no archive (NP7):
 ///        a missing archive logs no warning, and an archive carrying attributes (written while the server had a
 ///        server attribute) records nothing.
 ///
@@ -357,6 +405,13 @@ BOOST_AUTO_TEST_CASE(test_no_archive_read_without_server_attribute) {
     BOOST_CHECK_NO_THROW(replace.validate_transfer(*client->findSuite("s"), nullptr));
     BOOST_CHECK(replace.changes().empty());
     auto text = log_text();
+    BOOST_CHECK_MESSAGE(text.find("could not be read") == std::string::npos, text);
+
+    // A delete of the suite
+    PermissionsChange removal(*defs);
+    removal.record_removal(*s);
+    BOOST_CHECK(removal.changes().empty());
+    text = log_text();
     BOOST_CHECK_MESSAGE(text.find("could not be read") == std::string::npos, text);
 }
 

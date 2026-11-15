@@ -102,10 +102,12 @@ public:
     /// - its attributes name only users listed above their nodes; a user not listed is rejected, never removed
     ///   (D2.15, D2.18);
     /// - no node of the subtree is left without any user holding p, when one held it before: at the node of the
-    ///   definitions with the same path, or, for a new node, at the node above it (D4.6).
+    ///   definitions with the same path, or, for a new node, at the node above it (D4.6); see validate_move() for a
+    ///   subtree moved within the definitions.
     ///
     /// The records compare the attributes of the subtree with those of the nodes of the definitions at the same paths,
-    /// below the target path: an attribute the subtree no longer carries is recorded as removed.
+    /// below the target path: an attribute the subtree no longer carries is recorded as removed. They are added to the
+    /// records made before, e.g. by record_removal() for the source of a plug.
     ///
     /// Without a server attribute, no node of the definitions carries one (D2.20): the subtree is only checked to carry
     /// none, the first node carrying one, in the order of a walk of the tree, being named; nothing is recorded, and
@@ -116,6 +118,31 @@ public:
     /// @throws std::runtime_error naming the reason when the subtree is rejected.
     ///
     void validate_transfer(const Node& subtree, const Node* parent);
+
+    ///
+    /// @brief Validates a subtree about to be moved within the definitions (a local plug), as validate_transfer() does.
+    ///
+    /// The lockout check compares each node of the subtree with itself where it was, through the effective permissions
+    /// at its former place (D4.6): a node that had a holder of p must keep one.
+    ///
+    /// @param[in] subtree The subtree moved, or a copy of it holding its archived descendants restored
+    /// @param[in] from The node of the definitions the subtree leaves, or nullptr for a suite
+    /// @param[in] to The node of the definitions under which the subtree goes, or nullptr for a suite
+    /// @throws std::runtime_error naming the reason when the move is rejected.
+    ///
+    void validate_move(const Node& subtree, const Node* from, const Node* to);
+
+    ///
+    /// @brief Records as removed the attributes of a subtree about to leave the definitions (delete, or the source of
+    ///        a plug), for log().
+    ///
+    /// The archived descendants are read from their archive files, without changing anything. Nothing is checked:
+    /// removing nodes leaves the attributes of the other nodes, and who holds p there, unchanged. Without a server
+    /// attribute, no node carries one (D2.20): nothing is recorded, and no archive is read.
+    ///
+    /// @param[in] subtree The root of the subtree, part of the definitions
+    ///
+    void record_removal(const Node& subtree);
 
     ///
     /// @brief Writes the log records of the changes validated by validate_transfer(), once the operation is applied.
@@ -139,9 +166,11 @@ private:
     [[nodiscard]] bool holds_p(const std::vector<EffectivePermissions::State>& states) const;
     [[nodiscard]] bool
     listed(const std::string& user, bool suite, const std::vector<EffectivePermissions::State>& parent) const;
+    void validate_transfer(const Node& subtree, const Node* parent, const Node* from, bool moved);
     void transfer(const Node& node,
                   const std::string& path,
                   const std::vector<EffectivePermissions::State>& parent,
+                  const std::vector<EffectivePermissions::State>* old_parent,
                   bool parent_held_p,
                   bool suite);
     void cascade(Node& node, const std::vector<EffectivePermissions::State>& parent);

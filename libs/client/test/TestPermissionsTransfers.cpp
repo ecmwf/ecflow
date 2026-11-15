@@ -13,6 +13,7 @@
 #include "PermissionsServer.hpp"
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/NState.hpp"
@@ -96,26 +97,35 @@ std::string text_of(const Defs& defs) {
 
 ///
 /// @brief Holds the clients of a user kept synchronised across changes: one without a handle, one with a handle
-///        on suite s.
+///        on the given suites (s by default).
 ///
 struct Copies
 {
     const PermissionsServer& server;
     Credentials user;
+    std::vector<std::string> suites       = {"s"};
     std::unique_ptr<ClientInvoker> plain  = server.client(user);
     std::unique_ptr<ClientInvoker> handle = server.client(user);
 
     void start() {
         BOOST_REQUIRE_MESSAGE(plain->sync_local() == 0, plain->errorMsg());
-        BOOST_REQUIRE_MESSAGE(handle->ch_register(true, {"s"}) == 0, handle->errorMsg());
+        BOOST_REQUIRE_MESSAGE(handle->ch_register(true, suites) == 0, handle->errorMsg());
         BOOST_REQUIRE_MESSAGE(handle->sync_local() == 0, handle->errorMsg());
     }
 
     void check(const std::string& step) {
         auto fresh = server.client(user);
         BOOST_REQUIRE_MESSAGE(fresh->sync_local() == 0, fresh->errorMsg());
+        // The fresh handle holds the suites the kept handle holds now, those added automatically included
+        BOOST_REQUIRE_MESSAGE(handle->ch_suites() == 0, handle->errorMsg());
+        std::vector<std::string> held;
+        for (const auto& [number, names] : handle->server_reply().get_client_handle_suites()) {
+            if (static_cast<int>(number) == handle->client_handle()) {
+                held = names;
+            }
+        }
         auto fresh_handle = server.client(user);
-        BOOST_REQUIRE_MESSAGE(fresh_handle->ch_register(true, {"s"}) == 0, fresh_handle->errorMsg());
+        BOOST_REQUIRE_MESSAGE(fresh_handle->ch_register(true, held) == 0, fresh_handle->errorMsg());
         BOOST_REQUIRE_MESSAGE(fresh_handle->sync_local() == 0, fresh_handle->errorMsg());
         const std::vector<std::pair<ClientInvoker*, ClientInvoker*>> pairs{{plain.get(), fresh.get()},
                                                                            {handle.get(), fresh_handle.get()}};
@@ -305,6 +315,273 @@ BOOST_AUTO_TEST_CASE(test_replace) {
 }
 
 ///
+/// @brief Builds the definitions of A7.9 and of the other plugs: /pub, open to alice and carol, with family f, which
+///        inherits from /pub, and its task t, naming alice only; families g (naming carol too), h (whose family k
+///        names carol only), x (whose family y names carol too) and w (whose family v names alice only, as its family
+///        u does); /restr, listing alice only.
+///
+defs_ptr pub_and_restr(const std::string& home = {}) {
+    auto defs = Defs::create();
+    auto pub  = defs->add_suite("pub");
+    if (!home.empty()) {
+        // The archives of /pub go to a directory of their own, away from the working directory of the server
+        pub->add_variable(ecf::environment::ECF_HOME, home);
+    }
+    pub->add_permissions(Permissions::parse_cli("admin:rwxlop,alice:rwxp,carol:rwxp"));
+    auto f = pub->add_family("f");
+    f->add_task("t")->add_permissions(Permissions::parse_cli("alice:rwxp"));
+    auto g = pub->add_family("g");
+    g->add_permissions(Permissions::parse_cli("alice:rwxp,carol:r"));
+    g->add_task("t");
+    auto h = pub->add_family("h");
+    h->add_permissions(Permissions::parse_cli("alice:rwxp,carol:rwxp"));
+    h->add_family("k")->add_permissions(Permissions::parse_cli("carol:rwxp"));
+    auto x = pub->add_family("x");
+    x->add_family("y")->add_permissions(Permissions::parse_cli("alice:rwxp,carol:r"));
+    x->add_task("t");
+    auto w = pub->add_family("w");
+    auto v = w->add_family("v");
+    v->add_permissions(Permissions::parse_cli("alice:rwxp"));
+    v->add_family("u")->add_permissions(Permissions::parse_cli("alice:rp"));
+    auto restr = defs->add_suite("restr");
+    restr->add_permissions(Permissions::parse_cli("alice:rwxp"));
+    restr->add_task("t");
+    return defs;
+}
+
+const Credentials carol{"carol", "carol-secret"};
+
+///
+/// @brief Returns an absolute directory, outside the working directory of the server, for the archives of /pub.
+///
+std::string archives_of(const PermissionsServer& server) {
+    const auto directory = server.directory() / "pub archives";
+    fs::create_directories(directory);
+    return directory.string();
+}
+
+const std::string plug_server_attribute = R"([{"user": "admin", "permissions": "rwxlop"},)"
+                                          R"( {"user": "alice", "permissions": "rwxop"},)"
+                                          R"( {"user": "carol", "permissions": "r"}])";
+
+void check_records(const std::vector<std::string>& records, const std::vector<std::string>& expected) {
+    BOOST_REQUIRE_EQUAL(records.size(), expected.size());
+    for (std::size_t i = 0; i < expected.size(); ++i) {
+        BOOST_CHECK_MESSAGE(records[i].rfind(expected[i], 0) == 0,
+                            records[i] << " does not start with " << expected[i]);
+    }
+}
+
+bool archived(const PermissionsServer& server, const std::string& path) {
+    auto check = server.client(alice);
+    BOOST_REQUIRE_MESSAGE(check->sync_local() == 0, check->errorMsg());
+    const auto node = check->defs()->findAbsNode(path);
+    return node && node->get_flag().is_set(ecf::Flag::ARCHIVED);
+}
+
+///
+/// @brief A7.9 Plug into a restricted suite, and the validation of local plugs: carol, with w and p on /pub/f but
+///        not on /restr, is denied because of the destination; a user not listed where the node goes, or a node left
+///        without any holder of p, rejects the plug, archived parts included; a valid plug is logged at both paths,
+///        archived descendants included, and the copies of the clients follow.
+///
+BOOST_AUTO_TEST_CASE(test_a7_9_local_plug) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice, carol}, plug_server_attribute);
+    {
+        auto client = server.administrator();
+        BOOST_REQUIRE_MESSAGE(client->load(pub_and_restr(archives_of(server))) == 0, client->errorMsg());
+    }
+    Copies copies_of_carol{server, carol, {"pub"}};
+    Copies copies_of_alice{server, alice, {"pub", "restr"}};
+    copies_of_carol.start();
+    copies_of_alice.start();
+    BOOST_REQUIRE(copies_of_carol.plain->defs()->findAbsNode("/pub/f"));
+    BOOST_REQUIRE(!copies_of_carol.plain->defs()->findAbsNode("/pub/f/t"));
+
+    // carol, with w and p on /pub/f but not on /restr, is denied because of the destination (D4.11)
+    auto client_of_carol = server.client(carol);
+    BOOST_CHECK(client_of_carol->plug("/pub/f", "/restr") != 0);
+    BOOST_CHECK(client_of_carol->server_reply().permission_denied());
+    BOOST_CHECK_MESSAGE(client_of_carol->errorMsg().find("required at /restr)") != std::string::npos,
+                        client_of_carol->errorMsg());
+
+    auto client_of_alice = server.client(alice);
+    // g names carol, who is not listed above /restr/g: rejected, never removed (D2.18)
+    BOOST_CHECK(client_of_alice->plug("/pub/g", "/restr") != 0);
+    BOOST_CHECK_MESSAGE(client_of_alice->errorMsg().find("/restr/g names the user 'carol'") != std::string::npos,
+                        client_of_alice->errorMsg());
+    // h/k, where only carol holds p, would be left without any holder of p under /pub/g, where carol holds r only
+    // (D4.6); alice, holding p at h and at g, is allowed to plug, but holds nothing at k
+    BOOST_CHECK(client_of_alice->plug("/pub/h", "/pub/g/t") != 0); // a task: under its parent g
+    BOOST_CHECK_MESSAGE(client_of_alice->errorMsg().find(
+                            "nobody able to change the Permissions attribute of /pub/g/h/k") != std::string::npos,
+                        client_of_alice->errorMsg());
+    // An archived family is validated too: x/y, restored from the archive of x, names carol (D2.18); x stays archived
+    BOOST_REQUIRE_MESSAGE(client_of_alice->archive("/pub/x") == 0, client_of_alice->errorMsg());
+    BOOST_CHECK(client_of_alice->plug("/pub/x", "/restr") != 0);
+    BOOST_CHECK_MESSAGE(client_of_alice->errorMsg().find("/restr/x/y names the user 'carol'") != std::string::npos,
+                        client_of_alice->errorMsg());
+    BOOST_CHECK(archived(server, "/pub/x"));
+    BOOST_CHECK_EQUAL(attribute_at(server, "/pub/g"), "alice:rwxp,carol:r");
+    BOOST_CHECK_EQUAL(attribute_at(server, "/pub/h"), "alice:rwxp,carol:rwxp");
+
+    // alice plugs f into /restr: carol had /pub/f, and never receives /restr/f
+    BOOST_REQUIRE_MESSAGE(client_of_alice->plug("/pub/f", "/restr") == 0, client_of_alice->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/restr/f/t"), "alice:rwxp");
+    copies_of_carol.check("plug of f");
+    copies_of_alice.check("plug of f");
+    BOOST_CHECK(!copies_of_carol.plain->defs()->findAbsNode("/pub/f"));
+    BOOST_CHECK(!copies_of_carol.plain->defs()->findAbsNode("/restr/f"));
+
+    // w, archived with v archived inside it, moves too: both archives are read for the records
+    BOOST_REQUIRE_MESSAGE(client_of_alice->archive("/pub/w/v") == 0, client_of_alice->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_alice->archive("/pub/w") == 0, client_of_alice->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_alice->plug("/pub/w", "/restr") == 0, client_of_alice->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/restr/w/v/u"), "alice:rp");
+    copies_of_carol.check("plug of w");
+    copies_of_alice.check("plug of w");
+
+    check_records(permissions_records(server),
+                  {
+                      "permissions /pub (none) -> admin:rwxlop,alice:rwxp,carol:rwxp by admin@",
+                      "permissions /pub/f/t (none) -> alice:rwxp by admin@",
+                      "permissions /pub/g (none) -> alice:rwxp,carol:r by admin@",
+                      "permissions /pub/h (none) -> alice:rwxp,carol:rwxp by admin@",
+                      "permissions /pub/h/k (none) -> carol:rwxp by admin@",
+                      "permissions /pub/x/y (none) -> alice:rwxp,carol:r by admin@",
+                      "permissions /pub/w/v (none) -> alice:rwxp by admin@",
+                      "permissions /pub/w/v/u (none) -> alice:rp by admin@",
+                      "permissions /restr (none) -> alice:rwxp by admin@",
+                      "permissions /pub/f/t alice:rwxp -> (none) by alice@",
+                      "permissions /restr/f/t (none) -> alice:rwxp by alice@",
+                      "permissions /pub/w/v alice:rwxp -> (none) by alice@",
+                      "permissions /pub/w/v/u alice:rp -> (none) by alice@",
+                      "permissions /restr/w/v (none) -> alice:rwxp by alice@",
+                      "permissions /restr/w/v/u (none) -> alice:rp by alice@",
+                  });
+}
+
+///
+/// @brief Verifies the validation of a plug to another server, where the node goes: refused there, the source stays
+///        on the sending server; accepted, the attributes are logged on both servers, a whole suite included, and the
+///        copies of the clients of both servers follow.
+///
+BOOST_AUTO_TEST_CASE(test_remote_plug) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer sender(admin, {alice, carol}, plug_server_attribute);
+    {
+        auto client = sender.administrator();
+        BOOST_REQUIRE_MESSAGE(client->load(pub_and_restr()) == 0, client->errorMsg());
+    }
+    // The receiving server lists alice, not carol
+    PermissionsServer receiver(admin,
+                               {alice, carol},
+                               R"([{"user": "admin", "permissions": "rwxlop"},)"
+                               R"( {"user": "alice", "permissions": "rwxop"}])");
+    {
+        auto defs = Defs::create();
+        defs->add_suite("s2")->add_permissions(Permissions::parse_cli("admin:rwxlop,alice:rwxp"));
+        auto client = receiver.administrator();
+        BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+    }
+    Copies sender_copies{sender, alice, {"pub", "restr"}};
+    Copies receiver_copies{receiver, alice, {"s2"}}; // restr is added to the handle when it arrives
+    sender_copies.start();
+    receiver_copies.start();
+    const auto receiving   = "localhost:" + receiver.port();
+    const auto destination = receiving + "/s2";
+    auto client_of_alice   = sender.client(alice);
+
+    // g names carol, unknown to the receiving server: refused there, g stays on the sending server
+    BOOST_CHECK(client_of_alice->plug("/pub/g", destination) != 0);
+    BOOST_CHECK_MESSAGE(client_of_alice->errorMsg().find("names the user 'carol'") != std::string::npos,
+                        client_of_alice->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(sender, "/pub/g"), "alice:rwxp,carol:r");
+
+    // f moves, and the whole suite /restr; the attributes are logged where they go, and as removed where they were
+    BOOST_REQUIRE_MESSAGE(client_of_alice->plug("/pub/f", destination) == 0, client_of_alice->errorMsg());
+    sender_copies.check("remote plug of a family, sending server");
+    receiver_copies.check("remote plug of a family, receiving server");
+    BOOST_REQUIRE_MESSAGE(client_of_alice->plug("/restr", receiving) == 0, client_of_alice->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(sender, "/pub/f"), "missing");
+    BOOST_CHECK_EQUAL(attribute_at(receiver, "/s2/f/t"), "alice:rwxp");
+    BOOST_CHECK_EQUAL(attribute_at(receiver, "/restr"), "alice:rwxp");
+    sender_copies.check("remote plug of a suite, sending server");
+    receiver_copies.check("remote plug of a suite, receiving server");
+
+    auto received = permissions_records(receiver);
+    received.erase(received.begin()); // the load of s2
+    check_records(received,
+                  {
+                      "permissions /s2/f/t (none) -> alice:rwxp by alice@",
+                      "permissions /restr (none) -> alice:rwxp by alice@",
+                  });
+    auto sent = permissions_records(sender);
+    BOOST_REQUIRE_GE(sent.size(), 2U);
+    sent.erase(sent.begin(), sent.end() - 2);
+    check_records(sent,
+                  {
+                      "permissions /pub/f/t alice:rwxp -> (none) by alice@",
+                      "permissions /restr alice:rwxp -> (none) by alice@",
+                  });
+}
+
+///
+/// @brief Verifies that deleting nodes logs the attributes removed with them, archived ones included, and deleting
+///        every suite logs all of them (R4.5); the copies of the clients follow.
+///
+BOOST_AUTO_TEST_CASE(test_delete) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice, carol}, plug_server_attribute);
+    {
+        auto client = server.administrator();
+        BOOST_REQUIRE_MESSAGE(client->load(pub_and_restr(archives_of(server))) == 0, client->errorMsg());
+    }
+    Copies copies_of_carol{server, carol, {"pub"}};
+    copies_of_carol.start();
+    const auto loaded = permissions_records(server).size();
+
+    auto client_of_alice = server.client(alice);
+    BOOST_REQUIRE_MESSAGE(client_of_alice->delete_node("/pub/g") == 0, client_of_alice->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/pub/g"), "missing");
+    copies_of_carol.check("delete of g");
+    BOOST_REQUIRE_MESSAGE(client_of_alice->archive("/pub/w/v") == 0, client_of_alice->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_alice->archive("/pub/w") == 0, client_of_alice->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client_of_alice->delete_node("/pub/w") == 0, client_of_alice->errorMsg());
+    copies_of_carol.check("delete of w, archived");
+
+    auto records = permissions_records(server);
+    records.erase(records.begin(), records.begin() + static_cast<std::ptrdiff_t>(loaded));
+    check_records(records,
+                  {
+                      "permissions /pub/g alice:rwxp,carol:r -> (none) by alice@",
+                      "permissions /pub/w/v alice:rwxp -> (none) by alice@",
+                      "permissions /pub/w/v/u alice:rp -> (none) by alice@",
+                  });
+
+    // Deleting every suite logs every attribute removed
+    auto administrator = server.administrator();
+    BOOST_REQUIRE_MESSAGE(administrator->delete_all(true) == 0, administrator->errorMsg());
+    copies_of_carol.check("delete of all suites");
+    BOOST_CHECK(copies_of_carol.plain->defs()->suites().empty());
+    BOOST_CHECK(copies_of_carol.handle->defs()->suites().empty());
+    records = permissions_records(server);
+    records.erase(records.begin(), records.begin() + static_cast<std::ptrdiff_t>(loaded) + 3);
+    check_records(records,
+                  {
+                      "permissions /pub admin:rwxlop,alice:rwxp,carol:rwxp -> (none) by admin@",
+                      "permissions /pub/f/t alice:rwxp -> (none) by admin@",
+                      "permissions /pub/h alice:rwxp,carol:rwxp -> (none) by admin@",
+                      "permissions /pub/h/k carol:rwxp -> (none) by admin@",
+                      "permissions /pub/x/y alice:rwxp,carol:r -> (none) by admin@",
+                      "permissions /restr alice:rwxp -> (none) by admin@",
+                  });
+}
+
 ///
 /// @brief Verifies --load --force and --replace over nodes whose attributes are all archived: they require p, as if the
 ///        attributes were in the tree (R4.5), and the records compare with the archived attributes, nested archives
@@ -396,6 +673,7 @@ BOOST_AUTO_TEST_CASE(test_load_and_replace_over_archived_attributes) {
     }
 }
 
+///
 /// @brief Verifies that on a server without a server attribute, definitions carrying node attributes are refused by
 ///        --load and --replace (D2.20), and other definitions are accepted as before.
 ///
@@ -412,6 +690,42 @@ BOOST_AUTO_TEST_CASE(test_unrestricted_server) {
     BOOST_CHECK_MESSAGE(client->errorMsg().find("requires a server Permissions attribute") != std::string::npos,
                         client->errorMsg());
     BOOST_CHECK_EQUAL(attribute_at(server, "/s/f"), "-");
+}
+
+///
+/// @brief Verifies that on a server without a server attribute, deleting archived nodes reads no archive: a missing
+///        archive logs no warning, for the delete of a node and of every suite (NP7).
+///
+BOOST_AUTO_TEST_CASE(test_unrestricted_server_delete_of_missing_archives) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice}, "");
+    auto client = server.client(alice);
+    for (const std::string all : {"", "all"}) {
+        BOOST_TEST_CONTEXT("delete " << (all.empty() ? "of /s" : "of every suite")) {
+            {
+                auto defs = Defs::create();
+                defs->add_suite("s")->add_family("f")->add_task("t");
+                BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+            }
+            BOOST_REQUIRE_MESSAGE(client->archive("/s/f") == 0, client->errorMsg());
+            const auto archive = server.home() / ecf::Host{}.prefix_host_and_port(server.port(), ":s:f.check");
+            BOOST_REQUIRE(fs::exists(archive));
+            fs::remove(archive);
+            if (all.empty()) {
+                BOOST_REQUIRE_MESSAGE(client->delete_node("/s") == 0, client->errorMsg());
+            }
+            else {
+                auto administrator = server.administrator();
+                BOOST_REQUIRE_MESSAGE(administrator->delete_all(true) == 0, administrator->errorMsg());
+            }
+            BOOST_CHECK_EQUAL(attribute_at(server, "/s"), "missing");
+        }
+    }
+
+    std::ifstream log(server.home() / "server.log");
+    const std::string text{std::istreambuf_iterator<char>(log), std::istreambuf_iterator<char>()};
+    BOOST_CHECK_MESSAGE(text.find("could not be read") == std::string::npos, text);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

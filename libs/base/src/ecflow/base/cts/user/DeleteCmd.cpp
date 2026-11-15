@@ -15,6 +15,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/Visibility.hpp"
 
@@ -77,7 +78,12 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
         else {
             as->zombie_ctrl().add_user_zombies(as->defs(), CtsApi::delete_node_arg());
         }
+        ecf::PermissionsChange permissions(*as->defs());
+        for (const auto& suite : as->defs()->suites()) {
+            permissions.record_removal(*suite);
+        }
         as->clear_defs();
+        permissions.log(identity().username().value() + "@" + hostname());
 
         // If this command is part of a group command, let the following sync command, know about the new handle
         if (group_cmd_) {
@@ -110,10 +116,14 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
                 as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(), CtsApi::delete_node_arg());
             }
 
+            // The attributes of the nodes deleted are logged as removed (R4.5)
+            ecf::PermissionsChange permissions(*defs);
+            permissions.record_removal(*theNodeToDelete);
             if (!defs->deleteChild(theNodeToDelete.get())) {
                 std::string errorMsg = "Delete: Cannot delete node " + theNodeToDelete->debugNodePath();
                 throw std::runtime_error(errorMsg);
             }
+            permissions.log(identity().username().value() + "@" + hostname());
         }
 
         std::string error_msg = ss.str();

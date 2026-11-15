@@ -10,6 +10,7 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -135,6 +136,10 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
 
+    // The attributes brought are validated where the node goes (R4.5), before anything changes
+    ecf::PermissionsChange permissions(*defs);
+    const auto requester = identity().username().value() + "@" + hostname();
+
     if (destNode.get()) {
 
         // The destNode containing suite may be in a handle
@@ -145,6 +150,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
         if (thedestNode->isTask()) {
             thedestNode = thedestNode->parent();
         }
+        permissions.validate_transfer(*src_node, thedestNode);
 
         // check its ok to add
         std::string errorMsg;
@@ -159,6 +165,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
             // This should never fail !!!! else we have lost/ and leaked source node !!!!
             throw std::runtime_error("Fatal error plug(move) command failed. cannot addChild");
         }
+        permissions.log(requester);
 
         add_node_for_edit_history(destNode);
     }
@@ -168,6 +175,8 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
             throw std::runtime_error("plug(move): Source node was expected to be a suite");
         }
 
+        permissions.validate_transfer(*src_node, nullptr);
+
         // convert node_ptr to suite_ptr
         suite_ptr the_source_suite = std::dynamic_pointer_cast<Suite>(src_node);
 
@@ -175,6 +184,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
         SuiteChanged suiteChanged(the_source_suite);
 
         defs->addSuite(the_source_suite);
+        permissions.log(requester);
 
         add_node_for_edit_history(the_source_suite);
     }

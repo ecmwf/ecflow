@@ -446,6 +446,17 @@ before anything changes:
 The attributes they add, change or remove, ``--load --force`` and the nodes replaced included, are written to the
 server log like the changes made by ``--permissions``.
 
+``--plug`` validates the node plugged, with its attributes, archived parts included, where it goes, with the same
+rules:
+
+- for a local plug, on this server: a node that had a user holding ``p`` where it was must keep one where it goes;
+- for a plug to another server, on the receiving server, which knows nothing of the sending one: a node with a user
+  holding ``p`` at the destination (or at server level, for a whole suite) must keep one.
+
+The log holds both paths: the attributes removed from where the node was, and added where it goes (on each server,
+for a plug to another server). ``--delete`` logs the attributes removed with the nodes deleted, archived ones
+included.
+
 Each change is written to the server log, with the requester, the path, and the old and new values, e.g.::
 
    LOG:[10:12:01 15.11.2026]  permissions /s alice:rwxp,bob:r -> alice:rwxp by alice@host
