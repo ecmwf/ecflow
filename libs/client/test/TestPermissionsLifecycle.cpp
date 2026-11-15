@@ -413,6 +413,22 @@ BOOST_AUTO_TEST_CASE(test_remote_plug) {
             BOOST_CHECK_EQUAL(client->server_reply().permission_denied(), c.denied);
             BOOST_CHECK_MESSAGE((status != 0) == c.denied, client->errorMsg());
 
+            // A denial by the receiving server names it, the request and the requester, in the reply and, once, in
+            // the log of the sending server
+            if (c.denied) {
+                const auto receiver_named = "the receiving server localhost:" + receiver.port() + " denied the move";
+                BOOST_CHECK_MESSAGE(client->errorMsg().find(receiver_named) != std::string::npos, client->errorMsg());
+                BOOST_CHECK_MESSAGE(client->errorMsg().find("[--plug") != std::string::npos, client->errorMsg());
+                BOOST_CHECK_MESSAGE(client->errorMsg().find(":" + mover.user + "@") != std::string::npos,
+                                    client->errorMsg());
+                std::ifstream log(sender->home() / "server.log");
+                std::size_t records = 0;
+                for (std::string line; std::getline(log, line);) {
+                    records += line.find(receiver_named) != std::string::npos ? 1 : 0;
+                }
+                BOOST_CHECK_EQUAL(records, 1U);
+            }
+
             // On a denial, the source stays on the sending server
             auto check = sender->administrator();
             BOOST_REQUIRE_MESSAGE(check->getDefs() == 0, check->errorMsg());

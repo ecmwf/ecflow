@@ -44,7 +44,7 @@ std::vector<std::string> denied_records(const PermissionsServer& server) {
     std::ifstream log(server.home() / "server.log");
     std::vector<std::string> records;
     for (std::string line; std::getline(log, line);) {
-        if (line.find(" DENIED ") != std::string::npos) {
+        if (line.find("Command not accepted, due to: Authorisation") != std::string::npos) {
             records.push_back(line);
         }
     }
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_SUITE(T_PermissionsAcceptance)
 ///
 /// @brief A7.3 Denied operation: an operator with r at server level and r, but not x, on /sB requeues the aborted
 ///        task /sB/t; the request fails with "permission denied" (C++ client and command-line client), the task stays
-///        aborted, and one log record holds identity, command, path and reason.
+///        aborted, and one log line holds identity, command, path and reason.
 ///
 BOOST_AUTO_TEST_CASE(test_a7_3_denied_operation) {
     ECF_NAME_THIS_TEST();
@@ -92,7 +92,9 @@ BOOST_AUTO_TEST_CASE(test_a7_3_denied_operation) {
     {
         const auto records = denied_records(server);
         BOOST_REQUIRE_EQUAL(records.size(), 1U);
-        for (const auto* field : {"user='operator'", "command='--requeue'", "/sB/t", "reason='"}) {
+        // Identity, command, path and reason (D5.29)
+        for (const auto* field :
+             {":operator@", "[--requeue /sB/t", "Insufficient permissions (role x required at /sB/t)"}) {
             BOOST_CHECK_MESSAGE(records.front().find(field) != std::string::npos,
                                 "missing " << field << " in " << records.front());
         }
@@ -109,8 +111,10 @@ BOOST_AUTO_TEST_CASE(test_a7_3_denied_operation) {
         WithTestEnvironmentVariable password_file("ECF_CUSTOM_PASSWD", passwords.string());
         Process requeue(fs::path(ecf::File::find_ecf_client_path()), {"--requeue=/sB/t"}, server.directory());
         BOOST_CHECK_EQUAL(requeue.wait(), 3);
-        BOOST_CHECK_MESSAGE(requeue.read_stderr().find("Permission denied: --requeue") != std::string::npos,
-                            requeue.read_stderr());
+        // The output is taken once: a second read returns nothing
+        const auto error = requeue.read_stderr();
+        BOOST_CHECK_MESSAGE(error.find("(role x required at /sB/t) [--requeue /sB/t :operator@") != std::string::npos,
+                            error);
     }
     BOOST_CHECK_EQUAL(state_of(server, "/sB/t"), "aborted");
 }

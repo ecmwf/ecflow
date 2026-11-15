@@ -5,7 +5,6 @@
 
 #include <atomic>
 
-#include "ecflow/base/DenialLog.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/core/CheckPt.hpp"
@@ -131,13 +130,6 @@ public:
     virtual ecf::AuthenticationService& authentication()             = 0;
     virtual const ecf::AuthenticationService& authentication() const = 0;
 
-    ///
-    /// @brief Returns the bookkeeping bounding the rate at which denied requests are logged.
-    ///
-    /// @return The bookkeeping, owned by the server.
-    ///
-    ecf::DenialLog& denial_log() { return denial_log_; }
-
     virtual ecf::AuthorisationService& authorisation()             = 0;
     virtual const ecf::AuthorisationService& authorisation() const = 0;
 
@@ -223,5 +215,4 @@ private:
     ZombieCtrl zombie_ctrl_;
     Stats stats_;
     std::atomic<int> job_gen_count_{0};
-    ecf::DenialLog denial_log_;
 };

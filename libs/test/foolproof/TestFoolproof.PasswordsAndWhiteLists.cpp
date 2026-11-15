@@ -220,9 +220,10 @@ endsuite;
         auto client =
             RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(RunClient::CommandLoad{defs.path()});
         BOOST_REQUIRE(!client.ok());
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --load") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 
     { // #authorisation, perform write operation with "rw" access -- load defs file % [success]
@@ -284,9 +285,10 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --alter") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 
     { // ... check that previous update did not take effect
@@ -424,9 +426,10 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --alter") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 
     user_a = User{"alice", "somesecret", "r"};
@@ -451,9 +454,10 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --alter") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 
     { // #authorisation, perform write operation with only "rw" access -- update label value % [success]
@@ -583,9 +587,10 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --alter") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 }
 
@@ -595,12 +600,14 @@ BOOST_AUTO_TEST_CASE(test_e2e_rejection_message_includes_username) {
     /*
      * Description
      *
-     * This test case verifies the messages returned to the client when a command is rejected. See ECFLOW-2097.
+     * This test case verifies that, when a command is rejected, the rejection message returned to the client
+     * includes the rejected command, the originating user name and the client host (within square brackets).
+     * See ECFLOW-2097.
      *
      * Requirements
      *
-     * - An authorisation failure is a denial: the reply of the server names only the command, never the nodes or
-     *   arguments of the request ("Permission denied: --<command>"); the server log records the details.
+     * - An authorisation failure message ends with the rejected command, user and host, as:
+     *   [--<command> :<username>@<host>].
      * - An authentication failure message ends with the rejected command, user and host, as:
      *   [--<command> :<username>@<host>].
      *
@@ -668,13 +675,11 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --alter") != std::string::npos,
-                            client.reason());
-        // The reply of the server names neither the node nor the arguments (the server log records them)
-        const auto server_part = client.reason().substr(client.reason().find("Server reply: "));
-        BOOST_CHECK_MESSAGE(server_part.find("/s/f/task") == std::string::npos, client.reason());
-        BOOST_CHECK_MESSAGE(server_part.find("attempted_value") == std::string::npos, client.reason());
+        BOOST_CHECK(client.reason().find("Command not accepted, due to: Authorisation (user) failed, due to: "
+                                         "Insufficient permissions") != std::string::npos);
+        // The rejected command, originating user name and client host are present in the rejection message
+        BOOST_CHECK(client.reason().find("[--alter change label l attempted_value /s/f/task :bob@" + host.value() +
+                                         "]") != std::string::npos);
     }
 
     { // #authentication, perform operation with unknown user (i.e. not present in password file)
@@ -766,9 +771,8 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
     { // #authorisation, request news with bob, who is not in the whitelist % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_bob).with(cwd).execute(RunClient::CommandNews{});
         BOOST_REQUIRE(!client.ok());
-        // A denial names the command only
-        BOOST_CHECK_MESSAGE(client.reason().find("Server reply: Permission denied: --news") != std::string::npos,
-                            client.reason());
+        BOOST_CHECK(client.reason().find("Command not accepted, due to: Authorisation (user) failed, due to: "
+                                         "Insufficient permissions") != std::string::npos);
     }
 
     { // ... the next record must land on its own line, not on the (refused) news line
@@ -807,10 +811,9 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
     const std::regex embedded_record_marker{R"(.+(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} )"};
 
     const std::string accepted_news_record = "--news=0 0 0 :alice@" + host.value();
-    const std::string refused_news_bob =
-        "DENIED user='bob' host='" + host.value() +
-        "' command='--news' request='--news=0 0 0' reason='Authorisation (user) "
-        "failed, due to: Insufficient permissions (read access required at /)' suppressed=0";
+    const std::string refused_news_bob     = "Command not accepted, due to: Authorisation (user) failed, due to: "
+                                             "Insufficient permissions (read access required at /) [--news=0 0 0 :bob@" +
+                                         host.value() + "]";
     const std::string refused_news_charlie = "Command not accepted, due to: Authentication (user) failed, due to: "
                                              "Incorrect credentials detected [--news=0 0 0 :charlie@" +
                                              host.value() + "]";

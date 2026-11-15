@@ -86,7 +86,7 @@ public:
     ///
     /// @brief Returns the reply denying a request, an error reply of the kind PermissionDenied.
     ///
-    /// @param[in] error_msg The message, which names no node, entry or command argument
+    /// @param[in] error_msg The message, naming the reason and the request (see ecf::rejection_message)
     /// @return The reply, shared with other requests: it is valid until the next error reply is built.
     ///
     static STC_Cmd_ptr denied_cmd(const std::string& error_msg);

@@ -134,8 +134,8 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
     check_reload_access(client, probe, true, true);
     check_reload_access(client, probe, true, true, true);
     check_reload_access(client, removed, true, true);
-    check_reload_access(client, added, true, false, false, index == 2 ? "Permission denied" : "Authentication");
-    check_reload_access(client, denied, true, false, false, "Permission denied");
+    check_reload_access(client, added, true, false, false, index == 2 ? "Authorisation" : "Authentication");
+    check_reload_access(client, denied, true, false, false, "Authorisation");
 
     const auto selected   = home / filenames[index];
     const bool successful = action == "config" || action == "update";
@@ -220,13 +220,13 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
         client, probe, true, !(successful && index == 1), false, successful && index == 1 ? "Authentication" : "");
     check_reload_access(client, rotated_probe, true, successful && index == 1, false, "Authentication");
     if (index == 2) {
-        check_reload_access(client, probe, true, !successful, true, "Permission denied");
+        check_reload_access(client, probe, true, !successful, true, "Authorisation");
     }
     check_reload_access(
-        client, removed, true, !(successful && index != 0), false, index == 2 ? "Permission denied" : "Authentication");
+        client, removed, true, !(successful && index != 0), false, index == 2 ? "Authorisation" : "Authentication");
     check_reload_access(
-        client, added, true, successful && index != 0, false, index == 2 ? "Permission denied" : "Authentication");
-    check_reload_access(client, denied, true, false, false, "Permission denied");
+        client, added, true, successful && index != 0, false, index == 2 ? "Authorisation" : "Authentication");
+    check_reload_access(client, denied, true, false, false, "Authorisation");
 
     check_reload_access(client, controller, true, true);
     BOOST_REQUIRE(client.defs());
@@ -255,8 +255,8 @@ void check_security_reload(size_t index, const std::string& action, bool from_en
         }
         else {
             check_reload_access(client, probe, true, true);
-            check_reload_access(client, probe, true, false, true, "Permission denied");
-            check_reload_access(client, removed, true, false, false, "Permission denied");
+            check_reload_access(client, probe, true, false, true, "Authorisation");
+            check_reload_access(client, removed, true, false, false, "Authorisation");
             check_reload_access(client, added, true, true);
         }
     }

@@ -23,7 +23,7 @@ public:
     ///
     /// @brief Sets the message and the kind of the reply.
     ///
-    /// An error is logged; a denial is not, since the server records denials itself, at a bounded rate.
+    /// The message is written to the server log, for errors and denials alike.
     ///
     /// @param errorMsg The message, which must not be empty
     /// @param kind The kind

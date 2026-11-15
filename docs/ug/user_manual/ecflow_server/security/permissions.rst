@@ -388,8 +388,8 @@ Notes:
   writes (``ECF_HOME``, ``ECF_FILES``, ``ECF_INCLUDE``, ``ECF_JOB``, ``ECF_JOBOUT``). A user holding ``w`` can
   therefore run commands and reach files as the user of the server: grant ``w`` only to users trusted with that.
 - Requests and replies travel in clear text unless the server and its clients use SSL.
-- The existence of a node addressed by a denied request is not concealed: the denial names the command only, and a
-  request on a node that does not exist fails as such.
+- The existence of a node addressed by a denied request is not concealed: a request on a node that does not exist
+  fails as such.
 - The attributes restrict commands only, never the file system (the files of the server host, in the table above).
   The files the server writes hold what the attributes conceal from its clients, and the server creates them with
   the permissions its umask allows, usually readable by every account of the host:
@@ -468,12 +468,12 @@ A user name in an entry:
 Denied requests
 ===============
 
-A request refused by the authorisation of the server is a *denial*. The message of a denial names the command only,
-never a node, an entry, a file or an argument of the request:
+A request refused by the authorisation of the server is a *denial*. Its message names the reason, the request and the
+requester:
 
 .. code-block:: text
 
-  Permission denied: --suspend
+  Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions (role x required at /s/f) [--suspend /s/f :bob@client.host]
 
 Each client reports a denial distinctly from any other error:
 
@@ -491,7 +491,6 @@ Each client reports a denial distinctly from any other error:
 
 Notes:
 
-- The client prefixes the message with the request as given by the user, as for any other error.
-- The server records each denial in its log file, at a bounded rate (see :ref:`ecflow_log_file_denials`).
+- The server writes the same message in its log file, for every denial (see :ref:`ecflow_log_file_denials`).
 - The denials come from the Permissions attributes or from the :ref:`whitelist <ecflow_white_list_file>`,
   according to the :ref:`mode <permissions_attribute_modes>` in force.

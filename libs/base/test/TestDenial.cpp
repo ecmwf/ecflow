@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <chrono>
 #include <cstdint>
-#include <map>
+#include <fstream>
+#include <iterator>
 #include <memory>
 #include <string>
 
@@ -11,11 +11,11 @@
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
-#include "ecflow/base/DenialLog.hpp"
 #include "ecflow/base/ServerReply.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -57,7 +57,8 @@ BOOST_AUTO_TEST_CASE(test_denial_kind_serialisation) {
 }
 
 ///
-/// @brief Verifies that a request refused by the authorisation is denied, with a message naming no node.
+/// @brief Verifies that a request refused by the authorisation is denied, with a message naming the reason, the request
+///        and its requester, also written to the server log (D5.29, D5.30).
 ///
 BOOST_AUTO_TEST_CASE(test_denial_reply) {
     ECF_NAME_THIS_TEST();
@@ -78,157 +79,26 @@ BOOST_AUTO_TEST_CASE(test_denial_reply) {
     const auto* denied = dynamic_cast<const ErrorCmd*>(reply.get());
     BOOST_REQUIRE(denied != nullptr);
     BOOST_CHECK(denied->kind() == ErrorCmd::Kind::PermissionDenied);
-    BOOST_CHECK_EQUAL(denied->error(), "Permission denied: --suspend");
+    const std::string expected = "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient "
+                                 "permissions (write access required at /secret_suite) [--suspend /secret_suite :bob@";
+    BOOST_CHECK_MESSAGE(denied->error().rfind(expected, 0) == 0, denied->error());
+
+    // The server log holds the same message
+    { ecf::LogFlusher flusher; }
+    std::ifstream log(ecf::Log::instance()->path());
+    const std::string text{std::istreambuf_iterator<char>(log), {}};
+    BOOST_CHECK_MESSAGE(text.find(denied->error()) != std::string::npos, text);
 
     // The client records the denial
     ServerReply client;
     reply->handle_server_response(client, cmd, false);
     BOOST_CHECK(client.permission_denied());
-    // The part of the message from the server names no node; the client prefixes the request as given
-    const auto& message    = client.get_error_msg();
-    const auto server_part = message.substr(message.find("Server reply: "));
-    BOOST_CHECK_EQUAL(server_part, "Server reply: Permission denied: --suspend\n");
+    BOOST_CHECK_MESSAGE(client.get_error_msg().find(expected) != std::string::npos, client.get_error_msg());
 
     // An error that is not a denial is not recorded as one
     ServerReply other;
     ErrorCmd("failed", ErrorCmd::Kind::Error).handle_server_response(other, cmd, false);
     BOOST_CHECK(!other.permission_denied());
-}
-
-///
-/// @brief Verifies that denials are recorded at a bounded rate per key, counting those suppressed.
-///
-BOOST_AUTO_TEST_CASE(test_denial_log_rate) {
-    ECF_NAME_THIS_TEST();
-
-    using std::chrono::seconds;
-    ecf::DenialLog log(seconds(10), 3);
-    const auto t0          = ecf::DenialLog::Clock::time_point{};
-    std::size_t suppressed = 99;
-
-    BOOST_CHECK(log.record("bob --suspend", t0, suppressed));
-    BOOST_CHECK_EQUAL(suppressed, 0U);
-    BOOST_CHECK(!log.record("bob --suspend", t0 + seconds(1), suppressed));
-    BOOST_CHECK(!log.record("bob --suspend", t0 + seconds(9), suppressed));
-    BOOST_CHECK(log.record("bob --resume", t0 + seconds(9), suppressed));
-    BOOST_CHECK(log.record("bob --suspend", t0 + seconds(10), suppressed));
-    BOOST_CHECK_EQUAL(suppressed, 2U);
-
-    // The number of keys stays bounded
-    BOOST_CHECK(log.record("carol --suspend", t0 + seconds(11), suppressed));
-    BOOST_CHECK(log.record("dave --suspend", t0 + seconds(12), suppressed));
-    BOOST_CHECK_LE(log.keys(), 3U);
-}
-
-///
-/// @brief Verifies that, with every key tracked within its period, new keys share one limited overflow key, and the
-///        keys tracked keep their limits.
-///
-BOOST_AUTO_TEST_CASE(test_denial_log_saturated) {
-    ECF_NAME_THIS_TEST();
-
-    using std::chrono::seconds;
-    ecf::DenialLog log(seconds(10), 2);
-    const auto t0          = ecf::DenialLog::Clock::time_point{};
-    std::size_t suppressed = 99;
-    bool overflow          = true;
-
-    BOOST_CHECK(log.record("a", t0, suppressed, overflow));
-    BOOST_CHECK(!overflow);
-    BOOST_CHECK(log.record("b", t0, suppressed, overflow));
-
-    // Churn through new keys: one record for all of them per period, marked as an overflow
-    BOOST_CHECK(log.record("c", t0 + seconds(1), suppressed, overflow));
-    BOOST_CHECK_EQUAL(suppressed, 0U);
-    BOOST_CHECK(overflow);
-    for (int i = 0; i < 1000; ++i) {
-        BOOST_CHECK(!log.record("x" + std::to_string(i), t0 + seconds(2), suppressed, overflow));
-    }
-    BOOST_CHECK_EQUAL(log.keys(), 2U);
-
-    // The keys tracked are still limited, whatever the churn
-    BOOST_CHECK(!log.record("a", t0 + seconds(3), suppressed, overflow));
-    BOOST_CHECK(!log.record("b", t0 + seconds(3), suppressed, overflow));
-
-    // Once its period has elapsed, a key tracked reports what was suppressed
-    BOOST_CHECK(log.record("a", t0 + seconds(10), suppressed, overflow));
-    BOOST_CHECK_EQUAL(suppressed, 1U);
-    BOOST_CHECK(!overflow);
-
-    // b has expired, which makes room for c; c was recorded by the overflow key 9 s ago, and is not recorded again
-    // before the period has elapsed
-    BOOST_CHECK(!log.record("c", t0 + seconds(10), suppressed, overflow));
-    BOOST_CHECK_EQUAL(log.keys(), 2U);
-    BOOST_CHECK(log.record("c", t0 + seconds(11), suppressed, overflow));
-    BOOST_CHECK_EQUAL(suppressed, 1U);
-    BOOST_CHECK(!overflow);
-
-    // The overflow key reports every denial it suppressed, of whichever key, marked as an overflow
-    BOOST_CHECK(log.record("z", t0 + seconds(11), suppressed, overflow)); // a and c are within their period
-    BOOST_CHECK_EQUAL(suppressed, 1000U);
-    BOOST_CHECK(overflow);
-}
-
-///
-/// @brief Parses a record of a denial into its fields, undoing the quoting.
-///
-std::map<std::string, std::string> parse_denial(const std::string& record) {
-    std::map<std::string, std::string> fields;
-    BOOST_REQUIRE(record.rfind("DENIED ", 0) == 0);
-    std::size_t i = 7;
-    while (i < record.size()) {
-        const auto equal = record.find('=', i);
-        BOOST_REQUIRE(equal != std::string::npos);
-        const auto name = record.substr(i, equal - i);
-        std::string value;
-        i = equal + 1;
-        if (record[i] == '\'') {
-            for (++i; record.at(i) != '\''; ++i) {
-                if (record[i] == '\\') {
-                    ++i;
-                }
-                value += record.at(i);
-            }
-            ++i;
-        }
-        else {
-            const auto end = record.find(' ', i);
-            value          = record.substr(i, end == std::string::npos ? std::string::npos : end - i);
-            i              = end == std::string::npos ? record.size() : end;
-        }
-        fields[name] = value;
-        if (i < record.size()) {
-            BOOST_REQUIRE_EQUAL(record[i], ' ');
-            ++i;
-        }
-    }
-    return fields;
-}
-
-///
-/// @brief Verifies that a record of a denial is a single line, parsed back into its fields, whatever their content.
-///
-BOOST_AUTO_TEST_CASE(test_denial_record_format) {
-    ECF_NAME_THIS_TEST();
-
-    const auto record = ecf::DenialLog::format(
-        "o'brien", "host\\name", "--alter", "--alter change variable X 'a b' /s'\nx", "reason with = and '", 7);
-    BOOST_CHECK(record.find('\n') == std::string::npos);
-    BOOST_CHECK(record.find('\r') == std::string::npos);
-
-    const auto fields = parse_denial(record);
-    BOOST_CHECK_EQUAL(fields.size(), 6U);
-    BOOST_CHECK_EQUAL(fields.at("user"), "o'brien");
-    BOOST_CHECK_EQUAL(fields.at("host"), "host\\name");
-    BOOST_CHECK_EQUAL(fields.at("command"), "--alter");
-    BOOST_CHECK_EQUAL(fields.at("request"), "--alter change variable X 'a b' /s' x"); // the line break is a space
-    BOOST_CHECK_EQUAL(fields.at("reason"), "reason with = and '");
-    BOOST_CHECK_EQUAL(fields.at("suppressed"), "7");
-
-    // A record decided by the overflow key says so
-    const auto overflow = parse_denial(ecf::DenialLog::format("bob", "h", "--resume", "--resume /s", "r", 3, true));
-    BOOST_CHECK_EQUAL(overflow.at("overflow"), "yes");
-    BOOST_CHECK_EQUAL(fields.count("overflow"), 0U);
 }
 
 namespace {
@@ -254,6 +124,40 @@ struct ErrorCmdBeforeKind
 };
 
 } // namespace
+
+///
+/// @brief Verifies that a denial whose request holds line breaks is answered, and logged, on one line.
+///
+BOOST_AUTO_TEST_CASE(test_denial_on_one_line) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    auto defs = Defs::create();
+    defs->add_suite("s");
+    MockServer server(defs);
+    WithTestFile file(AutomaticTestFile{"whitelist"}, "4.5.0\n-bob\n");
+    WhiteListFile whitelist;
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(whitelist.load(file.path().string(), error), error);
+    server.set_authorisation(ecf::AuthorisationService::load_permissions_from_whitelist(whitelist).value());
+
+    auto cmd         = std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s\nERR:[00:00:00 1.1.2026] forged\r\nline");
+    const auto reply = TestHelper::invokeRequestAs(&server, cmd, "bob");
+    BOOST_REQUIRE(reply->error().find("Command not accepted") == 0);
+    BOOST_CHECK(reply->error().find_first_of("\r\n") == std::string::npos);
+
+    { ecf::LogFlusher flusher; }
+    std::ifstream log(ecf::Log::instance()->path());
+    std::size_t lines = 0;
+    for (std::string line; std::getline(log, line);) {
+        if (line.find("forged") != std::string::npos) {
+            ++lines;
+            BOOST_CHECK_MESSAGE(line.find("Command not accepted") != std::string::npos, line);
+        }
+    }
+    BOOST_CHECK_EQUAL(lines, 1U);
+}
 
 ///
 /// @brief Verifies that an error reply is read by a peer that predates the kind, and that a reply of such a peer is

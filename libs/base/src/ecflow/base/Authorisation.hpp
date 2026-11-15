@@ -58,13 +58,16 @@ authorisation_t fail_closed(const std::function<authorisation_t()>& evaluate) no
 authorisation_t is_authorised(const ClientToServerCmd& command, const RequestContext& context) noexcept;
 
 ///
-/// @brief Records a denied request in the server log, at a bounded rate, and returns the message of the denial.
+/// @brief Returns the message of a rejected request, as returned to the client and written to the server log.
 ///
-/// @param[in] command The request denied
-/// @param[in] server The server
-/// @param[in] reason Why the request was denied, for the log only
-/// @return The message of the denial, which names the option of the request only, e.g. "Permission denied: --suspend".
+/// The message names the reason, the request and its requester (D5.29), e.g.
+/// `Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions (role x required at
+/// /s/t) [--suspend /s/t :bob@host]`.
 ///
-std::string record_denial(const ClientToServerCmd& command, AbstractServer& server, const std::string& reason);
+/// @param[in] reason Why the request was rejected
+/// @param[in] command The request rejected
+/// @return The message, on one line: line breaks are replaced by spaces.
+///
+std::string rejection_message(const std::string& reason, const ClientToServerCmd& command);
 
 } // namespace ecf

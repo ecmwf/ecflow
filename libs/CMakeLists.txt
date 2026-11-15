@@ -134,7 +134,6 @@ set(srcs
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerProtocolProbe.hpp
   base/src/ecflow/base/ServerReply.hpp
-  base/src/ecflow/base/DenialLog.hpp
   base/src/ecflow/base/PermissionDenied.hpp
   base/src/ecflow/base/RequestContext.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
@@ -219,7 +218,6 @@ set(srcs
   base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerProtocolProbe.cpp
   base/src/ecflow/base/ServerReply.cpp
-  base/src/ecflow/base/DenialLog.cpp
   base/src/ecflow/base/RequestContext.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp

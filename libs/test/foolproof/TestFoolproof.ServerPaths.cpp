@@ -150,7 +150,7 @@ void check_server_runtime_paths(bool from_environment, const std::string& form) 
     client.set_user_name(excluded.username);
     client.set_password(PasswordEncryption::encrypt(excluded.password, excluded.username));
     BOOST_CHECK_NE(client.getDefs(), 0);
-    BOOST_CHECK_MESSAGE(client.errorMsg().find("Permission denied") != std::string::npos, client.errorMsg());
+    BOOST_CHECK_MESSAGE(client.errorMsg().find("Authorisation") != std::string::npos, client.errorMsg());
 
     client.set_user_name("");
     client.set_password(PasswordEncryption::encrypt(regular.password, regular.username));

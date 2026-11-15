@@ -179,15 +179,14 @@ fn denial_is_a_permission_denied_failure() {
         .suspend(["/secret_suite"])
         .expect_err("the request was not denied");
     assert_eq!(error.failure(), ecflow::Failure::PermissionDenied);
-    // The part of the message from the server names no node; the client
-    // prefixes the request as given
+    // The message names the reason, the request and its requester (D5.29)
     let message = error.to_string();
-    let server_part = message.split("Server reply: ").nth(1).unwrap_or_default();
     assert!(
-        server_part.contains("Permission denied: --suspend"),
+        message.contains(
+            "Insufficient permissions (write access required at /secret_suite) [--suspend /secret_suite :alice@"
+        ),
         "{message}"
     );
-    assert!(!server_part.contains("secret_suite"), "{message}");
 
     // Other errors are not denials, on the same client: an argument refused
     // before anything is sent, then a request that succeeds

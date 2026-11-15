@@ -11,38 +11,11 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 
-namespace {
-
-/// @brief Builds the message returned to the client, and written to the log, when a command is rejected.
-///
-/// The rejected command, the originating user name and the client host are appended to the message, as
-/// `[--<command> :<user>@<host>]`, so that the record identifies who attempted the command, from where, and which
-/// command was turned down.
-///
-/// @param[in] reason The reason for the rejection.
-/// @param[in] cmd The command that was rejected.
-/// @return A string containing the rejection message.
-///
-std::string make_rejection_message(const std::string& reason, const ClientToServerCmd& cmd) {
-    std::string message = "Command not accepted, due to: ";
-    message += reason;
-    message += " [";
-    message += cmd.print_short();
-    message += " :";
-    message += cmd.identity().username().value();
-    message += '@';
-    message += cmd.hostname();
-    message += ']';
-    return message;
-}
-
-} // namespace
-
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
     if (cmd_.get()) {
         // Perform Authentication (i.e. user/task identity) control
         if (auto result = ecf::is_authentic(*cmd_, *as); !result.ok()) {
-            return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), *cmd_));
+            return PreAllocatedReply::error_cmd(ecf::rejection_message(result.reason(), *cmd_));
         }
 
         // The context of this request, from the identity established by authentication
@@ -50,7 +23,8 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
 
         // Perform Authorisation (i.e. access rules) control; a request not authorised is denied
         if (auto result = ecf::is_authorised(*cmd_, context); !result.ok()) {
-            return PreAllocatedReply::denied_cmd(ecf::record_denial(*cmd_, *as, result.reason()));
+            ecf::LogFlusher flusher; // the message, logged by the reply, is written at once
+            return PreAllocatedReply::denied_cmd(ecf::rejection_message(result.reason(), *cmd_));
         }
         return cmd_->handleRequest(as, context);
     }

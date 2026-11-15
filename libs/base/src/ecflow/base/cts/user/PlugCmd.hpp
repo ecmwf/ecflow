@@ -32,12 +32,12 @@ public:
 
 private:
     ///
-    /// @brief Returns the denial of a plug that the receiving server denied, recording it, and recording no edit.
+    /// @brief Returns the denial of a plug that the receiving server denied, recording no edit.
     ///
     /// @param[in] server This server
     /// @param[in] host The receiving server's host
     /// @param[in] port The receiving server's port
-    /// @return The denial, naming the option only.
+    /// @return The denial, naming the request and the receiving server.
     ///
     STC_Cmd_ptr denied_by_receiver(AbstractServer& server, const std::string& host, const std::string& port) const;
 

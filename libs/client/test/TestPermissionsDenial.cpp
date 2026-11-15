@@ -69,10 +69,11 @@ BOOST_AUTO_TEST_CASE(test_denial_in_the_client) {
     }
     catch (const ecf::PermissionDenied& e) {
         const std::string message = e.what();
-        // The part of the message from the server names no node; the client prefixes the request as given
-        const auto server_part = message.substr(message.find("Server reply: "));
-        BOOST_CHECK_MESSAGE(server_part.find("Permission denied: --suspend") != std::string::npos, message);
-        BOOST_CHECK_MESSAGE(server_part.find("secret_suite") == std::string::npos, message);
+        // The message names the reason, the request and its requester (D5.29)
+        BOOST_CHECK_MESSAGE(message.find("Command not accepted, due to: Authorisation (user) failed, due to: "
+                                         "Insufficient permissions (write access required at /secret_suite) "
+                                         "[--suspend /secret_suite :alice@") != std::string::npos,
+                            message);
     }
     BOOST_CHECK(client->connection_diagnosis().failure == ecf::ConnectionFailure::PermissionDenied);
     BOOST_CHECK(client->server_reply().permission_denied());
@@ -114,14 +115,17 @@ BOOST_AUTO_TEST_CASE(test_denial_exit_status) {
     const auto executable = fs::path(ecf::File::find_ecf_client_path());
     Process denied(executable, {"--suspend=/secret_suite"}, server.directory());
     BOOST_CHECK_EQUAL(denied.wait(), 3);
-    BOOST_CHECK_MESSAGE(denied.read_stderr().find("Permission denied") != std::string::npos, denied.read_stderr());
+    // The output is taken once: a second read returns nothing
+    const auto error = denied.read_stderr();
+    BOOST_CHECK_MESSAGE(error.find("Insufficient permissions") != std::string::npos, error);
 
     Process failed(executable, {"--no_such_option"}, server.directory());
     BOOST_CHECK_EQUAL(failed.wait(), 1);
 }
 
 ///
-/// @brief Verifies that denials are recorded in the server log in a parsable form, at a bounded rate.
+/// @brief Verifies that every denial is written to the server log, with the reason, the request and the requester
+///        (D5.29).
 ///
 BOOST_AUTO_TEST_CASE(test_denial_log_records) {
     ECF_NAME_THIS_TEST();
@@ -137,17 +141,16 @@ BOOST_AUTO_TEST_CASE(test_denial_log_records) {
     std::istringstream log(read(server.home() / "server.log"));
     std::vector<std::string> records;
     for (std::string line; std::getline(log, line);) {
-        if (line.find(" DENIED ") != std::string::npos) {
+        if (line.find("Command not accepted, due to: Authorisation") != std::string::npos) {
             records.push_back(line);
         }
     }
-    // Repeated denials are suppressed: how many records remain depends on the speed of the run (the rate itself is
-    // verified with a controlled clock, by u_base T_Denial)
-    BOOST_REQUIRE_GE(records.size(), 1U);
-    const auto& first = records.front();
-    for (const auto* field :
-         {"user='alice'", "command='--suspend'", "request='--suspend /secret_suite'", "reason='", "suppressed=0"}) {
-        BOOST_CHECK_MESSAGE(first.find(field) != std::string::npos, "missing " << field << " in " << first);
+    BOOST_CHECK_EQUAL(records.size(), 20U);
+    for (const auto& record : records) {
+        BOOST_CHECK_MESSAGE(record.rfind("ERR:[", 0) == 0, record);
+        BOOST_CHECK_MESSAGE(record.find("(write access required at /secret_suite) [--suspend /secret_suite :alice@") !=
+                                std::string::npos,
+                            record);
     }
 }
 

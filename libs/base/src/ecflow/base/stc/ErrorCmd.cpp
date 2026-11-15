@@ -31,9 +31,7 @@ void ErrorCmd::init(const std::string& errorMsg, Kind kind) {
     if (pos != std::string::npos) {
         error_msg_.erase(error_msg_.begin() + pos);
     }
-    if (kind_ == Kind::Error) {
-        ecf::log(Log::ERR, error_msg_); // will automatically add end of line
-    }
+    ecf::log(Log::ERR, error_msg_); // will automatically add end of line; denials included (D5.29)
 }
 
 std::string ErrorCmd::print() const {

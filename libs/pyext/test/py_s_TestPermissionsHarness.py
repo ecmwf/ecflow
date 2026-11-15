@@ -94,7 +94,7 @@ def test_permissions_harness_ownership_mismatch_spares_foreign_server():
 
 def test_permissions_denial_is_a_permission_denied_exception():
     """A request refused by the authorisation of the server raises PermissionDenied,
-    a RuntimeError, with a message naming no node"""
+    a RuntimeError, with a message naming the reason, the request and its requester"""
     with Test.PermissionsServer(admin, [alice]) as server:
         home = server.home()
         lists = os.path.join(
@@ -110,11 +110,11 @@ def test_permissions_denial_is_a_permission_denied_exception():
         with pytest.raises(ecf.PermissionDenied) as denied:
             server.client("alice").suspend("/secret_suite")
         assert isinstance(denied.value, RuntimeError)
-        # The part of the message from the server names no node; the client
-        # prefixes the request as given
-        server_part = str(denied.value).split("Server reply: ")[1]
-        assert "Permission denied: --suspend" in server_part
-        assert "secret_suite" not in server_part
+        # The message names the reason, the request and its requester (D5.29)
+        assert (
+            "Insufficient permissions (write access required at /secret_suite) "
+            "[--suspend /secret_suite :alice@" in str(denied.value)
+        )
 
         # Other errors are not denials
         with pytest.raises(RuntimeError) as failed:
@@ -162,4 +162,3 @@ def test_permissions_write_without_read():
         administrator.sync_local()
         task = administrator.get_defs().find_abs_node("/w_only/t")
         assert [label.new_value() for label in task.labels] == ["single"]
-

@@ -169,8 +169,9 @@ STC_Cmd_ptr
 PlugCmd::denied_by_receiver(AbstractServer& server, const std::string& host, const std::string& port) const {
     // Nothing took place: no edit history is recorded, although the lock taken for the plug moved the change numbers
     use_EditHistoryMgr_ = false;
-    return PreAllocatedReply::denied_cmd(
-        ecf::record_denial(*this, server, "the receiving server " + host + ":" + port + " denied the move"));
+    ecf::LogFlusher flusher; // the message, logged by the reply, is written at once
+    return PreAllocatedReply::denied_cmd(ecf::rejection_message(
+        "Authorisation (user) failed, due to: the receiving server " + host + ":" + port + " denied the move", *this));
 }
 
 std::optional<std::string> PlugCmd::local_destination(const AbstractServer& server) const {

@@ -41,7 +41,7 @@ def test_a7_3_denied_operation():
 
         with pytest.raises(ecf.PermissionDenied) as denied:
             server.client("operator").requeue("/sB/t")
-        assert "Permission denied: --requeue" in str(denied.value)
+        assert "(role x required at /sB/t) [--requeue /sB/t :operator@" in str(denied.value)
 
         administrator.sync_local()
         state = administrator.get_defs().find_abs_node("/sB/t").get_state()

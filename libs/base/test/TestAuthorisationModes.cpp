@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_read_and_write) {
 }
 
 ///
-/// @brief Verifies that the reason of a denial, which only the server log records, names the target denied (R5.10).
+/// @brief Verifies that the reason of a denial, in the reply and the server log, names the target denied (D5.29).
 ///
 BOOST_AUTO_TEST_CASE(test_denial_reason_names_the_target) {
     ECF_NAME_THIS_TEST();
@@ -281,7 +281,12 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group) {
     BOOST_REQUIRE(replies != nullptr);
     BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
     BOOST_CHECK(denied(replies->cmdVec()[0]));
-    BOOST_CHECK_EQUAL(replies->cmdVec()[0]->error(), "Permission denied: --suspend");
+    BOOST_CHECK_MESSAGE(
+        replies->cmdVec()[0]->error().rfind("Command not accepted, due to: Authorisation (user) failed, due "
+                                            "to: Insufficient permissions (role x required at /s/b) "
+                                            "[--suspend /s/b :bob@",
+                                            0) == 0,
+        replies->cmdVec()[0]->error());
     ServerReply client_reply;
     BOOST_CHECK(!reply->handle_server_response(client_reply, group, false));
     BOOST_CHECK(client_reply.permission_denied());
