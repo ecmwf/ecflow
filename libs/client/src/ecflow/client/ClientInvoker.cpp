@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/Client.hpp"
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
@@ -340,12 +341,20 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
 
     int res = do_invoke_cmd(cts_cmd);
 
+    // A denial is a failure of its own kind
+    if (res == 1 && server_reply_.permission_denied()) {
+        diagnosis_.failure = ecf::ConnectionFailure::PermissionDenied;
+    }
+
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
     // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
+        if (server_reply_.permission_denied()) {
+            throw ecf::PermissionDenied(server_reply_.error_msg());
+        }
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;
@@ -374,12 +383,20 @@ int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
 
     int res = do_invoke_cmd(cts_cmd);
 
+    // A denial is a failure of its own kind
+    if (res == 1 && server_reply_.permission_denied()) {
+        diagnosis_.failure = ecf::ConnectionFailure::PermissionDenied;
+    }
+
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
     // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
+        if (server_reply_.permission_denied()) {
+            throw ecf::PermissionDenied(server_reply_.error_msg());
+        }
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;

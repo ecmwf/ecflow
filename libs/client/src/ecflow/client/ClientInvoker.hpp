@@ -70,6 +70,21 @@ public:
     const ecf::ConnectionDiagnosis& connection_diagnosis() const { return diagnosis_; }
 
     ///
+    /// @brief Returns the failure class of the most recent request, and forgets it.
+    ///
+    /// A caller that classifies each error it catches reads the class once, so that an error raised later without a
+    /// request (e.g. an invalid argument, refused before anything is sent) is not given the class of an earlier
+    /// request.
+    ///
+    /// @return The failure class; ConnectionFailure::None when there is none, or when it was already taken.
+    ///
+    ecf::ConnectionFailure take_connection_failure() const {
+        const auto failure = diagnosis_.failure;
+        diagnosis_.failure = ecf::ConnectionFailure::None;
+        return failure;
+    }
+
+    ///
     /// @brief Determines which protocol the configured server endpoint appears to speak, and
     ///        records the outcome in the diagnosis of the most recent request.
     ///

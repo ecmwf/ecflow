@@ -16,7 +16,8 @@ use bindman::track_cpp_api;
     class = "ClientInvoker",
     ignore = [
         // Environment and diagnosis
-        "environment", "effective_protocol", "connection_diagnosis", "probe_protocol", "to_string",
+        "environment", "effective_protocol", "connection_diagnosis", "take_connection_failure", "probe_protocol",
+        "to_string",
         "set_throw_on_error", "set_cli", "cli", "invoke",
         "enable_ssl_if_defined", "set_hostport", "taskPath", "set_jobs_password", "setEnv",
         "testInterface", "process_or_remote_id", "enable_logging", "disable_logging", "server_reply",
@@ -62,6 +63,8 @@ mod ffi {
         UndecodableReply,
         /// The peer answered, refusing the request.
         RejectedRequest,
+        /// The server answered, denying the request to the requester.
+        PermissionDenied,
         /// A failure that none of the other values describes.
         Other,
     }
@@ -300,8 +303,9 @@ mod ffi {
         fn get_certificate(self: &Client) -> Result<String>;
         /// Print each request and its round trip time to standard output.
         fn debug(self: Pin<&mut Client>, flag: bool);
-        /// The failure class of the most recent request.
-        fn last_failure(self: &Client) -> ConnectionFailure;
+        /// The failure class of the most recent request, forgotten once read, so that a later error raised without a
+        /// request is not given it.
+        fn take_failure(self: &Client) -> ConnectionFailure;
         /// The round trip time of the most recent request, in microseconds.
         fn round_trip_time(self: &Client) -> u64;
 

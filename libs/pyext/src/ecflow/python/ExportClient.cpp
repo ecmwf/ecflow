@@ -3,6 +3,7 @@
 
 #include <algorithm> // for std::transform
 
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
@@ -1041,6 +1042,8 @@ void ClientInvoker_enable_ssl(ClientInvoker* self) {
 } // namespace
 
 void export_Client(py::module& m) {
+    // A request denied by the authorisation of the server; a RuntimeError, as every other refused request
+    py::register_exception<ecf::PermissionDenied>(m, "PermissionDenied", PyExc_RuntimeError);
 
     static const char* ClientInvoker_version_doc = "Returns the current client version";
 

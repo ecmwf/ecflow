@@ -109,6 +109,20 @@ public:
 
     /// The SSyncCmd will set if we have a full sync(ie retrieved full node tree from server) or incremental sync
     bool full_sync() const { return full_sync_; }
+
+    ///
+    /// @brief Returns whether the last request was denied by the authorisation of the server.
+    ///
+    /// @return True for a denial.
+    ///
+    bool permission_denied() const { return permission_denied_; }
+
+    ///
+    /// @brief Records whether the last request was denied by the authorisation of the server.
+    ///
+    /// @param denied True for a denial.
+    ///
+    void set_permission_denied(bool denied) { permission_denied_ = denied; }
     void set_full_sync(bool f) { full_sync_ = f; }
 
     /// Only valid after a call to news()
@@ -160,6 +174,7 @@ private:
     bool cli_{false};
     bool in_sync_{false};                      // clear at the start of invoke
     bool full_sync_{false};                    // clear at the start of invoke
+    bool permission_denied_{false};            // clear at the start of invoke
     bool block_client_on_home_server_{false};  // clear at the start of invoke
     bool block_client_server_halted_{false};   // clear at the start of invoke
     bool block_client_zombie_detected_{false}; // clear at the start of invoke

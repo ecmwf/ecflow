@@ -141,3 +141,92 @@ fn stop_kills_when_termination_is_refused() {
         "port {port} still in use"
     );
 }
+
+#[test]
+fn denial_is_a_permission_denied_failure() {
+    let _serial = TESTS
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let Some(server) = PermissionsServer::start(ADMIN, &[ALICE], None) else {
+        return;
+    };
+
+    // A white list allowing alice to read only
+    let host = String::from_utf8(
+        std::process::Command::new("hostname")
+            .output()
+            .expect("hostname")
+            .stdout,
+    )
+    .expect("host name")
+    .trim()
+    .to_string();
+    std::fs::write(
+        server
+            .home()
+            .join(format!("{host}.{}.ecf.lists", server.port())),
+        "4.5.0\nadmin\n-alice\n",
+    )
+    .expect("white list");
+    let mut admin = server.administrator();
+    admin.reload_wl_file().expect("reload the white list");
+    admin
+        .load_defs_text("suite secret_suite\nendsuite\n", false)
+        .expect("load");
+
+    let mut alice = server.client("alice");
+    let error = alice
+        .suspend(["/secret_suite"])
+        .expect_err("the request was not denied");
+    assert_eq!(error.failure(), ecflow::Failure::PermissionDenied);
+    // The part of the message from the server names no node; the client
+    // prefixes the request as given
+    let message = error.to_string();
+    let server_part = message.split("Server reply: ").nth(1).unwrap_or_default();
+    assert!(
+        server_part.contains("Permission denied: --suspend"),
+        "{message}"
+    );
+    assert!(!server_part.contains("secret_suite"), "{message}");
+
+    // Other errors are not denials, on the same client: an argument refused
+    // before anything is sent, then a request that succeeds
+    let error = alice
+        .requeue(["/secret_suite"], "invalid")
+        .expect_err("the option is invalid");
+    assert_ne!(
+        error.failure(),
+        ecflow::Failure::PermissionDenied,
+        "{error}"
+    );
+    alice.ping().expect("ping");
+    let error = alice
+        .suspend(["/secret_suite"])
+        .expect_err("the request was not denied");
+    assert_eq!(error.failure(), ecflow::Failure::PermissionDenied);
+
+    // nor on another client
+    let error = admin
+        .suspend(["/no/such/node"])
+        .expect_err("the node does not exist");
+    assert_ne!(error.failure(), ecflow::Failure::PermissionDenied);
+
+    // A wait whose pings are denied leaves no denial behind
+    std::fs::write(
+        server
+            .home()
+            .join(format!("{host}.{}.ecf.lists", server.port())),
+        "4.5.0\nadmin\n",
+    )
+    .expect("white list");
+    admin.reload_wl_file().expect("reload the white list");
+    assert!(!alice.wait_for_server_reply(std::time::Duration::from_secs(1)));
+    let error = alice
+        .requeue(["/secret_suite"], "invalid")
+        .expect_err("the option is invalid");
+    assert_ne!(
+        error.failure(),
+        ecflow::Failure::PermissionDenied,
+        "{error}"
+    );
+}

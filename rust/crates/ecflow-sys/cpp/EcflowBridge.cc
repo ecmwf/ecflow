@@ -321,8 +321,8 @@ rust::String Client::get_certificate() const {
 #endif
 }
 
-ecf::ConnectionFailure Client::last_failure() const {
-    return connection_diagnosis().failure;
+ecf::ConnectionFailure Client::take_failure() const {
+    return take_connection_failure();
 }
 
 uint64_t Client::round_trip_time() const {

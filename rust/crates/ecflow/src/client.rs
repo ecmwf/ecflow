@@ -163,8 +163,11 @@ impl Client {
     }
 
     /// Attach the failure class ecFlow diagnosed for the request that just threw.
+    ///
+    /// The class is taken in every case, so that it is never attached to a later error raised without a request.
     fn diagnose<T>(&self, result: std::result::Result<T, Exception>) -> Result<T> {
-        result.map_err(|e| Error::new(Failure::from(self.inner.last_failure()), e.what()))
+        let failure = Failure::from(self.inner.take_failure());
+        result.map_err(|e| Error::new(failure, e.what()))
     }
 
     // ==================== Connection configuration ====================
@@ -246,7 +249,10 @@ impl Client {
     /// it does.
     pub fn wait_for_server_reply(&mut self, timeout: Duration) -> bool {
         let seconds = i32::try_from(timeout.as_secs()).unwrap_or(i32::MAX);
-        self.inner.wait_for_server_reply(seconds)
+        let answered = self.inner.wait_for_server_reply(seconds);
+        // The failures of the pings are not reported: they must not be attached to a later error
+        let _ = self.inner.take_failure();
+        answered
     }
 
     /// The path of the certificate used for SSL. Fails when built without

@@ -85,6 +85,7 @@ bool suggests_protocol_mismatch(ConnectionFailure failure) {
         case ConnectionFailure::Timeout:
         case ConnectionFailure::CertificateRejected:
         case ConnectionFailure::RejectedRequest:
+        case ConnectionFailure::PermissionDenied:
         case ConnectionFailure::Other:
             break;
     }

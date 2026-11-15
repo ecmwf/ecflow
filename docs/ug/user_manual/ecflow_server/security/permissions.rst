@@ -227,3 +227,36 @@ A user name in an entry:
 - contains no white space, ``#``, ``,``, ``:`` or ``;``;
 - does not start with ``-``;
 - is not ``*``: there is no wildcard, and every user is named explicitly.
+
+.. _permissions_attribute_denials:
+
+Denied requests
+===============
+
+A request refused by the authorisation of the server is a *denial*. The message of a denial names the command only,
+never a node, an entry, a file or an argument of the request:
+
+.. code-block:: text
+
+  Permission denied: --suspend
+
+Each client reports a denial distinctly from any other error:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Client
+     - Denial
+   * - ``ecflow_client``
+     - Exit status ``3``; any other error keeps exit status ``1``
+   * - Python
+     - Raises ``ecflow.PermissionDenied``, a subclass of ``RuntimeError``
+   * - Rust
+     - Returns the failure ``Failure::PermissionDenied``
+
+Notes:
+
+- The client prefixes the message with the request as given by the user, as for any other error.
+- The server records each denial in its log file, at a bounded rate (see :ref:`ecflow_log_file_denials`).
+- Until Permissions attributes are enforced, the denials come from the
+  :ref:`whitelist <ecflow_white_list_file>`.

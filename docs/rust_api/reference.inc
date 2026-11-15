@@ -1082,6 +1082,13 @@ Failure
 
    The peer answered, refusing the request.
 
+.. _rust_failure_permissiondenied:
+
+.. describe:: PermissionDenied
+
+   The server answered, denying the request to the requester: its
+   authorisation does not allow it.
+
 .. _rust_failure_other:
 
 .. describe:: Other

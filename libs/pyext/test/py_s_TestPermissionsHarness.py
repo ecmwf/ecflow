@@ -5,6 +5,7 @@
 # of Permissions attributes.
 
 import os
+import socket
 
 import pytest
 
@@ -89,3 +90,33 @@ def test_permissions_harness_ownership_mismatch_spares_foreign_server():
             with Test.PermissionsServer(admin, fixed_port=foreign.the_port):
                 pass
         foreign.admin_client().ping()
+
+
+def test_permissions_denial_is_a_permission_denied_exception():
+    """A request refused by the authorisation of the server raises PermissionDenied,
+    a RuntimeError, with a message naming no node"""
+    with Test.PermissionsServer(admin, [alice]) as server:
+        home = server.home()
+        lists = os.path.join(
+            home, socket.gethostname() + "." + server.the_port + ".ecf.lists"
+        )
+        with open(lists, "w") as f:
+            f.write("4.5.0\nadmin\n-alice\n")
+        server.admin_client().reload_wl_file()
+        defs = ecf.Defs()
+        defs.add_suite("secret_suite")
+        server.admin_client().load(defs)
+
+        with pytest.raises(ecf.PermissionDenied) as denied:
+            server.client("alice").suspend("/secret_suite")
+        assert isinstance(denied.value, RuntimeError)
+        # The part of the message from the server names no node; the client
+        # prefixes the request as given
+        server_part = str(denied.value).split("Server reply: ")[1]
+        assert "Permission denied: --suspend" in server_part
+        assert "secret_suite" not in server_part
+
+        # Other errors are not denials
+        with pytest.raises(RuntimeError) as failed:
+            server.admin_client().suspend("/no/such/node")
+        assert not isinstance(failed.value, ecf.PermissionDenied)

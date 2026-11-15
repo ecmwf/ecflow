@@ -82,6 +82,14 @@ public:
     ///
     static STC_Cmd_ptr zombie_get_cmd(const ecf::RequestContext& context);
     static STC_Cmd_ptr error_cmd(const std::string& error_msg);
+
+    ///
+    /// @brief Returns the reply denying a request, an error reply of the kind PermissionDenied.
+    ///
+    /// @param[in] error_msg The message, which names no node, entry or command argument
+    /// @return The reply, shared with other requests: it is valid until the next error reply is built.
+    ///
+    static STC_Cmd_ptr denied_cmd(const std::string& error_msg);
     static STC_Cmd_ptr client_handle_cmd(int handle);
 
     ///

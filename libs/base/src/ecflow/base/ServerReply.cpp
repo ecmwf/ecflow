@@ -10,6 +10,7 @@ void ServerReply::clear_for_invoke(bool command_line_interface) {
     cli_                          = command_line_interface;
     in_sync_                      = false;
     full_sync_                    = false;
+    permission_denied_            = false;
     news_                         = ServerReply::NO_NEWS;
     block_client_on_home_server_  = false;
     block_client_server_halted_   = false;

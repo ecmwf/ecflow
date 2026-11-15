@@ -188,14 +188,14 @@ void check_server_security(const std::array<std::string, 3>& kinds,
         BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
         BOOST_CHECK_EQUAL(client.checkPtDefs(ecf::CheckPt::NEVER) == 0, !restricted);
         if (restricted) {
-            BOOST_CHECK_MESSAGE(client.errorMsg().find("Authorisation") != std::string::npos, client.errorMsg());
+            BOOST_CHECK_MESSAGE(client.errorMsg().find("Permission denied") != std::string::npos, client.errorMsg());
         }
 
         client.set_user_name(excluded.username);
         client.set_password(PasswordEncryption::encrypt(excluded.password, excluded.username));
         BOOST_CHECK_EQUAL(client.getDefs() == 0, !restricted);
         if (restricted) {
-            BOOST_CHECK_MESSAGE(client.errorMsg().find("Authorisation") != std::string::npos, client.errorMsg());
+            BOOST_CHECK_MESSAGE(client.errorMsg().find("Permission denied") != std::string::npos, client.errorMsg());
         }
     }
 

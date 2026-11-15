@@ -124,8 +124,12 @@ public:
     /// The base method returns `std::string` by value, which cxx cannot bind.
     rust::String get_certificate() const;
 
-    /// The failure class of the most recent request.
-    ecf::ConnectionFailure last_failure() const;
+    ///
+    /// @brief Returns the failure class of the most recent request, and forgets it.
+    ///
+    /// @return The failure class; ecf::ConnectionFailure::None when no failure was observed, or once it has been read.
+    ///
+    ecf::ConnectionFailure take_failure() const;
 
     /// The round trip time of the most recent request, in microseconds; the
     /// base method returns a Boost duration, which cxx cannot bind.

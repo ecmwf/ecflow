@@ -334,6 +334,38 @@ Notes:
 - With ``--debug``, the start-up lines, from the start time on, and the authentication and authorisation blocks are
   also written to the standard output, with the same content.
 
+.. _ecflow_log_file_denials:
+
+Denied requests
+---------------
+
+When the authorisation of the server denies a request, the server writes one ``ERR`` line:
+
+.. code-block:: text
+
+  ERR:[12:00:00 18.10.2026] DENIED user='bob' host='client.host' command='--suspend' request='--suspend /s/f' reason='Authorisation (user) failed, due to: Insufficient permissions' suppressed=0
+
+The fields are:
+
+- ``user``: the requester, as authenticated;
+- ``host``: the host the request comes from, as given by the client;
+- ``command``: the option of the request;
+- ``request``: the request, in short form, with its arguments;
+- ``reason``: why the request was denied;
+- ``suppressed``: the denials of the same user and command left out since the previous line.
+
+Notes:
+
+- Every value but ``suppressed`` and ``overflow`` is quoted with ``'``; a ``'`` or ``\`` inside a quoted value is
+  preceded by ``\``.
+- A line break inside a value is replaced by a space, so that each record holds one line.
+- The server writes at most one line every 10 seconds for each user and command; the next line reports, in
+  ``suppressed``, the denials left out meanwhile.
+- The server follows at most 1000 users and commands at once; beyond that, the new ones share a single limit of one
+  line every 10 seconds. Such a line ends with ``overflow=yes``, and its ``suppressed`` counts the denials of all
+  the users and commands left out by that shared limit.
+- The reply to the client names only the command (see :ref:`permissions_attribute_denials`).
+
 .. _ecflow_log_file_commands:
 
 Records of the spawned commands

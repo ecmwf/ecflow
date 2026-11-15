@@ -142,6 +142,7 @@ The Client-Server API provides the capability of communicating with the server.
    :glob:
 
    reference/Client
+   reference/PermissionDenied
 
 
 .. contents::

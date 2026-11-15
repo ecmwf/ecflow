@@ -113,6 +113,12 @@ STC_Cmd_ptr PreAllocatedReply::error_cmd(const std::string& error_msg) {
     return error_cmd_;
 }
 
+STC_Cmd_ptr PreAllocatedReply::denied_cmd(const std::string& error_msg) {
+    auto* cmd = dynamic_cast<ErrorCmd*>(error_cmd_.get());
+    cmd->init(error_msg, ErrorCmd::Kind::PermissionDenied);
+    return error_cmd_;
+}
+
 STC_Cmd_ptr PreAllocatedReply::client_handle_cmd(int handle) {
     auto* cmd = dynamic_cast<SClientHandleCmd*>(client_handle_cmd_.get());
     cmd->init(handle);

@@ -30,6 +30,7 @@ enum class ConnectionFailure {
     CertificateRejected,  ///< The TLS handshake failed while verifying the peer certificate
     UndecodableReply,     ///< A reply was received that the transport cannot decode
     RejectedRequest,      ///< The peer answered, refusing the request
+    PermissionDenied,     ///< The server answered, denying the request to the requester
     Other                 ///< A failure that none of the other values describes
 };
 
@@ -38,7 +39,7 @@ namespace detail {
 template <>
 struct EnumTraits<ConnectionFailure>
 {
-    static constexpr std::array<std::pair<ConnectionFailure, const char*>, 11> map = {
+    static constexpr std::array<std::pair<ConnectionFailure, const char*>, 12> map = {
         {std::make_pair(ConnectionFailure::None, "NONE"),
          std::make_pair(ConnectionFailure::HostResolution, "HOST_RESOLUTION"),
          std::make_pair(ConnectionFailure::ConnectionRefused, "CONNECTION_REFUSED"),
@@ -49,10 +50,11 @@ struct EnumTraits<ConnectionFailure>
          std::make_pair(ConnectionFailure::CertificateRejected, "CERTIFICATE_REJECTED"),
          std::make_pair(ConnectionFailure::UndecodableReply, "UNDECODABLE_REPLY"),
          std::make_pair(ConnectionFailure::RejectedRequest, "REJECTED_REQUEST"),
+         std::make_pair(ConnectionFailure::PermissionDenied, "PERMISSION_DENIED"),
          std::make_pair(ConnectionFailure::Other, "OTHER")}};
 
     static constexpr size_t size = map.size();
-    static_assert(size == 11, "ConnectionFailure enum size mismatch");
+    static_assert(size == 12, "ConnectionFailure enum size mismatch");
 };
 
 } // namespace detail

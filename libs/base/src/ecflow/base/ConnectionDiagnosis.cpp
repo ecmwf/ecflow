@@ -44,6 +44,8 @@ std::string observation_of(ConnectionFailure failure) {
             return "A reply arrived that the client is unable to decode.";
         case ConnectionFailure::RejectedRequest:
             return "The server answered, refusing the request.";
+        case ConnectionFailure::PermissionDenied:
+            return "The server answered, denying the request to the requester.";
         case ConnectionFailure::Other:
             return "The exchange failed for an unrecognised reason.";
         case ConnectionFailure::None:
@@ -91,6 +93,9 @@ std::string explain(const ConnectionDiagnosis& diagnosis) {
     }
     else if (diagnosis.failure == ConnectionFailure::RejectedRequest) {
         headline = "Request refused";
+    }
+    else if (diagnosis.failure == ConnectionFailure::PermissionDenied) {
+        headline = "Permission denied";
     }
 
     os << headline << ": the client is using " << to_ui_designation(diagnosis.client_protocol) << " to reach "
