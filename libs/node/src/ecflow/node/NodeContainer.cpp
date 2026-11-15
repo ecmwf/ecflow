@@ -229,7 +229,9 @@ void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<ChildrenMemento>(nodes_));
+        // The children the requester can read, without the nodes it cannot read below them
+        const auto* visibility = changes.visibility();
+        comp->add(std::make_shared<ChildrenMemento>(visibility ? visibility->project(nodes_) : nodes_));
     }
     // Create OrderMemento to signal reordering of children
     else if (order_state_change_no_ > changes.client_state_change_no()) {
@@ -237,10 +239,16 @@ void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
 
+        // The order names the children the requester can read only
         std::vector<std::string> order_vec;
-        order_vec.reserve(nodes_.size());
-        for (const auto& n : nodes_) {
-            order_vec.push_back(n->name());
+        if (const auto* visibility = changes.visibility(); visibility) {
+            order_vec = visibility->names(nodes_);
+        }
+        else {
+            order_vec.reserve(nodes_.size());
+            for (const auto& n : nodes_) {
+                order_vec.push_back(n->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
@@ -311,9 +319,11 @@ void NodeContainer::collateChanges(DefsDelta& changes) const {
         return;
     }
 
-    // Traversal to children
+    // Traversal to the children the requester can read
     for (const auto& n : nodes_) {
-        n->collateChanges(changes);
+        if (!changes.hides(*n)) {
+            n->collateChanges(changes);
+        }
     }
 }
 
@@ -1366,3 +1376,17 @@ void NodeContainer::serialize(Archive& ar, std::uint32_t const version) {
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeContainer);
+
+void NodeContainer::retain_children_of_copy(const std::vector<bool>& keep) {
+    if (keep.size() != nodes_.size()) {
+        throw std::logic_error("NodeContainer::retain_children_of_copy: one flag per element expected");
+    }
+    decltype(nodes_) kept;
+    kept.reserve(nodes_.size());
+    for (std::size_t i = 0; i < nodes_.size(); ++i) {
+        if (keep[i]) {
+            kept.push_back(nodes_[i]);
+        }
+    }
+    nodes_.swap(kept);
+}

@@ -139,6 +139,36 @@ BOOST_AUTO_TEST_CASE(test_sticky_entry_keeps_subtree_readable) {
     BOOST_CHECK(bob.readable(*defs->findAbsNode("/s/f/t")));
 }
 
+///
+/// @brief Verifies that the projection of children leaves out the hidden ones, copies the readable ones with hidden
+///        nodes below them without those nodes, and changes no node of the definitions.
+///
+BOOST_AUTO_TEST_CASE(test_projection_of_children) {
+    ECF_NAME_THIS_TEST();
+
+    const auto defs =
+        make("admin:rwxlop,bob:r",
+             "suite s\n  family open\n    task t\n  endfamily\n  family mixed\n    task seen\n"
+             "    family covert\n" +
+                 attribute("admin:rwxlop") + "      task t\n    endfamily\n  endfamily\n  family covert\n" +
+                 attribute("admin:rwxlop") + "  endfamily\nendsuite\n");
+    const Visibility bob(*defs, "bob");
+    const auto& children = defs->findSuite("s")->children();
+
+    const auto projected = bob.project(children);
+    BOOST_REQUIRE_EQUAL(projected.size(), 2U);
+    BOOST_CHECK(projected[0] == children[0]); // nothing hidden below: the node itself
+    BOOST_CHECK(projected[1] != children[1]); // hidden nodes below: a copy
+    BOOST_CHECK_EQUAL(projected[1]->name(), "mixed");
+    std::set<std::string> copied;
+    for (const auto* n : ecf::get_all_nodes(*projected[1])) {
+        copied.insert(n->name());
+    }
+    BOOST_CHECK(copied.count("seen") == 1 && copied.count("covert") == 0);
+    BOOST_CHECK(defs->findAbsNode("/s/mixed/covert/t")); // the definitions keep their nodes
+    BOOST_CHECK_EQUAL(bob.names(children).size(), 2U);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

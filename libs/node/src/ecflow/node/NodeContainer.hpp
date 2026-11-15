@@ -93,6 +93,16 @@ public:
 
     NState::State computedState(Node::TraverseType) const override;
 
+    ///
+    /// @brief Keeps, in a detached copy, only the children marked, recording no change.
+    ///
+    /// For copies of nodes sent to a client without the nodes it cannot read; never for the nodes of a server.
+    ///
+    /// @param[in] keep One flag per child, in the order of the children
+    /// @throws std::logic_error when the number of flags differs from the number of children.
+    ///
+    void retain_children_of_copy(const std::vector<bool>& keep);
+
     node_ptr removeChild(Node* child) override;
     bool addChild(const node_ptr& child, size_t position = std::numeric_limits<std::size_t>::max()) override;
     bool isAddChildOk(Node* child, std::string& errorMsg) const override;

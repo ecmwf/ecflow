@@ -7,15 +7,21 @@
 
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 // #define DEBUG_MEMENTO 1
 
 //===============================================================
 // DefsDelta
 
+bool DefsDelta::hides(const Node& node) const {
+    return visibility_ != nullptr && visibility_->stops_at(node);
+}
+
 /// Defs delta can be re-used. reset all data members
 void DefsDelta::init(unsigned int client_state_change_no, bool sync_suite_clock) {
     sync_suite_clock_       = sync_suite_clock;
+    visibility_             = nullptr;
     client_state_change_no_ = client_state_change_no;
 
     server_state_change_no_  = 0;

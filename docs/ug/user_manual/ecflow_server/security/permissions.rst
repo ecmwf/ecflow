@@ -342,7 +342,10 @@ The replies filtered are:
 - the definitions sent by ``--get``, ``--get_state`` and ``--migrate`` without a path;
 - the node sent by ``--get``, ``--get_state`` and ``--migrate`` with a path, which the user can read, without the
   nodes below it that the user cannot read;
-- the full synchronisation of a client (e.g. ecFlowUI), with or without a client handle.
+- the full synchronisation of a client (e.g. ecFlowUI), with or without a client handle;
+- the incremental synchronisation of a client: the changes of the nodes it cannot read are left out, and the
+  children added below a readable node, the order of its children and the order of the suites name only the nodes
+  the client can read.
 
 Users reading the same nodes share the content the server prepares for them; users reading different nodes never
 receive content prepared for another.

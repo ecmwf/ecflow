@@ -25,6 +25,9 @@
 namespace cereal {
 class access;
 }
+namespace ecf {
+class Visibility;
+}
 
 class DefsDelta {
 public:
@@ -47,6 +50,28 @@ public:
 
     // ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
     bool sync_suite_clock() const { return sync_suite_clock_; }
+
+    ///
+    /// @brief Sets the nodes the requester can read: the changes of the other nodes are left out.
+    ///
+    /// @param[in] visibility The visibility, which must outlive the collation; every node when null
+    ///
+    void set_visibility(const ecf::Visibility* visibility) { visibility_ = visibility; }
+
+    ///
+    /// @brief Returns the nodes the requester can read.
+    ///
+    /// @return The visibility; null when every node is readable.
+    ///
+    const ecf::Visibility* visibility() const { return visibility_; }
+
+    ///
+    /// @brief Returns whether the changes of a node, and of the nodes below it, are left out.
+    ///
+    /// @param[in] node A node whose parent is readable (or a suite)
+    /// @return True when the requester cannot read the node.
+    ///
+    bool hides(const Node& node) const;
 
     /// Add the compound memento, i.e., store all memento's for a *given* node.
     void add(const compound_memento_ptr&);
@@ -71,8 +96,9 @@ public:
     size_t size() const { return compound_mementos_.size(); }
 
 private:
-    bool sync_suite_clock_{false};        // *no* need to persist since only used on server side
-    unsigned int client_state_change_no_; // *no* need to persist since only used on server side
+    bool sync_suite_clock_{false};               // *no* need to persist since only used on server side
+    const ecf::Visibility* visibility_{nullptr}; // server side only, not persisted
+    unsigned int client_state_change_no_;        // *no* need to persist since only used on server side
 
     unsigned int server_state_change_no_{0};
     unsigned int server_modify_change_no_{0};

@@ -50,6 +50,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 
     // Reset all data members since this command can be re-used
     reset_data_members(client_state_change_no, sync_suite_clock);
+    incremental_changes_.set_visibility(visibility); // the changes of hidden nodes are left out
 
     // explicit request
     if (do_full_sync) {

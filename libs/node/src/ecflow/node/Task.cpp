@@ -747,17 +747,25 @@ void Task::collateChanges(DefsDelta& changes) const {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<AliasChildrenMemento>(aliases_));
+        // The aliases the requester can read
+        const auto* visibility = changes.visibility();
+        comp->add(std::make_shared<AliasChildrenMemento>(visibility ? visibility->project(aliases_) : aliases_));
     }
     // Create OrderMemento to signal reordering of aliases
     else if (order_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
+        // The order names the aliases the requester can read only
         std::vector<std::string> order_vec;
-        order_vec.reserve(aliases_.size());
-        for (auto& alias : aliases_) {
-            order_vec.push_back(alias->name());
+        if (const auto* visibility = changes.visibility(); visibility) {
+            order_vec = visibility->names(aliases_);
+        }
+        else {
+            order_vec.reserve(aliases_.size());
+            for (auto& alias : aliases_) {
+                order_vec.push_back(alias->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
@@ -773,9 +781,11 @@ void Task::collateChanges(DefsDelta& changes) const {
     // ** base class will add compound memento into changes.
     Submittable::incremental_changes(changes, comp);
 
-    // Traversal to children
+    // Traversal to the aliases the requester can read
     for (auto& alias : aliases_) {
-        alias->collateChanges(changes);
+        if (!changes.hides(*alias)) {
+            alias->collateChanges(changes);
+        }
     }
 }
 
@@ -871,3 +881,17 @@ void Task::serialize(Archive& ar, std::uint32_t const version) {
 
 CEREAL_TEMPLATE_SPECIALIZE_V(Task);
 CEREAL_REGISTER_TYPE(Task)
+
+void Task::retain_aliases_of_copy(const std::vector<bool>& keep) {
+    if (keep.size() != aliases_.size()) {
+        throw std::logic_error("Task::retain_aliases_of_copy: one flag per element expected");
+    }
+    decltype(aliases_) kept;
+    kept.reserve(aliases_.size());
+    for (std::size_t i = 0; i < aliases_.size(); ++i) {
+        if (keep[i]) {
+            kept.push_back(aliases_[i]);
+        }
+    }
+    aliases_.swap(kept);
+}

@@ -6,8 +6,10 @@
 #include <cstdint>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "ecflow/node/EffectivePermissions.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class Defs;
 class Node;
@@ -75,6 +77,35 @@ public:
     [[nodiscard]] const std::string& key() const { return key_; }
 
     ///
+    /// @brief Returns the children of a readable node as the user reads them.
+    ///
+    /// The hidden children are left out; a readable child with hidden nodes below it is replaced by a copy without
+    /// them, so that the nodes of the server are never changed; the other children are returned as they are.
+    ///
+    /// @param[in] children The children of a readable node, of the definitions the visibility was computed from
+    /// @return The children to send.
+    ///
+    [[nodiscard]] std::vector<node_ptr> project(const std::vector<node_ptr>& children) const;
+
+    ///
+    /// @brief Returns the aliases of a readable task that the user can read.
+    ///
+    /// @param[in] aliases The aliases of a readable task
+    /// @return The readable aliases.
+    ///
+    [[nodiscard]] std::vector<alias_ptr> project(const std::vector<alias_ptr>& aliases) const;
+
+    ///
+    /// @brief Returns the names of the readable nodes among the children of a readable node, in their order.
+    ///
+    /// @tparam Pointer The type of pointer to the children (node, suite or alias)
+    /// @param[in] children The children
+    /// @return The names.
+    ///
+    template <typename Pointer>
+    [[nodiscard]] std::vector<std::string> names(const std::vector<Pointer>& children) const;
+
+    ///
     /// @brief Records a change that can alter what users read without a modify change: a node added below a suite
     ///        or removed from it, or a Permissions attribute added to a node or removed from it.
     ///
@@ -91,11 +122,25 @@ public:
 
 private:
     void visit(const EffectivePermissions& walker, const EffectivePermissions::State& parent, const Node& node);
+    void prune(const Node& original, Node& copy) const;
 
     bool applies_{false};
     bool admitted_{true};
-    std::unordered_set<const Node*> unreadable_; // the topmost unreadable nodes; nothing below them is visited
+    std::unordered_set<const Node*> unreadable_;    // the topmost unreadable nodes; nothing below them is visited
+    std::unordered_set<const Node*> partly_hidden_; // the readable nodes with unreadable nodes below them
     std::string key_;
 };
+
+template <typename Pointer>
+std::vector<std::string> Visibility::names(const std::vector<Pointer>& children) const {
+    std::vector<std::string> result;
+    result.reserve(children.size());
+    for (const auto& child : children) {
+        if (!stops_at(*child)) {
+            result.push_back(child->name());
+        }
+    }
+    return result;
+}
 
 } // namespace ecf

@@ -22,6 +22,7 @@ set(test_srcs
   test/TestFiltering.cpp
   test/TestFreeDepCmd.cpp
   test/TestHelpCatalog.cpp
+  test/TestIncrementalFiltering.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp

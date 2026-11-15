@@ -31,6 +31,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/move_peer.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
@@ -1624,7 +1625,9 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
             //   *IF* node/attribute change no > client_state_change_no
             //   *THEN*
             //       Create a memento, and store in incremental_changes_
-            s->collateChanges(incremental_changes);
+            if (!incremental_changes.hides(*s)) {
+                s->collateChanges(incremental_changes);
+            }
         }
     }
     else {
@@ -1658,10 +1661,16 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
+        // The order names the suites the requester can read only
         std::vector<std::string> order;
-        order.reserve(suiteVec_.size());
-        for (const auto& i : suiteVec_) {
-            order.push_back(i->name());
+        if (const auto* visibility = incremental_changes.visibility(); visibility) {
+            order = visibility->names(suiteVec_);
+        }
+        else {
+            order.reserve(suiteVec_.size());
+            for (const auto& i : suiteVec_) {
+                order.push_back(i->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order));
     }

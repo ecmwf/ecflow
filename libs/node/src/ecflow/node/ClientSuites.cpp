@@ -124,7 +124,7 @@ void ClientSuites::suite_deleted_in_defs(const suite_ptr& suite) {
 void ClientSuites::collateChanges(DefsDelta& changes) const {
     for (const HSuite& s : suites_) {
         suite_ptr suite = s.weak_suite_ptr_.lock();
-        if (suite.get()) {
+        if (suite.get() && !changes.hides(*suite)) {
             suite->collateChanges(changes);
         }
     }

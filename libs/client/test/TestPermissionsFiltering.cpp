@@ -142,6 +142,90 @@ BOOST_AUTO_TEST_CASE(test_full_synchronisation_carries_changes) {
 }
 
 ///
+/// @brief Verifies that, after changes of attributes, of order and of children under readable nodes holding hidden
+///        ones, an incremental synchronisation leaves the copy of each identity equal to a fresh full one (R5.5).
+///
+BOOST_AUTO_TEST_CASE(test_incremental_synchronisation_holds_the_readable_nodes) {
+    ECF_NAME_THIS_TEST();
+
+    for (const bool http : {false, true}) {
+        BOOST_TEST_CONTEXT("http: " << http) {
+            PermissionsServer server(admin,
+                                     {alice, bob},
+                                     server_attribute,
+                                     std::chrono::seconds(30),
+                                     std::nullopt,
+                                     std::nullopt,
+                                     false,
+                                     settings_of(http));
+            load_suites(server);
+            {
+                const auto file = server.directory() / "src.def";
+                std::ofstream(file)
+                    << "suite src\n  family extra\n    task t\n    family inner\n"
+                    << R"(      permissions [{"user": "admin", "permissions": "rwxlop"}, {"user": "alice", "permissions": "r"}])"
+                    << "\n      task t\n    endfamily\n  endfamily\nendsuite\n";
+                auto administrator = server.administrator();
+                BOOST_REQUIRE_MESSAGE(administrator->loadDefs(file.string()) == 0, administrator->errorMsg());
+            }
+            std::vector<std::pair<Credentials, std::unique_ptr<ClientInvoker>>> clients;
+            for (const auto& user : {alice, bob}) {
+                clients.emplace_back(user, server.client(user));
+                BOOST_REQUIRE_MESSAGE(clients.back().second->sync_local() == 0, clients.back().second->errorMsg());
+            }
+
+            auto administrator = server.administrator();
+            const auto request = [&](const std::vector<std::string>& args) {
+                BOOST_REQUIRE_MESSAGE(administrator->invoke(args) == 0, administrator->errorMsg());
+            };
+            request({"--alter", "add", "variable", "H", "1", "/m/hidden/t"});
+            request({"--alter", "add", "variable", "V", "1", "/m/seen/t"});
+            request({"--order=/m/seen", "bottom"});
+            request({"--order=/open", "bottom"}); // the order of the suites
+            request({"--suspend=/own/t"});
+            // A family moved by a local plug below a readable suite, holding a hidden family: a change of state,
+            // sent as the children of /m, the hidden family left out
+            BOOST_REQUIRE_MESSAGE(administrator->plug("/src/extra", "/m") == 0, administrator->errorMsg());
+
+            for (auto& [user, client] : clients) {
+                BOOST_TEST_CONTEXT(user.user) {
+                    BOOST_REQUIRE_MESSAGE(client->sync_local() == 0, client->errorMsg());
+                    BOOST_CHECK(!client->server_reply().full_sync());
+                    auto fresh = server.client(user);
+                    BOOST_REQUIRE_MESSAGE(fresh->sync_local() == 0, fresh->errorMsg());
+                    CHECK_PATHS(ecf::test::node_paths(*client->defs()), ecf::test::node_paths(*fresh->defs()));
+                    std::vector<std::string> received;
+                    std::vector<std::string> expected;
+                    for (const auto& s : client->defs()->suites()) {
+                        received.push_back(s->name());
+                    }
+                    for (const auto& s : fresh->defs()->suites()) {
+                        expected.push_back(s->name());
+                    }
+                    BOOST_CHECK_EQUAL_COLLECTIONS(received.begin(), received.end(), expected.begin(), expected.end());
+                    BOOST_CHECK(client->defs()->findAbsNode("/m/seen/t")->findVariable("V").value() == "1");
+                    std::vector<std::string> received_children;
+                    std::vector<std::string> expected_children;
+                    for (const auto& n : client->defs()->findSuite("m")->children()) {
+                        received_children.push_back(n->name());
+                    }
+                    for (const auto& n : fresh->defs()->findSuite("m")->children()) {
+                        expected_children.push_back(n->name());
+                    }
+                    BOOST_CHECK_EQUAL_COLLECTIONS(received_children.begin(),
+                                                  received_children.end(),
+                                                  expected_children.begin(),
+                                                  expected_children.end());
+                    BOOST_CHECK(client->defs()->findAbsNode("/m/extra/t"));
+                    BOOST_CHECK_EQUAL(static_cast<bool>(client->defs()->findAbsNode("/m/extra/inner")),
+                                      user.user == "alice");
+                }
+            }
+        }
+    }
+}
+
+///
 /// @brief Verifies that --get, --get_state and --migrate of a readable node omit its unreadable descendants.
 ///
 BOOST_AUTO_TEST_CASE(test_node_replies_omit_unreadable_descendants) {

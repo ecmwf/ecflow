@@ -4,11 +4,15 @@
 #include "ecflow/node/Visibility.hpp"
 
 #include <atomic>
+#include <stdexcept>
 #include <vector>
 
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 namespace ecf {
 
@@ -48,6 +52,11 @@ void Visibility::visit(const EffectivePermissions& walker,
     const auto state = walker.descend(parent, node);
     if (!walker.roles(state).has(Role::Read)) {
         unreadable_.insert(&node);
+        for (const Node* ancestor = node.parent(); ancestor != nullptr; ancestor = ancestor->parent()) {
+            if (!partly_hidden_.insert(ancestor).second) {
+                break; // its ancestors are recorded already
+            }
+        }
         key_ += node.absNodePath();
         key_ += '\n';
         return;
@@ -75,6 +84,74 @@ bool Visibility::stops_at(const Node& node) const {
         return true;
     }
     return unreadable_.count(&node) != 0;
+}
+
+std::vector<node_ptr> Visibility::project(const std::vector<node_ptr>& children) const {
+    if (!applies_) {
+        return children;
+    }
+    std::vector<node_ptr> result;
+    result.reserve(children.size());
+    for (const auto& child : children) {
+        if (stops_at(*child)) {
+            continue;
+        }
+        if (partly_hidden_.count(child.get()) == 0) {
+            result.push_back(child);
+            continue;
+        }
+        node_ptr copy;
+        if (const auto* family = child->isFamily(); family) {
+            copy = std::make_shared<Family>(*family);
+        }
+        else if (const auto* task = child->isTask(); task) {
+            copy = std::make_shared<Task>(*task);
+        }
+        else {
+            throw std::logic_error("Visibility::project: unexpected node with hidden nodes below it: " +
+                                   child->absNodePath());
+        }
+        prune(*child, *copy);
+        result.push_back(copy);
+    }
+    return result;
+}
+
+std::vector<alias_ptr> Visibility::project(const std::vector<alias_ptr>& aliases) const {
+    std::vector<alias_ptr> result;
+    result.reserve(aliases.size());
+    for (const auto& alias : aliases) {
+        if (!stops_at(*alias)) {
+            result.push_back(alias);
+        }
+    }
+    return result;
+}
+
+void Visibility::prune(const Node& original, Node& copy) const {
+    // The copy holds the children of the original, copied in the same order
+    if (const auto* task = original.isTask(); task) {
+        std::vector<bool> keep;
+        for (const auto& alias : task->aliases()) {
+            keep.push_back(!stops_at(*alias));
+        }
+        copy.isTask()->retain_aliases_of_copy(keep);
+        return;
+    }
+    const auto* container = original.isNodeContainer();
+    auto* copied          = copy.isNodeContainer();
+    if (!container || !copied || container->children().size() != copied->children().size()) {
+        throw std::logic_error("Visibility::prune: the copy does not match " + original.absNodePath());
+    }
+    std::vector<bool> keep;
+    for (std::size_t i = 0; i < container->children().size(); ++i) {
+        const auto& child = *container->children()[i];
+        keep.push_back(!stops_at(child));
+        if (keep.back() && partly_hidden_.count(&child) != 0) {
+            prune(child, *copied->children()[i]);
+        }
+    }
+    copied->retain_children_of_copy(keep);
 }
 
 bool Visibility::readable(const Node& node) const {
