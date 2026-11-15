@@ -6,6 +6,9 @@
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 class AbstractServer;
+namespace ecf {
+class Visibility;
+}
 
 //================================================================================
 // Paired with CtsCmd(GET_ZOMBIES)
@@ -17,9 +20,19 @@ public:
     ZombieGetCmd()
         : ServerToClientCmd() {}
 
-    void init(AbstractServer*);
+    ///
+    /// @brief Builds the reply in the server: the zombies of the tasks the requester can read.
+    ///
+    /// A zombie whose task no longer exists is listed when its closest existing ancestor below the server is readable.
+    ///
+    /// @param[in] as The server
+    /// @param[in] visibility The nodes the requester can read; every node when null
+    ///
+    void init(AbstractServer* as, const ecf::Visibility* visibility = nullptr);
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::Listing; }
     bool equals(ServerToClientCmd*) const override;
     void cleanup() override {
         std::vector<Zombie>().swap(zombies_);

@@ -99,4 +99,70 @@ inline std::vector<Channel> full_channels(const std::vector<std::string>& suites
     };
 }
 
+///
+/// @brief Returns the channels that list or count suites: --suites, and --stats (as many paths as suites counted).
+///
+/// @return The channels; each returns the paths of the suites it names (or, for --stats, "/#<n>" for a count n).
+/// @throws std::runtime_error from a channel, when its request fails.
+///
+inline std::vector<Channel> listing_channels() {
+    const auto require = [](const ClientInvoker& client, int status, const std::string& what) {
+        if (status != 0) {
+            throw std::runtime_error(what + " failed: " + client.errorMsg());
+        }
+    };
+    return {
+        {"--suites",
+         [require](const std::function<std::unique_ptr<ClientInvoker>()>& make) {
+             auto client = make();
+             require(*client, client->suites(), "--suites");
+             std::set<std::string> result;
+             for (const auto& name : client->server_reply().get_string_vec()) {
+                 result.insert("/" + name);
+             }
+             return result;
+         }},
+        {"--stats",
+         [require](const std::function<std::unique_ptr<ClientInvoker>()>& make) {
+             auto client = make();
+             require(*client, client->stats(), "--stats");
+             const auto& text = client->get_string();
+             const auto at    = text.find("Number of Suites");
+             if (at == std::string::npos) {
+                 throw std::runtime_error("--stats: no number of suites in " + text);
+             }
+             const auto line   = text.substr(at, text.find('\n', at) - at);
+             const auto digits = line.find_first_of("0123456789");
+             return std::set<std::string>{"/#" +
+                                          line.substr(digits, line.find_first_not_of("0123456789", digits) - digits)};
+         }},
+    };
+}
+
+///
+/// @brief Names a request addressing a node, which is denied when the requester cannot read the node.
+///
+struct NodeRequest
+{
+    std::string name;                                            ///< The request
+    std::function<int(ClientInvoker&, const std::string&)> send; ///< Sends the request for a node; returns its status
+    std::string expected; ///< Text found in the reply, when allowed, for a complete task with the script "echo hello"
+};
+
+///
+/// @brief Returns the requests that read a node (R5.2): --query, --file and --edit_script.
+///
+/// @return The requests.
+///
+inline std::vector<NodeRequest> node_reading_requests() {
+    return {
+        {"--query", [](ClientInvoker& c, const std::string& path) { return c.query("state", path, ""); }, "complete"},
+        {"--file", [](ClientInvoker& c, const std::string& path) { return c.file(path, "script"); }, "echo hello"},
+        {"--edit_script",
+         [](ClientInvoker& c, const std::string& path) { return c.edit_script_edit(path); },
+         "echo hello"},
+        {"--get", [](ClientInvoker& c, const std::string& path) { return c.invoke(CtsApi::get(path)); }, "t"},
+    };
+}
+
 } // namespace ecf::test

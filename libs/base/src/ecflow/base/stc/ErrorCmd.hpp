@@ -37,6 +37,10 @@ public:
     ///
     [[nodiscard]] Kind kind() const { return kind_; }
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override {
+        return ecf::ReplyFiltering::None;
+    } // messages; a denial names the request of its requester (D5.29)
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
 

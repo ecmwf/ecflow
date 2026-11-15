@@ -5,6 +5,10 @@
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
+namespace ecf {
+class Visibility;
+} // namespace ecf
+
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class DeleteCmd final : public UserCmd {
 public:
@@ -34,7 +38,18 @@ public:
     // called in the server
     void set_group_cmd(const GroupCTSCmd* cmd) override { group_cmd_ = cmd; }
 
-    static void check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete);
+    ///
+    /// @brief Refuses a deletion that would leave active or submitted tasks behind.
+    ///
+    /// @param[in] as The server
+    /// @param[in] theNodeToDelete The node deleted; nullptr for every suite
+    /// @param[in] visibility The nodes the requester can read; every node when null. The error names the first task
+    ///            only when the requester can read it (R5.2)
+    /// @throws std::runtime_error when active or submitted tasks are found.
+    ///
+    static void check_for_active_or_submitted_tasks(AbstractServer* as,
+                                                    Node* theNodeToDelete,
+                                                    const ecf::Visibility* visibility = nullptr);
 
 private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;

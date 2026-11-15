@@ -172,8 +172,15 @@ public:
     /// Reset the begin state. **** ONLY to be used for test ********
     void reset_begin();
 
-    /// throws runtime_error if suite cant begin
-    void check_suite_can_begin(const suite_ptr&) const;
+    ///
+    /// @brief Refuses to begin a suite whose tasks are active or submitted.
+    ///
+    /// @param[in] suite The suite
+    /// @param[in] visibility The nodes the requester can read; every node when null. The error names only the tasks
+    ///            the requester can read, and counts the others (R5.2)
+    /// @throws std::runtime_error when the suite cannot begin.
+    ///
+    void check_suite_can_begin(const suite_ptr& suite, const ecf::Visibility* visibility = nullptr) const;
 
     /// Will requeue all suites. Current used in test only
     void requeue();
@@ -401,7 +408,7 @@ private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
 
 private:
-    void collate_defs_changes_only(DefsDelta&) const;
+    void collate_defs_changes_only(unsigned int client_handle, DefsDelta&) const;
     void setupDefaultEnv();
 
     /**

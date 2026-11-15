@@ -13,6 +13,10 @@ public:
     void cleanup() override; /// After the command has run this function can be used to reclaim memory
 
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override {
+        return ecf::ReplyFiltering::None;
+    } // each reply it holds is filtered on its own
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
 

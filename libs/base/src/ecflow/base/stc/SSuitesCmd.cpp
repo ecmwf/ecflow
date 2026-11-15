@@ -7,6 +7,7 @@
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +15,7 @@ SSuitesCmd::SSuitesCmd(AbstractServer* as) {
     init(as);
 }
 
-void SSuitesCmd::init(AbstractServer* as) {
+void SSuitesCmd::init(AbstractServer* as, const ecf::Visibility* visibility) {
     // This command can be re-used hence clear existing data members
     suites_.clear();
 
@@ -22,7 +23,9 @@ void SSuitesCmd::init(AbstractServer* as) {
     size_t size        = suites.size();
     suites_.reserve(size);
     for (size_t i = 0; i < size; i++) {
-        suites_.push_back(suites[i]->name());
+        if (!visibility || !visibility->stops_at(*suites[i])) {
+            suites_.push_back(suites[i]->name());
+        }
     }
 }
 

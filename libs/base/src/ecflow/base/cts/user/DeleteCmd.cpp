@@ -16,6 +16,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -70,7 +71,8 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
 
     if (paths_.empty()) {
         if (!force_) {
-            check_for_active_or_submitted_tasks(as, nullptr);
+            const auto visibility = request_context().visibility();
+            check_for_active_or_submitted_tasks(as, nullptr, visibility->applies() ? visibility.get() : nullptr);
         }
         else {
             as->zombie_ctrl().add_user_zombies(as->defs(), CtsApi::delete_node_arg());
@@ -100,7 +102,9 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
             add_node_path_for_edit_history(path);
 
             if (!force_) {
-                check_for_active_or_submitted_tasks(as, theNodeToDelete.get());
+                const auto visibility = request_context().visibility();
+                check_for_active_or_submitted_tasks(
+                    as, theNodeToDelete.get(), visibility->applies() ? visibility.get() : nullptr);
             }
             else {
                 as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(), CtsApi::delete_node_arg());
@@ -125,7 +129,14 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
 //     return do_authenticate(as, cmd, paths_);
 // }
 
-void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete) {
+void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,
+                                                    Node* theNodeToDelete,
+                                                    const ecf::Visibility* visibility) {
+    // A task the requester cannot read is not named (R5.2)
+    auto readable_path = [visibility](const Node& task) {
+        return !visibility || visibility->readable(task) ? task.absNodePath() : std::string("(not readable)");
+    };
+
     auto tasks = theNodeToDelete ? ecf::get_all_tasks(*theNodeToDelete) : ecf::get_all_tasks(*as->defs());
 
     std::vector<Task*> activeVec, submittedVec;
@@ -146,12 +157,12 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* th
             ss << "Cannot delete all nodes.\n";
         }
         if (!activeVec.empty()) {
-            ss << " There are " << activeVec.size() << " active tasks. First : " << activeVec.front()->absNodePath()
+            ss << " There are " << activeVec.size() << " active tasks. First : " << readable_path(*activeVec.front())
                << "\n";
         }
         if (!submittedVec.empty()) {
             ss << " There are " << submittedVec.size()
-               << " submitted tasks. First : " << submittedVec.front()->absNodePath() << "\n";
+               << " submitted tasks. First : " << readable_path(*submittedVec.front()) << "\n";
         }
         ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
         throw std::runtime_error(ss.str());

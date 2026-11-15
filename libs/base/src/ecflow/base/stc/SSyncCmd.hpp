@@ -39,6 +39,8 @@ public:
           incremental_changes_(0) {}
 
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::NodeContent; }
     bool equals(ServerToClientCmd*) const override;
 
     // Client side functions:

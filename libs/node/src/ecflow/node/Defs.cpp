@@ -640,24 +640,36 @@ void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
     }
 }
 
-void Defs::check_suite_can_begin(const suite_ptr& suite) const {
+void Defs::check_suite_can_begin(const suite_ptr& suite, const ecf::Visibility* visibility) const {
     NState::State suiteState = suite->state();
     if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
         int count  = 0;
+        int hidden = 0;
         auto tasks = ecf::get_all_tasks(*this);
         std::ostringstream ss;
         for (auto& task : tasks) {
             if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
-                ss << "   " << task->absNodePath() << "\n";
+                if (!visibility || visibility->readable(*task)) {
+                    ss << "   " << task->absNodePath() << "\n";
+                }
+                else {
+                    ++hidden; // a task the requester cannot read is counted, not named (R5.2)
+                }
                 count++;
             }
         }
+        if (hidden > 0) {
+            ss << "   (" << hidden << " not readable)\n";
+        }
         /// allow suite to begin even its aborted provide no tasks in active or submitted states
         if (count > 0) {
+            // A suite the requester cannot read is neither named nor described (R5.2)
+            const bool readable = !visibility || visibility->readable(*suite);
+            const std::string described =
+                readable ? suite->name() + "(computed state=" + NState::toString(suiteState) + ")" : "(not readable)";
             throw std::runtime_error(
                 MESSAGE("Begin failed as suite "
-                        << suite->name() << "(computed state=" << NState::toString(suiteState)
-                        << ") can only begin if its in UNKNOWN or COMPLETE state\n"
+                        << described << " can only begin if its in UNKNOWN or COMPLETE state\n"
                         << "Found " << count << " tasks with state 'active' or 'submitted'\n"
                         << ss.str()
                         << "Use the force argument to bypass this check, at the risk of creating zombies\n"));
@@ -1613,7 +1625,7 @@ std::string Defs::toString() const {
 // Memento functions
 void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_changes) const {
     // Collate any small scale changes to the defs
-    collate_defs_changes_only(incremental_changes);
+    collate_defs_changes_only(client_handle, incremental_changes);
 
     if (0 == client_handle) {
         // small scale changes. Collate changes over all suites.
@@ -1641,15 +1653,31 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
     }
 }
 
-void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
+void Defs::collate_defs_changes_only(unsigned int client_handle, DefsDelta& incremental_changes) const {
     // ************************************************************************************************
     // determine if defs state changed. make sure this is in sync with defs_only_max_state_change_no()
     // ************************************************************************************************
 
     compound_memento_ptr comp;
 
-    // Create StateMemento to signal a change in state change of the Defs
-    if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
+    // Create StateMemento to signal a change in state change of the Defs; for a requester who cannot read every node,
+    // the state is aggregated from the readable suites it receives (those of its handle, if any), and is sent
+    // whenever one of them changed, since its aggregate can change while the state of the Defs does not
+    if (const auto* visibility = incremental_changes.visibility(); visibility) {
+        const auto received = client_handle == 0 ? suiteVec_ : client_suite_mgr_.loaded_suites(client_handle);
+        bool changed        = state_.state_change_no() > incremental_changes.client_state_change_no();
+        for (const auto& s : received) {
+            changed = changed || (!incremental_changes.hides(*s) &&
+                                  s->state_change_no() > incremental_changes.client_state_change_no());
+        }
+        if (changed) {
+            if (!comp.get()) {
+                comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
+            }
+            comp->add(std::make_shared<StateMemento>(visibility->root_state(*this, received)));
+        }
+    }
+    else if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }

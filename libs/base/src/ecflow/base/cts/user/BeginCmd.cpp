@@ -15,6 +15,7 @@
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -65,6 +66,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
     std::vector<Submittable*> tasks;
 
     // If no suite name begin all suites, else begin the specific suite
+    const auto visibility = request_context().visibility();
     if (suiteName_.empty()) {
 
         const auto& suites = defs->suites();
@@ -72,7 +74,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
             size_t size = suites.size();
             for (size_t s = 0; s < size; s++) {
                 /// check_suite_can_begin will throw if suite cannot begin
-                defs->check_suite_can_begin(suites[s]);
+                defs->check_suite_can_begin(suites[s], visibility->applies() ? visibility.get() : nullptr);
             }
         }
         else {
@@ -94,7 +96,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
         /// check_suite_can_begin will throw if suite cannot begin
         if (!force_) {
-            defs->check_suite_can_begin(suite);
+            defs->check_suite_can_begin(suite, visibility->applies() ? visibility.get() : nullptr);
         }
         else {
 

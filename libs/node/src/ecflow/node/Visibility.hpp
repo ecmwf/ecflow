@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "ecflow/core/NState.hpp"
 #include "ecflow/node/EffectivePermissions.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
@@ -104,6 +105,20 @@ public:
     ///
     template <typename Pointer>
     [[nodiscard]] std::vector<std::string> names(const std::vector<Pointer>& children) const;
+
+    ///
+    /// @brief Returns the state of the root as the user reads it: the most significant state of the readable suites
+    ///        among those given.
+    ///
+    /// The suites are those a client receives: every suite without a client handle, the suites of the handle
+    /// otherwise; full and incremental synchronisations pass the same ones, so that they agree, and the news of a
+    /// handle, which follows its suites, reports every change of that state.
+    ///
+    /// @param[in] defs The definitions, whose state is returned when Permissions do not apply
+    /// @param[in] suites The suites the client receives
+    /// @return The state.
+    ///
+    [[nodiscard]] NState::State root_state(const Defs& defs, const std::vector<suite_ptr>& suites) const;
 
     ///
     /// @brief Records a change that can alter what users read without a modify change: a node added below a suite

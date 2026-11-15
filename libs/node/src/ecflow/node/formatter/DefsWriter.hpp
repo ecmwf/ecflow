@@ -2292,9 +2292,11 @@ private:
         output << "defs_state ";
         output << PrintStyle::to_string(ctx.style.selected());
 
-        if (item.state() != NState::UNKNOWN) {
+        // The state of the root, aggregated from the suites the requester can read
+        if (const auto state = ctx.visibility ? ctx.visibility->root_state(item, item.suites()) : item.state();
+            state != NState::UNKNOWN) {
             output << " state>:";
-            output << NState::toString(item.state());
+            output << NState::toString(state);
         } // make <state> is unique
         if (auto flag = item.get_flag(); flag.flag() != 0) {
             output << " flag:";

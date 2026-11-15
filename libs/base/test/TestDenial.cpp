@@ -120,6 +120,7 @@ struct ErrorCmdBeforeKind
         bool handle_server_response(ServerReply&, Cmd_ptr, bool) const override { return false; }
         bool equals(ServerToClientCmd*) const override { return true; }
         std::string print() const override { return {}; }
+        ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::None; }
     } base_;
 };
 

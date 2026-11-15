@@ -10,12 +10,14 @@
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Gnuplot.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -397,7 +399,14 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         case CtsCmd::STATS: {
             as->update_stats().stats_++;
             as->stats().update_for_serialisation();
-            as->stats().no_of_suites_ = as->defs()->suites().size();
+            // The number of suites counts those the requester can read (R5.2)
+            const auto visibility     = request_context().visibility();
+            as->stats().no_of_suites_ = 0;
+            for (const auto& suite : as->defs()->suites()) {
+                if (!visibility->stops_at(*suite)) {
+                    ++as->stats().no_of_suites_;
+                }
+            }
             std::ostringstream ss;
             as->stats().show(ss); // ECFLOW-880, allow stats to be changed in server, by only returning string
             return PreAllocatedReply::string_cmd(ss.str());

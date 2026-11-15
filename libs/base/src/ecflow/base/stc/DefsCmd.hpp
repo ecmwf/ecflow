@@ -28,6 +28,8 @@ public:
 
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::NodeContent; }
     bool equals(ServerToClientCmd*) const override;
     void cleanup() override {
         std::string{}.swap(full_server_defs_as_string_);

@@ -11,6 +11,7 @@
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/HelpCatalog.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -19,6 +20,7 @@
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -257,7 +259,9 @@ node_ptr QueryCmd::find_node_for_query(Defs* defs) const {
 
 STC_Cmd_ptr QueryCmd::doHandleQueryForState(Defs* defs) const {
     if (path_to_attribute_ == "/") {
-        return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
+        // The state of the root, aggregated from the suites the requester can read
+        const auto visibility = request_context().visibility();
+        return PreAllocatedReply::string_cmd(NState::toString(visibility->root_state(*defs, defs->suites())));
     }
     node_ptr node = find_node(defs, path_to_attribute_);
     return PreAllocatedReply::string_cmd(NState::toString(node->state()));

@@ -99,24 +99,27 @@ STC_Cmd_ptr PreAllocatedReply::node_cmd(const ecf::RequestContext& context, node
 STC_Cmd_ptr PreAllocatedReply::stats_cmd(const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("stats_cmd", context);
-    auto* cmd = dynamic_cast<SStatsCmd*>(stats_cmd_.get());
-    cmd->init(as);
+    auto* cmd             = dynamic_cast<SStatsCmd*>(stats_cmd_.get());
+    const auto visibility = filter_of(context);
+    cmd->init(as, visibility.get());
     return stats_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::suites_cmd(const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("suites_cmd", context);
-    auto* cmd = dynamic_cast<SSuitesCmd*>(suites_cmd_.get());
-    cmd->init(as);
+    auto* cmd             = dynamic_cast<SSuitesCmd*>(suites_cmd_.get());
+    const auto visibility = filter_of(context);
+    cmd->init(as, visibility.get());
     return suites_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd(const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("zombie_get_cmd", context);
-    auto* cmd = dynamic_cast<ZombieGetCmd*>(zombie_get_cmd_.get());
-    cmd->init(as);
+    auto* cmd             = dynamic_cast<ZombieGetCmd*>(zombie_get_cmd_.get());
+    const auto visibility = filter_of(context);
+    cmd->init(as, visibility.get());
     return zombie_get_cmd_;
 }
 

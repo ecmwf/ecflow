@@ -9,6 +9,7 @@ set(test_srcs
   test/TestAlterCmdRepeat.cpp
   test/TestArchiveAndRestoreCmd.cpp
   test/TestBase_main.cpp # test entry point
+  test/TestClassification.cpp
   test/TestClientHandleCmd.cpp
   test/TestClientOptionsParser.cpp
   test/TestCmd.cpp
@@ -26,6 +27,7 @@ set(test_srcs
   test/TestIncrementalFiltering.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
+  test/TestListingFiltering.cpp
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
   test/TestPermissions.cpp

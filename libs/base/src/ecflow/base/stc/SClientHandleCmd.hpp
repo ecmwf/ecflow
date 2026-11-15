@@ -14,6 +14,8 @@ public:
 
     void init(int handle) { handle_ = handle; }
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::None; }
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
 

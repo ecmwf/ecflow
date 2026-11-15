@@ -11,6 +11,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
@@ -152,6 +153,19 @@ void Visibility::prune(const Node& original, Node& copy) const {
         }
     }
     copied->retain_children_of_copy(keep);
+}
+
+NState::State Visibility::root_state(const Defs& defs, const std::vector<suite_ptr>& suites) const {
+    if (!applies_) {
+        return defs.state();
+    }
+    std::vector<suite_ptr> readable;
+    for (const auto& suite : suites) {
+        if (!stops_at(*suite)) {
+            readable.push_back(suite);
+        }
+    }
+    return ecf::theComputedNodeState(readable, true /* immediate children only */);
 }
 
 bool Visibility::readable(const Node& node) const {

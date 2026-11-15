@@ -115,6 +115,13 @@ public:
     /// returns the list of suites
     void suites(std::vector<std::string>& names) const;
 
+    ///
+    /// @brief Returns the suites of the handle that exist in the definitions, in their order.
+    ///
+    /// @return The suites.
+    ///
+    std::vector<suite_ptr> loaded_suites() const;
+
     /// Update suites to be in same order as Defs.
     /// This should be done externally to avoid update after individual add
     void update_suite_order();

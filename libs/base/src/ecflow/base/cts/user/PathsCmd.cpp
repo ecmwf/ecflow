@@ -18,6 +18,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -329,7 +330,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 NodeContainer* the_container = containers_to_archive[i];
 
                 if (!force_) {
-                    DeleteCmd::check_for_active_or_submitted_tasks(as, the_container);
+                    const auto visibility = request_context().visibility();
+                    DeleteCmd::check_for_active_or_submitted_tasks(
+                        as, the_container, visibility->applies() ? visibility.get() : nullptr);
                 }
                 else {
                     as->zombie_ctrl().add_user_zombies(the_container, CtsApi::archive_arg());

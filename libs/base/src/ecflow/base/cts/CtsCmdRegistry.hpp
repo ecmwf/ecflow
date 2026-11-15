@@ -59,6 +59,13 @@ public:
     ///
     bool parse(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const;
 
+    ///
+    /// @brief Returns a prototype of every registered command, e.g. for tests that must cover every command.
+    ///
+    /// @return The prototypes, in the order of registration.
+    ///
+    [[nodiscard]] const std::vector<Cmd_ptr>& commands() const { return vec_; }
+
 private:
     std::vector<Cmd_ptr> vec_;
 

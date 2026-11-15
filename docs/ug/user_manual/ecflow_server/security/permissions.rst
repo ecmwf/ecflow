@@ -346,6 +346,13 @@ The replies filtered are:
 - the incremental synchronisation of a client: the changes of the nodes it cannot read are left out, and the
   children added below a readable node, the order of its children and the order of the suites name only the nodes
   the client can read.
+- ``--suites``, which lists the readable suites, and ``--stats``, which counts them;
+- ``--zombie_get``, which lists the zombies of the readable tasks;
+- the state of the server shown at the root (e.g. by ecFlowUI), and returned by ``--query state /``, aggregated from
+  the readable suites: every readable suite without a client handle, the readable suites of the handle otherwise.
+
+Every reply type declares how it is filtered: not at all (no node data, or data accepted unfiltered, listed below),
+by content (definitions and nodes) or as a listing (names and counts of nodes).
 
 Users reading the same nodes share the content the server prepares for them; users reading different nodes never
 receive content prepared for another.
@@ -366,7 +373,10 @@ The following are not filtered, and remain visible to every user holding ``r`` a
   limits and ``inlimit``, Mirror and Aviso attributes, shown as written;
 - the content of a file read through a command authorised on a readable node (e.g. ``--file`` of its job output),
   wherever the variables of that node point;
-- the change numbers returned by ``--news``, which tell that something changed in the server, not what.
+- the change numbers returned by ``--news``, which tell that something changed in the server, not what;
+- the results of the requests evaluating a readable node, which may depend on, and name, nodes below it or elsewhere:
+  the diagnostics of ``--check`` (e.g. a trigger of a task below the node that names a node missing), the
+  explanations of ``--why``, and the value of an expression evaluated by ``--query``.
 
 These channels let a user infer that unreadable nodes exist (e.g. a trigger naming them, or a change number moving
 while nothing readable changed); this is accepted.

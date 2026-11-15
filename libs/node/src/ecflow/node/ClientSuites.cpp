@@ -297,3 +297,14 @@ std::vector<HSuite>::iterator ClientSuites::find_suite(const std::string& name) 
 }
 
 } // namespace ecf
+
+std::vector<suite_ptr> ecf::ClientSuites::loaded_suites() const {
+    std::vector<suite_ptr> result;
+    result.reserve(suites_.size());
+    for (const HSuite& s : suites_) {
+        if (auto suite = s.weak_suite_ptr_.lock(); suite) {
+            result.push_back(suite);
+        }
+    }
+    return result;
+}
