@@ -60,6 +60,7 @@ set(test_srcs
   test/TestVariableInheritance.cpp
   test/TestVariableSubstitution.cpp
   test/TestVariableSubstitutionDefs.cpp
+  test/TestVisibility.cpp
   test/TestZombies.cpp
 )
 

@@ -5,6 +5,9 @@
 
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 class AbstractServer;
+namespace ecf {
+class Visibility;
+}
 
 //================================================================================
 // Paired with CtsNodeCmd(Get)
@@ -15,7 +18,14 @@ public:
     SNodeCmd(AbstractServer* as, node_ptr node);
     SNodeCmd() = default;
 
-    void init(AbstractServer* as, const node_ptr& node);
+    ///
+    /// @brief Builds the reply in the server: the node and the nodes below it that the requester can read.
+    ///
+    /// @param[in] as The server
+    /// @param[in] node The node requested, which the requester can read
+    /// @param[in] visibility The nodes the requester can read; every node when null
+    ///
+    void init(AbstractServer* as, const node_ptr& node, const ecf::Visibility* visibility = nullptr);
 
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;

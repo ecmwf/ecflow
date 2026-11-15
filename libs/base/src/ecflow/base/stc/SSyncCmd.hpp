@@ -56,16 +56,18 @@ private:
               unsigned int client_modify_change_no,
               bool full_sync,
               bool sync_suite_clock,
-              AbstractServer* as);
+              AbstractServer* as,
+              const ecf::Visibility* visibility = nullptr);
 
     /// For use when doing a full sync
     void init(unsigned int client_handle, AbstractServer* as);
 
     void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
-    void full_sync(unsigned int client_handle, AbstractServer* as);
+    void full_sync(unsigned int client_handle, AbstractServer* as, const ecf::Visibility* visibility);
     void cleanup() override; /// run in the server, after command sent to client
 
 private:
+    std::shared_ptr<const std::string> cached_; // server side: the entry of the cache sent with full_defs_
     bool full_defs_{false};
 
 public:
@@ -98,10 +100,10 @@ private:
            CEREAL_NVP(server_defs_)); // large scale changes, if non zero handle, a small subset of the suites
 
         // when full_defs_ is set 'server_defs_' will be empty.
-        if (Archive::is_saving::value) {
+        if constexpr (Archive::is_saving::value) {
             // Avoid copying the string. As this could be very large
-            if (full_defs_) {
-                ar& DefsCache::full_server_defs_as_string_;
+            if (full_defs_ && cached_) {
+                ar(*cached_);
             }
             else {
                 ar & full_server_defs_as_string_;

@@ -474,6 +474,7 @@ set(srcs
   node/src/ecflow/node/System.hpp
   node/src/ecflow/node/Task.hpp
   node/src/ecflow/node/TaskScriptGenerator.hpp
+  node/src/ecflow/node/Visibility.hpp
   node/src/ecflow/node/move_peer.hpp
   node/src/ecflow/node/formatter/AvisoFormatter.hpp
   node/src/ecflow/node/formatter/DefsWriter.hpp
@@ -561,6 +562,7 @@ set(srcs
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp
   node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/Visibility.cpp
   node/src/ecflow/node/formatter/DefsWriter.cpp
   node/src/ecflow/node/parser/AutoArchiveParser.cpp
   node/src/ecflow/node/parser/AutoCancelParser.cpp

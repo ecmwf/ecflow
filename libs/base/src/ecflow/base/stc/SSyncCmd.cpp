@@ -29,6 +29,7 @@ void SSyncCmd::reset_data_members(unsigned int client_state_change_no, bool sync
                               sync_suite_clock); // persisted, used for returning INCREMENTAL changes
     server_defs_.clear();                        // persisted, used for returning FULL definition
     full_server_defs_as_string_.clear(); // semi-persisted, i.e on load & not on saving used to return cached defs
+    cached_.reset();
 }
 
 void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suites used by client
@@ -36,7 +37,8 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
                     unsigned int client_modify_change_no,
                     bool do_full_sync,
                     bool sync_suite_clock,
-                    AbstractServer* as) {
+                    AbstractServer* as,
+                    const ecf::Visibility* visibility) {
     // ********************************************************
     // This is called in the server
     // ********************************************************
@@ -54,7 +56,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
         cout << ": *Flag do_full_sync set* ";
 #endif
-        full_sync(client_handle, as);
+        full_sync(client_handle, as, visibility);
         return;
     }
 
@@ -72,7 +74,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
             cout << ": client modify no > server modify no: Server died/restored? ";
 #endif
-            full_sync(client_handle, as);
+            full_sync(client_handle, as, visibility);
             return;
         }
 
@@ -80,7 +82,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
             cout << ": *Large* scale changes: modify numbers not in sync ";
 #endif
-            full_sync(client_handle, as);
+            full_sync(client_handle, as, visibility);
             return;
         }
 
@@ -143,7 +145,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
         cout << ": client no > server no: Server died/restored?";
 #endif
-        full_sync(client_handle, as);
+        full_sync(client_handle, as, visibility);
         return;
     }
 
@@ -151,7 +153,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
         cout << ": *Large* scale changes : modify numbers not in sync";
 #endif
-        full_sync(client_handle, as);
+        full_sync(client_handle, as, visibility);
         return;
     }
 
@@ -160,7 +162,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #ifdef DEBUG_SERVER_SYNC
         cout << ": *Large* scale changes: added/removed suites to handle";
 #endif
-        full_sync(client_handle, as);
+        full_sync(client_handle, as, visibility);
         return;
     }
 
@@ -178,7 +180,7 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
 #endif
 }
 
-void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
+void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as, const ecf::Visibility* visibility) {
     Defs* server_defs = as->defs().get();
 
     if (0 == client_handle) {
@@ -186,11 +188,10 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
         server_defs->set_state_change_no(Ecf::state_change_no());
         server_defs->set_modify_change_no(Ecf::modify_change_no());
 
-        DefsCache::update_cache_if_state_changed(server_defs);
+        cached_    = DefsCache::update_cache_if_state_changed(as->defs(), visibility);
         full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
-        cout << ": *no handle* returning FULL defs(*cached* string, size("
-             << DefsCache::full_server_defs_as_string_.size() << "))" << endl;
+        cout << ": *no handle* returning FULL defs(*cached* string, size(" << cached_->size() << "))" << endl;
 #endif
         return;
     }
@@ -217,15 +218,15 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
     // **** This means that server_defs_ will fail invarint_checking before serialisation
     defs_ptr the_server_defs = server_defs->client_suite_mgr().create_defs(client_handle, as->defs());
     if (the_server_defs.get() == server_defs) {
-        DefsCache::update_cache_if_state_changed(server_defs);
+        cached_    = DefsCache::update_cache_if_state_changed(as->defs(), visibility);
         full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
-        cout << ": The handle has *ALL* the suites: return the FULL defs(*cached* string, size("
-             << DefsCache::full_server_defs_as_string_.size() << "))";
+        cout << ": The handle has *ALL* the suites: return the FULL defs(*cached* string, size(" << cached_->size()
+             << "))";
 #endif
     }
     else {
-        the_server_defs->write_to_string(server_defs_, PrintStyle::NET);
+        the_server_defs->write_to_string(server_defs_, PrintStyle::NET, visibility);
     }
 
 #ifdef DEBUG_SERVER_SYNC
@@ -243,6 +244,7 @@ void SSyncCmd::cleanup() {
     incremental_changes_.cleanup();
     std::string{}.swap(server_defs_);
     std::string{}.swap(full_server_defs_as_string_); // will typically be empty in server
+    cached_.reset();
 }
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const {

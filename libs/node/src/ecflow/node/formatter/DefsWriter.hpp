@@ -21,6 +21,7 @@
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/formatter/Format.hpp"
 
 namespace ecf {
@@ -76,6 +77,22 @@ struct FormatContext
 {
     Style style;
     Format format;
+
+    ///
+    /// @brief The nodes to write, when only some are: a node the visibility rejects is skipped with its subtree.
+    ///
+    /// The node written first (e.g. the node of a request) is written whatever the visibility; only the nodes below
+    /// it, and the suites of definitions, are checked. Every node is written when there is no visibility.
+    ///
+    const Visibility* visibility = nullptr;
+
+    ///
+    /// @brief Returns whether a node met below a node written is to be written.
+    ///
+    /// @param[in] node The node, whose parent (or whose definitions, for a suite) is written
+    /// @return True when there is no visibility, or the visibility does not stop at the node.
+    ///
+    [[nodiscard]] bool writes(const Node& node) const { return visibility == nullptr || !visibility->stops_at(node); }
 
     static FormatContext make_for(PrintStyle::Type_t style) {
         switch (style) {
@@ -1936,11 +1953,15 @@ struct Writer<Task, Stream>
         // Although Aliases are not printed, they can part of _checkpoint_ files.
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             Indent l2(ctx);
+            bool written = false;
             for (auto alias : item.aliases()) {
-                Writer<Alias, Stream>::write(output, *alias, ctx);
+                if (ctx.writes(*alias)) {
+                    Writer<Alias, Stream>::write(output, *alias, ctx);
+                    written = true;
+                }
             }
             Indent l3(ctx);
-            if (!item.aliases().empty()) {
+            if (written) {
                 l3.write(output);
                 output << "endalias";
                 output << "\n";
@@ -2137,6 +2158,9 @@ struct Writer<NodeContainer, Stream>
         // taken from NodeContainer::print(std::string& os) const
 
         for (const auto& node : item.children()) {
+            if (!ctx.writes(*node)) {
+                continue;
+            }
 
             // Note: here we must use dynamic_cast to determine the type of the node
             // This is because we are using a templated Writer, and we need to call the correct
@@ -2246,7 +2270,9 @@ struct Writer<Defs, Stream>
 
         // Write the children (i.e. suites)
         for (const auto& s : item.suites()) {
-            Writer<Suite, Stream>::write(output, *s, ctx);
+            if (ctx.writes(*s)) {
+                Writer<Suite, Stream>::write(output, *s, ctx);
+            }
         }
 
         // Write footer

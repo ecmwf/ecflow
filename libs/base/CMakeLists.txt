@@ -19,6 +19,7 @@ set(test_srcs
   test/TestDenial.cpp
   test/TestMockServerIdentity.cpp
   test/TestForceCmd.cpp
+  test/TestFiltering.cpp
   test/TestFreeDepCmd.cpp
   test/TestHelpCatalog.cpp
   test/TestInLimitAndLimit.cpp

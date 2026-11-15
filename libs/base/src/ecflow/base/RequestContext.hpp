@@ -3,12 +3,14 @@
 
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/node/EffectivePermissions.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 class AbstractServer;
 
@@ -18,8 +20,9 @@ namespace ecf {
 /// @brief Holds what a request needs to know about its requester, for the duration of the request.
 ///
 /// The context is created when the server handles a request, once the requester is authenticated, and is passed to the
-/// authorisation, to the execution of the command and to the construction of its reply. It ends with the request: no
-/// requester is kept in global or static state.
+/// authorisation, to the execution of the command and to the construction of its reply. It ends with the request; only
+/// the visibilities of the users (see visibility()) are kept across requests, by user name, in a cache reset by the
+/// changes that can alter them; without a server attribute, a single visibility serves every user.
 ///
 /// @invariant The identity and the server outlive the context.
 ///
@@ -73,6 +76,18 @@ public:
     /// @throws std::logic_error when the server holds no definitions, or Permissions do not apply.
     ///
     [[nodiscard]] Roles roles_at(const std::string& path) const;
+
+    ///
+    /// @brief Returns the nodes the requester can read, to filter the reply.
+    ///
+    /// The visibility is shared by the requests of the same user, and computed again after a modify change, a node
+    /// added or removed, or a Permissions attribute added (Visibility::structure_changed()), or when the server holds
+    /// other definitions or another server attribute.
+    ///
+    /// @return The visibility, which every node passes when Permissions do not apply.
+    /// @throws std::logic_error when the server holds no definitions.
+    ///
+    [[nodiscard]] std::shared_ptr<const Visibility> visibility() const;
 
 private:
     const Identity& identity_;

@@ -36,6 +36,7 @@ class access;
 namespace ecf {
 class NodeTreeVisitor;
 class CalendarUpdateParams;
+class Visibility;
 } // namespace ecf
 
 class Defs {
@@ -301,6 +302,15 @@ public:
      * @param st the print style to use for writing the defs
      */
     void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+
+    ///
+    /// @brief Writes the suites and nodes a user can read to a string, using the given print style.
+    ///
+    /// @param[out] os The output string buffer
+    /// @param[in] st The print style
+    /// @param[in] visibility The nodes the user can read; every node when null
+    ///
+    void write_to_string(std::string& os, PrintStyle::Type_t st, const ecf::Visibility* visibility) const;
 
     /**
      * @brief Write the defs to a file at the given path.

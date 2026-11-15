@@ -22,6 +22,7 @@
 #include "ecflow/node/NodeTreeVisitor.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/TaskScriptGenerator.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/move_peer.hpp"
 
 // #define DEBUG_TASK_LOCATION 1
@@ -72,6 +73,7 @@ Task& Task::operator=(const Task& rhs) {
         order_state_change_no_      = 0;
         alias_change_no_            = 0;
         add_remove_state_change_no_ = Ecf::incr_state_change_no();
+        ecf::Visibility::structure_changed();
     }
     return *this;
 }
@@ -228,6 +230,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
 
     alias_change_no_            = Ecf::incr_state_change_no();
     add_remove_state_change_no_ = alias_change_no_;
+    ecf::Visibility::structure_changed();
     return alias;
 }
 
@@ -541,6 +544,7 @@ node_ptr Task::removeChild(Node* child) {
             node_ptr node = std::dynamic_pointer_cast<Alias>(aliases_[t]);
             aliases_.erase(aliases_.begin() + t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return node;
         }
     }
@@ -559,6 +563,7 @@ bool Task::doDeleteChild(Node* child) {
             }
             aliases_.erase(t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return true;
         }
     }

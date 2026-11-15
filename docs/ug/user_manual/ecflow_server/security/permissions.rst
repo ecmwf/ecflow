@@ -328,6 +328,38 @@ Notes:
   ``--debug_server_off``, the zombie actions and ``--checkJobGenOnly`` require write access, and handles are bound
   to their creator as in Permissions mode.
 
+.. _permissions_attribute_filtering:
+
+What a user receives
+====================
+
+A user receives only the nodes where the user holds ``r``: a node the user cannot read is left out of every reply,
+with its attributes, its state and every node below it. Since permissions only restrict from the suite down, no
+node below an unreadable node is readable.
+
+The replies filtered are:
+
+- the definitions sent by ``--get``, ``--get_state`` and ``--migrate`` without a path;
+- the node sent by ``--get``, ``--get_state`` and ``--migrate`` with a path, which the user can read, without the
+  nodes below it that the user cannot read;
+- the full synchronisation of a client (e.g. ecFlowUI), with or without a client handle.
+
+Users reading the same nodes share the content the server prepares for them; users reading different nodes never
+receive content prepared for another.
+
+The following are not filtered, and remain visible to every user holding ``r`` at server level:
+
+- the server log (``--log=get``, ``--server_load``) and the edit history (``--edit_history``, and the history
+  included by ``--migrate``), whose lines are free text;
+- the references to other nodes written in the attributes of a readable node: trigger and complete expressions,
+  limits and ``inlimit``, Mirror and Aviso attributes, shown as written;
+- the content of a file read through a command authorised on a readable node (e.g. ``--file`` of its job output),
+  wherever the variables of that node point;
+- the change numbers returned by ``--news``, which tell that something changed in the server, not what.
+
+These channels let a user infer that unreadable nodes exist (e.g. a trigger naming them, or a change number moving
+while nothing readable changed); this is accepted.
+
 .. _permissions_attribute_internal_clients:
 
 Granting access to internal clients

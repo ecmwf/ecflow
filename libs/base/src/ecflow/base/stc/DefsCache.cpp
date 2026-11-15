@@ -3,9 +3,12 @@
 
 #include "ecflow/base/stc/DefsCache.hpp"
 
+#include <iterator>
+
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 // =====================================================================================================
 // #define DEBUG_SERVER_SYNC 1
@@ -17,30 +20,64 @@
 // ===========================================================================================
 // CACHE: the deserialization costs, so that if multiple clients request the full defs
 //        we can improve the performance, by only performing that once for each state change.
-std::string DefsCache::full_server_defs_as_string_ = "";
-unsigned int DefsCache::state_change_no_           = 0;
-unsigned int DefsCache::modify_change_no_          = 0;
+std::map<std::string, DefsCache::Entry> DefsCache::entries_;
+std::weak_ptr<Defs> DefsCache::defs_;
+std::shared_ptr<const std::string> DefsCache::last_;
 
-void DefsCache::update_cache_if_state_changed(Defs* defs) {
-    // See if there was a state change *OR* if cache is empty
-    if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no() ||
-        full_server_defs_as_string_.empty()) {
-        update_cache(defs);
-    }
-#ifdef DEBUG_SERVER_SYNC
-    else {
-        cout << ": *cache* up to date";
-    }
-#endif
+namespace {
+
+const std::string& key_of(const ecf::Visibility* visibility) {
+    static const std::string everything = "*";
+    return visibility ? visibility->key() : everything;
 }
 
-void DefsCache::update_cache(Defs* defs) {
+} // namespace
+
+std::shared_ptr<const std::string> DefsCache::update_cache_if_state_changed(const defs_ptr& defs,
+                                                                            const ecf::Visibility* visibility) {
+    const bool same_defs = !defs_.expired() && !defs_.owner_before(defs) && !defs.owner_before(defs_);
+    if (same_defs) {
+        if (auto found = entries_.find(key_of(visibility)); found != entries_.end() &&
+                                                            found->second.state_change_no == Ecf::state_change_no() &&
+                                                            found->second.modify_change_no == Ecf::modify_change_no()) {
+#ifdef DEBUG_SERVER_SYNC
+            cout << ": *cache* up to date";
+#endif
+            last_ = found->second.text;
+            return last_;
+        }
+    }
+    return update_cache(defs, visibility);
+}
+
+std::shared_ptr<const std::string> DefsCache::update_cache(const defs_ptr& defs, const ecf::Visibility* visibility) {
 #ifdef DEBUG_SERVER_SYNC
     cout << ": *updating* cache";
 #endif
-    defs->write_to_string(full_server_defs_as_string_, PrintStyle::NET); // update cache
-    state_change_no_  = Ecf::state_change_no();
-    modify_change_no_ = Ecf::modify_change_no();
+    // Entries built from other definitions, or before the change numbers moved, are dropped
+    const bool same_defs = !defs_.expired() && !defs_.owner_before(defs) && !defs.owner_before(defs_);
+    if (!same_defs) {
+        entries_.clear();
+        defs_ = defs;
+    }
+    for (auto it = entries_.begin(); it != entries_.end();) {
+        const bool stale = it->second.state_change_no != Ecf::state_change_no() ||
+                           it->second.modify_change_no != Ecf::modify_change_no();
+        it = stale ? entries_.erase(it) : std::next(it);
+    }
+
+    auto text = std::make_shared<std::string>();
+    defs->write_to_string(*text, PrintStyle::NET, visibility);
+    auto& entry            = entries_[key_of(visibility)];
+    entry.text             = std::move(text);
+    entry.state_change_no  = Ecf::state_change_no();
+    entry.modify_change_no = Ecf::modify_change_no();
+    last_                  = entry.text;
+    return last_;
+}
+
+std::size_t DefsCache::entries() {
+    return entries_.size();
 }
 
 defs_ptr DefsCache::restore_defs_from_string(const std::string& archive_data) {
@@ -72,5 +109,5 @@ defs_ptr DefsCache::restore_defs_from_string(const std::string& archive_data) {
 
 defs_ptr DefsCache::restore_defs_from_string() {
     // Used in Test when no client/server
-    return restore_defs_from_string(full_server_defs_as_string_);
+    return restore_defs_from_string(last_ ? *last_ : std::string{});
 }

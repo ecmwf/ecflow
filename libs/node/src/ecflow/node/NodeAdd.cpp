@@ -18,6 +18,7 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -430,6 +431,7 @@ void Node::add_permissions(const ecf::Permissions& permissions) {
     }
     permissions_     = std::make_unique<ecf::Permissions>(permissions);
     state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void Node::add_autoarchive(const ecf::AutoArchiveAttr& aa) {

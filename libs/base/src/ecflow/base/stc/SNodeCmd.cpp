@@ -21,10 +21,12 @@ SNodeCmd::SNodeCmd(AbstractServer* as, node_ptr node) {
     init(as, std::move(node));
 }
 
-void SNodeCmd::init(AbstractServer* as, const node_ptr& node) {
+void SNodeCmd::init(AbstractServer* as, const node_ptr& node, const ecf::Visibility* visibility) {
     the_node_str_.clear();
     if (node.get()) {
-        the_node_str_ = ecf::as_string(node, PrintStyle::NET);
+        auto ctx       = ecf::FormatContext::make_for(PrintStyle::NET);
+        ctx.visibility = visibility;
+        the_node_str_  = ecf::as_string(node, ctx);
     }
 }
 

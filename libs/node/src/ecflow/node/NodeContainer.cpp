@@ -24,6 +24,7 @@
 #include "ecflow/node/NodeTreeVisitor.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/move_peer.hpp"
 
 using namespace ecf;
@@ -69,6 +70,7 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs) {
         copy(rhs);
         order_state_change_no_      = 0;
         add_remove_state_change_no_ = Ecf::incr_state_change_no();
+        ecf::Visibility::structure_changed();
     }
     return *this;
 }
@@ -544,6 +546,7 @@ NState::State NodeContainer::computedState(Node::TraverseType traverseType) cons
 
 void NodeContainer::force_sync() {
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 node_ptr NodeContainer::removeChild(Node* child) {
@@ -554,6 +557,7 @@ node_ptr NodeContainer::removeChild(Node* child) {
             child->set_parent(nullptr); // must set to NULL, allows it to be re-added to different parent
             nodes_.erase(nodes_.begin() + t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return node;
         }
     }
@@ -682,6 +686,7 @@ void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
         nodes_.insert(nodes_.begin() + position, t);
     }
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
@@ -698,6 +703,7 @@ void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
         nodes_.insert(nodes_.begin() + position, f);
     }
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void NodeContainer::addFamily(const family_ptr& f, size_t position) {
@@ -1148,7 +1154,8 @@ void NodeContainer::archive() {
 
     std::vector<node_ptr>().swap(nodes_);                      // reclaim vector memory
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-    std::string msg             = " autoarchive ";
+    ecf::Visibility::structure_changed();
+    std::string msg = " autoarchive ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 }
@@ -1219,6 +1226,7 @@ void NodeContainer::restore(bool remove_archive) {
     get_flag().clear(ecf::Flag::ARCHIVED);                     // clear flag archived
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
+    ecf::Visibility::structure_changed();
 
     if (!remove_archive) {
         return; // a copy: the archive remains for the original
@@ -1319,6 +1327,7 @@ bool NodeContainer::doDeleteChild(Node* child) {
             child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
             nodes_.erase(t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             set_most_significant_state_up_node_tree();
             return true;
         }
