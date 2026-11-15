@@ -7,6 +7,7 @@
 
 #include "ecflow/base/Authentication.hpp"
 #include "ecflow/base/Authorisation.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 namespace {
@@ -45,7 +46,9 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
 
         // Perform Authorisation (i.e. access rules) control
         if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
-            return cmd_->handleRequest(as);
+            // The context of this request, from the identity established by authentication
+            const ecf::RequestContext context(cmd_->identity(), *as);
+            return cmd_->handleRequest(as, context);
         }
         else {
             // The command is not accepted, return an error

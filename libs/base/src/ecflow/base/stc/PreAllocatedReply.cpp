@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/stc/BlockClientZombieCmd.hpp"
 #include "ecflow/base/stc/DefsCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
@@ -65,31 +67,41 @@ STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt
     return block_client_zombie_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as, bool save_edit_history) {
+STC_Cmd_ptr PreAllocatedReply::defs_cmd(const ecf::RequestContext& context, bool save_edit_history) {
+    AbstractServer* as = &context.server();
+    as->reply_built("defs_cmd", context);
     auto* cmd = dynamic_cast<DefsCmd*>(defs_cmd_.get());
     cmd->init(as, save_edit_history);
     return defs_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::node_cmd(AbstractServer* as, node_ptr node) {
+STC_Cmd_ptr PreAllocatedReply::node_cmd(const ecf::RequestContext& context, node_ptr node) {
+    AbstractServer* as = &context.server();
+    as->reply_built("node_cmd", context);
     auto* cmd = dynamic_cast<SNodeCmd*>(node_cmd_.get());
     cmd->init(as, std::move(node));
     return node_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::stats_cmd(AbstractServer* as) {
+STC_Cmd_ptr PreAllocatedReply::stats_cmd(const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("stats_cmd", context);
     auto* cmd = dynamic_cast<SStatsCmd*>(stats_cmd_.get());
     cmd->init(as);
     return stats_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::suites_cmd(AbstractServer* as) {
+STC_Cmd_ptr PreAllocatedReply::suites_cmd(const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("suites_cmd", context);
     auto* cmd = dynamic_cast<SSuitesCmd*>(suites_cmd_.get());
     cmd->init(as);
     return suites_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd(AbstractServer* as) {
+STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd(const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("zombie_get_cmd", context);
     auto* cmd = dynamic_cast<ZombieGetCmd*>(zombie_get_cmd_.get());
     cmd->init(as);
     return zombie_get_cmd_;
@@ -107,7 +119,9 @@ STC_Cmd_ptr PreAllocatedReply::client_handle_cmd(int handle) {
     return client_handle_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::client_handle_suites_cmd(AbstractServer* as) {
+STC_Cmd_ptr PreAllocatedReply::client_handle_suites_cmd(const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("client_handle_suites_cmd", context);
     auto* cmd = dynamic_cast<SClientHandleSuitesCmd*>(client_handle_suites_cmd_.get());
     cmd->init(as);
     return client_handle_suites_cmd_;
@@ -134,7 +148,9 @@ STC_Cmd_ptr PreAllocatedReply::server_load_cmd(const std::string& log_file_path)
 STC_Cmd_ptr PreAllocatedReply::news_cmd(unsigned int client_handle,
                                         unsigned int client_state_change_no,
                                         unsigned int client_modify_change_no,
-                                        AbstractServer* as) {
+                                        const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("news_cmd", context);
     auto* cmd = dynamic_cast<SNewsCmd*>(news_cmd_.get());
     cmd->init(client_handle, client_state_change_no, client_modify_change_no, as);
     return news_cmd_;
@@ -143,7 +159,9 @@ STC_Cmd_ptr PreAllocatedReply::news_cmd(unsigned int client_handle,
 STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
                                         unsigned int client_state_change_no,
                                         unsigned int client_modify_change_no,
-                                        AbstractServer* as) {
+                                        const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("sync_cmd", context);
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
     cmd->init(client_handle,
               client_state_change_no,
@@ -157,7 +175,9 @@ STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
 STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
                                               unsigned int client_state_change_no,
                                               unsigned int client_modify_change_no,
-                                              AbstractServer* as) {
+                                              const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("sync_clock_cmd", context);
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
     cmd->init(client_handle,
               client_state_change_no,
@@ -168,7 +188,9 @@ STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
     return sync_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle, AbstractServer* as) {
+STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle, const ecf::RequestContext& context) {
+    AbstractServer* as = &context.server();
+    as->reply_built("sync_full_cmd", context);
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get()); // can reuse the same command
     cmd->init(client_handle, 0, 0, true /*full sync*/, false /*sync suite clock*/, as);
     return sync_cmd_;

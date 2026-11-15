@@ -350,7 +350,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
 
             if (auto valid = cmd->check_preconditions(as, theReturnCmd); valid) {
                 // If command preconditions are valid, we just handle the request as usual
-                theReturnCmd = cmdVec_[i]->doHandleRequest(as);
+                theReturnCmd = cmdVec_[i]->doHandleRequestIn(as, request_context());
             }
             // Otherwise, theReturnCmd has been set in the process of checking the precondictions
         }

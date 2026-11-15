@@ -6,6 +6,7 @@
 #include <cassert>
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -80,8 +81,11 @@ public:
     ///
     struct SyncReply
     {
-        bool full;        ///< True for a full synchronisation
-        std::string user; ///< The user the reply was built for
+        bool full;                    ///< True for a full synchronisation
+        std::string user;             ///< The user the reply was built for
+        const AbstractServer* server; ///< The server of the context of the request
+        bool permissions_apply;       ///< Whether Permissions apply, by the evaluator of the context
+        std::string server_roles;     ///< The roles of the user at the server, by the evaluator of the context
     };
 
     ///
@@ -91,9 +95,36 @@ public:
     ///
     const std::vector<SyncReply>& sync_replies() const { return sync_replies_; }
 
+    ///
+    /// @brief Records a reply builder called by the requests handled.
+    ///
+    struct ReplyBuilt
+    {
+        std::string builder;          ///< The name of the builder
+        std::string user;             ///< The requester of the context the builder received
+        const AbstractServer* server; ///< The server of that context
+    };
+
+    ///
+    /// @brief Returns the reply builders called so far, oldest first.
+    ///
+    /// @return The builders; the reference stays valid for the lifetime of the server.
+    ///
+    const std::vector<ReplyBuilt>& replies_built() const { return replies_built_; }
+
+    /// @copydoc AbstractServer::reply_built
+    void reply_built(const char* builder, const ecf::RequestContext& context) override {
+        replies_built_.push_back(ReplyBuilt{builder, context.identity().username().value(), &context.server()});
+    }
+
     /// @copydoc AbstractServer::sync_reply_built
-    void sync_reply_built(bool full, const ecf::Identity& identity) override {
-        sync_replies_.push_back(SyncReply{full, identity.username().value()});
+    void sync_reply_built(bool full, const ecf::RequestContext& context) override {
+        const auto& permissions = context.permissions();
+        sync_replies_.push_back(SyncReply{full,
+                                          context.identity().username().value(),
+                                          &context.server(),
+                                          permissions.applies(),
+                                          permissions.roles(permissions.at_server()).to_string()});
     }
 
     ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
@@ -158,6 +189,7 @@ private:
     ecf::AuthenticationService authentication_service_;
     ecf::AuthorisationService authorisation_service_;
     std::vector<SyncReply> sync_replies_;
+    std::vector<ReplyBuilt> replies_built_;
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

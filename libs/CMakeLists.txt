@@ -134,6 +134,7 @@ set(srcs
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerProtocolProbe.hpp
   base/src/ecflow/base/ServerReply.hpp
+  base/src/ecflow/base/RequestContext.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
   base/src/ecflow/base/WhyCmd.hpp
@@ -216,6 +217,7 @@ set(srcs
   base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerProtocolProbe.cpp
   base/src/ecflow/base/ServerReply.cpp
+  base/src/ecflow/base/RequestContext.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>

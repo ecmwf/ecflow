@@ -241,7 +241,7 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         case ClientHandleCmd::SUITES: {
-            return PreAllocatedReply::client_handle_suites_cmd(as);
+            return PreAllocatedReply::client_handle_suites_cmd(request_context());
         }
 
         default:

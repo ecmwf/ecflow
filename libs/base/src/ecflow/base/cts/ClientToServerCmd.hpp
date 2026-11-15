@@ -21,6 +21,10 @@ class GroupCTSCmd;
 ///////////////////////////////////////////////////////////////////////////////////
 // Client->Server cmd's
 ///////////////////////////////////////////////////////////////////////////////////
+namespace ecf {
+class RequestContext;
+}
+
 class ClientToServerCmd {
 public:
     ///
@@ -83,7 +87,30 @@ public:
     /// The returned Server to Client  command is sent back to the client
     /// Uses template pattern, it first authenticates request and then calls
     /// doHandleRequest. This function can throw exceptions. std::runtime_error
-    STC_Cmd_ptr handleRequest(AbstractServer*) const;
+    ///
+    /// @brief Handles the request, in a context created from the identity of the command.
+    ///
+    /// @param[in] as The server
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr handleRequest(AbstractServer* as) const;
+
+    ///
+    /// @brief Handles the request in the given context, which the command can reach through request_context().
+    ///
+    /// @param[in] as The server
+    /// @param[in] context The context of the request; it must outlive the call
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr handleRequest(AbstractServer* as, const ecf::RequestContext& context) const;
+
+    ///
+    /// @brief Returns the context of the request being handled.
+    ///
+    /// @return The context, valid during handleRequest() only.
+    /// @throws std::logic_error when no request is being handled.
+    ///
+    [[nodiscard]] const ecf::RequestContext& request_context() const;
 
     /// After handleRequest() has run, this function can be used reclaim memory
     virtual void cleanup() {}
@@ -195,6 +222,15 @@ protected:
     /// called by handleRequest, part of the template pattern
     virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const = 0;
 
+    ///
+    /// @brief Calls doHandleRequest() in the given context, as a command of a group does with the context of the group.
+    ///
+    /// @param[in] as The server
+    /// @param[in] context The context of the request; it must outlive the call
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr doHandleRequestIn(AbstractServer* as, const ecf::RequestContext& context) const;
+
     virtual bool validate() const { return true; }
 
     // /// return true if authentication succeeds, false and STC_Cmd_ptr to return otherwise
@@ -245,6 +281,7 @@ private:
     std::string cl_host_; // The host where the client was called
 
     mutable ecf::Identity identity_ = ecf::Identity::make_none(); // The identity of the user who issued the command
+    mutable const ecf::RequestContext* context_{nullptr};         // The context of the request being handled
 
 private:
     friend class cereal::access;

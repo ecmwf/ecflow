@@ -332,7 +332,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES: {
             as->update_stats().zombie_get_++;
-            return PreAllocatedReply::zombie_get_cmd(as);
+            return PreAllocatedReply::zombie_get_cmd(request_context());
         }
 
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: {
@@ -408,14 +408,14 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         // added to Stats::serialize() must be appended last, behind a class version guard.
         case CtsCmd::STATS_SERVER: {
             as->update_stats().stats_++;
-            return PreAllocatedReply::stats_cmd(as);
+            return PreAllocatedReply::stats_cmd(request_context());
         }
         case CtsCmd::STATS_RESET:
             as->update_stats().reset();
             break; // we could have done as->update_stats().stats_++, to honor reset, we dont
         case CtsCmd::SUITES:
             as->update_stats().suites_++;
-            return PreAllocatedReply::suites_cmd(as);
+            return PreAllocatedReply::suites_cmd(request_context());
         case CtsCmd::DEBUG_SERVER_ON:
             as->update_stats().debug_server_on_++;
             as->debug_server_on();

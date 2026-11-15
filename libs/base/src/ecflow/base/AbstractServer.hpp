@@ -17,6 +17,10 @@ class Defs;
 /// This class is provided so that the cmd can issue requests to the server
 /// without depending on the server implementation
 ///
+namespace ecf {
+class RequestContext;
+}
+
 class AbstractServer {
 public:
     virtual ~AbstractServer() = default;
@@ -135,9 +139,20 @@ public:
     /// The server does nothing; a test server records the replies.
     ///
     /// @param[in] full True for a full synchronisation, false for an incremental one
-    /// @param[in] identity The identity the reply was built for
+    /// @param[in] context The context of the request the reply was built for
     ///
-    virtual void sync_reply_built(bool full, const ecf::Identity& identity) {}
+    virtual void sync_reply_built(bool full, const ecf::RequestContext& context) {}
+
+    ///
+    /// @brief Observes the construction of a reply that depends on the requester, so that tests can tell the context
+    ///        each reply builder received.
+    ///
+    /// The server does nothing; a test server records the builders and their requesters.
+    ///
+    /// @param[in] builder The name of the builder, e.g. "sync_cmd"
+    /// @param[in] context The context the builder received
+    ///
+    virtual void reply_built(const char* builder, const ecf::RequestContext& context) {}
 
     /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()
