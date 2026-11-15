@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <algorithm> // for std::transform
+#include <iterator>
 
 #include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/WhyCmd.hpp"
@@ -773,6 +774,30 @@ void ClientInvoker_alter(ClientInvoker* self,
 }
 
 ///
+/// @brief Check, with `--check`, that the nodes named by a list of paths exist, before a request given the list.
+///
+/// Notes:
+///
+/// - The path `/` names the server, which `--check` does not know, and is left out.
+/// - When no other path remains, nothing is checked, since `--check` without paths checks the whole definitions.
+/// - `--check` stops at the first node whose expressions are in error, without checking the paths after it; a missing
+///   path after such a node is then not detected before the request.
+///
+/// @param self The client invoker.
+/// @param paths The absolute paths given to the request.
+/// @throws std::runtime_error when a node does not exist (with the message of `--check`), or when the server refuses
+///         the check (under Permissions, the check needs the role r at every node).
+///
+void check_nodes_exist(ClientInvoker* self, const std::vector<std::string>& paths) {
+    std::vector<std::string> nodes;
+    std::copy_if(
+        paths.begin(), paths.end(), std::back_inserter(nodes), [](const std::string& path) { return path != "/"; });
+    if (!nodes.empty()) {
+        self->check(nodes);
+    }
+}
+
+///
 /// @brief Alter an attribute on all nodes in the given list of paths.
 ///
 /// @param self The client invoker.
@@ -790,7 +815,7 @@ void ClientInvoker_alter_s(ClientInvoker* self,
                            const std::string& value = "") {
     std::vector<std::string> paths;
     py_list_to_str_vec(list, paths);
-    self->check(paths);
+    check_nodes_exist(self, paths);
     self->alter(paths, alterType, attrType, name, value);
 }
 
@@ -823,7 +848,7 @@ void ClientInvoker_alter_sort_s(ClientInvoker* self,
                                 bool recursive = true) {
     std::vector<std::string> paths;
     py_list_to_str_vec(list, paths);
-    self->check(paths);
+    check_nodes_exist(self, paths);
     self->alter_sort(paths, attribute_name, recursive);
 }
 

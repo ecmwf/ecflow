@@ -120,3 +120,46 @@ def test_permissions_denial_is_a_permission_denied_exception():
         with pytest.raises(RuntimeError) as failed:
             server.admin_client().suspend("/no/such/node")
         assert not isinstance(failed.value, ecf.PermissionDenied)
+
+
+def test_permissions_write_without_read():
+    """A user holding w but not r on a suite changes it through the single-path forms
+    of alter and sort_attributes, and cannot read it; the list forms check the paths
+    first, which needs r, and change nothing"""
+    with Test.PermissionsServer(
+        admin,
+        [alice],
+        [
+            {"user": "admin", "permissions": "rwxlops"},
+            {"user": "alice", "permissions": "r"},
+        ],
+    ) as server:
+        definition = os.path.join(server.home(), "write_only.def")
+        with open(definition, "w") as f:
+            f.write(
+                "suite w_only\n"
+                'permissions [{"user": "admin", "permissions": "rwxlop"},'
+                ' {"user": "alice", "permissions": "w"}]\n'
+                "  task t\n"
+                "    label l v\n"
+                "endsuite\n"
+            )
+        server.admin_client().load(definition)
+
+        client = server.client("alice")
+        client.alter("/w_only/t", "change", "label", "l", "single")
+        client.sort_attributes("/w_only/t", "label")
+        with pytest.raises(ecf.PermissionDenied) as failed:
+            client.alter(["/w_only/t"], "change", "label", "l", "list")
+        assert "--check /w_only/t" in str(failed.value)  # refused by the check of the paths
+        with pytest.raises(ecf.PermissionDenied) as failed:
+            client.sort_attributes(["/w_only/t"], "label")
+        assert "--check /w_only/t" in str(failed.value)  # refused by the check of the paths
+        with pytest.raises(ecf.PermissionDenied):
+            client.query("label", "/w_only/t", "l")
+
+        administrator = server.admin_client()
+        administrator.sync_local()
+        task = administrator.get_defs().find_abs_node("/w_only/t")
+        assert [label.new_value() for label in task.labels] == ["single"]
+

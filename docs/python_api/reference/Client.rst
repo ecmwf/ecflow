@@ -125,6 +125,10 @@ Alter command is used to change the attributes of a node
 This function will raise exceptions because:
 
 - A provided path does not exist.
+  Given a list, the paths other than ``/`` are first checked with ``check``, which raises for a
+  missing path, so that nothing is altered. ``check`` stops at the first node whose expressions are
+  in error, without checking the paths after it. With Permissions attributes, this check requires
+  the role r at each of these nodes. The same applies to ``sort_attributes`` given a list.
 - A provided value cannot be parsed
 - A provided value is invalid or out of range
 

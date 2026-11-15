@@ -267,12 +267,36 @@ The commands below require a role at the server level, or at the node they addre
    * - ``--job_gen``, ``--checkJobGenOnly``
      - ``x``
      - the node, or the server without a path
+   * - ``--file``, ``--edit_script`` (``edit``, ``pre_process``, ``pre_process_file``), ``--check``
+     - ``r``
+     - the node (the server for ``--check=_all_``)
+   * - ``--edit_history`` with a path
+     - ``r``
+     - server: the history is returned unfiltered
+   * - ``--alter``, ``--order``, ``--archive``
+     - ``w``
+     - the nodes (the server for ``--alter`` on ``/``)
+   * - ``--edit_history=clear``
+     - ``w``
+     - server
+   * - ``--suspend``, ``--resume``, ``--kill``, ``--status``, ``--force`` (states and events), ``--requeue``,
+       ``--run``, ``--free-dep``, ``--edit_script`` (``submit``, ``submit_file``)
+     - ``x``
+     - the nodes
+   * - ``--edit_script ... submit_file ... create_alias``
+     - ``x`` and ``w``
+     - the node
+   * - ``--restore``
+     - ``w`` and ``p``
+     - the nodes: restored nodes may carry Permissions attributes
 
 Notes:
 
 - Client handles belong to the user who created them: only that user can change or drop a handle
   (``--ch_add``, ``--ch_rem``, ``--ch_auto_add``, ``--ch_drop``), and ``--ch_drop_user`` drops the handles of the
   requester only.
+- Each command is checked at the nodes it names, not at the nodes it affects below them: ``x`` on a suite allows
+  requeueing the whole suite. An event or attribute named as ``path:name`` is checked at the node ``path``.
 - The other commands read with ``r`` and change with ``w`` at the nodes they address.
 - In whitelist mode, the same commands require read access for ``r``, and write access for every other role. Hence
   ``--msg``, ``--log=clear``, ``--log=flush``, ``--check_pt`` without arguments, ``--debug_server_on``,

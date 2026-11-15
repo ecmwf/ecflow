@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_group_per_sub_command) {
     ECF_NAME_THIS_TEST();
 
     PermissionsServer server(
-        admin, {alice}, R"([{"user": "admin", "permissions": "rwxlops"}, {"user": "alice", "permissions": "rw"}])");
+        admin, {alice}, R"([{"user": "admin", "permissions": "rwxlops"}, {"user": "alice", "permissions": "rwx"}])");
     load_suites(server, "admin:rw,alice:r");
 
     auto client = server.client(alice);

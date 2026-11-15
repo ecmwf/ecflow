@@ -2233,6 +2233,82 @@ class TestClientApi:
                 flg
             ), "expected flag %r NOT to be set" % task_flag.type_to_string(flg)
 
+    def test_client_alter_path_lists(self):
+        """A list of paths is checked before any change: with a missing path, nothing is
+        altered or sorted; "/" (the server variables) is accepted in the list, and left
+        out of the check, which is not sent when no other path remains"""
+        print_test(self.ci, "test_client_alter_path_lists")
+        self.ci.delete_all()
+        defs = Defs()
+        for name in ("alter_list_1", "alter_list_2"):
+            suite = defs.add_suite(name)
+            suite.add_variable("Z", "1")
+            suite.add_variable("A", "1")
+        self.ci.load(defs)
+        s1, s2 = "/alter_list_1", "/alter_list_2"
+
+        def values():
+            sync_local(self.ci)
+            server_defs = self.ci.get_defs()
+            return [
+                server_defs.find_abs_node(path).find_variable("A").value()
+                for path in (s1, s2)
+            ]
+
+        def names(path):
+            sync_local(self.ci)
+            return [v.name() for v in self.ci.get_defs().find_abs_node(path).variables]
+
+        def server_variables():
+            sync_local(self.ci)
+            return {v.name(): v.value() for v in self.ci.get_defs().user_variables}
+
+        def checks():
+            # The number of --check requests the server has handled
+            for line in self.ci.stats(False).splitlines():
+                if line.strip().startswith("Check cmd"):
+                    return int(line.split()[-1])
+            return 0
+
+        # A missing path: refused with the message of --check, and nothing changed
+        with pytest.raises(RuntimeError) as failed:
+            self.ci.alter([s1, "/nope", s2], "change", "variable", "A", "2")
+        assert "PathsCmd:Check: Could not find node at path '/nope'" in str(failed.value)
+        assert values() == ["1", "1"]
+
+        with pytest.raises(RuntimeError) as failed:
+            self.ci.sort_attributes([s1, "/nope"], "variable")
+        assert "PathsCmd:Check: Could not find node at path '/nope'" in str(failed.value)
+        assert names(s1) == ["Z", "A"]
+
+        # Existing paths: checked once, then altered and sorted
+        before = checks()
+        self.ci.alter([s1, s2], "change", "variable", "A", "3")
+        assert values() == ["3", "3"]
+        assert checks() == before + 1
+        self.ci.sort_attributes([s1, s2], "variable")
+        assert names(s1) == ["A", "Z"]
+        assert names(s2) == ["A", "Z"]
+
+        # An empty list: nothing checked (--check without paths would check every suite), nothing changed
+        before = checks()
+        self.ci.alter([], "change", "variable", "A", "4")
+        self.ci.sort_attributes([], "variable")
+        assert checks() == before
+        assert values() == ["3", "3"]
+
+        # "/" names the server: not checked, and its variables are altered; the other paths are still checked
+        before = checks()
+        self.ci.alter(["/"], "add", "variable", "ALTER_LIST_SV", "x")
+        assert server_variables().get("ALTER_LIST_SV") == "x"
+        assert checks() == before
+        with pytest.raises(RuntimeError) as failed:
+            self.ci.alter(["/", "/nope"], "change", "variable", "ALTER_LIST_SV", "y")
+        assert "PathsCmd:Check: Could not find node at path '/nope'" in str(failed.value)
+        assert server_variables().get("ALTER_LIST_SV") == "x"
+        self.ci.alter(["/"], "delete", "variable", "ALTER_LIST_SV")
+        assert "ALTER_LIST_SV" not in server_variables()
+
     def test_client_force(self):
         print_test(self.ci, "test_client_force")
         self.ci.delete_all()

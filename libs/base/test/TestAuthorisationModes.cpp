@@ -168,12 +168,12 @@ BOOST_AUTO_TEST_CASE(test_authorisation_mode_selection) {
 }
 
 ///
-/// @brief Verifies that, in Permissions mode, reads need r and changes need w, at the paths addressed.
+/// @brief Verifies that, in Permissions mode, a read needs r and an operation (--suspend) x, at the paths addressed.
 ///
 BOOST_AUTO_TEST_CASE(test_permissions_mode_read_and_write) {
     ECF_NAME_THIS_TEST();
 
-    MockServer server(make_defs("alice:r,bob:rw", "alice:r,bob:r"));
+    MockServer server(make_defs("alice:r,bob:rwx", "alice:r,bob:r"));
 
     BOOST_CHECK(allowed(get(server, "/s", "alice")));
     BOOST_CHECK(denied(suspend(server, "/s/a", "alice")));
@@ -185,6 +185,23 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_read_and_write) {
     BOOST_CHECK(denied(suspend(server, "/s/missing", "alice")));
     // Not a denial: the request runs, and fails on the missing node
     BOOST_CHECK_THROW((void)suspend(server, "/s/missing", "bob"), std::runtime_error);
+}
+
+///
+/// @brief Verifies that the reason of a denial, which only the server log records, names the target denied (R5.10).
+///
+BOOST_AUTO_TEST_CASE(test_denial_reason_names_the_target) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r", "admin:r");
+    MockServer server(defs);
+    const auto bob = ecf::Identity::make_user("bob", "");
+    const ecf::RequestContext context(bob, server);
+    CtsNodeCmd get(CtsNodeCmd::GET, "/s/b");
+    get.set_identity(bob);
+    const auto result = ecf::is_authorised(get, context);
+    BOOST_REQUIRE(!result.ok());
+    BOOST_CHECK_MESSAGE(result.reason().find("/s/b") != std::string::npos, result.reason());
 }
 
 ///
@@ -243,7 +260,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_task_requests) {
 BOOST_AUTO_TEST_CASE(test_permissions_mode_group) {
     ECF_NAME_THIS_TEST();
 
-    auto defs = make_defs("bob:rw", "bob:r");
+    auto defs = make_defs("bob:rwx", "bob:r");
     MockServer server(defs);
     auto group = std::make_shared<GroupCTSCmd>();
     group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
@@ -313,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_attribute_paths) {
     auto suite = defs->add_suite("s");
     suite->addEvent(Event("e"));
     suite->add_permissions(Permissions::parse_cli("bob:r"));
-    defs->server_state().set_permissions(Permissions::parse_cli("bob:rw"));
+    defs->server_state().set_permissions(Permissions::parse_cli("bob:rwx"));
     MockServer server(defs);
 
     const auto bob = ecf::Identity::make_user("bob", "");
@@ -323,8 +340,8 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_attribute_paths) {
             BOOST_CHECK_EQUAL(context.roles_at(path).to_string(), "r");
         }
     }
-    BOOST_CHECK_EQUAL(context.roles_at("/").to_string(), "rw");
-    BOOST_CHECK_EQUAL(context.roles_at("").to_string(), "rw");
+    BOOST_CHECK_EQUAL(context.roles_at("/").to_string(), "rwx");
+    BOOST_CHECK_EQUAL(context.roles_at("").to_string(), "rwx");
 
     for (const auto* path : {"s:e", "/s:e"}) {
         BOOST_TEST_CONTEXT("path " << path) {
@@ -342,7 +359,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_attribute_paths) {
 BOOST_AUTO_TEST_CASE(test_permissions_mode_fail_closed_requests) {
     ECF_NAME_THIS_TEST();
 
-    auto defs = make_defs("bob:rw");
+    auto defs = make_defs("bob:rwx");
     MockServer server(defs);
 
     auto throwing = std::make_shared<ThrowingCmd>();
@@ -367,8 +384,8 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_fail_closed_requests) {
 BOOST_AUTO_TEST_CASE(test_permissions_mode_group_fresh_evaluation) {
     ECF_NAME_THIS_TEST();
 
-    // b grants bob rw; the replacement of b grants bob r only
-    auto defs = make_defs("bob:rw", "bob:rw");
+    // b grants bob rwx; the replacement of b grants bob r only
+    auto defs = make_defs("bob:rwx", "bob:rwx");
     MockServer server(defs);
     auto replacement = Defs::create();
     replacement->add_suite("s")->add_task("b")->add_permissions(Permissions::parse_cli("bob:r"));
@@ -393,7 +410,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
     ECF_NAME_THIS_TEST();
 
     {
-        MockServer server(make_defs("bob:rw", "bob:r"));
+        MockServer server(make_defs("bob:rwx", "bob:r"));
         auto group = std::make_shared<GroupCTSCmd>();
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
@@ -401,7 +418,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
         BOOST_CHECK_EQUAL(server.node_tree_state_changes(), 1);
     }
     {
-        MockServer server(make_defs("bob:rw"));
+        MockServer server(make_defs("bob:rwx"));
         auto group = std::make_shared<GroupCTSCmd>();
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
@@ -410,7 +427,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
     }
     {
         // A command classified as a write by its arguments, which its clean-up empties
-        MockServer server(make_defs("bob:rw", "bob:r"));
+        MockServer server(make_defs("bob:rwx", "bob:r"));
         auto group = std::make_shared<GroupCTSCmd>();
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY, "clear"));
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
@@ -419,7 +436,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
     }
     {
         // The same command in a group that succeeds, with nothing to return
-        MockServer server(make_defs("bob:rw"));
+        MockServer server(make_defs("bob:rwx"));
         auto group = std::make_shared<GroupCTSCmd>();
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY, "clear"));
         group->addChild(std::make_shared<CtsCmd>(CtsCmd::PING));
@@ -428,7 +445,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
     }
     {
         // Nothing changed: nothing notified
-        MockServer server(make_defs("bob:rw", "bob:r"));
+        MockServer server(make_defs("bob:rwx", "bob:r"));
         auto group = std::make_shared<GroupCTSCmd>();
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
         (void)TestHelper::invokeRequestAs(&server, group, "bob");

@@ -807,9 +807,10 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
     const std::regex embedded_record_marker{R"(.+(MSG|LOG|ERR|WAR|DBG|OTH):\[\d{1,2}:\d{2}:\d{2} )"};
 
     const std::string accepted_news_record = "--news=0 0 0 :alice@" + host.value();
-    const std::string refused_news_bob     = "DENIED user='bob' host='" + host.value() +
-                                         "' command='--news' request='--news=0 0 0' reason='Authorisation (user) "
-                                         "failed, due to: Insufficient permissions' suppressed=0";
+    const std::string refused_news_bob =
+        "DENIED user='bob' host='" + host.value() +
+        "' command='--news' request='--news=0 0 0' reason='Authorisation (user) "
+        "failed, due to: Insufficient permissions (read access required at /)' suppressed=0";
     const std::string refused_news_charlie = "Command not accepted, due to: Authentication (user) failed, due to: "
                                              "Incorrect credentials detected [--news=0 0 0 :charlie@" +
                                              host.value() + "]";
