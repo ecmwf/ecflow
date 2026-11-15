@@ -311,7 +311,13 @@ The following Authentication headers are used by the reverse proxy to forward au
 
 The ecFlow server extracts the username, realm, and roles from these headers to manage user access and permissions.
 The `X-Auth-Username` header is currently mandatory for the ecFlow server to identify the user, while the `X-Auth-Realm` and `X-Auth-Roles` headers are optional and used for additional context.
-The content provided in the `X-Auth-Username` header is used as user identity information, and the server uses it to enforce access controls and permissions (i.e. `read`, `write` permissions based on the configured whitelist via ECF_LISTS).
+The content provided in the `X-Auth-Username` header is used as user identity information, and the server uses it to enforce access controls:
+
+- when a server :ref:`Permissions attribute <permissions_attribute>` is configured, the identity is matched against
+  the users the Permissions attributes list, and the white list file is not used;
+- otherwise, the identity is matched against the white list file (``ECF_LISTS``), granting `read` or `write` access.
+
+See :ref:`permissions_attribute_modes`.
 
 .. important::
    When using HTTPS authentication, the ecFlow server does not perform its own authentication checks.

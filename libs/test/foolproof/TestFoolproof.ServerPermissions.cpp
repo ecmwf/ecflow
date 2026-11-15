@@ -15,6 +15,7 @@
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/User.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -40,6 +41,17 @@ public:
         : directory_{ecf::test::scaffold::MakeDirectory{}.create()},
           port_{ecf::test::foolproof::reserve_port()} {
         fs::create_directories(home());
+
+        // The users the tests act as, whom the server attributes list (D11.6)
+        std::ofstream passwords(home() / (host_name() + "." + std::to_string(port()) + ".ecf.custom_passwd"));
+        passwords << "4.5.0\n";
+        for (const auto* user : {"alice", "carol", "u01"}) {
+            for (const auto& host : {host_name(), std::string("localhost")}) {
+                passwords << user << " " << host << " " << port() << " secret\n";
+            }
+        }
+        passwords.close();
+
         const auto file = directory_.path() / (host_name() + "." + std::to_string(port()) + ".ecf.cfg");
         std::ofstream(file) << R"({"version": 1, "ecflow": {"server": {)"
                             << (permissions.empty() ? "" : R"("permissions": )" + permissions + ", ")
@@ -125,6 +137,14 @@ private:
 };
 
 ///
+/// @brief Makes the client act as one of the users of the custom password file written by Startup.
+///
+void act_as(ClientInvoker& client, const std::string& user) {
+    client.set_user_name(user);
+    client.set_password(PasswordEncryption::encrypt("secret", user));
+}
+
+///
 /// @brief Returns the server attribute received by a client, in the command-line form; empty when there is none.
 ///
 std::string server_permissions_of(ClientInvoker& client) {
@@ -163,10 +183,14 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_from_configuration_file) {
 
     ClientInvoker client;
     ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+    act_as(client, "alice"); // a user the server attribute lists (D11.6)
     BOOST_CHECK_EQUAL(server_permissions_of(client), "alice:rwxlops,bob:r");
 
-    const std::vector<std::string> expected{
-        "Source = configuration file", "Users = 2", "Sticky users = alice", "Nodes with permissions = 0"};
+    const std::vector<std::string> expected{"Mode = permissions",
+                                            "Source = configuration file",
+                                            "Users = 2",
+                                            "Sticky users = alice",
+                                            "Nodes with permissions = 0"};
     const auto actual = startup.last_block("Permissions:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
@@ -194,10 +218,14 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_from_checkpoint) {
 
     ClientInvoker client;
     ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+    act_as(client, "carol"); // a user the server attribute lists (D11.6)
     BOOST_CHECK_EQUAL(server_permissions_of(client), "carol:rwxlops,dave:rs,erin:rws");
 
-    const std::vector<std::string> expected{
-        "Source = checkpoint", "Users = 3", "Sticky users = carol, dave, erin", "Nodes with permissions = 1"};
+    const std::vector<std::string> expected{"Mode = permissions",
+                                            "Source = checkpoint",
+                                            "Users = 3",
+                                            "Sticky users = carol, dave, erin",
+                                            "Nodes with permissions = 1"};
     const auto actual = startup.last_block("Permissions:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
@@ -225,10 +253,14 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_checkpoint_without_attribute) {
 
     ClientInvoker client;
     ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+    act_as(client, "alice"); // a user the server attribute lists (D11.6)
     BOOST_CHECK_EQUAL(server_permissions_of(client), "alice:rwxlop");
 
-    const std::vector<std::string> expected{
-        "Source = configuration file", "Users = 1", "Sticky users = none", "Nodes with permissions = 1"};
+    const std::vector<std::string> expected{"Mode = permissions",
+                                            "Source = configuration file",
+                                            "Users = 1",
+                                            "Sticky users = none",
+                                            "Nodes with permissions = 1"};
     const auto actual = startup.last_block("Permissions:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
 }
@@ -246,7 +278,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_summary_bound_and_reload) {
     std::string entries;
     for (int i = 1; i <= 12; ++i) {
         entries += std::string(entries.empty() ? "" : ", ") + R"({"user": "u)" + (i < 10 ? "0" : "") +
-                   std::to_string(i) + R"(", "permissions": "rs"})";
+                   std::to_string(i) + R"(", "permissions": "rwxs"})";
     }
     Startup startup("[" + entries + "]");
     startup.write_whitelist();
@@ -261,6 +293,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_summary_bound_and_reload) {
     BOOST_REQUIRE_MESSAGE(!error, "Server did not start: " << error.message());
 
     const std::vector<std::string> expected{
+        "Mode = permissions",
         "Source = configuration file",
         "Users = 12",
         "Sticky users = u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, ... (2 more)",
@@ -271,6 +304,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_summary_bound_and_reload) {
 
     ClientInvoker client;
     ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+    act_as(client, "u01"); // a user the server attribute lists (D11.6)
     BOOST_REQUIRE_MESSAGE(client.reloadwsfile() == 0, client.errorMsg());
     BOOST_CHECK_EQUAL(startup.summaries(), 2U);
 
@@ -327,11 +361,13 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_restore_from_checkpoint) {
 
             ClientInvoker client;
             ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+            act_as(client, "alice"); // a user the server attribute lists (D11.6)
             BOOST_REQUIRE_MESSAGE(client.haltServer() == 0, client.errorMsg());
             startup.write_checkpoint("carol:rwxlops");
 
             if (configured) {
                 BOOST_REQUIRE_MESSAGE(client.restoreDefsFromCheckPt() == 0, client.errorMsg());
+                act_as(client, "carol"); // the server attribute of the checkpoint lists carol
                 BOOST_CHECK_EQUAL(server_permissions_of(client), "carol:rwxlops");
                 auto summary = startup.last_block("Permissions:");
                 BOOST_CHECK(std::find(summary.begin(), summary.end(), "Source = checkpoint") != summary.end());
@@ -340,6 +376,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_restore_from_checkpoint) {
                 BOOST_REQUIRE_MESSAGE(client.delete_all(true) == 0, client.errorMsg());
                 startup.write_checkpoint("");
                 BOOST_REQUIRE_MESSAGE(client.restoreDefsFromCheckPt() == 0, client.errorMsg());
+                act_as(client, "alice"); // back to the server attribute of the configuration file
                 BOOST_CHECK_EQUAL(server_permissions_of(client), "alice:rwxlops");
                 summary = startup.last_block("Permissions:");
                 BOOST_CHECK(std::find(summary.begin(), summary.end(), "Source = configuration file") != summary.end());
@@ -385,6 +422,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_restore_failure_keeps_configuration
 
     ClientInvoker client;
     ecf::test::foolproof::configure_client(client, host.value(), startup.port());
+    act_as(client, "alice"); // a user the server attribute lists (D11.6)
     BOOST_REQUIRE_MESSAGE(client.haltServer() == 0, client.errorMsg());
 
     // The checkpoint cannot even be inspected

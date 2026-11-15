@@ -25,7 +25,7 @@ public:
     bool isWrite() const override { return true; }
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     const char* theArg() const override;
     void addOption(boost::program_options::options_description& desc) const override;

@@ -266,8 +266,8 @@ ecf::authentication_t GroupCTSCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t GroupCTSCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t GroupCTSCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 void GroupCTSCmd::addChild(const Cmd_ptr& childCmd) {
@@ -330,6 +330,14 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
 
     std::shared_ptr<GroupSTCCmd> theReturnedGroupCmd = std::make_shared<GroupSTCCmd>();
 
+    // In Permissions mode, each sub-command is authorised just before it runs, as if sent on its own; a denied
+    // sub-command does not undo the earlier ones, nor prevent the later ones (D5.27)
+    const bool authorise_each = ecf::authorisation_mode(*as) == ecf::AuthorisationMode::Permissions;
+
+    // Whether a sub-command that changes the definitions succeeded: the changes must be checkpointed even when another
+    // sub-command fails (the caller notifies a change only for a group that succeeds as a whole)
+    bool changed = false;
+
     // For the command to succeed all children MUST succeed
     size_t cmd_vec_size = cmdVec_.size();
     for (size_t i = 0; i < cmd_vec_size; i++) {
@@ -343,6 +351,18 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
         // Let child know about Group command.
         // Only used by ClientHandleCmd and DeleteCmd to transfer client_handle to the sync cmd, in *this* group
         cmdVec_[i]->set_group_cmd(this);
+
+        if (authorise_each) {
+            if (auto result = ecf::is_authorised(*cmdVec_[i], request_context()); !result.ok()) {
+                const auto message = ecf::record_denial(*cmdVec_[i], *as, result.reason());
+                theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(message, ErrorCmd::Kind::PermissionDenied));
+                cmdVec_[i]->cleanup();
+                continue;
+            }
+        }
+
+        // Classified before the command runs and is cleaned up, since cleaning up may change the classification
+        const bool write = cmdVec_[i]->isWrite();
 
         STC_Cmd_ptr theReturnCmd;
         try {
@@ -367,10 +387,20 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
         std::cout << " to client\n";
 #endif
 
+        if (write && theReturnCmd->ok()) {
+            changed = true;
+        }
+
         if (theReturnCmd->is_returnable_in_group_cmd()) {
             theReturnedGroupCmd->addChild(theReturnCmd);
             continue;
         }
+    }
+
+    // The caller notifies a group that succeeds and still classifies as a write once its commands are cleaned up
+    if (changed && !(theReturnedGroupCmd->ok() && isWrite())) {
+        // This can end up check pointing the definitions
+        as->nodeTreeStateChanged();
     }
 
     if (theReturnedGroupCmd->cmdVec().empty()) {

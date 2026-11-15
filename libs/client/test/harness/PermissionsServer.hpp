@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "SCPort.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -83,6 +85,8 @@ public:
     /// @param[in] executable An executable to launch instead of ecflow_server, for tests of the harness itself
     /// @param[in] open_to_login_user When true, the server has no password file for users that are not custom, so
     ///            that the user running the test is authenticated without a password, as the REST service requires
+    /// @param[in] settings Further members of `/ecflow/server` in the configuration file, as JSON text, e.g.
+    ///            `"whitelist": {"ignore": true}`; none when empty. With `"http": true`, the clients use HTTP.
     /// @throws std::runtime_error when the server does not answer within the timeout, or another server answers; the
     ///         process launched, if any, is killed (never sent a request) and the port released.
     /// @throws std::exception when the process cannot be launched, with the same cleanup.
@@ -93,12 +97,14 @@ public:
                       std::chrono::seconds timeout                 = std::chrono::seconds(30),
                       const std::optional<std::string>& fixed_port = std::nullopt,
                       const std::optional<fs::path>& executable    = std::nullopt,
-                      bool open_to_login_user                      = false)
+                      bool open_to_login_user                      = false,
+                      const std::string& settings                  = {})
         : administrator_{std::move(admin)},
           users_{std::move(users)},
           cleared_{cleared_environment()},
           reservation_{fixed_port ? Reservation(*fixed_port, false) : Reservation(SCPort::next(), true)},
-          directory_{scaffold::MakeDirectory{}.create()} {
+          directory_{scaffold::MakeDirectory{}.create()},
+          http_{!settings.empty() && nlohmann::json::parse("{" + settings + "}").value("http", false)} {
         try {
             const auto host = Host{}.name();
             if (!open_to_login_user) {
@@ -108,6 +114,7 @@ public:
             std::ofstream(directory_.path() / (host + "." + port() + ".ecf.cfg"))
                 << R"({"version": 1, "ecflow": {"server": {)"
                 << (permissions.empty() ? std::string{} : R"("permissions": )" + permissions + ", ")
+                << (settings.empty() ? std::string{} : settings + ", ")
                 << R"("variables": {"ECF_HOME": "home", "ECF_LOG": "server.log", "ECF_CHECKMODE": "CHECK_NEVER"}}}})";
 
             process_ = std::make_unique<scaffold::Process>(executable.value_or(fs::path(File::find_ecf_server_path())),
@@ -144,6 +151,9 @@ public:
         auto client = std::make_unique<ClientInvoker>(std::string(string_constants::localhost), port());
         client->set_throw_on_error(false);
         client->set_connection_attempts(1);
+        if (http_) {
+            client->enable_http();
+        }
         client->set_user_name(credentials.user);
         // The client sends the password in the encrypted form held by the password files
         client->set_password(encrypted_password(credentials.password, credentials.user));
@@ -312,6 +322,7 @@ private:
     scaffold::Directory directory_;
     std::unique_ptr<scaffold::Process> process_;
     bool owned_{false}; // true once the server answering on the port is known to be the one launched
+    bool http_{false};  // true when the server uses HTTP, and so do its clients
 };
 
 } // namespace ecf::test

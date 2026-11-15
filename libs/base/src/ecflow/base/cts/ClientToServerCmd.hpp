@@ -62,7 +62,18 @@ public:
     [[nodiscard]] ecf::Identity& identity() const { return identity_; }
 
     [[nodiscard]] virtual ecf::authorisation_t authenticate(AbstractServer& server) const = 0;
-    [[nodiscard]] virtual ecf::authorisation_t authorise(AbstractServer& server) const    = 0;
+
+    ///
+    /// @brief Decides whether the request is allowed, by the roles its command requires (see AuthorisationDetails.hpp).
+    ///
+    /// Called by the server after authentication, through ecf::is_authorised; every command specialises the decision
+    /// for its targets, in the authorisation mode in force (Permissions, whitelist or unrestricted).
+    ///
+    /// @param[in] context The context of the request: the identity of the requester and the server
+    /// @return Success when the request is allowed; otherwise a failure holding the reason.
+    /// @throws std::exception when the permissions cannot be evaluated; the caller refuses the request (R11.7).
+    ///
+    [[nodiscard]] virtual ecf::authorisation_t authorise(const ecf::RequestContext& context) const = 0;
 
     /**
      *  Evaluates the preconditions of the command, thus acting as a command customisation point.
@@ -85,8 +96,9 @@ public:
     /// Called by the _server_ to service the client depending on the Command
     /// The server will pass itself down via the AbstractServer
     /// The returned Server to Client  command is sent back to the client
-    /// Uses template pattern, it first authenticates request and then calls
-    /// doHandleRequest. This function can throw exceptions. std::runtime_error
+    /// Uses template pattern: it checks the preconditions and then calls doHandleRequest. It neither authenticates
+    /// nor authorises the request: the caller (ClientToServerRequest) does both before calling it. This function can
+    /// throw exceptions. std::runtime_error
     ///
     /// @brief Handles the request, in a context created from the identity of the command.
     ///
@@ -134,7 +146,8 @@ public:
     /// A command can be read only command or write only command
     /// A read only command will not change the state of the suites in the server
     /// A write only command can modify the state of suite in the server
-    /// Used by the server for authentication since only write only users are allowed to edit.
+    /// Used by the server for checkpointing and statistics; the access a command requires follows the roles of its
+    /// command (see authorise()), not this classification.
     virtual bool isWrite() const { return false; /* returning false means read only */ }
 
     /// Some read only commands under exceptional situation can modify the DEFS.

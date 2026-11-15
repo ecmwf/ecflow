@@ -70,6 +70,29 @@ BOOST_AUTO_TEST_CASE(test_permissions_harness_without_server_attribute) {
 }
 
 ///
+/// @brief Verifies that the harness runs an HTTP server, and its clients use HTTP, whatever the JSON spacing.
+///
+BOOST_AUTO_TEST_CASE(test_permissions_harness_http) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto* settings : {R"("http": true)", R"("http":true)", "\"http\"\n:\ttrue"}) {
+        BOOST_TEST_CONTEXT("settings: " << settings) {
+            PermissionsServer server(Credentials{"admin", "admin-secret"},
+                                     {},
+                                     "",
+                                     std::chrono::seconds(30),
+                                     std::nullopt,
+                                     std::nullopt,
+                                     false,
+                                     settings);
+            auto client = server.administrator();
+            BOOST_CHECK_EQUAL(client->pingServer(), 0);
+            BOOST_CHECK(client->effective_protocol() == ecf::Protocol::Http);
+        }
+    }
+}
+
+///
 /// @brief Verifies that a server refused at start-up is stopped, and its port released.
 ///
 BOOST_AUTO_TEST_CASE(test_permissions_harness_start_failure_cleans_up) {

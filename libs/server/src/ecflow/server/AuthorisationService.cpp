@@ -3,6 +3,8 @@
 
 #include "ecflow/server/AuthorisationService.hpp"
 
+#include <variant>
+
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
@@ -57,6 +59,10 @@ AuthorisationService& AuthorisationService::operator=(AuthorisationService&& rhs
 
 bool AuthorisationService::good() const {
     return impl_ != nullptr;
+}
+
+bool AuthorisationService::uses_whitelist() const {
+    return impl_ != nullptr && std::holds_alternative<WhiteListRules>(impl_->permissions_);
 }
 
 bool AuthorisationService::allows(const Identity& identity,

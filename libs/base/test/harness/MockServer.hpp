@@ -60,7 +60,14 @@ public:
         return true;
     }
     void restore_defs_from_checkpt() override {}
-    void nodeTreeStateChanged() override {}
+    void nodeTreeStateChanged() override { ++node_tree_state_changes_; }
+
+    ///
+    /// @brief Returns how many times a change of the definitions was notified, i.e. could trigger a checkpoint.
+    ///
+    /// @return The number of notifications.
+    ///
+    [[nodiscard]] int node_tree_state_changes() const { return node_tree_state_changes_; }
     bool allowTaskCommunication() const override { return (serverState_ != SState::HALTED) ? true : false; }
     void shutdown() override { set_server_state(SState::SHUTDOWN); }
     void halted() override { set_server_state(SState::HALTED); }
@@ -190,6 +197,7 @@ private:
     ecf::AuthorisationService authorisation_service_;
     std::vector<SyncReply> sync_replies_;
     std::vector<ReplyBuilt> replies_built_;
+    int node_tree_state_changes_{0};
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

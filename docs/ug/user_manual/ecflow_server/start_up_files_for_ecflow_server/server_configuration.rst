@@ -242,6 +242,13 @@ Settings
      - no
      - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/permissions``: the JSON form of the server
        Permissions attribute, see :ref:`permissions_attribute_server`
+   * - Ignore the whitelist
+     - disabled
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/whitelist/ignore``: ``true`` neither loads nor
+       reloads the :ref:`whitelist <ecflow_white_list_file>`, see :ref:`permissions_attribute_modes`
 
 Notes:
 

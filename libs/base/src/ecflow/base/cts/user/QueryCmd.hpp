@@ -70,7 +70,7 @@ public:
     bool equals(ClientToServerCmd* rhs) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     const char* theArg() const override { return arg(); }
 

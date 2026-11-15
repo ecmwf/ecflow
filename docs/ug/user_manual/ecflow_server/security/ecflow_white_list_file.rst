@@ -21,6 +21,9 @@ include a version number, e.g. 4.4.14 as the first non-comment line.
 The environment variable ECF_LISTS is used to point to the white list
 file. The white list file is an ASCII file.
 
+The white list file is not used when a server :ref:`Permissions attribute <permissions_attribute>` is in force,
+and can be ignored by the configuration (see :ref:`permissions_attribute_modes`).
+
 Named users with write and read access (file ecf.lists):
 
 .. code-block:: shell

@@ -19,11 +19,17 @@ The file lists users with full access and users with only read access.
 Including a user name gives full read/write access, starting with '-' (dash/minus) gives read access only.
 Note you must include a version number, e.g. 4.4.14 as the first non-comment line to allow for potential future updates to the format.
 The environment variable ECF_LISTS is used to define the white list file name which should exist in the ECF_HOME folder of your server.
-The white list file is an ASCII file.
+The white list file is a text file, encoded in UTF-8.
 
 .. note::
 
-    When creating a white list file (ecf.lists) be sure to include your user name with read/write privileges. Otherwise, you can be locked out of your own server.
+    The user running the server always holds read/write access, even when the white list file does not list it.
+
+.. note::
+
+    The white list file is not used when a server :term:`permissions` attribute is in force: the server then
+    authorises each request by the roles the Permissions attributes grant (see
+    :ref:`tutorial-server-security-permissions` and :ref:`permissions_attribute_modes`).
 
 File ecf.lists:
 

@@ -36,27 +36,6 @@ std::string make_rejection_message(const std::string& reason, const ClientToServ
     return message;
 }
 
-// The option of a command, e.g. "--suspend", without its arguments
-std::string option_of(const ClientToServerCmd& cmd) {
-    const auto text = cmd.print_short();
-    return text.substr(0, text.find_first_of(" ="));
-}
-
-// Records a denied request in the server log, at a bounded rate, and returns the reply denying it, whose message names
-// neither nodes nor arguments
-STC_Cmd_ptr deny(const ClientToServerCmd& cmd, AbstractServer& as, const std::string& reason) {
-    const auto& user       = cmd.identity().username().value();
-    const auto option      = option_of(cmd);
-    std::size_t suppressed = 0;
-    bool overflow          = false;
-    ecf::LogFlusher flusher; // the record is written at once, as the records of handled requests
-    if (as.denial_log().record(user + " " + option, ecf::DenialLog::Clock::now(), suppressed, overflow)) {
-        ecf::log(ecf::Log::ERR,
-                 ecf::DenialLog::format(user, cmd.hostname(), option, cmd.print_short(), reason, suppressed, overflow));
-    }
-    return PreAllocatedReply::denied_cmd("Permission denied: " + option);
-}
-
 } // namespace
 
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
@@ -66,16 +45,14 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
             return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), *cmd_));
         }
 
-        // Perform Authorisation (i.e. access rules) control
-        if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
-            // The context of this request, from the identity established by authentication
-            const ecf::RequestContext context(cmd_->identity(), *as);
-            return cmd_->handleRequest(as, context);
+        // The context of this request, from the identity established by authentication
+        const ecf::RequestContext context(cmd_->identity(), *as);
+
+        // Perform Authorisation (i.e. access rules) control; a request not authorised is denied
+        if (auto result = ecf::is_authorised(*cmd_, context); !result.ok()) {
+            return PreAllocatedReply::denied_cmd(ecf::record_denial(*cmd_, *as, result.reason()));
         }
-        else {
-            // The command is not authorised: a denial
-            return deny(*cmd_, *as, result.reason());
-        }
+        return cmd_->handleRequest(as, context);
     }
 
     /// means programming error somewhere

@@ -87,8 +87,8 @@ ecf::authentication_t ZombieCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t ZombieCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t ZombieCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {

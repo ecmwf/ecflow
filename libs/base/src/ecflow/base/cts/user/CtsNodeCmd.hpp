@@ -40,7 +40,7 @@ public:
     bool equals(ClientToServerCmd*) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     PrintStyle::Type_t show_style() const override;
 

@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "ecflow/attribute/Permissions.hpp"
+#include "ecflow/base/Authorisation.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -414,6 +415,19 @@ void BaseServer::log_permissions_summary() const {
         named += ", ... (" + std::to_string(sticky.size() - max_named) + " more)";
     }
 
+    // The mode in force, which the white list alone does not tell (D5.17)
+    std::string mode = "unrestricted";
+    switch (ecf::authorisation_mode(*this)) {
+        case ecf::AuthorisationMode::Permissions:
+            mode = "permissions";
+            break;
+        case ecf::AuthorisationMode::WhiteList:
+            mode = "whitelist";
+            break;
+        case ecf::AuthorisationMode::Unrestricted:
+            break;
+    }
+
     std::size_t nodes = 0;
     for (const auto* node : ecf::get_all_nodes(static_cast<const Defs&>(*defs_))) {
         nodes += node->permissions() ? 1 : 0;
@@ -421,6 +435,7 @@ void BaseServer::log_permissions_summary() const {
 
     for (const auto& line :
          std::vector<std::string>{"Permissions:",
+                                  "  Mode = " + mode,
                                   "  Source = " + permissions_source_,
                                   "  Users = " + std::to_string(server ? server->entries().size() : 0),
                                   "  Sticky users = " + (sticky.empty() ? "none" : named),

@@ -3318,6 +3318,54 @@ BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions) {
 }
 
 ///
+/// @brief Verifies that the configuration can ignore the white list file (D12.2): it is neither loaded at start-up nor
+///        reloaded, and the log says so.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_ignores_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto lists_directory = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto lists     = lists_directory.path() / "ecf.lists";
+    std::ofstream(lists) << "4.5.0\n-bob\n";
+    const std::string variables = R"("ECF_LISTS": ")" + lists.string() + R"(")";
+
+    for (const bool ignore : {true, false}) {
+        BOOST_TEST_CONTEXT("ignore: " << ignore) {
+            auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+            IsolatedServerStartup isolation;
+            std::list<WithTestEnvironmentVariable> overrides;
+            prepare_configuration_file(
+                directory.path(),
+                WithConfigurationFile{std::nullopt,
+                                      "3141",
+                                      configuration_document(variables,
+                                                             ignore ? R"("whitelist": {"ignore": true})"
+                                                                    : R"("whitelist": {"ignore": false})")},
+                overrides);
+
+            ServerEnvironment serverEnv(std::vector<std::string>{"ServerEnvironment"});
+            std::string error;
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+            BOOST_CHECK_EQUAL(serverEnv.authorisation().uses_whitelist(), !ignore);
+
+            const auto block = last_block("Authorisation:");
+            BOOST_REQUIRE_GE(block.size(), 2U);
+            if (ignore) {
+                BOOST_CHECK_EQUAL(block[0], "Mode = unrestricted");
+                BOOST_CHECK_EQUAL(block[1], "ECF_LISTS (" + lists.string() + ") = ignored");
+                BOOST_CHECK(!serverEnv.reloadWhiteListFile(error));
+                BOOST_CHECK_MESSAGE(error.find("/ecflow/server/whitelist/ignore") != std::string::npos, error);
+                BOOST_CHECK(!serverEnv.authorisation().uses_whitelist());
+            }
+            else {
+                BOOST_CHECK_EQUAL(block[0], "Mode = whitelist");
+                BOOST_CHECK(serverEnv.reloadWhiteListFile(error));
+            }
+        }
+    }
+}
+
+///
 /// @brief Verifies that an invalid server attribute in the configuration file stops the start-up, naming the setting.
 ///
 BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions_refused) {

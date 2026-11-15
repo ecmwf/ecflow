@@ -128,6 +128,10 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             outbound_response.set_cmd(PreAllocatedReply::error_cmd(e.what()));
         }
 
+        // Only a request that succeeded terminates the server: not one refused by the authentication or the
+        // authorisation, nor a group with a sub-command denied or failed
+        is_terminate = is_terminate && outbound_response.get_cmd() && outbound_response.get_cmd()->ok();
+
         // Clean up after inbound_request_ has run. i.e like re-claiming memory
         inbound_request.cleanup();
     }

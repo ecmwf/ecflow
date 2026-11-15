@@ -115,7 +115,7 @@ void TcpBaseServer::handle_terminate_request() {
     // *HOWEVER* only do this if the request was successful.
     //           we do this by checking that the out bound response was ok
     //           i.e a read only user should not be allowed to terminate server.
-    if (inbound_request_.terminateRequest()) {
+    if (inbound_request_.terminateRequest() && outbound_response_.get_cmd() && outbound_response_.get_cmd()->ok()) {
         if (serverEnv_.debug()) {
             std::cout << "   <-- TcpBaseServer::handle_terminate_request  exiting server via terminate() port "
                       << serverEnv_.port() << std::endl;

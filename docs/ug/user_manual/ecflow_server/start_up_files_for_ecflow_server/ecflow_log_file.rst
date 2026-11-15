@@ -292,6 +292,7 @@ the whitelist, the server also summarises the :ref:`Permissions attributes <perm
 .. code-block:: text
 
   MSG:[12:00:00 18.10.2026] Permissions:
+  MSG:[12:00:00 18.10.2026]   Mode = permissions
   MSG:[12:00:00 18.10.2026]   Source = checkpoint
   MSG:[12:00:00 18.10.2026]   Users = 3
   MSG:[12:00:00 18.10.2026]   Sticky users = admin, ops
@@ -299,6 +300,9 @@ the whitelist, the server also summarises the :ref:`Permissions attributes <perm
 
 The block lists:
 
+- ``Mode``: the :ref:`authorisation mode <permissions_attribute_modes>` in force: ``permissions`` (a server
+  attribute applies, and the whitelist is not used), ``whitelist`` or ``unrestricted``; the ``Authorisation`` block
+  above describes the whitelist only;
 - ``Source``: where the server attribute in force comes from: ``configuration file``, ``checkpoint`` (which
   overrides the configuration file), or ``none``;
 - ``Users``: the number of users listed by the server attribute;

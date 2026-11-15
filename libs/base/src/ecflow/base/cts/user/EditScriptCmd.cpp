@@ -45,8 +45,8 @@ ecf::authentication_t EditScriptCmd::authenticate(AbstractServer& server) const 
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t EditScriptCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t EditScriptCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 static std::string to_string(EditScriptCmd::EditType et) {

@@ -59,8 +59,8 @@ ecf::authentication_t CtsWaitCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CtsWaitCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CtsWaitCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const {

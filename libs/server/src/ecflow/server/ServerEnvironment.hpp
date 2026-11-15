@@ -110,6 +110,13 @@ public:
     ///
     bool log_commands() const { return log_commands_; }
 
+    ///
+    /// @brief Returns whether the configuration ignores the white list file (/ecflow/server/whitelist/ignore).
+    ///
+    /// @return True when the white list file is neither loaded nor reloaded.
+    ///
+    bool ignores_whitelist() const { return ignore_whitelist_; }
+
     /// Whenever we save the checkpt, we time how long this takes.
     /// For very large definition the time can be significant and start to interfere with
     /// the scheduling. (i.e since write to disk is blocking).
@@ -371,6 +378,7 @@ private:
     int ecf_task_threshold_; ///< Effective signed millisecond threshold, validated before updating the profiler.
     bool jobGeneration_;     // used in debug/test mode only
     bool log_commands_{false};
+    bool ignore_whitelist_{false};
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

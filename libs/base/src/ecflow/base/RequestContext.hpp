@@ -4,7 +4,9 @@
 #pragma once
 
 #include <optional>
+#include <string>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/node/EffectivePermissions.hpp"
 
@@ -15,9 +17,9 @@ namespace ecf {
 ///
 /// @brief Holds what a request needs to know about its requester, for the duration of the request.
 ///
-/// The context is created when the server handles a request, once the requester is authenticated and authorised, and
-/// is passed to the execution of the command and to the construction of its reply. It ends with the request: no
-/// requester is kept in global or static state. (The authorisation does not use the context yet.)
+/// The context is created when the server handles a request, once the requester is authenticated, and is passed to the
+/// authorisation, to the execution of the command and to the construction of its reply. It ends with the request: no
+/// requester is kept in global or static state.
 ///
 /// @invariant The identity and the server outlive the context.
 ///
@@ -57,6 +59,20 @@ public:
     /// @return The evaluator.
     ///
     [[nodiscard]] const EffectivePermissions& permissions() const;
+
+    ///
+    /// @brief Returns the effective roles of the requester at a path, as the definitions are now.
+    ///
+    /// The roles are those of the node with the path or, when there is none, of its closest existing ancestor; the
+    /// server for "/", an empty path, or a path without a suite. An attribute name after the node path (`path:name`)
+    /// is ignored. The roles are evaluated afresh at each call, so that a request that changes the definitions (e.g.
+    /// a sub-command of a group) is followed by an evaluation of the new definitions.
+    ///
+    /// @param[in] path The path addressed by the request
+    /// @return The effective roles; empty for a requester the server attribute does not admit.
+    /// @throws std::logic_error when the server holds no definitions, or Permissions do not apply.
+    ///
+    [[nodiscard]] Roles roles_at(const std::string& path) const;
 
 private:
     const Identity& identity_;

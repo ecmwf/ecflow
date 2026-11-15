@@ -36,6 +36,14 @@ public:
     [[nodiscard]]
     bool good() const;
 
+    ///
+    /// @brief Returns whether the service applies a white list file.
+    ///
+    /// @return True for a service loaded from a white list; false for an unrestricted or an empty service.
+    ///
+    [[nodiscard]]
+    bool uses_whitelist() const;
+
     [[nodiscard]]
     bool authenticate(const Identity& identity) const {
         return true;

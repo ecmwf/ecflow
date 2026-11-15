@@ -91,8 +91,8 @@ ecf::authentication_t CtsNodeCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CtsNodeCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CtsNodeCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {

@@ -179,6 +179,113 @@ An invalid server attribute in the configuration file stops the start-up, before
 summarises the attributes in force (see :ref:`ecflow_log_file`). Definitions cannot set the server attribute; it
 appears only in checkpoints and in the definitions sent to clients.
 
+.. _permissions_attribute_modes:
+
+Authorisation modes
+===================
+
+The server authorises each user request in one of three modes:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 35 45
+
+   * - Mode
+     - Selected when
+     - Requests allowed
+   * - Permissions
+     - a server attribute is in force
+     - as granted by the Permissions attributes; the whitelist is not used
+   * - Whitelist
+     - no server attribute, and the :ref:`whitelist <ecflow_white_list_file>` (``ECF_LISTS``) is loaded
+     - as granted by the whitelist
+   * - Unrestricted
+     - neither
+     - every request
+
+Notes:
+
+- The whitelist remains supported during a transition. Setting ``/ecflow/server/whitelist/ignore`` to ``true`` in
+  ``<host>.<port>.ecf.cfg`` makes the server ignore it: the file is neither loaded at start-up nor reloaded
+  (``ecflow_client --reloadwsfile`` fails), and the log states ``ECF_LISTS (...) = ignored``.
+- In Permissions mode, no user holds an implicit right: the user running the server is listed like any other, and
+  the write access the whitelist grants to that user does not apply.
+- A request reads with ``r`` and changes with ``w``, at each node it addresses; a node that does not exist is
+  checked at its closest existing ancestor, and a request addressing the server at the server level.
+- An error while evaluating the permissions denies the request.
+
+Some requests are handled apart:
+
+- task requests, sent by jobs (``--init``, ``--complete``, ``--label``, ...), are never subject to the authorisation
+  of users, in any mode;
+- in Permissions mode, ``--ping`` is allowed to every user, listed or not;
+- in Permissions mode, each command of a ``--group`` is authorised just before it runs, as if sent on its own: a
+  denied command neither undoes the earlier ones nor prevents the later ones, and the group is reported as denied;
+  in whitelist mode, a group is allowed only when all its commands are.
+
+Permissions never affect scheduling: dependencies, limits, job generation and job submission behave as without
+attributes, whatever the attributes grant.
+
+.. _permissions_attribute_threat_model:
+
+Threat model and scope
+======================
+
+Permissions attributes govern authorisation only. They rely on the authentication of every request beforehand (see
+:ref:`security`): without authentication, a user name is merely a claim, and the attributes protect nothing.
+
+Under that assumption:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 40 35
+
+   * - Actor
+     - Protected against
+     - Not protected against
+   * - Authenticated user
+     - reading and changing the nodes, attributes and server settings not granted to them
+     - what other channels reveal: the files of the server host, the outputs of jobs on disk
+   * - Job (task requests)
+     - nothing: task requests have a special grant, and are not subject to the attributes
+     - a request presenting the job identifier of a task (``ECF_PASS``, used to detect zombies, not a password)
+       acting on that task; how task requests are authenticated is outside the scope of the attributes
+   * - Job running as the user of the server
+     - nothing
+     - access to the files of the server: configuration, checkpoints, password files
+   * - User with access to the server host as the user of the server
+     - nothing
+     - changes to the configuration file and the checkpoints, which hold the attributes
+
+Notes:
+
+- ``w`` on a node grants more than changing its attributes: the variables of a node include commands the server
+  runs as the user of the server (``ECF_JOB_CMD``, ``ECF_KILL_CMD``, ``ECF_STATUS_CMD``) and paths it reads and
+  writes (``ECF_HOME``, ``ECF_FILES``, ``ECF_INCLUDE``, ``ECF_JOB``, ``ECF_JOBOUT``). A user holding ``w`` can
+  therefore run commands and reach files as the user of the server: grant ``w`` only to users trusted with that.
+- Requests and replies travel in clear text unless the server and its clients use SSL.
+- The existence of a node addressed by a denied request is not concealed: the denial names the command only, and a
+  request on a node that does not exist fails as such.
+- The attributes restrict commands only, never the file system (the files of the server host, in the table above).
+  The files the server writes hold what the attributes conceal from its clients, and the server creates them with
+  the permissions its umask allows, usually readable by every account of the host:
+
+  - the checkpoint and its backup (``ECF_CHECK`` and ``ECF_CHECKOLD``, by default ``<host>.<port>.ecf.check`` and
+    ``<host>.<port>.ecf.check.b`` in ``ECF_HOME``): every node and attribute, the server attribute, and the edit
+    history, which names users;
+  - the archives, in the ``ECF_HOME`` of each archived node, named after its path with ``:`` in place of ``/`` (e.g.
+    ``<host>.<port>.:s:f.check`` for ``/s/f``): the archived nodes and their attributes;
+  - the server log (``ECF_LOG``): every request with its user, the changes of attributes, the denied and audited
+    requests.
+
+  When the server uses Permissions attributes, only the user of the server should be able to read these files:
+
+  - give the directories holding them (``ECF_HOME``, the directories of ``ECF_CHECK``, ``ECF_CHECKOLD`` and
+    ``ECF_LOG`` when set elsewhere, and the ``ECF_HOME`` of archived nodes when it differs) the mode ``0700``;
+  - start the server with the umask ``077``, for the files it creates from then on;
+  - restrict the files that already exist (e.g. ``chmod 600``): the server keeps the mode of a file it appends to
+    (the log) or renames (the checkpoint becoming the backup), whatever its umask.
+
 .. _permissions_attribute_compatibility:
 
 Compatibility with other versions
@@ -206,7 +313,7 @@ The attribute is available from ecFlow 5.20.0:
 Making a server unrestricted again
 ==================================
 
-A server becomes unrestricted only through its configuration and a restart:
+A server stops using Permissions attributes only through its configuration and a restart:
 
 #. stop the server;
 #. remove ``/ecflow/server/permissions`` from ``<host>.<port>.ecf.cfg``;
@@ -215,6 +322,10 @@ A server becomes unrestricted only through its configuration and a restart:
 #. start the server.
 
 Otherwise, a checkpoint that still carries a server attribute stops the start-up.
+
+The server is then in whitelist mode when its :ref:`whitelist <ecflow_white_list_file>` (``ECF_LISTS``) exists, and
+unrestricted only without it (see :ref:`permissions_attribute_modes`). To make it unrestricted, also remove the
+whitelist file, or set ``/ecflow/server/whitelist/ignore`` to ``true``, before starting the server.
 
 .. _permissions_attribute_users:
 
@@ -258,5 +369,5 @@ Notes:
 
 - The client prefixes the message with the request as given by the user, as for any other error.
 - The server records each denial in its log file, at a bounded rate (see :ref:`ecflow_log_file_denials`).
-- Until Permissions attributes are enforced, the denials come from the
-  :ref:`whitelist <ecflow_white_list_file>`.
+- The denials come from the Permissions attributes or from the :ref:`whitelist <ecflow_white_list_file>`,
+  according to the :ref:`mode <permissions_attribute_modes>` in force.

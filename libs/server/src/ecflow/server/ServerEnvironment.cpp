@@ -234,8 +234,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     log_authentication();
 
     // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
-    // user is free to access the server.
-    if (ecf_white_list_file_.empty() || !fs::exists(ecf_white_list_file_)) {
+    // user is free to access the server. The configuration may also ignore it.
+    if (ignore_whitelist_ || ecf_white_list_file_.empty() || !fs::exists(ecf_white_list_file_)) {
         log_authorisation();
         return true;
     }
@@ -302,6 +302,10 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
     if (debug()) {
         std::cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
                   << fs::current_path().string() << ")\n";
+    }
+    if (ignore_whitelist_) {
+        errorMsg += "The ECF_LISTS file is ignored by the configuration (/ecflow/server/whitelist/ignore)";
+        return false;
     }
     if (ecf_white_list_file_.empty()) {
         errorMsg += "The ECF_LISTS file ";
@@ -373,7 +377,7 @@ std::vector<std::string> ServerEnvironment::authorisation_lines() const {
     }
     else {
         lines.push_back("  ECF_LISTS (" + fs::absolute(ecf_white_list_file_).lexically_normal().string() +
-                        ") = " + (whitelist ? "loaded" : "absent"));
+                        ") = " + (ignore_whitelist_ ? "ignored" : (whitelist ? "loaded" : "absent")));
     }
     if (whitelist) {
         lines.emplace_back("  Users:");
@@ -492,6 +496,7 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
     jobGeneration_           = option("ecflow.server.job_generation");
     log_commands_            = option("ecflow.server.log.commands.enabled");
+    ignore_whitelist_        = option("ecflow.server.whitelist.ignore");
     if (option("ecflow.server.http")) {
         protocol_ = ecf::Protocol::Http;
     }

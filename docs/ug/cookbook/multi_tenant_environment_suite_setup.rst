@@ -202,9 +202,11 @@ Access permissions
 The reverse proxy authenticates every request and forwards the authenticated identity to the server
 (through the ``X-Auth-Username`` header). The server then authorises user commands as follows:
 
-- with a white list file (:code:`ECF_LISTS`), each user has the read or read/write access the file
-  grants;
-- without a white list file, every authenticated user has full access.
+- with a server :ref:`Permissions attribute <permissions_attribute>`, each user has the roles the
+  attributes grant, and the white list file is not used;
+- otherwise, with a white list file (:code:`ECF_LISTS`), each user has the read or read/write access the
+  file grants;
+- otherwise, every authenticated user has full access.
 
 Variables do not control access: a variable named :code:`PERMISSIONS` or :code:`ECF_PERMISSIONS` is an
 ordinary variable, with no effect on authorisation.
@@ -246,9 +248,9 @@ are simply superseded by the reverse proxy.
   the ``Authorization`` or ``X-Auth-Username`` headers set  by Auth-o-tron), the server treats the request
   as already authenticated and does not check it against :code:`ECF_PASSWD` or :code:`ECF_CUSTOM_PASSWD`.
 
-- **The white list file is not bypassed.** Authorisation is a separate step from authentication, and
-  the white list file (:code:`ECF_LISTS`), if configured, continues to be consulted for read/write
-  access regardless of how the identity was established.
+- **Authorisation is not bypassed.** Authorisation is a separate step from authentication: the
+  Permissions attributes, when a server attribute is configured, or otherwise the white list file
+  (:code:`ECF_LISTS`), if configured, decide the access regardless of how the identity was established.
 
 .. implementation::
 

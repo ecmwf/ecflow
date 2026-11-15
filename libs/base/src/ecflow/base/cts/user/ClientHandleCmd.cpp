@@ -113,8 +113,8 @@ ecf::authentication_t ClientHandleCmd::authenticate(AbstractServer& server) cons
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t ClientHandleCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t ClientHandleCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 const char* ClientHandleCmd::theArg() const {

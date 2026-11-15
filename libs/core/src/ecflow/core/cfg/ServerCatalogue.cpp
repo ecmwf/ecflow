@@ -402,6 +402,18 @@ std::vector<Setting> server_settings() {
                 std::nullopt                           // cli
             }),
 
+        // Neither load nor reload the white list file (ECF_LISTS)
+        Setting(
+            Key::for_option("ecflow.server.whitelist.ignore"),
+            Type::Boolean,
+            Value{false},
+            Names{
+                std::nullopt,                          // env_cfg
+                "/ecflow/server/whitelist/ignore",     // ecf_cfg
+                std::nullopt,                          // env
+                std::nullopt                           // cli
+            }),
+
         // The server Permissions attribute, as its JSON form; validated by the server
         Setting(
             Key::for_option("ecflow.server.permissions"),
