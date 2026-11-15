@@ -30,6 +30,7 @@ credentials remain visible elsewhere, e.g. in job files and in the variables sho
 .. toctree::
     :maxdepth: 1
 
+    user_names
     ecflow_white_list_file
     permissions
     black_list_file

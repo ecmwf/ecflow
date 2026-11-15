@@ -92,6 +92,11 @@ void check_server_security(const std::array<std::string, 3>& kinds,
             else if (kind == "wrong_host") {
                 data = "4.5.0\nother_user other.invalid.host " + std::to_string(port.value()) + " secret\n";
             }
+            else if (kind == "invalid_user") {
+                // A valid entry, then an entry whose user name is outside the model
+                data = i < 2 ? content + "al:ice " + host.value() + " " + std::to_string(port.value()) + " secret\n"
+                             : content + "al:ice\n";
+            }
             else if (kind == "wrong_port") {
                 data = "4.5.0\nother_user " + host.value() + " " + std::to_string(port.value() + 1) + " secret\n";
             }
@@ -277,6 +282,22 @@ BOOST_AUTO_TEST_CASE(test_server_security_whitelist_content) {
     check_server_security({"valid", "valid", "malformed"}, false, 2, "Could not load ECF_LISTS file");
     check_server_security({"valid", "valid", "empty"});
     check_server_security({"valid", "valid", "version"});
+}
+
+///
+/// @brief Verifies that the server does not start when a password or white list file holds a user name outside the
+///        model, and that the error names the file, the line and the reason.
+///
+BOOST_AUTO_TEST_CASE(test_server_security_invalid_user_name) {
+    ECF_NAME_THIS_TEST();
+
+    for (int index = 0; index < 3; ++index) {
+        BOOST_TEST_CONTEXT("Security file index " << index) {
+            std::array<std::string, 3> kinds = {"valid", "valid", "valid"};
+            kinds[index]                     = "invalid_user";
+            check_server_security(kinds, false, index, "invalid user name 'al:ice'");
+        }
+    }
 }
 
 ///

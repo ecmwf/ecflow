@@ -5,8 +5,49 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
+#include <type_traits>
 
 namespace ecf {
+
+///
+/// @brief Checks a user name against the user name model, followed by every user name ecFlow reads.
+///
+/// A valid user name is a non-empty string of valid UTF-8 (RFC 3629: no overlong form, no surrogate, no code point
+/// above U+10FFFF) that:
+///
+/// - contains no white space, i.e. no character with the Unicode property White_Space;
+/// - contains no control character (U+0000 to U+001F, U+007F to U+009F);
+/// - contains none of '#', ',', ':' and ';';
+/// - does not start with '-';
+/// - is not '*'.
+///
+/// User names are compared exactly, byte for byte, without case folding or Unicode normalisation.
+///
+/// @param[in] name The user name checked.
+/// @param[out] error Receives the reason when the name is invalid, naming it in its printable form; left unchanged
+///             otherwise.
+/// @return true when the name is valid.
+///
+bool is_valid_user_name(std::string_view name, std::string& error);
+
+///
+/// @brief Returns a user name in quotes, with its white space and control characters written as <U+XXXX>, and the
+///        bytes that are not valid UTF-8 as <0xXX>, so that it can be logged and shown safely.
+///
+/// @param[in] name Any text, valid or not.
+/// @return The printable form, e.g. 'a<U+00A0>b'.
+///
+std::string printable_user_name(std::string_view name);
+
+///
+/// @brief Returns a text with its control characters written as <U+XXXX>, and the bytes that are not valid UTF-8 as
+///        <0xXX>, so that it can be logged and shown safely; other characters, white space included, are kept.
+///
+/// @param[in] text Any text, valid or not.
+/// @return The printable form; the text itself when it holds neither.
+///
+std::string printable_text(std::string_view text);
 
 ///
 /// @brief Strongly-typed wrapper for a user login name.
@@ -92,7 +133,17 @@ public:
     virtual const Password& password() const = 0;
 
     virtual std::string as_string() const = 0;
+
+    ///
+    /// @brief Returns whether the identity is the absence of identity (None).
+    ///
+    /// @return true for None; answered without run-time type information, so that the answer holds across shared
+    ///         libraries.
+    ///
+    virtual bool is_none() const = 0;
 };
+
+class None;
 
 template <class T>
 class WrappingIdentity : public AbstractIdentity {
@@ -109,6 +160,8 @@ public:
     [[nodiscard]] const Password& password() const override { return id_.password(); }
 
     [[nodiscard]] std::string as_string() const override { return id_.as_string(); }
+
+    [[nodiscard]] bool is_none() const override { return std::is_same_v<T, None>; }
 
 private:
     T id_;
@@ -257,6 +310,13 @@ public:
                is_a<WrappingIdentity<SecureUserX>>(*handle_);
     }
     [[nodiscard]] bool is_task() const { return is_a<WrappingIdentity<TaskX>>(*handle_); }
+
+    ///
+    /// @brief Returns whether this is the absence of identity, i.e. no identity was established.
+    ///
+    /// @return true for an identity made by make_none().
+    ///
+    [[nodiscard]] bool is_none() const { return handle_->is_none(); }
 
     [[nodiscard]] bool is_custom() const { return is_a<WrappingIdentity<CustomUserX>>(*handle_); }
     [[nodiscard]] bool is_secure() const { return is_a<WrappingIdentity<SecureUserX>>(*handle_); }

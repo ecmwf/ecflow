@@ -67,6 +67,10 @@ Connection configuration
 
    Override the user name from ``ECF_USER``.
 
+   The name follows the user name model (valid UTF-8; no white space,
+   control character, ``#``, ``,``, ``:`` or ``;``; not starting with ``-``; not
+   ``*``): a request under another name fails before anything is sent.
+
 .. _rust_client_set_password:
 
 .. describe:: pub fn set_password(&mut self, password: &str)

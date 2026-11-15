@@ -13,6 +13,7 @@
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
@@ -205,6 +206,10 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         case ClientHandleCmd::DROP_USER: {
+            // A user named as the argument follows the user name model (R2.8)
+            if (std::string error; !drop_user_.empty() && !ecf::is_valid_user_name(drop_user_, error)) {
+                throw std::runtime_error("ClientHandleCmd: invalid " + error);
+            }
             // will throw if no users handles dropped
             if (drop_user_.empty()) {
                 as->defs()->client_suite_mgr().remove_client_suites(requester);
@@ -364,7 +369,10 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::DROP_USER: {
             std::string the_user_to_drop = vm[theArg()].as<std::string>();
-            cmd                          = std::make_shared<ClientHandleCmd>(the_user_to_drop);
+            if (std::string error; !the_user_to_drop.empty() && !ecf::is_valid_user_name(the_user_to_drop, error)) {
+                throw std::runtime_error("ClientHandleCmd: invalid " + error);
+            }
+            cmd = std::make_shared<ClientHandleCmd>(the_user_to_drop);
             break;
         }
 

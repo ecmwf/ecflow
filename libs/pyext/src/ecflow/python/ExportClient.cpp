@@ -1076,7 +1076,9 @@ void export_Client(py::module& m) {
         "Returns the server version, can throw for old servers, that did not implement this request.";
 
     static const char* ClientInvoker_set_user_name_doc =
-        "Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd";
+        "Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd.\n"
+        "The name follows the user name model (valid UTF-8; no white space, control character, '#', ',', ':' or ';'; "
+        "not starting with '-'; not '*'): a request under another name raises RuntimeError, before anything is sent.";
 
     static const char* ClientInvoker_get_host_doc =
         "Returns the host, assume set_host_port() has been set, otherwise return localhost";

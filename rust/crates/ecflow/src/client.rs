@@ -193,6 +193,10 @@ impl Client {
     }
 
     /// Override the user name from `ECF_USER`.
+    ///
+    /// The name follows the user name model (valid UTF-8; no white space,
+    /// control character, `#`, `,`, `:` or `;`; not starting with `-`; not
+    /// `*`): a request under another name fails before anything is sent.
     pub fn set_user_name(&mut self, user: &str) {
         let_cxx_string!(user = user);
         self.inner.pin_mut().set_user_name(&user);

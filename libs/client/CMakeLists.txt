@@ -120,6 +120,7 @@ if (ENABLE_SERVER)
     test/TestServerAndLifeCycle.cpp
     test/TestServerLoad.cpp
     test/TestSignalSIGTERM.cpp
+    test/TestUserNameModelAgainstServer.cpp
     test/TestWhiteListFile.cpp
   )
 endif()

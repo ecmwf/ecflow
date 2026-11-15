@@ -2517,7 +2517,8 @@ Usage:
 .. py:method:: Client.set_user_name(self: ecflow.Client, arg0: str) -> None
    :module: ecflow
 
-Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd
+Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd.
+The name follows the user name model (valid UTF-8; no white space, control character, '#', ',', ':' or ';'; not starting with '-'; not '*'): a request under another name raises RuntimeError, before anything is sent.
 
 
 .. py:method:: Client.set_zombie_child_timeout(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None

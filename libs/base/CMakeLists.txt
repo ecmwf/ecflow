@@ -38,6 +38,7 @@ set(test_srcs
   test/TestSSyncCmdOrder.cpp
   test/TestSSyncCmd_CH1.cpp
   test/TestStatsCmd.cpp
+  test/TestUserNameAuthentication.cpp
 )
 
 ecflow_add_test(

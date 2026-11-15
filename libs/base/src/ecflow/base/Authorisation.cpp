@@ -7,6 +7,7 @@
 
 #include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
 
@@ -51,14 +52,19 @@ std::string rejection_message(const std::string& reason, const ClientToServerCmd
     message += " [";
     message += command.print_short();
     message += " :";
-    message += command.identity().username().value();
+    // A name outside the user name model (refused by the authentication) is shown in its printable form
+    const auto& user = command.identity().username().value();
+    std::string error;
+    message += is_valid_user_name(user, error) ? user : printable_user_name(user);
     message += '@';
     message += command.hostname();
     message += ']';
     // One line: line breaks in the arguments of the request would otherwise split the record in the server log
     std::replace(message.begin(), message.end(), '\n', ' ');
     std::replace(message.begin(), message.end(), '\r', ' ');
-    return message;
+    // Other control characters and invalid bytes (e.g. a user name outside the model, printed by the request) never
+    // reach the reply or the log
+    return printable_text(message);
 }
 
 } // namespace ecf

@@ -456,12 +456,8 @@ whitelist file, or set ``/ecflow/server/whitelist/ignore`` to ``true``, before s
 User names
 ==========
 
-A user name in an entry:
-
-- is not empty, and is valid UTF-8;
-- contains no white space, ``#``, ``,``, ``:`` or ``;``;
-- does not start with ``-``;
-- is not ``*``: there is no wildcard, and every user is named explicitly.
+A user name in an entry follows the :ref:`user name model <user_names>`, as every user name does. In particular, a
+name is not ``*``: there is no wildcard, and every user is named explicitly.
 
 .. _permissions_attribute_denials:
 

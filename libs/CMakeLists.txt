@@ -396,6 +396,7 @@ set(srcs
   core/src/ecflow/core/NState.cpp
   core/src/ecflow/core/NodePath.cpp
   core/src/ecflow/core/Passwd.cpp
+  core/src/ecflow/core/Identity.cpp
   core/src/ecflow/core/PasswdFile.cpp
   core/src/ecflow/core/Pid.cpp
   core/src/ecflow/core/PrintStyle.cpp

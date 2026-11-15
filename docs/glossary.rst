@@ -2450,6 +2450,13 @@ Glossary
    user command
       User commands are any client to server requests that are **not** :term:`task command`\ s.
 
+   user name
+      The name identifying a user: the login name of a client, or the name given with ``ECF_USER``, ``--user`` or the
+      client libraries, as listed in the password files, the white list and the Permissions attributes.
+
+      Every user name follows one model: valid UTF-8, without white space, control characters, ``#``, ``,``, ``:`` or
+      ``;``, not starting with ``-``, and not ``*``. See :ref:`user_names`.
+
    variable
       ecFlow makes heavy use of different kinds of variables.There are several kinds of variables:
 

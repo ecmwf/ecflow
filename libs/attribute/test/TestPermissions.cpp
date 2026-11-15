@@ -85,6 +85,11 @@ BOOST_AUTO_TEST_CASE(test_permissions_user_name_rule) {
                                       "al;ice",
                                       "-alice",
                                       "*",
+                                      "al\x01ice",           // control character
+                                      "al\x7fice",           // DEL
+                                      "al\xc2\x85ice",       // next line, U+0085
+                                      "al\xc2\xa0ice",       // no-break space, U+00A0
+                                      "al\xe3\x80\x80ice",   // ideographic space, U+3000
                                       "al\xffice",           // byte never valid in UTF-8
                                       "al\xc3",              // truncated sequence
                                       "\xc3\x28",            // bad continuation

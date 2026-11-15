@@ -145,6 +145,7 @@ set(s_tests
   s_TestPythonChildApi
   s_TestServerPortReservation
   s_TestSslSetup
+  s_TestUserNames
 )
 
 if (Python3_FOUND AND pybind11_FOUND)

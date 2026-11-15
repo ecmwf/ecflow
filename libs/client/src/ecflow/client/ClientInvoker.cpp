@@ -42,10 +42,13 @@
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/cts/user/RunNodeCmd.hpp"
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/Identity.hpp"
+#include "ecflow/core/User.hpp"
 
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
@@ -434,6 +437,20 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                   // contact server
     }
     assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
+
+    // The user name of a request follows the user name model (D2.23); an invalid name is refused before anything is
+    // sent. The name is the one given (ECF_USER, --user, set_user_name()), else the login name
+    if (dynamic_cast<const UserCmd*>(cts_cmd.get()) != nullptr) {
+        const auto& given = clientEnv_.get_user_name();
+        const auto name   = given.empty() ? ecf::get_login_name() : given;
+        if (std::string error; !ecf::is_valid_user_name(name, error)) {
+            // The outcome of a previous request does not carry over to this one, which is never sent
+            server_reply_.clear_for_invoke(cli());
+            diagnosis_.clear();
+            server_reply_.set_error_msg(failed_request_prefix(*cts_cmd) + "invalid " + error);
+            return 1;
+        }
+    }
 
     // Add support for AUTO sync(using the group command), used by GUI and python *ONLY*
     // only add to group those commands that actually update the defs

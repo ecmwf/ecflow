@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Authentication.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
@@ -41,6 +43,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/server/BaseServer.hpp"
 
 namespace ecf {
@@ -58,7 +61,33 @@ inline authentication_t verify_task_authentication_rules(AbstractServer& server,
     return authentication_t::success("Authentication (task) successful");
 }
 
+///
+/// @brief Checks the user names of a request against the user name model (D2.23).
+///
+/// The names checked are the name of the identity, unless no identity was established, and the name the request
+/// carries when it differs (e.g. when the identity comes from HTTP headers).
+///
+/// @param[in] command The request.
+/// @return A failure naming the reason when a name is invalid; nothing otherwise.
+///
+inline std::optional<authentication_t> verify_user_names(const UserCmd& command) {
+    const auto& identity = command.identity();
+    if (std::string error; !identity.is_none() && !is_valid_user_name(identity.username().value(), error)) {
+        return authentication_t::failure("Authentication (user) failed, due to: invalid " + error);
+    }
+    if (const auto& user = command.user(); !user.empty() && user != identity.username().value()) {
+        if (std::string error; !is_valid_user_name(user, error)) {
+            return authentication_t::failure("Authentication (user) failed, due to: invalid " + error);
+        }
+    }
+    return std::nullopt;
+}
+
 inline authentication_t verify_user_authentication_rules(const AbstractServer& server, const UserCmd& command) {
+    if (auto refused = verify_user_names(command); refused) {
+        return *refused;
+    }
+
     const auto& service = server.authentication();
     if (service.is_authentic(command.identity())) {
         return authentication_t::success("Authentication (user) successful");
@@ -206,7 +235,11 @@ template <>
 struct Authenticator<CtsCmd>
 {
     static authentication_t accept(const CtsCmd& command, AbstractServer& server) {
-        if (command.api() == CtsCmd::Api::PING) { // No authentication required for Ping command
+        if (command.api() == CtsCmd::Api::PING) { // No credentials required for Ping command
+            // ... but its user names follow the user name model, as for every request (D2.23)
+            if (auto refused = verify_user_names(command); refused) {
+                return *refused;
+            }
             return authentication_t::success("Authentication successful");
         }
         return verify_authentication_rules(command, server);

@@ -4,8 +4,6 @@
 #include "ecflow/attribute/Permissions.hpp"
 
 #include <algorithm>
-#include <cctype>
-#include <cstdint>
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
@@ -67,48 +65,6 @@ Permissions::Entry make_entry(std::string_view user, std::string_view letters) {
     return entry;
 }
 
-// Returns whether the text is well-formed UTF-8: no overlong form, no surrogate, nothing above U+10FFFF
-bool is_valid_utf8(std::string_view text) {
-    std::size_t i = 0;
-    while (i < text.size()) {
-        const auto c       = static_cast<unsigned char>(text[i]);
-        std::size_t length = 0;
-        std::uint32_t code = 0;
-        std::uint32_t min  = 0;
-        if (c < 0x80) {
-            ++i;
-            continue;
-        }
-        if ((c & 0xE0) == 0xC0) {
-            length = 2, code = c & 0x1F, min = 0x80;
-        }
-        else if ((c & 0xF0) == 0xE0) {
-            length = 3, code = c & 0x0F, min = 0x800;
-        }
-        else if ((c & 0xF8) == 0xF0) {
-            length = 4, code = c & 0x07, min = 0x10000;
-        }
-        else {
-            return false;
-        }
-        if (i + length > text.size()) {
-            return false;
-        }
-        for (std::size_t k = 1; k < length; ++k) {
-            const auto cc = static_cast<unsigned char>(text[i + k]);
-            if ((cc & 0xC0) != 0x80) {
-                return false;
-            }
-            code = (code << 6) | (cc & 0x3F);
-        }
-        if (code < min || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) {
-            return false;
-        }
-        i += length;
-    }
-    return true;
-}
-
 } // namespace
 
 const std::array<Role, static_cast<std::size_t>(Role::Count)>& all_roles() {
@@ -141,36 +97,6 @@ std::string Roles::to_string() const {
         }
     }
     return letters;
-}
-
-bool is_valid_user_name(std::string_view name, std::string& error) {
-    if (name.empty()) {
-        error = "empty user name";
-        return false;
-    }
-    if (name == "*") {
-        error = "user name '*' is not allowed";
-        return false;
-    }
-    if (!is_valid_utf8(name)) {
-        error = "user name is not valid UTF-8";
-        return false;
-    }
-    if (name.front() == '-') {
-        error = "user name " + in_quotes(name) + " starts with '-'";
-        return false;
-    }
-    for (char c : name) {
-        if (std::isspace(static_cast<unsigned char>(c)) != 0) {
-            error = "user name " + in_quotes(name) + " contains white space";
-            return false;
-        }
-        if (c == '#' || c == ',' || c == ':' || c == ';') {
-            error = "user name " + in_quotes(name) + " contains " + in_quotes(std::string(1, c));
-            return false;
-        }
-    }
-    return true;
 }
 
 Permissions::Permissions(std::vector<Entry> entries)

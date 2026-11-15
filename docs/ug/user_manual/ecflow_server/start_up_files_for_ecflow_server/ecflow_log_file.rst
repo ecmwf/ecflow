@@ -358,7 +358,9 @@ The line holds:
   user is authenticated for a denial by the authorisation, and only claimed for a refusal by the authentication; the
   host is given by the client in both cases.
 
-A line break inside the request is replaced by a space, so that each refusal holds one line.
+A line break inside the request is replaced by a space, so that each refusal holds one line. Other control characters
+are written as ``<U+XXXX>``, and bytes that are not valid UTF-8 as ``<0xXX>``, e.g. for a user name outside the
+:ref:`user name model <user_names>`.
 
 .. _ecflow_log_file_commands:
 

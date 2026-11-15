@@ -83,6 +83,7 @@ set(test_srcs
   test/TestStringSplitter.cpp
   test/TestTimeSeries.cpp
   test/TestTimeSlot.cpp
+  test/TestUserNameModel.cpp
   test/TestVersion.cpp
   test/TestVersioning.cpp
   test/TestWhiteListFile.cpp

@@ -19,7 +19,12 @@ The read-only user names start with '-' (dash/minus). Note you must
 include a version number, e.g. 4.4.14 as the first non-comment line.
 
 The environment variable ECF_LISTS is used to point to the white list
-file. The white list file is an ASCII file.
+file. The white list file is a text file, encoded in UTF-8.
+
+Every user name follows the :ref:`user name model <user_names>`. A file holding a name outside the model is rejected
+as a whole, naming the file, the line and the reason: the server does not start, or the reload fails and the previous
+content stays in force. ``-`` (read-only access) and ``*`` (every user) are the syntax of the file, not part of a
+name: ``*bob`` names the user ``*bob``.
 
 The white list file is not used when a server :ref:`Permissions attribute <permissions_attribute>` is in force,
 and can be ignored by the configuration (see :ref:`permissions_attribute_modes`).

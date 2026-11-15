@@ -12,6 +12,8 @@
 #include <string_view>
 #include <vector>
 
+#include "ecflow/core/Identity.hpp"
+
 namespace cereal {
 class access;
 }
@@ -156,18 +158,6 @@ private:
 };
 
 ///
-/// @brief Checks a user name against the rule followed by every Permissions entry.
-///
-/// A valid user name is not empty, is valid UTF-8 (so that the JSON form can hold it), contains no white space,
-/// '#', ',', ':' or ';', does not start with '-', and is not '*'.
-///
-/// @param[in] name The user name checked.
-/// @param[out] error Receives the reason when the name is invalid; left unchanged otherwise.
-/// @return true when the name is valid.
-///
-bool is_valid_user_name(std::string_view name, std::string& error);
-
-///
 /// @brief Holds the value of a Permissions attribute: the roles granted to each listed user.
 ///
 /// The value has two textual forms:
@@ -180,7 +170,8 @@ bool is_valid_user_name(std::string_view name, std::string& error);
 ///
 /// @invariant The value holds at least one entry.
 /// @invariant Entries are sorted by user name, and each user is listed once.
-/// @invariant Every user name follows is_valid_user_name(), and every entry grants at least one role.
+/// @invariant Every user name follows the user name model (is_valid_user_name()), and every entry grants at least one
+///            role.
 ///
 class Permissions {
 public:

@@ -143,6 +143,42 @@ fn stop_kills_when_termination_is_refused() {
 }
 
 #[test]
+fn invalid_user_name_is_refused_by_the_client() {
+    let _serial = TESTS
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let Some(server) = PermissionsServer::start(ADMIN, &[ALICE], None) else {
+        return;
+    };
+
+    for name in [
+        "al ice",
+        "-bob",
+        "*",
+        "a:b",
+        "a;b",
+        "a,b",
+        "a#b",
+        "a\u{1}b",
+        "a\u{a0}b",
+        "a\u{3000}b",
+    ] {
+        let mut client = server.client(name);
+        let error = client.ping().expect_err("the user name was accepted");
+        assert_ne!(
+            error.failure(),
+            ecflow::Failure::PermissionDenied,
+            "{error}"
+        );
+        assert!(
+            error.to_string().contains("invalid user name"),
+            "{name:?}: {error}"
+        );
+    }
+    server.client("alice").ping().expect("ping");
+}
+
+#[test]
 fn denial_is_a_permission_denied_failure() {
     let _serial = TESTS
         .lock()
