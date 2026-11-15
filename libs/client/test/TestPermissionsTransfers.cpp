@@ -583,6 +583,89 @@ BOOST_AUTO_TEST_CASE(test_delete) {
 }
 
 ///
+/// @brief Verifies that restoring archived nodes removes the entries of users no longer listed above (D3.5), logs it,
+///        and that the copies of the clients equal fresh synchronisations afterwards.
+///
+BOOST_AUTO_TEST_CASE(test_restore) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice, bob}, server_attribute);
+    auto client = server.client(alice);
+    BOOST_REQUIRE_MESSAGE(client->load(suite_s("alice:rwxp,bob:r", "", "alice:rwxp,bob:r")) == 0, client->errorMsg());
+    Copies copies_of_alice{server, alice};
+    Copies copies_of_bob{server, bob};
+    copies_of_alice.start();
+    copies_of_bob.start();
+
+    BOOST_REQUIRE_MESSAGE(client->archive("/s/f") == 0, client->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client->permissions("update", "/s", "alice:rwxp", false) == 0, client->errorMsg());
+    copies_of_alice.check("archive and update");
+    copies_of_bob.check("archive and update");
+
+    BOOST_REQUIRE_MESSAGE(client->restore("/s/f") == 0, client->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/s/f/t"), "alice:rwxp");
+    copies_of_alice.check("restore");
+    copies_of_bob.check("restore");
+    const auto records = permissions_records(server);
+    BOOST_REQUIRE(!records.empty());
+    BOOST_CHECK_MESSAGE(
+        records.back().rfind(
+            "permissions /s/f/t alice:rwxp,bob:r -> alice:rwxp (removal of users above) by restore of /s/f", 0) == 0,
+        records.back());
+}
+
+///
+/// @brief Verifies that a plug moves the archived nodes as they were validated where they go: their attributes are not
+///        cut by the restoration policy of the place they leave (where the users they name may no longer be listed);
+///        a plug among siblings, which leaves the nodes where they are, restores them under that policy.
+///
+BOOST_AUTO_TEST_CASE(test_plug_of_archived_nodes) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice, bob}, server_attribute);
+    auto client = server.client(alice);
+    {
+        auto defs = Defs::create();
+        auto src  = defs->add_suite("src");
+        src->add_permissions(Permissions::parse_cli("alice:rwxp,bob:r"));
+        src->add_family("m")->add_task("t")->add_permissions(Permissions::parse_cli("alice:rwxp,bob:r"));
+        defs->add_suite("dst")->add_permissions(Permissions::parse_cli("alice:rwxp,bob:r"));
+        BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+    }
+    // m is archived, then bob is removed from /src: the archive still names bob, listed at /dst
+    BOOST_REQUIRE_MESSAGE(client->archive("/src/m") == 0, client->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client->permissions("update", "/src", "alice:rwxp", false) == 0, client->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client->plug("/src/m", "/dst") == 0, client->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/dst/m/t"), "alice:rwxp,bob:r");
+    const auto records = permissions_records(server);
+    BOOST_REQUIRE(!records.empty());
+    BOOST_CHECK_MESSAGE(records.back().rfind("permissions /dst/m/t (none) -> alice:rwxp,bob:r by alice@", 0) == 0,
+                        records.back());
+
+    // Among siblings, the source stays where it is: it is restored as an explicit restore would, and the entries of
+    // users no longer listed above are removed (D3.5)
+    {
+        auto defs = Defs::create();
+        auto sib  = defs->add_suite("sib");
+        sib->add_permissions(Permissions::parse_cli("alice:rwxp,bob:r"));
+        sib->add_family("m")->add_task("t")->add_permissions(Permissions::parse_cli("alice:rwxp,bob:r"));
+        sib->add_family("n");
+        BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+    }
+    BOOST_REQUIRE_MESSAGE(client->archive("/sib/m") == 0, client->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client->permissions("update", "/sib", "alice:rwxp", false) == 0, client->errorMsg());
+    BOOST_REQUIRE_MESSAGE(client->plug("/sib/m", "/sib/n") == 0, client->errorMsg());
+    BOOST_CHECK_EQUAL(attribute_at(server, "/sib/m/t"), "alice:rwxp");
+    const auto last = permissions_records(server);
+    BOOST_REQUIRE(!last.empty());
+    BOOST_CHECK_MESSAGE(
+        last.back().rfind("permissions /sib/m/t alice:rwxp,bob:r -> alice:rwxp (removal of users above) "
+                          "by restore of /sib/m",
+                          0) == 0,
+        last.back());
+}
+
+///
 /// @brief Verifies --load --force and --replace over nodes whose attributes are all archived: they require p, as if the
 ///        attributes were in the tree (R4.5), and the records compare with the archived attributes, nested archives
 ///        included.
@@ -675,7 +758,8 @@ BOOST_AUTO_TEST_CASE(test_load_and_replace_over_archived_attributes) {
 
 ///
 /// @brief Verifies that on a server without a server attribute, definitions carrying node attributes are refused by
-///        --load and --replace (D2.20), and other definitions are accepted as before.
+///        --load and --replace (D2.20), and other definitions are accepted as before; the start-up summary counts no
+///        node with an attribute.
 ///
 BOOST_AUTO_TEST_CASE(test_unrestricted_server) {
     ECF_NAME_THIS_TEST();
@@ -690,6 +774,54 @@ BOOST_AUTO_TEST_CASE(test_unrestricted_server) {
     BOOST_CHECK_MESSAGE(client->errorMsg().find("requires a server Permissions attribute") != std::string::npos,
                         client->errorMsg());
     BOOST_CHECK_EQUAL(attribute_at(server, "/s/f"), "-");
+
+    std::ifstream log(server.home() / "server.log");
+    const std::string text{std::istreambuf_iterator<char>(log), std::istreambuf_iterator<char>()};
+    BOOST_CHECK_MESSAGE(text.find("Nodes with permissions = 0") != std::string::npos, text);
+}
+
+///
+/// @brief Verifies that on a server without a server attribute, a local plug of an archived family whose archive
+///        carries a node attribute (written while the server had a server attribute) is refused (D2.20, D3.6): under
+///        another parent, naming the node where it would go; among its siblings, as an explicit restore. The family
+///        stays archived, its archive in place.
+///
+BOOST_AUTO_TEST_CASE(test_unrestricted_server_plug_of_archived_attributes) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice}, "");
+    auto client = server.client(alice);
+    {
+        auto defs = Defs::create();
+        auto s    = defs->add_suite("s");
+        s->add_family("f")->add_task("t");
+        s->add_family("g");
+        defs->add_suite("u");
+        BOOST_REQUIRE_MESSAGE(client->load(defs) == 0, client->errorMsg());
+    }
+    BOOST_REQUIRE_MESSAGE(client->archive("/s/f") == 0, client->errorMsg());
+    const auto archive = server.home() / ecf::Host{}.prefix_host_and_port(server.port(), ":s:f.check");
+    BOOST_REQUIRE(fs::exists(archive));
+    {
+        // The archive as written by a server holding a server attribute
+        Defs stale;
+        stale.add_suite("s")->add_family("f")->add_task("t")->add_permissions(Permissions::parse_cli("alice:rwxp"));
+        stale.write_to_checkpt_file(archive.string());
+    }
+
+    BOOST_CHECK(client->plug("/s/f", "/u") != 0);
+    BOOST_CHECK_MESSAGE(client->errorMsg().find("The Permissions attribute of /u/f/t requires a server Permissions "
+                                                "attribute") != std::string::npos,
+                        client->errorMsg());
+    BOOST_CHECK(archived(server, "/s/f"));
+    BOOST_CHECK(fs::exists(archive));
+
+    BOOST_CHECK(client->plug("/s/f", "/s/g") != 0);
+    BOOST_CHECK_MESSAGE(client->errorMsg().find("The restore of /s/f brings Permissions attributes, which require a "
+                                                "server Permissions attribute: /s/f/t") != std::string::npos,
+                        client->errorMsg());
+    BOOST_CHECK(archived(server, "/s/f"));
+    BOOST_CHECK(fs::exists(archive));
 }
 
 ///

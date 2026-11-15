@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
@@ -22,6 +23,7 @@
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/Visibility.hpp"
@@ -1190,14 +1192,14 @@ void NodeContainer::restore_on_begin_or_requeue() {
 
     // Node::requeue(...) will clear ecf::Flag::RESTORED, set in restore()
     try {
-        restore();
+        restore(true, RestoreTrigger::Automatic);
     }
     catch (std::exception& e) {
         log(Log::ERR, MESSAGE("NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what()));
     }
 }
 
-void NodeContainer::restore(bool remove_archive) {
+void NodeContainer::restore(bool remove_archive, RestoreTrigger trigger) {
     if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
         throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
                                          << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set"));
@@ -1232,11 +1234,25 @@ void NodeContainer::restore(bool remove_archive) {
                                          << " is not a container(suite/family)"));
     }
 
+    // The restoration policy of Permissions attributes (D3.5, D3.6) applies to explicit and automatic restores; the
+    // source of a plug is restored as archived, having been validated where it goes
+    Defs* owner = defs();
+    std::optional<ecf::PermissionsChange> permissions;
+    if (owner && trigger != RestoreTrigger::Transfer) {
+        permissions.emplace(*owner);
+        std::vector<node_ptr> archived_children;
+        archived_node_container->immediateChildren(archived_children);
+        permissions->prepare_restore(archived_children, *this, trigger == RestoreTrigger::Requested);
+    }
+
     swap(*archived_node_container);                            // swap the children, and set parent pointers
     get_flag().clear(ecf::Flag::ARCHIVED);                     // clear flag archived
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
     ecf::Visibility::structure_changed();
+    if (permissions) {
+        permissions->complete_restore(*this);
+    }
 
     if (!remove_archive) {
         return; // a copy: the archive remains for the original

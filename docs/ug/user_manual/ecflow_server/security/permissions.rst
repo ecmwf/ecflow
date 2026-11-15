@@ -433,7 +433,8 @@ completely or not at all. A change is rejected when:
 Removing a user from an attribute also removes that user from the attributes below it, wherever the user no longer
 holds any role above them (a sticky server entry keeps its user listed everywhere); an attribute left empty is
 removed, and its node then inherits from above. This can give the users of the upper level access to the branch
-below.
+below. Archived nodes are adjusted in the same way when they are restored (see
+:ref:`permissions_attribute_restore`).
 
 The definitions brought by ``--load`` and ``--replace`` are validated where their nodes go, with the same rules,
 before anything changes:
@@ -468,6 +469,52 @@ the new permissions allow.
 
 Configuring the server attribute, or removing it, requires a restart: every client then reconnects and synchronises
 in full.
+
+.. _permissions_attribute_restore:
+
+Restoring archived nodes
+========================
+
+Archived nodes are restored (``--restore``, ``autorestore``, or a ``--begin`` or ``--requeue`` of an archived
+container) with the attributes saved in their archive, which may no longer fit the attributes above them.
+
+On a server with a server attribute:
+
+- the entries of users no longer listed above a restored node are removed, as when a user is removed above it, and
+  an attribute left empty is removed; each removal is written to the server log (``... (removal of users above) by
+  restore of <path>``);
+- the restore never fails because of this, even when it leaves a restored node without any user holding ``p``. The
+  server then writes a warning naming the node, e.g.::
+
+     WAR:[10:12:01 15.11.2026] restore of /s/f: nobody is able to change the Permissions attribute of /s/f/g; a sticky server entry holding p can change it
+
+  Such a node can be read and run as its attribute allows, but its attribute cannot be changed by ``--permissions``
+  until a user holds ``p`` there. To recover, give a user a sticky server entry holding ``p`` (for example
+  ``--permissions update / ...,admin:rwxlops``), change the attribute of the node, and remove the sticky entry if it
+  is no longer needed.
+
+On a server without a server attribute, where node attributes are not allowed:
+
+- an explicit ``--restore`` of nodes carrying attributes fails, as a load would, and leaves the archive in place;
+- an automatic restore (``autorestore``, ``--begin``, ``--requeue``) removes their attributes, and writes a warning
+  naming the nodes.
+
+.. _permissions_attribute_checkpoints:
+
+Invalid checkpoints
+===================
+
+At start-up, and with ``--restore_from_checkpt``, every attribute of a checkpoint is checked as a load would check it:
+its syntax, the users listed above each node, and node attributes only with a server attribute (that of the
+checkpoint, or of the configuration file). An invalid attribute makes the checkpoint unusable; it is never dropped:
+
+- the server then uses the backup checkpoint, which is checked in the same way, and writes a warning, since the
+  backup may carry older attributes, granting more than those of the rejected checkpoint;
+- when both checkpoints are unusable, the server does not start. Its output names each file and the reason: the line
+  of a syntax error, or the node and the user at fault.
+
+To recover, correct the checkpoint by hand at the line or node reported (or remove the attribute concerned, or the
+entry naming the user), and start the server again.
 
 .. _permissions_attribute_internal_clients:
 

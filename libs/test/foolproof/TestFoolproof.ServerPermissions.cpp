@@ -68,13 +68,16 @@ public:
     /// @brief Writes the primary checkpoint, holding the given server attribute and a suite carrying an attribute.
     ///
     /// @param[in] server_permissions The server attribute, in the command-line form; none when empty
+    /// @param[in] suite_permissions The attribute of the suite, in the command-line form; it names only users listed
+    ///            by the server attribute in force, or the checkpoint is rejected (D2.15)
     ///
-    void write_checkpoint(const std::string& server_permissions) const {
+    void write_checkpoint(const std::string& server_permissions,
+                          const std::string& suite_permissions = "carol:rx") const {
         Defs defs;
         if (!server_permissions.empty()) {
             defs.server_state().set_permissions(Permissions::parse_cli(server_permissions));
         }
-        defs.add_suite("s")->add_permissions(Permissions::parse_cli("carol:rx"));
+        defs.add_suite("s")->add_permissions(Permissions::parse_cli(suite_permissions));
         defs.write_to_checkpt_file((home() / (host_name() + "." + std::to_string(port()) + ".ecf.check")).string());
     }
 
@@ -240,7 +243,7 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_checkpoint_without_attribute) {
     ecf::test::foolproof::ClearedServerEnvironment cleared;
     auto host = MakeHost{}.create();
     Startup startup(R"([{"user": "alice", "permissions": "rwxlop"}])");
-    startup.write_checkpoint("");
+    startup.write_checkpoint("", "alice:rx"); // the configured attribute lists alice only
 
     Process process(ecf::test::foolproof::ecflow_server_executable(),
                     {"--port=" + std::to_string(startup.port())},
@@ -374,10 +377,15 @@ BOOST_AUTO_TEST_CASE(test_server_permissions_restore_from_checkpoint) {
 
                 // A later checkpoint without a server attribute falls back to the configuration file
                 BOOST_REQUIRE_MESSAGE(client.delete_all(true) == 0, client.errorMsg());
-                startup.write_checkpoint("");
+                startup.write_checkpoint("", "alice:rx"); // the configured attribute lists alice only
                 BOOST_REQUIRE_MESSAGE(client.restoreDefsFromCheckPt() == 0, client.errorMsg());
                 act_as(client, "alice"); // back to the server attribute of the configuration file
                 BOOST_CHECK_EQUAL(server_permissions_of(client), "alice:rwxlops");
+                BOOST_REQUIRE_MESSAGE(client.getDefs() == 0, client.errorMsg());
+                const auto suite = client.defs()->findAbsNode("/s");
+                BOOST_REQUIRE_MESSAGE(suite, "the checkpoint was not restored");
+                BOOST_REQUIRE(suite->permissions());
+                BOOST_CHECK_EQUAL(suite->permissions()->to_cli(), "alice:rx");
                 summary = startup.last_block("Permissions:");
                 BOOST_CHECK(std::find(summary.begin(), summary.end(), "Source = configuration file") != summary.end());
             }

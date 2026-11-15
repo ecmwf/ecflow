@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <functional>
 #include <future>
 #include <list>
 #include <memory>
@@ -87,6 +88,8 @@ public:
     ///            that the user running the test is authenticated without a password, as the REST service requires
     /// @param[in] settings Further members of `/ecflow/server` in the configuration file, as JSON text, e.g.
     ///            `"whitelist": {"ignore": true}`; none when empty. With `"http": true`, the clients use HTTP.
+    /// @param[in] prepare Called with the home and the port of the server before the server is launched, e.g. to place
+    ///            checkpoint files there; nothing when empty
     /// @throws std::runtime_error when the server does not answer within the timeout, or another server answers; the
     ///         process launched, if any, is killed (never sent a request) and the port released.
     /// @throws std::exception when the process cannot be launched, with the same cleanup.
@@ -98,7 +101,8 @@ public:
                       const std::optional<std::string>& fixed_port = std::nullopt,
                       const std::optional<fs::path>& executable    = std::nullopt,
                       bool open_to_login_user                      = false,
-                      const std::string& settings                  = {})
+                      const std::string& settings                  = {},
+                      const std::function<void(const fs::path&, const std::string&)>& prepare = {})
         : administrator_{std::move(admin)},
           users_{std::move(users)},
           cleared_{cleared_environment()},
@@ -116,6 +120,11 @@ public:
                 << (permissions.empty() ? std::string{} : R"("permissions": )" + permissions + ", ")
                 << (settings.empty() ? std::string{} : settings + ", ")
                 << R"("variables": {"ECF_HOME": "home", "ECF_LOG": "server.log", "ECF_CHECKMODE": "CHECK_NEVER"}}}})";
+
+            if (prepare) {
+                fs::create_directories(home());
+                prepare(home(), port());
+            }
 
             process_ = std::make_unique<scaffold::Process>(executable.value_or(fs::path(File::find_ecf_server_path())),
                                                            std::vector<std::string>{"--port=" + port()},

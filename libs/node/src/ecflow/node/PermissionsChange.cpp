@@ -5,7 +5,9 @@
 
 #include <algorithm>
 #include <functional>
+#include <istream>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -88,6 +90,78 @@ struct Holders
 };
 
 } // namespace
+
+int line_of_permissions(std::istream& in, const std::string& path) {
+    std::vector<std::string> nodes; // the names, from the suite down
+    bool task        = false;       // true when the last name is a task, whose end keyword is optional
+    bool alias       = false;       // true when the last name is an alias: successive aliases are siblings
+    int number       = 0;
+    auto close_alias = [&]() {
+        if (alias && !nodes.empty()) {
+            nodes.pop_back();
+        }
+        alias = false;
+    };
+    for (std::string line; std::getline(in, line);) {
+        ++number;
+        std::istringstream words(line);
+        std::string keyword, name;
+        words >> keyword >> name;
+        if (keyword == "suite") {
+            nodes.assign(1, name);
+            task  = false;
+            alias = false;
+        }
+        else if (keyword == "family" || keyword == "task") {
+            close_alias();
+            if (task) {
+                nodes.pop_back();
+            }
+            nodes.push_back(name);
+            task = keyword == "task";
+        }
+        else if (keyword == "endtask") {
+            close_alias();
+            if (task) {
+                nodes.pop_back();
+            }
+            task = false;
+        }
+        else if (keyword == "alias") {
+            close_alias(); // the previous alias, a sibling, ends here (one endalias closes the last)
+            nodes.push_back(name);
+            alias = true;
+        }
+        else if (keyword == "endalias") {
+            close_alias();
+        }
+        else if (keyword == "endfamily") {
+            close_alias();
+            if (task && !nodes.empty()) {
+                nodes.pop_back();
+            }
+            if (!nodes.empty()) {
+                nodes.pop_back();
+            }
+            task = false;
+        }
+        else if (keyword == "endsuite") {
+            nodes.clear();
+            task  = false;
+            alias = false;
+        }
+        else if (keyword == "permissions") {
+            std::string current;
+            for (const auto& node : nodes) {
+                current += "/" + node;
+            }
+            if (current == path) {
+                return number;
+            }
+        }
+    }
+    return 0;
+}
 
 PermissionsChange::PermissionsChange(Defs& defs)
     : defs_{defs} {
@@ -583,6 +657,169 @@ void PermissionsChange::record_removal(const Node& subtree) {
                 PermissionsChangeRecord{node.absNodePath(), value_of(node.permissions()), std::nullopt, false});
         }
     });
+}
+
+void PermissionsChange::prepare_restore(const std::vector<node_ptr>& archived,
+                                        const Node& container,
+                                        bool requested) const {
+    if (server_after()) {
+        return;
+    }
+    // Without a server attribute, node attributes are not allowed (D2.20, D3.6)
+    std::vector<Node*> carrying;
+    std::function<void(Node&)> collect = [&](Node& node) {
+        if (node.permissions()) {
+            carrying.push_back(&node);
+        }
+        std::vector<node_ptr> children;
+        node.immediateChildren(children);
+        for (const auto& child : children) {
+            collect(*child);
+        }
+    };
+    for (const auto& node : archived) {
+        collect(*node);
+    }
+    if (carrying.empty()) {
+        return;
+    }
+    std::string named;
+    for (const auto* node : carrying) {
+        named += (named.empty() ? "" : ", ") + node->absNodePath();
+    }
+    if (requested) {
+        throw std::runtime_error(
+            "The restore of " + container.absNodePath() +
+            " brings Permissions attributes, which require a server Permissions attribute: " + named);
+    }
+    for (auto* node : carrying) {
+        node->set_permissions(nullptr);
+    }
+    ecf::log(Log::WAR,
+             "restore of " + container.absNodePath() +
+                 ": Permissions attributes removed, the server having no server Permissions attribute: " + named);
+}
+
+void PermissionsChange::complete_restore(Node& container) {
+    const auto* server = server_after();
+    if (!server) {
+        return;
+    }
+    records_.clear();
+    candidate_.clear();
+    walkers_.clear();
+    for (const auto& entry : server->entries()) {
+        walkers_.emplace_back(server, entry.user);
+    }
+
+    // The entries of users not listed above are removed, as in the cascade (D3.5, D2.17)
+    const auto states = states_at(&container);
+    std::vector<node_ptr> children;
+    container.immediateChildren(children);
+    for (const auto& child : children) {
+        cascade(*child, states);
+    }
+    std::function<void(Node&)> apply = [&](Node& node) {
+        if (const auto it = candidate_.find(&node); it != candidate_.end()) {
+            const auto before = value_of(node.permissions());
+            node.set_permissions(it->second ? &*it->second : nullptr);
+            write_record(PermissionsChangeRecord{node.absNodePath(), before, it->second, true},
+                         "restore of " + container.absNodePath());
+        }
+        std::vector<node_ptr> below;
+        node.immediateChildren(below);
+        for (const auto& child : below) {
+            apply(*child);
+        }
+    };
+    for (const auto& child : children) {
+        apply(*child);
+    }
+    candidate_.clear();
+
+    // A lockout is accepted, with a warning naming the topmost nodes concerned (D3.5)
+    std::function<void(const Node&, const std::vector<EffectivePermissions::State>&, bool)> warn =
+        [&](const Node& node, const std::vector<EffectivePermissions::State>& parent, bool parent_held_p) {
+            std::vector<EffectivePermissions::State> here;
+            here.reserve(walkers_.size());
+            for (std::size_t i = 0; i < walkers_.size(); ++i) {
+                here.push_back(walkers_[i].descend(parent[i], node.permissions()));
+            }
+            const bool held_p = holds_p(here);
+            if (parent_held_p && !held_p) {
+                ecf::log(Log::WAR,
+                         "restore of " + container.absNodePath() +
+                             ": nobody is able to change the Permissions attribute of " + node.absNodePath() +
+                             "; a sticky server entry holding p can change it");
+            }
+            std::vector<node_ptr> below;
+            node.immediateChildren(below);
+            for (const auto& child : below) {
+                warn(*child, here, held_p);
+            }
+        };
+    const bool container_held_p = holds_p(states);
+    for (const auto& child : children) {
+        warn(*child, states, container_held_p);
+    }
+}
+
+void PermissionsChange::check_node(const Node& node,
+                                   const std::vector<EffectivePermissions::State>& parent,
+                                   bool suite) const {
+    const auto* attribute = node.permissions();
+    if (attribute) {
+        if (!server_after()) {
+            throw InvalidPermissions(node.absNodePath(),
+                                     "The Permissions attribute of " + node.absNodePath() +
+                                         " requires a server Permissions attribute");
+        }
+        for (const auto& entry : attribute->entries()) {
+            if (!listed(entry.user, suite, parent)) {
+                throw InvalidPermissions(node.absNodePath(),
+                                         "The Permissions attribute of " + node.absNodePath() + " names the user '" +
+                                             entry.user + "', who is not listed above it");
+            }
+        }
+    }
+    std::vector<EffectivePermissions::State> here;
+    here.reserve(walkers_.size());
+    for (std::size_t i = 0; i < walkers_.size(); ++i) {
+        here.push_back(walkers_[i].descend(parent[i], attribute));
+    }
+    std::vector<node_ptr> children;
+    node.immediateChildren(children);
+    for (const auto& child : children) {
+        check_node(*child, here, false);
+    }
+}
+
+void PermissionsChange::check_definitions(const Permissions* server) {
+    if (server && !defs_.server_state().permissions()) {
+        server_ = *server;
+    }
+    if (!server_after()) {
+        // Node attributes require a server attribute (D2.20): the first node carrying one is at fault
+        for (const auto& suite : defs_.suites()) {
+            if (const auto* found = first_carrying(*suite); found) {
+                throw InvalidPermissions(found->absNodePath(),
+                                         "The Permissions attribute of " + found->absNodePath() +
+                                             " requires a server Permissions attribute");
+            }
+        }
+        return;
+    }
+    walkers_.clear();
+    if (const auto* in_force = server_after(); in_force) {
+        for (const auto& entry : in_force->entries()) {
+            walkers_.emplace_back(in_force, entry.user);
+        }
+    }
+    const auto states = states_at(nullptr);
+    for (const auto& suite : defs_.suites()) {
+        check_node(*suite, states, true);
+    }
+    server_.reset();
 }
 
 void PermissionsChange::log(const std::string& requester) const {

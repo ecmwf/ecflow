@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include <iosfwd>
 #include <optional>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -13,6 +15,7 @@
 
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/node/EffectivePermissions.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class Defs;
 class Node;
@@ -29,6 +32,45 @@ struct PermissionsChangeRecord
     std::optional<Permissions> after;  ///< The attribute after the change; std::nullopt when the node has none
     bool cascade{false};               ///< True for a change made by the removal of a user above the node
 };
+
+///
+/// @brief Reports an invalid Permissions attribute found in definitions, naming the node that carries it.
+///
+class InvalidPermissions : public std::runtime_error {
+public:
+    ///
+    /// @brief Creates the report.
+    ///
+    /// @param[in] path The path of the node carrying the attribute
+    /// @param[in] what The reason, naming the node
+    ///
+    InvalidPermissions(std::string path, const std::string& what)
+        : std::runtime_error(what),
+          path_{std::move(path)} {}
+
+    ///
+    /// @brief Returns the path of the node carrying the attribute.
+    ///
+    /// @return The path.
+    ///
+    [[nodiscard]] const std::string& path() const { return path_; }
+
+private:
+    std::string path_;
+};
+
+///
+/// @brief Returns the number of the line of definitions, in the defs format, holding the Permissions attribute of a
+///        node.
+///
+/// The lines are read one by one, following the keywords suite, family, task and alias, and their end keywords
+/// (endtask included), to know the node of each line.
+///
+/// @param[in,out] in The definitions, read to their end or to the line found
+/// @param[in] path The path of the node
+/// @return The number, from 1; 0 when the line is not found.
+///
+int line_of_permissions(std::istream& in, const std::string& path);
 
 ///
 /// @brief Validates and applies changes of Permissions attributes, all or nothing.
@@ -145,6 +187,46 @@ public:
     void record_removal(const Node& subtree);
 
     ///
+    /// @brief Applies the restoration policy to archived nodes, before they are restored (D3.6).
+    ///
+    /// Without a server attribute, node attributes are not allowed (D2.20): when the nodes restored carry some, an
+    /// explicit restore fails, as a load would, and an automatic one (autorestore, or a restore during begin or
+    /// requeue) strips them, with a warning naming the nodes. With a server attribute, nothing is done here (see
+    /// complete_restore()).
+    ///
+    /// @param[in,out] archived The children read from the archive, about to be restored under @p container
+    /// @param[in] container The container restored, part of the definitions
+    /// @param[in] requested True for an explicit restore (--restore, or of the source of a plug among its siblings)
+    /// @throws std::runtime_error for an explicit restore of nodes carrying attributes, without a server attribute.
+    ///
+    void prepare_restore(const std::vector<node_ptr>& archived, const Node& container, bool requested) const;
+
+    ///
+    /// @brief Applies the restoration policy to the nodes just restored under a container (D3.5).
+    ///
+    /// With a server attribute, the entries naming users no longer listed above are removed, and the attributes left
+    /// empty with them, as in the cascade of D2.17; each removal is logged. The restore never fails because of this:
+    /// a restored node left without any holder of p, below a node that has one, is accepted, with a warning naming
+    /// it.
+    ///
+    /// @param[in,out] container The container restored, part of the definitions
+    ///
+    void complete_restore(Node& container);
+
+    ///
+    /// @brief Checks every attribute of the definitions, as loaded from a checkpoint (R3.5, D11.4).
+    ///
+    /// Node attributes require a server attribute (D2.20), and their entries name only users listed above their
+    /// nodes (D2.15, D2.18). Self-lockouts are not checked: a restore can leave them (D3.5). Without a server
+    /// attribute, the first node carrying one, in the order of a walk of the tree, is at fault.
+    ///
+    /// @param[in] server The server attribute in force: that of the checkpoint, or of the configuration file; nullptr
+    ///            when none
+    /// @throws InvalidPermissions naming the first node at fault.
+    ///
+    void check_definitions(const Permissions* server);
+
+    ///
     /// @brief Writes the log records of the changes validated by validate_transfer(), once the operation is applied.
     ///
     /// @param[in] requester The identity of the requester, written in the log records
@@ -167,6 +249,7 @@ private:
     [[nodiscard]] bool
     listed(const std::string& user, bool suite, const std::vector<EffectivePermissions::State>& parent) const;
     void validate_transfer(const Node& subtree, const Node* parent, const Node* from, bool moved);
+    void check_node(const Node& node, const std::vector<EffectivePermissions::State>& parent, bool suite) const;
     void transfer(const Node& node,
                   const std::string& path,
                   const std::vector<EffectivePermissions::State>& parent,

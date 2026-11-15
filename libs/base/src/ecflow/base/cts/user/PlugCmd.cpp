@@ -57,17 +57,22 @@ private:
 };
 
 // Restores every archived container of a source, at any depth, top down; the archive files are removed unless they
-// must remain (restoring a copy), and the paths of the archives read are recorded
-void restore(NodeContainer* container, bool remove_archive, std::vector<std::string>& archives) {
+// must remain (restoring a copy), and the paths of the archives read are recorded. A source moved under another
+// parent, validated where it goes, is restored as archived (a transfer); a source reordered among its siblings stays
+// where it is, and is restored as an explicit restore would (D3.5, D3.6)
+void restore(NodeContainer* container,
+             bool remove_archive,
+             std::vector<std::string>& archives,
+             NodeContainer::RestoreTrigger trigger = NodeContainer::RestoreTrigger::Transfer) {
     if (!container) {
         return;
     }
     if (container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
         archives.push_back(container->archive_path());
-        container->restore(remove_archive);
+        container->restore(remove_archive, trigger);
     }
     for (const family_ptr& family : container->familyVec()) {
-        restore(family->isNodeContainer(), remove_archive, archives);
+        restore(family->isNodeContainer(), remove_archive, archives, trigger);
     }
 }
 
@@ -383,7 +388,11 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 
     // If the source node or *any* of its children are archived restore them first. Must be done in a top down manner.
     std::vector<std::string> archives;
-    restore(sourceNode->isNodeContainer(), true, archives);
+    restore(sourceNode->isNodeContainer(),
+            true,
+            archives,
+            sourceNode->parent() == destNode->parent() ? NodeContainer::RestoreTrigger::Requested
+                                                       : NodeContainer::RestoreTrigger::Transfer);
 
     if (sourceNode->parent() == destNode->parent()) {
         Node* parent = sourceNode->parent();

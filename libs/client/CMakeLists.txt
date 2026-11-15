@@ -110,6 +110,7 @@ if (ENABLE_SERVER)
     test/TestPermissionsDenial.cpp
     test/TestPermissionsNodeRoles.cpp
     test/TestPermissionsRoles.cpp
+    test/TestPermissionsStartup.cpp
     test/TestPermissionsFiltering.cpp
     test/TestPermissionsHarness.cpp
     test/TestPermissionsLifecycle.cpp

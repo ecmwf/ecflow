@@ -3,8 +3,10 @@
 
 #include "ecflow/server/BaseServer.hpp" // Must come before boost/serialization headers.
 
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/Authorisation.hpp"
@@ -19,6 +21,7 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Operations.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/service/Registry.hpp"
@@ -144,6 +147,14 @@ bool BaseServer::load_check_pt_file_on_startup() {
     bool backup_checkpt_failed = false;
     std::string backup_checkpt_error;
     if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed, &backup_checkpt_error)) {
+        if (checkpt_failed) {
+            // The backup may carry older, wider permissions (R11.12)
+            log(Log::WAR,
+                "Started from the backup checkpoint " + serverEnv_.oldCheckPtFilename() + ", the checkpoint " +
+                    serverEnv_.checkPtFilename() + " having been rejected (" + checkpt_error +
+                    "); the backup may carry older Permissions attributes, granting more than those of the rejected "
+                    "checkpoint");
+        }
         return true;
     }
 
@@ -174,6 +185,14 @@ void BaseServer::loadCheckPtFile() {
 
     bool backup_checkpt_failed = false;
     if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed)) {
+        if (checkpt_failed) {
+            // The backup may carry older, wider permissions (R11.12)
+            log(Log::WAR,
+                "Restored from the backup checkpoint " + serverEnv_.oldCheckPtFilename() + ", the checkpoint " +
+                    serverEnv_.checkPtFilename() +
+                    " having been rejected; the backup may carry older Permissions attributes, granting more than "
+                    "those of the rejected checkpoint");
+        }
         return;
     }
     if (backup_checkpt_failed) {
@@ -210,7 +229,19 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed,
             if (!fs::is_regular_file(filename)) {
                 throw std::runtime_error("Checkpoint path is not a regular file");
             }
-            defs_->restore(filename);   // this can throw
+            defs_->restore(filename); // this can throw
+            // Every Permissions attribute is checked, under the server attribute in force: invalid content is a
+            // failure, never dropped (R3.5, D11.4)
+            try {
+                ecf::PermissionsChange(*defs_).check_definitions(serverEnv_.permissions());
+            }
+            catch (const ecf::InvalidPermissions& e) {
+                std::ifstream file(filename);
+                const auto line = ecf::line_of_permissions(file, e.path());
+                throw std::runtime_error(std::string("invalid Permissions attributes in ") + filename + ": " +
+                                         e.what() +
+                                         (line > 0 ? " (line number " + std::to_string(line) + ")" : std::string()));
+            }
             defs_->handle_migration();  // handle any migration of checkpt file.
             update_defs_server_state(); // works on def_
             LOG(Log::MSG,
@@ -428,9 +459,12 @@ void BaseServer::log_permissions_summary() const {
             break;
     }
 
+    // Without a server attribute, no node carries one (D2.20): the tree is not walked
     std::size_t nodes = 0;
-    for (const auto* node : ecf::get_all_nodes(static_cast<const Defs&>(*defs_))) {
-        nodes += node->permissions() ? 1 : 0;
+    if (server) {
+        for (const auto* node : ecf::get_all_nodes(static_cast<const Defs&>(*defs_))) {
+            nodes += node->permissions() ? 1 : 0;
+        }
     }
 
     for (const auto& line :
