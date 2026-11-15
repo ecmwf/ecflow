@@ -35,6 +35,7 @@
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
@@ -359,6 +360,14 @@ template <>
 struct Authenticator<PlugCmd>
 {
     static authentication_t accept(const PlugCmd& command, AbstractServer& server) {
+        return verify_authentication_rules(command, server);
+    }
+};
+
+template <>
+struct Authenticator<PermissionsCmd>
+{
+    static authentication_t accept(const PermissionsCmd& command, AbstractServer& server) {
         return verify_authentication_rules(command, server);
     }
 };

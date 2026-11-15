@@ -459,6 +459,23 @@ public:
     int plug(const std::string& sourcePath, const std::string& destPath) const;
 
     ///
+    /// @brief Reads or changes the Permissions attribute of a node, or of the server (--permissions).
+    ///
+    /// @param[in] operation One of create, read, update, delete or effective
+    /// @param[in] path The path of a node, or "/" for the server
+    /// @param[in] value The attribute for create and update (command-line or JSON form), the user for effective
+    ///            (the requester when empty); empty for read and delete
+    /// @param[in] json When true, read and effective return the JSON form instead of the command-line form
+    /// @return 0 on success, the value returned by read and effective being available via get_string(); 1 on failure,
+    ///         when the client does not throw on error (see set_throw_on_error()).
+    /// @throws ecf::PermissionDenied when the server refuses the request by its authorisation, and the client throws
+    ///         on error.
+    /// @throws std::runtime_error for any other failure, the invalid arguments included, when the client throws on
+    ///         error.
+    ///
+    int permissions(const std::string& operation, const std::string& path, const std::string& value, bool json);
+
+    ///
     /// @brief Queries an attribute (state, event, meter, variable, trigger expression, ...) on the server.
     ///
     /// @param[in] query_type the kind of query, e.g. state, dstate, repeat, event, meter, label, variable, trigger

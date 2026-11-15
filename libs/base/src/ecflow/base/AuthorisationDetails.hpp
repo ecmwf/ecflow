@@ -41,6 +41,7 @@
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
@@ -634,6 +635,17 @@ struct Authoriser<PathsCmd>
                 break;
         }
         return authorisation_t::failure("Authorisation (user) failed, due to: unknown command");
+    }
+};
+
+template <>
+struct Authoriser<PermissionsCmd>
+{
+    static authorisation_t accept(const PermissionsCmd& command, const RequestContext& context) {
+        // read and effective read the node, or the server for "/" (D3.1, D5.24); create, update and delete change
+        // the attribute, which requires p there (D2.21)
+        const auto role = command.changes() ? Role::Permissions : Role::Read;
+        return require_role(command, context, role, node_or_server(command.path()));
     }
 };
 

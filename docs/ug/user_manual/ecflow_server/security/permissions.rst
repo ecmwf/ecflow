@@ -105,10 +105,11 @@ The rules are:
 
 There are no deny entries: roles are removed by omission, or by restriction below a suite.
 
-Removing a user from an attribute also removes that user from every attribute below it, since no attribute may name
-a user absent from above. An attribute left empty by this removal is itself removed, and its node then inherits from
-above: the users of the upper level may then gain access to that branch. Check the attributes below a node before
-removing a user from it.
+Removing a user from an attribute also removes that user from the attributes below it, wherever the user no longer
+holds any role above them, since no attribute may name a user absent from above (see
+:ref:`permissions_attribute_changes`). An attribute left empty by this removal is itself removed, and its node then
+inherits from above: the users of the upper level may then gain access to that branch. Check the attributes below a
+node before removing a user from it.
 
 Examples, for the user ``alice``:
 
@@ -311,6 +312,12 @@ The commands below require a role at the server level, or at the node they addre
      - ``w`` and ``p``
      - the source and the destination; for a destination on another server, that server checks the destination
        under the identity of the user: ``w`` and ``p`` there, or ``o`` (and ``p`` for attributes) for a whole suite
+   * - ``--permissions read``, ``--permissions effective``
+     - ``r``
+     - the node (the server for ``/``)
+   * - ``--permissions create``, ``--permissions update``, ``--permissions delete``
+     - ``p``
+     - the node (the server for ``/``)
 
 Notes:
 
@@ -380,6 +387,65 @@ The following are not filtered, and remain visible to every user holding ``r`` a
 
 These channels let a user infer that unreadable nodes exist (e.g. a trigger naming them, or a change number moving
 while nothing readable changed); this is accepted.
+
+.. _permissions_attribute_changes:
+
+Changing permissions
+====================
+
+The command ``--permissions`` reads and changes attributes at run time. It acts on the whole list of one attribute,
+at exactly one path; ``/`` addresses the server attribute:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Command
+     - Effect
+   * - ``--permissions create <path> <value>``
+     - Gives the node an attribute; fails when the node already has one.
+   * - ``--permissions read <path>``
+     - Prints the attribute; fails when the node has none.
+   * - ``--permissions update <path> <value>``
+     - Replaces the attribute; fails when the node has none.
+   * - ``--permissions delete <path>``
+     - Removes the attribute; the node then inherits from above. Fails when the node has none.
+   * - ``--permissions effective <path> [<user>]``
+     - Prints the effective roles of the user at the path (the requester by default), e.g. ``rwx``; nothing when the
+       user holds no role there.
+
+Notes:
+
+- The value is given in the command-line form (``alice:rwxp,bob:r``) or in the JSON form; ``--fmt json`` makes
+  ``read`` and ``effective`` print the JSON form.
+- ``read`` and ``effective`` require ``r`` at the path; ``create``, ``update`` and ``delete`` require ``p``.
+- At ``/``, only ``update`` is possible: the server attribute is created or removed only through the configuration
+  file and a restart (see :ref:`permissions_attribute_unrestricted`).
+- On a server without a server attribute, node attributes cannot be created.
+
+Every change, whether made by ``--permissions`` or brought by another command, is validated as a whole, and applied
+completely or not at all. A change is rejected when:
+
+- an entry names a user who is not listed above the node: at a suite, a user not listed by the server attribute;
+  below a suite, a user holding no effective role at the parent node;
+- it would leave a node, or the server, where some user held ``p``, without any user holding ``p``.
+
+Removing a user from an attribute also removes that user from the attributes below it, wherever the user no longer
+holds any role above them (a sticky server entry keeps its user listed everywhere); an attribute left empty is
+removed, and its node then inherits from above. This can give the users of the upper level access to the branch
+below.
+
+Each change is written to the server log, with the requester, the path, and the old and new values, e.g.::
+
+   LOG:[10:12:01 15.11.2026]  permissions /s alice:rwxp,bob:r -> alice:rwxp by alice@host
+   LOG:[10:12:01 15.11.2026]  permissions /s/f alice:rp,bob:r -> alice:rp (removal of users above) by alice@host
+
+A change of permissions can change what clients may read: the clients receiving the nodes concerned (every client,
+for a change of the server attribute) synchronise fully at their next request, and from then on receive only what
+the new permissions allow.
+
+Configuring the server attribute, or removing it, requires a restart: every client then reconnects and synchronises
+in full.
 
 .. _permissions_attribute_internal_clients:
 
@@ -537,6 +603,18 @@ Each client reports a denial distinctly from any other error:
      - Raises ``ecflow.PermissionDenied``, a subclass of ``RuntimeError``
    * - Rust
      - Returns the failure ``Failure::PermissionDenied``
+
+To obtain the access a denial reports:
+
+#. read the role and the node it names, e.g. ``role x required at /s/f``;
+#. ask a user holding ``p`` at that node to grant the role (``ecflow_client --permissions update``): the attribute in
+   force is that of the node, or of its closest ancestor carrying one, and ``ecflow_client --permissions read`` on
+   that node shows its entries; ``ecflow_client --permissions effective /s/f <user>`` tells the roles a user holds;
+#. when nobody holding ``p`` can be reached, ask the administrators of the server, who hold ``p`` at the server level
+   (a sticky entry keeps it on every node, see :ref:`permissions_attribute_effective`).
+
+The errors of the command ``--permissions`` follow one style, without internal names: the option, then the reason,
+e.g. ``--permissions: /s/f has no Permissions attribute``.
 
 Notes:
 

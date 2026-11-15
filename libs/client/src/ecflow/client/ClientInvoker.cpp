@@ -36,6 +36,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
@@ -1646,6 +1647,30 @@ int ClientInvoker::query(const std::string& query_type,
     }
     return invoke(
         std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path(), evaluate));
+}
+
+int ClientInvoker::permissions(const std::string& operation,
+                               const std::string& path,
+                               const std::string& value,
+                               bool json) {
+    if (testInterface_) {
+        return invoke(CtsApi::permissions(operation, path, value, json));
+    }
+    try {
+        server_reply_.clear_for_invoke(cli()); // no state of an earlier request remains
+        diagnosis_.clear();
+        server_reply_.set_diagnosis(diagnosis_);
+        PermissionsCmd::check_arguments(operation, path, value);
+    }
+    catch (const std::exception& e) {
+        server_reply_.set_error_msg(e.what());
+        if (on_error_throw_exception_) {
+            throw std::runtime_error(e.what());
+        }
+        return 1;
+    }
+    return invoke(std::make_shared<PermissionsCmd>(
+        operation, path, value, json ? PermissionsCmd::Format::Json : PermissionsCmd::Format::Cli));
 }
 
 // ======================================================================================================

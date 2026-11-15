@@ -396,6 +396,26 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
 
     BOOST_REQUIRE_MESSAGE(theClient.plug("/source", "/dest") == 0, " should return 0\n" << theClient.errorMsg());
 
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("create", "/s", "alice:rwxp,bob:r", false) == 0,
+                          "--permissions create should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("read", "/s", "", true) == 0,
+                          "--permissions read should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(
+        theClient.permissions("update", "/", R"([{"user": "admin", "permissions": "rwxlops"}])", false) == 0,
+        "--permissions update should return 0\n"
+            << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("delete", "/s/f", "", false) == 0,
+                          "--permissions delete should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("effective", "/s/f", "bob", false) == 0,
+                          "--permissions effective should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("effective", "/s/f", "", true) == 0,
+                          "--permissions effective, for the requester, should return 0\n"
+                              << theClient.errorMsg());
+
     {
         BOOST_REQUIRE_MESSAGE(theClient.getLog(10) == 0, " should return 0\n" << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.clearLog() == 0,
@@ -1476,6 +1496,19 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
     BOOST_REQUIRE_MESSAGE(theClient.query("repeat", "/suite", "prevyyy") == 1,
                           CtsApi::queryArg() << " should return 1\n"
                                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("list", "/s", "", false) == 1,
+                          "--permissions with an unknown operation should return 1\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("read", "s", "", false) == 1,
+                          "--permissions with a relative path should return 1\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("create", "/s", "", false) == 1,
+                          "--permissions create without a value should return 1\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.permissions("delete", "/s", "alice:r", false) == 1,
+                          "--permissions delete with a value should return 1\n"
+                              << theClient.errorMsg());
 }
 
 BOOST_AUTO_TEST_CASE(test_client_task_interface) {

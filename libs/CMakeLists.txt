@@ -175,6 +175,7 @@ set(srcs
   base/src/ecflow/base/cts/user/MoveCmd.hpp
   base/src/ecflow/base/cts/user/OrderNodeCmd.hpp
   base/src/ecflow/base/cts/user/PathsCmd.hpp
+  base/src/ecflow/base/cts/user/PermissionsCmd.hpp
   base/src/ecflow/base/cts/user/PlugCmd.hpp
   base/src/ecflow/base/cts/user/QueryCmd.hpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
@@ -259,6 +260,7 @@ set(srcs
   base/src/ecflow/base/cts/user/MoveCmd.cpp
   base/src/ecflow/base/cts/user/OrderNodeCmd.cpp
   base/src/ecflow/base/cts/user/PathsCmd.cpp
+  base/src/ecflow/base/cts/user/PermissionsCmd.cpp
   base/src/ecflow/base/cts/user/PlugCmd.cpp
   base/src/ecflow/base/cts/user/QueryCmd.cpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.cpp

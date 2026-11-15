@@ -31,6 +31,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
@@ -225,6 +226,11 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TIME, "+12:00")));
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TIME, "+10:00 20:00 00:30")));
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TODAY, "10:00 20:00 00:30")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("create", "/suiteName", "alice:rwxp,bob:r")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("read", "/suiteName", "", PermissionsCmd::Format::Json)));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("update", "/", "admin:rwxlops,alice:r,bob:r")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("delete", "/suiteName/t1")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("effective", "/suiteName/t1", "bob")));
     cmd_vec.push_back(Cmd_ptr(new PlugCmd()));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("event", "/suiteName/t1", "event", "")));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));

@@ -32,6 +32,8 @@ use bindman::track_cpp_api;
         "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
         "delete_node", "forceDependencyEval", "edit_script",
+        // Permissions attributes, not bound yet
+        "permissions",
     ]
 )]
 #[cxx::bridge]

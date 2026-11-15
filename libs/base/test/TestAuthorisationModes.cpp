@@ -22,6 +22,7 @@
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
@@ -383,6 +384,30 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_fail_closed_requests) {
     BOOST_CHECK(denied(replies->cmdVec()[0]));
     BOOST_CHECK_EQUAL(throwing->runs, 0);
     BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+}
+
+///
+/// @brief Verifies that the server checks the user diagnosed by --permissions effective, for a request built directly,
+///        which no client has checked (R2.8).
+///
+BOOST_AUTO_TEST_CASE(test_permissions_effective_user_checked_by_the_server) {
+    ECF_NAME_THIS_TEST();
+
+    MockServer server(make_defs("bob:r"));
+    // The server refuses the request while handling it (the server turns the exception into an error reply)
+    for (const std::string name : {"a:b", "*", "al ice"}) {
+        BOOST_TEST_CONTEXT("user '" << name << "'") {
+            BOOST_CHECK_EXCEPTION((void)TestHelper::invokeRequestAs(
+                                      &server, std::make_shared<PermissionsCmd>("effective", "/s", name), "bob"),
+                                  std::runtime_error,
+                                  [](const std::runtime_error& e) {
+                                      return std::string(e.what()).find("invalid user name") != std::string::npos;
+                                  });
+        }
+    }
+    const auto reply =
+        TestHelper::invokeRequestAs(&server, std::make_shared<PermissionsCmd>("effective", "/s", "bob"), "bob");
+    BOOST_CHECK(dynamic_cast<const ErrorCmd*>(reply.get()) == nullptr);
 }
 
 ///
