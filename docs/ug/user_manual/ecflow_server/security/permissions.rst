@@ -350,6 +350,14 @@ The replies filtered are:
 Users reading the same nodes share the content the server prepares for them; users reading different nodes never
 receive content prepared for another.
 
+Client handles (``--ch_register``, ``--ch_add``, ``--ch_suites``) follow the same rule:
+
+- registering, or adding to a handle, a suite the user cannot read is denied (``role r required at /<suite>``);
+- a registered suite that becomes unreadable stays registered, and is left out of every reply until it is readable
+  again;
+- the suites added automatically to a handle (``--ch_auto_add``) are sent only when readable;
+- ``--ch_suites`` lists the user's own handles, with the suites the user can read.
+
 The following are not filtered, and remain visible to every user holding ``r`` at server level:
 
 - the server log (``--log=get``, ``--server_load``) and the edit history (``--edit_history``, and the history

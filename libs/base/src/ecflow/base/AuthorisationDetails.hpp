@@ -361,6 +361,19 @@ struct Authoriser<ClientHandleCmd>
             case ClientHandleCmd::SUITES:
                 break;
         }
+
+        // In Permissions mode, a handle holds only suites the requester can read when they are registered or added
+        // (R5.2); a suite that becomes unreadable later stays registered, and is filtered out of the replies
+        if (authorisation_mode(context.server()) == AuthorisationMode::Permissions &&
+            (command.api() == ClientHandleCmd::REGISTER || command.api() == ClientHandleCmd::ADD)) {
+            std::vector<std::string> targets;
+            for (const auto& suite : command.suites()) {
+                targets.push_back(suite.rfind('/', 0) == 0 ? suite : "/" + suite);
+            }
+            if (!targets.empty()) {
+                return require_role(command, context, Role::Read, targets);
+            }
+        }
         return authorisation_t::success("Authorisation (user) granted");
     }
 };

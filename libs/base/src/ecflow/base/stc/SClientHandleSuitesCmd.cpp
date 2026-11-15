@@ -9,6 +9,7 @@
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +17,7 @@ SClientHandleSuitesCmd::SClientHandleSuitesCmd(AbstractServer* as) {
     init(as);
 }
 
-void SClientHandleSuitesCmd::init(AbstractServer* as) {
+void SClientHandleSuitesCmd::init(AbstractServer* as, const ecf::Visibility* visibility, const std::string& requester) {
     // This command can be re-used hence clear existing data members
     users_.clear();
     client_handles_.clear();
@@ -27,10 +28,24 @@ void SClientHandleSuitesCmd::init(AbstractServer* as) {
     size_t client_suites_size = clientSuites.size();
     client_handles_.reserve(client_suites_size);
     for (size_t c = 0; c < client_suites_size; c++) {
+        if (visibility && clientSuites[c].user() != requester) {
+            continue; // in Permissions mode, the requester's own handles only
+        }
 
         // The handle suites are already ordered same as Defs suites
         std::vector<std::string> suite_names;
         clientSuites[c].suites(suite_names);
+        if (visibility) {
+            // The suites the requester can read, and the names of suites that do not exist
+            std::vector<std::string> readable;
+            for (const auto& name : suite_names) {
+                const auto suite = as->defs()->findSuite(name);
+                if (!suite || !visibility->stops_at(*suite)) {
+                    readable.push_back(name);
+                }
+            }
+            suite_names.swap(readable);
+        }
 
         client_handles_.emplace_back(clientSuites[c].handle(), suite_names);
 

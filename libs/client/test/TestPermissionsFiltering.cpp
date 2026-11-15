@@ -226,6 +226,74 @@ BOOST_AUTO_TEST_CASE(test_incremental_synchronisation_holds_the_readable_nodes) 
 }
 
 ///
+/// @brief Returns the names of the suites held by the copy of a client.
+///
+std::set<std::string> suites_of(const ClientInvoker& client) {
+    std::set<std::string> result;
+    for (const auto& s : client.defs()->suites()) {
+        result.insert(s->name());
+    }
+    return result;
+}
+
+///
+/// @brief Verifies the client handles of two users: a suite the requester cannot read cannot be registered; a
+///        registered suite that loses read through --replace is no longer sent, and is sent again once readable;
+///        suites added automatically are sent only when readable.
+///
+BOOST_AUTO_TEST_CASE(test_client_handles) {
+    ECF_NAME_THIS_TEST();
+
+    PermissionsServer server(admin, {alice, bob}, server_attribute);
+    load_suites(server);
+
+    auto for_bob = server.client(bob);
+    BOOST_CHECK(for_bob->ch_register(false, {"open", "own"}) != 0);
+    BOOST_CHECK(for_bob->server_reply().permission_denied());
+
+    BOOST_REQUIRE_MESSAGE(for_bob->ch_register(true, {"open", "m"}) == 0, for_bob->errorMsg());
+    BOOST_REQUIRE_MESSAGE(for_bob->sync_local() == 0, for_bob->errorMsg());
+    auto for_alice = server.client(alice);
+    BOOST_REQUIRE_MESSAGE(for_alice->ch_register(false, {"open", "own", "m"}) == 0, for_alice->errorMsg());
+    BOOST_REQUIRE_MESSAGE(for_alice->sync_local() == 0, for_alice->errorMsg());
+    BOOST_CHECK(suites_of(*for_bob) == (std::set<std::string>{"open", "m"}));
+    BOOST_CHECK(suites_of(*for_alice) == (std::set<std::string>{"open", "own", "m"}));
+
+    auto administrator   = server.administrator();
+    const auto replace_m = [&](bool hidden) {
+        const auto file = server.directory() / "m.def";
+        std::ofstream(file)
+            << "suite m\n"
+            << (hidden
+                    ? R"(  permissions [{"user": "admin", "permissions": "rwxlop"}, {"user": "alice", "permissions": "r"}])"
+                      "\n"
+                    : "")
+            << "  task t\nendsuite\n";
+        BOOST_REQUIRE_MESSAGE(administrator->replace("/m", file.string(), false, true) == 0, administrator->errorMsg());
+    };
+
+    replace_m(true); // bob loses read on m
+    BOOST_REQUIRE_MESSAGE(for_bob->sync_local() == 0, for_bob->errorMsg());
+    BOOST_CHECK(suites_of(*for_bob) == (std::set<std::string>{"open"}));
+    BOOST_REQUIRE_MESSAGE(for_alice->sync_local() == 0, for_alice->errorMsg());
+    BOOST_CHECK(suites_of(*for_alice) == (std::set<std::string>{"open", "own", "m"}));
+
+    replace_m(false); // bob regains read on m
+    BOOST_REQUIRE_MESSAGE(for_bob->sync_local() == 0, for_bob->errorMsg());
+    BOOST_CHECK(suites_of(*for_bob) == (std::set<std::string>{"open", "m"}));
+
+    // Suites added automatically to bob's handle
+    const auto file = server.directory() / "more.def";
+    std::ofstream(file)
+        << "suite newpub\n  task t\nendsuite\nsuite newpriv\n"
+        << R"(  permissions [{"user": "admin", "permissions": "rwxlop"}, {"user": "alice", "permissions": "r"}])"
+        << "\n  task t\nendsuite\n";
+    BOOST_REQUIRE_MESSAGE(administrator->loadDefs(file.string()) == 0, administrator->errorMsg());
+    BOOST_REQUIRE_MESSAGE(for_bob->sync_local() == 0, for_bob->errorMsg());
+    BOOST_CHECK(suites_of(*for_bob) == (std::set<std::string>{"open", "m", "newpub"}));
+}
+
+///
 /// @brief Verifies that --get, --get_state and --migrate of a readable node omit its unreadable descendants.
 ///
 BOOST_AUTO_TEST_CASE(test_node_replies_omit_unreadable_descendants) {

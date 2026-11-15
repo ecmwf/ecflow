@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(test_aliases) {
 }
 
 ///
-/// @brief Verifies that a full synchronisation through a handle returns only the readable nodes, for a handle holding
+/// @brief Verifies that a full synchronisation through a handle returns only the readable nodes, for handles holding
 ///        some suites and for a handle holding all suites.
 ///
 BOOST_AUTO_TEST_CASE(test_full_sync_with_handle) {
@@ -361,8 +361,9 @@ BOOST_AUTO_TEST_CASE(test_full_sync_with_handle) {
     CHECK_PATHS(received_defs(server, std::make_shared<CSyncCmd>(subset), "bob"),
                 (std::set<std::string>{"/m", "/m/seen", "/m/seen/t"}));
 
-    const auto all = register_handle(server, "bob", {"open", "own", "m"});
-    CHECK_PATHS(received_defs(server, std::make_shared<CSyncCmd>(all), "bob"), without_alice_only);
+    // A handle cannot hold a suite its user cannot read (see T_HandleFiltering)
+    const auto readable = register_handle(server, "bob", {"open", "m"});
+    CHECK_PATHS(received_defs(server, std::make_shared<CSyncCmd>(readable), "bob"), without_alice_only);
 
     const auto alice = register_handle(server, "alice", {"open", "own", "m"});
     CHECK_PATHS(received_defs(server, std::make_shared<CSyncCmd>(alice), "alice"), everything);

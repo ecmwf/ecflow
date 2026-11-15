@@ -46,6 +46,13 @@ public:
     ///
     int client_handle() const { return client_handle_; }
 
+    ///
+    /// @brief Returns the names of the suites the command registers or adds (REGISTER, ADD, REMOVE), or none.
+    ///
+    /// @return The suite names, as given.
+    ///
+    const std::vector<std::string>& suites() const { return suites_; }
+
     bool cmd_updates_defs() const override;
     using UserCmd::print;
     void print(std::string&) const override;

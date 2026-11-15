@@ -141,8 +141,9 @@ STC_Cmd_ptr PreAllocatedReply::client_handle_cmd(int handle) {
 STC_Cmd_ptr PreAllocatedReply::client_handle_suites_cmd(const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("client_handle_suites_cmd", context);
-    auto* cmd = dynamic_cast<SClientHandleSuitesCmd*>(client_handle_suites_cmd_.get());
-    cmd->init(as);
+    auto* cmd             = dynamic_cast<SClientHandleSuitesCmd*>(client_handle_suites_cmd_.get());
+    const auto visibility = filter_of(context);
+    cmd->init(as, visibility.get(), context.identity().username().value());
     return client_handle_suites_cmd_;
 }
 
