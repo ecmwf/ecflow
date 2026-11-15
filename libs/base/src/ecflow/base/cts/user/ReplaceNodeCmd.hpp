@@ -26,6 +26,27 @@ public:
     ///
     defs_ptr client_definitions() const;
 
+    ///
+    /// @brief Identifies the nodes concerned by a replace, as Defs::replaceChild determines them.
+    ///
+    struct Target
+    {
+        node_ptr existing; ///< The node of the server at the path, if any
+        const Node*
+            imported{};  ///< The subtree imported: the client node, or its topmost ancestor missing on the server
+        node_ptr parent; ///< The node of the server under which the subtree goes; null for a suite
+    };
+
+    ///
+    /// @brief Returns the nodes concerned by the replace of a node.
+    ///
+    /// @param[in] server The definitions of the server
+    /// @param[in] client_node The node at the path, in the client definitions
+    /// @param[in] create Whether missing parents are created
+    /// @return The nodes; when the node exists, imported is the client node and parent that of the existing node.
+    ///
+    static Target target(const Defs& server, const node_ptr& client_node, bool create);
+
     bool isWrite() const override { return true; }
     time_duration_t timeout() const override { return std::chrono::seconds{300}; }
     using UserCmd::print;

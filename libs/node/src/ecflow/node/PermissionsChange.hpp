@@ -4,6 +4,7 @@
 #pragma once
 
 #include <optional>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -92,6 +93,38 @@ public:
     void commit(const std::string& requester);
 
     ///
+    /// @brief Validates a subtree about to be inserted into the definitions, and records the attributes it changes.
+    ///
+    /// Used by the operations that bring nodes with their attributes: load, replace, plug and move. The subtree is
+    /// validated where it will be inserted, under the current server attribute:
+    ///
+    /// - node attributes require a server attribute (D2.20);
+    /// - its attributes name only users listed above their nodes; a user not listed is rejected, never removed
+    ///   (D2.15, D2.18);
+    /// - no node of the subtree is left without any user holding p, when one held it before: at the node of the
+    ///   definitions with the same path, or, for a new node, at the node above it (D4.6).
+    ///
+    /// The records compare the attributes of the subtree with those of the nodes of the definitions at the same paths,
+    /// below the target path: an attribute the subtree no longer carries is recorded as removed.
+    ///
+    /// Without a server attribute, no node of the definitions carries one (D2.20): the subtree is only checked to carry
+    /// none, the first node carrying one, in the order of a walk of the tree, being named; nothing is recorded, and
+    /// neither the definitions nor the archives are read.
+    ///
+    /// @param[in] subtree The root of the subtree; it may still be part of the definitions, elsewhere (a move)
+    /// @param[in] parent The node of the definitions under which the subtree is inserted, or nullptr for a suite
+    /// @throws std::runtime_error naming the reason when the subtree is rejected.
+    ///
+    void validate_transfer(const Node& subtree, const Node* parent);
+
+    ///
+    /// @brief Writes the log records of the changes validated by validate_transfer(), once the operation is applied.
+    ///
+    /// @param[in] requester The identity of the requester, written in the log records
+    ///
+    void log(const std::string& requester) const;
+
+    ///
     /// @brief Returns the changes made, or to be made, in the order of a walk of the tree.
     ///
     /// @return The changes; empty before validate(). A requested value equal to the current one is not a change.
@@ -102,8 +135,15 @@ private:
     [[nodiscard]] const Permissions* server_after() const;
     [[nodiscard]] const Permissions* candidate(const Node& node) const;
     [[nodiscard]] std::vector<EffectivePermissions::State> states_of_parent(const Node& node) const;
+    [[nodiscard]] std::vector<EffectivePermissions::State> states_at(const Node* node) const;
+    [[nodiscard]] bool holds_p(const std::vector<EffectivePermissions::State>& states) const;
     [[nodiscard]] bool
-    listed(const std::string& user, const Node& node, const std::vector<EffectivePermissions::State>& parent) const;
+    listed(const std::string& user, bool suite, const std::vector<EffectivePermissions::State>& parent) const;
+    void transfer(const Node& node,
+                  const std::string& path,
+                  const std::vector<EffectivePermissions::State>& parent,
+                  bool parent_held_p,
+                  bool suite);
     void cascade(Node& node, const std::vector<EffectivePermissions::State>& parent);
     void check_lockout() const;
 
@@ -115,6 +155,9 @@ private:
     std::vector<PermissionsChangeRecord> records_;
     std::vector<Node*> changed_;                // the node of each record; nullptr for the server
     std::vector<EffectivePermissions> walkers_; // one per user of the server attribute after the change
+    std::set<std::string> transferred_;         // the paths of the nodes of a subtree transferred
+    std::optional<std::vector<std::pair<std::string, Permissions>>> replaced_; // the attributes a transfer replaces
+    std::unordered_map<std::string, std::size_t> replaced_index_;              // their positions, by path
     bool validated_{false};
 };
 

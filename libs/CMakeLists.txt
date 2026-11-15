@@ -430,6 +430,7 @@ set(srcs
   node/src/ecflow/node/Alias.hpp
   node/src/ecflow/node/Aspect.hpp
   node/src/ecflow/node/Attr.hpp
+  node/src/ecflow/node/ArchivedNodes.hpp
   node/src/ecflow/node/AutoRestoreAttr.hpp
   node/src/ecflow/node/AvisoAttr.hpp
   node/src/ecflow/node/ClientSuiteMgr.hpp
@@ -519,6 +520,7 @@ set(srcs
   # Node -- Sources
   node/src/ecflow/node/Alias.cpp
   node/src/ecflow/node/Attr.cpp
+  node/src/ecflow/node/ArchivedNodes.cpp
   node/src/ecflow/node/AutoRestoreAttr.cpp
   node/src/ecflow/node/AvisoAttr.cpp
   node/src/ecflow/node/ClientSuiteMgr.cpp

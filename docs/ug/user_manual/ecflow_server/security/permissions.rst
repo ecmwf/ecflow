@@ -435,6 +435,17 @@ holds any role above them (a sticky server entry keeps its user listed everywher
 removed, and its node then inherits from above. This can give the users of the upper level access to the branch
 below.
 
+The definitions brought by ``--load`` and ``--replace`` are validated where their nodes go, with the same rules,
+before anything changes:
+
+- an entry naming a user who is not listed above its node rejects the whole request: such entries are never removed
+  from the definitions brought;
+- ``--load`` rejects definitions that carry a server attribute;
+- on a server without a server attribute, definitions carrying node attributes are rejected.
+
+The attributes they add, change or remove, ``--load --force`` and the nodes replaced included, are written to the
+server log like the changes made by ``--permissions``.
+
 Each change is written to the server log, with the requester, the path, and the old and new values, e.g.::
 
    LOG:[10:12:01 15.11.2026]  permissions /s alice:rwxp,bob:r -> alice:rwxp by alice@host

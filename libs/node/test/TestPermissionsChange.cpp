@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <fstream>
+#include <functional>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -12,14 +13,19 @@
 
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
 #include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/node/Visibility.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 #include "ecflow/test/scaffold/TestLog.hpp"
 
 using ecf::Permissions;
@@ -250,6 +256,108 @@ BOOST_AUTO_TEST_CASE(test_node_attributes_need_a_server_attribute) {
 
     BOOST_CHECK_EQUAL(change(defs, "/u", ""), "");
     BOOST_CHECK_EQUAL(at(defs, "/u"), "-");
+}
+
+///
+/// @brief Verifies the validation of the subtrees brought by load and replace on a server without a server
+///        attribute (D2.20): the first node carrying an attribute, in the order of a walk of the tree (aliases
+///        included), is named at the path where it would go; subtrees without attributes are accepted, recording
+///        nothing.
+///
+BOOST_AUTO_TEST_CASE(test_transfers_without_server_attribute) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = Defs::create();
+    auto s    = defs->add_suite("s");
+    s->add_family("f")->add_task("t");
+
+    const auto attribute = Permissions::parse_cli("alice:rwxp");
+    const auto refusal   = [](const std::string& path) {
+        return "The Permissions attribute of " + path + " requires a server Permissions attribute";
+    };
+    const auto error_of = [](const std::function<void()>& validate) {
+        try {
+            validate();
+        }
+        catch (const std::runtime_error& e) {
+            return std::string(e.what());
+        }
+        return std::string();
+    };
+
+    // A load of a new suite, and of an existing one: no node of the subtree carries an attribute
+    auto client = Defs::create();
+    auto n      = client->add_suite("n");
+    auto a      = n->add_family("a");
+    auto u      = a->add_task("u");
+    auto b      = n->add_family("b");
+    auto bt     = b->add_task("t");
+    for (const auto* name : {"n", "s"}) {
+        auto plain = Defs::create();
+        plain->add_suite(name)->add_family("f")->add_task("t");
+        PermissionsChange change(*defs);
+        BOOST_CHECK_EQUAL(error_of([&] { change.validate_transfer(*plain->findSuite(name), nullptr); }), "");
+        BOOST_CHECK(change.changes().empty());
+    }
+
+    // The first node carrying an attribute is named: an alias, then a family before its task
+    u->add_alias_only()->add_permissions(attribute);
+    b->add_permissions(attribute);
+    bt->add_permissions(attribute);
+    PermissionsChange load(*defs);
+    BOOST_CHECK_EQUAL(error_of([&] { load.validate_transfer(*n, nullptr); }), refusal("/n/a/u/alias0"));
+    u->find_alias("alias0")->set_permissions(nullptr);
+    BOOST_CHECK_EQUAL(error_of([&] { load.validate_transfer(*n, nullptr); }), refusal("/n/b"));
+    b->set_permissions(nullptr);
+    BOOST_CHECK_EQUAL(error_of([&] { load.validate_transfer(*n, nullptr); }), refusal("/n/b/t"));
+
+    // A replace below a node of the definitions names the node where it goes
+    auto replacement = Defs::create();
+    auto f           = replacement->add_suite("s")->add_family("f");
+    f->add_task("t")->add_permissions(attribute);
+    PermissionsChange replace(*defs);
+    BOOST_CHECK_EQUAL(error_of([&] { replace.validate_transfer(*f, s.get()); }), refusal("/s/f/t"));
+}
+
+///
+/// @brief Verifies that on a server without a server attribute, replacing nodes reads no archive (NP7):
+///        a missing archive logs no warning, and an archive carrying attributes (written while the server had a
+///        server attribute) records nothing.
+///
+BOOST_AUTO_TEST_CASE(test_no_archive_read_without_server_attribute) {
+    ECF_NAME_THIS_TEST();
+
+    const auto home = ecf::test::scaffold::MakeDirectory{}.create();
+    ecf::test::scaffold::TestLog log((home.path() / "test_no_archive_read.log").string());
+    const auto log_text = []() {
+        { ecf::LogFlusher flusher; }
+        std::ifstream file(ecf::Log::instance()->path());
+        std::stringstream content;
+        content << file.rdbuf();
+        return content.str();
+    };
+    auto defs = Defs::create();
+    defs->server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, home.path().string());
+    auto s = defs->add_suite("s");
+    auto f = s->add_family("f");
+    f->add_task("t");
+    auto h = s->add_family("h");
+    h->add_task("t")->add_permissions(Permissions::parse_cli("alice:rwxp"));
+    defs->server_state().set_permissions(Permissions::parse_cli("admin:rwxlop,alice:rwxp"));
+    f->archive();
+    h->archive();
+    defs->server_state().clear_permissions();
+    fs::remove(f->archive_path());
+    BOOST_REQUIRE(fs::exists(h->archive_path()));
+
+    // A replace of the suite
+    auto client = Defs::create();
+    client->add_suite("s")->add_family("f")->add_task("t");
+    PermissionsChange replace(*defs);
+    BOOST_CHECK_NO_THROW(replace.validate_transfer(*client->findSuite("s"), nullptr));
+    BOOST_CHECK(replace.changes().empty());
+    auto text = log_text();
+    BOOST_CHECK_MESSAGE(text.find("could not be read") == std::string::npos, text);
 }
 
 ///

@@ -416,18 +416,19 @@ BOOST_AUTO_TEST_CASE(test_permissions_effective_user_checked_by_the_server) {
 BOOST_AUTO_TEST_CASE(test_permissions_mode_group_fresh_evaluation) {
     ECF_NAME_THIS_TEST();
 
-    // b grants bob rwxp (p to replace a node carrying an attribute); the replacement of b grants bob r only
-    auto defs = make_defs("bob:rwxp", "bob:rwxp");
+    // b grants bob rwxp (p to replace a node carrying an attribute); the replacement of b grants bob r only, and keeps
+    // p for admin, so that the validation of changes accepts it (D4.6)
+    auto defs = make_defs("admin:rwxp,bob:rwxp", "admin:rwxp,bob:rwxp");
     MockServer server(defs);
     auto replacement = Defs::create();
-    replacement->add_suite("s")->add_task("b")->add_permissions(Permissions::parse_cli("bob:r"));
+    replacement->add_suite("s")->add_task("b")->add_permissions(Permissions::parse_cli("admin:rwxp,bob:r"));
 
     auto group = std::make_shared<GroupCTSCmd>();
     group->addChild(std::make_shared<ReplaceNodeCmd>("/s/b", false, replacement, false));
     group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
     const auto reply = TestHelper::invokeRequestAs(&server, group, "bob");
 
-    BOOST_CHECK_EQUAL(defs->findAbsNode("/s/b")->permissions()->to_cli(), "bob:r");
+    BOOST_CHECK_EQUAL(defs->findAbsNode("/s/b")->permissions()->to_cli(), "admin:rwxp,bob:r");
     BOOST_CHECK(!defs->findAbsNode("/s/b")->isSuspended());
     const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
     BOOST_REQUIRE(replies != nullptr);

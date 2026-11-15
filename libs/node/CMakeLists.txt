@@ -7,6 +7,7 @@ set(test_srcs
   # Sources
   test/TestAdd.cpp
   test/TestAlias.cpp
+  test/TestArchivedNodes.cpp
   test/TestAssignmentOperator.cpp
   test/TestAvisoAttr.cpp
   test/TestChangeMgrSingleton.cpp

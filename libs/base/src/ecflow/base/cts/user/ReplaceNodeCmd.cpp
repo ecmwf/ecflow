@@ -13,6 +13,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
@@ -129,6 +130,28 @@ defs_ptr ReplaceNodeCmd::client_definitions() const {
     return parsed_;
 }
 
+ReplaceNodeCmd::Target ReplaceNodeCmd::target(const Defs& server, const node_ptr& client_node, bool create) {
+    Target result;
+    result.existing = server.findAbsNode(client_node->absNodePath());
+    result.imported = client_node.get();
+    if (result.existing) {
+        if (Node* parent = result.existing->parent(); parent) {
+            result.parent = server.findAbsNode(parent->absNodePath());
+        }
+        return result;
+    }
+    if (create) {
+        for (const Node* parent = result.imported->parent(); parent != nullptr; parent = parent->parent()) {
+            result.parent = server.findAbsNode(parent->absNodePath());
+            if (result.parent) {
+                break;
+            }
+            result.imported = parent;
+        }
+    }
+    return result;
+}
+
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().replace_++;
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
@@ -145,6 +168,16 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
 
+    // The attributes brought are validated where the subtree goes (R4.5), before anything changes
+    ecf::PermissionsChange permissions(*defs);
+    if (const auto client_node = client_defs->findAbsNode(pathToNode_); client_node) {
+        const auto where = target(*defs, client_node, createNodesAsNeeded_);
+        if (where.existing || createNodesAsNeeded_) {
+            permissions.validate_transfer(*where.imported, where.parent.get());
+        }
+    }
+
+    // Zombies only once the replace is accepted
     if (force_) {
         node_ptr node = defs->findAbsNode(pathToNode_);
         as->zombie_ctrl().add_user_zombies(node.get(), CtsApi::replace_arg());
@@ -156,6 +189,7 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     if (!client_node_to_add) {
         throw std::runtime_error(errorMsg);
     }
+    permissions.log(identity().username().value() + "@" + hostname());
 
     // ECFLOW-835, flag node as changed, before check for trigger expressions.
     add_node_for_edit_history(defs, pathToNode_);

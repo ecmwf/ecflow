@@ -11,10 +11,14 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/ArchivedNodes.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/EffectivePermissions.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/node/Visibility.hpp"
 
 namespace ecf {
@@ -23,6 +27,53 @@ namespace {
 
 std::string text_of(const std::optional<Permissions>& value) {
     return value ? value->to_cli() : std::string("(none)");
+}
+
+void write_record(const PermissionsChangeRecord& record, const std::string& requester) {
+    ecf::log(Log::LOG,
+             " permissions " + record.path + " " + text_of(record.before) + " -> " + text_of(record.after) +
+                 (record.cascade ? " (removal of users above)" : "") + " by " + requester);
+}
+
+std::optional<Permissions> value_of(const Permissions* attribute) {
+    return attribute ? std::optional<Permissions>(*attribute) : std::nullopt;
+}
+
+// Returns the first node of a subtree carrying a Permissions attribute, in the order of a walk of the tree (that of
+// immediateChildren(), aliases included), or nullptr; the children are visited in place, without copies
+const Node* first_carrying(const Node& node) {
+    if (node.permissions()) {
+        return &node;
+    }
+    if (const auto* container = node.isNodeContainer(); container) {
+        for (const auto& child : container->children()) {
+            if (const auto* found = first_carrying(*child); found) {
+                return found;
+            }
+        }
+    }
+    else if (const auto* task = node.isTask(); task) {
+        for (const auto& alias : task->aliases()) {
+            if (alias->permissions()) {
+                return alias.get();
+            }
+        }
+    }
+    return nullptr;
+}
+
+// Returns the path that a node of a subtree takes once the subtree is inserted under a parent (nullptr for a suite)
+std::string destination_of(const Node& node, const Node& subtree, const Node* parent) {
+    std::vector<const Node*> names;
+    for (const Node* n = &node; n != &subtree; n = n->parent()) {
+        names.push_back(n);
+    }
+    names.push_back(&subtree);
+    std::string path = parent ? parent->absNodePath() : std::string();
+    for (auto it = names.rbegin(); it != names.rend(); ++it) {
+        path += "/" + (*it)->name();
+    }
+    return path;
 }
 
 // The roles of every user, before and after the change, at one level of the tree
@@ -78,13 +129,13 @@ std::vector<EffectivePermissions::State> PermissionsChange::states_of_parent(con
 }
 
 bool PermissionsChange::listed(const std::string& user,
-                               const Node& node,
+                               bool suite,
                                const std::vector<EffectivePermissions::State>& parent) const {
     const auto* server = server_after();
     if (!server) {
         return false;
     }
-    if (node.parent() == nullptr) {
+    if (suite) {
         // At a suite, the users of the server attribute (D2.15)
         return server->find(user) != nullptr;
     }
@@ -105,7 +156,7 @@ void PermissionsChange::cascade(Node& node, const std::vector<EffectivePermissio
         if (requested_nodes_.count(&node) != 0) {
             // A requested attribute names only users listed above (D2.15, D2.18)
             for (const auto& entry : attribute->entries()) {
-                if (!listed(entry.user, node, parent)) {
+                if (!listed(entry.user, node.parent() == nullptr, parent)) {
                     throw std::runtime_error("The Permissions attribute of " + node.absNodePath() +
                                              " names the user '" + entry.user + "', who is not listed above it");
                 }
@@ -115,7 +166,7 @@ void PermissionsChange::cascade(Node& node, const std::vector<EffectivePermissio
             // The entries of users no longer listed above are removed, and an emptied attribute with them (D2.17)
             std::vector<Permissions::Entry> kept;
             for (const auto& entry : attribute->entries()) {
-                if (listed(entry.user, node, parent)) {
+                if (listed(entry.user, node.parent() == nullptr, parent)) {
                     kept.push_back(entry);
                 }
             }
@@ -348,9 +399,7 @@ void PermissionsChange::commit(const std::string& requester) {
             Visibility::structure_changed();
             defs_.server_modified();
         }
-        ecf::log(Log::LOG,
-                 " permissions " + record.path + " " + text_of(record.before) + " -> " + text_of(record.after) +
-                     (record.cascade ? " (removal of users above)" : "") + " by " + requester);
+        write_record(record, requester);
     }
 
     // A change of permissions can change what clients may read: clients of the suites concerned perform a full
@@ -363,6 +412,140 @@ void PermissionsChange::commit(const std::string& requester) {
     requested_nodes_.clear();
     server_.reset();
     validated_ = false;
+}
+
+std::vector<EffectivePermissions::State> PermissionsChange::states_at(const Node* node) const {
+    if (!node) {
+        std::vector<EffectivePermissions::State> states;
+        states.reserve(walkers_.size());
+        for (const auto& walker : walkers_) {
+            states.push_back(walker.at_server());
+        }
+        return states;
+    }
+    auto states = states_of_parent(*node);
+    for (std::size_t i = 0; i < walkers_.size(); ++i) {
+        states[i] = walkers_[i].descend(states[i], candidate(*node));
+    }
+    return states;
+}
+
+bool PermissionsChange::holds_p(const std::vector<EffectivePermissions::State>& states) const {
+    for (std::size_t i = 0; i < walkers_.size(); ++i) {
+        if (walkers_[i].roles(states[i]).has(Role::Permissions)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void PermissionsChange::transfer(const Node& node,
+                                 const std::string& path,
+                                 const std::vector<EffectivePermissions::State>& parent,
+                                 bool parent_held_p,
+                                 bool suite) {
+    transferred_.insert(path);
+    const auto* attribute = node.permissions();
+    if (attribute) {
+        if (!server_after()) {
+            // Node attributes require a server attribute (D2.20)
+            throw std::runtime_error("The Permissions attribute of " + path +
+                                     " requires a server Permissions attribute");
+        }
+        // Rejected, never removed: the definitions brought are taken as they are (D2.18)
+        for (const auto& entry : attribute->entries()) {
+            if (!listed(entry.user, suite, parent)) {
+                throw std::runtime_error("The Permissions attribute of " + path + " names the user '" + entry.user +
+                                         "', who is not listed above it");
+            }
+        }
+    }
+
+    std::vector<EffectivePermissions::State> here;
+    here.reserve(walkers_.size());
+    for (std::size_t i = 0; i < walkers_.size(); ++i) {
+        here.push_back(walkers_[i].descend(parent[i], attribute));
+    }
+
+    // No lockout (D4.6): compared with the node at the same path, or, for a new node, with the node above it
+    const auto existing = defs_.findAbsNode(path);
+    const bool held_p   = existing ? holds_p(states_at(existing.get())) : parent_held_p;
+    if (held_p && !holds_p(here)) {
+        throw std::runtime_error("The change would leave nobody able to change the Permissions attribute of " + path);
+    }
+
+    // The attribute replaced: that of the node at the same path, archived or not, below the target path
+    const Permissions* before = existing ? existing->permissions() : nullptr;
+    if (replaced_) {
+        const auto it = replaced_index_.find(path);
+        before        = it != replaced_index_.end() ? &(*replaced_)[it->second].second : nullptr;
+    }
+    if (before ? !(attribute && *attribute == *before) : attribute != nullptr) {
+        records_.push_back(PermissionsChangeRecord{path, value_of(before), value_of(attribute), false});
+    }
+
+    std::vector<node_ptr> children;
+    node.immediateChildren(children);
+    for (const auto& child : children) {
+        transfer(*child, path + "/" + child->name(), here, held_p, false);
+    }
+}
+
+void PermissionsChange::validate_transfer(const Node& subtree, const Node* parent) {
+    records_.clear();
+    transferred_.clear();
+    changed_.clear();
+    candidate_.clear();
+    walkers_.clear();
+    if (const auto* server = server_after(); server) {
+        for (const auto& entry : server->entries()) {
+            walkers_.emplace_back(server, entry.user);
+        }
+    }
+
+    if (!server_after()) {
+        // Without a server attribute, no node of the definitions carries one (D2.20): nothing is replaced, nobody can
+        // be locked out, and the only possible outcome is the refusal of an attribute brought
+        if (const auto* found = first_carrying(subtree); found) {
+            throw std::runtime_error("The Permissions attribute of " + destination_of(*found, subtree, parent) +
+                                     " requires a server Permissions attribute");
+        }
+        return;
+    }
+
+    const std::string root = (parent ? parent->absNodePath() : std::string()) + "/" + subtree.name();
+
+    // The attributes of the nodes the subtree replaces, archived ones included, by path
+    replaced_.reset();
+    replaced_index_.clear();
+    if (const auto replaced = defs_.findAbsNode(root); replaced) {
+        replaced_.emplace();
+        (void)for_each_node(*replaced, [this](const Node& node) {
+            if (node.permissions()) {
+                replaced_index_.emplace(node.absNodePath(), replaced_->size());
+                replaced_->emplace_back(node.absNodePath(), *node.permissions());
+            }
+        });
+    }
+    const auto states = states_at(parent);
+    transfer(subtree, root, states, holds_p(states), parent == nullptr);
+
+    // The attributes of the nodes replaced, archived ones included, that are absent from the subtree
+    if (replaced_) {
+        for (const auto& [path, attribute] : *replaced_) {
+            if (transferred_.count(path) == 0) {
+                records_.push_back(PermissionsChangeRecord{path, attribute, std::nullopt, false});
+            }
+        }
+    }
+    replaced_.reset();
+    replaced_index_.clear();
+}
+
+void PermissionsChange::log(const std::string& requester) const {
+    for (const auto& record : records_) {
+        write_record(record, requester);
+    }
 }
 
 } // namespace ecf

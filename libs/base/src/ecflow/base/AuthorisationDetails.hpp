@@ -50,6 +50,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/node/ArchivedNodes.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
@@ -84,19 +85,13 @@ authorisation_t task_request([[maybe_unused]] const COMMAND& command) {
 }
 
 ///
-/// @brief Returns whether a node, or any node below it, carries a Permissions attribute.
+/// @brief Returns whether a node, or any node below it, carries a Permissions attribute, archived nodes included.
 ///
 /// @param[in] node The node
-/// @return True when an attribute is found.
+/// @return True when an attribute is found, also in an archive file.
 ///
 inline bool carries_permissions(const Node& node) {
-    if (node.permissions()) {
-        return true;
-    }
-    std::vector<node_ptr> children;
-    node.immediateChildren(children);
-    return std::any_of(
-        children.begin(), children.end(), [](const node_ptr& child) { return carries_permissions(*child); });
+    return ecf::carries_permissions(node);
 }
 
 template <typename COMMAND>
@@ -687,18 +682,11 @@ struct Authoriser<ReplaceNodeCmd>
 
         // The node replaced, or the subtree imported, as Defs::replaceChild determines them: when the node does not
         // exist and parents are created, the topmost missing ancestor of the client node, or its whole suite
-        const auto path      = client_node->absNodePath();
-        const auto existing  = server_defs->findAbsNode(path);
-        const Node* imported = client_node.get();
-        node_ptr server_parent;
-        if (!existing && command.createNodesAsNeeded()) {
-            for (const Node* parent = imported->parent(); parent != nullptr; parent = parent->parent()) {
-                if ((server_parent = server_defs->findAbsNode(parent->absNodePath()))) {
-                    break;
-                }
-                imported = parent;
-            }
-        }
+        const auto path          = client_node->absNodePath();
+        const auto where         = ReplaceNodeCmd::target(*server_defs, client_node, command.createNodesAsNeeded());
+        const auto& existing     = where.existing;
+        const Node* imported     = where.imported;
+        const auto server_parent = existing ? node_ptr{} : where.parent;
 
         // Replacing or creating a suite requires o at server level (D4.5, D4.14); otherwise w at the node replaced,
         // or at the existing parent of the subtree created (D4.14)
