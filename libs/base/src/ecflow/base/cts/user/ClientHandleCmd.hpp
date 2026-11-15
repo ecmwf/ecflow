@@ -39,6 +39,13 @@ public:
     Api api() const { return api_; }
     const std::string& drop_user() const { return drop_user_; }
 
+    ///
+    /// @brief Returns the handle the command addresses (DROP, ADD, REMOVE, AUTO_ADD), or 0.
+    ///
+    /// @return The handle.
+    ///
+    int client_handle() const { return client_handle_; }
+
     bool cmd_updates_defs() const override;
     using UserCmd::print;
     void print(std::string&) const override;

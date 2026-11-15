@@ -105,6 +105,7 @@ if (ENABLE_SERVER)
     test/TestPermissionsBenchmarkHelpers.cpp
     test/TestPermissionsAuthorisation.cpp
     test/TestPermissionsDenial.cpp
+    test/TestPermissionsRoles.cpp
     test/TestPermissionsHarness.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp

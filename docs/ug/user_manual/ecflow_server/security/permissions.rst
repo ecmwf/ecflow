@@ -210,8 +210,9 @@ Notes:
   (``ecflow_client --reloadwsfile`` fails), and the log states ``ECF_LISTS (...) = ignored``.
 - In Permissions mode, no user holds an implicit right: the user running the server is listed like any other, and
   the write access the whitelist grants to that user does not apply.
-- A request reads with ``r`` and changes with ``w``, at each node it addresses; a node that does not exist is
-  checked at its closest existing ancestor, and a request addressing the server at the server level.
+- Each command requires a role at each node it addresses (see :ref:`permissions_attribute_commands`); a node that
+  does not exist is checked at its closest existing ancestor, and a request addressing the server at the server
+  level.
 - An error while evaluating the permissions denies the request.
 
 Some requests are handled apart:
@@ -225,6 +226,58 @@ Some requests are handled apart:
 
 Permissions never affect scheduling: dependencies, limits, job generation and job submission behave as without
 attributes, whatever the attributes grant.
+
+.. _permissions_attribute_commands:
+
+Roles of commands
+=================
+
+The commands below require a role at the server level, or at the node they address:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 55 15 30
+
+   * - Commands
+     - Role
+     - Where
+   * - ``--ping``
+     - none
+     - in Permissions mode, every user
+   * - ``--server_version``, ``--stats``, ``--stats_server``, ``--suites``, ``--zombie_get``, ``--server_load``,
+       ``--log=get``, ``--log=path``, ``--sync``, ``--sync_full``, ``--sync_clock``, ``--news``, ``--ch_*``,
+       ``--get``, ``--get_state``, ``--migrate``, ``--why`` and ``--show`` without a path
+     - ``r``
+     - server
+   * - ``--get``, ``--get_state``, ``--migrate``, ``--why`` with a path; ``--query``
+     - ``r``
+     - the node (the server for ``--query ... /:name``)
+   * - ``--msg``, ``--stats_reset``, ``--debug_server_on``, ``--debug_server_off``, ``--zombie_adopt``,
+       ``--zombie_block``, ``--zombie_fail``, ``--zombie_fob``, ``--zombie_kill``, ``--zombie_remove``
+     - ``w``
+     - server
+   * - ``--log=clear``, ``--log=flush``, ``--log=new``
+     - ``l``
+     - server
+   * - ``--halt``, ``--shutdown``, ``--restart``, ``--terminate``, ``--check_pt`` (with or without arguments),
+       ``--restore_from_checkpt``, ``--reloadwsfile``, ``--reloadpasswdfile``, ``--reloadcustompasswdfile``,
+       ``--force-dep-eval``
+     - ``x``
+     - server
+   * - ``--job_gen``, ``--checkJobGenOnly``
+     - ``x``
+     - the node, or the server without a path
+
+Notes:
+
+- Client handles belong to the user who created them: only that user can change or drop a handle
+  (``--ch_add``, ``--ch_rem``, ``--ch_auto_add``, ``--ch_drop``), and ``--ch_drop_user`` drops the handles of the
+  requester only.
+- The other commands read with ``r`` and change with ``w`` at the nodes they address.
+- In whitelist mode, the same commands require read access for ``r``, and write access for every other role. Hence
+  ``--msg``, ``--log=clear``, ``--log=flush``, ``--check_pt`` without arguments, ``--debug_server_on``,
+  ``--debug_server_off``, the zombie actions and ``--checkJobGenOnly`` require write access, and handles are bound
+  to their creator as in Permissions mode.
 
 .. _permissions_attribute_threat_model:
 

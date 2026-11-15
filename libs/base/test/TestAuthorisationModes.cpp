@@ -11,20 +11,24 @@
 #include "TestHelper.hpp"
 #include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/Authorisation.hpp"
+#include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/ServerReply.hpp"
 #include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/cts/user/CtsNodeCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
+#include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/GroupSTCCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/User.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Submittable.hpp"
@@ -213,6 +217,10 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_ping) {
     MockServer server(make_defs("alice:r"));
     BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, std::make_shared<CtsCmd>(CtsCmd::PING), "carol")));
     BOOST_CHECK(denied(TestHelper::invokeRequestAs(&server, std::make_shared<CtsCmd>(CtsCmd::STATS), "carol")));
+
+    // --show requires r at the server level
+    BOOST_CHECK(denied(TestHelper::invokeRequestAs(&server, std::make_shared<ShowCmd>(), "carol")));
+    BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, std::make_shared<ShowCmd>(), "alice")));
 }
 
 ///
@@ -425,6 +433,53 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_group_checkpoint) {
         group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
         (void)TestHelper::invokeRequestAs(&server, group, "bob");
         BOOST_CHECK_EQUAL(server.node_tree_state_changes(), 0);
+    }
+}
+
+///
+/// @brief Verifies that handles are created for, and dropped by, the authenticated requester, whatever user the request
+///        names (D10.7).
+///
+BOOST_AUTO_TEST_CASE(test_handles_follow_the_authenticated_requester) {
+    ECF_NAME_THIS_TEST();
+
+    for (const auto* server_attribute : {"bob:r,victim:r", ""}) {
+        BOOST_TEST_CONTEXT("server attribute: " << server_attribute) {
+            auto defs = make_defs(server_attribute);
+            MockServer server(defs);
+            (void)defs->client_suite_mgr().create_client_suite(false, {"s"}, "victim");
+
+            // In a group, the sub-commands take the identity of the group, but keep the user they name: the
+            // credentials of the group are set before the sub-commands naming victim are added
+            const auto send = [&](const Cmd_ptr& child) {
+                auto group = std::make_shared<GroupCTSCmd>();
+                static_cast<ClientToServerCmd&>(*group).setup_user_authentification("bob", "");
+                child->setup_user_authentification("victim", "");
+                group->addChild(child);
+                // As the server does on receiving the request: the identity of the group, given to its sub-commands
+                group->set_identity(ecf::Identity::make_user("bob", ""));
+                BOOST_REQUIRE_EQUAL(child->identity().username().value(), "bob");
+                BOOST_REQUIRE_EQUAL(dynamic_cast<const UserCmd&>(*child).user(), "victim");
+                ClientToServerRequest request;
+                request.set_cmd(group);
+                const auto reply = request.handleRequest(&server);
+                BOOST_REQUIRE_EQUAL(dynamic_cast<const UserCmd&>(*child).user(), "victim"); // the mismatch held
+                return reply;
+            };
+
+            // A handle registered by bob belongs to bob, whatever user the sub-command names
+            const auto registered = send(std::make_shared<ClientHandleCmd>(0, std::vector<std::string>{"s"}, false));
+            BOOST_CHECK(registered->ok());
+            const auto& handles = defs->client_suite_mgr().clientSuites();
+            BOOST_REQUIRE_EQUAL(handles.size(), 2U);
+            BOOST_CHECK_EQUAL(handles.back().user(), "bob");
+
+            // An implicit --ch_drop_user drops bob's handles, not victim's
+            const auto dropped = send(std::make_shared<ClientHandleCmd>(std::string{}));
+            BOOST_CHECK(dropped->ok());
+            BOOST_REQUIRE_EQUAL(handles.size(), 1U);
+            BOOST_CHECK_EQUAL(handles.front().user(), "victim");
+        }
     }
 }
 

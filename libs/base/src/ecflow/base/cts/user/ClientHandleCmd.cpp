@@ -162,6 +162,10 @@ bool ClientHandleCmd::cmd_updates_defs() const {
 STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().ch_cmd_++;
 
+    // The requester, as authenticated, owns the handles it creates, and drops its own handles (D10.7); the user named
+    // in the request is used only when no identity was established
+    const auto& requester = identity().username().value().empty() ? user() : identity().username().value();
+
     switch (api_) {
         case ClientHandleCmd::REGISTER: {
 
@@ -171,7 +175,7 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
             }
 
             unsigned int client_handle =
-                as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_, suites_, user());
+                as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_, suites_, requester);
             // #ifdef DEBUG
             //  	   LOG(Log::DBG,as->defs()->client_suite_mgr().dump_max_change_no());
             // #endif
@@ -203,13 +207,13 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
         case ClientHandleCmd::DROP_USER: {
             // will throw if no users handles dropped
             if (drop_user_.empty()) {
-                as->defs()->client_suite_mgr().remove_client_suites(user());
+                as->defs()->client_suite_mgr().remove_client_suites(requester);
             }
             else {
                 as->defs()->client_suite_mgr().remove_client_suites(drop_user_);
             }
 
-            if (drop_user_.empty() || drop_user_ == user()) {
+            if (drop_user_.empty() || drop_user_ == requester) {
 
                 // If this command is part of a group command, let the following sync command, know about the new handle
                 // So it return the defs with the right set of suites.
