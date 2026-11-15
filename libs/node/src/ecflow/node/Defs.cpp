@@ -1733,6 +1733,10 @@ void Defs::collate_defs_changes_only(unsigned int client_handle, DefsDelta& incr
     }
 }
 
+void Defs::server_modified() {
+    server_modify_change_no_ = Ecf::incr_modify_change_no();
+}
+
 unsigned int Defs::defs_only_max_state_change_no() const {
     // ************************************************************************************************
     // make sure this is in sync with collate_defs_changes_only()

@@ -23,6 +23,7 @@ set(test_srcs
   test/TestFiltering.cpp
   test/TestFreeDepCmd.cpp
   test/TestHandleFiltering.cpp
+  test/TestPermissionsChangeSync.cpp
   test/TestHelpCatalog.cpp
   test/TestIncrementalFiltering.cpp
   test/TestInLimitAndLimit.cpp

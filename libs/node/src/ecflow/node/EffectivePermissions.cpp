@@ -13,9 +13,12 @@
 namespace ecf {
 
 EffectivePermissions::EffectivePermissions(const Defs& defs, std::string user)
+    : EffectivePermissions(defs.server_state().permissions(), std::move(user)) {
+}
+
+EffectivePermissions::EffectivePermissions(const Permissions* server, std::string user)
     : user_{std::move(user)} {
-    const auto* server = defs.server_state().permissions();
-    applies_           = server != nullptr;
+    applies_ = server != nullptr;
     if (!applies_) {
         return;
     }
@@ -34,10 +37,13 @@ EffectivePermissions::State EffectivePermissions::at_server() const {
 }
 
 EffectivePermissions::State EffectivePermissions::descend(const State& parent, const Node& node) const {
+    return descend(parent, node.permissions());
+}
+
+EffectivePermissions::State EffectivePermissions::descend(const State& parent, const Permissions* attribute) const {
     if (!admitted_ || parent.locked) {
         return State{parent.roles, parent.locked, false};
     }
-    const auto* attribute = node.permissions();
     if (!attribute) {
         // A suite without attribute takes the server entry; any other node inherits
         return State{parent.roles, false, false};

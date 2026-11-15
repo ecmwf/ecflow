@@ -434,6 +434,12 @@ void Node::add_permissions(const ecf::Permissions& permissions) {
     ecf::Visibility::structure_changed();
 }
 
+void Node::set_permissions(const ecf::Permissions* permissions) {
+    permissions_     = permissions ? std::make_unique<ecf::Permissions>(*permissions) : nullptr;
+    state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
+}
+
 void Node::add_autoarchive(const ecf::AutoArchiveAttr& aa) {
     if (auto_cancel_) {
         throw std::runtime_error(MESSAGE(

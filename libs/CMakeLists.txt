@@ -435,6 +435,7 @@ set(srcs
   node/src/ecflow/node/CmdContext.hpp
   node/src/ecflow/node/Defs.hpp
   node/src/ecflow/node/EffectivePermissions.hpp
+  node/src/ecflow/node/PermissionsChange.hpp
   node/src/ecflow/node/DefsDelta.hpp
   node/src/ecflow/node/DefsTreeVisitor.hpp
   node/src/ecflow/node/EcfFile.hpp
@@ -523,6 +524,7 @@ set(srcs
   node/src/ecflow/node/CmdContext.cpp
   node/src/ecflow/node/Defs.cpp
   node/src/ecflow/node/EffectivePermissions.cpp
+  node/src/ecflow/node/PermissionsChange.cpp
   node/src/ecflow/node/DefsDelta.cpp
   node/src/ecflow/node/EcfFile.cpp
   node/src/ecflow/node/ExprAst.cpp

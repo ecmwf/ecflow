@@ -44,6 +44,7 @@ set(test_srcs
   test/TestOperations.cpp
   test/TestOrder.cpp
   test/TestPermissionsAttr.cpp
+  test/TestPermissionsChange.cpp
   test/TestServerPermissions.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp

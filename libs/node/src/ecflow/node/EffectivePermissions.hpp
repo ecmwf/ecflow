@@ -54,6 +54,16 @@ public:
     EffectivePermissions(const Defs& defs, std::string user);
 
     ///
+    /// @brief Prepares the walk for a user, under a given server attribute.
+    ///
+    /// Used to evaluate a candidate server attribute before it is applied.
+    ///
+    /// @param[in] server The server attribute, or nullptr when the server has none
+    /// @param[in] user The user
+    ///
+    EffectivePermissions(const Permissions* server, std::string user);
+
+    ///
     /// @brief Returns whether Permissions apply, i.e. whether the server has a Permissions attribute.
     ///
     /// @return True when the server has a Permissions attribute.
@@ -82,6 +92,17 @@ public:
     /// @return The state of the node.
     ///
     [[nodiscard]] State descend(const State& parent, const Node& node) const;
+
+    ///
+    /// @brief Returns the state of a node carrying a given attribute, from the state of its parent.
+    ///
+    /// Used to evaluate a candidate attribute before it is applied.
+    ///
+    /// @param[in] parent The state of the parent: at_server() for a suite
+    /// @param[in] attribute The attribute of the node, or nullptr when the node has none
+    /// @return The state of the node.
+    ///
+    [[nodiscard]] State descend(const State& parent, const Permissions* attribute) const;
 
     ///
     /// @brief Returns the effective roles of a state: its roles, united with the sticky server entry.

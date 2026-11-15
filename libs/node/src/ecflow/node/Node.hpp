@@ -630,6 +630,16 @@ public:
     /// @throws std::runtime_error when the node already has a Permissions attribute.
     ///
     void add_permissions(const ecf::Permissions& permissions);
+
+    ///
+    /// @brief Sets or removes the Permissions attribute of the node.
+    ///
+    /// The change is recorded for the visibilities kept for later requests (ecf::Visibility::structure_changed()).
+    /// It is not a modify change by itself: changes go through ecf::PermissionsChange, which records them as one.
+    ///
+    /// @param permissions The attribute, copied, or nullptr to remove it.
+    ///
+    void set_permissions(const ecf::Permissions* permissions);
     void add_autoarchive(const ecf::AutoArchiveAttr&);
     void add_autorestore(const ecf::AutoRestoreAttr&);
     void addLate(const ecf::LateAttr&);

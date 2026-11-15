@@ -178,6 +178,9 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const {
     // Handle suites that get deleted. Need a full sync
     the_max_modify_change_no = std::max(the_max_modify_change_no, modify_change_no_);
 
+    // Changes of the server attribute, as in max_change_no()
+    the_max_modify_change_no = std::max(the_max_modify_change_no, server_defs->server_modify_change_no());
+
     // Suites should already be in order
     for (auto i = suites_.begin(); i != suites_end; ++i) {
         suite_ptr suite = (*i).weak_suite_ptr_.lock();
@@ -228,6 +231,9 @@ void ClientSuites::max_change_no(unsigned int& the_max_state_change_no, unsigned
     // Take into account registered suites that get deleted, and where all suites registered
     the_max_modify_change_no = 0;
     the_max_modify_change_no = std::max(the_max_modify_change_no, modify_change_no_);
+
+    // Take into account changes of the server attribute, which can change what every handle reads (D3.7)
+    the_max_modify_change_no = std::max(the_max_modify_change_no, defs_->server_modify_change_no());
 
     for (const HSuite& p : suites_) {
         suite_ptr suite = p.weak_suite_ptr_.lock();
