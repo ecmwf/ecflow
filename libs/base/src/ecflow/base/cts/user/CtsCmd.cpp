@@ -399,6 +399,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         case CtsCmd::STATS: {
             as->update_stats().stats_++;
             as->stats().update_for_serialisation();
+            ecf::update_authorisation_statistics(*as);
             // The number of suites counts those the requester can read (R5.2)
             const auto visibility     = request_context().visibility();
             as->stats().no_of_suites_ = 0;

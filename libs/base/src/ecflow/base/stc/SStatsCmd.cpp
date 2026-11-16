@@ -4,6 +4,7 @@
 #include "ecflow/base/stc/SStatsCmd.hpp"
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/Authorisation.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Visibility.hpp"
 
@@ -15,8 +16,10 @@ SStatsCmd::SStatsCmd(AbstractServer* as) {
 
 void SStatsCmd::init(AbstractServer* as, const ecf::Visibility* visibility) {
     as->stats().update_for_serialisation();
+    ecf::update_authorisation_statistics(*as);
     stats_               = as->stats();
     stats_.no_of_suites_ = 0;
+
     for (const auto& suite : as->defs()->suites()) {
         if (!visibility || !visibility->stops_at(*suite)) {
             ++stats_.no_of_suites_;

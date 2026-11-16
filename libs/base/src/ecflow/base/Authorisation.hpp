@@ -63,7 +63,7 @@ authorisation_t is_authorised(const ClientToServerCmd& command, const RequestCon
 ///
 /// Evaluates the request as is_authorised does. In audit-only mode, when the server uses Permissions attributes, a
 /// request they deny is executed nevertheless: the denial is written to the server log as a warning (see
-/// audit_message), and success is returned. The exceptions, refused as in Permissions mode:
+/// audit_message), counted, and success is returned. The exceptions, refused as in Permissions mode:
 ///
 /// - a denial for want of the role r (see is_role_denial), so that no content of a node is returned to a requester
 ///   who cannot read it; the evaluation stops at the first requirement not met, and every command checks its
@@ -109,6 +109,24 @@ std::string handle_owner_denial(const std::string& unreadable = {});
 /// @return True when the reason names the role as missing.
 ///
 bool is_role_denial(const std::string& reason, Role role);
+
+///
+/// @brief Brings the authorisation part of the statistics of the server up to date: its mode, and the number of sets
+///        of readable nodes cached (R12.5).
+///
+/// Called before the statistics are reported, by `--stats` and `--stats_server`.
+///
+/// @param[in,out] server The server
+///
+void update_authorisation_statistics(AbstractServer& server);
+
+///
+/// @brief Returns the option naming a request, as counted by the statistics of the server (R12.5).
+///
+/// @param[in] command The request
+/// @return The option, e.g. `--suspend`.
+///
+std::string command_name(const ClientToServerCmd& command);
 
 ///
 /// @brief Returns the log record of a request executed in audit-only mode although the attributes deny it.

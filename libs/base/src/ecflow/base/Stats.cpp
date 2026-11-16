@@ -101,6 +101,12 @@ Stats::Stats(const Stats& rhs)
       stats_(rhs.stats_),
       check_(rhs.check_),
       query_(rhs.query_),
+      authorisation_mode_(rhs.authorisation_mode_),
+      denials_(rhs.denials_),
+      audited_(rhs.audited_),
+      filtered_replies_(rhs.filtered_replies_),
+      filtering_time_us_(rhs.filtering_time_us_),
+      readable_sets_(rhs.readable_sets_),
       process_meter_(nullptr),
       request_vec_(rhs.request_vec_) {
     if (rhs.process_meter_) {
@@ -201,6 +207,12 @@ Stats& Stats::operator=(const Stats& rhs) {
     swap(stats_, tmp.stats_);
     swap(check_, tmp.check_);
     swap(query_, tmp.query_);
+    swap(authorisation_mode_, tmp.authorisation_mode_);
+    swap(denials_, tmp.denials_);
+    swap(audited_, tmp.audited_);
+    swap(filtered_replies_, tmp.filtered_replies_);
+    swap(filtering_time_us_, tmp.filtering_time_us_);
+    swap(readable_sets_, tmp.readable_sets_);
     swap(process_meter_, tmp.process_meter_);
     swap(request_vec_, tmp.request_vec_);
 
@@ -354,6 +366,11 @@ void Stats::reset() {
     stats_           = 0;
     check_           = 0;
     query_           = 0;
+
+    denials_.clear();
+    audited_.clear();
+    filtered_replies_  = 0;
+    filtering_time_us_ = 0;
 }
 
 static std::string show_checkpt_mode(ecf::CheckPt::Mode m) {
@@ -611,6 +628,25 @@ void Stats::show(std::ostream& os) const {
         display("Query cmd", query_);
         display("Reload white list file", reload_white_list_file_);
         display("Reload password file", reload_passwd_file_);
+        os << "\n";
+    }
+
+    if (!authorisation_mode_.empty()) {
+        os << "Authorisation\n";
+        display("Mode", authorisation_mode_);
+        for (const auto& [command, count] : denials_) {
+            display("Denied " + command, count);
+        }
+        for (const auto& [command, count] : audited_) {
+            display("Audited " + command, count);
+        }
+        display("Filtered replies", filtered_replies_);
+        if (filtered_replies_ > 0) {
+            std::ostringstream time;
+            time << std::fixed << std::setprecision(3) << static_cast<double>(filtering_time_us_) / 1000.0;
+            display("Filtering time", time.str(), "ms");
+        }
+        display("Readable sets cached", readable_sets_);
         os << "\n";
     }
 

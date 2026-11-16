@@ -5,8 +5,11 @@
 
 #include <algorithm>
 
+#include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/RequestContext.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/DefsCache.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -78,10 +81,11 @@ authorisation_t is_authorised_or_audited(const ClientToServerCmd& command, const
         if (is_role_denial(result.reason(), Role::Read)) {
             return result; // reads are enforced: no content of a node the requester cannot read is returned
         }
-        // Audit-only mode (R12.3): the would-be denial is logged, and the request executed
+        // Audit-only mode (R12.3): the would-be denial is logged, counted, and the request executed
         if (!ecf::log_flushed(Log::WAR, audit_message(result.reason(), command))) {
             return result; // a would-be denial that cannot be recorded is enforced
         }
+        context.server().stats().record_audited(command_name(command));
     }
     catch (...) {
         return result; // a would-be denial that cannot be recorded is enforced
@@ -123,6 +127,26 @@ bool is_role_denial(const std::string& reason, Role role) {
     const std::string cause = insufficient + letter_of(role) + " required at ";
     return starts_with(reason, denial_prefix + cause) ||
            starts_with(reason, denial_prefix + handle_owner + "; " + cause);
+}
+
+void update_authorisation_statistics(AbstractServer& server) {
+    auto& stats = server.stats();
+    switch (authorisation_mode(server)) {
+        case AuthorisationMode::Permissions:
+            stats.authorisation_mode_ = server.audit_only() ? "permissions (audit only)" : "permissions";
+            break;
+        case AuthorisationMode::WhiteList:
+            stats.authorisation_mode_ = "whitelist";
+            break;
+        case AuthorisationMode::Unrestricted:
+            stats.authorisation_mode_ = "unrestricted";
+            break;
+    }
+    stats.readable_sets_ = static_cast<unsigned int>(DefsCache::entries());
+}
+
+std::string command_name(const ClientToServerCmd& command) {
+    return std::string("--") + command.theArg();
 }
 
 std::string audit_message(const std::string& reason, const ClientToServerCmd& command) {

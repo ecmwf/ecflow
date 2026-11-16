@@ -176,6 +176,7 @@ PlugCmd::denied_by_receiver(AbstractServer& server, const std::string& host, con
     // Nothing took place: no edit history is recorded, although the lock taken for the plug moved the change numbers
     use_EditHistoryMgr_ = false;
     ecf::LogFlusher flusher; // the message, logged by the reply, is written at once
+    server.stats().record_denial(ecf::command_name(*this));
     return PreAllocatedReply::denied_cmd(ecf::rejection_message(
         "Authorisation (user) failed, due to: the receiving server " + host + ":" + port + " denied the move", *this));
 }

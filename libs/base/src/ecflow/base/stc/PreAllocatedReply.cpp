@@ -3,10 +3,13 @@
 
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
+#include <chrono>
+#include <cstdint>
 #include <utility>
 
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/RequestContext.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/base/stc/BlockClientZombieCmd.hpp"
 #include "ecflow/base/stc/DefsCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
@@ -49,6 +52,24 @@ std::shared_ptr<const ecf::Visibility> filter_of(const ecf::RequestContext& cont
     return visibility->applies() ? visibility : nullptr;
 }
 
+///
+/// @brief Builds a reply that depends on the nodes its requester can read, counting its cost when filtered (R12.5).
+///
+/// @param[in] context The context of the request
+/// @param[in] build Builds the reply, given the visibility of the requester (nullptr when nothing is filtered)
+///
+template <typename BUILD>
+void build_filtered(const ecf::RequestContext& context, BUILD build) {
+    const auto start      = std::chrono::steady_clock::now();
+    const auto visibility = filter_of(context);
+    build(visibility.get());
+    if (visibility) {
+        const auto elapsed = std::chrono::steady_clock::now() - start;
+        context.server().stats().record_filtered_reply(
+            static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
+    }
+}
+
 } // namespace
 
 STC_Cmd_ptr PreAllocatedReply::ok_cmd() {
@@ -81,18 +102,16 @@ STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt
 STC_Cmd_ptr PreAllocatedReply::defs_cmd(const ecf::RequestContext& context, bool save_edit_history) {
     AbstractServer* as = &context.server();
     as->reply_built("defs_cmd", context);
-    auto* cmd             = dynamic_cast<DefsCmd*>(defs_cmd_.get());
-    const auto visibility = filter_of(context);
-    cmd->init(as, save_edit_history, visibility.get());
+    auto* cmd = dynamic_cast<DefsCmd*>(defs_cmd_.get());
+    build_filtered(context, [&](const ecf::Visibility* visibility) { cmd->init(as, save_edit_history, visibility); });
     return defs_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::node_cmd(const ecf::RequestContext& context, node_ptr node) {
     AbstractServer* as = &context.server();
     as->reply_built("node_cmd", context);
-    auto* cmd             = dynamic_cast<SNodeCmd*>(node_cmd_.get());
-    const auto visibility = filter_of(context);
-    cmd->init(as, node, visibility.get());
+    auto* cmd = dynamic_cast<SNodeCmd*>(node_cmd_.get());
+    build_filtered(context, [&](const ecf::Visibility* visibility) { cmd->init(as, node, visibility); });
     return node_cmd_;
 }
 
@@ -185,15 +204,16 @@ STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
                                         const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("sync_cmd", context);
-    auto* cmd             = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
-    const auto visibility = filter_of(context);
-    cmd->init(client_handle,
-              client_state_change_no,
-              client_modify_change_no,
-              false /*full sync*/,
-              false /*sync suite clock*/,
-              as,
-              visibility.get());
+    auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
+    build_filtered(context, [&](const ecf::Visibility* visibility) {
+        cmd->init(client_handle,
+                  client_state_change_no,
+                  client_modify_change_no,
+                  false /*full sync*/,
+                  false /*sync suite clock*/,
+                  as,
+                  visibility);
+    });
     return sync_cmd_;
 }
 
@@ -203,24 +223,26 @@ STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
                                               const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("sync_clock_cmd", context);
-    auto* cmd             = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
-    const auto visibility = filter_of(context);
-    cmd->init(client_handle,
-              client_state_change_no,
-              client_modify_change_no,
-              false /*full sync*/,
-              true /*sync suite clock*/,
-              as,
-              visibility.get());
+    auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
+    build_filtered(context, [&](const ecf::Visibility* visibility) {
+        cmd->init(client_handle,
+                  client_state_change_no,
+                  client_modify_change_no,
+                  false /*full sync*/,
+                  true /*sync suite clock*/,
+                  as,
+                  visibility);
+    });
     return sync_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle, const ecf::RequestContext& context) {
     AbstractServer* as = &context.server();
     as->reply_built("sync_full_cmd", context);
-    auto* cmd             = dynamic_cast<SSyncCmd*>(sync_cmd_.get()); // can reuse the same command
-    const auto visibility = filter_of(context);
-    cmd->init(client_handle, 0, 0, true /*full sync*/, false /*sync suite clock*/, as, visibility.get());
+    auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get()); // can reuse the same command
+    build_filtered(context, [&](const ecf::Visibility* visibility) {
+        cmd->init(client_handle, 0, 0, true /*full sync*/, false /*sync suite clock*/, as, visibility);
+    });
     return sync_cmd_;
 }
 

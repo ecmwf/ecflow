@@ -16,7 +16,9 @@
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/ServerReply.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/user/CSyncCmd.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/cts/user/CtsNodeCmd.hpp"
@@ -569,8 +571,8 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_reads_enforced) {
 
 ///
 /// @brief Verifies that registering or adding an unreadable suite on the handle of another user is denied naming both
-///        the owner of the handle and the role r, and that, in audit-only mode, such a request is refused,
-///        alone or within a group (D10.7, R5.2).
+///        the owner of the handle and the role r, and that, in audit-only mode, such a request is refused and counted
+///        as denied, alone or within a group (D10.7, R5.2).
 ///
 BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_suite) {
     ECF_NAME_THIS_TEST();
@@ -578,6 +580,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_sui
     auto defs = make_defs("bob:r,victim:r");
     defs->add_suite("u")->add_permissions(Permissions::parse_cli("admin:r"));
     MockServer server(defs);
+    auto& stats       = server.stats();
     const auto handle = defs->client_suite_mgr().create_client_suite(false, {"s"}, "victim");
     const auto bob    = ecf::Identity::make_user("bob", "");
     const auto suites = [&]() {
@@ -598,6 +601,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_sui
                     api == ClientHandleCmd::ADD
                         ? std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, ClientHandleCmd::ADD)
                         : std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, false);
+                const auto name = ecf::command_name(*command);
 
                 // One reason names both the owner of the handle and the role r missing
                 command->set_identity(bob);
@@ -607,10 +611,13 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_sui
                 BOOST_CHECK_MESSAGE(both(result.reason()), result.reason());
                 BOOST_CHECK(ecf::is_role_denial(result.reason(), ecf::Role::Read));
 
-                // Refused in both modes, and never executed
-                const auto reply = TestHelper::invokeRequestAs(&server, command, "bob");
+                // Refused in both modes, never executed, and counted as denied
+                const auto denials = stats.denials_[name];
+                const auto reply   = TestHelper::invokeRequestAs(&server, command, "bob");
                 BOOST_CHECK(denied(reply));
                 BOOST_CHECK_MESSAGE(both(reply->error()), reply->error());
+                BOOST_CHECK_EQUAL(stats.denials_[name], denials + 1);
+                BOOST_CHECK_EQUAL(stats.audited_.count(name), 0U);
                 BOOST_CHECK(suites() == std::vector<std::string>{"s"});
             }
         }
@@ -621,6 +628,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_sui
     group->addChild(std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, ClientHandleCmd::ADD));
     group->addChild(std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, false));
     group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
+    const auto denials  = stats.denials_.size();
     const auto reply    = TestHelper::invokeRequestAs(&server, group, "bob");
     const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
     BOOST_REQUIRE(replies != nullptr);
@@ -631,6 +639,10 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_sui
     }
     BOOST_CHECK(suites() == std::vector<std::string>{"s"});
     BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+    BOOST_CHECK_EQUAL(stats.denials_.size(), denials);
+    BOOST_CHECK_EQUAL(stats.denials_["--ch_add"], 3U);
+    BOOST_CHECK_EQUAL(stats.denials_["--ch_register"], 3U);
+    BOOST_CHECK_EQUAL(stats.audited_["--suspend"], 1U);
 }
 
 ///
@@ -643,6 +655,7 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user) {
     auto defs = make_defs("bob:r,victim:r");
     defs->add_suite("v");
     MockServer server(defs);
+    auto& stats       = server.stats();
     const auto handle = defs->client_suite_mgr().create_client_suite(false, {"s"}, "victim");
     const auto bob    = ecf::Identity::make_user("bob", "");
     const ecf::RequestContext context(bob, server);
@@ -662,11 +675,14 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user) {
     // Audit-only mode: audited and executed
     server.set_audit_only(true);
     BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, add, "bob")));
+    BOOST_CHECK_EQUAL(stats.audited_[ecf::command_name(*add)], 1U);
     std::vector<std::string> names;
     defs->client_suite_mgr().suites(handle, names);
     BOOST_CHECK(names == (std::vector<std::string>{"s", "v"}));
 
     BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, replace, "bob")));
+    BOOST_CHECK_EQUAL(stats.audited_[ecf::command_name(*replace)], 1U);
+    BOOST_CHECK_EQUAL(stats.denials_.size(), 0U);
     BOOST_CHECK(defs->client_suite_mgr().clientSuites().front().user() == "bob");
 }
 
@@ -702,6 +718,52 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_unrecorded) {
     BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
     BOOST_CHECK(denied(replies->cmdVec()[0]));
     BOOST_CHECK(!defs->findAbsNode("/s/b")->isSuspended());
+}
+
+///
+/// @brief Verifies the statistics of the replies filtered per requester: counted for each kind of filtered reply, with
+///        their cost, and never without a server attribute (R12.5).
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_filtered_reply_statistics) {
+    ECF_NAME_THIS_TEST();
+
+    // A large definition, so that building a filtered reply takes measurable time; bob cannot read /s/b
+    auto defs = make_defs("admin:rwxp,bob:r", "admin:rwxp");
+    auto big  = defs->add_suite("big");
+    for (int i = 0; i < 2000; ++i) {
+        big->add_task("t" + std::to_string(i));
+    }
+    MockServer server(defs);
+    auto& stats = server.stats();
+
+    (void)TestHelper::invokeRequestAs(&server, std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET), "bob");
+    BOOST_CHECK_EQUAL(stats.filtered_replies_, 1U);
+    BOOST_CHECK_GT(stats.filtering_time_us_, 0U);
+    (void)TestHelper::invokeRequestAs(&server, std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET, "/s"), "bob");
+    BOOST_CHECK_EQUAL(stats.filtered_replies_, 2U);
+    (void)TestHelper::invokeRequestAs(&server, std::make_shared<CSyncCmd>(CSyncCmd::SYNC, 0, 0, 0), "bob");
+    BOOST_CHECK_EQUAL(stats.filtered_replies_, 3U);
+    (void)TestHelper::invokeRequestAs(&server, std::make_shared<CSyncCmd>(CSyncCmd::SYNC_CLOCK, 0, 0, 0), "bob");
+    BOOST_CHECK_EQUAL(stats.filtered_replies_, 4U);
+    (void)TestHelper::invokeRequestAs(&server, std::make_shared<CSyncCmd>(0), "bob"); // full synchronisation
+    BOOST_CHECK_EQUAL(stats.filtered_replies_, 5U);
+
+    // Without a server attribute, nothing is filtered, hence nothing counted
+    {
+        MockServer unrestricted(make_defs(""));
+        (void)TestHelper::invokeRequestAs(&unrestricted, std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET), "bob");
+        (void)TestHelper::invokeRequestAs(&unrestricted, std::make_shared<CSyncCmd>(0), "bob");
+        BOOST_CHECK_EQUAL(unrestricted.stats().filtered_replies_, 0U);
+        BOOST_CHECK_EQUAL(unrestricted.stats().filtering_time_us_, 0U);
+    }
+
+    // The mode and the readable sets, as --stats reports them
+    ecf::update_authorisation_statistics(server);
+    BOOST_CHECK_EQUAL(stats.authorisation_mode_, "permissions");
+    BOOST_CHECK_GE(stats.readable_sets_, 1U);
+    server.set_audit_only(true);
+    ecf::update_authorisation_statistics(server);
+    BOOST_CHECK_EQUAL(stats.authorisation_mode_, "permissions (audit only)");
 }
 
 ///

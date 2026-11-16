@@ -272,6 +272,40 @@ Notes:
 - Before enforcing a configuration, search the log for ``Audit only`` to find the requests it would refuse; the
   refused reads are logged as ``Command not accepted``, as in Permissions mode.
 
+.. _permissions_attribute_monitoring:
+
+Monitoring
+----------
+
+``ecflow_client --stats`` reports, in its section ``Authorisation``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Line
+     - Value
+   * - ``Mode``
+     - ``permissions``, ``permissions (audit only)``, ``whitelist`` or ``unrestricted``
+   * - ``Denied --<command>``
+     - the requests refused by the authorisation, per command, in any mode; in Permissions mode each command of a
+       ``--group`` counts on its own, while in whitelist mode a refused group counts as ``--group``
+   * - ``Audited --<command>``
+     - the requests executed in :ref:`audit-only mode <permissions_attribute_audit>` although denied, per command
+   * - ``Filtered replies``
+     - the replies built from the nodes their requester can read (definitions, nodes, synchronisations); in
+       Permissions mode, every such reply
+   * - ``Filtering time``
+     - the time taken to build those replies, including the selection of the readable nodes
+   * - ``Readable sets cached``
+     - the full definitions held in the cache of the server, one for each set of readable nodes
+
+Notes:
+
+- ``ecflow_client --stats_reset`` clears the counters; the mode and the cache are kept.
+- Lines with a zero count are not shown.
+- A server older than the Permissions attribute reports no ``Authorisation`` section.
+
 .. _permissions_attribute_commands:
 
 Roles of commands
