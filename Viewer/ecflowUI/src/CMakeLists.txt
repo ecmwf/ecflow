@@ -147,6 +147,7 @@ set(viewer_srcs
   ServerListSyncWidget.hpp
   ServerLoadItemWidget.hpp
   ServerObserver.hpp
+  ServerPermissionsDialog.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp
   SessionAutoSave.hpp
@@ -429,6 +430,7 @@ set(viewer_srcs
   ServerListDialog.cpp
   ServerListSyncWidget.cpp
   ServerLoadItemWidget.cpp
+  ServerPermissionsDialog.cpp
   ServerSettingsItemWidget.cpp
   SessionAutoSave.cpp
   SessionDialog.cpp
@@ -651,6 +653,7 @@ set(viewer_moc_files
   ServerHandler.hpp
   ServerListDialog.hpp
   ServerListSyncWidget.hpp
+  ServerPermissionsDialog.hpp
   SessionAutoSave.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp

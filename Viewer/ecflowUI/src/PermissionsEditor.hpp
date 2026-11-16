@@ -15,6 +15,7 @@
 class PermissionsEditorWidget : public QWidget, protected Ui::PermissionsEditorWidget {
     friend class PermissionsEditor;
     friend class AddPermissionsDialog;
+    friend class ServerPermissionsDialog;
 
 public:
     ///

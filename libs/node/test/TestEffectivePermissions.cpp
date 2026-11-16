@@ -192,6 +192,51 @@ BOOST_AUTO_TEST_CASE(test_effective_permissions_top_down_walk) {
     BOOST_CHECK(!unrestricted.applies());
 }
 
+///
+/// @brief Verifies the effective roles of every user at a path, as listed by ecFlowUI's Info panel.
+///
+BOOST_AUTO_TEST_CASE(test_effective_permissions_of_every_user) {
+    ECF_NAME_THIS_TEST();
+
+    // The layout of the manual ecFlowUI check, with a sticky entry and a user not admitted (no r at server level)
+    const auto defs = make("admin:rwxlops,bob:r,mamb:rwxp,carol:w,dave:rs",
+                           "suite s\n" + attribute("admin:rwxlop,bob:r,mamb:rwxp") + "  family f\n    task t\n" +
+                               "  endfamily\n  family g\n" + attribute("admin:rwxlop,mamb:r") +
+                               "    task t\n  endfamily\nendsuite\n");
+
+    const auto listed = [&](const std::string& path) {
+        const auto result = ecf::effective_permissions_of_every_user(*defs, path);
+        BOOST_REQUIRE(result.has_value());
+        std::string text;
+        for (const auto& [user, roles] : *result) {
+            text += (text.empty() ? "" : ",") + user + ":" + roles.to_string();
+        }
+        return text;
+    };
+
+    // Users in the order of the server attribute (by name); carol (not admitted) never listed; dave listed through the
+    // sticky entry, even where the attribute below does not name the user
+    BOOST_CHECK_EQUAL(listed("/"), "admin:rwxlop,bob:r,dave:r,mamb:rwxp");
+    BOOST_CHECK_EQUAL(listed("/s"), "admin:rwxlop,bob:r,dave:r,mamb:rwxp");
+    BOOST_CHECK_EQUAL(listed("/s/f"), "admin:rwxlop,bob:r,dave:r,mamb:rwxp");
+    BOOST_CHECK_EQUAL(listed("/s/f/t"), "admin:rwxlop,bob:r,dave:r,mamb:rwxp");
+    BOOST_CHECK_EQUAL(listed("/s/g"), "admin:rwxlop,dave:r,mamb:r");
+    BOOST_CHECK_EQUAL(listed("/s/g/t"), "admin:rwxlop,dave:r,mamb:r");
+
+    // Each entry agrees with effective_permissions() for the same user
+    for (const std::string path : {"/", "/s", "/s/f/t", "/s/g/t"}) {
+        const auto users = ecf::effective_permissions_of_every_user(*defs, path);
+        BOOST_REQUIRE(users.has_value());
+        for (const auto& [user, r] : *users) {
+            BOOST_CHECK_EQUAL(r.to_string(), roles(defs, path, user));
+        }
+    }
+
+    // Without a server attribute, Permissions do not apply; an unknown path is refused
+    BOOST_CHECK(!ecf::effective_permissions_of_every_user(*make("", "suite s\nendsuite\n"), "/s").has_value());
+    BOOST_CHECK_THROW((void)ecf::effective_permissions_of_every_user(*defs, "/s/missing"), std::invalid_argument);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

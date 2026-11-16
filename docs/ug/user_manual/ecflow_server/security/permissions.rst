@@ -580,9 +580,19 @@ tooltip lists one entry per line. The attribute can be:
 - deleted with "Delete", after a confirmation whose default answer is "Cancel". This runs
   ``ecflow_client --permissions delete``; the node then inherits its roles from above.
 
-The server validates every change, as for ``ecflow_client`` itself: a rejected change is reported like any other
-failed command, and the attribute is left unchanged. The server attribute is configured at start-up: it is neither
-added nor deleted at run time.
+The server attribute is not shown as a row of the tree. On a server that has one, it is:
+
+- edited with "Edit Permissions ..." of the context menu of the server, in the same dialog holding one entry per
+  line. Accepting the dialog runs ``ecflow_client --permissions update /``;
+- never added nor deleted from ecFlowUI: it is configured at start-up (see :ref:`permissions_attribute_server`).
+
+The server validates every change, as for ``ecflow_client`` itself: a rejected change (for example one that leaves
+nobody holding ``p``) is reported like any other failed command, and the attribute is left unchanged.
+
+The Info panel of the server and of every node shows, on a server using Permissions, the line ``permissions :``
+listing the effective roles of every user there, for example ``admin:rwxlop, alice:rwxp, bob:r``. The roles are
+computed by ecFlowUI with the rules of the server; users are listed by name, and users without any role there are
+not listed.
 
 When permissions change during a session, ecFlowUI follows the full synchronisation of its client: nodes that can no
 longer be read disappear, with the panels open on them. When the server denies the refresh itself (the user lost

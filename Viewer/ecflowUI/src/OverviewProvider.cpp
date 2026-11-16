@@ -4,6 +4,7 @@
 #include "OverviewProvider.hpp"
 
 #include "ConnectState.hpp"
+#include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
 #include "VFileInfo.hpp"
@@ -11,10 +12,34 @@
 #include "VNode.hpp"
 #include "VSState.hpp"
 #include "VTriggerAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EffectivePermissions.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
+
+namespace {
+
+///
+/// @brief Returns a key of the header of the Info panel, padded to a common width and followed by " : ".
+///
+/// The keys are aligned on the width of the longest one: "permissions" when that line is shown, otherwise the width
+/// used since before Permissions (7, as in "status  : ").
+///
+/// @param[in] key The key, e.g. "name"
+/// @param[in] withPermissions Whether the header holds the line "permissions"
+/// @return The padded key, e.g. "name    : "
+///
+std::string headerKey(const std::string& key, bool withPermissions) {
+    static const std::size_t plainWidth       = 7;
+    static const std::size_t permissionsWidth = std::string("permissions").size();
+    const std::size_t width                   = withPermissions ? permissionsWidth : plainWidth;
+    return key + std::string(width > key.size() ? width - key.size() : 0, ' ') + " : ";
+}
+
+} // namespace
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner)
     : InfoProvider(owner, VTask::NoTask) {
@@ -161,13 +186,21 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     std::string statusName(VSState::toName(server).toStdString());
     std::string flags(snode->flagsAsStr());
 
+    // The effective roles at server level (the server attribute is not shown as a row in the tree)
+    const auto permissions     = effectivePermissions(server, "/");
+    const bool withPermissions = permissions.has_value();
+
     // Header
-    f << "name    : " << nodeName << "\n";
-    f << "type    : " << typeName << "\n";
-    f << "status  : " << statusName << "\n";
+    f << headerKey("name", withPermissions) << nodeName << "\n";
+    f << headerKey("type", withPermissions) << typeName << "\n";
+    f << headerKey("status", withPermissions) << statusName << "\n";
 
     if (!flags.empty()) {
-        f << "flags   : " << flags << "\n";
+        f << headerKey("flags", withPermissions) << flags << "\n";
+    }
+
+    if (permissions) {
+        f << headerKey("permissions", withPermissions) << *permissions << "\n";
     }
 
     f << "----------\n";
@@ -215,6 +248,32 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     f << "end" << typeName << " # " << nodeName << "\n";
 }
 
+std::optional<std::string> OverviewProvider::effectivePermissions(ServerHandler* server, const std::string& path) {
+    if (server->isAccessDenied()) {
+        return std::nullopt;
+    }
+    ServerDefsAccess defsAccess(server); // relinquishes its resources on destruction
+    defs_ptr defs = defsAccess.defs();
+    if (!defs) {
+        return std::nullopt;
+    }
+    try {
+        // Computed on the client's copy with the rules of the server: every attribute on the path is held by the
+        // copy, since a node is only sent with all its ancestors and their attributes
+        if (const auto users = ecf::effective_permissions_of_every_user(*defs, path); users) {
+            std::string line;
+            for (const auto& [user, roles] : *users) {
+                line += (line.empty() ? "" : ", ") + user + ":" + roles.to_string();
+            }
+            return line;
+        }
+    }
+    catch (const std::invalid_argument&) {
+        // The node is gone from the copy (e.g. during an update): nothing is shown
+    }
+    return std::nullopt;
+}
+
 void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
     ServerHandler* server = info->server();
     if (!server) {
@@ -234,20 +293,27 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
     std::string statusName(node->stateName().toStdString());
     std::string flags(node->flagsAsStr());
 
+    node_ptr nn = node->node();
+
+    const auto permissions     = effectivePermissions(server, nn->absNodePath());
+    const bool withPermissions = permissions.has_value();
+
     // Header
-    f << "name    : " << nodeName << "\n";
-    f << "type    : " << typeName << "\n";
-    f << "status  : " << statusName << "\n";
+    f << headerKey("name", withPermissions) << nodeName << "\n";
+    f << headerKey("type", withPermissions) << typeName << "\n";
+    f << headerKey("status", withPermissions) << statusName << "\n";
 
     if (!flags.empty()) {
-        f << "flags   : " << flags << "\n";
+        f << headerKey("flags", withPermissions) << flags << "\n";
     }
-
-    node_ptr nn = node->node();
 
     auto state_change_time = nn->state_change_time();
     if (!state_change_time.is_special()) {
-        f << "at      : " << boost::posix_time::to_simple_string(state_change_time) << "\n";
+        f << headerKey("at", withPermissions) << boost::posix_time::to_simple_string(state_change_time) << "\n";
+    }
+
+    if (permissions) {
+        f << headerKey("permissions", withPermissions) << *permissions << "\n";
     }
 
     f << "----------\n";

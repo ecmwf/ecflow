@@ -88,4 +88,19 @@ std::optional<Roles> effective_permissions(const Defs& defs, const std::string& 
     return walker.roles(state);
 }
 
+std::optional<std::vector<std::pair<std::string, Roles>>> effective_permissions_of_every_user(const Defs& defs,
+                                                                                              const std::string& path) {
+    const auto* server = defs.server_state().permissions();
+    if (!server) {
+        return std::nullopt;
+    }
+    std::vector<std::pair<std::string, Roles>> result;
+    for (const auto& entry : server->entries()) {
+        if (auto roles = effective_permissions(defs, path, entry.user); roles && !roles->empty()) {
+            result.emplace_back(entry.user, *roles);
+        }
+    }
+    return result;
+}
+
 } // namespace ecf

@@ -361,6 +361,20 @@
             "status_tip"     : "__cmd__"
         },
 
+        {
+            "menu"           : "Node",
+            "name"           : "-",
+            "visible_for"    : "server and has_permissions"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit Permissions ...",
+            "visible_for"    : "server and has_permissions",
+            "command"        : "edit_server_permissions",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
 
 
 

@@ -812,6 +812,11 @@ bool NodeAttributeCondition::execute(VItem* item) {
         if (nodeAttrName_ == "locked") {
             return false; //  XXX temporary for now
         }
+        if (nodeAttrName_ == "has_permissions") {
+            // The server attribute: present only on a server using Permissions
+            ServerHandler* server = item->isServer()->server();
+            return server && server->usesPermissions();
+        }
     }
 
     else if (item->isNode()) {

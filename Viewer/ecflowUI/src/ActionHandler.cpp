@@ -26,6 +26,7 @@
 #include "CustomCommandDialog.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
+#include "ServerPermissionsDialog.hpp"
 #include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
@@ -213,6 +214,15 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
             if (filteredNodes.size() == 1) {
                 if (filteredNodes[0] && filteredNodes[0]->node()) {
                     AddPermissionsDialog permissionsDialog(filteredNodes[0]);
+                    permissionsDialog.exec();
+                }
+            }
+        }
+
+        else if (item->command() == "edit_server_permissions") {
+            if (filteredNodes.size() == 1 && filteredNodes[0] && filteredNodes[0]->isServer()) {
+                ServerPermissionsDialog permissionsDialog(filteredNodes[0]);
+                if (permissionsDialog.isValid()) {
                     permissionsDialog.exec();
                 }
             }

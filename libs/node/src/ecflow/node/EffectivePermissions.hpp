@@ -5,6 +5,8 @@
 
 #include <optional>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "ecflow/attribute/Permissions.hpp"
 
@@ -130,5 +132,19 @@ private:
 /// @throws std::invalid_argument when no node has the path.
 ///
 std::optional<Roles> effective_permissions(const Defs& defs, const std::string& path, const std::string& user);
+
+///
+/// @brief Computes the effective roles of every user at a path.
+///
+/// Only the users listed by the server attribute can hold roles; those with no role at the path are omitted.
+///
+/// @param[in] defs The definitions, holding the server attribute
+/// @param[in] path The path of a node, or "/" for the server
+/// @return The users with their effective roles, in the order of the server attribute (by name), or std::nullopt when
+///         Permissions do not apply (the server has no attribute).
+/// @throws std::invalid_argument when no node has the path.
+///
+std::optional<std::vector<std::pair<std::string, Roles>>> effective_permissions_of_every_user(const Defs& defs,
+                                                                                              const std::string& path);
 
 } // namespace ecf
