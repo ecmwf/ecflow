@@ -796,6 +796,11 @@ void ServerHandler::refreshInternal() {
     // before the comQueue_ was created so we need to check if it exists.
     if (comQueue_) {
         comQueue_->addNewsTask();
+        // Suites left out of the handle return to it once readable: their return changes nothing the news report,
+        // so the readable suites are listed at each refresh (R6.4)
+        if (suitesWithheld_) {
+            comQueue_->addSuiteListTask();
+        }
     }
 }
 
@@ -1252,6 +1257,10 @@ void ServerHandler::clientTaskFinished(VTask_ptr task, const ServerReply& server
                 // Update the suite filter with the list of suites actually loaded onto the server.
                 // If the suitefilter is enabled this might have only a subset of it in our tree
                 updateSuiteFilterWithLoaded(serverReply.get_string_vec());
+                if (suitesWithheld_ && withheldSuiteReadable(serverReply.get_string_vec())) {
+                    UiLogS(this).dbg() << " a suite left out of the handle is readable again - will reset";
+                    reset();
+                }
                 break;
             }
 
@@ -1283,12 +1292,20 @@ void ServerHandler::clientTaskFailed(VTask_ptr task, const std::string& errMsg, 
         return;
     }
 
-    if (task->type() == VTask::NewsTask) {
+    // A refresh denied by the authorisation of the server: the user lost read access (R6.4)
+    if (serverReply.permission_denied() && (task->type() == VTask::NewsTask || task->type() == VTask::SyncTask)) {
+        accessDenied(task, errMsg);
+    }
+
+    else if (task->type() == VTask::NewsTask) {
         connectionLost(errMsg);
         refreshFinished();
     }
 
     else if (task->type() == VTask::ResetTask) {
+        if (serverReply.permission_denied()) {
+            accessDenied_ = true;
+        }
         resetFailed(errMsg);
     }
 
@@ -1325,6 +1342,52 @@ void ServerHandler::connectionLost(const std::string& errMsg) {
     connectState_->state(ConnectState::Lost);
     connectState_->errorMessage(errMsg);
     broadcast(&ServerObserver::notifyServerConnectState);
+}
+
+void ServerHandler::accessDenied(VTask_ptr task, const std::string& errMsg) {
+    UiLogS(this).dbg() << "ServerHandler::accessDenied --> " << errMsg;
+
+    if (task->type() == VTask::NewsTask) {
+        refreshFinished();
+    }
+    else {
+        task->reply()->setErrorText(errMsg);
+        task->status(VTask::ABORTED);
+    }
+
+    // The state is set first: the next refresh that succeeds is then seen as a regained connection, and resets. The
+    // panels showing the server learn from it that their content must be discarded
+    accessDenied_ = true;
+    connectionLost(errMsg);
+
+    // The tree, and the panels showing it, are cleared, and a full synchronisation is attempted; a denied one keeps
+    // the server shown as lost, with the reason (resetFailed)
+    reset();
+}
+
+bool ServerHandler::usesPermissions() {
+    ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
+    defs_ptr defs = defsAccess.defs();
+    return defs != nullptr && defs->server_state().permissions() != nullptr;
+}
+
+bool ServerHandler::withheldSuiteReadable(const std::vector<std::string>& readable) const {
+    if (!suiteFilter_ || !suiteFilter_->isEnabled()) {
+        return false;
+    }
+    for (const auto& suite : suiteFilter_->filter()) {
+        if (std::find(readable.begin(), readable.end(), suite) == readable.end()) {
+            continue; // still unreadable, or not loaded
+        }
+        bool shown = false;
+        for (int i = 0; i < vRoot_->numOfChildren() && !shown; i++) {
+            shown = vRoot_->childAt(i)->strName() == suite;
+        }
+        if (!shown) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ServerHandler::connectionGained() {
@@ -1495,6 +1558,7 @@ void ServerHandler::reset() {
 // The reset was successful
 void ServerHandler::resetFinished() {
     setActivity(NoActivity);
+    accessDenied_ = false;
 
     // Set server host and port in defs. It is used to find the server of
     // a given node in the viewer.

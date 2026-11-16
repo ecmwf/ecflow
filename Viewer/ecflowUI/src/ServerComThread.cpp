@@ -4,6 +4,7 @@
 #include "ServerComThread.hpp"
 
 #include <algorithm>
+#include <iterator>
 
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
@@ -11,6 +12,7 @@
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/CommandLine.hpp"
@@ -408,7 +410,16 @@ void ServerComThread::reset() {
 
             // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and
             // defs to the client
-            ci_->ch1_register(autoAddNewSuites_, filteredSuites_);
+            try {
+                registerSuites(filteredSuites_);
+                server_->setSuitesWithheld(false);
+            }
+            catch (const ecf::PermissionDenied&) {
+                // Some suite of the filter exists, but the user cannot read it (R6.4): the suites that can be read
+                // are registered instead, the filter itself is kept, and is registered whole again once readable
+                registerReadableSuites();
+                server_->setSuitesWithheld(true);
+            }
         }
         // If the suite filter is empty
         else {
@@ -421,11 +432,13 @@ void ServerComThread::reset() {
             // defs to the client
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
-            ci_->ch1_register(autoAddNewSuites_, fsl);
+            registerSuites(fsl);
+            server_->setSuitesWithheld(false);
         }
     }
     else {
         UiLog(serverName_).dbg() << " drop handle";
+        server_->setSuitesWithheld(false);
         ci_->ch1_drop();
         // if there was a handle to drop sync is done automatically
         if (!ci_->server_reply().full_sync()) {
@@ -440,6 +453,80 @@ void ServerComThread::reset() {
     attach(defsAccess.defs());
 
     UiLog(serverName_).dbg() << "<-- ComThread::reset";
+}
+
+void ServerComThread::registerReadableSuites() {
+    // The suites listed to the user are those it can read
+    ci_->suites();
+    const auto& readable = ci_->server_reply().get_string_vec();
+
+    std::vector<std::string> suites;
+    for (const auto& suite : filteredSuites_) {
+        if (std::find(readable.begin(), readable.end(), suite) != readable.end()) {
+            suites.push_back(suite);
+        }
+    }
+    if (suites.empty()) {
+        // Registering an empty set would retrieve every suite: a dummy suite retrieves none
+        suites.push_back(SuiteFilter::dummySuite());
+    }
+
+    UiLog(serverName_).dbg() << " register readable suites=" << suites;
+    registerSuites(suites);
+}
+
+void ServerComThread::registerSuites(const std::vector<std::string>& suites) {
+    // The current handle, and those left behind by failed registrations, are dropped first, explicitly: a registration
+    // that fails (e.g. denied, the user having lost read access) would otherwise leave the handle on the server, since
+    // ch1_register() forgets it before the request. A drop changes the state of the client (its handle), which the
+    // registration then resets
+    if (const int previous = ci_->client_handle(); previous != 0) {
+        if (std::find(orphanedHandles_.begin(), orphanedHandles_.end(), previous) == orphanedHandles_.end()) {
+            orphanedHandles_.push_back(previous);
+        }
+    }
+    dropOrphanedHandles();
+    ci_->ch1_register(autoAddNewSuites_, suites);
+}
+
+void ServerComThread::dropOrphanedHandles() {
+    if (orphanedHandles_.empty()) {
+        return;
+    }
+
+    // The handles of the user that the server still has: a handle that is not listed is gone, and forgotten. When the
+    // listing fails (denied, server not reached, or a failure before any request is sent), every handle is kept
+    std::vector<int> existing;
+    try {
+        ci_->ch_suites();
+        for (const auto& [handle, suites] : ci_->server_reply().get_client_handle_suites()) {
+            existing.push_back(static_cast<int>(handle));
+        }
+    }
+    catch (const std::exception& e) {
+        UiLog(serverName_).dbg() << " handles kept, their listing failed: " << e.what();
+        return;
+    }
+
+    // No synchronisation follows a drop: the definitions held are those of the registration that follows
+    const bool autoSync = ci_->is_auto_sync_enabled();
+    ci_->set_auto_sync(false);
+    for (auto it = orphanedHandles_.begin(); it != orphanedHandles_.end();) {
+        if (std::find(existing.begin(), existing.end(), *it) == existing.end()) {
+            it = orphanedHandles_.erase(it); // gone already
+            continue;
+        }
+        try {
+            ci_->ch_drop(*it);
+            it = orphanedHandles_.erase(it);
+        }
+        catch (const std::exception& e) {
+            // Listed but not dropped: kept, for the next registration
+            UiLog(serverName_).dbg() << " drop of handle " << *it << " failed, kept: " << e.what();
+            it = std::next(it);
+        }
+    }
+    ci_->set_auto_sync(autoSync);
 }
 
 // This is an observer notification method!!

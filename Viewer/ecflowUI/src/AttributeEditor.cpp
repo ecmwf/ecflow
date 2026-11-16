@@ -97,6 +97,12 @@ void AttributeEditor::addForm(QWidget* w) {
     mainLayout_->insertWidget(3, w, 1);
 }
 
+void AttributeEditor::hideForm() {
+    if (form_) {
+        form_->hide();
+    }
+}
+
 void AttributeEditor::accept() {
     apply();
     QDialog::accept();
@@ -187,10 +193,15 @@ void AttributeEditor::notifyDataLost(VInfo* info) {
     UI_FUNCTION_LOG
 #endif
     if (info_ && info_.get() == info) {
+        ServerHandler* server = info_->server();
         detachInfo();
         messageLabel_->showWarning("The parent node or the edited " + type_ +
                                    " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
+        // On a server using Permissions, the node may have become unreadable: its content is no longer shown (R6.4)
+        if (server && (server->isAccessDenied() || server->usesPermissions())) {
+            hideForm();
+        }
     }
 }
 
@@ -318,6 +329,10 @@ void AttributeEditor::notifyServerConnectState(ServerHandler* server) {
                                            type_ + " <b>cannot be modified</b>!");
                 messageLabel_->stopLoadLabel();
                 setSuspended(true);
+                // The user lost read access to the server (R6.4): the content is no longer shown
+                if (server->isAccessDenied()) {
+                    hideForm();
+                }
                 break;
             case ConnectState::Normal:
                 messageLabel_->hide();

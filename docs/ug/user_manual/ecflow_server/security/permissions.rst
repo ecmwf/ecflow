@@ -577,6 +577,13 @@ tooltip lists one entry per line. The attribute can be:
   ``ecflow_client --permissions update``; the server validates the change, and a rejected change is reported like any
   other failed command.
 
+When permissions change during a session, ecFlowUI follows the full synchronisation of its client: nodes that can no
+longer be read disappear, with the panels open on them. When the server denies the refresh itself (the user lost
+read access at server level), the tree and its panels are cleared, unlike after a connection failure, and the server
+is shown as lost with the reason, and the info panels showing the server are emptied; ecFlowUI synchronises in
+full once access returns. A suite filter naming a suite that the user can no longer read registers the suites that
+can be read; a suite of the filter that becomes readable again returns at the next refresh.
+
 REST API
 ========
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <ctime>
 #include <deque>
 #include <string>
@@ -65,6 +66,29 @@ public:
     bool isEnabled() const { return !isDisabled(); }
     bool isDisabled() const;
     bool isInLogout() const;
+
+    ///
+    /// @brief Returns whether the last refresh was denied by the authorisation of the server: the user lost read
+    ///        access at server level (R6.4).
+    ///
+    /// @return True from the denial until a synchronisation succeeds; panels showing the server are then cleared.
+    ///
+    bool isAccessDenied() const { return accessDenied_; }
+
+    ///
+    /// @brief Returns whether the server uses Permissions attributes, as its definitions held by ecFlowUI show.
+    ///
+    /// @return True when the definitions carry a server Permissions attribute.
+    ///
+    bool usesPermissions();
+
+    ///
+    /// @brief Records whether the handle holds only part of the suite filter, some of its suites being unreadable when
+    ///        it was registered (R6.4); called by the communication thread.
+    ///
+    /// @param[in] withheld True when suites of the filter were left out of the registration
+    ///
+    void setSuitesWithheld(bool withheld) { suitesWithheld_ = withheld; }
 
     bool readFromDisk() const;
     QString uidForServerLogTransfer() const;
@@ -162,6 +186,8 @@ protected:
     std::string host_;
     std::string port_;
     std::string user_;
+    bool accessDenied_{false};                // the last refresh was denied by the server (R6.4)
+    std::atomic<bool> suitesWithheld_{false}; // suites of the filter left out of the handle (R6.4)
     ecf::Protocol protocol_;
     ClientInvoker* client_;
     std::string longName_;
@@ -194,6 +220,26 @@ private:
     void clearTree();
     void rescanTree(bool needNewSuiteList = true);
     void connectionLost(const std::string& errMsg);
+
+    ///
+    /// @brief Handles a refresh denied by the authorisation of the server: the user lost read access (R6.4).
+    ///
+    /// Unlike a transient connection failure, which keeps the tree, the tree and the panels showing it are cleared,
+    /// and a full synchronisation is attempted; while it is denied, the server is shown as lost with the reason, and
+    /// the next refresh that succeeds resynchronises in full.
+    ///
+    /// @param[in] task The news or synchronisation task denied
+    /// @param[in] errMsg The reason of the denial, as reported by the server
+    ///
+    void accessDenied(VTask_ptr task, const std::string& errMsg);
+
+    ///
+    /// @brief Returns whether a suite of the filter, left out of the handle, is now readable.
+    ///
+    /// @param[in] readable The suites listed to the user, those it can read
+    /// @return True when a suite of the enabled filter is readable but missing from the tree.
+    ///
+    bool withheldSuiteReadable(const std::vector<std::string>& readable) const;
     bool connectionGained();
     void checkServerVersion();
     void failedClientServer(const std::string& msg);
