@@ -472,32 +472,38 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     auto option = [&configuration](const char* path) {
         return std::get<bool>(*configuration.get(ecf::cfg::Key::for_option(path)));
     };
+    auto limit = [&configuration](const char* path) {
+        return static_cast<std::size_t>(std::get<std::int64_t>(*configuration.get(ecf::cfg::Key::for_option(path))));
+    };
     auto text    = [&value](const char* name) { return std::get<std::string>(value(name)); };
     auto integer = [&value](const char* name) { return static_cast<int>(std::get<std::int64_t>(value(name))); };
 
-    ecfHome_                 = text("ECF_HOME");
-    serverPort_              = integer("ECF_PORT");
-    ecf_checkpt_file_        = text("ECF_CHECK");
-    ecf_backup_checkpt_file_ = text("ECF_CHECKOLD");
-    log_file_name            = text("ECF_LOG");
-    checkPtInterval_         = integer("ECF_CHECKINTERVAL");
-    submitJobsInterval_      = integer("ECF_INTERVAL");
-    ecf_cmd_                 = text("ECF_JOB_CMD");
-    killCmd_                 = text("ECF_KILL_CMD");
-    statusCmd_               = text("ECF_STATUS_CMD");
-    checkCmd_                = text("ECF_CHECK_CMD");
-    urlCmd_                  = text("ECF_URL_CMD");
-    urlBase_                 = text("ECF_URL_BASE");
-    url_                     = text("ECF_URL");
-    ecf_micro_               = text("ECF_MICRODEF");
-    ecf_white_list_file_     = text("ECF_LISTS");
-    ecf_task_threshold_      = integer("ECF_TASK_THRESHOLD");
-    ecf_prune_node_log_      = integer("ECF_PRUNE_NODE_LOG");
-    debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
-    jobGeneration_           = option("ecflow.server.job_generation");
-    log_commands_            = option("ecflow.server.log.commands.enabled");
-    ignore_whitelist_        = option("ecflow.server.whitelist.ignore");
-    audit_only_              = option("ecflow.server.authorisation.audit_only");
+    ecfHome_                    = text("ECF_HOME");
+    serverPort_                 = integer("ECF_PORT");
+    ecf_checkpt_file_           = text("ECF_CHECK");
+    ecf_backup_checkpt_file_    = text("ECF_CHECKOLD");
+    log_file_name               = text("ECF_LOG");
+    checkPtInterval_            = integer("ECF_CHECKINTERVAL");
+    submitJobsInterval_         = integer("ECF_INTERVAL");
+    ecf_cmd_                    = text("ECF_JOB_CMD");
+    killCmd_                    = text("ECF_KILL_CMD");
+    statusCmd_                  = text("ECF_STATUS_CMD");
+    checkCmd_                   = text("ECF_CHECK_CMD");
+    urlCmd_                     = text("ECF_URL_CMD");
+    urlBase_                    = text("ECF_URL_BASE");
+    url_                        = text("ECF_URL");
+    ecf_micro_                  = text("ECF_MICRODEF");
+    ecf_white_list_file_        = text("ECF_LISTS");
+    ecf_task_threshold_         = integer("ECF_TASK_THRESHOLD");
+    ecf_prune_node_log_         = integer("ECF_PRUNE_NODE_LOG");
+    debug_                      = std::get<bool>(value("ECF_DEBUG_SERVER"));
+    jobGeneration_              = option("ecflow.server.job_generation");
+    log_commands_               = option("ecflow.server.log.commands.enabled");
+    ignore_whitelist_           = option("ecflow.server.whitelist.ignore");
+    audit_only_                 = option("ecflow.server.authorisation.audit_only");
+    limits_.request_size        = limit("ecflow.server.limits.request_size");
+    limits_.permissions_entries = limit("ecflow.server.limits.permissions_entries");
+    limits_.handles_per_user    = limit("ecflow.server.limits.handles_per_user");
     if (option("ecflow.server.http")) {
         protocol_ = ecf::Protocol::Http;
     }

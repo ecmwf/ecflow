@@ -30,6 +30,7 @@ void SslTcpServer::start_accept() {
 
     ssl_connection_ptr new_conn =
         std::make_shared<ssl_connection>(boost::ref(io_), boost::ref(serverEnv_.openssl().context()));
+    new_conn->set_max_inbound_size(serverEnv_.limits().request_size);
 
     acceptor_.async_accept(new_conn->socket_ll(),
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });

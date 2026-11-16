@@ -24,6 +24,7 @@ and ensuring security.
    running-the-jobs
    files-location
    server-security-whitelist-file
+   server-security-permissions
    dates-and-clocks
    using_python_scripting/using-python-scripting.rst
    introducing-zombies

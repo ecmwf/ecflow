@@ -306,6 +306,46 @@ Notes:
 - Lines with a zero count are not shown.
 - A server older than the Permissions attribute reports no ``Authorisation`` section.
 
+.. _permissions_attribute_limits:
+
+Limits
+------
+
+The server can bound the inputs of its clients. Each limit is set in ``<host>.<port>.ecf.cfg``, under
+``/ecflow/server/limits``, and enforced where the input arrives; ``0``, the default, sets no limit:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Setting
+     - Effect
+   * - ``request_size``
+     - the largest request accepted, in bytes (its serialised form); a larger request is refused before it is read,
+       with an error reply (over HTTP, the status ``413 Payload Too Large``), and the server log records it; the server
+       keeps serving the other requests
+   * - ``permissions_entries``
+     - the largest number of entries of a Permissions attribute brought in by ``--permissions create`` or
+       ``update``, ``--load``, ``--replace`` and ``--plug`` (on the receiving server); a larger attribute refuses the
+       whole request, and nothing changes
+   * - ``handles_per_user``
+     - the largest number of client handles a user holds; ``--ch_register`` beyond it is refused, while replacing a
+       handle of the user, or dropping one, is always possible
+
+For example:
+
+.. code-block:: json
+
+   {"version": 1, "ecflow": {"server": {
+     "limits": {"request_size": 104857600, "permissions_entries": 200, "handles_per_user": 20}}}}
+
+Notes:
+
+- The limits apply in every mode, with or without Permissions attributes.
+- Over HTTP, without ``request_size``, the HTTP library keeps its own default limit on the size of a request.
+- The attributes already held by the server (in checkpoints and archives) are not checked against
+  ``permissions_entries``.
+
 .. _permissions_attribute_commands:
 
 Roles of commands

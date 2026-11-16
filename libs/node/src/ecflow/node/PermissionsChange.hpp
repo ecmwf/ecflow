@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <iosfwd>
 #include <optional>
 #include <set>
@@ -71,6 +72,29 @@ private:
 /// @return The number, from 1; 0 when the line is not found.
 ///
 int line_of_permissions(std::istream& in, const std::string& path);
+
+///
+/// @brief Refuses a Permissions attribute holding more entries than a limit (R11.10).
+///
+/// @param[in] value The attribute
+/// @param[in] path The path of its node, or "/" for the server attribute, named in the error
+/// @param[in] max_entries The largest number of entries allowed; 0 for no limit
+/// @throws std::runtime_error naming the node and the limit when the attribute holds more entries.
+///
+void check_permissions_entries(const Permissions& value, const std::string& path, std::size_t max_entries);
+
+///
+/// @brief Refuses a subtree, about to arrive in the definitions, carrying a Permissions attribute with more entries
+///        than a limit (R11.10).
+///
+/// The live nodes of the subtree, aliases included, are checked; the attributes of archived nodes are those of their
+/// archive files, held by the server, not brought by the request.
+///
+/// @param[in] subtree The root of the subtree
+/// @param[in] max_entries The largest number of entries allowed; 0 for no limit
+/// @throws std::runtime_error naming the first node carrying a larger attribute, and the limit.
+///
+void check_permissions_entries(const Node& subtree, std::size_t max_entries);
 
 ///
 /// @brief Validates and applies changes of Permissions attributes, all or nothing.

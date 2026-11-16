@@ -134,6 +134,7 @@ if (ENABLE_SERVER)
     test/TestPermissionsFiltering.cpp
     test/TestPermissionsHarness.cpp
     test/TestPermissionsLifecycle.cpp
+    test/TestPermissionsLimits.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp

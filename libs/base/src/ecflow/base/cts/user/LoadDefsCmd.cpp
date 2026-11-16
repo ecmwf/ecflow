@@ -172,6 +172,7 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         std::vector<ecf::PermissionsChange> permissions;
         permissions.reserve(defs->suites().size());
         for (const auto& suite : defs->suites()) {
+            ecf::check_permissions_entries(*suite, as->limits().permissions_entries); // R11.10
             permissions.emplace_back(*as->defs());
             permissions.back().validate_transfer(*suite, nullptr);
         }

@@ -25,6 +25,7 @@
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/ServerLimits.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/core/cfg/Configuration.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
@@ -123,6 +124,13 @@ public:
     /// @return True when the requests the Permissions attributes deny are logged and executed, rather than refused.
     ///
     bool audit_only() const { return audit_only_; }
+
+    ///
+    /// @brief Returns the limits on the inputs of the server (/ecflow/server/limits).
+    ///
+    /// @return The limits; 0 stands for no limit.
+    ///
+    const ecf::ServerLimits& limits() const { return limits_; }
 
     /// Whenever we save the checkpt, we time how long this takes.
     /// For very large definition the time can be significant and start to interfere with
@@ -387,6 +395,7 @@ private:
     bool log_commands_{false};
     bool ignore_whitelist_{false};
     bool audit_only_{false};
+    ecf::ServerLimits limits_;
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

@@ -173,6 +173,7 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     if (const auto client_node = client_defs->findAbsNode(pathToNode_); client_node) {
         const auto where = target(*defs, client_node, createNodesAsNeeded_);
         if (where.existing || createNodesAsNeeded_) {
+            ecf::check_permissions_entries(*where.imported, as->limits().permissions_entries); // R11.10
             permissions.validate_transfer(*where.imported, where.parent.get());
         }
     }

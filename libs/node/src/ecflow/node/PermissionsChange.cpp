@@ -91,6 +91,32 @@ struct Holders
 
 } // namespace
 
+void check_permissions_entries(const Permissions& value, const std::string& path, std::size_t max_entries) {
+    if (max_entries > 0 && value.entries().size() > max_entries) {
+        throw std::runtime_error("The Permissions attribute of " + path + " has more than " +
+                                 std::to_string(max_entries) +
+                                 " entries, the limit of the server (/ecflow/server/limits/permissions_entries)");
+    }
+}
+
+void check_permissions_entries(const Node& subtree, std::size_t max_entries) {
+    if (max_entries == 0) {
+        return;
+    }
+    std::function<void(const Node&)> visit = [&](const Node& node) {
+        if (const auto* value = node.permissions(); value) {
+            check_permissions_entries(*value, node.absNodePath(), max_entries);
+        }
+        // Every child, the aliases of a task included
+        std::vector<node_ptr> children;
+        node.immediateChildren(children);
+        for (const auto& child : children) {
+            visit(*child);
+        }
+    };
+    visit(subtree);
+}
+
 int line_of_permissions(std::istream& in, const std::string& path) {
     std::vector<std::string> nodes; // the names, from the suite down
     bool task        = false;       // true when the last name is a task, whose end keyword is optional

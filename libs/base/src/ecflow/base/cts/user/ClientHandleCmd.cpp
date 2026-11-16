@@ -170,6 +170,23 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
     switch (api_) {
         case ClientHandleCmd::REGISTER: {
 
+            // The number of handles of each user is limited (R11.10); a handle replaced is not a new one
+            if (const auto limit = as->limits().handles_per_user; limit > 0) {
+                std::size_t held = 0;
+                for (const auto& handle : as->defs()->client_suite_mgr().clientSuites()) {
+                    if (handle.user() == requester && static_cast<int>(handle.handle()) != client_handle_) {
+                        ++held;
+                    }
+                }
+                if (held >= limit) {
+                    throw std::runtime_error("ClientHandleCmd: " + requester + " already holds " +
+                                             std::to_string(held) + " client handles, the limit of " +
+                                             std::to_string(limit) +
+                                             " client handles per user of the server "
+                                             "(/ecflow/server/limits/handles_per_user)");
+                }
+            }
+
             // If existing handle is non zero drop it first
             if (client_handle_ != 0) {
                 as->defs()->client_suite_mgr().remove_client_suite(client_handle_); // will throw if handle not found

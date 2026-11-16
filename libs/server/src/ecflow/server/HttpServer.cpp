@@ -3,6 +3,8 @@
 
 #include "ecflow/server/HttpServer.hpp"
 
+#include <optional>
+
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/Identification.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
@@ -165,6 +167,7 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
     boost::beast::flat_buffer buffer_{};
     boost::beast::http::request<boost::beast::http::string_body> request_{};
     boost::beast::http::response<boost::beast::http::string_body> response_{};
+    std::optional<boost::beast::http::request_parser<boost::beast::http::string_body>> parser_{};
     bool is_terminate_{false};
     // The Http server that owns this session
     HttpServer* owner_;
@@ -187,10 +190,16 @@ public:
     }
 
     void do_read() {
+        // A request larger than the limit of the server is refused, unread (R11.10); without a limit, the default
+        // limit of the parser applies, as before
+        parser_.emplace();
+        if (const auto limit = owner_->server()->limits().request_size; limit > 0) {
+            parser_->body_limit(limit);
+        }
         boost::beast::http::async_read(
             socket_,
             buffer_,
-            request_,
+            *parser_,
             [self = shared_from_this()](boost::beast::error_code ec, std::size_t bytes_transferred) {
                 self->on_read(ec, bytes_transferred);
             });
@@ -203,10 +212,27 @@ public:
             return do_close();
         }
 
+        // A request larger than the limit is answered with an error, and the connection closed
+        if (ec == boost::beast::http::error::body_limit) {
+            log_error("HttpSession::on_read: the request exceeds the limit of the server "
+                      "(/ecflow/server/limits/request_size)",
+                      ec);
+            response_ = {};
+            response_.version(11);
+            response_.result(boost::beast::http::status::payload_too_large);
+            response_.set(boost::beast::http::field::content_type, "text/plain");
+            response_.body() = "The request exceeds the limit of the server (/ecflow/server/limits/request_size)";
+            response_.keep_alive(false);
+            response_.prepare_payload();
+            return send_response();
+        }
+
         // Handle eventual read error
         if (ec) {
             return log_error("HttpSession::on_read", ec);
         }
+
+        request_ = parser_->release();
 
         // Handle actual request
         handle_request(request_, response_, is_terminate_, owner_->server());

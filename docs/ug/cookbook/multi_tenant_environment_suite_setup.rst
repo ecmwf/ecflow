@@ -211,6 +211,8 @@ The reverse proxy authenticates every request and forwards the authenticated ide
 Variables do not control access: a variable named :code:`PERMISSIONS` or :code:`ECF_PERMISSIONS` is an
 ordinary variable, with no effect on authorisation.
 
+See also :ref:`how_to_control_access_with_the_permissions_attribute_two_teams`, for two teams sharing a server.
+
 The image currently running in the reference environment is an earlier development build, which
 enforces node permissions given by an :code:`ECF_PERMISSIONS` variable (see
 :ref:`multi_tenant_reference_environment`); released versions of ecFlow do not. How the environment

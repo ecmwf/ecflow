@@ -196,6 +196,7 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
                 "log": {"commands": {"enabled": true}},
                 "whitelist": {"ignore": true},
                 "authorisation": {"audit_only": true},
+                "limits": {"request_size": 1000000, "permissions_entries": 100, "handles_per_user": 10},
                 "permissions": [{"user": "admin", "permissions": "rwxlops"}]
             }
         }

@@ -250,6 +250,14 @@ Settings
      - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/authorisation/audit_only``: ``true`` logs the
        requests the Permissions attributes deny, and executes them, except reads (role ``r``), which are always
        enforced, see :ref:`permissions_attribute_audit`
+   * - Limits on the inputs
+     - none
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/limits/request_size``,
+       ``/ecflow/server/limits/permissions_entries`` and ``/ecflow/server/limits/handles_per_user``: positive
+       integers, ``0`` for no limit, see :ref:`permissions_attribute_limits`
    * - Ignore the whitelist
      - disabled
      - no

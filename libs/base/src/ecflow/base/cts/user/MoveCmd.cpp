@@ -117,6 +117,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     if (!error_msg.empty() || !src_node) {
         throw std::runtime_error("Plug(Move) command failed. Error in source:\n" + error_msg);
     }
+    ecf::check_permissions_entries(*src_node, as->limits().permissions_entries); // R11.10
 
     // destNode can be NULL when we are moving a suite
     node_ptr destNode;

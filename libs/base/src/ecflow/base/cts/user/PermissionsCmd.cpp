@@ -231,6 +231,10 @@ STC_Cmd_ptr PermissionsCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     PermissionsChange change(*defs);
+    if (operation_ != "delete") {
+        // The size of an attribute brought in is limited (R11.10)
+        check_permissions_entries(parse_value(value_), path_, as->limits().permissions_entries);
+    }
     if (server) {
         change.set_server(parse_value(value_));
     }

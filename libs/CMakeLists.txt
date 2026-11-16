@@ -351,6 +351,7 @@ set(srcs
   core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
+  core/src/ecflow/core/ServerLimits.hpp
   core/src/ecflow/core/Stl.hpp
   core/src/ecflow/core/Str.hpp
   core/src/ecflow/core/StringSplitter.hpp

@@ -152,6 +152,18 @@ std::vector<Expected> expected_settings() {
          Type::Boolean,
          boolean(false),
          Names{std::nullopt, "/ecflow/server/authorisation/audit_only", std::nullopt, std::nullopt}},
+        {"ecflow.server.limits.request_size",
+         Type::Integer,
+         integer(0),
+         Names{std::nullopt, "/ecflow/server/limits/request_size", std::nullopt, std::nullopt}},
+        {"ecflow.server.limits.permissions_entries",
+         Type::Integer,
+         integer(0),
+         Names{std::nullopt, "/ecflow/server/limits/permissions_entries", std::nullopt, std::nullopt}},
+        {"ecflow.server.limits.handles_per_user",
+         Type::Integer,
+         integer(0),
+         Names{std::nullopt, "/ecflow/server/limits/handles_per_user", std::nullopt, std::nullopt}},
         {"ecflow.server.permissions",
          Type::Json,
          std::nullopt,
@@ -273,6 +285,16 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_integer_ranges) {
     check_accepted(prune, "2147483647", value_of<std::int64_t>(2147483647));
     check_refused(prune, "-1");
     check_refused(prune, "2147483648");
+
+    // The limits on the inputs (R11.10): 0 for no limit
+    for (const std::string key : {"ecflow.server.limits.request_size",
+                                  "ecflow.server.limits.permissions_entries",
+                                  "ecflow.server.limits.handles_per_user"}) {
+        check_accepted(key, "0", value_of<std::int64_t>(0));
+        check_accepted(key, "2147483647", value_of<std::int64_t>(2147483647));
+        check_refused(key, "-1");
+        check_refused(key, "2147483648");
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_catalogue_check_mode) {

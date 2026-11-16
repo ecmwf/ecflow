@@ -125,6 +125,8 @@ public:
 
     bool audit_only() const override { return serverEnv_.audit_only(); }
 
+    ecf::ServerLimits limits() const override { return serverEnv_.limits(); }
+
     bool lock(const std::string& user) override;
     void unlock() override;
     const std::string& lockedUser() const override;

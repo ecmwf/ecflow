@@ -9,6 +9,7 @@
 #include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/SState.hpp"
+#include "ecflow/core/ServerLimits.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
 
@@ -137,6 +138,13 @@ public:
     ///         refused; false by default.
     ///
     virtual bool audit_only() const { return false; }
+
+    ///
+    /// @brief Returns the limits on the inputs of the server (R11.10).
+    ///
+    /// @return The limits; none by default.
+    ///
+    virtual ecf::ServerLimits limits() const { return {}; }
 
     virtual ecf::AuthorisationService& authorisation()             = 0;
     virtual const ecf::AuthorisationService& authorisation() const = 0;
