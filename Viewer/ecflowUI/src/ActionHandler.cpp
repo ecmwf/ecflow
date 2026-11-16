@@ -4,6 +4,8 @@
 #include "ActionHandler.hpp"
 
 #include <algorithm>
+#include <string>
+#include <vector>
 
 #include <QAction>
 #include <QClipboard>
@@ -19,6 +21,7 @@
 #endif
 
 #include "AddLabelDialog.hpp"
+#include "AddPermissionsDialog.hpp"
 #include "CommandHandler.hpp"
 #include "CustomCommandDialog.hpp"
 #include "MenuHandler.hpp"
@@ -35,6 +38,44 @@
 #include "ecflow/core/Str.hpp"
 
 #define UI_ACTIONHANDLER_DEBUG
+
+namespace {
+
+//
+// Deletion of a Permissions attribute: the confirmation defaults to Cancel, since the node then inherits its roles
+// from above, which can widen the access to it
+//
+
+bool still_attached(const VInfo_ptr& info) {
+    return info && info->hasData() && info->node() && info->node()->node();
+}
+
+void delete_permissions(const VInfo_ptr& info) {
+    if (!still_attached(info)) {
+        return;
+    }
+
+    const QString path = QString::fromStdString(info->node()->node()->absNodePath()).toHtmlEscaped();
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(QObject::tr("Confirm command"));
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setText("Delete the Permissions attribute of <b>" + path +
+                   "</b>?<br><br>The node then inherits its roles from above.<br><br><i>command: ecflow_client "
+                   "--permissions delete " +
+                   path + "</i>");
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setEscapeButton(QMessageBox::Cancel);
+
+    // The node can be gone once the question is answered (a refresh runs meanwhile): nothing is sent then
+    if (msgBox.exec() == QMessageBox::Ok && still_attached(info)) {
+        CommandHandler::run(info, std::vector<std::string>{"ecflow_client", "--permissions", "delete", "<full_name>"});
+    }
+}
+
+} // namespace
 
 ActionHandler::ActionHandler(QObject* actionSender, QWidget* menuParent)
     : QObject(actionSender),
@@ -165,6 +206,21 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
                     AddLabelDialog labelDialog(filteredNodes[0], "Jira");
                     labelDialog.exec();
                 }
+            }
+        }
+
+        else if (item->command() == "add_permissions") {
+            if (filteredNodes.size() == 1) {
+                if (filteredNodes[0] && filteredNodes[0]->node()) {
+                    AddPermissionsDialog permissionsDialog(filteredNodes[0]);
+                    permissionsDialog.exec();
+                }
+            }
+        }
+
+        else if (item->command() == "delete_permissions") {
+            if (filteredNodes.size() == 1 && filteredNodes[0] && filteredNodes[0]->isAttribute()) {
+                delete_permissions(filteredNodes[0]);
             }
         }
 

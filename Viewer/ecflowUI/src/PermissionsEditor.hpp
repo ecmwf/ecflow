@@ -10,10 +10,11 @@
 #include "ui_PermissionsEditorWidget.h"
 
 ///
-/// @brief Holds the form of the dialog that edits a Permissions attribute.
+/// @brief Holds the form of the dialogs that add and edit a Permissions attribute.
 ///
 class PermissionsEditorWidget : public QWidget, protected Ui::PermissionsEditorWidget {
     friend class PermissionsEditor;
+    friend class AddPermissionsDialog;
 
 public:
     ///

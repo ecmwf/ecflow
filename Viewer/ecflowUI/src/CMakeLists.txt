@@ -11,6 +11,7 @@ set(viewer_srcs
   ActionHandler.hpp
   AddLabelDialog.hpp
   AddModelColumnDialog.hpp
+  AddPermissionsDialog.hpp
   Animation.hpp
   AstCollateVNodesVisitor.hpp
   AttributeEditor.hpp
@@ -297,6 +298,7 @@ set(viewer_srcs
   ActionHandler.cpp
   AddLabelDialog.cpp
   AddModelColumnDialog.cpp
+  AddPermissionsDialog.cpp
   Animation.cpp
   AstCollateVNodesVisitor.cpp
   AttributeEditor.cpp
@@ -568,6 +570,7 @@ set(viewer_moc_files
   ActionHandler.hpp
   AddLabelDialog.hpp
   AddModelColumnDialog.hpp
+  AddPermissionsDialog.hpp
   Animation.hpp
   AttributeEditor.hpp
   CaseSensitiveButton.hpp

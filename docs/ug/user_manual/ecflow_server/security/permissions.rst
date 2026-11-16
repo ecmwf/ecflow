@@ -570,12 +570,19 @@ ecFlowUI
 ecFlowUI shows the attribute of a node as a row of its attributes, with its entries in the command-line form; the
 tooltip lists one entry per line. The attribute can be:
 
-- shown or hidden with the entry "Permissions" of the attribute filter;
+- shown or hidden with the entry "Permissions" of the attribute filter; new tree views show it by default;
 - found by a search on the attribute ``permissions``, by its value or by its users;
 - tested with the condition ``has_permissions`` in the menu configuration and in searches;
+- added to a node without one with "Add permissions" of the "Special" menu, in a dialog holding one entry per
+  line. Accepting the dialog runs ``ecflow_client --permissions create``;
 - edited with "Edit ...", in a dedicated dialog holding one entry per line. Applying the dialog runs
-  ``ecflow_client --permissions update``; the server validates the change, and a rejected change is reported like any
-  other failed command.
+  ``ecflow_client --permissions update``;
+- deleted with "Delete", after a confirmation whose default answer is "Cancel". This runs
+  ``ecflow_client --permissions delete``; the node then inherits its roles from above.
+
+The server validates every change, as for ``ecflow_client`` itself: a rejected change is reported like any other
+failed command, and the attribute is left unchanged. The server attribute is configured at start-up: it is neither
+added nor deleted at run time.
 
 When permissions change during a session, ecFlowUI follows the full synchronisation of its client: nodes that can no
 longer be read disappear, with the panels open on them. When the server denies the refresh itself (the user lost

@@ -592,6 +592,25 @@
 
         {
             "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "node and (not has_permissions)"
+        },
+        {
+            "menu"           : "Special",
+            "name"           : "Add permissions",
+            "visible_for"    : "node and (not has_permissions)",
+            "command"        : "add_permissions",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "node and (not has_permissions)"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Check node state in UI",
             "visible_for"    : "(server or node) and ECFLOWUI_DEVELOP_MODE)",
             "command"        : "check_ui_node_state",
@@ -1067,6 +1086,14 @@
             "name"           : "Delete",
             "visible_for"    : "label",
             "command"        : "ecflow_client --alter delete label <node_name> <parent_name>",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Delete",
+            "visible_for"    : "permissions",
+            "command"        : "delete_permissions",
             "multi"          : "false",
             "status_tip"     : "__cmd__"
         },
