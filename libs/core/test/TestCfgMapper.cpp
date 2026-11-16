@@ -195,6 +195,7 @@ BOOST_AUTO_TEST_CASE(test_map_every_setting_of_the_server) {
                 "job_generation": false,
                 "log": {"commands": {"enabled": true}},
                 "whitelist": {"ignore": true},
+                "authorisation": {"audit_only": true},
                 "permissions": [{"user": "admin", "permissions": "rwxlops"}]
             }
         }

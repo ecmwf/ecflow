@@ -211,6 +211,15 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
                                          << " is only valid with query type 'variable', but found: " << query_type_));
     }
 
+    // A node the requester cannot read is never queried; the authorisation already refuses a read lacking r, in every
+    // mode (audit-only included), and this check guards the reply itself
+    if (const auto path = ecf::implementation::node_path_of(path_to_attribute_); path != "/") {
+        const auto visibility = request_context().visibility();
+        if (const auto node = defs->findAbsNode(path); node && visibility->applies() && !visibility->readable(*node)) {
+            throw std::runtime_error("The node " + path + " is not readable");
+        }
+    }
+
     if (query_type_ == "state") {
         return doHandleQueryForState(defs);
     }

@@ -123,6 +123,8 @@ public:
     ecf::AuthorisationService& authorisation() override { return serverEnv_.authorisation(); }
     const ecf::AuthorisationService& authorisation() const override { return serverEnv_.authorisation(); }
 
+    bool audit_only() const override { return serverEnv_.audit_only(); }
+
     bool lock(const std::string& user) override;
     void unlock() override;
     const std::string& lockedUser() const override;

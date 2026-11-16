@@ -414,6 +414,18 @@ std::vector<Setting> server_settings() {
                 std::nullopt                           // cli
             }),
 
+        // Execute, and log, the requests the Permissions attributes deny (audit-only mode)
+        Setting(
+            Key::for_option("ecflow.server.authorisation.audit_only"),
+            Type::Boolean,
+            Value{false},
+            Names{
+                std::nullopt,                                // env_cfg
+                "/ecflow/server/authorisation/audit_only",   // ecf_cfg
+                std::nullopt,                                // env
+                std::nullopt                                 // cli
+            }),
+
         // The server Permissions attribute, as its JSON form; validated by the server
         Setting(
             Key::for_option("ecflow.server.permissions"),

@@ -117,6 +117,13 @@ public:
     ///
     bool ignores_whitelist() const { return ignore_whitelist_; }
 
+    ///
+    /// @brief Returns whether the configuration selects the audit-only mode (/ecflow/server/authorisation/audit_only).
+    ///
+    /// @return True when the requests the Permissions attributes deny are logged and executed, rather than refused.
+    ///
+    bool audit_only() const { return audit_only_; }
+
     /// Whenever we save the checkpt, we time how long this takes.
     /// For very large definition the time can be significant and start to interfere with
     /// the scheduling. (i.e since write to disk is blocking).
@@ -379,6 +386,7 @@ private:
     bool jobGeneration_;     // used in debug/test mode only
     bool log_commands_{false};
     bool ignore_whitelist_{false};
+    bool audit_only_{false};
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;

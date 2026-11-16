@@ -124,6 +124,7 @@ if (ENABLE_SERVER)
     test/TestPermissionsAcceptance.cpp
     test/TestPermissionsCommand.cpp
     test/TestPermissionsTransfers.cpp
+    test/TestPermissionsAudit.cpp
     test/TestPermissionsAuthorisation.cpp
     test/TestPermissionsDenial.cpp
     test/TestPermissionsNodeRoles.cpp

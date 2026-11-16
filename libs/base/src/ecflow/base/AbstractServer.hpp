@@ -130,6 +130,14 @@ public:
     virtual ecf::AuthenticationService& authentication()             = 0;
     virtual const ecf::AuthenticationService& authentication() const = 0;
 
+    ///
+    /// @brief Returns whether the server is in audit-only mode (R12.3).
+    ///
+    /// @return True when, in Permissions mode, the requests the attributes deny are logged and executed rather than
+    ///         refused; false by default.
+    ///
+    virtual bool audit_only() const { return false; }
+
     virtual ecf::AuthorisationService& authorisation()             = 0;
     virtual const ecf::AuthorisationService& authorisation() const = 0;
 

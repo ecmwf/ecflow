@@ -137,6 +137,15 @@ public:
     ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
     const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
 
+    bool audit_only() const override { return audit_only_; }
+
+    ///
+    /// @brief Selects the audit-only mode (R12.3), as the configuration of a server does.
+    ///
+    /// @param[in] audit_only True to execute, and log, the requests the Permissions attributes deny
+    ///
+    void set_audit_only(bool audit_only) { audit_only_ = audit_only; }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }
@@ -198,6 +207,7 @@ private:
     std::vector<SyncReply> sync_replies_;
     std::vector<ReplyBuilt> replies_built_;
     int node_tree_state_changes_{0};
+    bool audit_only_{false};
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

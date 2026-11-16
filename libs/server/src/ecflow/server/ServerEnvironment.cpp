@@ -497,6 +497,7 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     jobGeneration_           = option("ecflow.server.job_generation");
     log_commands_            = option("ecflow.server.log.commands.enabled");
     ignore_whitelist_        = option("ecflow.server.whitelist.ignore");
+    audit_only_              = option("ecflow.server.authorisation.audit_only");
     if (option("ecflow.server.http")) {
         protocol_ = ecf::Protocol::Http;
     }

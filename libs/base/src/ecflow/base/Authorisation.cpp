@@ -8,6 +8,7 @@
 #include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Identity.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
 
@@ -36,14 +37,98 @@ authorisation_t fail_closed(const std::function<authorisation_t()>& evaluate) no
     }
 }
 
-authorisation_t is_authorised(const ClientToServerCmd& command, const RequestContext& context) noexcept {
+namespace {
+
+///
+/// @brief Evaluates a user request, telling an evaluated decision from an error while evaluating.
+///
+/// @param[in] command The request
+/// @param[in] context The context of the request
+/// @param[out] evaluated Set to true when the decision was evaluated, false when an error refused the request
+/// @return The decision; a refusal when the evaluation throws. Never throws.
+///
+authorisation_t evaluate(const ClientToServerCmd& command, const RequestContext& context, bool& evaluated) noexcept {
+    evaluated = false;
     return fail_closed([&]() {
-        if (authorisation_mode(context.server()) == AuthorisationMode::Unrestricted) {
-            // Without a server attribute and a white list, every request is allowed
-            return authorisation_t::success(true);
-        }
-        return command.authorise(context);
+        auto result = authorisation_mode(context.server()) == AuthorisationMode::Unrestricted
+                          ? authorisation_t::success(true) // without a server attribute and a white list, all allowed
+                          : command.authorise(context);
+        evaluated   = true;
+        return result;
     });
+}
+
+} // namespace
+
+authorisation_t is_authorised(const ClientToServerCmd& command, const RequestContext& context) noexcept {
+    bool evaluated = false;
+    return evaluate(command, context, evaluated);
+}
+
+authorisation_t is_authorised_or_audited(const ClientToServerCmd& command, const RequestContext& context) noexcept {
+    bool evaluated = false;
+    auto result    = evaluate(command, context, evaluated);
+    if (result.ok() || !evaluated) {
+        return result; // an error while evaluating refuses the request, in every mode (R11.7)
+    }
+    try {
+        if (!context.server().audit_only() || authorisation_mode(context.server()) != AuthorisationMode::Permissions) {
+            return result;
+        }
+        if (is_role_denial(result.reason(), Role::Read)) {
+            return result; // reads are enforced: no content of a node the requester cannot read is returned
+        }
+        // Audit-only mode (R12.3): the would-be denial is logged, and the request executed
+        if (!ecf::log_flushed(Log::WAR, audit_message(result.reason(), command))) {
+            return result; // a would-be denial that cannot be recorded is enforced
+        }
+    }
+    catch (...) {
+        return result; // a would-be denial that cannot be recorded is enforced
+    }
+    return authorisation_t::success("Authorisation (user) not enforced: audit only");
+}
+
+namespace {
+
+/// The beginning of the reason of every denial
+const std::string denial_prefix = "Authorisation (user) failed, due to: ";
+
+/// The beginning of the cause of a denial for want of a role, before the letter of the role
+const std::string insufficient = "Insufficient permissions (role ";
+
+/// The cause of a denial because a client handle belongs to another user
+const std::string handle_owner = "the handle belongs to another user";
+
+bool starts_with(const std::string& text, const std::string& prefix) {
+    return text.rfind(prefix, 0) == 0;
+}
+
+} // namespace
+
+std::string role_denial(Role role, const std::string& target) {
+    return denial_prefix + insufficient + letter_of(role) + " required at " + target + ")";
+}
+
+std::string handle_owner_denial(const std::string& unreadable) {
+    std::string reason = denial_prefix + handle_owner;
+    if (!unreadable.empty()) {
+        reason += "; " + insufficient + letter_of(Role::Read) + " required at " + unreadable + ")";
+    }
+    return reason;
+}
+
+bool is_role_denial(const std::string& reason, Role role) {
+    // The role is named before the target, the only part of the reason chosen by the requester
+    const std::string cause = insufficient + letter_of(role) + " required at ";
+    return starts_with(reason, denial_prefix + cause) ||
+           starts_with(reason, denial_prefix + handle_owner + "; " + cause);
+}
+
+std::string audit_message(const std::string& reason, const ClientToServerCmd& command) {
+    static const std::string refused = "Command not accepted, due to: ";
+    std::string message              = rejection_message(reason, command);
+    return "Audit only, executed although denied: " + message.substr(refused.size());
 }
 
 std::string rejection_message(const std::string& reason, const ClientToServerCmd& command) {

@@ -228,6 +228,50 @@ Some requests are handled apart:
 Permissions never affect scheduling: dependencies, limits, job generation and job submission behave as without
 attributes, whatever the attributes grant.
 
+.. _permissions_attribute_audit:
+
+Audit-only mode
+---------------
+
+The audit-only mode trials a configuration of Permissions attributes: the requests the attributes deny are executed
+and recorded, instead of being refused, except reads, which are always enforced. It is selected in
+``<host>.<port>.ecf.cfg``:
+
+.. code-block:: json
+
+   {"version": 1, "ecflow": {"server": {
+     "permissions": [{"user": "admin", "permissions": "rwxlops"}, {"user": "alice", "permissions": "r"}],
+     "authorisation": {"audit_only": true}}}}
+
+In audit-only mode:
+
+- each request is evaluated as in Permissions mode;
+- a request denied for want of the role ``r`` is refused, as in Permissions mode, so that no content is returned
+  that Permissions mode would refuse (for example by ``--file``, ``--why``, ``--check``, ``--edit_script`` or
+  ``--edit_history``);
+- a request denied only for want of another role, or only because a client handle belongs to another user, is
+  executed nevertheless, and recorded in the server log as a warning, e.g. ``WAR:[...] Audit only, executed although
+  denied: Authorisation (user) failed, due to: Insufficient permissions (role x required at /s) [--suspend /s
+  :alice@host]``;
+- each command of a ``--group`` is evaluated, and then refused or executed, on its own;
+- the content returned to each user is filtered as in Permissions mode: unreadable nodes stay hidden;
+- the checks that are not authorisation still apply: authentication, the validation of changes (for example a change
+  leaving nobody with ``p`` is refused), and the :ref:`limits <permissions_attribute_limits>`;
+- a request whose evaluation fails, or whose record cannot be written to the log (for example on a full file system),
+  is refused, as in Permissions mode.
+
+Notes:
+
+- The mode applies to Permissions mode only: without a server attribute, the whitelist is enforced as usual.
+- The start-up log states ``Mode = permissions (audit only)``.
+- Every requirement of ``r`` of a request is checked before its other requirements, so a request lacking ``r``
+  wherever it requires that role is refused, even when it also lacks another role. ``--edit_history`` requires
+  ``r`` at server level only.
+- A request that needs only other roles is executed even at a node the user cannot read, for example ``--suspend``,
+  which needs only ``x``; it returns no content of the node.
+- Before enforcing a configuration, search the log for ``Audit only`` to find the requests it would refuse; the
+  refused reads are logged as ``Command not accepted``, as in Permissions mode.
+
 .. _permissions_attribute_commands:
 
 Roles of commands
@@ -368,7 +412,9 @@ receive content prepared for another.
 
 Client handles (``--ch_register``, ``--ch_add``, ``--ch_suites``) follow the same rule:
 
-- registering, or adding to a handle, a suite the user cannot read is denied (``role r required at /<suite>``);
+- registering, or adding to a handle, a suite the user cannot read is denied (``role r required at /<suite>``); on
+  the handle of another user, the denial names both causes (``the handle belongs to another user; Insufficient
+  permissions (role r required at /<suite>)``);
 - a registered suite that becomes unreadable stays registered, and is left out of every reply until it is readable
   again;
 - the suites added automatically to a handle (``--ch_auto_add``) are sent only when readable;

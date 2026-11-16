@@ -353,7 +353,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
         cmdVec_[i]->set_group_cmd(this);
 
         if (authorise_each) {
-            if (auto result = ecf::is_authorised(*cmdVec_[i], request_context()); !result.ok()) {
+            if (auto result = ecf::is_authorised_or_audited(*cmdVec_[i], request_context()); !result.ok()) {
                 const auto message = ecf::rejection_message(result.reason(), *cmdVec_[i]);
                 theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(message, ErrorCmd::Kind::PermissionDenied));
                 cmdVec_[i]->cleanup();

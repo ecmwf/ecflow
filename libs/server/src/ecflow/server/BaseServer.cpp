@@ -450,7 +450,7 @@ void BaseServer::log_permissions_summary() const {
     std::string mode = "unrestricted";
     switch (ecf::authorisation_mode(*this)) {
         case ecf::AuthorisationMode::Permissions:
-            mode = "permissions";
+            mode = serverEnv_.audit_only() ? "permissions (audit only)" : "permissions";
             break;
         case ecf::AuthorisationMode::WhiteList:
             mode = "whitelist";

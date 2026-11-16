@@ -22,7 +22,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
         const ecf::RequestContext context(cmd_->identity(), *as);
 
         // Perform Authorisation (i.e. access rules) control; a request not authorised is denied
-        if (auto result = ecf::is_authorised(*cmd_, context); !result.ok()) {
+        if (auto result = ecf::is_authorised_or_audited(*cmd_, context); !result.ok()) {
             ecf::LogFlusher flusher; // the message, logged by the reply, is written at once
             return PreAllocatedReply::denied_cmd(ecf::rejection_message(result.reason(), *cmd_));
         }

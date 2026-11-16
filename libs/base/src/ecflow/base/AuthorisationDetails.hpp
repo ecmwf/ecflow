@@ -137,9 +137,9 @@ inline authorisation_t require_role(const ClientToServerCmd& command,
         case AuthorisationMode::Permissions:
             for (const auto& target : targets) {
                 if (!context.roles_at(target).has(role)) {
-                    // The reason names the role and the target denied; it reaches the client and the server log (D5.29)
-                    return authorisation_t::failure(refused + " (role " + letter_of(role) + " required at " + target +
-                                                    ")");
+                    // The reason names the role and the target denied; it reaches the client and the server log
+                    // (D5.29), and tells the audit-only mode a denied read (is_role_denial)
+                    return authorisation_t::failure(role_denial(role, target));
                 }
             }
             return authorisation_t::success("Authorisation (user) granted");
@@ -327,7 +327,23 @@ struct Authoriser<ClientHandleCmd>
             return authorisation_t::success("Authorisation (user) granted");
         }
 
-        // Handles are bound to their creator (D10.7)
+        // In Permissions mode, a handle holds only suites the requester can read when they are registered or added
+        // (R5.2); a suite that becomes unreadable later stays registered, and is filtered out of the replies
+        std::string unreadable;
+        if (authorisation_mode(context.server()) == AuthorisationMode::Permissions &&
+            (command.api() == ClientHandleCmd::REGISTER || command.api() == ClientHandleCmd::ADD)) {
+            for (const auto& suite : command.suites()) {
+                auto target = suite.rfind('/', 0) == 0 ? suite : "/" + suite;
+                if (!context.roles_at(target).has(Role::Read)) {
+                    unreadable = std::move(target);
+                    break;
+                }
+            }
+        }
+
+        // Handles are bound to their creator (D10.7); a denial names the owner of the handle, and the role r when it
+        // is also missing, so that the audit-only mode refuses an unreadable suite (requirements of r first, see
+        // is_authorised_or_audited)
         const auto& requester = command.identity().username().value();
         switch (command.api()) {
             case ClientHandleCmd::REGISTER:
@@ -342,8 +358,7 @@ struct Authoriser<ClientHandleCmd>
                 const auto defs = context.server().defs();
                 for (const auto& handle : defs->client_suite_mgr().clientSuites()) {
                     if (static_cast<int>(handle.handle()) == command.client_handle() && handle.user() != requester) {
-                        return authorisation_t::failure(
-                            "Authorisation (user) failed, due to: the handle belongs to another user");
+                        return authorisation_t::failure(handle_owner_denial(unreadable));
                     }
                 }
                 break; // a handle that does not exist is reported by the command
@@ -357,18 +372,8 @@ struct Authoriser<ClientHandleCmd>
             case ClientHandleCmd::SUITES:
                 break;
         }
-
-        // In Permissions mode, a handle holds only suites the requester can read when they are registered or added
-        // (R5.2); a suite that becomes unreadable later stays registered, and is filtered out of the replies
-        if (authorisation_mode(context.server()) == AuthorisationMode::Permissions &&
-            (command.api() == ClientHandleCmd::REGISTER || command.api() == ClientHandleCmd::ADD)) {
-            std::vector<std::string> targets;
-            for (const auto& suite : command.suites()) {
-                targets.push_back(suite.rfind('/', 0) == 0 ? suite : "/" + suite);
-            }
-            if (!targets.empty()) {
-                return require_role(command, context, Role::Read, targets);
-            }
+        if (!unreadable.empty()) {
+            return authorisation_t::failure(role_denial(Role::Read, unreadable));
         }
         return authorisation_t::success("Authorisation (user) granted");
     }

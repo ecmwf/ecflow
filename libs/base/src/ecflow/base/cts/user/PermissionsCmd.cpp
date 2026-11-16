@@ -22,6 +22,7 @@
 #include "ecflow/node/EffectivePermissions.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/PermissionsChange.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -185,6 +186,15 @@ STC_Cmd_ptr PermissionsCmd::doHandleRequest(AbstractServer* as) const {
         node = find_node(defs, path_); // throws when no node has the path
     }
     const Permissions* current = server ? defs->server_state().permissions() : node->permissions();
+
+    // A node the requester cannot read is never described; the authorisation already refuses a read lacking r, in
+    // every mode (audit-only included), and this check guards the reply itself
+    if (!server && !changes()) {
+        if (const auto visibility = request_context().visibility();
+            visibility->applies() && !visibility->readable(*node)) {
+            throw std::runtime_error("The node " + path_ + " is not readable");
+        }
+    }
 
     if (operation_ == "effective") {
         const std::string user = value_.empty() ? identity().username().value() : value_;

@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <csignal>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
+#include <sys/resource.h>
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
@@ -28,6 +30,8 @@
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/GroupSTCCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/User.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
@@ -133,6 +137,111 @@ private:
         ++runs;
         return PreAllocatedReply::ok_cmd();
     }
+};
+
+///
+/// @brief A command denied by its authorisation, whose first printing throws, as a failure of the recording would.
+///
+class DeniedOncePrintThrowingCmd final : public UserCmd {
+public:
+    void print(std::string& os) const override { os += "--denied"; }
+    [[nodiscard]] std::string print_short() const override {
+        if (!printed) {
+            printed = true;
+            throw std::runtime_error("broken printing");
+        }
+        return "--denied";
+    }
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer&) const override {
+        return ecf::authentication_t::success(true);
+    }
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext&) const override {
+        return ecf::authorisation_t::failure("Authorisation (user) failed, due to: denied for the test");
+    }
+    [[nodiscard]] const char* theArg() const override { return "denied"; }
+    void addOption(boost::program_options::options_description&) const override {}
+    void create(Cmd_ptr&, boost::program_options::variables_map&, AbstractClientEnv*) const override {}
+
+    mutable bool printed{false}; ///< Whether the command was printed once
+    mutable int runs{0};         ///< How many times the command ran
+
+private:
+    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override {
+        ++runs;
+        return PreAllocatedReply::ok_cmd();
+    }
+};
+
+///
+/// @brief Directs the log to a fresh file that cannot grow beyond 1 byte, for the lifetime of the object.
+///
+/// The soft limit RLIMIT_FSIZE is lowered and SIGXFSZ ignored, so that writing past the limit fails with EFBIG
+/// instead of stopping the process. The destructor restores the limit, the signal disposition and the log, and removes
+/// the file, whatever happened meanwhile.
+///
+/// @throws std::runtime_error when the limit or the signal disposition cannot be changed; nothing is then left changed.
+///
+class FileSizeLimitedLog {
+public:
+    FileSizeLimitedLog()
+        : log_path_{ecf::Log::instance()->path()},
+          file_{(fs::path(log_path_).parent_path() / "test_audit_only_flush_fails.log").string()} {
+        std::error_code ignored;
+        fs::remove(file_, ignored);
+        if (getrlimit(RLIMIT_FSIZE, &saved_) != 0) {
+            throw std::runtime_error("getrlimit(RLIMIT_FSIZE) failed");
+        }
+        // From here on, every change is undone on failure
+        previous_ = std::signal(SIGXFSZ, SIG_IGN);
+        if (previous_ == SIG_ERR) {
+            throw std::runtime_error("signal(SIGXFSZ) failed");
+        }
+        try {
+            ecf::Log::destroy();
+            ecf::Log::create(file_);
+            rlimit limited   = saved_;
+            limited.rlim_cur = 1;
+            if (setrlimit(RLIMIT_FSIZE, &limited) != 0) {
+                throw std::runtime_error("setrlimit(RLIMIT_FSIZE) failed");
+            }
+        }
+        catch (...) {
+            restore();
+            throw;
+        }
+    }
+
+    FileSizeLimitedLog(const FileSizeLimitedLog&)            = delete;
+    FileSizeLimitedLog& operator=(const FileSizeLimitedLog&) = delete;
+
+    ~FileSizeLimitedLog() { restore(); }
+
+private:
+    ///
+    /// @brief Undoes every change, each step independently; never throws, and reports a step that fails.
+    ///
+    void restore() noexcept {
+        if (setrlimit(RLIMIT_FSIZE, &saved_) != 0) {
+            BOOST_TEST_MESSAGE("FileSizeLimitedLog: setrlimit(RLIMIT_FSIZE) could not be restored");
+        }
+        if (std::signal(SIGXFSZ, previous_) == SIG_ERR) {
+            BOOST_TEST_MESSAGE("FileSizeLimitedLog: signal(SIGXFSZ) could not be restored");
+        }
+        try {
+            ecf::Log::destroy();
+            ecf::Log::create(log_path_);
+        }
+        catch (...) {
+            BOOST_TEST_MESSAGE("FileSizeLimitedLog: the log could not be restored");
+        }
+        std::error_code ignored;
+        fs::remove(file_, ignored);
+    }
+
+    std::string log_path_;
+    std::string file_;
+    rlimit saved_{};
+    void (*previous_)(int){SIG_DFL};
 };
 
 } // namespace
@@ -384,6 +493,276 @@ BOOST_AUTO_TEST_CASE(test_permissions_mode_fail_closed_requests) {
     BOOST_CHECK(denied(replies->cmdVec()[0]));
     BOOST_CHECK_EQUAL(throwing->runs, 0);
     BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+}
+
+///
+/// @brief Verifies that, in audit-only mode, a denial is executed, and an error while evaluating still
+///        refuses the request, alone or within a group (R12.3, R11.7).
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r");
+    MockServer server(defs);
+    server.set_audit_only(true);
+
+    // Denied by the attributes (bob lacks x): executed, and counted
+    BOOST_CHECK(
+        !denied(TestHelper::invokeRequestAs(&server, std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"), "bob")));
+    BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+
+    // An error while evaluating: refused, never executed
+    auto throwing = std::make_shared<ThrowingCmd>();
+    BOOST_CHECK(denied(TestHelper::invokeRequestAs(&server, throwing, "bob")));
+    BOOST_CHECK_EQUAL(throwing->runs, 0);
+
+    auto group = std::make_shared<GroupCTSCmd>();
+    group->addChild(throwing);
+    group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
+    const auto reply    = TestHelper::invokeRequestAs(&server, group, "bob");
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
+    BOOST_CHECK(denied(replies->cmdVec()[0]));
+    BOOST_CHECK_EQUAL(throwing->runs, 0);
+    BOOST_CHECK(defs->findAbsNode("/s/b")->isSuspended()); // audited
+}
+
+///
+/// @brief Verifies that, in audit-only mode, a request denied for want of the role r is refused, alone or within a
+///        group, while a request lacking another role is executed, also at a node the requester cannot read.
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_reads_enforced) {
+    ECF_NAME_THIS_TEST();
+
+    // bob holds r at server level and nothing at /s/b; carol holds x at server level, without r
+    auto defs = make_defs("bob:r,carol:x", "admin:r");
+    MockServer server(defs);
+    server.set_audit_only(true);
+
+    // A read lacking r: refused, naming the role
+    const auto bob = ecf::Identity::make_user("bob", "");
+    const ecf::RequestContext context(bob, server);
+    CtsNodeCmd read(CtsNodeCmd::GET, "/s/b");
+    read.set_identity(bob);
+    const auto result = ecf::is_authorised_or_audited(read, context);
+    BOOST_REQUIRE(!result.ok());
+    BOOST_CHECK_MESSAGE(result.reason().find("(role r required at /s/b)") != std::string::npos, result.reason());
+    BOOST_CHECK(denied(get(server, "/s/b", "bob")));
+    BOOST_CHECK(denied(TestHelper::invokeRequestAs(&server, std::make_shared<CtsCmd>(CtsCmd::STATS), "carol")));
+
+    // Lacking x only, at a node bob cannot read: executed
+    BOOST_CHECK(allowed(suspend(server, "/s/b", "bob")));
+    BOOST_CHECK(defs->findAbsNode("/s/b")->isSuspended());
+
+    // Within a group: the read is refused, the other command executed
+    auto group = std::make_shared<GroupCTSCmd>();
+    group->addChild(std::make_shared<CtsNodeCmd>(CtsNodeCmd::WHY, "/s/b"));
+    group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
+    const auto reply    = TestHelper::invokeRequestAs(&server, group, "bob");
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
+    BOOST_CHECK(denied(replies->cmdVec()[0]));
+    BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+}
+
+///
+/// @brief Verifies that registering or adding an unreadable suite on the handle of another user is denied naming both
+///        the owner of the handle and the role r, and that, in audit-only mode, such a request is refused,
+///        alone or within a group (D10.7, R5.2).
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user_unreadable_suite) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r,victim:r");
+    defs->add_suite("u")->add_permissions(Permissions::parse_cli("admin:r"));
+    MockServer server(defs);
+    const auto handle = defs->client_suite_mgr().create_client_suite(false, {"s"}, "victim");
+    const auto bob    = ecf::Identity::make_user("bob", "");
+    const auto suites = [&]() {
+        std::vector<std::string> names;
+        defs->client_suite_mgr().suites(handle, names);
+        return names;
+    };
+    const auto both = [](const std::string& reason) {
+        return reason.find("the handle belongs to another user") != std::string::npos &&
+               reason.find("(role r required at /u)") != std::string::npos;
+    };
+
+    for (const bool audit : {false, true}) {
+        server.set_audit_only(audit);
+        for (const auto api : {ClientHandleCmd::ADD, ClientHandleCmd::REGISTER}) {
+            BOOST_TEST_CONTEXT("audit only: " << audit << ", api: " << api) {
+                const auto command =
+                    api == ClientHandleCmd::ADD
+                        ? std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, ClientHandleCmd::ADD)
+                        : std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, false);
+
+                // One reason names both the owner of the handle and the role r missing
+                command->set_identity(bob);
+                const ecf::RequestContext context(bob, server);
+                const auto result = ecf::is_authorised_or_audited(*command, context);
+                BOOST_REQUIRE(!result.ok());
+                BOOST_CHECK_MESSAGE(both(result.reason()), result.reason());
+                BOOST_CHECK(ecf::is_role_denial(result.reason(), ecf::Role::Read));
+
+                // Refused in both modes, and never executed
+                const auto reply = TestHelper::invokeRequestAs(&server, command, "bob");
+                BOOST_CHECK(denied(reply));
+                BOOST_CHECK_MESSAGE(both(reply->error()), reply->error());
+                BOOST_CHECK(suites() == std::vector<std::string>{"s"});
+            }
+        }
+    }
+
+    // Within a group, in audit-only mode: both handle commands refused, the other command audited and executed
+    auto group = std::make_shared<GroupCTSCmd>();
+    group->addChild(std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, ClientHandleCmd::ADD));
+    group->addChild(std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"u"}, false));
+    group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"));
+    const auto reply    = TestHelper::invokeRequestAs(&server, group, "bob");
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 2U);
+    for (const auto& refused : replies->cmdVec()) {
+        BOOST_CHECK(denied(refused));
+        BOOST_CHECK_MESSAGE(both(refused->error()), refused->error());
+    }
+    BOOST_CHECK(suites() == std::vector<std::string>{"s"});
+    BOOST_CHECK(defs->findAbsNode("/s/a")->isSuspended());
+}
+
+///
+/// @brief Verifies that registering or adding a readable suite on the handle of another user is denied naming the
+///        owner of the handle only, and that, in audit-only mode, such a request is audited and executed (D10.7).
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_handle_of_another_user) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r,victim:r");
+    defs->add_suite("v");
+    MockServer server(defs);
+    const auto handle = defs->client_suite_mgr().create_client_suite(false, {"s"}, "victim");
+    const auto bob    = ecf::Identity::make_user("bob", "");
+    const ecf::RequestContext context(bob, server);
+    const auto add     = std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"v"}, ClientHandleCmd::ADD);
+    const auto replace = std::make_shared<ClientHandleCmd>(handle, std::vector<std::string>{"v"}, false);
+    add->set_identity(bob);
+    replace->set_identity(bob);
+
+    // Permissions mode: refused, naming the owner of the handle only
+    for (const auto& command : {add, replace}) {
+        const auto result = ecf::is_authorised(*command, context);
+        BOOST_REQUIRE(!result.ok());
+        BOOST_CHECK_EQUAL(result.reason(), "Authorisation (user) failed, due to: the handle belongs to another user");
+        BOOST_CHECK(!ecf::is_role_denial(result.reason(), ecf::Role::Read));
+    }
+
+    // Audit-only mode: audited and executed
+    server.set_audit_only(true);
+    BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, add, "bob")));
+    std::vector<std::string> names;
+    defs->client_suite_mgr().suites(handle, names);
+    BOOST_CHECK(names == (std::vector<std::string>{"s", "v"}));
+
+    BOOST_CHECK(allowed(TestHelper::invokeRequestAs(&server, replace, "bob")));
+    BOOST_CHECK(defs->client_suite_mgr().clientSuites().front().user() == "bob");
+}
+
+///
+/// @brief Verifies that, in audit-only mode, a would-be denial that cannot be written to the log is enforced, alone or
+///        within a group.
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_unrecorded) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r");
+    MockServer server(defs);
+    server.set_audit_only(true);
+
+    // A log that cannot be written: its directory does not exist
+    const auto log_path = ecf::Log::instance()->path();
+    ecf::Log::destroy();
+    ecf::Log::create((fs::path(log_path).parent_path() / "no_such_directory" / "audit.log").string());
+
+    const bool alone =
+        denied(TestHelper::invokeRequestAs(&server, std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"), "bob"));
+    auto group = std::make_shared<GroupCTSCmd>();
+    group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
+    const auto reply = TestHelper::invokeRequestAs(&server, group, "bob");
+
+    ecf::Log::destroy();
+    ecf::Log::create(log_path);
+
+    BOOST_CHECK(alone);
+    BOOST_CHECK(!defs->findAbsNode("/s/a")->isSuspended());
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
+    BOOST_CHECK(denied(replies->cmdVec()[0]));
+    BOOST_CHECK(!defs->findAbsNode("/s/b")->isSuspended());
+}
+
+///
+/// @brief Verifies that, in audit-only mode, a would-be denial whose record is buffered but cannot be flushed (e.g. on
+/// a
+///        full file system) is enforced, alone or within a group.
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_flush_fails) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = make_defs("bob:r");
+    MockServer server(defs);
+    server.set_audit_only(true);
+
+    // A log whose file cannot grow: the record fits the buffer of the stream, the flush fails (EFBIG); every
+    // process-wide change is undone by the guard, whatever happens in the test
+    bool alone = false;
+    STC_Cmd_ptr reply;
+    {
+        FileSizeLimitedLog limited;
+        alone =
+            denied(TestHelper::invokeRequestAs(&server, std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/a"), "bob"));
+        auto group = std::make_shared<GroupCTSCmd>();
+        group->addChild(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, "/s/b"));
+        reply = TestHelper::invokeRequestAs(&server, group, "bob");
+    }
+
+    BOOST_CHECK(alone);
+    BOOST_CHECK(!defs->findAbsNode("/s/a")->isSuspended());
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
+    BOOST_CHECK(denied(replies->cmdVec()[0]));
+    BOOST_CHECK(!defs->findAbsNode("/s/b")->isSuspended());
+}
+
+///
+/// @brief Verifies that, in audit-only mode, a would-be denial whose recording throws is enforced, alone or within a
+///        group.
+///
+BOOST_AUTO_TEST_CASE(test_permissions_mode_audit_only_recording_throws) {
+    ECF_NAME_THIS_TEST();
+
+    MockServer server(make_defs("bob:r"));
+    server.set_audit_only(true);
+
+    auto alone = std::make_shared<DeniedOncePrintThrowingCmd>();
+    BOOST_CHECK(denied(TestHelper::invokeRequestAs(&server, alone, "bob")));
+    BOOST_CHECK(alone->printed);
+    BOOST_CHECK_EQUAL(alone->runs, 0);
+
+    auto within = std::make_shared<DeniedOncePrintThrowingCmd>();
+    auto group  = std::make_shared<GroupCTSCmd>();
+    group->addChild(within);
+    const auto reply    = TestHelper::invokeRequestAs(&server, group, "bob");
+    const auto* replies = dynamic_cast<const GroupSTCCmd*>(reply.get());
+    BOOST_REQUIRE(replies != nullptr);
+    BOOST_REQUIRE_EQUAL(replies->cmdVec().size(), 1U);
+    BOOST_CHECK(denied(replies->cmdVec()[0]));
+    BOOST_CHECK(within->printed);
+    BOOST_CHECK_EQUAL(within->runs, 0);
 }
 
 ///

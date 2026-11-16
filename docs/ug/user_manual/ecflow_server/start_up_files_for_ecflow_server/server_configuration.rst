@@ -242,6 +242,14 @@ Settings
      - no
      - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/permissions``: the JSON form of the server
        Permissions attribute, see :ref:`permissions_attribute_server`
+   * - Audit-only authorisation
+     - disabled
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/authorisation/audit_only``: ``true`` logs the
+       requests the Permissions attributes deny, and executes them, except reads (role ``r``), which are always
+       enforced, see :ref:`permissions_attribute_audit`
    * - Ignore the whitelist
      - disabled
      - no
