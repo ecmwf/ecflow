@@ -33,10 +33,11 @@ public:
     /// @param[in] server The server the service connects to; it must outlive the service
     /// @param[in] min The lowest port of the range reserved for the service
     /// @param[in] max The highest port of the range reserved for the service
+    /// @param[in] http_backend When true, the service reaches the server over HTTP (the server must use HTTP)
     /// @throws std::runtime_error when no port of the range can be reserved, or the service does not answer within
     ///         30 s; the service is then killed, and its output reported.
     ///
-    RestService(const PermissionsServer& server, int min, int max)
+    RestService(const PermissionsServer& server, int min, int max, bool http_backend = false)
         : directory_{scaffold::MakeDirectory{}.create()},
           port_{reserve(min, max)} {
         const auto tokens = directory_.path() / "tokens.json";
@@ -48,17 +49,20 @@ public:
         scaffold::WithTestEnvironmentVariable host("ECF_HOST", "localhost");
         scaffold::WithTestEnvironmentVariable server_port("ECF_PORT", server.port());
 
-        const std::vector<std::string> args{"--no_ssl",
-                                            "--port",
-                                            port(),
-                                            "--ecflow_host",
-                                            "localhost",
-                                            "--ecflow_port",
-                                            server.port(),
-                                            "--polling_interval",
-                                            "1",
-                                            "--tokens_file",
-                                            tokens.string()};
+        std::vector<std::string> args{"--no_ssl",
+                                      "--port",
+                                      port(),
+                                      "--ecflow_host",
+                                      "localhost",
+                                      "--ecflow_port",
+                                      server.port(),
+                                      "--polling_interval",
+                                      "1",
+                                      "--tokens_file",
+                                      tokens.string()};
+        if (http_backend) {
+            args.emplace_back("--http");
+        }
         const auto executable = fs::path(File::find_ecf_server_path()).parent_path() / "ecflow_http";
         process_              = std::make_unique<scaffold::Process>(executable, args, directory_.path());
 
@@ -90,6 +94,39 @@ public:
         client.set_read_timeout(std::chrono::seconds(10));
         return client.Get(path);
     }
+
+    ///
+    /// @brief Sends a request with a JSON body to the service.
+    ///
+    /// @param[in] method The method: POST, PUT or DELETE
+    /// @param[in] path The path of the request, e.g. `/v1/suites`
+    /// @param[in] body The JSON body, possibly empty
+    /// @return The response, or an empty result when the service does not answer.
+    /// @throws std::invalid_argument for another method.
+    ///
+    [[nodiscard]] httplib::Result
+    send(const std::string& method, const std::string& path, const std::string& body) const {
+        httplib::Client client("localhost", std::stoi(port()));
+        client.set_connection_timeout(std::chrono::seconds(5));
+        client.set_read_timeout(std::chrono::seconds(10));
+        if (method == "POST") {
+            return client.Post(path, body, "application/json");
+        }
+        if (method == "PUT") {
+            return client.Put(path, body, "application/json");
+        }
+        if (method == "DELETE") {
+            return client.Delete(path, body, "application/json");
+        }
+        throw std::invalid_argument("RestService: unsupported method " + method);
+    }
+
+    ///
+    /// @brief Returns whether the process of the service runs.
+    ///
+    /// @return True while the service runs.
+    ///
+    [[nodiscard]] bool is_running() const { return process_ && process_->is_running(); }
 
     ///
     /// @brief Kills the service, if it runs, and releases its port.

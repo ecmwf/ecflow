@@ -148,6 +148,38 @@ Two new environment variables are introduced:
 -  ECF_RESTAPI_CERT_DIRECTORY: Directory where server.crt and server.key
    files are located. If not specified, **$HOME/.ecflowrc/ssl** is used.
 
+.. _rest_api_permissions:
+
+Servers using Permissions
+=========================
+
+The REST API does not support :ref:`Permissions attributes <permissions_attribute>`. Against an ecFlow server that has
+a server Permissions attribute, the REST API refuses every request, read or write, whatever its route, with the status
+``403`` and a message stating that the REST API does not support Permissions:
+
+.. code:: json
+
+  {"code": 403, "message": "The REST API does not support Permissions: ...", "path": "/v1/suites", "method": "GET"}
+
+The REST API learns that the server uses Permissions by reading the server attribute
+(``ecflow_client --permissions read /``) at each refresh of its copy of the tree, and at each check for news:
+
+- a success, or a denial naming a role, means that the server uses Permissions;
+- any other answer means that it does not: a server without a server attribute replies that ``/`` has no Permissions
+  attribute, and a server older than the Permissions attribute does not know the request.
+
+The REST API also refuses requests when a refresh is denied by Permissions, or when the refreshed tree carries the
+server Permissions attribute.
+
+Notes:
+
+- On a server without a server attribute, each of these reads is a failed request, which the server writes to its
+  log, e.g. ``ERR:[10:50:22 18.11.2026] --permissions: / has no Permissions attribute``.
+- On a server older than the Permissions attribute, each read is a request the server cannot decode, and rejects.
+
+It refuses requests from its start, and until a refresh succeeds with a tree that carries no server attribute. Against
+a server without a server attribute, it works as described below.
+
 Authentication
 ==============
 
@@ -1097,6 +1129,9 @@ The inherited variables grouped by ancestor node, each identified by the node na
       ...
     }
   }
+
+The response never holds a :term:`permissions` attribute: the REST API refuses every request against a server that
+uses them (see :ref:`rest_api_permissions`).
 
 Update a Node attribute
 ~~~~~~~~~~~~~~~~~~~~~~~

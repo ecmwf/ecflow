@@ -1,13 +1,18 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ecflow/http/DefsStorage.hpp"
+
 #include <condition_variable>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
 
+#include "ecflow/base/ConnectionDiagnosis.hpp"
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/Options.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -25,6 +30,9 @@ static std::atomic update_defs(true);
 static std::unique_ptr<std::thread> loop_thread;
 static std::atomic stop_loop(false);
 
+// Whether the ecFlow server uses Permissions attributes, as learnt from the last refresh (D6.6)
+static std::atomic uses_permissions(false);
+
 namespace /* __anonymous__ */ {
 
 void print_polling_interval_notification(long long sleeptime,
@@ -41,8 +49,28 @@ void print_polling_interval_notification(long long sleeptime,
 } // namespace
 
 std::shared_ptr<Defs> get_defs() {
+    // The copy and the mode are changed together, under the same lock: a request admitted just before a refresh
+    // reveals that the server uses Permissions never receives the tree of that refresh
     std::scoped_lock lock(def_mutex);
+    if (uses_permissions.load()) {
+        throw HttpServerException(HttpStatusCode::client_error_forbidden, permissions_refusal());
+    }
+    if (defs_ == nullptr) {
+        throw HttpServerException(HttpStatusCode::server_error_service_unavailable,
+                                  "The copy of the tree of the ecFlow server is not available");
+    }
     return defs_;
+}
+
+bool server_uses_permissions() noexcept {
+    return uses_permissions.load();
+}
+
+const std::string& permissions_refusal() {
+    static const std::string message =
+        "The REST API does not support Permissions: the ecFlow server uses Permissions attributes, and every request "
+        "is refused";
+    return message;
 }
 
 namespace /* __anonymous__ */ {
@@ -56,24 +84,122 @@ void defs_update(int interval) {
         return static_cast<unsigned int>(curtime.tv_sec);
     };
 
+    // A request denied by the authorisation of Permissions (role r missing at /): the server uses Permissions and does
+    // not list the account of the service. A denial by the white list names an access, not a role, and is reported as
+    // any other failure.
+    auto denied_by_permissions = [](const std::exception& e) {
+        return dynamic_cast<const ecf::PermissionDenied*>(&e) != nullptr &&
+               std::string(e.what()).find("(role ") != std::string::npos;
+    };
+
+    // Asks the server whether it uses Permissions, whatever the change numbers: a server restarted with Permissions can
+    // answer the news and an incremental synchronisation of an earlier copy without revealing its server attribute.
+    // Reading the server attribute succeeds, or is denied, only on a server using Permissions; any other answer of the
+    // server (no attribute, or a server that does not know the command) means that it does not use them. A failure
+    // to reach the server is thrown, and changes nothing.
+    auto server_uses_permissions_now = [&] {
+        try {
+            client.permissions("read", "/", "", false);
+            return true;
+        }
+        catch (const std::exception& e) {
+            if (denied_by_permissions(e)) {
+                return true;
+            }
+            const auto failure = client.connection_diagnosis().failure;
+            if (failure == ecf::ConnectionFailure::None || failure == ecf::ConnectionFailure::RejectedRequest) {
+                return false;
+            }
+            throw;
+        }
+    };
+
+    // Drops the copy: every request is refused, and each refresh is a full one, so that a server restarted without
+    // Permissions is recognised whatever its change numbers
+    auto refuse = [&] {
+        uses_permissions = true;
+        defs_            = nullptr;
+        client.reset();
+    };
+
+    // Refreshes the copy of the tree. A server using Permissions (see above), a refresh denied by Permissions, or a
+    // tree carrying a server Permissions attribute, drops the copy: every request is refused until a refresh succeeds
+    // against a server that does not use them
     auto update = [&] {
+        const bool permissions = server_uses_permissions_now();
         {
             std::scoped_lock lock(def_mutex);
-            if (defs_ != nullptr) {
-                client.sync(defs_);
+            if (permissions) {
+                refuse();
+                return;
+            }
+            try {
+                if (defs_ != nullptr) {
+                    client.sync(defs_);
+                }
+                else {
+                    client.sync_local();
+                }
+            }
+            catch (const std::exception& e) {
+                if (!denied_by_permissions(e)) {
+                    throw;
+                }
+                refuse();
+                if (opts.verbose) {
+                    printf("Refresh denied: the ecFlow server uses Permissions, every request is refused\n");
+                }
+                return;
             }
             defs_ = client.defs();
+            if (defs_ != nullptr && defs_->server_state().permissions() != nullptr) {
+                refuse(); // the tree of a server using Permissions is never kept
+                return;
+            }
+            uses_permissions = false;
         }
-        if (opts.verbose) {
+        if (opts.verbose && defs_ != nullptr) {
             printf(
                 "Defs modify_change_no: %d state_change_no: %d\n", defs_->modify_change_no(), defs_->state_change_no());
         }
     };
 
+    // Asks the server for news; without a copy of the tree, after a denied refresh, a refresh is attempted instead.
+    // A server that uses Permissions has news: the refresh that follows records it
+    auto has_news = [&] {
+        {
+            std::scoped_lock lock(def_mutex);
+            if (defs_ == nullptr) {
+                return true;
+            }
+        }
+        if (server_uses_permissions_now()) {
+            return true;
+        }
+        try {
+            client.news(defs_);
+        }
+        catch (const std::exception& e) {
+            if (!denied_by_permissions(e)) {
+                throw;
+            }
+            return true; // the refresh that follows is denied as well, and records it
+        }
+        return client.get_news();
+    };
+
     // These will throw is ecflow server is not present; we will not
-    // try to reconnect if there was not a connection to begin with
-    client.news_local();
-    client.sync_local();
+    // try to reconnect if there was not a connection to begin with.
+    // A server that denies the refresh by Permissions is present: the service starts, and refuses every request.
+    try {
+        client.news_local();
+    }
+    catch (const std::exception& e) {
+        if (!denied_by_permissions(e)) {
+            throw;
+        }
+    }
+    update();
 
     // Implement a drift to update cycle. The basic idea is that if we
     // do not get requests to the interface, we slowly start to increase
@@ -114,8 +240,7 @@ void defs_update(int interval) {
                     }
 
                     // update triggered by timeout
-                    client.news(defs_);
-                    if (client.get_news()) {
+                    if (has_news()) {
                         update();
                         update_defs = false;
                     }

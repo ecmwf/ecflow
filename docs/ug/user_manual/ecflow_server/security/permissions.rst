@@ -564,6 +564,12 @@ form:
 The value is given in either textual form. A denied request fails with an error whose ``failure()`` is
 ``Failure::PermissionDenied``.
 
+REST API
+========
+
+The REST API does not support Permissions: against a server that has a server attribute, it refuses every request
+(see :ref:`rest_api_permissions`).
+
 .. _permissions_attribute_restore:
 
 Restoring archived nodes
