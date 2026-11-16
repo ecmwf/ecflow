@@ -55,7 +55,7 @@ NodeExpressionParser::NodeExpressionParser() {
 
     QStringList attrNames;
     attrNames << "meter" << "event" << "repeat" << "trigger" << "label" << "time" << "date" << "late" << "limit"
-              << "limiter" << "var" << "genvar" << "mirror" << "aviso";
+              << "limiter" << "var" << "genvar" << "mirror" << "aviso" << "permissions";
     Q_FOREACH (QString s, attrNames) {
         VAttributeType* t = VAttributeType::find(s.toStdString());
         Q_ASSERT(t);
@@ -110,7 +110,8 @@ bool NodeExpressionParser::isEnvVar(const std::string& str) const {
 }
 
 bool NodeExpressionParser::isNodeHasAttribute(const std::string& str) const {
-    constexpr std::array searchable = {"has_triggers", "has_time", "has_date", "locked", "has_aviso", "has_mirror"};
+    constexpr std::array searchable = {
+        "has_triggers", "has_time", "has_date", "locked", "has_aviso", "has_mirror", "has_permissions"};
     return std::find(searchable.begin(), searchable.end(), str) != searchable.end();
 }
 
@@ -133,12 +134,13 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string& str, bool& isAttr
 
     constexpr auto is_searchable_attribute = [](const std::string& str) {
         static constexpr std::array searchable = {
-            "var_name",           "var_value",          "var_type",           "label_name",  "label_value",
-            "meter_name",         "meter_value",        "event_name",         "event_value", "date_name",
-            "time_name",          "limit_name",         "limit_value",        "limit_max",   "limiter_name",
-            "repeat_name",        "repeat_value",       "trigger_expression", "mirror_name", "mirror_remote_path",
-            "mirror_remote_host", "mirror_remote_port", "mirror_polling",     "aviso_name",  "aviso_listener",
-            "aviso_url",          "aviso_auth",         "aviso_collapse",     "aviso_repeat"};
+            "var_name",           "var_value",          "var_type",           "label_name",   "label_value",
+            "meter_name",         "meter_value",        "event_name",         "event_value",  "date_name",
+            "time_name",          "limit_name",         "limit_value",        "limit_max",    "limiter_name",
+            "repeat_name",        "repeat_value",       "trigger_expression", "mirror_name",  "mirror_remote_path",
+            "mirror_remote_host", "mirror_remote_port", "mirror_polling",     "aviso_name",   "aviso_listener",
+            "aviso_url",          "aviso_auth",         "aviso_collapse",     "aviso_repeat", "permissions_value",
+            "permissions_users"};
         return std::find(searchable.begin(), searchable.end(), str) != searchable.end();
     };
 
@@ -830,6 +832,9 @@ bool NodeAttributeCondition::execute(VItem* item) {
         }
         else if (nodeAttrName_ == "has_mirror") {
             return node->isMirror();
+        }
+        else if (nodeAttrName_ == "has_permissions") {
+            return node->permissions() != nullptr;
         }
     }
 

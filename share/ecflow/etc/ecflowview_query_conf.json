@@ -19,7 +19,7 @@
         },
         "flag"  : {
             "type"   : "list",
-            "values" : "has_date|has_message|has_time|is_archived|is_ecfcmd_failed|is_killed|is_killcmd_failed|is_late|is_rerun|is_restored|is_statuscmd_failed|is_waiting|is_zombie|no_script|threshold"
+            "values" : "has_date|has_message|has_permissions|has_time|is_archived|is_ecfcmd_failed|is_killed|is_killcmd_failed|is_late|is_rerun|is_restored|is_statuscmd_failed|is_waiting|is_zombie|no_script|threshold"
         },
         "status_change_time" : {
             "type"   : "period",
@@ -30,7 +30,7 @@
 
         "attribute"  : {
             "type"  : "list",
-            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable|mirror|aviso"
+            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable|mirror|aviso|permissions"
         },
 
         "event" : {
@@ -111,6 +111,16 @@
                 "labels" : "Any|Yes|No",
                 "default" : "any",
                 "ignoreIfAny" : "true"
+            }
+        },
+        "permissions" : {
+            "permissions_value" : {
+                "type" : "string",
+                "label" : "Permissions value"
+            },
+            "permissions_users" : {
+                "type" : "string",
+                "label" : "Permissions users"
             }
         },
         "meter" : {

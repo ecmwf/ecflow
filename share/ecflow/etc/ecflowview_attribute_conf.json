@@ -64,6 +64,9 @@
         },
         "mirror" : {
           "label" : "Mirrors"
+        },
+        "permissions" : {
+          "label" : "Permissions"
         }
     }
 }

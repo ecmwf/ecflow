@@ -44,7 +44,7 @@ nodes which match the options in the **Nodes** tab.
    * The **Status** selection box works in a similar way to the **Type** selection box.
    * The **Flag** box is also similar - if nothing is selected, then nodes will be found regardless of their flags; otherwise, the search will be restricted to just those nodes that contain the specified flags.
 
-* Attribute options: The **Attributes** tab defines the options used for attributes search. If nothing is selected, no attributes are searched. By selecting an attribute from the list in the left, the search options available for this this attribute will appear in the right hand side.
+* Attribute options: The **Attributes** tab defines the options used for attributes search. If nothing is selected, no attributes are searched. By selecting an attribute from the list in the left, the search options available for this this attribute will appear in the right hand side. For example, the attribute ``permissions`` is searched by its value or by its users (see :ref:`viewing_and_editing_permissions`).
 
 
    .. image:: /_static/ecflow_ui/searching_for_nodes/image3.png

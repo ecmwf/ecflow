@@ -187,6 +187,23 @@ protected:
                              const QStyleOptionViewItem& option,
                              QSize&,
                              const QColor& foregroundColour) const;
+
+    ///
+    /// @brief Renders the row of a Permissions attribute: its icon, "permissions:" in bold, and its value in the
+    ///        command-line form.
+    ///
+    /// @param[in] painter The painter
+    /// @param[in] data The data of the attribute (type name, value, users, JSON form); nothing is drawn with fewer than
+    /// 2
+    /// @param[in] option The style of the row
+    /// @param[out] size The size used by the row
+    /// @param[in] foregroundColour Ignored: the row is drawn in black
+    ///
+    virtual void renderPermissions(QPainter* painter,
+                                   QStringList data,
+                                   const QStyleOptionViewItem& option,
+                                   QSize&,
+                                   const QColor& foregroundColour) const;
     virtual void renderMirror(QPainter* painter,
                               QStringList data,
                               const QStyleOptionViewItem& option,
@@ -322,6 +339,7 @@ protected:
 
     int avisoPixId_;
     int mirrorPixId_;
+    int permissionsPixId_;
     int holdingTimePixId_;
     int holdingDatePixId_;
 
