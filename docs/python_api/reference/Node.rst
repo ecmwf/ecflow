@@ -703,6 +703,35 @@ The trigger for task2 is equivalent to:
 3. add_part_trigger(self: ecflow.Node, arg0: str, arg1: bool) -> ecflow.Node
 
 
+.. py:method:: Node.add_permissions(self: ecflow.Node, value: object) -> ecflow.Node
+   :module: ecflow
+
+Adds a :term:`permissions` attribute to the node. See :py:class:`ecflow.Permissions`
+
+A node carries at most one Permissions attribute.
+
+::
+
+   Node add_permissions(value)
+      value: a Permissions object, a string in the command-line or JSON form, or a list or tuple of
+             entries
+
+Returns the node, so that calls can be chained.
+
+Exceptions:
+
+- Raises RuntimeError when the value is invalid, or the node already has a Permissions attribute
+- Raises TypeError for a value of another type
+
+Usage:
+
+.. code-block:: python
+
+   suite = Suite('s')
+   suite.add_permissions(Permissions('alice:rwxp,bob:r'))
+   task = Task('t').add_permissions('bob:rx')
+
+
 .. py:method:: Node.add_queue(*args, **kwargs)
    :module: ecflow
 
@@ -1211,6 +1240,25 @@ Overloaded function.
    :module: ecflow
 
 
+.. py:method:: Node.delete_permissions(self: ecflow.Node) -> None
+   :module: ecflow
+
+Removes the :term:`permissions` attribute of the node
+
+::
+
+   None delete_permissions()
+
+The node then inherits its roles from above. A node without a Permissions attribute is left unchanged.
+
+Usage:
+
+.. code-block:: python
+
+   suite.delete_permissions()
+   assert suite.get_permissions() is None
+
+
 .. py:method:: Node.delete_queue(self: ecflow.Node, arg0: str) -> None
    :module: ecflow
 
@@ -1415,6 +1463,28 @@ Retrieves the list of generated variables. Pass in ecflow.VariableList as argume
 
 .. py:method:: Node.get_parent(self: ecflow.Node) -> ecflow.Node
    :module: ecflow
+
+
+.. py:method:: Node.get_permissions(self: ecflow.Node) -> object
+   :module: ecflow
+
+Returns a copy of the :term:`permissions` attribute of the node
+
+::
+
+   Permissions get_permissions()
+
+Returns a copy, or None when the node has no Permissions attribute: changing the copy leaves the node
+unchanged. The attribute holds the entries of this node only; the roles a user holds there also depend
+on the attributes above it.
+
+Usage:
+
+.. code-block:: python
+
+   suite = Suite('s', Permissions('alice:rwxp'))
+   suite.get_permissions().entries()   # ['alice:rwxp']
+   Task('t').get_permissions()          # None
 
 
 .. py:method:: Node.get_repeat(self: ecflow.Node) -> ecflow.Repeat

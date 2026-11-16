@@ -406,6 +406,41 @@ Usage:
 2. check_job_creation(self: ecflow.Defs, arg0: ecflow.JobCreationCtrl) -> None
 
 
+.. py:method:: Defs.check_permissions(self: ecflow.Defs, server: object) -> str
+   :module: ecflow
+
+Validates the :term:`permissions` attributes of the definition offline
+
+Each suite is checked as a load into a server holding no suite, and having the given server
+Permissions attribute, would check it:
+
+- each entry names a user listed above its node, at server level for a suite;
+- no node is left without a user able to change its attributes (role p), when one could above it;
+- the definition carries no server Permissions attribute.
+
+::
+
+   string check_permissions(server)
+      server: the server Permissions attribute, declaring the users and their roles at server level,
+              as a Permissions object or in any form accepted by its constructor
+
+Returns the errors, one per line naming its suite, or an empty string when the definition would be
+accepted.
+
+Exceptions:
+
+- Raises RuntimeError when the server attribute given is invalid
+- Raises TypeError when it is of another type
+
+Usage:
+
+.. code-block:: python
+
+   defs = Defs('my.def')
+   errors = defs.check_permissions(Permissions('admin:rwxlops,alice:rwxp,bob:r'))
+   assert errors == '', errors
+
+
 .. py:method:: Defs.delete_variable(self: ecflow.Defs, arg0: str) -> None
    :module: ecflow
 

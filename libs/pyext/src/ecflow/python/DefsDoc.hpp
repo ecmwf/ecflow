@@ -46,6 +46,34 @@ public:
     static const char* add_late_doc();
     static const char* add_autocancel_doc();
     static const char* add_autoarchive_doc();
+
+    ///
+    /// @brief Returns the docstring of Node.add_permissions.
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* add_permissions_doc();
+
+    ///
+    /// @brief Returns the docstring of Node.get_permissions.
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* get_permissions_doc();
+
+    ///
+    /// @brief Returns the docstring of Node.delete_permissions.
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* delete_permissions_doc();
+
+    ///
+    /// @brief Returns the docstring of Defs.check_permissions.
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* check_permissions_doc();
     static const char* add_autorestore_doc();
     static const char* add_verify_doc();
     static const char* add_repeat_date_doc();

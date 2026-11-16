@@ -16,6 +16,7 @@
 #include "ecflow/attribute/DayAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/attribute/RepeatAttr.hpp"
 #include "ecflow/attribute/TimeAttr.hpp"
 #include "ecflow/attribute/TodayAttr.hpp"
@@ -161,6 +162,9 @@ void NodeUtil::add(Node& self, const py::handle& arg) {
     }
     else if (auto found = py_extract<ecf::AutoArchiveAttr>(arg); found) {
         self.add_autoarchive(found.value());
+    }
+    else if (auto found = py_extract<ecf::Permissions>(arg); found) {
+        self.add_permissions(found.value());
     }
     else if (auto found = py_extract<ecf::AutoRestoreAttr>(arg); found) {
         self.add_autorestore(found.value());

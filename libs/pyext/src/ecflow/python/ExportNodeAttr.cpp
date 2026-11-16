@@ -15,6 +15,7 @@
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/attribute/RepeatAttr.hpp"
 #include "ecflow/attribute/TimeAttr.hpp"
@@ -35,6 +36,7 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/ExportCollections.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
+#include "ecflow/python/PermissionsUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/python/Trigger.hpp"
@@ -551,6 +553,68 @@ ecf::MirrorAttr MirrorAttr_make(const std::string& name,
 ///
 std::string MirrorAttr_str(const ecf::MirrorAttr& mirror) {
     return ecf::to_python_string(mirror);
+}
+
+// Permissions
+
+///
+/// @brief Returns the entries of a Permissions attribute, each in the form <user>:<letters>.
+///
+/// @param self The attribute.
+/// @return The entries, sorted by user name, e.g. ["alice:rwxs", "bob:r"].
+///
+py::list Permissions_entries(const ecf::Permissions& self) {
+    py::list entries;
+    for (const auto& entry : self.entries()) {
+        entries.append(PermissionsUtil::to_string(entry));
+    }
+    return entries;
+}
+
+///
+/// @brief Returns the letters of the roles a Permissions attribute grants to a user, without the sticky flag.
+///
+/// @param self The attribute.
+/// @param user The user name.
+/// @return The letters in canonical order, e.g. "rwx", or None when the attribute does not list @p user.
+///
+py::object Permissions_roles(const ecf::Permissions& self, const std::string& user) {
+    if (const auto* entry = self.find(user); entry) {
+        return py::str(entry->roles.to_string());
+    }
+    return py::none();
+}
+
+///
+/// @brief Returns whether the entry of a user is sticky.
+///
+/// @param self The attribute.
+/// @param user The user name.
+/// @return true when the attribute lists @p user with the sticky flag; false otherwise.
+///
+bool Permissions_sticky(const ecf::Permissions& self, const std::string& user) {
+    const auto* entry = self.find(user);
+    return entry && entry->sticky;
+}
+
+///
+/// @brief Returns the string form of a Permissions attribute: its line in a definition file.
+///
+/// @param self The attribute.
+/// @return The line, e.g. 'permissions [{"user": "alice", "permissions": "rwx"}]'.
+///
+std::string Permissions_str(const ecf::Permissions& self) {
+    return "permissions " + self.to_json();
+}
+
+///
+/// @brief Returns the representation of a Permissions attribute, which recreates it.
+///
+/// @param self The attribute.
+/// @return The representation, e.g. "Permissions('alice:rwx')", the value quoted as a Python string literal.
+///
+std::string Permissions_repr(const ecf::Permissions& self) {
+    return "Permissions(" + py::repr(py::str(self.to_cli())).cast<std::string>() + ")";
 }
 
 } // namespace
@@ -1131,6 +1195,27 @@ void export_NodeAttr(py::module& m) {
         .def("idle",
              &ecf::AutoArchiveAttr::idle,
              "Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed");
+
+    py::class_<ecf::Permissions, std::shared_ptr<ecf::Permissions>>(
+        m, "Permissions", py::dynamic_attr(), NodeAttrDoc::permissions_doc())
+
+        .def(py::init([](const py::object& value) { return PermissionsUtil::from(value); }), py::arg("value"))
+        .def(py::self == py::self)
+        .def(py::self != py::self)
+        .def("__hash__", [](const ecf::Permissions& self) { return static_cast<py::ssize_t>(self.hash()); })
+        .def("__str__", &Permissions_str)
+        .def("__repr__", &Permissions_repr)
+        .def("__copy__", pyutil_copy_object<ecf::Permissions>)
+        .def("entries", &Permissions_entries, NodeAttrDoc::permissions_entries_doc())
+        .def("roles", &Permissions_roles, py::arg("user"), NodeAttrDoc::permissions_roles_doc())
+        .def("sticky", &Permissions_sticky, py::arg("user"), NodeAttrDoc::permissions_sticky_doc())
+        .def("to_cli", &ecf::Permissions::to_cli, NodeAttrDoc::permissions_to_cli_doc())
+        .def("to_json", &ecf::Permissions::to_json, NodeAttrDoc::permissions_to_json_doc())
+        .def("add_to",
+             &PermissionsUtil::add_to,
+             py::arg("nodes"),
+             py::arg("replace") = false,
+             NodeAttrDoc::permissions_add_to_doc());
 
     py::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>(
         m, "Autorestore", py::dynamic_attr(), NodeAttrDoc::autorestore_doc())

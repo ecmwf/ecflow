@@ -17,6 +17,7 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/python/ClientDoc.hpp"
+#include "ecflow/python/PermissionsUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 
@@ -104,6 +105,33 @@ const std::string& ClientInvoker_query(ClientInvoker* self,
                                        bool evaluate) {
     self->query(query_type, path_to_attribute, attribute, evaluate);
     return self->get_string();
+}
+
+///
+/// @brief Adds a Permissions attribute to a node, or changes that of a node or of the server (--permissions).
+///
+/// @param self The client invoker.
+/// @param operation Either "create" or "update".
+/// @param path The absolute path of the node, or "/" for the server attribute (update only).
+/// @param value The attribute: a Permissions object, a string in either textual form, or a list of entries.
+///
+void ClientInvoker_change_permissions(ClientInvoker* self,
+                                      const std::string& operation,
+                                      const std::string& path,
+                                      const py::object& value) {
+    self->permissions(operation, path, PermissionsUtil::from(value).to_json(), false);
+}
+
+///
+/// @brief Returns the Permissions attribute of a node, or of the server (--permissions read).
+///
+/// @param self The client invoker.
+/// @param path The absolute path of the node, or "/" for the server attribute.
+/// @return The attribute.
+///
+ecf::Permissions ClientInvoker_get_permissions(ClientInvoker* self, const std::string& path) {
+    self->permissions("read", path, "", true);
+    return ecf::Permissions::parse_json(self->get_string());
 }
 
 ///
@@ -1068,7 +1096,8 @@ void ClientInvoker_enable_ssl(ClientInvoker* self) {
 
 void export_Client(py::module& m) {
     // A request denied by the authorisation of the server; a RuntimeError, as every other refused request
-    py::register_exception<ecf::PermissionDenied>(m, "PermissionDenied", PyExc_RuntimeError);
+    py::register_exception<ecf::PermissionDenied>(m, "PermissionDenied", PyExc_RuntimeError).attr("__doc__") =
+        ClientDoc::permission_denied();
 
     static const char* ClientInvoker_version_doc = "Returns the current client version";
 
@@ -1284,6 +1313,42 @@ void export_Client(py::module& m) {
              ClientDoc::get_file())
 
         .def("plug", &ClientInvoker::plug, ClientDoc::plug())
+
+        .def(
+            "create_permissions",
+            [](ClientInvoker* self, const std::string& path, const py::object& value) {
+                ClientInvoker_change_permissions(self, "create", path, value);
+            },
+            py::arg("path"),
+            py::arg("value"),
+            ClientDoc::create_permissions())
+
+        .def("get_permissions", &ClientInvoker_get_permissions, py::arg("path"), ClientDoc::get_permissions())
+
+        .def(
+            "update_permissions",
+            [](ClientInvoker* self, const std::string& path, const py::object& value) {
+                ClientInvoker_change_permissions(self, "update", path, value);
+            },
+            py::arg("path"),
+            py::arg("value"),
+            ClientDoc::update_permissions())
+
+        .def(
+            "delete_permissions",
+            [](ClientInvoker* self, const std::string& path) { self->permissions("delete", path, "", false); },
+            py::arg("path"),
+            ClientDoc::delete_permissions())
+
+        .def(
+            "effective_permissions",
+            [](ClientInvoker* self, const std::string& path, const std::string& user) {
+                self->permissions("effective", path, user, false);
+                return self->get_string();
+            },
+            py::arg("path"),
+            py::arg("user") = "",
+            ClientDoc::effective_permissions())
 
         .def("query",
              &ClientInvoker_query,

@@ -116,7 +116,7 @@ For a detailed  explanation please consult the :ref:`user_manual`.
 
 Adding Node attributes
 -----------------------------
-There are several styles for adding node attributes(Repeat,Time,Today,Date,Day,Cron,Clock,DefStatus,Meter,Event,Variable,Label,Trigger, Complete, Limit,Inlimit,Zombie,Late)
+There are several styles for adding node attributes(Repeat,Time,Today,Date,Day,Cron,Clock,DefStatus,Meter,Event,Variable,Label,Trigger, Complete, Limit,Inlimit,Zombie,Late,AvisoAttr,MirrorAttr,Permissions)
 
 .. code-block:: python
 

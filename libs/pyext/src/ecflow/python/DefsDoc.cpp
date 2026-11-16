@@ -685,6 +685,72 @@ const char* DefsDoc::add_autocancel_doc() {
            "            Autocancel(20,10,False))\n";
 }
 
+const char* DefsDoc::add_permissions_doc() {
+    return "Adds a :term:`permissions` attribute to the node. See :py:class:`ecflow.Permissions`\n\n"
+           "A node carries at most one Permissions attribute.\n\n"
+           "::\n\n"
+           "   Node add_permissions(value)\n"
+           "      value: a Permissions object, a string in the command-line or JSON form, or a list or tuple of\n"
+           "             entries\n\n"
+           "Returns the node, so that calls can be chained.\n\n"
+           "Exceptions:\n\n"
+           "- Raises RuntimeError when the value is invalid, or the node already has a Permissions attribute\n"
+           "- Raises TypeError for a value of another type\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   suite = Suite('s')\n"
+           "   suite.add_permissions(Permissions('alice:rwxp,bob:r'))\n"
+           "   task = Task('t').add_permissions('bob:rx')\n";
+}
+
+const char* DefsDoc::get_permissions_doc() {
+    return "Returns a copy of the :term:`permissions` attribute of the node\n\n"
+           "::\n\n"
+           "   Permissions get_permissions()\n\n"
+           "Returns a copy, or None when the node has no Permissions attribute: changing the copy leaves the node\n"
+           "unchanged. The attribute holds the entries of this node only; the roles a user holds there also depend\n"
+           "on the attributes above it.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   suite = Suite('s', Permissions('alice:rwxp'))\n"
+           "   suite.get_permissions().entries()   # ['alice:rwxp']\n"
+           "   Task('t').get_permissions()          # None\n";
+}
+
+const char* DefsDoc::delete_permissions_doc() {
+    return "Removes the :term:`permissions` attribute of the node\n\n"
+           "::\n\n"
+           "   None delete_permissions()\n\n"
+           "The node then inherits its roles from above. A node without a Permissions attribute is left unchanged.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   suite.delete_permissions()\n"
+           "   assert suite.get_permissions() is None\n";
+}
+
+const char* DefsDoc::check_permissions_doc() {
+    return "Validates the :term:`permissions` attributes of the definition offline\n\n"
+           "Each suite is checked as a load into a server holding no suite, and having the given server\n"
+           "Permissions attribute, would check it:\n\n"
+           "- each entry names a user listed above its node, at server level for a suite;\n"
+           "- no node is left without a user able to change its attributes (role p), when one could above it;\n"
+           "- the definition carries no server Permissions attribute.\n\n"
+           "::\n\n"
+           "   string check_permissions(server)\n"
+           "      server: the server Permissions attribute, declaring the users and their roles at server level,\n"
+           "              as a Permissions object or in any form accepted by its constructor\n\n"
+           "Returns the errors, one per line naming its suite, or an empty string when the definition would be\n"
+           "accepted.\n"
+           "\nExceptions:\n\n"
+           "- Raises RuntimeError when the server attribute given is invalid\n"
+           "- Raises TypeError when it is of another type\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   defs = Defs('my.def')\n"
+           "   errors = defs.check_permissions(Permissions('admin:rwxlops,alice:rwxp,bob:r'))\n"
+           "   assert errors == '', errors\n";
+}
+
 const char* DefsDoc::add_autoarchive_doc() {
     return "Add a `autoarchive` attribute. See :py:class:`ecflow.Autoarchive`\n\n"
            "Provides a way to automatically archive a suite/family which has completed.(i.e remove children)\n"

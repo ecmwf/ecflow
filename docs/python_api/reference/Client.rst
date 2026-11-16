@@ -122,6 +122,10 @@ Alter command is used to change the attributes of a node
           The new/updated value for the attribute.
    )
 
+The :term:`permissions` attribute is not changed by alter: use
+:py:meth:`ecflow.Client.create_permissions`, :py:meth:`ecflow.Client.update_permissions` and
+:py:meth:`ecflow.Client.delete_permissions`, which require the role p.
+
 This function will raise exceptions because:
 
 - A provided path does not exist.
@@ -922,6 +926,38 @@ Usage:
        print(str(e))
 
 
+.. py:method:: Client.create_permissions(self: ecflow.Client, path: str, value: object) -> None
+   :module: ecflow
+
+Adds a :term:`permissions` attribute to a node on the server (ecflow_client --permissions create)
+
+Requires the role p at the node. The change is validated as every change of Permissions
+attributes: the entries name only users listed above the node, and the change leaves a user able to
+change the attributes (role p) wherever one could before.
+
+::
+
+   None create_permissions(
+      string path : Absolute path of the node
+      value       : Permissions object, string in the command-line or JSON form, or list or tuple of
+                    entries
+   )
+
+Exceptions:
+
+- Raises PermissionDenied when the user does not hold the role p at the node
+- Raises RuntimeError when the value is invalid, the node already has a Permissions attribute,
+  the server has no server Permissions attribute, or the change is rejected
+- Raises TypeError when the value is of another type
+
+Usage:
+
+.. code-block:: python
+
+   ci = Client()
+   ci.create_permissions('/s', Permissions('alice:rwxp,bob:r'))
+
+
 .. py:method:: Client.debug(self: ecflow.Client, arg0: bool) -> None
    :module: ecflow
 
@@ -1009,6 +1045,33 @@ Usage:
        print(str(e));    # expect failure since all nodes deleted
 
 
+.. py:method:: Client.delete_permissions(self: ecflow.Client, path: str) -> None
+   :module: ecflow
+
+Removes the :term:`permissions` attribute of a node (ecflow_client --permissions delete)
+
+Requires the role p at the node. The server attribute cannot be removed at run time.
+
+::
+
+   None delete_permissions(
+      string path : Absolute path of the node
+   )
+
+Exceptions:
+
+- Raises PermissionDenied when the user does not hold the role p at the node
+- Raises RuntimeError when the node does not exist, has no Permissions attribute, or the change is
+  rejected
+
+Usage:
+
+.. code-block:: python
+
+   ci = Client()
+   ci.delete_permissions('/s/f')   # /s/f now inherits its roles from /s
+
+
 .. py:method:: Client.disable_ssl(self: ecflow.Client) -> None
    :module: ecflow
 
@@ -1054,6 +1117,37 @@ to run as alias or not:
                            alias, # bool False,
                            run  # bool true
                       )
+
+
+.. py:method:: Client.effective_permissions(self: ecflow.Client, path: str, user: str = '') -> str
+   :module: ecflow
+
+Returns the roles a user holds at a node (ecflow_client --permissions effective)
+
+Requires the role r at the node.
+
+::
+
+   string effective_permissions(
+      string path : Absolute path of the node, or '/' for the server level
+      string user : The user; by default, the user issuing the request
+   )
+
+Returns the letters of the roles held, e.g. 'rwx', or an empty string when the user holds none.
+
+Exceptions:
+
+- Raises PermissionDenied when the user issuing the request does not hold the role r at the node
+- Raises RuntimeError when the node does not exist, or the server does not use Permissions
+  attributes (it has no server Permissions attribute)
+
+Usage:
+
+.. code-block:: python
+
+   ci = Client()
+   if 'x' in ci.effective_permissions('/s/f/t'):
+       ci.requeue('/s/f/t')
 
 
 .. py:method:: Client.enable_http(self: ecflow.Client) -> None
@@ -1478,6 +1572,32 @@ Usage:
        print(ci.get_log(100)  # get the 100 last lines from server log file
    except RuntimeError, e:
        print(str(e))
+
+
+.. py:method:: Client.get_permissions(self: ecflow.Client, path: str) -> ecflow.Permissions
+   :module: ecflow
+
+Returns the :term:`permissions` attribute of a node, or of the server (ecflow_client --permissions read)
+
+Requires the role r at the node, or at server level for '/'.
+
+::
+
+   Permissions get_permissions(
+      string path : Absolute path of the node, or '/' for the server attribute
+   )
+
+Exceptions:
+
+- Raises PermissionDenied when the user does not hold the role r
+- Raises RuntimeError when the node does not exist, or has no Permissions attribute
+
+Usage:
+
+.. code-block:: python
+
+   ci = Client()
+   print(ci.get_permissions('/s').entries())
 
 
 .. py:method:: Client.get_port(self: ecflow.Client) -> str
@@ -2757,6 +2877,37 @@ Usage:
        ci.terminate_server()
    except RuntimeError, e:
        print(str(e))
+
+
+.. py:method:: Client.update_permissions(self: ecflow.Client, path: str, value: object) -> None
+   :module: ecflow
+
+Changes the :term:`permissions` attribute of a node, or of the server (ecflow_client --permissions update)
+
+Requires the role p at the node, or at server level for '/'. Entries of the nodes below that name users
+no longer listed above them are removed.
+
+::
+
+   None update_permissions(
+      string path : Absolute path of the node, or '/' for the server attribute
+      value       : Permissions object, string in the command-line or JSON form, or list or tuple of
+                    entries
+   )
+
+Exceptions:
+
+- Raises PermissionDenied when the user does not hold the role p
+- Raises RuntimeError when the value is invalid, the node has no Permissions attribute,
+  or the change is rejected
+- Raises TypeError when the value is of another type
+
+Usage:
+
+.. code-block:: python
+
+   ci = Client()
+   ci.update_permissions('/s', 'alice:rwxp,bob:rw')
 
 
 .. py:method:: Client.version(self: ecflow.Client) -> str

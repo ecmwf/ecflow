@@ -54,6 +54,7 @@ set(srcs
   ../src/ecflow/python/GlossaryDoc.hpp
   ../src/ecflow/python/NodeAttrDoc.hpp
   ../src/ecflow/python/NodeUtil.hpp
+  ../src/ecflow/python/PermissionsUtil.hpp
   ../src/ecflow/python/PythonBinding.hpp
   ../src/ecflow/python/PythonUtil.hpp
   ../src/ecflow/python/Trigger.hpp
@@ -73,6 +74,7 @@ set(srcs
   ../src/ecflow/python/GlossaryDoc.cpp
   ../src/ecflow/python/NodeAttrDoc.cpp
   ../src/ecflow/python/NodeUtil.cpp
+  ../src/ecflow/python/PermissionsUtil.cpp
   ../src/ecflow/python/PythonUtil.cpp
   ../src/ecflow/python/Trigger.cpp
 )
@@ -123,6 +125,7 @@ set(u_tests
   u_TestNodeReplace
   u_TestParent
   u_TestParsingMultiStatement
+  u_TestPermissions
   u_TestPrint
   u_TestPythonBindings
   u_TestRemove
@@ -141,6 +144,7 @@ set(u_tests
 set(s_tests
   s_TestClientApi
   s_TestPermissionsAcceptance
+  s_TestPermissionsClient
   s_TestPermissionsHarness
   s_TestPythonChildApi
   s_TestServerPortReservation

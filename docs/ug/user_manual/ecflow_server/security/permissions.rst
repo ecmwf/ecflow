@@ -470,6 +470,72 @@ the new permissions allow.
 Configuring the server attribute, or removing it, requires a restart: every client then reconnects and synchronises
 in full.
 
+.. _permissions_attribute_python:
+
+Python
+======
+
+The Python module binds the attribute as :py:class:`ecflow.Permissions`, built from either textual form or from a
+list of entries:
+
+.. code-block:: python
+
+   import ecflow
+
+   team = ecflow.Permissions("alice:rwxp,bob:r")          # or ["alice:rwxp", "bob:r"], or the JSON form
+   defs = ecflow.Defs(
+       ecflow.Suite("s", team, ecflow.Family("f", ecflow.Permissions("alice:rwxp"), ecflow.Task("t"))))
+
+   # One attribute applied to a set of nodes, all or none; replace=True replaces existing attributes
+   ecflow.Permissions("alice:rxp").add_to(defs.get_all_tasks())
+
+   # Offline validation, as a load into a server with this server attribute would validate the definitions
+   errors = defs.check_permissions(ecflow.Permissions("admin:rwxlops,alice:rwxp,bob:r"))
+   assert errors == "", errors
+
+A :py:class:`ecflow.Permissions` object provides:
+
+- ``entries()``: the entries, each a string ``<user>:<letters>``, sorted by user;
+- ``roles(user)``: the letters of the roles granted to a user, without the sticky flag, or ``None``;
+- ``sticky(user)``: whether the entry of a user is sticky;
+- ``to_cli()`` and ``to_json()``: the command-line and JSON forms;
+- ``add_to(nodes, replace=False)``: the attribute added to a set of nodes, all or none.
+
+Its string form is its line in a definition file. Nodes provide:
+
+- ``add_permissions(value)``, returning the node;
+- ``get_permissions()``, returning a copy of the attribute, or ``None``;
+- ``delete_permissions()``, after which the node inherits its roles from above.
+
+The full reference is in :py:class:`ecflow.Permissions`, :py:meth:`ecflow.Node.add_permissions` and
+:py:meth:`ecflow.Defs.check_permissions`.
+
+The client provides the operations of ``--permissions``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 45 55
+
+   * - Method
+     - Command
+   * - ``create_permissions(path, value)``
+     - ``--permissions create``
+   * - ``get_permissions(path)``, returning a :py:class:`ecflow.Permissions`
+     - ``--permissions read``
+   * - ``update_permissions(path, value)``
+     - ``--permissions update``
+   * - ``delete_permissions(path)``
+     - ``--permissions delete``
+   * - ``effective_permissions(path, user="")``, returning the letters, e.g. ``"rwx"``
+     - ``--permissions effective``
+
+A denied request raises ``ecflow.PermissionDenied``. An invalid value, or any other failure of a request, raises
+``RuntimeError``; an argument of another type (neither a ``Permissions`` object, a string, nor a list or tuple of
+strings) raises ``TypeError``.
+
+On a server without a server attribute, ``effective_permissions`` raises ``RuntimeError``, since the server does not
+use Permissions attributes, and ``create_permissions`` is rejected.
+
 .. _permissions_attribute_restore:
 
 Restoring archived nodes

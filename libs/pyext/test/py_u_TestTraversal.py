@@ -96,6 +96,10 @@ class DefsTraverser:
         if autorestore:
             self._writeln(str(autorestore))
 
+        permissions = node.get_permissions()
+        if permissions:
+            self._writeln(str(permissions))
+
         repeat = node.get_repeat()
         if not repeat.empty():
             self._writeln(str(repeat) + " # value: " + str(repeat.value()))

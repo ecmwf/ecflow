@@ -54,6 +54,7 @@ The state of the elements of a suite definition can be set using the Client-serv
    reference/Node
    reference/NodeContainer
    reference/PartExpression
+   reference/Permissions
    reference/Queue
    reference/Repeat
    reference/RepeatDate
