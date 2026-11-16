@@ -32,8 +32,6 @@ use bindman::track_cpp_api;
         "zombieFob", "zombieFail", "zombieAdopt", "zombieBlock", "zombieRemove", "zombieKill",
         "zombieFobCli", "zombieFailCli", "zombieAdoptCli", "zombieBlockCli", "zombieRemoveCli", "zombieKillCli",
         "delete_node", "forceDependencyEval", "edit_script",
-        // Permissions attributes, not bound yet
-        "permissions",
     ]
 )]
 #[cxx::bridge]
@@ -440,6 +438,18 @@ mod ffi {
             name: &CxxString,
             value: &CxxString,
         ) -> Result<()>;
+        /// Read or change the Permissions attribute of a node, or of the server at `/`;
+        /// `operation` is `create`, `read`, `update`, `delete` or `effective`. `value` is the
+        /// attribute for `create` and `update`, the user for `effective` (the requester when
+        /// empty), and empty otherwise. With `json`, `read` and `effective` answer in the JSON
+        /// form. The answer is in `get_string`.
+        fn permissions(
+            self: Pin<&mut Client>,
+            operation: &CxxString,
+            path: &CxxString,
+            value: &CxxString,
+            json: bool,
+        ) -> Result<i32>;
         /// Sort the attributes of a kind of the nodes by name.
         fn alter_sort(
             self: &Client,

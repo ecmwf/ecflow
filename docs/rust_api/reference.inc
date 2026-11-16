@@ -503,6 +503,10 @@ Nodes
    options applied together, as for ``ecflow_client --alter change repeat``,
    such as ``"--begin 20260101 --end 20261231 --current 20260115"``.
 
+   The Permissions attribute is not changed by ``alter``: use
+   :ref:`Client::create_permissions <rust_client_create_permissions>`, :ref:`Client::update_permissions <rust_client_update_permissions>` and
+   :ref:`Client::delete_permissions <rust_client_delete_permissions>`, which require the role ``p``.
+
 .. _rust_client_sort_attributes:
 
 .. describe:: pub fn sort_attributes<I, S>(&mut self, paths: I, attribute: &str, recursive: bool) -> Result<()> where I: IntoIterator<Item = S>, S: AsRef<str>
@@ -510,6 +514,72 @@ Nodes
    Sort the attributes of a kind (``event``, ``meter``, ``label``, ``variable``,
    ``limit`` or ``all``) of the nodes by name. With ``recursive``, below them
    too.
+
+Permissions
+^^^^^^^^^^^
+
+.. _rust_client_create_permissions:
+
+.. describe:: pub fn create_permissions(&mut self, path: &str, value: &str) -> Result<()>
+
+   Add a Permissions attribute to the node (``--permissions create``).
+   ``value`` lists the roles of each user, in the command-line form, such
+   as ``alice:rwxp,bob:r``, or the JSON form, such as
+   ``[{"user": "alice", "permissions": "rwxp"}]``.
+
+   Requires the role ``p`` at the node; fails with
+   :ref:`Failure::PermissionDenied <rust_failure_permissiondenied>` otherwise. Fails when the value is
+   invalid, when the node already has an attribute, when the server has no
+   server Permissions attribute, or when the change is rejected: an entry
+   naming a user not listed above the node, or a node left without a user
+   holding ``p``.
+
+.. _rust_client_read_permissions:
+
+.. describe:: pub fn read_permissions(&mut self, path: &str) -> Result<String>
+
+   The Permissions attribute of the node, or of the server for ``/``
+   (``--permissions read``), in the JSON form: a list of objects with the
+   keys ``permissions`` (the letters of the roles, and ``s`` for a sticky
+   entry) and ``user``, sorted by user, such as
+   ``[{"permissions":"rwxp","user":"alice"},{"permissions":"r","user":"bob"}]``.
+
+   Requires the role ``r`` at the node; fails when the node has no
+   attribute.
+
+.. _rust_client_update_permissions:
+
+.. describe:: pub fn update_permissions(&mut self, path: &str, value: &str) -> Result<()>
+
+   Replace the Permissions attribute of the node, or of the server for
+   ``/`` (``--permissions update``); ``value`` is as for
+   :ref:`Client::create_permissions <rust_client_create_permissions>`. Entries of the nodes below naming users
+   no longer listed above them are removed.
+
+   Requires the role ``p`` at the node; fails when the node has no
+   attribute, or when the change is rejected.
+
+.. _rust_client_delete_permissions:
+
+.. describe:: pub fn delete_permissions(&mut self, path: &str) -> Result<()>
+
+   Remove the Permissions attribute of the node
+   (``--permissions delete``); the server attribute cannot be removed at
+   run time.
+
+   Requires the role ``p`` at the node; fails when the node has no
+   attribute, or when the change is rejected.
+
+.. _rust_client_effective_permissions:
+
+.. describe:: pub fn effective_permissions(&mut self, path: &str, user: Option<&str>) -> Result<String>
+
+   The letters of the roles ``user`` holds at the node, the requester's
+   with ``None`` (``--permissions effective``), such as ``rwx``; empty when the
+   user holds none.
+
+   Requires the role ``r`` at the node. Fails when the server does not use
+   Permissions attributes (it has no server attribute).
 
 Zombies
 ^^^^^^^

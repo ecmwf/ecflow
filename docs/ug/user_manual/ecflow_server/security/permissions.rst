@@ -536,6 +536,34 @@ strings) raises ``TypeError``.
 On a server without a server attribute, ``effective_permissions`` raises ``RuntimeError``, since the server does not
 use Permissions attributes, and ``create_permissions`` is rejected.
 
+.. _permissions_attribute_rust:
+
+Rust
+====
+
+The ``ecflow`` crate provides the operations of ``--permissions`` on ``Client``, and gives the attribute in the JSON
+form:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 55 45
+
+   * - Method
+     - Command
+   * - ``create_permissions(path, value)``
+     - ``--permissions create``
+   * - ``read_permissions(path)``, returning the JSON form
+     - ``--permissions read``
+   * - ``update_permissions(path, value)``
+     - ``--permissions update``
+   * - ``delete_permissions(path)``
+     - ``--permissions delete``
+   * - ``effective_permissions(path, user)``, returning the letters; ``None`` for the requester
+     - ``--permissions effective``
+
+The value is given in either textual form. A denied request fails with an error whose ``failure()`` is
+``Failure::PermissionDenied``.
+
 .. _permissions_attribute_restore:
 
 Restoring archived nodes

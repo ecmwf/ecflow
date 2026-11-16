@@ -5,7 +5,8 @@
 //!
 //! Provides:
 //! - [`Client`] - connection configuration, server probes and control, node
-//!   commands, child (task) commands and definitions as text
+//!   commands, Permissions attributes (in the JSON form), child (task)
+//!   commands and definitions as text
 //! - [`Error`] - with the [`Failure`] class ecFlow diagnosed
 //!
 //! ```no_run
