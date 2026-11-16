@@ -70,6 +70,7 @@ set(viewer_srcs
   JobItemWidget.hpp
   JobStatusItemWidget.hpp
   LabelEditor.hpp
+  PermissionsEditor.hpp
   LimitEditor.hpp
   LineEdit.hpp
   LogProvider.hpp
@@ -354,6 +355,7 @@ set(viewer_srcs
   JobItemWidget.cpp
   JobStatusItemWidget.cpp
   LabelEditor.cpp
+  PermissionsEditor.cpp
   LimitEditor.cpp
   LineEdit.cpp
   LogProvider.cpp
@@ -599,6 +601,7 @@ set(viewer_moc_files
   InputEventLog.hpp
   JobStatusItemWidget.hpp
   LabelEditor.hpp
+  PermissionsEditor.hpp
   LimitEditor.hpp
   LineEdit.hpp
   LogProvider.hpp
@@ -726,6 +729,7 @@ set(viewer_wrap_ui_files
   HtmlItemWidget.ui
   InfoPanel.ui
   LabelEditorWidget.ui
+  PermissionsEditorWidget.ui
   LimitEditorWidget.ui
   MainWindow.ui
   MessageItemWidget.ui

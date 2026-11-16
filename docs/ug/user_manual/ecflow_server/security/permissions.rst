@@ -564,6 +564,19 @@ form:
 The value is given in either textual form. A denied request fails with an error whose ``failure()`` is
 ``Failure::PermissionDenied``.
 
+ecFlowUI
+========
+
+ecFlowUI shows the attribute of a node as a row of its attributes, with its entries in the command-line form; the
+tooltip lists one entry per line. The attribute can be:
+
+- shown or hidden with the entry "Permissions" of the attribute filter;
+- found by a search on the attribute ``permissions``, by its value or by its users;
+- tested with the condition ``has_permissions`` in the menu configuration and in searches;
+- edited with "Edit ...", in a dedicated dialog holding one entry per line. Applying the dialog runs
+  ``ecflow_client --permissions update``; the server validates the change, and a rejected change is reported like any
+  other failed command.
+
 REST API
 ========
 
