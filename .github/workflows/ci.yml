@@ -94,10 +94,10 @@ jobs:
 
   rebuild-producers:
     needs: [ci-approval, resolve]
-    if: ${{ needs.resolve.outputs.dispatch-plans != '' && needs.resolve.outputs.dispatch-plans != '[]' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: ecmwf/ci-infrastructure/actions/dispatch-producers@main
+      - if: needs.resolve.outputs.dispatch-plans != '' && needs.resolve.outputs.dispatch-plans != '[]'
+        uses: ecmwf/ci-infrastructure/actions/dispatch-producers@main
         with:
           dispatch-plans: ${{ needs.resolve.outputs.dispatch-plans }}
           repositories: ecbuild,ecflow,stack-dependencies
@@ -117,7 +117,7 @@ jobs:
 
   wait-build-hpc:
     needs: [ci-approval, resolve, rebuild-producers, hpc-gate]
-    if: ${{ !cancelled() && needs['ci-approval'].result == 'success' && needs['resolve'].result == 'success' && needs['rebuild-producers'].result != 'failure' && needs['hpc-gate'].result == 'success' && needs['hpc-gate'].outputs.run == 'true' }}
+    if: needs.hpc-gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - id: mint
@@ -136,7 +136,6 @@ jobs:
 
   build:
     needs: [ci-approval, resolve, rebuild-producers, pre-commit]
-    if: ${{ !cancelled() && needs['ci-approval'].result == 'success' && needs['resolve'].result == 'success' && needs['rebuild-producers'].result != 'failure' && needs['pre-commit'].result == 'success' }}
     name: build+test (${{ matrix._resolved['job-name'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
@@ -185,7 +184,7 @@ jobs:
 
   build-hpc:
     needs: [ci-approval, resolve, rebuild-producers, pre-commit, hpc-gate, wait-build-hpc]
-    if: ${{ !cancelled() && needs['ci-approval'].result == 'success' && needs['resolve'].result == 'success' && needs['rebuild-producers'].result != 'failure' && needs['pre-commit'].result == 'success' && needs['hpc-gate'].result == 'success' && needs['wait-build-hpc'].result == 'success' && needs['hpc-gate'].outputs.run == 'true' }}
+    if: needs.hpc-gate.outputs.run == 'true'
     name: build-hpc (${{ matrix._resolved['job-name'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
@@ -238,7 +237,6 @@ jobs:
 
   rust:
     needs: [ci-approval, resolve, rebuild-producers, pre-commit]
-    if: ${{ !cancelled() && needs['ci-approval'].result == 'success' && needs['resolve'].result == 'success' && needs['rebuild-producers'].result != 'failure' && needs['pre-commit'].result == 'success' }}
     name: rust (${{ matrix._resolved['job-name'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
