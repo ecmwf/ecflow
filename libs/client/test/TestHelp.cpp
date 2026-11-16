@@ -286,6 +286,47 @@ BOOST_AUTO_TEST_CASE(test_defs_prefix_never_collides_with_a_same_named_command) 
     BOOST_CHECK(contains(render("defs/task"), "A leaf node in the node hierarchy."));
 }
 
+BOOST_AUTO_TEST_CASE(test_command_help_shows_the_roles_required) {
+    ECF_NAME_THIS_TEST();
+
+    // D6.3: the help of each command states the roles it requires, before the environment banner
+    std::string suspend = render("suspend");
+    const auto roles    = suspend.find("Roles required, when the server uses Permissions attributes:");
+    BOOST_REQUIRE(roles != std::string::npos);
+    BOOST_CHECK(contains(suspend, "    x at each node addressed"));
+    BOOST_CHECK(roles < suspend.find(client_env_banner));
+
+    std::string permissions = render("permissions");
+    BOOST_CHECK(contains(permissions, "    read, effective: r at each node addressed"));
+    BOOST_CHECK(contains(permissions, "    create, update, delete: p at each node addressed"));
+
+    BOOST_CHECK(contains(render("abort"), "    none (task requests are never subject to the authorisation of users)"));
+
+    // Options have no roles
+    BOOST_CHECK(!contains(render("host"), "Roles required"));
+}
+
+BOOST_AUTO_TEST_CASE(test_every_registered_command_documents_its_roles) {
+    ECF_NAME_THIS_TEST();
+
+    // Every command the client registers has its roles in the manifest
+    boost::program_options::options_description desc("Client options");
+    CtsCmdRegistry registry;
+    registry.addAllOptions(desc);
+    for (const auto& option : desc.options()) {
+        const std::string& name = option->long_name();
+        BOOST_TEST_CONTEXT("command " << name) {
+            // Options are not commands: those of the manifest (e.g. --remove of --complete), and the modifiers that
+            // their command documents (--fmt of --permissions, --evaluate of --query)
+            if (ecf::HelpCatalog::find_option(name) || name == "fmt" || name == "evaluate") {
+                continue;
+            }
+            BOOST_CHECK(ecf::HelpCatalog::find_command(name) != nullptr);
+            BOOST_CHECK(ecf::HelpCatalog::roles_for(name).has_value());
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

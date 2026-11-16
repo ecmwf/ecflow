@@ -45,6 +45,50 @@ std::optional<std::string> HelpCatalog::description_for(const std::string& name)
     return join_description(entry->at("description"));
 }
 
+std::optional<std::string> HelpCatalog::roles_for(const std::string& name) {
+    const nlohmann::json* command = find_command(name);
+    if (!command) {
+        return std::nullopt;
+    }
+
+    std::string text = "Roles required, when the server uses Permissions attributes:\n\n";
+    for (const auto& entry : command->at("permissions")) {
+        text += "    ";
+        if (entry.contains("variant")) {
+            text += entry.at("variant").get<std::string>() + ": ";
+        }
+        const auto roles = entry.at("roles").get<std::string>();
+        if (roles == "none") {
+            text += "none";
+        }
+        else {
+            for (std::size_t i = 0; i < roles.size(); ++i) {
+                if (i > 0) {
+                    text += " and ";
+                }
+                text += roles[i];
+            }
+        }
+        if (const auto at = entry.at("at").get<std::string>(); at == "server") {
+            text += " at the server";
+        }
+        else if (at == "node") {
+            text += " at each node addressed";
+        }
+        if (entry.contains("note")) {
+            text += " (" + entry.at("note").get<std::string>() + ")";
+        }
+        text += "\n";
+    }
+    if (command->at("kind") == "user") {
+        text += "\nIn whitelist mode, r requires read access, and the other roles write access.";
+    }
+    else {
+        text.pop_back();
+    }
+    return text;
+}
+
 std::optional<std::string> HelpCatalog::summary_for_definition_item(const std::string& name) {
     if (const nlohmann::json* entry = find_definition_item(name)) {
         return entry->at("summary").get<std::string>();

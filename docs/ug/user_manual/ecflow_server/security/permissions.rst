@@ -233,7 +233,9 @@ attributes, whatever the attributes grant.
 Roles of commands
 =================
 
-The commands below require a role at the server level, or at the node they address:
+The commands below require a role at the server level, or at the node they address. The help of each command
+(``ecflow_client --help=<command>``, and its page in the :ref:`command reference <ecflow_cli>`) states the same
+roles:
 
 .. list-table::
    :header-rows: 1

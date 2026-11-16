@@ -88,6 +88,24 @@ ecflow_add_test(
   FORMAT
 )
 
+# The scripts generating the command reference (docs/client_api): the roles of each command, the validation of the
+# manifest, and the parity of the generated help with ecflow_client --help
+ecflow_add_test(
+  TARGET
+    py3_u_client_api_docs
+  LABELS
+    unit python nightly fast
+  TYPE PYTHON
+  ARGS
+    -m pytest ${ecflow_SOURCE_DIR}/docs/client_api/test_client_api.py -v -p no:cacheprovider
+  ENVIRONMENT
+    ECFLOW_CLIENT=$<TARGET_FILE:ecflow_client>
+  TEST_DEPENDS
+    u_base
+  CONDITION
+    ENABLE_TESTS
+)
+
 # ================================================================================
 # TEST (Integration) - requires server to be running
 

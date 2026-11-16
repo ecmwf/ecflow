@@ -61,10 +61,26 @@
         }
       }
     },
+    "role_requirement": {
+      "description": "Roles one variant of a command requires (D6.3). roles: the letters of the roles all required (r read, w write, x execute, l log, o owner, p permissions), or none. at: where they are checked: at the server level, at each node the command addresses, or nowhere (none, together with roles none). In whitelist mode, r stands for read access and every other role for write access.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roles", "at"],
+      "properties": {
+        "variant": {
+          "description": "The variant of the command the entry applies to, e.g. its sub-command or the shape of its arguments; absent when the entry covers the whole command.",
+          "type": "string",
+          "minLength": 1
+        },
+        "roles": { "type": "string", "pattern": "^(none|[rwxlop]+)$" },
+        "at": { "enum": ["server", "node", "none"] },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
     "command": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "kind", "visibility", "implementation", "summary", "description"],
+      "required": ["name", "kind", "visibility", "implementation", "summary", "description", "permissions"],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "kind": {
@@ -81,6 +97,12 @@
         "arguments": {
           "type": "array",
           "items": { "$ref": "#/$defs/argument" }
+        },
+        "permissions": {
+          "description": "The roles the command requires when the server uses Permissions attributes (D6.3), one entry per variant of the command; a single entry without variant covers the whole command.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/role_requirement" }
         }
       }
     },

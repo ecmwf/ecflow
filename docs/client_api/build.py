@@ -231,6 +231,29 @@ def render_task_env_description(env_vars):
     return txt
 
 
+def render_roles(command):
+    # Reproduces HelpCatalog::roles_for() byte-for-byte (D6.3)
+    txt = "Roles required, when the server uses Permissions attributes:\n\n"
+    for entry in command["permissions"]:
+        line = "    "
+        if "variant" in entry:
+            line += entry["variant"] + ": "
+        roles = entry["roles"]
+        line += "none" if roles == "none" else " and ".join(roles)
+        if entry["at"] == "server":
+            line += " at the server"
+        elif entry["at"] == "node":
+            line += " at each node addressed"
+        if "note" in entry:
+            line += f" ({entry['note']})"
+        txt += line + "\n"
+    if command["kind"] == "user":
+        txt += "\nIn whitelist mode, r requires read access, and the other roles write access."
+    else:
+        txt = txt[:-1]
+    return txt
+
+
 def render_help_output(manifest, name):
     # Reproduces Documentation::show_command_help()'s output byte-for-byte, without invoking the
     # built ecflow_client binary: the name banner, the manifest description, and (for anything other
@@ -245,6 +268,8 @@ def render_help_output(manifest, name):
     description = join_description(entry["description"])
     txt = f"\n{name}\n{'-' * len(name)}\n\n{description}\n\n"
     if not is_option:
+        if name in commands_by_name:
+            txt += render_roles(commands_by_name[name]) + "\n\n"
         txt += render_client_env_description(manifest["environment_variables"])
         if is_task_command:
             txt += "\n" + render_task_env_description(manifest["environment_variables"])
