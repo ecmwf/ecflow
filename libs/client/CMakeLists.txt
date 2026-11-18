@@ -106,6 +106,22 @@ ecflow_add_test(
     ENABLE_TESTS
 )
 
+# Every user command class registered by the client is documented in command_internals.rst, mapped by build.py, and
+# round-tripped by TestRequest.cpp
+ecflow_add_test(
+  TARGET
+    py3_u_client_api_coverage
+  LABELS
+    unit python nightly fast
+  TYPE PYTHON
+  ARGS
+    -m pytest ${ecflow_SOURCE_DIR}/docs/client_api/test_command_coverage.py -v -p no:cacheprovider
+  ENVIRONMENT
+    ECFLOW_SOURCE_DIR=${ecflow_SOURCE_DIR}
+  CONDITION
+    ENABLE_TESTS
+)
+
 # ================================================================================
 # TEST (Integration) - requires server to be running
 

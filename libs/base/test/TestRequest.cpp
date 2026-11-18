@@ -22,6 +22,7 @@
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/cts/user/CtsNodeCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/EditScriptCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/FreeDepCmd.hpp"
@@ -325,6 +326,9 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     BOOST_CHECK_MESSAGE(theGroupCmd->terminate_cmd(), "Expected terminate_cmd() to return true");
     BOOST_CHECK_MESSAGE(theGroupCmd->group_cmd(), "Expected group_cmd() to return true");
     cmd_vec.push_back(theGroupCmd);
+
+    // Last, since it deletes the suite the commands above address
+    cmd_vec.push_back(Cmd_ptr(new DeleteCmd("/EmptySuite", true)));
 
     // Server --> Client commands
     stc_cmd_vec.push_back(STC_Cmd_ptr(new ErrorCmd("The error")));
