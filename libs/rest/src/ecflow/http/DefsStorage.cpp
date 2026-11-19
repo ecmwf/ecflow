@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
-#include <condition_variable>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <thread>
+#include "ecflow/http/DefsStorage.hpp"
 
-#include "ecflow/client/ClientInvoker.hpp"
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <string>
+
+#include "ecflow/client/ShadowDefs.hpp"
 #include "ecflow/http/Options.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -15,17 +16,9 @@ namespace ecf::http {
 
 extern std::atomic<unsigned int> last_request_time;
 
-static std::shared_ptr<Defs> defs_ = nullptr;
-
-static std::mutex def_mutex;
-static std::mutex cv_mutex;
-static std::condition_variable defs_cv;
-static std::atomic update_defs(true);
-
-static std::unique_ptr<std::thread> loop_thread;
-static std::atomic stop_loop(false);
-
 namespace /* __anonymous__ */ {
+
+std::unique_ptr<ShadowDefs> shadow;
 
 void print_polling_interval_notification(long long sleeptime,
                                          long long base_sleeptime,
@@ -38,156 +31,93 @@ void print_polling_interval_notification(long long sleeptime,
            max_sleeptime);
 }
 
-} // namespace
-
-std::shared_ptr<Defs> get_defs() {
-    std::scoped_lock lock(def_mutex);
-    return defs_;
+std::chrono::seconds idle_drift(double last_request_age) {
+    return std::chrono::seconds(static_cast<int>(std::floor(last_request_age / 60.)));
 }
 
-namespace /* __anonymous__ */ {
+unsigned int current_time() {
+    struct timeval curtime;
+    gettimeofday(&curtime, nullptr);
+    return static_cast<unsigned int>(curtime.tv_sec);
+}
 
-void defs_update(int interval) {
-    ClientInvoker client;
+} // namespace
 
-    auto get_current_time = [] {
-        struct timeval curtime;
-        gettimeofday(&curtime, nullptr);
-        return static_cast<unsigned int>(curtime.tv_sec);
-    };
-
-    auto update = [&] {
-        {
-            std::scoped_lock lock(def_mutex);
-            if (defs_ != nullptr) {
-                client.sync(defs_);
-            }
-            defs_ = client.defs();
-        }
-        if (opts.verbose) {
-            printf(
-                "Defs modify_change_no: %d state_change_no: %d\n", defs_->modify_change_no(), defs_->state_change_no());
-        }
-    };
-
-    // These will throw is ecflow server is not present; we will not
-    // try to reconnect if there was not a connection to begin with
-    client.news_local();
-    client.sync_local();
-
+std::chrono::seconds polling_interval(int base, int max_option, double last_request_age) {
     // Implement a drift to update cycle. The basic idea is that if we
     // do not get requests to the interface, we slowly start to increase
     // the interval which we use to poll ecFlow server. This is done to
     // reduce ecFlow server load when there is no activity on the REST
     // API.
     // For every minute that goes by without any activity on the REST API,
-    // we increase the drift by one second. The maximum drift value is
-    // 10 * polling interval, but minimum 30 seconds. Activity on the API
-    // will reset drift to zero.
-
-    const std::chrono::seconds base_sleeptime(interval);
-    std::chrono::seconds sleeptime(interval);
-    const std::chrono::seconds max_sleeptime(std::max(30, opts.max_polling_interval));
-    std::chrono::seconds previous_sleeptime(interval);
-
-    for (;;) {
-        try {
-            while (true) {
-                std::unique_lock lock(cv_mutex);
-                if (defs_cv.wait_for(lock, sleeptime, [] { return update_defs.load(); })) {
-                    if (stop_loop.load() == true) {
-                        // we received the 'signal' to stop, so we terminate the loop
-                        return;
-                    }
-
-                    // update requested by some other thread
-                    if (opts.verbose) {
-                        printf("defs update requested\n");
-                    }
-                    update();
-                    update_defs = false;
-                }
-                else {
-                    if (stop_loop.load() == true) {
-                        // we received the 'signal' to stop, so we terminate the loop
-                        return;
-                    }
-
-                    // update triggered by timeout
-                    client.news(defs_);
-                    if (client.get_news()) {
-                        update();
-                        update_defs = false;
-                    }
-                }
-
-                if (opts.max_polling_interval <= opts.polling_interval) {
-                    // drift disabled
-                    continue;
-                }
-                const auto last_request_age = static_cast<double>(get_current_time() - last_request_time.load());
-                const auto drift            = std::chrono::seconds(static_cast<int>(floor(last_request_age / 60.)));
-
-                sleeptime = min(max_sleeptime, base_sleeptime + drift);
-                if (opts.verbose && sleeptime != previous_sleeptime) {
-                    print_polling_interval_notification(
-                        sleeptime.count(), base_sleeptime.count(), drift.count(), max_sleeptime.count());
-                }
-
-                previous_sleeptime = sleeptime;
-            }
-        }
-        catch (const std::exception& e) {
-            printf("ERROR: Communication problem with ecflow server? Retrying in 5s\n");
-            std::this_thread::sleep_for(std::chrono::seconds(5));
-        }
+    // we increase the drift by one second, up to the maximum interval, which
+    // is never below 30 seconds. Activity on the API resets the drift to zero.
+    const std::chrono::seconds base_sleeptime(base);
+    if (max_option <= base) {
+        // drift disabled
+        return base_sleeptime;
     }
+    const std::chrono::seconds max_sleeptime(std::max(30, max_option));
+    return std::min(max_sleeptime, base_sleeptime + idle_drift(last_request_age));
 }
 
-} // namespace
+std::shared_ptr<Defs> get_defs() {
+    return shadow ? shadow->get() : nullptr;
+}
 
 void start_update_defs_loop(int interval) {
-    loop_thread = std::make_unique<std::thread>(defs_update, interval);
+    auto previous = std::make_shared<std::chrono::seconds>(interval);
 
-    while (update_defs.load() == true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    auto next_interval = [interval, previous]() -> std::chrono::milliseconds {
+        const auto last_request_age = static_cast<double>(current_time() - last_request_time.load());
+        const auto sleeptime        = polling_interval(interval, opts.max_polling_interval, last_request_age);
+        if (opts.verbose && sleeptime != *previous) {
+            print_polling_interval_notification(sleeptime.count(),
+                                                interval,
+                                                idle_drift(last_request_age).count(),
+                                                std::max(30, opts.max_polling_interval));
+        }
+        *previous = sleeptime;
+        return sleeptime;
+    };
+
+    auto report = [](const std::string& /* reason */) {
+        printf("ERROR: Communication problem with ecflow server? Retrying in 5s\n");
+    };
+
+    auto updated = [](const Defs& defs) {
+        if (opts.verbose) {
+            printf("Defs modify_change_no: %d state_change_no: %d\n", defs.modify_change_no(), defs.state_change_no());
+        }
+    };
+
+    shadow = std::make_unique<ShadowDefs>(
+        std::make_unique<ClientInvokerShadowDefsSource>(), next_interval, report, std::chrono::seconds(5), updated);
+    if (opts.verbose) {
+        printf("defs update requested\n");
     }
+
+    // This throws if the ecflow server is not present; there is no attempt to reconnect if there was not a
+    // connection to begin with
+    shadow->start();
+    updated(*shadow->get());
 }
 
 void stop_update_defs_loop() {
-    {
-        std::unique_lock lock(cv_mutex);
-        // set the 'signal' to stop the loop
-        stop_loop = true;
-        // and trigger the update loop immediately
-        update_defs = true;
-        defs_cv.notify_one();
+    if (shadow) {
+        shadow->stop();
     }
-
-    loop_thread->join();
-}
-
-template <typename F>
-void trigger_defs_update_predicate(F f) {
-    {
-        std::unique_lock lock(cv_mutex);
-        update_defs = true;
-        defs_cv.notify_one();
-    }
-
-    while (update_defs.load() == true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
-
-    f();
 }
 
 void trigger_defs_update() {
-    trigger_defs_update_predicate([] { /* No OP */ });
+    trigger_defs_update([] { /* No OP */ });
 }
 
 void trigger_defs_update(std::function<void()> function) {
-    trigger_defs_update_predicate(function);
+    if (opts.verbose) {
+        printf("defs update requested\n");
+    }
+    shadow->refresh(function);
 }
 
 } // namespace ecf::http

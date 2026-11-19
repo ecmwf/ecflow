@@ -291,10 +291,12 @@ set(srcs
   client/src/ecflow/client/Help.hpp
   client/src/ecflow/client/HostsFile.hpp
   client/src/ecflow/client/Rtt.hpp
+  client/src/ecflow/client/ShadowDefs.hpp
   client/src/ecflow/client/UrlCmd.hpp
   # Client -- Sources
   client/src/ecflow/client/ClientCmdCache.cpp
   client/src/ecflow/client/Rtt.cpp
+  client/src/ecflow/client/ShadowDefs.cpp
   client/src/ecflow/client/ClientEnvironment.cpp
   client/src/ecflow/client/ClientInvoker.cpp
   client/src/ecflow/client/Help.cpp

@@ -59,6 +59,7 @@ set(test_srcs
   test/TestLifeCycle.cpp
   test/TestJobGenOnly.cpp
   test/TestRtt.cpp
+  test/TestShadowDefs.cpp
   test/TestUrlCmd.cpp
 )
 

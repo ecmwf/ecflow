@@ -98,6 +98,28 @@ SET_TARGET_PROPERTIES(ecflow_http
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
+if (ENABLE_HTTP)
+
+  ecflow_add_test(
+    TARGET
+      u_http
+    LABELS
+      unit nightly fast
+    SOURCES
+      test/TestDefsStorage.cpp
+      test/TestHttpUnit_main.cpp # test entry point
+    LIBS
+      libhttp
+      ecflow_all
+      test_scaffold
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
+  )
+
+endif ()
+
 if (ENABLE_HTTP AND ENABLE_SERVER)
 
   if (OPENSSL_FOUND AND NOT DISABLED_SSL_IN_HTTP_SERVER)
