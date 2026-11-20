@@ -64,11 +64,20 @@ if (ENABLE_AVISO)
   # docs/ug/user_manual/text_based_suite_definition/external/aviso.rst and releng/dockit/INSTRUCTIONS.md
   set(ECFLOW_AVISO_FFI_MINIMUM_VERSION "2.4.2")
 
+  if ( ENABLE_STATIC_AVISO_LIBS )
+    set(AVISO_FFI_USE_STATIC_LIBS ON)
+    ecbuild_info( "Using STATIC Aviso client library" )
+  else()
+    set(AVISO_FFI_USE_STATIC_LIBS OFF)
+    ecbuild_info( "Using SHARED Aviso client library" )
+  endif()
+
   find_package(AvisoFfi ${ECFLOW_AVISO_FFI_MINIMUM_VERSION} REQUIRED)
 
   ecbuild_info( "Aviso client library details:" )
   ecbuild_info( " * AVISO_FFI_FOUND        : ${AVISO_FFI_FOUND}" )
   ecbuild_info( " * AVISO_FFI_VERSION      : ${AVISO_FFI_VERSION}" )
+  ecbuild_info( " * AVISO_FFI_IS_STATIC    : ${AVISO_FFI_IS_STATIC}" )
   ecbuild_info( " * AVISO_FFI_INCLUDE_DIRS : ${AVISO_FFI_INCLUDE_DIRS}" )
   ecbuild_info( " * AVISO_FFI_LIBRARIES    : ${AVISO_FFI_LIBRARIES}" )
 

@@ -42,10 +42,11 @@ SET_TARGET_PROPERTIES(ecflow_server
     INSTALL_RPATH ""
 )
 
-# The (shared) Aviso client library is not installed with ecFlow, and as an imported target its
+# The shared Aviso client library is not installed with ecFlow, and as an imported target its
 # directory is not added to the install run path automatically; the installed server must
-# therefore find it at run time where it was found at build time
-if (ENABLE_AVISO)
+# therefore find it at run time where it was found at build time. The static library is
+# linked into the server, and requires no run path.
+if (ENABLE_AVISO AND NOT AVISO_FFI_IS_STATIC)
   SET_TARGET_PROPERTIES(ecflow_server
     PROPERTIES
       INSTALL_RPATH "${AVISO_FFI_LIBRARY_DIR}"
