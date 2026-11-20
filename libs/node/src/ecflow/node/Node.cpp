@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
-#include <string_view>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -13,7 +12,6 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
@@ -34,6 +32,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/VariableLookup.hpp"
 #include "ecflow/node/formatter/Format.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
@@ -1281,22 +1280,6 @@ void Node::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const Limit
     }
 }
 
-static bool
-search_user_edit_variables(const std::string& name, std::string& value, const NameValueMap& user_edit_variables) {
-    auto i = user_edit_variables.find(name);
-    if (i != user_edit_variables.end()) {
-        if (((*i).second).empty()) {
-            // when we call --edit_script submit file, before a job is submitted the values
-            // of generated variables like  ECF_RID, ECF_TRYNO, ECF_NAME, ECF_PASS, ECF_JOB, ECF_JOBOUT, ECF_SCRIPT
-            // will be empty. In this case return false, so that we pick up the values from the node.
-            return false;
-        }
-        value = (*i).second;
-        return true;
-    }
-    return false;
-}
-
 // #define DEBUG_S 1
 bool Node::variableSubstitution(std::string& cmd, SubstitutionRecord* record) const {
     char micro = '%';
@@ -1310,219 +1293,32 @@ bool Node::variableSubstitution(std::string& cmd, SubstitutionRecord* record) co
     return variable_substitution(cmd, user_edit_variables, micro, record);
 }
 
+namespace {
+
+/// Gives the variables visible from a node to ecf::variable_substitution
+class NodeVariableLookup : public ecf::VariableLookup {
+public:
+    explicit NodeVariableLookup(const Node& node)
+        : node_(node) {}
+    bool find(const std::string& name, std::string& value) const override {
+        return node_.findParentVariableValue(name, value);
+    }
+    bool find_generated(const std::string& name, std::string& value) const override {
+        return node_.find_parent_gen_variable_value(name, value);
+    }
+    bool allows_colon_names() const override { return node_.isAlias() != nullptr; }
+
+private:
+    const Node& node_;
+};
+
+} // namespace
+
 bool Node::variable_substitution(std::string& cmd,
                                  const NameValueMap& user_edit_variables,
                                  char micro,
                                  SubstitutionRecord* record) const {
-    if (record) {
-        // The masked command is rendered separately, so that the command itself is substituted as without a record
-        record->variables.clear();
-        record->masked_command = cmd;
-        substitute_variables(record->masked_command, user_edit_variables, micro, nullptr, true);
-    }
-    return substitute_variables(cmd, user_edit_variables, micro, record, false);
-}
-
-bool Node::substitute_variables(std::string& cmd,
-                                const NameValueMap& user_edit_variables,
-                                char micro,
-                                SubstitutionRecord* record,
-                                bool mask) const {
-    // scan the command for variables, and substitute
-    // edit cmd "/home/ma/map/sms/smsfectch -F %ECF_FILES% -I %ECF_INCLUDE%"
-    // We can also have
-    //
-    // "%<VAR>:<substitute>% i.e. if VAR exist use it, else use substitute
-    //
-    // ************************************************************************************************************
-    // Special case handling for user variables, and generated variables, which take precedence over node variables
-    // ************************************************************************************************************
-    //
-    // i.e. VAR is defined as BILL
-    //  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
-    //
-    // Infinite recursion. It is possible to end up with infinite recursion:
-    //   	edit hello '%hello%'  # string like %hello% will cause infinite recursion
-    //   	edit fred '%bill%'
-    //	 	edit bill '%fred%'   # should be 10
-    // To prevent this we will use a simple count
-#ifdef DEBUG_S
-    cout << "cmd  = " << cmd << "\n";
-#endif
-    bool double_micro_found    = false;
-    std::string::size_type pos = 0;
-    int count                  = 0;
-    Alias* is_a_alias          = isAlias();
-    while (true) {
-        // A while loop here is used to:
-        //   a/ Allow for multiple substitution on a single line. i.e. `%ECF_FILES% -I %ECF_INCLUDE%`
-        //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
-
-        size_t firstPercentPos = cmd.find(micro, pos);
-        if (firstPercentPos == std::string::npos) {
-            break;
-        }
-
-        size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == std::string::npos) {
-            break;
-        }
-
-        pos = 0;
-        if (secondPercentPos - firstPercentPos <= 1) {
-            // handle %% with no characters in between, skip over
-            // i.e. to handle "printf %%02d %HOUR:00%" --> "printf %02d 00" i.e. if HOUR not defined
-            pos                = secondPercentPos + 1;
-            double_micro_found = true;
-            continue;
-        }
-
-        std::string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
-
-        // Replace the reference by the value used, recording the variable once, and masking it when requested
-        auto replace_reference = [&](const std::string& name, const std::string& value) {
-            constexpr std::string_view masked_value = "***";
-            const bool credential                   = (record || mask) && ecf::is_credential_name(name);
-            if (record) {
-                auto& variables = record->variables;
-                if (std::none_of(variables.begin(), variables.end(), [&](const auto& v) { return v.first == name; })) {
-                    variables.emplace_back(name, credential ? std::string(masked_value) : value);
-                }
-            }
-            cmd.replace(
-                firstPercentPos, secondPercentPos - firstPercentPos + 1, mask && credential ? masked_value : value);
-        };
-        // cout << percentVar << "\n";
-#ifdef DEBUG_S
-        cout << "   Found percentVar " << percentVar << "\n";
-#endif
-
-        // ****************************************************************************************
-        // Look for generated variables that should NOT be overridden first:
-        //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
-        //    However for job file generation we should use the generated variables first.
-        //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
-        //    FREE_JOBS_PASSWORD is left for the server to deal with
-        // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitimately override these. ECFLOW-999
-        bool generated_variable = false;
-        if (percentVar.find("ECF_") == 0) {
-            if (percentVar.find(ecf::environment::ECF_HOST) != std::string::npos) {
-                generated_variable = true;
-            }
-            else if (percentVar.find(ecf::environment::ECF_PORT) != std::string::npos) {
-                generated_variable = true;
-            }
-            else if (percentVar.find(ecf::environment::ECF_TRYNO) != std::string::npos) {
-                generated_variable = true;
-            }
-            else if (percentVar.find(ecf::environment::ECF_NAME) != std::string::npos) {
-                generated_variable = true;
-            }
-            else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos) {
-                generated_variable = true;
-            }
-        }
-
-        size_t firstColon = percentVar.find(':');
-
-        // First search user variable (*ONLY* set user edit's the script)
-        // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
-        // Handle case: cmd = "%fred%      and where we have user variable "fred"
-        // If we fail to find the variable we return false.
-        // Note: When a variable is found, it can have an empty value  which is still valid
-        std::string varValue;
-        if (!user_edit_variables.empty() && search_user_edit_variables(percentVar, varValue, user_edit_variables)) {
-            replace_reference(percentVar, varValue);
-        }
-        else if (generated_variable && firstColon == std::string::npos &&
-                 find_parent_gen_variable_value(percentVar, varValue)) {
-            replace_reference(percentVar, varValue);
-        }
-        else {
-            if (firstColon != std::string::npos) {
-
-                if (is_a_alias && findParentVariableValue(percentVar, varValue)) {
-                    // For alias, we could have added variables with %A:0%, %A:1%.
-                    // Aliases allow variables with ':' in the name.
-                    replace_reference(percentVar, varValue);
-                }
-                else {
-                    // ':' is not a valid in variables, hence split, and search, if search fails use replacement
-                    std::string var(percentVar.begin(), percentVar.begin() + firstColon);
-#ifdef DEBUG_S
-                    cout << "   var " << var << "\n";
-#endif
-                    if (!user_edit_variables.empty() &&
-                        search_user_edit_variables(var, varValue, user_edit_variables)) {
-#ifdef DEBUG_S
-                        cout << "   user var value = " << varValue << "\n";
-#endif
-                        replace_reference(var, varValue);
-                    }
-                    else if (generated_variable && find_parent_gen_variable_value(var, varValue)) {
-#ifdef DEBUG_S
-                        cout << "   generated var value = " << varValue << "\n";
-#endif
-                        replace_reference(var, varValue);
-                    }
-                    else if (findParentVariableValue(var, varValue)) {
-                        // Note: variable can exist, but have an empty value
-#ifdef DEBUG_S
-                        cout << "   var value = " << varValue << "\n";
-#endif
-                        // replace the "%VAR:fred --f%" with var
-                        replace_reference(var, varValue);
-                    }
-                    else {
-                        std::string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
-#ifdef DEBUG_S
-                        cout << "  substitute value = " << substitute << "\n";
-#endif
-                        replace_reference(var, substitute);
-                    }
-#ifdef DEBUG_S
-                    cout << "   cmd = " << cmd << "\n";
-#endif
-                }
-            }
-            else if (findParentVariableValue(percentVar, varValue)) {
-                // No ':' search user variables, repeat, and then generated variables.
-                replace_reference(percentVar, varValue);
-            }
-            else {
-                // Cannot find in user variables, or node variable, hence cannot go any further
-                return false;
-            }
-        }
-
-        // Simple Check for infinite recursion
-        if (count > 1000) {
-            return false;
-        }
-        count++;
-    }
-
-    if (double_micro_found) {
-        // replace all double micro with a single micro, this must be a single parse
-        // date +%%Y%%m%%d" ==> date +%Y%m%d
-        // %%%%             ==> %%            // i.e. single parse
-        std::string doubleEcfMicro;
-        doubleEcfMicro += micro;
-        doubleEcfMicro += micro;
-        size_t last_pos = 0;
-        while (true) {
-            auto ecf_double_micro_pos = cmd.find(doubleEcfMicro, last_pos);
-            if (ecf_double_micro_pos != std::string::npos) {
-                cmd.erase(cmd.begin() + ecf_double_micro_pos);
-                last_pos = ecf_double_micro_pos + 1;
-            }
-            else {
-                break;
-            }
-        }
-    }
-
-    return true;
+    return ecf::variable_substitution(cmd, NodeVariableLookup(*this), user_edit_variables, micro, record);
 }
 
 bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variables, char micro) const {

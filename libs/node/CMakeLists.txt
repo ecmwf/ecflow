@@ -55,6 +55,7 @@ set(test_srcs
   test/TestTimeDependencies.cpp
   test/TestVariableGeneration.cpp
   test/TestVariableInheritance.cpp
+  test/TestVariableLookup.cpp
   test/TestVariableSubstitution.cpp
   test/TestVariableSubstitutionDefs.cpp
   test/TestZombies.cpp

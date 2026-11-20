@@ -464,12 +464,14 @@ set(srcs
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
+  node/src/ecflow/node/SubstitutionRecord.hpp
   node/src/ecflow/node/Submittable.hpp
   node/src/ecflow/node/Suite.hpp
   node/src/ecflow/node/SuiteChanged.hpp
   node/src/ecflow/node/System.hpp
   node/src/ecflow/node/Task.hpp
   node/src/ecflow/node/TaskScriptGenerator.hpp
+  node/src/ecflow/node/VariableLookup.hpp
   node/src/ecflow/node/move_peer.hpp
   node/src/ecflow/node/formatter/AvisoFormatter.hpp
   node/src/ecflow/node/formatter/DefsWriter.hpp
@@ -556,6 +558,7 @@ set(srcs
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp
   node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/VariableLookup.cpp
   node/src/ecflow/node/formatter/DefsWriter.cpp
   node/src/ecflow/node/parser/AutoArchiveParser.cpp
   node/src/ecflow/node/parser/AutoCancelParser.cpp

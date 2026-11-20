@@ -43,6 +43,7 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/SubstitutionRecord.hpp"
 
 namespace ecf {
 class Simulator;
@@ -250,22 +251,9 @@ public:
     virtual void setRepeatToLastValueHierarchically() { setRepeatToLastValue(); }
 
     ///
-    /// @brief Records a variable substitution, for the log: the variables used, and the command with its credentials
-    /// masked.
+    /// @brief Records a variable substitution, for the log; see ecf::SubstitutionRecord.
     ///
-    /// Every value of a variable whose name is a credential name (see ecf::is_credential_name()) is replaced by
-    /// `***`, both in the variables and in the masked command.
-    ///
-    struct SubstitutionRecord
-    {
-        /// The name and the value used of each variable substituted, in the order of first use, once each; for
-        /// `%NAME:default%`, the value of NAME when defined, and the default otherwise
-        std::vector<std::pair<std::string, std::string>> variables;
-        /// The command as substituted, with `***` in place of the value of each variable with a credential name,
-        /// whether referenced directly or through the value of another variable; when the substitution fails, the
-        /// command as partially substituted, likewise masked
-        std::string masked_command;
-    };
+    using SubstitutionRecord = ecf::SubstitutionRecord;
 
     ///
     /// @brief Replaces every variable reference of a command, e.g. `%VAR%`, by the value of the variable.
@@ -1027,13 +1015,6 @@ private:
     friend class VariableHelper;
     friend class AstParentVariable;
     bool update_variable(const std::string& name, const std::string& value);
-
-    // The substitution of variable_substitution(); with mask, the value of a credential variable is replaced by ***
-    bool substitute_variables(std::string& cmd,
-                              const NameValueMap& user_edit_variables,
-                              char micro,
-                              SubstitutionRecord* record,
-                              bool mask) const;
 
 private:
     void add_trigger_expression(const Expression&);  // Can throw std::runtime_error
