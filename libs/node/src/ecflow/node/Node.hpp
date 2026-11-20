@@ -292,9 +292,14 @@ public:
     /// Find all %VAR% and add to the list, there can be more than one. i.e %ECF_FILES% -I %ECF_INCLUDE%"
     bool find_all_used_variables(std::string& cmd, NameValueMap& used_variables, char micro = '%') const;
 
-    /// Find all environment variables, in the input string and substitute.
-    /// with correspondingly named variable value.
-    /// i.e search for ${ENV} and replace
+    ///
+    /// @brief Replaces every reference of the form `$NAME` by the value of the variable NAME, seen from this node.
+    ///
+    /// See ecf::variable_dollar_substitution, to which it delegates.
+    ///
+    /// @param[in,out] cmd The command; on return, the command as substituted, or as partially substituted on failure
+    /// @return false when a variable cannot be found; true otherwise.
+    ///
     bool variable_dollar_substitution(std::string& cmd) const;
 
     /// Resolve inlimit references to limits, and check trigger and complete expression

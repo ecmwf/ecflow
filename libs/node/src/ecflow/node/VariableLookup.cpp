@@ -8,6 +8,7 @@
 
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/MaskCredentials.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 
@@ -326,6 +327,53 @@ bool variable_substitution(std::string& cmd,
         detail::substitute_variables(record->masked_command, lookup, user_edit_variables, micro, nullptr, true);
     }
     return detail::substitute_variables(cmd, lookup, user_edit_variables, micro, record, false);
+}
+
+bool variable_substitution_with_user_micro(std::string& cmd, const VariableLookup& lookup, SubstitutionRecord* record) {
+    char micro = '%';
+    std::string micro_char;
+    lookup.find_user(ecf::environment::ECF_MICRO, micro_char);
+    if (!micro_char.empty() && micro_char.size() == 1) {
+        micro = micro_char.front();
+    }
+
+    NameValueMap user_edit_variables;
+    return variable_substitution(cmd, lookup, user_edit_variables, micro, record);
+}
+
+bool variable_dollar_substitution(std::string& cmd, const VariableLookup& lookup) {
+    // scan command for environment variables, and substitute
+    // edit ECF_INCLUDE $ECF_HOME/include
+
+    while (true) {
+        size_t firstPos = cmd.find('$');
+        if (firstPos == std::string::npos) {
+            break;
+        }
+
+        size_t secondPos = cmd.find_first_not_of(ecf::string_constants::alphanumeric_underscore_chars, firstPos + 1);
+        if (secondPos == std::string::npos) {
+            secondPos = cmd.size();
+        }
+        if (secondPos - firstPos <= 1) {
+            break; // handle $/ with no characters in between
+        }
+
+        std::string env(cmd.begin() + firstPos + 1, cmd.begin() + secondPos);
+
+        std::string envValue;
+        if (!lookup.find(env, envValue)) {
+            return false;
+        }
+
+        cmd.replace(firstPos, secondPos - firstPos, envValue);
+
+        if (envValue.find(env) != std::string::npos) {
+            // infinite loop
+            break;
+        }
+    }
+    return true;
 }
 
 } // namespace ecf

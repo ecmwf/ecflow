@@ -1282,15 +1282,7 @@ void Node::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const Limit
 
 // #define DEBUG_S 1
 bool Node::variableSubstitution(std::string& cmd, SubstitutionRecord* record) const {
-    char micro = '%';
-    std::string micro_char;
-    findParentUserVariableValue(ecf::environment::ECF_MICRO, micro_char);
-    if (!micro_char.empty() && micro_char.size() == 1) {
-        micro = micro_char[0];
-    }
-
-    NameValueMap user_edit_variables;
-    return variable_substitution(cmd, user_edit_variables, micro, record);
+    return ecf::variable_substitution_with_user_micro(cmd, ecf::NodeVariableLookup(*this), record);
 }
 
 bool Node::variable_substitution(std::string& cmd,
@@ -1386,40 +1378,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
 }
 
 bool Node::variable_dollar_substitution(std::string& cmd) const {
-    // scan command for environment variables, and substitute
-    // edit ECF_INCLUDE $ECF_HOME/include
-
-    while (true) {
-        size_t firstPos = cmd.find('$');
-        if (firstPos == std::string::npos) {
-            break;
-        }
-
-        size_t secondPos = cmd.find_first_not_of(ecf::string_constants::alphanumeric_underscore_chars, firstPos + 1);
-        if (secondPos == std::string::npos) {
-            secondPos = cmd.size();
-        }
-        if (secondPos - firstPos <= 1) {
-            break; // handle $/ with no characters in between
-        }
-
-        std::string env(cmd.begin() + firstPos + 1, cmd.begin() + secondPos);
-        // cout << "find env " << env << "\n";
-
-        std::string envValue;
-        if (!findParentVariableValue(env, envValue)) {
-            // cout << " could not find " << env << "\n";
-            return false;
-        }
-
-        cmd.replace(firstPos, secondPos - firstPos, envValue);
-
-        if (envValue.find(env) != std::string::npos) {
-            // infinite loop
-            break;
-        }
-    }
-    return true;
+    return ecf::variable_dollar_substitution(cmd, ecf::NodeVariableLookup(*this));
 }
 
 std::string Node::completeExpression() const {

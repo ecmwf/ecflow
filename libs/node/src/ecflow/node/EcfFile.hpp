@@ -9,6 +9,10 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
+namespace ecf {
+class VariableLookup;
+} // namespace ecf
+
 // This class is used to minimise file I/0.
 // When job processing the same include file can be opened and closed many time
 // This cache serves to open the include file only once. It halves the job processing time.
@@ -57,6 +61,11 @@ public:
     // Use to record how the ecf_file was located from ECF_FILES and ECF_HOME directories. Default is PRUNE_ROOT
     enum EcfFileSearchAlgorithm { PRUNE_ROOT, PRUNE_LEAF };
 
+    ///
+    /// @brief The kind of node whose file is processed, when the file is processed without the node.
+    ///
+    enum class NodeKind { TASK, ALIAS, FAMILY, SUITE };
+
     EcfFile();
 
     /// This preserves the caches, used to avoid opening/stat of include file more than once.
@@ -69,6 +78,37 @@ public:
             const std::string& path_to_script_or_fetch_cmd,
             EcfFile::Origin                 = ECF_SCRIPT,
             EcfFile::EcfFileSearchAlgorithm = PRUNE_ROOT);
+
+    ///
+    /// @brief Creates the file of a node from its variables only, without the node.
+    ///
+    /// The file is pre-processed as the server would pre-process it for the node: the includes are expanded and the
+    /// variables substituted from @p lookup, and the messages name the node by @p kind and @p abs_node_path. Only
+    /// manual() and script() are available; the operations that need the node (create_job(), pre_process(),
+    /// edit_used_variables() and pre_process_user_file()) throw std::runtime_error.
+    ///
+    /// A file created this way never runs a command: the origins ECF_FETCH_CMD and ECF_SCRIPT_CMD, whose script is the
+    /// output of a command taken from the variables, are refused.
+    ///
+    /// @param[in] kind The kind of the node.
+    /// @param[in] abs_node_path The absolute path of the node, such as /suite/family/task.
+    /// @param[in] lookup The variables as seen from the node, with the generated variables current and the server
+    ///                   variables included (such as ECF_MICRO), as MapVariableLookup::from_node gives them; it must
+    ///                   not be null.
+    /// @param[in] path_to_script_or_cmd The path of the file, or the command that produces it, as located by
+    ///                                  ecf::locate_script or ecf::locate_manual_in_ecf_files and
+    ///                                  ecf::locate_manual_in_ecf_home.
+    /// @param[in] origin Where the file comes from.
+    /// @param[in] search_algorithm The search that found the file in ECF_FILES or ECF_HOME.
+    /// @throws std::invalid_argument when @p lookup is null, or @p origin is ECF_FETCH_CMD or ECF_SCRIPT_CMD.
+    /// @throws std::runtime_error when ECF_MICRO is not a single character.
+    ///
+    EcfFile(NodeKind kind,
+            const std::string& abs_node_path,
+            std::shared_ptr<const ecf::VariableLookup> lookup,
+            const std::string& path_to_script_or_cmd,
+            EcfFile::Origin origin                           = ECF_SCRIPT,
+            EcfFile::EcfFileSearchAlgorithm search_algorithm = PRUNE_ROOT);
 
     // The path to the ecf file, empty path means that ecf file could not be located
     bool valid() const { return !script_path_or_cmd_.empty(); }
@@ -86,6 +126,26 @@ public:
 
     /// What is the origin of this ecf_file
     std::string ecf_file_origin_dump() const;
+
+    ///
+    /// @brief Gives the kind of a node, as the constructor without a node takes it.
+    ///
+    /// @param[in] node A task, an alias, a family or a suite.
+    /// @return The kind of the node.
+    ///
+    static NodeKind node_kind(const Node& node);
+
+    ///
+    /// @brief Gives the extension of the script of a task or an alias from its variables, as Submittable does.
+    ///
+    /// For a task, the extension is the user variable ECF_EXTN, as for Task::script_extension, or `.ecf`; for an
+    /// alias it is `.usr`; a family or a suite has no script, and an empty extension.
+    ///
+    /// @param[in] kind The kind of the node.
+    /// @param[in] lookup The variables as seen from the node.
+    /// @return The extension, for ecf::locate_script.
+    ///
+    static std::string script_extension(NodeKind kind, const ecf::VariableLookup& lookup);
 
     /// simple accessors
     Origin ecf_file_origin() const { return script_origin_; }
@@ -152,7 +212,7 @@ private:
     static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
     static void dump_expanded_script_file(const std::vector<std::string>& lines); // for DEBUG
 
-    /// returns the extension, i.e for task->.ecf for alias->.usr, will throw if node_ is not task or alias
+    /// returns the extension, i.e for task->.ecf for alias->.usr, will throw if the node is not task or alias
     const std::string& get_extn() const;
 
     bool
@@ -169,7 +229,52 @@ private:
     void doCreateUsrFile() const;
     bool file_exists(const std::string& file_path) const;
 
-    Node* node_{nullptr};               // Task or Alias or Container when pre-processing the man files
+    ///
+    /// @brief Reads ECF_MICRO into the cache, checking that it is a single character.
+    ///
+    /// @throws std::runtime_error when ECF_MICRO is not a single character.
+    ///
+    void init_micro();
+
+    ///
+    /// @brief Gives the node, for the operations that need it.
+    ///
+    /// @param[in] operation The name of the operation, for the message.
+    /// @return The node.
+    /// @throws std::runtime_error when the file was created from variables only, without the node.
+    ///
+    Node& node(const char* operation) const;
+
+    /// Whether the node is a task or an alias, rather than a family or a suite
+    [[nodiscard]] bool is_submittable() const { return kind_ == NodeKind::TASK || kind_ == NodeKind::ALIAS; }
+
+    ///
+    /// @brief Gives the absolute path of the node: the current one of the node when there is one, else as given.
+    ///
+    /// @return The path.
+    ///
+    [[nodiscard]] std::string abs_node_path() const;
+
+    ///
+    /// @brief Gives the name of the node: from the node when there is one, else the last part of the path given.
+    ///
+    /// @return The name.
+    ///
+    [[nodiscard]] std::string node_name() const;
+
+    ///
+    /// @brief Gives the kind and path of the node, such as `TASK:/suite/task`, as Node::debugNodePath does.
+    ///
+    /// @return The kind and path, for messages.
+    ///
+    [[nodiscard]] std::string debug_node_path() const;
+
+    Node* node_{nullptr}; // Task or Alias or Container when pre-processing the man files; null when created from
+                          // variables only
+    std::shared_ptr<const ecf::VariableLookup> lookup_; // The variables as seen from the node
+    NodeKind kind_{NodeKind::TASK};                     // The kind of the node
+    std::string abs_node_path_;                         // The absolute path of the node; only used without a node
+    std::string extension_;             // The extension of the script, only used without a node; empty for a container
     std::string ecfMicroCache_;         // cache value of ECF_MICRO
     std::string script_path_or_cmd_;    // path to .ecf, .usr file or command
     std::vector<std::string> jobLines_; // Lines that will form the job file.

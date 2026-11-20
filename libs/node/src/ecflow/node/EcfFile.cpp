@@ -4,6 +4,7 @@
 #include "ecflow/node/EcfFile.hpp"
 
 #include <array>
+#include <cassert>
 #include <cerrno>
 #include <memory>
 #include <sstream>
@@ -20,6 +21,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/VariableLookup.hpp"
 
 // #define DEBUG_ECF_ 1
 // #define DEBUG_PRE_PROCESS 1
@@ -71,6 +73,10 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs) {
     /// This preserves the caches, used to avoid opening/stat of include file more than once.
     // assign in order or declaration
     node_               = rhs.node_;
+    lookup_             = rhs.lookup_;
+    kind_               = rhs.kind_;
+    abs_node_path_      = rhs.abs_node_path_;
+    extension_          = rhs.extension_;
     ecfMicroCache_      = rhs.ecfMicroCache_;
     script_path_or_cmd_ = rhs.script_path_or_cmd_;
     jobLines_.resize(0); // the most expensive
@@ -93,16 +99,13 @@ EcfFile::EcfFile(Node* t,
                  EcfFile::Origin script_origin,
                  EcfFile::EcfFileSearchAlgorithm search_algo)
     : node_(t),
+      lookup_(std::make_shared<ecf::NodeVariableLookup>(*t)),
       script_path_or_cmd_(pathToEcfFileOrCommand),
       script_origin_(script_origin),
       ecf_file_search_algorithm_(search_algo) {
-    node_->findParentUserVariableValue(ecf::environment::ECF_MICRO, ecfMicroCache_);
-    if (ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
-        throw std::runtime_error(MESSAGE("EcfFile::EcfFile: Node "
-                                         << t->absNodePath() << " is referencing a invalid ECF_MICRO variable(' "
-                                         << ecfMicroCache_
-                                         << "). ECF_MICRO when overridden, must be a single character."));
-    }
+    // The path, name and extension are read from the node at each use, so that they are always its current ones
+    kind_ = node_kind(*t);
+    init_micro();
 
 #ifdef DEBUG_ECF_
     cout << "   EcfFile::EcfFile pathToEcfFileOrCommand = " << script_path_or_cmd_ << " script_type = " << script_type
@@ -110,15 +113,110 @@ EcfFile::EcfFile(Node* t,
 #endif
 }
 
+EcfFile::EcfFile(NodeKind kind,
+                 const std::string& abs_node_path,
+                 std::shared_ptr<const ecf::VariableLookup> lookup,
+                 const std::string& path_to_script_or_cmd,
+                 EcfFile::Origin origin,
+                 EcfFile::EcfFileSearchAlgorithm search_algorithm)
+    : lookup_(std::move(lookup)),
+      kind_(kind),
+      abs_node_path_(abs_node_path),
+      script_path_or_cmd_(path_to_script_or_cmd),
+      script_origin_(origin),
+      ecf_file_search_algorithm_(search_algorithm) {
+    if (!lookup_) {
+        throw std::invalid_argument("EcfFile::EcfFile: the variable lookup of " + abs_node_path_ + " is null");
+    }
+    if (script_origin_ == ECF_FETCH_CMD || script_origin_ == ECF_SCRIPT_CMD) {
+        throw std::invalid_argument("EcfFile::EcfFile: the script of " + abs_node_path_ + " is obtained by running " +
+                                    origin_str(script_origin_) + ", which is never run without the node");
+    }
+    extension_ = script_extension(kind_, *lookup_);
+    init_micro();
+}
+
+EcfFile::NodeKind EcfFile::node_kind(const Node& node) {
+    if (node.isSubmittable()) {
+        return node.isAlias() ? NodeKind::ALIAS : NodeKind::TASK;
+    }
+    return node.isSuite() ? NodeKind::SUITE : NodeKind::FAMILY;
+}
+
+std::string EcfFile::script_extension(NodeKind kind, const ecf::VariableLookup& lookup) {
+    switch (kind) {
+        case NodeKind::TASK: {
+            std::string extension;
+            lookup.find_user(ecf::environment::ECF_EXTN, extension);
+            return extension.empty() ? File::ECF_EXTN() : extension;
+        }
+        case NodeKind::ALIAS:
+            return File::USR_EXTN();
+        case NodeKind::FAMILY:
+        case NodeKind::SUITE:
+            break;
+    }
+    return {};
+}
+
+std::string EcfFile::abs_node_path() const {
+    return node_ ? node_->absNodePath() : abs_node_path_;
+}
+
+std::string EcfFile::node_name() const {
+    return node_ ? node_->name() : abs_node_path_.substr(abs_node_path_.rfind('/') + 1);
+}
+
+std::string EcfFile::debug_node_path() const {
+    if (node_) {
+        return node_->debugNodePath();
+    }
+    std::string ret;
+    switch (kind_) {
+        case NodeKind::TASK:
+            ret = ecf::string_constants::task;
+            break;
+        case NodeKind::ALIAS:
+            ret = ecf::string_constants::alias;
+            break;
+        case NodeKind::FAMILY:
+            ret = ecf::string_constants::family;
+            break;
+        case NodeKind::SUITE:
+            ret = ecf::string_constants::suite;
+            break;
+    }
+    ret += ecf::string_constants::colon;
+    ret += abs_node_path_;
+    return ret;
+}
+
+void EcfFile::init_micro() {
+    lookup_->find_user(ecf::environment::ECF_MICRO, ecfMicroCache_);
+    if (ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
+        throw std::runtime_error(MESSAGE("EcfFile::EcfFile: Node "
+                                         << abs_node_path() << " is referencing a invalid ECF_MICRO variable(' "
+                                         << ecfMicroCache_
+                                         << "). ECF_MICRO when overridden, must be a single character."));
+    }
+}
+
+Node& EcfFile::node(const char* operation) const {
+    if (!node_) {
+        throw std::runtime_error(MESSAGE("EcfFile::" << operation << ": the operation needs the node, but the file of "
+                                                     << debug_node_path() << " was created from its variables only"));
+    }
+    return *node_;
+}
+
 void EcfFile::manual(std::string& theManual) {
     /// Pre-process the file accessible from the server
     std::vector<std::string> lines;
     std::string error_msg;
-    EcfFile::Type file_type = (node_->isSubmittable()) ? EcfFile::SCRIPT : EcfFile::MANUAL;
+    EcfFile::Type file_type = is_submittable() ? EcfFile::SCRIPT : EcfFile::MANUAL;
     if (!open_script_file(script_path_or_cmd_, file_type, lines, error_msg)) {
-        throw std::runtime_error(MESSAGE("EcfFile::manual: For node " << node_->debugNodePath()
-                                                                      << ", failed to open file " << script_path_or_cmd_
-                                                                      << " : " << error_msg));
+        throw std::runtime_error(MESSAGE("EcfFile::manual: For node " << debug_node_path() << ", failed to open file "
+                                                                      << script_path_or_cmd_ << " : " << error_msg));
     }
 
     // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
@@ -136,14 +234,14 @@ void EcfFile::manual(std::string& theManual) {
     std::vector<std::string> theManualLines;
     if (!extractManual(jobLines_, theManualLines, error_msg)) {
         throw std::runtime_error(
-            MESSAGE("EcfFile::manual: extraction failed for task " << node_->absNodePath() << " " << error_msg));
+            MESSAGE("EcfFile::manual: extraction failed for task " << abs_node_path() << " " << error_msg));
     }
 
     if (theManualLines.empty()) {
         // There is no %manual -> %end in the file. However this may be .man file for Suites/Family
         // For this case just include the pre-processed contents as is, i.e., since the whole file
         // is the manual
-        if (node_->isNodeContainer()) {
+        if (!is_submittable()) {
             vector_to_string(jobLines_, theManual);
             return;
         }
@@ -228,7 +326,7 @@ void EcfFile::script(std::string& theScript) const {
     if (script_origin_ == EcfFile::ECF_SCRIPT) {
         if (!File::open(script_path_or_cmd_, theScript)) {
             throw std::runtime_error(MESSAGE("EcfFile::script: Could not open script for task/alias "
-                                             << node_->absNodePath() << " at path " << script_path_or_cmd_ << " ("
+                                             << abs_node_path() << " at path " << script_path_or_cmd_ << " ("
                                              << strerror(errno) << ")"));
         }
         return;
@@ -240,12 +338,13 @@ void EcfFile::script(std::string& theScript) const {
     std::string error_msg;
     if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines, error_msg)) {
         throw std::runtime_error(MESSAGE("EcfFile::script: Could not open script for task/alias "
-                                         << node_->absNodePath() << " using command " << script_path_or_cmd_));
+                                         << abs_node_path() << " using command " << script_path_or_cmd_));
     }
     vector_to_string(lines, theScript);
 }
 
 void EcfFile::pre_process_user_file(std::vector<std::string>& user_edit_file, std::string& pre_processed_file) {
+    (void)node("pre_process_user_file"); // the user file is pre-processed for submitting the task
     // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
     PreProcessor data(this, "EcfFile::pre_process_user_file");
     data.preProcess(user_edit_file);
@@ -259,6 +358,7 @@ void EcfFile::pre_process_user_file(std::vector<std::string>& user_edit_file, st
 }
 
 void EcfFile::pre_process(std::string& pre_processed_file) {
+    (void)node("pre_process"); // the used variables are found through the node
     /// Pre-process the ECF file accessible from the server
     std::vector<std::string> lines;
     std::string error_msg;
@@ -279,6 +379,7 @@ void EcfFile::pre_process(std::string& pre_processed_file) {
 }
 
 void EcfFile::edit_used_variables(std::string& return_script_with_used_variables) {
+    (void)node("edit_used_variables"); // the used variables are found through the node
     std::string errorMsg;
     std::vector<std::string> lines;
     if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines, errorMsg)) {
@@ -301,9 +402,9 @@ void EcfFile::edit_used_variables(std::string& return_script_with_used_variables
 }
 
 const std::string& EcfFile::create_job(JobsParam& jobsParam) {
+    (void)node("create_job"); // only the server creates jobs, for its own nodes
 #ifdef DEBUG_ECF_
-    cout << "EcfFile::createJob task " << node_->absNodePath() << " script_path_or_cmd_ = " << script_path_or_cmd_
-         << "\n";
+    cout << "EcfFile::createJob task " << abs_node_path() << " script_path_or_cmd_ = " << script_path_or_cmd_ << "\n";
 #endif
 
     // NOTE: When editing pure python jobs, we may have *NO* variable specified, but only user_edit_file
@@ -347,7 +448,7 @@ const std::string& EcfFile::create_job(JobsParam& jobsParam) {
     // The variable ECF_CLIENT is used to specify the path to client exe.
     // This is then used to replace smsinit,smscomplete, smsevent,smsmeter.smslabel,smsabort
     std::string clientPath;
-    if (node_->findParentUserVariableValue("ECF_CLIENT", clientPath)) {
+    if (lookup_->find_user("ECF_CLIENT", clientPath)) {
         if (!replaceSmsChildCmdsWithEcf(clientPath, error_msg)) {
             throw std::runtime_error("EcfFile::create_job: ECF_CLIENT replacement failed " + error_msg);
         }
@@ -374,7 +475,7 @@ const std::string& EcfFile::create_job(JobsParam& jobsParam) {
 #endif
 
     /// Create the user file for tasks, when submitting without aliases,  before removing comments
-    if (node_->isTask() && !jobsParam.user_edit_variables().empty()) {
+    if (kind_ == NodeKind::TASK && !jobsParam.user_edit_variables().empty()) {
         doCreateUsrFile();
     }
 
@@ -447,11 +548,11 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,
  *   all ecFlow variables.
  */
 std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
-    assert(ecf.node_);
-    const Node& node = *ecf.node_;
+    assert(ecf.lookup_);
+    const ecf::VariableLookup& lookup = *ecf.lookup_;
 
     std::string ecf_include;
-    node.findParentUserVariableValue(ecf::environment::ECF_INCLUDE, ecf_include);
+    lookup.find_user(ecf::environment::ECF_INCLUDE, ecf_include);
 
     std::vector<std::string> paths;
     if (!ecf_include.empty()) {
@@ -467,8 +568,8 @@ std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
         // Do not rely on hard coded paths. Added for testing, but could be generally useful
         // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
         for (std::string& path : paths) {
-            node.variable_dollar_substitution(path);
-            node.variableSubstitution(path);
+            ecf::variable_dollar_substitution(path, lookup);
+            ecf::variable_substitution_with_user_micro(path, lookup);
         }
     }
 
@@ -504,13 +605,12 @@ bool EcfFile::open_script_file(const std::string& file_or_cmd,
         }
 
         case ECF_FETCH_CMD: {
-            // Not tested.
             std::string theFile;
             std::string theCommand = file_or_cmd; // variables have already been substituted
             switch (type) {
                 case EcfFile::SCRIPT: {
                     theCommand += " -s ";
-                    theFile = node_->name() + get_extn();
+                    theFile = node_name() + get_extn();
                     break;
                 }
                 case EcfFile::INCLUDE:
@@ -518,12 +618,12 @@ bool EcfFile::open_script_file(const std::string& file_or_cmd,
                     break;
                 case EcfFile::MANUAL: {
                     theCommand += " -m ";
-                    theFile = node_->name() + get_extn();
+                    theFile = node_name() + get_extn();
                     break;
                 }
                 case EcfFile::COMMENT: {
                     theCommand += " -c ";
-                    theFile = node_->name() + get_extn();
+                    theFile = node_name() + get_extn();
                     break;
                 }
             }
@@ -644,7 +744,7 @@ bool EcfFile::do_popen(const std::string& the_cmd,
     if (!fp) {
         errormsg +=
             MESSAGE("EcfFile::do_popen:: Could not open " << fileType(type) << " via cmd " << the_cmd << " for task "
-                                                          << node_->absNodePath() << " (" << strerror(errno) << ") ");
+                                                          << abs_node_path() << " (" << strerror(errno) << ") ");
         return false;
     }
     std::array<char, LINE_MAX> line;
@@ -659,7 +759,7 @@ bool EcfFile::do_popen(const std::string& the_cmd,
     int status = pclose(fp);
     if (status == -1) {
         errormsg += MESSAGE("EcfFile::do_popen: error on pclose for " << fileType(type) << " via cmd " << the_cmd
-                                                                      << " for task " << node_->absNodePath() << " ("
+                                                                      << " for task " << abs_node_path() << " ("
                                                                       << strerror(errno) << ") ");
         return false;
     }
@@ -668,7 +768,7 @@ bool EcfFile::do_popen(const std::string& the_cmd,
         // *Normal* termination via exit
         if (WEXITSTATUS(status)) {
             errormsg += MESSAGE("EcfFile::do_popen: non-zero exit : " << fileType(type) << " via cmd " << the_cmd
-                                                                      << " for task " << node_->absNodePath() << " ("
+                                                                      << " for task " << abs_node_path() << " ("
                                                                       << strerror(errno) << ") ");
             return false;
         }
@@ -679,7 +779,7 @@ bool EcfFile::do_popen(const std::string& the_cmd,
     }
     if (WIFSIGNALED(status)) {
         errormsg += MESSAGE("EcfFile::do_popen: child process terminated by a signal  : "
-                            << fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " ("
+                            << fileType(type) << " via cmd " << the_cmd << " for task " << abs_node_path() << " ("
                             << strerror(errno) << ") ");
         return false;
     }
@@ -831,7 +931,7 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
         if (ecfmicro_pos != std::string::npos) {
 
             /// In the *NORMAL* flow jobsParam.user_edit_variables() will be EMPTY
-            if (!node_->variable_substitution(jobLines_[i], jobsParam.user_edit_variables(), microChar)) {
+            if (!ecf::variable_substitution(jobLines_[i], *lookup_, jobsParam.user_edit_variables(), microChar)) {
 
                 // Allow variable substitution in comment and manual blocks.
                 // But if it fails, do not report as an error
@@ -1002,7 +1102,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
 
             /// *Note:* currently this modifies jobLines_[i]
             std::string line_copy = jobLines_[i]; // avoid modifying the jobs Lines, end up doing  variable substitution
-            if (!node_->find_all_used_variables(line_copy, used_variables, microChar)) {
+            if (!node("get_used_variables").find_all_used_variables(line_copy, used_variables, microChar)) {
 
                 // Allow variable substitution in comment and manual blocks.
                 // But if it fails, dont report as an error
@@ -1040,7 +1140,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const {
         //   b/ The value of the user variable has a valid directory paths and job file name
         //   c/ The user will lose the try number.
         std::string ecf_job;
-        if (!node_->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job)) {
+        if (!lookup_->find(ecf::environment::ECF_JOB, ecf_job)) {
             LOG_ASSERT(!ecf_job.empty(), "EcfFile::doCreateJobFile: ECF_JOB should have been generated, program error");
         }
 
@@ -1102,8 +1202,8 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const {
     }
 
     throw std::runtime_error(MESSAGE("EcfFile::doCreateJobFile: The ecf file '"
-                                     << script_path_or_cmd_ << "' that is associated with task '"
-                                     << node_->absNodePath() << "' is empty"));
+                                     << script_path_or_cmd_ << "' that is associated with task '" << abs_node_path()
+                                     << "' is empty"));
 }
 
 fs::path EcfFile::file_creation_path() const {
@@ -1117,7 +1217,7 @@ std::string EcfFile::script_or_job_path() const {
 
     // ECF_FETCH or ECF_SCRIPT_CMD
     std::string ecf_job;
-    (void)node_->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job);
+    (void)lookup_->find(ecf::environment::ECF_JOB, ecf_job);
     return ecf_job;
 }
 
@@ -1133,7 +1233,7 @@ bool EcfFile::doCreateManFile(std::string& errormsg) {
         fs::path parent_path      = script_file_path.parent_path();
         if (fs::is_directory(parent_path)) {
 
-            fs::path theManFilePath(parent_path.string() + '/' + node_->name() + File::MAN_EXTN());
+            fs::path theManFilePath(parent_path.string() + '/' + node_name() + File::MAN_EXTN());
 
             // cout << "EcfFile::doCreateManFile job " << manFile.string() << "\n";
             if (!File::create(theManFilePath.string(), manFile, errormsg)) {
@@ -1155,7 +1255,7 @@ void EcfFile::doCreateUsrFile() const {
     fs::path parent_path      = script_file_path.parent_path();
     if (fs::is_directory(parent_path)) {
 
-        fs::path theUsrFilePath(parent_path.string() + '/' + node_->name() + File::USR_EXTN());
+        fs::path theUsrFilePath(parent_path.string() + '/' + node_name() + File::USR_EXTN());
 
         // cout << "EcfFile::doCreateUsrFile job " << theUsrFilePath.string() << "\n";
         std::string error_msg;
@@ -1406,14 +1506,16 @@ void EcfFile::dump_expanded_script_file(const std::vector<std::string>& lines) {
 
 /// returns the extension, i.e. for task->.ecf for alias->.usr
 const std::string& EcfFile::get_extn() const {
-    Submittable* task_or_alias = node_->isSubmittable();
-    if (task_or_alias) {
-        return task_or_alias->script_extension();
+    if (node_) {
+        if (const Submittable* task_or_alias = node_->isSubmittable()) {
+            return task_or_alias->script_extension();
+        }
     }
-    else {
-        throw std::runtime_error(MESSAGE("EcfFile::get_extn(): Can only return extension for task/alias but found "
-                                         << node_->debugNodePath()));
+    else if (is_submittable()) {
+        return extension_;
     }
+    throw std::runtime_error(
+        MESSAGE("EcfFile::get_extn(): Can only return extension for task/alias but found " << debug_node_path()));
 }
 
 // =======================================================================================
@@ -1713,7 +1815,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
                                                              << ecfMicroCount << ") at : " << line));
         }
         NameValueMap user_edit_variables;
-        ecfile_->node_->variable_substitution(includedFile, user_edit_variables, ecf_micro_[0]);
+        ecf::variable_substitution(includedFile, *ecfile_->lookup_, user_edit_variables, ecf_micro_[0]);
     }
 
     std::string the_include_file = includedFile.substr(1, includedFile.size() - 2);
@@ -1724,7 +1826,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
         return the_include_file;
     }
 
-    Node* node = ecfile_->node_;
+    const ecf::VariableLookup& lookup = *ecfile_->lookup_;
     if (includedFile[0] == '<') {
 
         auto ecf_include_paths = EcfFile::get_ecf_include_paths(*ecfile_);
@@ -1740,7 +1842,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
 
         // WE get HERE *if* ECF_INCLUDE not specified, or if specified but file *not found*
         std::string ecf_include;
-        node->findParentVariableValue(ecf::environment::ECF_HOME, ecf_include);
+        lookup.find(ecf::environment::ECF_HOME, ecf_include);
         if (ecf_include.empty()) {
             throw std::runtime_error(MESSAGE(error_context() << "ECF_INCLUDE/ECF_HOME not specified, at : " << line));
         }
@@ -1778,20 +1880,20 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
         }
 
         // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
-        node->findParentUserVariableValue(ecf::environment::ECF_HOME, path);
+        lookup.find_user(ecf::environment::ECF_HOME, path);
         if (path.empty()) {
             throw std::runtime_error(MESSAGE(error_context() << "ECF_HOME not specified, at : " << line));
         }
         path += '/';
         std::string suite;
-        node->findParentVariableValue("SUITE", suite); // SUITE is a generated variable
+        lookup.find("SUITE", suite); // SUITE is a generated variable
         if (suite.empty()) {
             throw std::runtime_error(MESSAGE(error_context() << "SUITE not specified, at : " << line));
         }
         path += suite;
         path += '/';
         std::string family;
-        node->findParentVariableValue("FAMILY", family); // FAMILY is a generated variable
+        lookup.find("FAMILY", family); // FAMILY is a generated variable
         if (family.empty()) {
             throw std::runtime_error(MESSAGE(error_context() << "FAMILY not specified, at : " << line));
         }
@@ -1807,7 +1909,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
 }
 
 std::string PreProcessor::error_context() const {
-    return MESSAGE(error_context_ << ": Failed preprocessing : " << ecfile_->node_->debugNodePath() << " : path/cmd("
+    return MESSAGE(error_context_ << ": Failed preprocessing : " << ecfile_->debug_node_path() << " : path/cmd("
                                   << ecfile_->script_path_or_cmd_ << ")\n: ");
 }
 

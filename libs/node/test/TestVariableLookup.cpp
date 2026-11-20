@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
@@ -197,6 +198,52 @@ BOOST_AUTO_TEST_CASE(test_map_lookup_gives_user_edit_variables_precedence) {
     std::string cmd = "%A%";
     BOOST_CHECK(detail::substitute_variables(cmd, lookup, user_edit, '%', nullptr, false));
     BOOST_CHECK_EQUAL(cmd, "edited");
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_substitution_with_user_micro) {
+    ECF_NAME_THIS_TEST();
+
+    const auto substituted = [](const NameValueMap& user, std::string cmd) {
+        NameValueMap all = user;
+        all.emplace("A", "1");
+        MapVariableLookup lookup(all, {}, user);
+        const bool ok = variable_substitution_with_user_micro(cmd, lookup);
+        return std::make_pair(ok, cmd);
+    };
+    BOOST_CHECK(substituted({}, "%A% &A&") == std::make_pair(true, std::string("1 &A&")));
+    BOOST_CHECK(substituted({{"ECF_MICRO", "&"}}, "%A% &A&") == std::make_pair(true, std::string("%A% 1")));
+    // An ECF_MICRO that is not a single character is ignored, as by the server
+    BOOST_CHECK(substituted({{"ECF_MICRO", "&&"}}, "%A% &A&") == std::make_pair(true, std::string("1 &A&")));
+    BOOST_CHECK(substituted({{"ECF_MICRO", ""}}, "%A%") == std::make_pair(true, std::string("1")));
+    // ECF_MICRO only counts as a user variable
+    {
+        MapVariableLookup lookup({{"A", "1"}, {"ECF_MICRO", "&"}}, {}, {});
+        std::string cmd = "%A% &A&";
+        BOOST_CHECK(variable_substitution_with_user_micro(cmd, lookup));
+        BOOST_CHECK_EQUAL(cmd, "1 &A&");
+    }
+    BOOST_CHECK(!substituted({}, "%UNDEFINED%").first);
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_dollar_substitution) {
+    ECF_NAME_THIS_TEST();
+
+    MapVariableLookup lookup({{"HOME", "/home/x"}, {"SELF", "a$SELF"}, {"A_1", "v"}}, {}, {});
+    const auto substituted = [&lookup](std::string cmd) {
+        const bool ok = variable_dollar_substitution(cmd, lookup);
+        return std::make_pair(ok, cmd);
+    };
+    BOOST_CHECK(substituted("$HOME/include") == std::make_pair(true, std::string("/home/x/include")));
+    BOOST_CHECK(substituted("$A_1:$HOME") == std::make_pair(true, std::string("v:/home/x")));
+    BOOST_CHECK(substituted("no reference") == std::make_pair(true, std::string("no reference")));
+    // A '$' at the end, or before a character that cannot start a name, stops the replacement
+    BOOST_CHECK(substituted("$HOME/$") == std::make_pair(true, std::string("/home/x/$")));
+    BOOST_CHECK(substituted("$/x $HOME") == std::make_pair(true, std::string("$/x $HOME")));
+    BOOST_CHECK(substituted("${HOME}") == std::make_pair(true, std::string("${HOME}")));
+    // A value that contains its own name stops the replacement, to avoid an endless one
+    BOOST_CHECK(substituted("$SELF") == std::make_pair(true, std::string("a$SELF")));
+    // A variable that cannot be found
+    BOOST_CHECK(!substituted("$UNDEFINED/x").first);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -15,6 +15,7 @@ set(test_srcs
   test/TestDefStatus.cpp
   test/TestDefs.cpp
   test/TestEcfFile.cpp
+  test/TestEcfFileFromVariables.cpp
   test/TestEcfFileLocator.cpp
   test/TestEnviromentSubstitution.cpp
   test/TestExprASTRendering.cpp

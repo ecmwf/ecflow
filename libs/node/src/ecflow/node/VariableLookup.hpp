@@ -85,7 +85,8 @@ public:
     ///
     /// The generated variables of the node and its parents are taken as they are, created when missing, as the node
     /// lookups do; the caller updates them first, for example with update_generated_variables(), when current values
-    /// are needed. For each name, the value is the one that the node lookups give.
+    /// are needed. For each name, the value is the one that the node lookups give. Like the node lookups, building
+    /// the maps can create the generated variables that are missing; see NodeVariableLookup.
     ///
     /// @param[in] node The node.
     /// @return The lookup, which gives the same values as the node.
@@ -127,6 +128,11 @@ private:
 
 ///
 /// @brief Gives the variables visible from a node, through the node's own lookups.
+///
+/// Although the lookups are const, the first lookup of a generated variable can create the generated variables of a
+/// task, an alias or a suite (they are mutable members). A NodeVariableLookup is therefore not safe for concurrent
+/// readers of a shared definition unless the generated variables were created beforehand; MapVariableLookup gives a
+/// copy that is.
 ///
 class NodeVariableLookup : public VariableLookup {
 public:
@@ -196,5 +202,34 @@ bool variable_substitution(std::string& cmd,
                            const NameValueMap& user_edit_variables,
                            char micro,
                            SubstitutionRecord* record = nullptr);
+
+///
+/// @brief Replaces every variable reference of a command, with the micro character given by ECF_MICRO.
+///
+/// The micro character is the value of the user variable ECF_MICRO, found through VariableLookup::find_user, or `%`
+/// when ECF_MICRO is not defined or is not a single character; no user edit variables are used. Otherwise as
+/// variable_substitution.
+///
+/// @param[in,out] cmd The command; on return, the command as substituted, or as partially substituted on failure
+/// @param[in] lookup Gives the values of the variables
+/// @param[out] record When given, receives the variables used and the masked command
+/// @return true when every reference was substituted; false otherwise, as for substitute_variables.
+///
+bool variable_substitution_with_user_micro(std::string& cmd,
+                                           const VariableLookup& lookup,
+                                           SubstitutionRecord* record = nullptr);
+
+///
+/// @brief Replaces every reference of the form `$NAME` of a command by the value of the variable NAME.
+///
+/// NAME is the longest run of letters, digits and underscores after the `$`; its value is found through
+/// VariableLookup::find. The replacement stops at a `$` not followed by such a name, and when a value contains its
+/// own name, to avoid an endless replacement.
+///
+/// @param[in,out] cmd The command; on return, the command as substituted, or as partially substituted on failure
+/// @param[in] lookup Gives the values of the variables
+/// @return false when a variable cannot be found; true otherwise.
+///
+bool variable_dollar_substitution(std::string& cmd, const VariableLookup& lookup);
 
 } // namespace ecf

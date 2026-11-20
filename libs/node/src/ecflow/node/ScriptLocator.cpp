@@ -16,18 +16,6 @@ namespace ecf {
 
 namespace {
 
-/// Substitutes a command as Node::variableSubstitution does: no user edit variables, and ECF_MICRO as the micro
-bool substitute(std::string& cmd, const VariableLookup& lookup) {
-    char micro = '%';
-    std::string micro_char;
-    lookup.find_user(ecf::environment::ECF_MICRO, micro_char);
-    if (!micro_char.empty() && micro_char.size() == 1) {
-        micro = micro_char.front();
-    }
-    NameValueMap user_edit_variables;
-    return variable_substitution(cmd, lookup, user_edit_variables, micro);
-}
-
 std::string search(const std::string& directory,
                    const std::string& abs_node_path,
                    const std::string& extension,
@@ -59,7 +47,7 @@ locate_script(const std::string& abs_node_path, const std::string& extension, co
     std::string ecf_fetch_cmd;
     lookup.find(ecf::environment::ECF_FETCH, ecf_fetch_cmd);
     if (!ecf_fetch_cmd.empty()) {
-        if (substitute(ecf_fetch_cmd, lookup)) {
+        if (variable_substitution_with_user_micro(ecf_fetch_cmd, lookup)) {
             return {EcfFile::ECF_FETCH_CMD, ecf_fetch_cmd, EcfFile::PRUNE_ROOT};
         }
         reasonEcfFileNotFound += "   Variable ECF_FETCH(";
@@ -72,7 +60,7 @@ locate_script(const std::string& abs_node_path, const std::string& extension, co
     std::string ecf_script_cmd; // ECFLOW-427
     lookup.find("ECF_SCRIPT_CMD", ecf_script_cmd);
     if (!ecf_script_cmd.empty()) {
-        if (substitute(ecf_script_cmd, lookup)) {
+        if (variable_substitution_with_user_micro(ecf_script_cmd, lookup)) {
             return {EcfFile::ECF_SCRIPT_CMD, ecf_script_cmd, EcfFile::PRUNE_ROOT};
         }
         reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD(";
@@ -113,7 +101,7 @@ locate_script(const std::string& abs_node_path, const std::string& extension, co
         else {
             // Before failing try again but with variable Substitution. ECFLOW-788
             std::string original_ecf_filesDirectory = ecf_filesDirectory;
-            substitute(ecf_filesDirectory, lookup);
+            variable_substitution_with_user_micro(ecf_filesDirectory, lookup);
             if (!ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory)) {
                 std::string searchResult = search(ecf_filesDirectory, abs_node_path, extension, file_search_algo);
                 if (searchResult.empty()) {
