@@ -1293,32 +1293,11 @@ bool Node::variableSubstitution(std::string& cmd, SubstitutionRecord* record) co
     return variable_substitution(cmd, user_edit_variables, micro, record);
 }
 
-namespace {
-
-/// Gives the variables visible from a node to ecf::variable_substitution
-class NodeVariableLookup : public ecf::VariableLookup {
-public:
-    explicit NodeVariableLookup(const Node& node)
-        : node_(node) {}
-    bool find(const std::string& name, std::string& value) const override {
-        return node_.findParentVariableValue(name, value);
-    }
-    bool find_generated(const std::string& name, std::string& value) const override {
-        return node_.find_parent_gen_variable_value(name, value);
-    }
-    bool allows_colon_names() const override { return node_.isAlias() != nullptr; }
-
-private:
-    const Node& node_;
-};
-
-} // namespace
-
 bool Node::variable_substitution(std::string& cmd,
                                  const NameValueMap& user_edit_variables,
                                  char micro,
                                  SubstitutionRecord* record) const {
-    return ecf::variable_substitution(cmd, NodeVariableLookup(*this), user_edit_variables, micro, record);
+    return ecf::variable_substitution(cmd, ecf::NodeVariableLookup(*this), user_edit_variables, micro, record);
 }
 
 bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variables, char micro) const {

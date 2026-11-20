@@ -32,15 +32,20 @@ bool search_user_edit_variables(const std::string& name, std::string& value, con
 
 } // namespace
 
-MapVariableLookup::MapVariableLookup(NameValueMap variables, NameValueMap generated, bool colon_names)
+MapVariableLookup::MapVariableLookup(NameValueMap variables,
+                                     NameValueMap generated,
+                                     NameValueMap user,
+                                     bool colon_names)
     : variables_(std::move(variables)),
       generated_(std::move(generated)),
+      user_(std::move(user)),
       colon_names_(colon_names) {
 }
 
 MapVariableLookup MapVariableLookup::from_node(const Node& node) {
     NameValueMap variables;
     NameValueMap generated;
+    NameValueMap user;
 
     // Nearest first: the order of Node::findParentVariableValue and Node::find_parent_gen_variable_value. The names
     // of the generated variables come from gen_variables, but their values from findGenVariableValue, since a node
@@ -50,6 +55,7 @@ MapVariableLookup MapVariableLookup::from_node(const Node& node) {
     for (const Node* n = &node; n != nullptr; n = n->parent()) {
         for (const auto& v : n->variables()) {
             variables.emplace(v.name(), v.value());
+            user.emplace(v.name(), v.value());
         }
         if (!n->repeat().empty()) {
             variables.emplace(n->repeat().name(), n->repeat().valueAsString());
@@ -71,11 +77,12 @@ MapVariableLookup MapVariableLookup::from_node(const Node& node) {
             for (const auto& v : *list) {
                 variables.emplace(v.name(), v.value());
                 generated.emplace(v.name(), v.value());
+                user.emplace(v.name(), v.value());
             }
         }
     }
 
-    return {std::move(variables), std::move(generated), node.isAlias() != nullptr};
+    return {std::move(variables), std::move(generated), std::move(user), node.isAlias() != nullptr};
 }
 
 bool MapVariableLookup::find(const std::string& name, std::string& value) const {
@@ -96,8 +103,33 @@ bool MapVariableLookup::find_generated(const std::string& name, std::string& val
     return true;
 }
 
+bool MapVariableLookup::find_user(const std::string& name, std::string& value) const {
+    auto i = user_.find(name);
+    if (i == user_.end()) {
+        return false;
+    }
+    value = i->second;
+    return true;
+}
+
 bool MapVariableLookup::allows_colon_names() const {
     return colon_names_;
+}
+
+bool NodeVariableLookup::find(const std::string& name, std::string& value) const {
+    return node_.findParentVariableValue(name, value);
+}
+
+bool NodeVariableLookup::find_generated(const std::string& name, std::string& value) const {
+    return node_.find_parent_gen_variable_value(name, value);
+}
+
+bool NodeVariableLookup::find_user(const std::string& name, std::string& value) const {
+    return node_.findParentUserVariableValue(name, value);
+}
+
+bool NodeVariableLookup::allows_colon_names() const {
+    return node_.isAlias() != nullptr;
 }
 
 namespace detail {

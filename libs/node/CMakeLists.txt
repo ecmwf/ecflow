@@ -46,6 +46,7 @@ set(test_srcs
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp
   test/TestReplace.cpp
+  test/TestScriptLocator.cpp
   test/TestSetState.cpp
   test/TestSpecificIssues.cpp
   test/TestSystem.cpp

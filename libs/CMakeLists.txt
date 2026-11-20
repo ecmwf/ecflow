@@ -463,6 +463,7 @@ set(srcs
   node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
+  node/src/ecflow/node/ScriptLocator.hpp
   node/src/ecflow/node/Signal.hpp
   node/src/ecflow/node/SubstitutionRecord.hpp
   node/src/ecflow/node/Submittable.hpp
@@ -551,6 +552,7 @@ set(srcs
   node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
+  node/src/ecflow/node/ScriptLocator.cpp
   node/src/ecflow/node/Signal.cpp
   node/src/ecflow/node/Submittable.cpp
   node/src/ecflow/node/Suite.cpp

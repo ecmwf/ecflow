@@ -43,6 +43,16 @@ public:
     virtual bool find_generated(const std::string& name, std::string& value) const = 0;
 
     ///
+    /// @brief Finds a user variable as seen from a node: its user variables, then those of its parents, then the
+    /// server's.
+    ///
+    /// @param[in] name The name of the variable.
+    /// @param[out] value Receives the value when the variable is found.
+    /// @return True when the variable is found.
+    ///
+    virtual bool find_user(const std::string& name, std::string& value) const = 0;
+
+    ///
     /// @brief Tells whether a variable name may contain a colon, as for an alias.
     ///
     /// @return True when `%NAME:default%` is first looked up as a whole name.
@@ -64,9 +74,11 @@ public:
     /// @param[in] variables The variables as seen from the node, as VariableLookup::find gives them.
     /// @param[in] generated The generated variables as seen from the node, as VariableLookup::find_generated gives
     ///                      them.
+    /// @param[in] user The user variables as seen from the node, as VariableLookup::find_user gives them; a name
+    ///                 absent from this map is not found by find_user, even when it is in @p variables.
     /// @param[in] colon_names Whether names may contain a colon, as for an alias.
     ///
-    MapVariableLookup(NameValueMap variables, NameValueMap generated, bool colon_names = false);
+    MapVariableLookup(NameValueMap variables, NameValueMap generated, NameValueMap user, bool colon_names = false);
 
     ///
     /// @brief Builds the maps from the variables visible from a node.
@@ -82,6 +94,7 @@ public:
 
     bool find(const std::string& name, std::string& value) const override;
     bool find_generated(const std::string& name, std::string& value) const override;
+    bool find_user(const std::string& name, std::string& value) const override;
     bool allows_colon_names() const override;
 
     ///
@@ -98,10 +111,40 @@ public:
     ///
     [[nodiscard]] const NameValueMap& generated() const { return generated_; }
 
+    ///
+    /// @brief Returns the user variables as seen from the node.
+    ///
+    /// @return The map of names to values.
+    ///
+    [[nodiscard]] const NameValueMap& user() const { return user_; }
+
 private:
     NameValueMap variables_;
     NameValueMap generated_;
+    NameValueMap user_;
     bool colon_names_;
+};
+
+///
+/// @brief Gives the variables visible from a node, through the node's own lookups.
+///
+class NodeVariableLookup : public VariableLookup {
+public:
+    ///
+    /// @brief Creates a lookup over a node, which must outlive the lookup.
+    ///
+    /// @param[in] node The node.
+    ///
+    explicit NodeVariableLookup(const Node& node)
+        : node_(node) {}
+
+    bool find(const std::string& name, std::string& value) const override;
+    bool find_generated(const std::string& name, std::string& value) const override;
+    bool find_user(const std::string& name, std::string& value) const override;
+    bool allows_colon_names() const override;
+
+private:
+    const Node& node_;
 };
 
 namespace detail {

@@ -21,11 +21,11 @@
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/node/ScriptLocator.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/node/VariableLookup.hpp"
 
 using namespace ecf;
-
-// #define DEBUG_TASK_LOCATION 1
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // init static
@@ -317,217 +317,18 @@ std::string Submittable::tryNo() const {
 }
 
 EcfFile Submittable::locatedEcfFile() const {
-    // Look for scripts file(Task->.ecf | Alias->.usr) in the following order
-    // o/ ECF_SCRIPT Generated VARIABLE  absolute path, check if files exists
-    //    The variable MUST exist, but the file may not
-    // o/ ECF_FETCH (user variable)
-    //    if this variable exist, we need to flag it,
-    //    So that that file is obtained from running the command. (Output of popen)
-    // o/ ECF_SCRIPT_CMD (user variable)
-    //    if this variable exist, we need to flag it,
-    //    So that that file is obtained from running the command. (Output of popen)
-    // o/ ECF_FILES (Typically in the definition file, defines a directory) (backward search)
-    //    if ECF_FILES_LOOKUP=PRUNE_LEAF (forward_search)
-    // o/ ECF_HOME (backward search)
-    //    if ECF_FILES_LOOKUP=PRUNE_LEAF (forward_search)
-    //    where: backward search is root_path = (ECF_FILES | ECF_HOME) (PRUNE_ROOT)
-    //           <root-path>/suite/family/family2/task.ecf
-    //           <root-path>/family/family2/task.ecf
-    //           <root-path>/family2/task.ecf
-    //           <root-path>/task.ecf
-    //    where: forward search is root_path = (ECF_FILES | ECF_HOME) (PRUNE_LEAF)
-    //           <root-path>/suite/family/family2/task.ecf
-    //           <root-path>/suite/family/task.ecf
-    //           <root-path>/suite/task.ecf
-    //           <root-path>/task.ecf
-
-    std::string reasonEcfFileNotFound;
+    // The search is shared with the services that locate scripts from a set of variables: see ecf::locate_script,
+    // which documents the order of the places tried. ECF_FETCH and ECF_SCRIPT_CMD are only reported, never run here.
     std::string theAbsNodePath = absNodePath();
     std::string ecf_home;
     findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
 
-    /// Update local ECF_SCRIPT variable, ECF_SCRIPT is a generated variable. IT *MUST* exist
-    /// Likewise generated variable like TASK and ECF_NAME as they may occur in ECF_FETCH_CMD/ECF_SCRIPT_CMD
+    // Update the static generated variables, such as TASK and ECF_NAME, which the substitutions of ECF_FETCH,
+    // ECF_SCRIPT_CMD and ECF_FILES in ecf::locate_script may use
     update_static_generated_variables(ecf_home, theAbsNodePath);
 
-    const Variable& genvar_ecfscript = get_genvar_ecfscript();
-
-#ifdef DEBUG_TASK_LOCATION
-    std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_SCRIPT = '"
-              << genvar_ecfscript.value() << "'\n";
-#endif
-    if (fs::exists(genvar_ecfscript.value())) {
-#ifdef DEBUG_TASK_LOCATION
-        std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT = '"
-                  << genvar_ecfscript.value() << "' exists\n";
-#endif
-        return EcfFile(const_cast<Submittable*>(this), genvar_ecfscript.value(), EcfFile::ECF_SCRIPT);
-    }
-    else {
-        reasonEcfFileNotFound += "   ECF_SCRIPT(";
-        reasonEcfFileNotFound += genvar_ecfscript.value();
-        reasonEcfFileNotFound += ") does not exist:\n";
-    }
-
-    // Caution: This is not used in operations or research; equally it has not been tested.
-    std::string ecf_fetch_cmd;
-    findParentVariableValue(ecf::environment::ECF_FETCH, ecf_fetch_cmd);
-    if (!ecf_fetch_cmd.empty()) {
-#ifdef DEBUG_TASK_LOCATION
-        std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << ecf_fetch_cmd
-                  << "' variable exists\n";
-#endif
-        if (variableSubstitution(ecf_fetch_cmd)) {
-            return EcfFile(const_cast<Submittable*>(this), ecf_fetch_cmd, EcfFile::ECF_FETCH_CMD);
-        }
-        else {
-            reasonEcfFileNotFound += "   Variable ECF_FETCH(";
-            reasonEcfFileNotFound += ecf_fetch_cmd;
-            reasonEcfFileNotFound += ") defined, but variable substitution has failed:\n";
-            throw std::runtime_error(reasonEcfFileNotFound);
-        }
-    }
-    else {
-        reasonEcfFileNotFound += "   Variable ECF_FETCH not defined:\n";
-    }
-
-    std::string ecf_script_cmd; // ECFLOW-427
-    findParentVariableValue("ECF_SCRIPT_CMD", ecf_script_cmd);
-    if (!ecf_script_cmd.empty()) {
-#ifdef DEBUG_TASK_LOCATION
-        std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT_CMD = '" << ecf_script_cmd
-                  << "' variable exists\n";
-#endif
-        if (variableSubstitution(ecf_script_cmd)) {
-            return EcfFile(const_cast<Submittable*>(this), ecf_script_cmd, EcfFile::ECF_SCRIPT_CMD);
-        }
-        else {
-            reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD(";
-            reasonEcfFileNotFound += ecf_script_cmd;
-            reasonEcfFileNotFound += ") defined, but variable substitution has failed:\n";
-            throw std::runtime_error(reasonEcfFileNotFound);
-        }
-    }
-    else {
-        reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD not defined:\n";
-    }
-
-    EcfFile::EcfFileSearchAlgorithm file_search_algo = EcfFile::PRUNE_ROOT;
-    std::string ecf_files_lookup;
-    if (findParentUserVariableValue("ECF_FILES_LOOKUP", ecf_files_lookup)) {
-        if (ecf_files_lookup == "prune_leaf" || ecf_files_lookup == "PRUNE_LEAF") {
-            file_search_algo = EcfFile::PRUNE_LEAF;
-        }
-    }
-
-    std::string ecf_filesDirectory;
-    if (findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_filesDirectory)) {
-#ifdef DEBUG_TASK_LOCATION
-        std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_FILES = '"
-                  << ecf_filesDirectory << "' backwards\n";
-#endif
-        if (!ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory)) {
-            // If File::backwardSearch fails it returns an empty string, i.e. failure to locate script (Task/.ecf ||
-            // Alias/.usr) file
-            std::string searchResult;
-            if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-            }
-            else {
-                searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-            }
-            if (searchResult.empty()) {
-                reasonEcfFileNotFound += "   Search of directory ECF_FILES(";
-                reasonEcfFileNotFound += ecf_filesDirectory;
-                reasonEcfFileNotFound += ") failed ";
-                if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                    reasonEcfFileNotFound += "using prune_root:\n";
-                }
-                else {
-                    reasonEcfFileNotFound += "using prune_leaf:\n";
-                }
-            }
-            else {
-                return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
-            }
-        }
-        else {
-            // Before failing try again but with variable Substitution. ECFLOW-788
-            std::string original_ecf_filesDirectory = ecf_filesDirectory;
-            variableSubstitution(ecf_filesDirectory);
-            if (!ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory)) {
-                // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr)
-                // file
-                std::string searchResult;
-                if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                    searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-                }
-                else {
-                    searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-                }
-                if (searchResult.empty()) {
-                    reasonEcfFileNotFound += MESSAGE("   Search of directory ECF_FILES(variable substituted)("
-                                                     << ecf_filesDirectory << ") failed:\n");
-                }
-                else {
-                    return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
-                }
-            }
-            else {
-                std::ostringstream ss;
-                ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
-                if (original_ecf_filesDirectory != ecf_filesDirectory) {
-                    ss << "   Directory ECF_FILES(" << ecf_filesDirectory
-                       << ") after variable substitution does not exist:\n";
-                }
-                reasonEcfFileNotFound += ss.str();
-            }
-        }
-    }
-    else {
-        reasonEcfFileNotFound += "   Variable ECF_FILES not defined:\n";
-    }
-
-#ifdef DEBUG_TASK_LOCATION
-    std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_HOME = '" << ecf_home
-              << "' backwards\n";
-#endif
-    if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
-        // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr) file
-        std::string searchResult;
-        if (file_search_algo == EcfFile::PRUNE_ROOT) {
-            searchResult = File::backwardSearch(ecf_home, theAbsNodePath, script_extension());
-        }
-        else {
-            searchResult = File::forwardSearch(ecf_home, theAbsNodePath, script_extension());
-        }
-        if (searchResult.empty()) {
-            reasonEcfFileNotFound += "   Search of directory ECF_HOME(";
-            reasonEcfFileNotFound += ecf_home;
-            reasonEcfFileNotFound += ") failed ";
-            if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                reasonEcfFileNotFound += "using prune_root:\n";
-            }
-            else {
-                reasonEcfFileNotFound += "using prune_leaf:\n";
-            }
-        }
-        else {
-            return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_HOME, file_search_algo);
-        }
-    }
-    else {
-        reasonEcfFileNotFound += "   Directory ECF_HOME(";
-        reasonEcfFileNotFound += ecf_home;
-        reasonEcfFileNotFound += ") does not exist:\n";
-    }
-
-    // failed to find  .ecf file
-    std::string error_msg = "   Script for ";
-    error_msg += theAbsNodePath;
-    error_msg += " cannot be found:\n";
-    error_msg += reasonEcfFileNotFound;
-    throw std::runtime_error(error_msg);
+    const auto location = ecf::locate_script(theAbsNodePath, script_extension(), ecf::NodeVariableLookup(*this));
+    return EcfFile(const_cast<Submittable*>(this), location.path_or_cmd, location.origin, location.algorithm);
 }
 
 void Submittable::set_jobs_password(const std::string& p) {

@@ -16,6 +16,7 @@
 #include <string>
 #include <thread>
 #include <variant>
+#include <vector>
 
 #include <sys/param.h>
 
@@ -556,6 +557,61 @@ public:
 private:
     fs::path location_;
     std::string content_;
+};
+
+///
+/// @brief Provisions a directory for the files of one test, removed with its content at the end of the test.
+///
+/// The directory is unique to the test and to the process, as MakeDirectory makes it. Files and directories are
+/// created below it by relative paths; the files are removed before the directory.
+///
+class TestFiles {
+public:
+    TestFiles()
+        : directory_(MakeDirectory{}.create()) {}
+
+    TestFiles(const TestFiles&)            = delete;
+    TestFiles& operator=(const TestFiles&) = delete;
+
+    ///
+    /// @brief Gives the path of the provisioned directory.
+    ///
+    /// @return The absolute path.
+    ///
+    [[nodiscard]] std::string root() const { return directory_.path().string(); }
+
+    ///
+    /// @brief Creates a directory, and its parents, below the provisioned directory.
+    ///
+    /// @param[in] relative The path of the directory, relative to the provisioned directory.
+    /// @return The absolute path of the directory.
+    ///
+    [[nodiscard]] std::string dir(const std::string& relative) const {
+        auto path = directory_.path() / relative;
+        fs::create_directories(path);
+        return path.string();
+    }
+
+    ///
+    /// @brief Creates a file, and its directories, below the provisioned directory.
+    ///
+    /// @param[in] relative The path of the file, relative to the provisioned directory.
+    /// @param[in] content The content of the file.
+    /// @return The absolute path of the file.
+    ///
+    std::string add(const std::string& relative, const std::string& content = "echo\n") {
+        auto path = directory_.path() / relative;
+        fs::create_directories(path.parent_path());
+        files_.push_back(MakeTestFile{}
+                             .with(SpecificFileLocation(path.filename().string(), path.parent_path()))
+                             .with(content)
+                             .create());
+        return path.string();
+    }
+
+private:
+    Directory directory_;
+    std::vector<File> files_;
 };
 
 struct User

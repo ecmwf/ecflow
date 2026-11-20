@@ -100,6 +100,13 @@ void check_lookups(const Node& node, const std::vector<std::string>& names) {
         const bool gen_map  = lookup.find_generated(name, from_map);
         BOOST_CHECK_MESSAGE(gen_node == gen_map && from_node == from_map,
                             "find_generated(" << name << "): node '" << from_node << "' map '" << from_map << "'");
+
+        from_node.clear();
+        from_map.clear();
+        const bool user_node = node.findParentUserVariableValue(name, from_node);
+        const bool user_map  = lookup.find_user(name, from_map);
+        BOOST_CHECK_MESSAGE(user_node == user_map && from_node == from_map,
+                            "find_user(" << name << "): node '" << from_node << "' map '" << from_map << "'");
     }
     BOOST_CHECK(lookup.allows_colon_names() == (node.isAlias() != nullptr));
 }
@@ -170,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_map_lookup_substitutes_with_another_micro_character) {
 BOOST_AUTO_TEST_CASE(test_map_lookup_from_plain_maps) {
     ECF_NAME_THIS_TEST();
 
-    MapVariableLookup lookup({{"A", "1"}, {"B", "%A%2"}, {"ECF_NAME", "user"}}, {{"ECF_NAME", "/suite/task"}});
+    MapVariableLookup lookup({{"A", "1"}, {"B", "%A%2"}, {"ECF_NAME", "user"}}, {{"ECF_NAME", "/suite/task"}}, {});
     NameValueMap none;
 
     std::string cmd = "%B% %ECF_NAME%";
@@ -184,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_map_lookup_from_plain_maps) {
 BOOST_AUTO_TEST_CASE(test_map_lookup_gives_user_edit_variables_precedence) {
     ECF_NAME_THIS_TEST();
 
-    MapVariableLookup lookup({{"A", "1"}}, {});
+    MapVariableLookup lookup({{"A", "1"}}, {}, {});
     NameValueMap user_edit{{"A", "edited"}};
 
     std::string cmd = "%A%";
