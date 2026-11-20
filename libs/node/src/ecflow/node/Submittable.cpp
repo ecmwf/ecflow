@@ -564,6 +564,11 @@ void Submittable::clear() {
 }
 
 bool Submittable::submitJob(JobsParam& jobsParam) {
+    if (isMirror() || (isAlias() && parent()->isMirror())) {
+        jobsParam.errorMsg() +=
+            MESSAGE("Cannot submit a local job for mirrored task or alias " << absNodePath() << "\n");
+        return false;
+    }
     increment_try_no();
 
     return submit_job_only(jobsParam);
@@ -766,6 +771,10 @@ void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
 }
 
 bool Submittable::run(JobsParam& jobsParam, bool force) {
+    if (isMirror() || (isAlias() && parent()->isMirror())) {
+        jobsParam.errorMsg() += MESSAGE("Cannot run a local job for mirrored task or alias " << absNodePath() << "\n");
+        return false;
+    }
     if (force || ((state() != NState::SUBMITTED) && (state() != NState::ACTIVE))) {
 
         if (jobsParam.createJobs()) {

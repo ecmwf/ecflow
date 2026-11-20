@@ -6,21 +6,26 @@
 #include "TestHelper.hpp"
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
+#include "ecflow/base/cts/user/EditScriptCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
+#include "ecflow/base/cts/user/RunNodeCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 #include "ecflow/test/scaffold/TestLog.hpp"
 
 using namespace ecf;
@@ -36,6 +41,332 @@ struct LogFixture
 BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_FIXTURE_TEST_SUITE(T_AlterCmd, LogFixture)
+
+BOOST_AUTO_TEST_CASE(test_mirrored_submittables_reject_local_submission) {
+    ECF_NAME_THIS_TEST();
+
+    for (bool alias_node : {false, true}) {
+        Defs defs;
+        auto task     = defs.add_suite("s")->add_task("t");
+        node_ptr node = alias_node ? std::static_pointer_cast<Node>(task->add_alias_only()) : task;
+        node->add_variable("ECF_DUMMY_TASK", "1");
+        defs.beginAll();
+        node->addMirror(MirrorAttr{node.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+        auto* submittable = node->isSubmittable();
+        BOOST_REQUIRE(submittable);
+        const auto initial_state = node->state();
+        JobsParam jobs(60, false);
+        BOOST_CHECK(!submittable->run(jobs, false));
+        BOOST_CHECK(!submittable->run(jobs, true));
+        BOOST_CHECK(!submittable->submitJob(jobs));
+        BOOST_CHECK(jobs.getErrorMsg().find("mirrored task or alias") != std::string::npos);
+        BOOST_CHECK(!jobs.getErrorMsg().empty() && jobs.getErrorMsg().back() == '\n');
+        BOOST_CHECK_EQUAL(submittable->try_no(), 0);
+        BOOST_CHECK_EQUAL(node->state(), initial_state);
+
+        MockServer server(&defs);
+        server.shutdown();
+        TestHelper::invokeFailureRequest(server, Cmd_ptr(new RunNodeCmd(node->absNodePath(), false, true)));
+        TestHelper::invokeFailureRequest(server, Cmd_ptr(new RunNodeCmd(node->absNodePath(), true, true)));
+        TestHelper::invokeFailureRequest(server, Cmd_ptr(new EditScriptCmd(node->absNodePath(), NameValueVec{})));
+        TestHelper::invokeFailureRequest(
+            server,
+            Cmd_ptr(new EditScriptCmd(node->absNodePath(), NameValueVec{}, std::vector<std::string>{}, false, false)));
+        if (!alias_node) {
+            const auto alias_count = task->aliases().size();
+            auto directory         = ecf::test::scaffold::MakeDirectory{}.create();
+            defs.findSuite("s")->add_variable("ECF_HOME", directory.path().string());
+            for (bool run_alias : {false, true}) {
+                TestHelper::invokeFailureRequest(
+                    server,
+                    Cmd_ptr(new EditScriptCmd(
+                        task->absNodePath(), NameValueVec{}, std::vector<std::string>{"echo test"}, true, run_alias)));
+                BOOST_CHECK_EQUAL(task->aliases().size(), alias_count);
+            }
+        }
+        BOOST_CHECK_EQUAL(submittable->try_no(), 0);
+        BOOST_CHECK_EQUAL(node->state(), initial_state);
+    }
+
+    Defs local_defs;
+    auto local_task = local_defs.add_suite("local")->add_task("t");
+    auto directory  = ecf::test::scaffold::MakeDirectory{}.create();
+    local_defs.findSuite("local")->add_variable("ECF_HOME", directory.path().string());
+    MockServer local_server(&local_defs);
+    local_server.shutdown();
+    TestHelper::invokeRequest(
+        &local_server,
+        Cmd_ptr(new EditScriptCmd(
+            local_task->absNodePath(), NameValueVec{}, std::vector<std::string>{"echo test"}, true, false)));
+    BOOST_CHECK_EQUAL(local_task->aliases().size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(test_run_continues_past_mirrored_path) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto suite  = defs.add_suite("s");
+    auto remote = suite->add_task("remote");
+    auto local  = suite->add_task("local");
+    local->add_variable("ECF_DUMMY_TASK", "1");
+    defs.beginAll();
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeFailureRequest(
+        server, Cmd_ptr(new RunNodeCmd(std::vector<std::string>{remote->absNodePath(), local->absNodePath()}, false)));
+    BOOST_CHECK_EQUAL(remote->try_no(), 0);
+    BOOST_CHECK_EQUAL(local->try_no(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_run_mirrored_container_reports_skipped_child) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto family = defs.add_suite("s")->add_family("f");
+    auto remote = family->add_task("remote");
+    auto local  = family->add_task("local");
+    remote->add_variable("ECF_DUMMY_TASK", "1");
+    local->add_variable("ECF_DUMMY_TASK", "1");
+    defs.beginAll();
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeFailureRequest(server, Cmd_ptr(new RunNodeCmd(family->absNodePath(), false)));
+    BOOST_CHECK_EQUAL(remote->try_no(), 0);
+    BOOST_CHECK_EQUAL(local->try_no(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_local_alias_under_mirrored_task_cannot_submit) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto task  = defs.add_suite("s")->add_task("t");
+    auto alias = task->add_alias_only();
+    alias->add_variable("ECF_DUMMY_TASK", "1");
+    defs.beginAll();
+    task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    JobsParam jobs(60, false);
+    BOOST_CHECK(!alias->run(jobs, false));
+    BOOST_CHECK(!alias->submitJob(jobs));
+    BOOST_CHECK_EQUAL(alias->try_no(), 0);
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeFailureRequest(server, Cmd_ptr(new RunNodeCmd(alias->absNodePath(), false, true)));
+    TestHelper::invokeFailureRequest(server, Cmd_ptr(new EditScriptCmd(alias->absNodePath(), NameValueVec{})));
+    BOOST_CHECK_EQUAL(alias->try_no(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_forced_run_of_active_alias_under_mirrored_task_creates_no_zombie) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto task  = defs.add_suite("s")->add_task("t");
+    auto alias = task->add_alias_only();
+    defs.beginAll();
+    task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    alias->init("local-pid");
+    MockServer server(&defs);
+    server.shutdown();
+
+    TestHelper::invokeFailureRequest(server, Cmd_ptr(new RunNodeCmd(alias->absNodePath(), true, true)));
+    BOOST_CHECK(server.zombie_ctrl().find_by_path_only(alias->absNodePath()).empty());
+    BOOST_CHECK_EQUAL(alias->state(), NState::ACTIVE);
+}
+
+BOOST_AUTO_TEST_CASE(test_forced_operations_only_zombify_local_submittables) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto suite  = defs.add_suite("s");
+    auto family = suite->add_family("f");
+    family->addMirror(MirrorAttr{family.get(), "m", "/remote/f", "host", "3141", "60", false, "", "", false});
+    auto local  = family->add_task("local");
+    auto remote = family->add_task("remote");
+    auto alias  = remote->add_alias_only();
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    alias->addMirror(MirrorAttr{alias.get(), "m", "/remote/a", "host", "3141", "60", false, "", "", false});
+    local->set_state(NState::ACTIVE);
+    remote->set_state(NState::ACTIVE);
+    alias->set_state(NState::SUBMITTED);
+    MockServer server(&defs);
+    server.zombie_ctrl().add_user_zombies(family.get(), "replace");
+    BOOST_CHECK(!server.zombie_ctrl().find_by_path_only(local->absNodePath()).empty());
+    BOOST_CHECK(server.zombie_ctrl().find_by_path_only(remote->absNodePath()).empty());
+    BOOST_CHECK(server.zombie_ctrl().find_by_path_only(alias->absNodePath()).empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_forced_requeue_filters_direct_mirror_zombies) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto family = defs.add_suite("s")->add_family("f");
+    auto local  = family->add_task("local");
+    auto remote = family->add_task("remote");
+    defs.beginAll();
+    remote->addMirror(MirrorAttr{remote.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    local->set_state(NState::ACTIVE);
+    remote->set_state(NState::ACTIVE);
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeRequest(&server, Cmd_ptr(new RequeueNodeCmd(family->absNodePath(), RequeueNodeCmd::FORCE)));
+    BOOST_CHECK(!server.zombie_ctrl().find_by_path_only(local->absNodePath()).empty());
+    BOOST_CHECK(server.zombie_ctrl().find_by_path_only(remote->absNodePath()).empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_mirror_admission_rejects_local_job_and_zombie) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto task  = defs.add_suite("s")->add_task("t");
+    auto alias = task->add_alias_only();
+    MockServer server(&defs);
+    const std::string mirror = "--remote_path /remote/t";
+    for (auto node : {static_cast<Node*>(task.get()), static_cast<Node*>(alias.get())}) {
+        for (auto state : {NState::ACTIVE, NState::SUBMITTED}) {
+            node->set_state(state);
+            TestHelper::invokeFailureRequest(
+                server, Cmd_ptr(new AlterCmd(node->absNodePath(), AlterCmd::ADD_MIRROR, "m", mirror)));
+            BOOST_CHECK(!node->isMirror());
+            BOOST_CHECK_EQUAL(node->state(), state);
+        }
+        node->isSubmittable()->init("pid-old");
+        server.zombie_ctrl().add_user_zombies(node, "test");
+        BOOST_CHECK(!server.zombie_ctrl().find_by_path_only(node->absNodePath()).empty());
+        node->isSubmittable()->init("pid-new");
+        BOOST_CHECK(server.zombie_ctrl()
+                        .find(node->absNodePath(),
+                              node->isSubmittable()->process_or_remote_id(),
+                              node->isSubmittable()->jobsPassword())
+                        .empty());
+        node->set_state(NState::QUEUED);
+        TestHelper::invokeFailureRequest(server,
+                                         Cmd_ptr(new AlterCmd(node->absNodePath(), AlterCmd::ADD_MIRROR, "m", mirror)));
+        BOOST_CHECK(!node->isMirror());
+        BOOST_CHECK_EQUAL(node->state(), NState::QUEUED);
+        server.zombie_ctrl().remove_by_path(node->absNodePath());
+        TestHelper::invokeRequest(&server,
+                                  Cmd_ptr(new AlterCmd(node->absNodePath(), AlterCmd::ADD_MIRROR, "m", mirror)));
+        BOOST_CHECK(node->isMirror());
+        node->deleteMirror("m");
+    }
+
+    task->set_state(NState::ACTIVE);
+    TestHelper::invokeRequest(
+        &server, Cmd_ptr(new AlterCmd(defs.findSuite("s")->absNodePath(), AlterCmd::ADD_MIRROR, "m", mirror)));
+    BOOST_CHECK(defs.findSuite("s")->isMirror());
+    BOOST_CHECK_EQUAL(task->state(), NState::ACTIVE);
+}
+
+BOOST_AUTO_TEST_CASE(test_mirror_admission_protects_local_aliases) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto task  = defs.add_suite("s")->add_task("t");
+    auto alias = task->add_alias_only();
+    MockServer server(&defs);
+    alias->set_state(NState::ACTIVE);
+    BOOST_CHECK_EQUAL(task->state(), NState::UNKNOWN);
+    TestHelper::invokeFailureRequest(
+        server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::ADD_MIRROR, "m", "--remote_path /remote/t")));
+    BOOST_CHECK(!task->isMirror());
+    alias->set_state(NState::SUBMITTED);
+    TestHelper::invokeFailureRequest(
+        server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::ADD_MIRROR, "m", "--remote_path /remote/t")));
+    BOOST_CHECK(!task->isMirror());
+    if (task->isMirror()) {
+        task->deleteMirror("m"); // Keep the zombie case independent of the preceding failure.
+    }
+    server.zombie_ctrl().add_user_zombies(alias.get(), "test");
+    alias->set_state(NState::QUEUED);
+    TestHelper::invokeFailureRequest(
+        server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::ADD_MIRROR, "m", "--remote_path /remote/t")));
+    BOOST_CHECK(!task->isMirror());
+}
+
+BOOST_AUTO_TEST_CASE(test_delete_mirror_resets_remote_state_only_on_removal) {
+    ECF_NAME_THIS_TEST();
+
+    for (auto state : {NState::QUEUED, NState::SUBMITTED, NState::ACTIVE, NState::COMPLETE, NState::ABORTED}) {
+        for (bool alias_node : {false, true}) {
+            for (bool delete_all : {false, true}) {
+                Defs defs;
+                auto suite    = defs.add_suite("s");
+                auto task     = suite->add_task("t");
+                node_ptr node = task;
+                if (alias_node) {
+                    node = task->add_alias_only();
+                }
+                node->addMirror(MirrorAttr{node.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+                node->set_state(state);
+                node->get_flag().set(ecf::Flag::REMOTE_ERROR);
+                MockServer server(&defs);
+                server.shutdown();
+                TestHelper::invokeRequest(
+                    &server, Cmd_ptr(new AlterCmd(node->absNodePath(), AlterCmd::DEL_MIRROR, delete_all ? "" : "m")));
+                BOOST_CHECK(!node->isMirror());
+                BOOST_CHECK_EQUAL(node->state(), NState::UNKNOWN);
+                BOOST_CHECK(!node->get_flag().is_set(ecf::Flag::REMOTE_ERROR));
+                if (!alias_node) {
+                    BOOST_CHECK_EQUAL(suite->state(), NState::UNKNOWN);
+                }
+                else {
+                    BOOST_CHECK_EQUAL(task->state(), NState::UNKNOWN);
+                }
+            }
+        }
+    }
+
+    Defs defs;
+    auto task = defs.add_suite("s")->add_task("t");
+    task->set_state(NState::ACTIVE);
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeRequest(&server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::DEL_MIRROR)), false);
+    BOOST_CHECK_EQUAL(task->state(), NState::ACTIVE);
+    task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    TestHelper::invokeFailureRequest(server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::DEL_MIRROR, "wrong")));
+    BOOST_CHECK(task->isMirror());
+    BOOST_CHECK_EQUAL(task->state(), NState::ACTIVE);
+    TestHelper::invokeRequest(
+        &server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::MIRROR, "m", "--remote_path /remote/new")));
+    BOOST_CHECK(task->isMirror());
+    BOOST_CHECK_EQUAL(task->state(), NState::ACTIVE);
+}
+
+BOOST_AUTO_TEST_CASE(test_delete_mirror_does_not_complete_task_from_aliases) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto suite = defs.add_suite("s");
+    auto task  = suite->add_task("t");
+    auto alias = task->add_alias_only();
+    task->addMirror(MirrorAttr{task.get(), "m", "/remote/t", "host", "3141", "60", false, "", "", false});
+    alias->set_state(NState::COMPLETE);
+    task->setStateOnly(NState::ACTIVE);
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeRequest(&server, Cmd_ptr(new AlterCmd(task->absNodePath(), AlterCmd::DEL_MIRROR, "m")));
+    BOOST_CHECK_EQUAL(task->state(), NState::UNKNOWN);
+    BOOST_CHECK_EQUAL(suite->state(), NState::UNKNOWN);
+}
+
+BOOST_AUTO_TEST_CASE(test_delete_container_mirror_clears_remote_error) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    auto family = defs.add_suite("s")->add_family("f");
+    auto local  = family->add_task("local");
+    family->addMirror(MirrorAttr{family.get(), "m", "/remote/f", "host", "3141", "60", false, "", "", false});
+    family->get_flag().set(ecf::Flag::REMOTE_ERROR);
+    local->set_state(NState::ACTIVE);
+    MockServer server(&defs);
+    server.shutdown();
+    TestHelper::invokeRequest(&server, Cmd_ptr(new AlterCmd(family->absNodePath(), AlterCmd::DEL_MIRROR, "m")));
+    BOOST_CHECK(!family->isMirror());
+    BOOST_CHECK(!family->get_flag().is_set(ecf::Flag::REMOTE_ERROR));
+    BOOST_CHECK_EQUAL(local->state(), NState::ACTIVE);
+}
 
 class TestStateChanged {
 public:

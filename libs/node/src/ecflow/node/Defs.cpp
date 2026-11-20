@@ -1094,19 +1094,19 @@ node_ptr Defs::replaceChild(const std::string& path,
 
     node_ptr serverNode = findAbsNode(path);
     if (!force && serverNode.get()) {
-        // Check if serverNode has child tasks in submitted or active states
-        auto taskVec = ecf::get_all_tasks(*serverNode); // taskVec will be empty if serverNode is a task
-        int count    = 0;
-        for (Task* t : taskVec) {
-            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
-                count++;
+        // Only locally running jobs must prevent replacement. Include the root and runnable aliases.
+        auto active = ecf::get_all_active_submittables(*serverNode);
+        int count   = 0;
+        for (const Submittable* node : active) {
+            if (!node->isMirror()) {
+                ++count;
             }
         }
         if (count != 0) {
             errorMsg =
                 MESSAGE("Cannot replace node "
                         << serverNode->debugNodePath() << " because it has " << count
-                        << " tasks which are active or submitted\n"
+                        << " tasks or aliases which are active or submitted and not mirrored\n"
                         << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n");
             return node_ptr();
         }

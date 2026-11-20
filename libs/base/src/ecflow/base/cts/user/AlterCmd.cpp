@@ -23,6 +23,7 @@
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
@@ -31,6 +32,7 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/AvisoParser.hpp"
 #include "ecflow/node/parser/MirrorParser.hpp"
 
@@ -440,9 +442,20 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::DEL_AVISO:
                     node->deleteAviso(name_);
                     break;
-                case AlterCmd::DEL_MIRROR:
+                case AlterCmd::DEL_MIRROR: {
+                    const bool had_mirror = node->isMirror();
                     node->deleteMirror(name_);
+                    if (had_mirror && !node->isMirror()) {
+                        // Aviso and Mirror are mutually exclusive on a node.
+                        node->get_flag().clear(ecf::Flag::REMOTE_ERROR);
+                        if (node->isTask() || node->isAlias()) {
+                            // The old state was remote, not a local job transition: avoid limit/repeat side effects.
+                            node->setStateOnly(NState::UNKNOWN);
+                            node->set_most_significant_state_up_node_tree();
+                        }
+                    }
                     break;
+                }
                 default:
                     break;
             }
@@ -544,6 +557,27 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 }
                 case AlterCmd::ADD_MIRROR: {
+                    if (!node->isMirror() && (node->isTask() || node->isAlias())) {
+                        if (node->state() == NState::ACTIVE || node->state() == NState::SUBMITTED) {
+                            throw std::runtime_error(
+                                "Cannot add a mirror to an active or submitted local task or alias: " +
+                                node->absNodePath());
+                        }
+                        if (!as->zombie_ctrl().find_by_path_only(node->absNodePath()).empty()) {
+                            throw std::runtime_error("Cannot add a mirror while a local zombie exists at: " +
+                                                     node->absNodePath());
+                        }
+                        if (auto* task = node->isTask()) {
+                            for (const auto& alias : task->aliases()) {
+                                if (alias->state() == NState::ACTIVE || alias->state() == NState::SUBMITTED ||
+                                    !as->zombie_ctrl().find_by_path_only(alias->absNodePath()).empty()) {
+                                    throw std::runtime_error("Cannot add a mirror while a local alias is running or "
+                                                             "has a zombie at: " +
+                                                             alias->absNodePath());
+                                }
+                            }
+                        }
+                    }
                     auto mirror = MirrorParser::parse_mirror_line(value_, name_, node.get());
                     node->addMirror(mirror);
                     break;

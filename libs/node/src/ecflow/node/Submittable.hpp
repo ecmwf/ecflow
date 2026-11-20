@@ -51,6 +51,12 @@ public:
     void reset() override;
     void begin() override;
     void requeue(Requeue_args&) override;
+    ///
+    /// @brief Runs a local job unless this submittable or its parent task is mirrored.
+    /// @param[in,out] jobsParam Submission configuration and error details.
+    /// @param[in] force Allows rerunning a local active or submitted job, not a mirror.
+    /// @return Whether the local run was accepted.
+    ///
     bool run(JobsParam& jobsParam, bool force) override;
     void kill(const std::string& zombie_pid = "") override;
     void status() override;
@@ -69,9 +75,12 @@ public:
     EcfFile locatedEcfFile() const;
     virtual const std::string& script_extension() const = 0;
 
-    /// Spawn of a child process. Clear process and remote id before jobs is spawned
-    /// Will increment try no first, and then update generated varaibles
-    bool submitJob(JobsParam&);
+    ///
+    /// @brief Submits a local job unless this node is mirrored, or this alias belongs to a mirrored task.
+    /// @param[in,out] jobsParam Submission configuration and error details.
+    /// @return Whether the submission succeeded; a mirrored node is rejected without changing its attempt number.
+    ///
+    bool submitJob(JobsParam& jobsParam);
 
     /// generates job file independent of dependencies, resets the try Number
     void check_job_creation(job_creation_ctrl_ptr jobCtrl) override;
