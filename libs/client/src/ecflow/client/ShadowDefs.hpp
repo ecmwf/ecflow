@@ -10,6 +10,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
+#include <shared_mutex>
 #include <string>
 #include <thread>
 
@@ -31,6 +33,10 @@ public:
 
     ///
     /// @brief Fetches the whole definition from the server.
+    ///
+    /// A source may refresh, in place, the definition that an earlier fetch returned and return it again, as
+    /// ClientInvokerShadowDefsSource does; ShadowDefs therefore makes a fetch, once a copy is published, while no
+    /// read view is held.
     ///
     /// @return The definition, as the server holds it now.
     /// @throws std::exception when the server cannot be reached, or refuses the request.
@@ -74,6 +80,15 @@ private:
 };
 
 ///
+/// @brief Describes how far the copy of the definition can be trusted.
+///
+enum class ShadowDefsState {
+    NeverSynchronised, ///< No definition has been obtained from the server yet.
+    Current,           ///< The last successful contact with the server is within the maximum age.
+    Stale              ///< The last successful contact is older than the maximum age; the last copy is kept.
+};
+
+///
 /// @brief Keeps a copy of the definition held by an ecFlow server, polling the server for changes.
 ///
 /// After start, a thread asks the server for changes at an interval, and updates the copy when there are some. The
@@ -90,10 +105,24 @@ private:
 /// same means of reaching the server. The interval policy is called in the polling thread; an exception that it
 /// throws is reported and retried like a failure to reach the server.
 ///
-/// The copy returned by get is the object that later updates change in place; the copy is not handed out while an
-/// update runs, but a holder of the copy may observe a later update.
+/// The copy is one object, which updates change in place. A reader that must not see the copy change while it reads
+/// takes a read view: a multiple-reader, single-writer lock, held for as long as the view is held. Reads proceed in
+/// parallel; an update takes the lock exclusively, so it waits for the reads in progress. Writers have priority on
+/// every platform: once an update waits, new read views, and get, wait until it is done, so that a stream of readers
+/// cannot hold an update back. An update holds the lock for its whole exchange with the server, so readers that
+/// arrive meanwhile wait for the server's reply as well. No copy of the definition is made. The pointer returned by
+/// get is not protected: the copy may change while it is used, so get suits only callers that tolerate that.
 ///
-/// @invariant Once start has returned, get never returns null.
+/// A thread that holds a read view must not call get, read, refresh, poll_once, start or stop until it releases the
+/// view: each of them takes the lock again, or waits for an update that the view holds back. A read view must not
+/// outlive its ShadowDefs, and every update waits while it is held, so it should be held only for as long as the
+/// reading takes.
+///
+/// The state of the copy is derived from the last successful contact with the server: a fetch, a question for news,
+/// or an update. A failed contact does not refresh it.
+///
+/// @invariant Once start has returned, or once the first fetch after start_in_background has succeeded, get never
+/// returns null.
 ///
 class ShadowDefs {
 public:
@@ -103,6 +132,50 @@ public:
     using Report = std::function<void(const std::string&)>;
     /// @brief Receives the copy after each update; called in the thread that made the update.
     using Updated = std::function<void(const Defs&)>;
+    /// @brief Returns the current time; replaced by tests.
+    using Clock = std::function<std::chrono::steady_clock::time_point()>;
+
+    ///
+    /// @brief Gives access to the copy of the definition, which no update changes while the view is held.
+    ///
+    /// The view holds a shared lock on the copy, and gives read-only access to it. See the class documentation for
+    /// the calls that the holding thread must not make.
+    ///
+    class ReadView {
+    public:
+        ///
+        /// @brief Creates a view over the copy, holding the given lock.
+        ///
+        /// @param[in] lock A shared lock on the copy's mutex.
+        /// @param[in] defs The copy; null before the first fetch.
+        ///
+        ReadView(std::shared_lock<std::shared_mutex> lock, std::shared_ptr<const Defs> defs);
+
+        ///
+        /// @brief Tells whether the view shows a definition.
+        ///
+        /// @return False before the first successful fetch.
+        ///
+        explicit operator bool() const { return defs_ != nullptr; }
+
+        ///
+        /// @brief Gives read-only access to the definition.
+        ///
+        /// @return The definition; the view must show one.
+        ///
+        const Defs* operator->() const { return defs_.get(); }
+
+        ///
+        /// @brief Returns the definition shown by the view.
+        ///
+        /// @return The definition, or null before the first successful fetch.
+        ///
+        [[nodiscard]] std::shared_ptr<const Defs> get() const { return defs_; }
+
+    private:
+        std::shared_lock<std::shared_mutex> lock_;
+        std::shared_ptr<const Defs> defs_;
+    };
 
     ///
     /// @brief Creates a copy that is empty until start is called.
@@ -134,10 +207,21 @@ public:
     /// The definition is fetched in the calling thread, so that a server that cannot be reached is reported to the
     /// caller.
     ///
+    /// @throws std::logic_error when the polling thread already runs; stop it first.
     /// @throws std::exception when the server cannot be reached, or refuses the request; the polling thread is then
     ///         not started.
     ///
     void start();
+
+    ///
+    /// @brief Starts polling without needing the server: the first fetch is made by the polling thread.
+    ///
+    /// The copy stays empty, and the state never synchronised, until a fetch succeeds; each failure is reported and
+    /// retried after the retry delay.
+    ///
+    /// @throws std::logic_error when the polling thread already runs; stop it first.
+    ///
+    void start_in_background();
 
     ///
     /// @brief Stops the polling thread and waits for it to end. Calling it again, or before start, does nothing.
@@ -147,9 +231,44 @@ public:
     ///
     /// @brief Returns the current copy of the definition.
     ///
-    /// @return The copy; null before start has succeeded.
+    /// @return The copy; null until the first fetch has succeeded.
     ///
     [[nodiscard]] std::shared_ptr<Defs> get() const;
+
+    ///
+    /// @brief Returns a read view of the copy, which no update changes while the view is held.
+    ///
+    /// @return The view; it shows no definition before the first successful fetch.
+    ///
+    [[nodiscard]] ReadView read() const;
+
+    ///
+    /// @brief Sets the maximum age of the last successful contact before the copy is stale.
+    ///
+    /// @param[in] max_age The maximum age; zero, the default, means that the copy is never stale.
+    ///
+    void set_max_age(std::chrono::milliseconds max_age);
+
+    ///
+    /// @brief Replaces the clock used to compute the age; for tests. Must be called before start.
+    ///
+    /// @param[in] now Returns the current time.
+    ///
+    void set_clock(Clock now);
+
+    ///
+    /// @brief Returns how far the copy can be trusted.
+    ///
+    /// @return The state, derived from the last successful contact and the maximum age.
+    ///
+    [[nodiscard]] ShadowDefsState state() const;
+
+    ///
+    /// @brief Returns the time since the last successful contact with the server.
+    ///
+    /// @return The age, or nothing before the first successful contact.
+    ///
+    [[nodiscard]] std::optional<std::chrono::milliseconds> age() const;
 
     ///
     /// @brief Asks the polling thread for an immediate update, waits until it is done, then calls the continuation.
@@ -183,9 +302,23 @@ public:
     ///
     [[nodiscard]] std::uint64_t requests_made();
 
+    ///
+    /// @brief Tells whether an update waits for read views to be released.
+    ///
+    /// Intended for tests and diagnostics.
+    ///
+    /// @return True while an update waits for the lock.
+    ///
+    [[nodiscard]] bool update_waiting() const;
+
 private:
     void update_copy();
     void loop();
+    void record_contact(std::chrono::steady_clock::time_point when);
+    std::chrono::steady_clock::time_point now() const;
+    void fetch_copy();
+    std::shared_lock<std::shared_mutex> admit_reader() const;
+    std::unique_lock<std::shared_mutex> admit_writer();
     std::uint64_t served_requests();
 
     std::unique_ptr<ShadowDefsSource> source_;
@@ -194,8 +327,18 @@ private:
     std::chrono::milliseconds retry_delay_;
     Updated updated_;
 
-    mutable std::mutex defs_mutex_;
+    mutable std::shared_mutex defs_mutex_;
     std::shared_ptr<Defs> defs_;
+
+    // Gives writers priority over new readers, whatever the platform's shared mutex prefers
+    mutable std::mutex admission_mutex_;
+    mutable std::condition_variable admission_;
+    int writers_waiting_{0}; // guarded by admission_mutex_
+
+    mutable std::mutex contact_mutex_;
+    Clock now_;
+    std::chrono::milliseconds max_age_{0};
+    std::optional<std::chrono::steady_clock::time_point> last_contact_;
 
     std::mutex wakeup_mutex_;
     std::condition_variable wakeup_;

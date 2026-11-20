@@ -4,6 +4,7 @@
 #include "ecflow/client/ShadowDefs.hpp"
 
 #include <exception>
+#include <stdexcept>
 #include <utility>
 
 #include "ecflow/node/Defs.hpp"
@@ -39,7 +40,13 @@ ShadowDefs::ShadowDefs(std::unique_ptr<ShadowDefsSource> source,
       next_interval_(std::move(next_interval)),
       report_(std::move(report)),
       retry_delay_(retry_delay),
-      updated_(std::move(updated)) {
+      updated_(std::move(updated)),
+      now_([] { return std::chrono::steady_clock::now(); }) {
+}
+
+ShadowDefs::ReadView::ReadView(std::shared_lock<std::shared_mutex> lock, std::shared_ptr<const Defs> defs)
+    : lock_(std::move(lock)),
+      defs_(std::move(defs)) {
 }
 
 ShadowDefs::~ShadowDefs() {
@@ -47,10 +54,16 @@ ShadowDefs::~ShadowDefs() {
 }
 
 void ShadowDefs::start() {
-    auto fetched = source_->fetch();
-    {
-        std::scoped_lock lock(defs_mutex_);
-        defs_ = std::move(fetched);
+    if (thread_) {
+        throw std::logic_error("ShadowDefs::start: the polling thread already runs");
+    }
+    fetch_copy();
+    start_in_background();
+}
+
+void ShadowDefs::start_in_background() {
+    if (thread_) {
+        throw std::logic_error("ShadowDefs::start_in_background: the polling thread already runs");
     }
     {
         std::scoped_lock lock(wakeup_mutex_);
@@ -74,9 +87,100 @@ void ShadowDefs::stop() {
     running_ = false;
 }
 
+std::shared_lock<std::shared_mutex> ShadowDefs::admit_reader() const {
+    std::unique_lock admission(admission_mutex_);
+    admission_.wait(admission, [this] { return writers_waiting_ == 0; });
+    // Taken while admission is held, so that a writer arriving now waits for this reader rather than overtaking it
+    return std::shared_lock(defs_mutex_);
+}
+
+std::unique_lock<std::shared_mutex> ShadowDefs::admit_writer() {
+    {
+        std::scoped_lock admission(admission_mutex_);
+        ++writers_waiting_;
+    }
+    std::unique_lock lock(defs_mutex_);
+    {
+        std::scoped_lock admission(admission_mutex_);
+        --writers_waiting_;
+    }
+    admission_.notify_all();
+    return lock;
+}
+
 std::shared_ptr<Defs> ShadowDefs::get() const {
-    std::scoped_lock lock(defs_mutex_);
+    auto lock = admit_reader();
     return defs_;
+}
+
+ShadowDefs::ReadView ShadowDefs::read() const {
+    auto lock                        = admit_reader();
+    std::shared_ptr<const Defs> defs = defs_;
+    return ReadView(std::move(lock), std::move(defs));
+}
+
+bool ShadowDefs::update_waiting() const {
+    std::scoped_lock admission(admission_mutex_);
+    return writers_waiting_ > 0;
+}
+
+void ShadowDefs::set_max_age(std::chrono::milliseconds max_age) {
+    std::scoped_lock lock(contact_mutex_);
+    max_age_ = max_age;
+}
+
+void ShadowDefs::set_clock(Clock now) {
+    std::scoped_lock lock(contact_mutex_);
+    now_ = std::move(now);
+}
+
+ShadowDefsState ShadowDefs::state() const {
+    std::scoped_lock lock(contact_mutex_);
+    if (!last_contact_) {
+        return ShadowDefsState::NeverSynchronised;
+    }
+    if (max_age_.count() > 0 && now_() - *last_contact_ > max_age_) {
+        return ShadowDefsState::Stale;
+    }
+    return ShadowDefsState::Current;
+}
+
+std::optional<std::chrono::milliseconds> ShadowDefs::age() const {
+    std::scoped_lock lock(contact_mutex_);
+    if (!last_contact_) {
+        return std::nullopt;
+    }
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now_() - *last_contact_);
+}
+
+std::chrono::steady_clock::time_point ShadowDefs::now() const {
+    std::scoped_lock lock(contact_mutex_);
+    return now_();
+}
+
+void ShadowDefs::record_contact(std::chrono::steady_clock::time_point when) {
+    std::scoped_lock lock(contact_mutex_);
+    last_contact_ = when;
+}
+
+void ShadowDefs::fetch_copy() {
+    std::chrono::steady_clock::time_point contact;
+    if (get()) {
+        // A copy is published, as after a restart: the source may refresh it in place, so the fetch waits for the
+        // read views in progress and holds back new ones, as an update does
+        auto lock = admit_writer();
+        defs_     = source_->fetch();
+        contact   = now();
+    }
+    else {
+        // Nothing is published, so readers are not held back while the server is slow or absent
+        auto fetched = source_->fetch();
+        // The contact happened when the fetch returned, however long the publication waits for read views
+        contact   = now();
+        auto lock = admit_writer();
+        defs_     = std::move(fetched);
+    }
+    record_contact(contact);
 }
 
 void ShadowDefs::refresh(const std::function<void()>& then) {
@@ -96,19 +200,24 @@ void ShadowDefs::refresh(const std::function<void()>& then) {
 }
 
 void ShadowDefs::poll_once() {
-    if (source_->has_news(get())) {
+    const bool news = source_->has_news(get());
+    record_contact(now());
+    if (news) {
         update_copy();
     }
 }
 
 void ShadowDefs::update_copy() {
     std::shared_ptr<Defs> updated;
+    std::chrono::steady_clock::time_point contact;
     {
-        // The update may change the copy in place, so the copy is not handed out while the update runs
-        std::scoped_lock lock(defs_mutex_);
-        updated = source_->update(defs_);
-        defs_   = updated;
+        // The update changes the copy in place, so it waits for the read views in progress and holds back new ones
+        auto lock = admit_writer();
+        updated   = source_->update(defs_);
+        defs_     = updated;
+        contact   = now();
     }
+    record_contact(contact);
     if (updated_ && updated) {
         updated_(*updated);
     }
@@ -119,6 +228,10 @@ void ShadowDefs::loop() {
     bool first = true;
     while (true) {
         try {
+            if (!get()) {
+                // Started without the server: the first fetch is retried until it succeeds
+                fetch_copy();
+            }
             if (first) {
                 // The first wait is given by the policy once the definition has been fetched
                 wait  = next_interval_();
