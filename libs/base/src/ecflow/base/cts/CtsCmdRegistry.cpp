@@ -32,6 +32,7 @@
 #include "ecflow/base/cts/user/LogCmd.hpp"
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -128,6 +129,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     vec_.push_back(std::make_shared<EditScriptCmd>());
     vec_.push_back(std::make_shared<AlterCmd>());
     vec_.push_back(std::make_shared<QueryCmd>());
+    vec_.push_back(std::make_shared<OwnershipCmd>());
     vec_.push_back(std::make_shared<PlugCmd>());
     // Note: we deliberately do not add MoveCmd, as it should not appear in the public api
     //       It is created on the fly by the PlugCmd

@@ -1,0 +1,5 @@
+# The Owner keyword takes a single value
+suite s
+   task t
+      owner alice bob
+endsuite

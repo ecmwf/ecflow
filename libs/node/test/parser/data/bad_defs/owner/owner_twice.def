@@ -1,0 +1,5 @@
+# A node can only have one Owner
+suite s
+   owner alice
+   owner bob
+endsuite

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -42,6 +43,30 @@ public:
     bool compare(const ServerState& rhs) const;
 
     ecf::Permissions permissions() const { return ecf::Permissions::find_in(user_variables_); }
+
+    ///
+    /// @brief Returns the server Owner, used by nodes without any Owner on their path.
+    ///
+    /// @details The server Owner is configuration: it is set by the server at start-up and after a checkpoint is
+    ///          restored, transported to clients only by full synchronisations (PrintStyle::NET), and never
+    ///          checkpointed. It is always ignored by operator==, and considered by compare().
+    ///
+    /// @return The server Owner, or nullptr when none is set.
+    ///
+    const ecf::OwnerAttr* server_owner() const { return server_owner_.user().empty() ? nullptr : &server_owner_; }
+
+    ///
+    /// @brief Sets the server Owner.
+    ///
+    /// @param[in] owner The server Owner; must not be empty.
+    /// @throws std::runtime_error if @p owner is empty.
+    ///
+    void set_server_owner(const ecf::OwnerAttr& owner);
+
+    ///
+    /// @brief Removes the server Owner.
+    ///
+    void clear_server_owner() { server_owner_ = ecf::OwnerAttr{}; }
 
     void sort_variables();
 
@@ -114,6 +139,7 @@ private:
     SState::State server_state_;
     std::vector<Variable> server_variables_;
     std::vector<Variable> user_variables_;
+    ecf::OwnerAttr server_owner_; // empty when no server Owner is set; not persisted
 
     std::pair<std::string, std::string> hostPort_; // NOT persisted, set by server hence no need to persist
     bool jobGeneration_{true};                     // NOT persisted, since set in the server

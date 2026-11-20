@@ -277,6 +277,12 @@ void NodeLateMemento::serialize(Archive& ar, std::uint32_t const version) {
 }
 
 template <class Archive>
+void NodeOwnerMemento::serialize(Archive& ar, std::uint32_t const version) {
+    ar(cereal::base_class<Memento>(this), CEREAL_NVP(present_));
+    CEREAL_OPTIONAL_NVP(ar, owner_, [this]() { return present_; }); // an absent Owner cannot be serialised
+}
+
+template <class Archive>
 void FlagMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(flag_));
 }
@@ -361,6 +367,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(NodeLimitMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeInLimitMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeVariableMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeLateMemento);
+CEREAL_TEMPLATE_SPECIALIZE_V(NodeOwnerMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeTodayMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeTimeMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeDayMemento);
@@ -400,6 +407,7 @@ CEREAL_REGISTER_TYPE(NodeLimitMemento)
 CEREAL_REGISTER_TYPE(NodeInLimitMemento)
 CEREAL_REGISTER_TYPE(NodeVariableMemento)
 CEREAL_REGISTER_TYPE(NodeLateMemento)
+CEREAL_REGISTER_TYPE(NodeOwnerMemento)
 CEREAL_REGISTER_TYPE(NodeTodayMemento)
 CEREAL_REGISTER_TYPE(NodeTimeMemento)
 CEREAL_REGISTER_TYPE(NodeDayMemento)

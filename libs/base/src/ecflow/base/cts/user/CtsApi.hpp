@@ -216,6 +216,16 @@ public:
                                           const std::string& attribute,
                                           bool evaluate = false);
 
+    ///
+    /// @brief Builds the command line tokens of an --ownership request.
+    ///
+    /// @param[in] op The operation, one of [create | read | update | delete].
+    /// @param[in] path The absolute path of the node, or '/' for the server Owner.
+    /// @param[in] value The Owner, as user[:group], for create and update; empty otherwise (then omitted).
+    /// @return The tokens, starting with "--ownership=<op>".
+    ///
+    static std::vector<std::string> ownership(const std::string& op, const std::string& path, const std::string& value);
+
     // Only to be used in Cmd
     static const char* server_version_arg();
     static const char* statsArg();
@@ -286,6 +296,7 @@ public:
     static const char* alterArg();
     static const char* edit_script_arg();
     static const char* queryArg();
+    static const char* ownershipArg();
 
     ///
     /// @brief Returns the name of the --evaluate option, a modifier of --query that is only valid with query

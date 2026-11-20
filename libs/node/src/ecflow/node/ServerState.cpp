@@ -3,6 +3,8 @@
 
 #include "ecflow/node/ServerState.hpp"
 
+#include <stdexcept>
+
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Host.hpp"
@@ -81,7 +83,17 @@ bool ServerState::operator==(const ServerState& rhs) const {
     return true;
 }
 
+void ServerState::set_server_owner(const ecf::OwnerAttr& owner) {
+    if (owner.user().empty()) {
+        throw std::runtime_error("ServerState::set_server_owner: The server Owner cannot be empty");
+    }
+    server_owner_ = owner;
+}
+
 bool ServerState::compare(const ServerState& rhs) const {
+    if (!(server_owner_ == rhs.server_owner_)) {
+        return false;
+    }
     if (get_state() != rhs.get_state()) {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {

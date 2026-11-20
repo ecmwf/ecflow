@@ -34,6 +34,9 @@ std::string NodeStats::print() const {
     ss << "days                " << days_ << "\n\n";
 
     ss << "late                " << late_ << "\n";
+    if (owners_ != 0) { // only shown when Owners are used, so that existing outputs are unchanged
+        ss << "owners              " << owners_ << "\n";
+    }
     ss << "inlimits            " << inlimits_ << "\n";
     ss << "limits              " << limits_ << "\n";
     ss << "repeats             " << repeats_ << "\n";

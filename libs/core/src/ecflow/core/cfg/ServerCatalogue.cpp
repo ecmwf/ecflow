@@ -3,6 +3,8 @@
 
 #include "ecflow/core/cfg/ServerCatalogue.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <limits>
 
 #include "ecflow/core/CheckPt.hpp"
@@ -30,6 +32,32 @@ Check ssl_supported() {
     constexpr bool supported = false;
 #endif
     return checks::only_when_supported(supported, "this server was built without SSL support");
+}
+
+/// Accepts a comma-separated list of environment variable names, possibly empty
+Check variable_names() {
+    return [](const Value& value) -> std::optional<std::string> {
+        const auto& text = std::get<std::string>(value);
+        if (text.empty()) {
+            return std::nullopt;
+        }
+        std::size_t start = 0;
+        for (;;) {
+            const auto end   = text.find(',', start);
+            const auto name  = text.substr(start, end == std::string::npos ? std::string::npos : end - start);
+            const bool valid = !name.empty() && !std::isdigit(static_cast<unsigned char>(name[0])) &&
+                               std::all_of(name.begin(), name.end(), [](char c) {
+                                   return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+                               });
+            if (!valid) {
+                return std::string("expected comma-separated environment variable names");
+            }
+            if (end == std::string::npos) {
+                return std::nullopt;
+            }
+            start = end + 1;
+        }
+    };
 }
 
 std::vector<Setting> server_settings() {
@@ -401,6 +429,44 @@ std::vector<Setting> server_settings() {
                 std::nullopt,                          // env
                 std::nullopt                           // cli
             }),
+
+        // Ownership: <host>.<port>.ecf.cfg, overridden by the environment, then the command line
+
+        Setting(
+            Key::for_option("ecflow.server.ownership.owner"),
+            Type::Text,
+            std::nullopt, // ownership is enabled by configuring a server Owner
+            Names{
+                std::nullopt,                     // env_cfg
+                "/ecflow/server/ownership/owner", // ecf_cfg
+                "ECF_OWNERSHIP_OWNER",            // env
+                "ownership_owner"                 // cli
+            },
+            required),
+
+        Setting(
+            Key::for_option("ecflow.server.ownership.path"),
+            Type::Text,
+            Value{std::string("/usr/local/bin:/usr/bin:/bin")},
+            Names{
+                std::nullopt,                    // env_cfg
+                "/ecflow/server/ownership/path", // ecf_cfg
+                "ECF_OWNERSHIP_PATH",            // env
+                "ownership_path"                 // cli
+            },
+            required),
+
+        Setting(
+            Key::for_option("ecflow.server.ownership.environment"),
+            Type::Text,
+            Value{std::string()},
+            Names{
+                std::nullopt,                           // env_cfg
+                "/ecflow/server/ownership/environment", // ecf_cfg
+                "ECF_OWNERSHIP_ENVIRONMENT",            // env
+                "ownership_environment"                 // cli
+            },
+            variable_names()),
     };
     // clang-format on
 }

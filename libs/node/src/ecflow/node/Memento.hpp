@@ -31,6 +31,7 @@
 
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
@@ -696,6 +697,43 @@ private:
     }
 
     ecf::LateAttr late_;
+    friend class Node;
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
+};
+
+///
+/// @brief Represents the Owner of a node, sent to clients whenever the attributes of the node are resent.
+///
+/// @details The Owner has no changeable state of its own: adding, changing or removing it changes the attributes of
+///          the node, which are then all resent, this memento included when the node has an Owner, or when its
+///          Owner was removed since the client last synchronised (the memento then holds no Owner).
+///
+class NodeOwnerMemento : public Memento {
+public:
+    ///
+    /// @brief Creates a memento for the given Owner.
+    ///
+    /// @param[in] owner The Owner of the node.
+    ///
+    explicit NodeOwnerMemento(const ecf::OwnerAttr& owner)
+        : owner_(owner),
+          present_(true) {}
+
+    ///
+    /// @brief Creates a memento stating that the node has no Owner (any longer); also used for deserialisation.
+    ///
+    NodeOwnerMemento() = default;
+
+private:
+    void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
+        n->set_memento(this, aspects, f);
+    }
+
+    ecf::OwnerAttr owner_;
+    bool present_{false}; // false when the Owner was removed
     friend class Node;
 
     friend class cereal::access;

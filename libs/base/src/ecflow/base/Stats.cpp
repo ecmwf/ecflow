@@ -27,6 +27,7 @@ Stats::Stats(const Stats& rhs)
       ECF_LOG_(rhs.ECF_LOG_),
       ECF_SSL_(rhs.ECF_SSL_),
       ECF_SSL_CERTIFICATE_(rhs.ECF_SSL_CERTIFICATE_),
+      ownership_(rhs.ownership_),
       status_(rhs.status_),
       request_count_(rhs.request_count_),
       job_sub_interval_(rhs.job_sub_interval_),
@@ -127,6 +128,7 @@ Stats& Stats::operator=(const Stats& rhs) {
     swap(ECF_LOG_, tmp.ECF_LOG_);
     swap(ECF_SSL_, tmp.ECF_SSL_);
     swap(ECF_SSL_CERTIFICATE_, tmp.ECF_SSL_CERTIFICATE_);
+    swap(ownership_, tmp.ownership_);
     swap(status_, tmp.status_);
     swap(request_count_, tmp.request_count_);
     swap(job_sub_interval_, tmp.job_sub_interval_);
@@ -515,6 +517,9 @@ void Stats::show(std::ostream& os) const {
     display("ECF_SSL", ECF_SSL_);
     if (!ECF_SSL_CERTIFICATE_.empty()) {
         display("ECF_SSL", ECF_SSL_CERTIFICATE_);
+    }
+    if (!ownership_.empty()) {
+        display("Ownership", ownership_);
     }
     display("Check pt interval", checkpt_interval_, "s");
     display("Check pt mode", show_checkpt_mode(checkpt_mode_));

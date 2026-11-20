@@ -22,6 +22,9 @@ set(test_srcs
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
+  test/TestOwnershipCmd.cpp
+  test/TestOwnershipChangeSet.cpp
+  test/TestOwnershipPolicy.cpp
   test/TestPermissions.cpp
   test/TestProgramOptions.cpp
   test/TestQueryCmd.cpp
@@ -33,6 +36,7 @@ set(test_srcs
   test/TestSNewsCmd.cpp
   test/TestSSyncCmd.cpp
   test/TestSSyncCmdOrder.cpp
+  test/TestSSyncCmdOwner.cpp
   test/TestSSyncCmd_CH1.cpp
   test/TestStatsCmd.cpp
 )

@@ -12,6 +12,7 @@ set(test_srcs
   test/TestLabel.cpp
   test/TestLateAttr.cpp
   test/TestMigration.cpp
+  test/TestOwnerAttr.cpp
   test/TestRepeat.cpp
   test/TestRepeatAlter.cpp
   test/TestRepeatChange.cpp

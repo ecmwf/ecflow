@@ -172,6 +172,30 @@ BOOST_AUTO_TEST_CASE(test_alter_help_explains_the_change_of_a_repeat) {
     BOOST_CHECK(contains(out, "--alter=change repeat \"--step 7\" /path/to/node"));
 }
 
+BOOST_AUTO_TEST_CASE(test_ownership_help_describes_the_operations) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("ownership");
+    BOOST_CHECK(contains(out, "Create, read, update or delete the Owner of a node"));
+    BOOST_CHECK(contains(out, "operation: [ create | read | update | delete ]"));
+    BOOST_CHECK(contains(out, "--ownership create /suite alice"));
+    BOOST_CHECK(contains(out, "The server Owner is configuration: '/' accepts 'read' only."));
+    BOOST_CHECK(contains(out, client_env_banner));
+    BOOST_CHECK(!contains(out, task_env_banner));
+
+    // listed with the other user commands
+    BOOST_CHECK(contains(render("user"), "ownership"));
+}
+
+BOOST_AUTO_TEST_CASE(test_help_defs_owner) {
+    ECF_NAME_THIS_TEST();
+
+    std::string out = render("defs/owner");
+    BOOST_CHECK(contains(out, "owner user[:group]"));
+    BOOST_CHECK(contains(out, "An alias cannot have an Owner"));
+    BOOST_CHECK(contains(render("definition"), "owner"));
+}
+
 BOOST_AUTO_TEST_CASE(test_command_help_for_option_omits_env_banner) {
     ECF_NAME_THIS_TEST();
 

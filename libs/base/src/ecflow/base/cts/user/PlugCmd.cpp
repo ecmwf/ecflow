@@ -4,6 +4,7 @@
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 
 #include <stdexcept>
+#include <vector>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -14,9 +15,11 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
@@ -46,15 +49,65 @@ private:
     AbstractServer* as_;
 };
 
-static void restore(NodeContainer* container) {
-    if (container && container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
-        container->restore();
-        std::vector<family_ptr> family_vec = container->familyVec();
-        for (family_ptr node : family_vec) {
-            restore(node->isNodeContainer());
+///
+/// Restores every archived node of a subtree, top down, so that the whole subtree is moved; unless committed, the
+/// restored nodes are archived again (bottom up) on destruction, leaving the source as it was when the plug fails.
+///
+class RestoreGuard {
+public:
+    explicit RestoreGuard(NodeContainer* container) {
+        try {
+            restore(container);
+        }
+        catch (...) {
+            rollback(); // the destructor does not run when the constructor throws
+            throw;
         }
     }
-}
+    RestoreGuard(const RestoreGuard&)            = delete;
+    RestoreGuard& operator=(const RestoreGuard&) = delete;
+    ~RestoreGuard() {
+        if (!committed_) {
+            rollback();
+        }
+    }
+
+    void commit() { committed_ = true; }
+
+private:
+    void rollback() noexcept {
+        for (auto it = restored_.rbegin(); it != restored_.rend(); ++it) {
+            try {
+                (*it)->archive();
+            }
+            catch (const std::exception& e) {
+                ecf::log(Log::ERR,
+                         "Plug command failed, and could not archive " + (*it)->absNodePath() + " again: " + e.what());
+            }
+            catch (...) {
+                ecf::log(Log::ERR, "Plug command failed, and could not archive " + (*it)->absNodePath() + " again");
+            }
+        }
+        restored_.clear();
+    }
+
+    void restore(NodeContainer* container) {
+        if (!container) {
+            return;
+        }
+        if (container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
+            // Recorded first: archiving again a node whose restoration failed before it changed does nothing
+            restored_.push_back(container);
+            container->restore();
+        }
+        for (const family_ptr& family : container->familyVec()) {
+            restore(family.get());
+        }
+    }
+
+    std::vector<NodeContainer*> restored_;
+    bool committed_{false};
+};
 
 } // namespace
 
@@ -94,14 +147,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().plug_++;
     Defs* defs = as->defs().get();
 
-    Lock lock(user(), as);
-    if (!lock.ok()) {
-        std::string errorMsg = "Plug command failed. User ";
-        errorMsg += as->lockedUser();
-        errorMsg += " already has an exclusive lock";
-        throw std::runtime_error(errorMsg);
-    }
-
     node_ptr sourceNode = defs->findAbsNode(source_);
     if (!sourceNode.get()) {
         throw std::runtime_error("Plug command failed. Could not find source path " + source_);
@@ -122,10 +167,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         errorMsg += " is a Alias. Alias cannot be moved";
         throw std::runtime_error(errorMsg);
     }
-
-    // If the source node or *any* of its children are archived restore them first.
-    // Must be done in a top down manner.
-    restore(sourceNode->isNodeContainer());
 
     // Check to see if dest node is on the same server
     std::string host, port, destPath;
@@ -159,6 +200,28 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
         // dest_ is on another server.
     }
+
+    // Moving to another server removes the Owners of the moved subtree, archived nodes included; the destination
+    // checks their addition. This is checked before any archived node is restored, so that a refused plug leaves
+    // the source unchanged.
+    ecf::ownership::ChangeSet changes;
+    if (!destNode.get()) {
+        changes = ecf::ownership::change_set_for_move_out(*sourceNode);
+        as->ownership().check_change_set(identity(), changes, "plug");
+    }
+
+    // The checks above only read the definitions: the server is locked (and so halted) only for the move itself
+    Lock lock(user(), as);
+    if (!lock.ok()) {
+        std::string errorMsg = "Plug command failed. User ";
+        errorMsg += as->lockedUser();
+        errorMsg += " already has an exclusive lock";
+        throw std::runtime_error(errorMsg);
+    }
+
+    // If the source node or *any* of its descendants are archived, restore them first, top down; they are archived
+    // again if the plug fails
+    RestoreGuard restored(sourceNode->isNodeContainer());
 
     if (!destNode.get()) {
 
@@ -210,7 +273,9 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 #endif
 
             // The move command was ok, remove the source node, and delete its memory
+            restored.commit();
             sourceNode->remove();
+            ecf::ownership::log_removals(changes, identity().username().value(), "plug");
 
             // Updated defs state
             defs->set_most_significant_state();
@@ -256,6 +321,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
 
+    restored.commit();
     add_node_for_edit_history(destNode);
 
     // Updated defs state

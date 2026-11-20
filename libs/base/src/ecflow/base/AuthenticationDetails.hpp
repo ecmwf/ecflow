@@ -32,6 +32,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -318,6 +319,14 @@ template <>
 struct Authenticator<PathsCmd>
 {
     static authentication_t accept(const PathsCmd& command, AbstractServer& server) {
+        return verify_authentication_rules(command, server);
+    }
+};
+
+template <>
+struct Authenticator<OwnershipCmd>
+{
+    static authentication_t accept(const OwnershipCmd& command, AbstractServer& server) {
         return verify_authentication_rules(command, server);
     }
 };

@@ -3,7 +3,10 @@
 
 #include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 
+#include <set>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -16,6 +19,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/Ownership.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
@@ -130,6 +134,10 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
                 MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
         }
 
+        // The Owners brought in, and those of the suites replaced, are checked as a whole, before any change
+        const auto changes = ecf::ownership::change_set_for_load(*as->defs(), *defs, force_);
+        as->ownership().check_change_set(identity(), changes, "load");
+
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
         ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
 
@@ -137,7 +145,32 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         // Cannot really used defs after this point
         // *NOTE* Externs are not persisted. Hence calling check() will report
         // all errors, references are not resolved.
-        as->updateDefs(defs, force_);
+        // The suites are absorbed one at a time: when the load fails part way (e.g. on a suite that already exists,
+        // without --force), the suites absorbed before remain, and their Owners are reported as brought in. A suite
+        // is absorbed when the server holds the very suite loaded.
+        const std::vector<suite_ptr> incoming = defs->suites();
+        try {
+            as->updateDefs(defs, force_);
+        }
+        catch (...) {
+            std::set<std::string> absorbed_suites;
+            for (const auto& suite : incoming) {
+                if (as->defs()->findSuite(suite->name()) == suite) {
+                    absorbed_suites.insert(suite->name());
+                }
+            }
+            ecf::ownership::ChangeSet absorbed;
+            for (const auto& addition : changes.added) {
+                const auto end = addition.path.find('/', 1);
+                if (absorbed_suites.count(addition.path.substr(1, end == std::string::npos ? end : end - 1)) != 0) {
+                    absorbed.added.push_back(addition);
+                }
+            }
+            as->ownership().report_additions(absorbed, "load");
+            throw;
+        }
+        ecf::ownership::log_removals(changes, identity().username().value(), "load");
+        as->ownership().report_additions(changes, "load");
 
         LOG_ASSERT(defs->suites().size() == 0, "Expected suites to be transferred to server defs");
     }

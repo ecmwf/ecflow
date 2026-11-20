@@ -237,6 +237,73 @@ BOOST_AUTO_TEST_CASE(is_able_to_preserve_selected_certificate_when_serialised) {
     BOOST_CHECK_EQUAL(restored.ECF_SSL_CERTIFICATE_, saved.ECF_SSL_CERTIFICATE_);
 }
 
+BOOST_AUTO_TEST_CASE(is_able_to_show_ownership_only_when_enabled) {
+    ECF_NAME_THIS_TEST();
+
+    auto shown = [](const Stats& stats) {
+        std::ostringstream os;
+        stats.show(os);
+        return os.str();
+    };
+    Stats stats;
+    BOOST_CHECK(shown(stats).find("Ownership") == std::string::npos);
+    stats.ownership_ = "enabled, server Owner ecflow-default:ecflow, capabilities CAP_SETUID and CAP_SETGID";
+    BOOST_CHECK_MESSAGE(shown(stats).find("Ownership") != std::string::npos, shown(stats));
+    BOOST_CHECK(shown(stats).find(stats.ownership_) != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_preserve_ownership_when_serialised) {
+    ECF_NAME_THIS_TEST();
+
+    Stats saved;
+    saved.ownership_ = "enabled, server Owner ecflow-default:ecflow, running as root";
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+
+    Stats restored;
+    ecf::restore_from_string(archive_data, restored);
+    BOOST_CHECK_EQUAL(restored.ownership_, saved.ownership_);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_preserve_ownership_when_copied) {
+    ECF_NAME_THIS_TEST();
+
+    Stats original;
+    original.ownership_ = "enabled, server Owner ecflow-default:ecflow, running as root";
+
+    const Stats copied(original);
+    BOOST_CHECK_EQUAL(copied.ownership_, original.ownership_);
+
+    Stats assigned;
+    assigned = original;
+    BOOST_CHECK_EQUAL(assigned.ownership_, original.ownership_);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_decode_statistics_of_an_older_server) {
+    ECF_NAME_THIS_TEST();
+
+    // A server of version 3 of the format sends no ownership: the client reports none
+    Stats saved;
+    saved.ECF_SSL_CERTIFICATE_ = "found shared certificate: server.crt";
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+
+    const std::string version_4 = "\"cereal_class_version\": 4";
+    const auto at               = archive_data.find(version_4);
+    BOOST_REQUIRE_MESSAGE(at != std::string::npos, archive_data);
+    archive_data.replace(at, version_4.size(), "\"cereal_class_version\": 3");
+    // The last member, the ownership, is absent from an older payload
+    const auto last = archive_data.rfind(",\n");
+    const auto end  = archive_data.find('\n', last + 2);
+    BOOST_REQUIRE(archive_data.substr(last, end - last).find("\"\"") != std::string::npos);
+    archive_data.erase(last, end - last);
+
+    Stats restored;
+    ecf::restore_from_string(archive_data, restored);
+    BOOST_CHECK_EQUAL(restored.ECF_SSL_CERTIFICATE_, saved.ECF_SSL_CERTIFICATE_);
+    BOOST_CHECK(restored.ownership_.empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

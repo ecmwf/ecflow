@@ -1074,18 +1074,22 @@ void NodeContainer::update_limits() {
 }
 
 std::string NodeContainer::archive_path() const {
-    std::string the_archive_path;
-    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, the_archive_path)) {
+    std::string ecf_home;
+    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home)) {
         throw std::runtime_error(MESSAGE("NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath()));
     }
+    return make_archive_path(ecf_home, absNodePath(), defs());
+}
 
-    std::string the_archive_file_name = absNodePath();
+std::string
+NodeContainer::make_archive_path(const std::string& ecf_home, const std::string& abs_node_path, const Defs* the_defs) {
+    std::string the_archive_path      = ecf_home;
+    std::string the_archive_file_name = abs_node_path;
     // The following uses ':' since it is not allowed in the node names
     ecf::algorithm::replace_all(the_archive_file_name, "/", ":");
     the_archive_file_name += ".check";
 
     std::string port = ecf::string_constants::default_port_number;
-    Defs* the_defs   = defs();
     if (the_defs) {
         port = the_defs->server_state().find_variable(ecf::environment::ECF_PORT);
         if (port.empty()) {
@@ -1224,7 +1228,14 @@ void NodeContainer::restore() {
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 
-    fs::remove(the_archive_path); // remove the file, could still throw
+    // The node is restored: a file that cannot be removed is left behind (any later archive overwrites it)
+    std::error_code ec;
+    fs::remove(the_archive_path, ec);
+    if (ec) {
+        ecf::log(Log::WAR,
+                 MESSAGE("NodeContainer::restore() Node " << absNodePath() << " restored, but could not remove "
+                                                          << the_archive_path << " : " << ec.message()));
+    }
 }
 
 bool NodeContainer::has_archive() const {

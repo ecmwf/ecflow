@@ -34,6 +34,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/OwnershipCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -404,6 +405,16 @@ struct Authoriser<PathsCmd>
 };
 
 template <>
+struct Authoriser<OwnershipCmd>
+{
+    static authorisation_t accept(const OwnershipCmd& command, AbstractServer& server) {
+        return allows_as_per_read_write_rules(command, server);
+    }
+
+    static void paths(const OwnershipCmd& command, std::vector<std::string>& paths) { paths.push_back(command.path()); }
+};
+
+template <>
 struct Authoriser<PlugCmd>
 {
     static authorisation_t accept(const PlugCmd& command, AbstractServer& server) {
@@ -534,6 +545,7 @@ struct Authoriser<GroupCTSCmd>
                           MeterCmd,
                           MoveCmd,
                           OrderNodeCmd,
+                          OwnershipCmd,
                           PathsCmd,
                           PlugCmd,
                           QueryCmd,

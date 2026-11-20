@@ -32,6 +32,7 @@
 #include "ecflow/node/parser/LimitParser.hpp"
 #include "ecflow/node/parser/MeterParser.hpp"
 #include "ecflow/node/parser/MirrorParser.hpp"
+#include "ecflow/node/parser/OwnerParser.hpp"
 #include "ecflow/node/parser/QueueParser.hpp"
 #include "ecflow/node/parser/RepeatParser.hpp"
 #include "ecflow/node/parser/TimeParser.hpp"
@@ -150,7 +151,7 @@ class TaskParser : public Parser {
 public:
     explicit TaskParser(DefsStructureParser* p)
         : Parser(p) {
-        reserve_vec(25);
+        reserve_vec(26);
         addParser(new VariableParser(p));
         addParser(new TriggerParser(p));
         addParser(new LabelParser(p));
@@ -174,6 +175,7 @@ public:
         addParser(new QueueParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new OwnerParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
     }
@@ -254,7 +256,7 @@ class FamilyParser : public Parser {
 public:
     explicit FamilyParser(DefsStructureParser* p)
         : Parser(p) {
-        reserve_vec(25);
+        reserve_vec(26);
         addParser(new VariableParser(p));
         addParser(new TaskParser(p));
         addParser(new TriggerParser(p));
@@ -279,6 +281,7 @@ public:
         addParser(new AutoArchiveParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new OwnerParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
     }
@@ -380,7 +383,7 @@ class SuiteParser : public Parser {
 public:
     explicit SuiteParser(DefsStructureParser* p)
         : Parser(p) {
-        reserve_vec(25);
+        reserve_vec(26);
         addParser(new VariableParser(p));
         addParser(new FamilyParser(p));
         addParser(new TaskParser(p));
@@ -403,6 +406,7 @@ public:
         addParser(new AutoArchiveParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new OwnerParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
     }

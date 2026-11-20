@@ -11,6 +11,7 @@
 #include "ecflow/core/SState.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
 #include "ecflow/server/AuthorisationService.hpp"
+#include "ecflow/server/OwnershipPolicy.hpp"
 
 class Defs;
 
@@ -128,6 +129,13 @@ public:
 
     virtual ecf::AuthorisationService& authorisation()             = 0;
     virtual const ecf::AuthorisationService& authorisation() const = 0;
+
+    ///
+    /// @brief Returns the rules deciding who may create, update and delete Owners.
+    ///
+    /// @return The ownership policy of the server.
+    ///
+    virtual const ecf::OwnershipPolicy& ownership() const = 0;
 
     /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()

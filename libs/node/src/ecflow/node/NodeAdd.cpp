@@ -6,6 +6,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/OwnerAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
@@ -443,6 +444,24 @@ void Node::add_autorestore(const ecf::AutoRestoreAttr& ar) {
     auto_restore_ = std::make_unique<ecf::AutoRestoreAttr>(ar);
     auto_restore_->set_node(this);
     state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
+}
+
+void Node::addOwner(const ecf::OwnerAttr& owner) {
+    if (isAlias()) {
+        throw std::runtime_error(
+            "Add Owner failed: An alias cannot have an Owner (it inherits the Owner of its task), see node " +
+            debugNodePath());
+    }
+    if (owner.user().empty()) {
+        throw std::runtime_error("Add Owner failed: The Owner is empty, see node " + debugNodePath());
+    }
+    if (owner_) {
+        throw std::runtime_error("Add Owner failed: A node can only have one Owner attribute, see node " +
+                                 debugNodePath());
+    }
+    owner_           = std::make_unique<ecf::OwnerAttr>(owner);
+    state_change_no_ = Ecf::incr_state_change_no();
+    owner_change_no_ = state_change_no_;
 }
 
 void Node::addLate(const ecf::LateAttr& l) {

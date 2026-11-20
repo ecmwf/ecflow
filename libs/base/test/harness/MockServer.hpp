@@ -4,6 +4,9 @@
 #pragma once
 
 #include <cassert>
+#include <memory>
+#include <unistd.h>
+#include <utility>
 
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
@@ -71,6 +74,26 @@ public:
     ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
     const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
 
+    const ecf::OwnershipPolicy& ownership() const override { return ownership_; }
+
+    ///
+    /// @brief Replaces the account database (by default, the system's) and the server account of the ownership rules.
+    ///
+    /// @param[in] accounts The account database; must not be null.
+    /// @param[in] server_uid The user identifier taken as the server account.
+    /// @throws std::invalid_argument if @p accounts is null.
+    ///
+    void set_account_database(std::shared_ptr<const ecf::os::AccountDatabase> accounts, uid_t server_uid) {
+        ownership_ = ecf::OwnershipPolicy(std::move(accounts), server_uid);
+    }
+
+    ///
+    /// @brief Sets whether ownership is enabled in the ownership rules (disabled by default, as in a server).
+    ///
+    /// @param[in] enabled Whether ownership is enabled.
+    ///
+    void set_ownership_enabled(bool enabled) { ownership_.set_enabled(enabled); }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }
@@ -129,6 +152,7 @@ private:
 
     ecf::AuthenticationService authentication_service_;
     ecf::AuthorisationService authorisation_service_;
+    ecf::OwnershipPolicy ownership_{std::make_shared<ecf::os::SystemAccountDatabase>(), ::geteuid()};
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

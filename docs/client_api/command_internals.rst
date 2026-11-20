@@ -4849,6 +4849,155 @@ attributes, evaluation order. The ordering is carried by ``option_``.
               }
             }
 
+.. _proto_OwnershipCmd:
+
+OwnershipCmd
+~~~~~~~~~~~~
+
+.. list-table::
+   :stub-columns: 1
+   :widths: 20 80
+
+   * - Type
+     - User command
+   * - C++ class
+     - ``.../libs/base/src/ecflow/base/cts/user/OwnershipCmd.hpp``
+   * - Action
+     - ``--ownership``
+   * - Parameters
+     - - ``arg1`` (operation): ``create`` (``op_`` ``0``), ``read`` (``1``), ``update`` (``2``) or
+         ``delete`` (``3``).
+       - ``arg2`` (path): the node whose Owner is managed, or ``/`` for the server Owner, which is
+         read only (``path_``).
+       - ``arg3`` (Owner, ``create`` and ``update`` only): the new Owner, as ``user[:group]``
+         (``value_``, empty otherwise).
+   * - Environment variables
+     - - ``ECF_USER`` (optional): overrides the authenticated user name.
+
+Creates, reads, updates or deletes the Owner of a node. Reading is a read-only command; the other
+operations are write commands, recorded in the edit history, and decided by the ownership policy of
+the server, using the user attached to the request: only the user named in a new Owner may create it,
+and only the user of the current Owner may update or delete it. The arguments are checked by the
+client, and again by the server. **A server older than 5.20 cannot decode the request**, and replies
+with a generic ``Invalid argument`` error, which the client explains as an unsupported command.
+
+.. tabs::
+
+    .. tab:: Usage
+
+        .. code-block:: shell
+
+            ecflow_client --ownership create /suite alice
+            ecflow_client --ownership read /suite/family/task
+
+    .. tab:: Help
+
+        Verbatim ``ecflow_client --ownership`` output (the common environment-variable footer is
+        omitted):
+
+        .. code-block:: none
+
+            ownership
+            ---------
+
+            Create, read, update or delete the Owner of a node
+
+            The Owner of a node (user[:group]) is the identity under which the server runs the commands of the
+            node (ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD, ECF_FETCH, ECF_SCRIPT_CMD) and accesses its files,
+            when ownership is enabled. A node without Owner inherits the Owner of its closest ancestor, otherwise
+            the server Owner. Reading requires read access; the other operations require write access, and:
+              - create: only the user named in the new Owner, on a node without Owner (users can only claim
+                        ownership for themselves);
+              - update: only the user of the current Owner, who may hand the node over to another user;
+              - delete: only the user of the current Owner; the node then inherits the closest Owner again.
+            Every Owner introduced must name an existing account, other than the superuser and the server account;
+            with a group, the user must belong to it. The server Owner is configuration: '/' accepts 'read' only.
+
+            Argument(s):
+
+                operation: [ create | read | update | delete ]
+
+                path: path
+                    # The absolute path of the node, or '/' for the server Owner (read only).
+
+                value: user[:group]
+                    # The new Owner; required for create and update, rejected for read and delete.
+
+            read prints, one per line: owner=<the node's own Owner>, effective=<the effective Owner> and
+            origin=<the node holding it, or 'server'>; 'none' when there is none. On '/', only effective and origin.
+
+            This command can fail because:
+            - The node path does not exist in the server
+            - The operation is not allowed for the requester, or the Owner is not acceptable
+            - The server does not support ownership (older servers)
+
+            Usage:
+
+                --ownership create /suite alice      # alice claims the suite
+                --ownership read /suite/family/task  # owner=none, effective=alice, origin=/suite
+                --ownership update /suite bob:ops    # alice hands the suite over to bob, group ops
+                --ownership delete /suite            # bob removes the Owner
+                --ownership read /                   # the server Owner
+
+    .. tab:: Request
+
+        ``--ownership create /suite/family alice:ops`` (``op_`` ``0``; ``value_`` is empty for
+        ``read`` and ``delete``):
+
+        .. code-block:: json
+
+            {
+              "21ClientToServerRequest": {
+                "cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "OwnershipCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": {
+                        "cereal_class_version": 0,
+                        "value0": {
+                          "cereal_class_version": 0,
+                          "cl_host_": "host.example.com"
+                        },
+                        "user_": "operator"
+                      },
+                      "op_": 0,
+                      "path_": "/suite/family",
+                      "value_": "alice:ops"
+                    }
+                  }
+                }
+              }
+            }
+
+    .. tab:: Reply
+
+        For ``create``, ``update`` and ``delete``, the generic success reply (``StcCmd`` with ``api_``
+        equal to ``0``). For ``read``, an ``SStringCmd`` whose ``str_`` field holds ``key=value`` lines:
+        ``owner`` (the node's own Owner), ``effective`` and ``origin`` (the node holding the effective
+        Owner, or ``server``), each ``none`` when absent; on ``/``, only ``effective`` and ``origin``:
+
+        .. code-block:: json
+
+            {
+              "22ServerToClientResponse": {
+                "stc_cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "SStringCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": { "cereal_class_version": 0 },
+                      "str_": "owner=none\neffective=alice\norigin=/suite\n"
+                    }
+                  }
+                }
+              }
+            }
+
 .. _proto_PathsCmd:
 
 PathsCmd

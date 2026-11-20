@@ -144,6 +144,22 @@ std::vector<Expected> expected_settings() {
          Type::Boolean,
          boolean(false),
          Names{std::nullopt, "/ecflow/server/log/commands/enabled", std::nullopt, std::nullopt}},
+        // Ownership: configuration file, environment, command line
+        {"ecflow.server.ownership.owner",
+         Type::Text,
+         std::nullopt,
+         Names{std::nullopt, "/ecflow/server/ownership/owner", "ECF_OWNERSHIP_OWNER", "ownership_owner"}},
+        {"ecflow.server.ownership.path",
+         Type::Text,
+         text("/usr/local/bin:/usr/bin:/bin"),
+         Names{std::nullopt, "/ecflow/server/ownership/path", "ECF_OWNERSHIP_PATH", "ownership_path"}},
+        {"ecflow.server.ownership.environment",
+         Type::Text,
+         text(""),
+         Names{std::nullopt,
+               "/ecflow/server/ownership/environment",
+               "ECF_OWNERSHIP_ENVIRONMENT",
+               "ownership_environment"}},
     };
 }
 
@@ -278,10 +294,12 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_check_mode) {
 BOOST_AUTO_TEST_CASE(test_server_catalogue_refuses_empty_text) {
     ECF_NAME_THIS_TEST();
 
-    // Every text setting, except ECF_SSL, is required to be non-empty; ECF_SSL depends on the build, and is
-    // verified by test_server_catalogue_ssl_requires_support
+    // Every text setting, except ECF_SSL and the ownership environment, is required to be non-empty; ECF_SSL
+    // depends on the build, and is verified by test_server_catalogue_ssl_requires_support; an empty list of
+    // environment variables is valid, as verified by test_server_catalogue_ownership
     for (const auto& setting : server_catalogue().settings()) {
-        if (setting.type() != Type::Text || setting.key() == Key("ecflow.server.variables@ECF_SSL")) {
+        if (setting.type() != Type::Text || setting.key() == Key("ecflow.server.variables@ECF_SSL") ||
+            setting.key() == Key("ecflow.server.ownership.environment")) {
             continue;
         }
         check_refused(setting.key().key(), "");
@@ -309,6 +327,27 @@ BOOST_AUTO_TEST_CASE(test_server_catalogue_log_commands) {
     check_accepted(key, "false", value_of(false));
     for (const std::string text : {"", "1", "yes", "True"}) {
         check_refused(key, text);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_server_catalogue_ownership) {
+    ECF_NAME_THIS_TEST();
+
+    // The server Owner is checked by the server at start-up; here, only its presence
+    check_accepted(
+        "ecflow.server.ownership.owner", "ecflow-default:ecflow", value_of<std::string>("ecflow-default:ecflow"));
+    check_refused("ecflow.server.ownership.owner", "");
+
+    check_accepted("ecflow.server.ownership.path", "/usr/bin:/bin", value_of<std::string>("/usr/bin:/bin"));
+    check_refused("ecflow.server.ownership.path", "");
+
+    // A comma-separated list of environment variable names, possibly empty
+    const std::string environment = "ecflow.server.ownership.environment";
+    for (const std::string text : {"", "http_proxy", "http_proxy,https_proxy,NO_PROXY", "_A1,B_2"}) {
+        check_accepted(environment, text, value_of<std::string>(text));
+    }
+    for (const std::string text : {",", "http_proxy,", ",http_proxy", "a b", "1A", "A=B", "A,,B", "A;B"}) {
+        check_refused(environment, text);
     }
 }
 

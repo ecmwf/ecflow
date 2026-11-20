@@ -57,6 +57,7 @@ set(test_srcs
   test/TestHostsFile.cpp
   test/TestInitAddVariables.cpp
   test/TestLifeCycle.cpp
+  test/TestOwnershipOlderServer.cpp
   test/TestJobGenOnly.cpp
   test/TestRtt.cpp
   test/TestUrlCmd.cpp
@@ -106,6 +107,7 @@ if (ENABLE_SERVER)
     test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp
     test/TestLogAndCheckptErrors.cpp
+    test/TestOwnershipCmd.cpp
     test/TestPasswdFile.cpp
     test/TestPlugCmd.cpp
     test/TestServer.cpp

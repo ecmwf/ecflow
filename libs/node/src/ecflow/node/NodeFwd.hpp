@@ -91,6 +91,7 @@ class NodeLimitMemento;
 class NodeInLimitMemento;
 class NodeVariableMemento;
 class NodeLateMemento;
+class NodeOwnerMemento;
 class NodeTodayMemento;
 class NodeTimeMemento;
 class NodeDayMemento;

@@ -458,6 +458,16 @@ public:
               const std::string& attribute,
               bool evaluate = false);
 
+    ///
+    /// @brief Creates, reads, updates or deletes the Owner of a node.
+    ///
+    /// @param[in] op The operation, one of [create | read | update | delete].
+    /// @param[in] path The absolute path of the node, or '/' to read the server Owner.
+    /// @param[in] value The Owner, as user[:group], for create and update; empty for read and delete.
+    /// @return 0 on success; for read, the reply (key=value lines) is available via get_string().
+    ///
+    int ownership(const std::string& op, const std::string& path, const std::string& value = "") const;
+
     int alter(const std::vector<std::string>& paths,
               const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
               const std::string& attrType,

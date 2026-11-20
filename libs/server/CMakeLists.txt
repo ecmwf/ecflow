@@ -78,6 +78,7 @@ ecflow_add_test(
     src
   SOURCES
     test/TestCheckPtSaver.cpp
+    test/TestOwnershipStartup.cpp
     test/TestServerConfigurations.cpp
     test/TestServerEnvironment.cpp
     test/TestServer_main.cpp # test entry point
