@@ -4,13 +4,12 @@
 # This test ensures that test servers started concurrently by separate test runs
 # never share a port.
 #
-# Each run is a separate process, and all runs start the search from the same seed
-# port at the same moment. The runs use either:
-#  - separate lock directories, invisible to each other, as CI jobs on one node
-#    that do not share a lock directory; or
-#  - one shared lock directory, as the HPC CI jobs of one node.
-# Each run must end up with a server of its own.
+# Each run is a separate process, and all runs start the search from the same
+# seed port at the same moment. They share a lock directory so the reservation
+# is atomic across the runs. Separate lock directories cannot provide this
+# guarantee; the bind probe only detects ports that are already occupied.
 
+import errno
 import multiprocessing
 import os
 import signal
@@ -37,13 +36,18 @@ def server_pid(ci):
     return int(variables["ECF_PID"])
 
 
-def run_reservation(index, lock_dir, protocol, start, results, release):
+def run_reservation(index, lock_dir, work_dir, protocol, start, results, release):
     """Reserves a test server, reports the run index, the port and the server process
     id, and keeps the server until released. A server that does not answer within
     the start timeout makes the reservation fail, and the run report the error.
     The run leads a process group of its own, which includes its server."""
     os.setpgid(0, 0)
-    os.environ["ECF_PORT_LOCK_DIR"] = lock_dir
+    if work_dir is not None:
+        os.chdir(work_dir)
+    if lock_dir is None:
+        os.environ.pop("ECF_PORT_LOCK_DIR", None)
+    else:
+        os.environ["ECF_PORT_LOCK_DIR"] = lock_dir
     os.environ["ECF_FREE_PORT"] = str(seed_port)
     start.wait(timeout)
     try:
@@ -59,18 +63,17 @@ CUSTOM, HTTP = Test.Protocol.CUSTOM, Test.Protocol.HTTP
 
 
 @pytest.mark.parametrize(
-    "protocols,shared",
+    "protocols,use_host_locks",
     [
         ((CUSTOM, CUSTOM), False),
         ((HTTP, HTTP), False),
         ((CUSTOM, HTTP), False),
         ((CUSTOM, CUSTOM), True),
     ],
-    ids=["custom", "http", "mixed", "shared-lock-directory"],
+    ids=["custom", "http", "mixed", "default-host-locks"],
 )
-def test_concurrent_runs_get_distinct_servers(protocols, shared, tmp_path):
-    # Separate lock directories model jobs that cannot see each other's locks;
-    # a shared one models the jobs of one node in the HPC CI
+def test_concurrent_runs_get_distinct_servers(protocols, use_host_locks, tmp_path):
+    # The lock serializes reservations even when both runs start at the same seed.
     runs = len(protocols)
     context = multiprocessing.get_context("spawn")
     start = context.Barrier(runs)
@@ -79,11 +82,25 @@ def test_concurrent_runs_get_distinct_servers(protocols, shared, tmp_path):
 
     processes = []
     for i, protocol in enumerate(protocols):
-        lock_dir = tmp_path / ("shared" if shared else "run" + str(i))
-        lock_dir.mkdir(exist_ok=True)
+        lock_dir = tmp_path / "shared" if not use_host_locks else None
+        work = None
+        if lock_dir is not None:
+            lock_dir.mkdir(exist_ok=True)
+        else:
+            # The default path must coordinate runs with different work trees.
+            work = tmp_path / ("checkout" + str(i))
+            work.mkdir()
         process = context.Process(
             target=run_reservation,
-            args=(i, str(lock_dir), protocol, start, results, release),
+            args=(
+                i,
+                str(lock_dir) if lock_dir else None,
+                str(work) if work else None,
+                protocol,
+                start,
+                results,
+                release,
+            ),
         )
         process.start()
         processes.append(process)
@@ -216,6 +233,79 @@ def test_start_moves_on_when_another_server_holds_the_port(
     finally:
         other.kill()
         other.wait()
+
+
+def test_start_moves_on_when_port_race_ends_before_listener_probe(
+    lock_dir, tmp_path, monkeypatch
+):
+    # Another process claims and releases the port between our bind probe and
+    # the listener check. The server's own stderr still identifies the race.
+    port = seed_port + 1 if ecf.debug_build() else seed_port
+    failing = tmp_path / "port_race_server"
+    failing.write_text(
+        "#!/bin/sh\n"
+        + 'echo "Exception in ServerMain:: Could not listen on port '
+        + str(port)
+        + ": "
+        + os.strerror(errno.EADDRINUSE)
+        + '" >&2\nexit 1\n'
+    )
+    failing.chmod(0o755)
+    real_server = ecf.File.find_server()
+    calls = []
+
+    def find_server():
+        calls.append(True)
+        return str(failing) if len(calls) == 1 else real_server
+
+    monkeypatch.setattr(ecf.File, "find_server", staticmethod(find_server))
+    with Test.Server(CUSTOM) as ctx:
+        assert int(ctx[0].get_port()) == port + 1
+    assert len(calls) == 2
+    assert list(lock_dir.iterdir()) == []
+
+
+def test_unrelated_listen_failure_is_not_retried(lock_dir, tmp_path, monkeypatch):
+    port = seed_port + 1 if ecf.debug_build() else seed_port
+    failing = tmp_path / "failing_server"
+    failing.write_text(
+        "#!/bin/sh\n"
+        + 'echo "Could not listen on port '
+        + str(port)
+        + ': Permission denied" >&2\nexit 3\n'
+    )
+    failing.chmod(0o755)
+    calls = []
+
+    def find_server():
+        calls.append(True)
+        return str(failing)
+
+    monkeypatch.setattr(ecf.File, "find_server", staticmethod(find_server))
+    with pytest.raises(RuntimeError, match="exited with code 3"):
+        with Test.Server(CUSTOM):
+            pass
+    assert len(calls) == 1
+    assert list(lock_dir.iterdir()) == []
+
+
+def test_unconfigured_runs_share_host_lock_directory(tmp_path, monkeypatch):
+    monkeypatch.delenv("ECF_FREE_PORT", raising=False)
+    monkeypatch.delenv("ECF_PORT_LOCK_DIR", raising=False)
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    monkeypatch.chdir(first)
+    lock = Test.EcfPortLock()
+    port = int(lock.find_free_port(seed_port))
+    try:
+        monkeypatch.chdir(second)
+        other = Test.EcfPortLock()
+        assert other._lock_file(port) == lock._lock_file(port)
+        assert not other.do_lock(port)
+    finally:
+        lock.remove(port)
 
 
 def test_start_fails_when_the_server_exits(lock_dir, tmp_path, monkeypatch, capsys):
