@@ -97,6 +97,7 @@ set(u_tests
   u_TestDynamicObjects
   u_TestEcf
   u_TestError
+  u_TestErrorCode
   u_TestExportClient
   u_TestExportCore
   u_TestExportDefs

@@ -73,13 +73,24 @@ public:
     // The path to the ecf file, empty path means that ecf file could not be located
     bool valid() const { return !script_path_or_cmd_.empty(); }
 
-    /// This function will return the contents of %manual -> %end for the input file
-    /// It will pre-process the file, then extract the manual form all the pre-processed files
-    /// Will throw std::runtime_error for errors
+    ///
+    /// @brief Preprocesses a script or manual and extracts its manual text.
+    ///
+    /// A task without a %manual block yields empty text without failing.
+    ///
+    /// @param[out] theManual Extracted manual text; suite and family manuals can use the complete file.
+    /// @throws ecf::FileHandlingError if the source file is confirmed absent.
+    /// @throws std::runtime_error if opening, preprocessing or extracting fails for another reason.
+    ///
     void manual(std::string& theManual);
 
-    /// returns the script, The first line contains the origin of the file/cmd.
-    /// Will throw std::runtime_error for errors
+    ///
+    /// @brief Reads a script and includes its source origin when applicable.
+    ///
+    /// @param[out] theScript Script contents, including the source-origin comment for directory lookups.
+    /// @throws ecf::FileHandlingError if a file candidate disappears before it can be opened.
+    /// @throws std::runtime_error if a script command or another file operation fails.
+    ///
     void script(std::string& theScript) const;
 
     const std::string& script_path_or_cmd() const { return script_path_or_cmd_; }

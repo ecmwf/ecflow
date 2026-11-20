@@ -86,12 +86,14 @@ public:
     /// for debug allow the current client environment to be printed
     std::string to_string() const { return clientEnv_.toString(); }
 
-    /// if throw_exception_on_error = false, then
-    ///    invoke() will return 0 for success and 1 for error.
-    ///    The error message can be retrieved from errorMsg()
-    /// if throw_exception_on_error = true,
-    ///	  then invoke() for errors will throw std::runtime_error
-    ///   will still return 0 for success.
+    ///
+    /// @brief Selects throwing or non-throwing handling for failed client requests.
+    ///
+    /// A non-throwing failure returns 1 and retains its diagnostic and any server code in server_reply().
+    /// Throwing failures preserve the diagnostic in a std::runtime_error-compatible exception hierarchy.
+    ///
+    /// @param[in] f True to throw on failure; false to return a failure status.
+    ///
     void set_throw_on_error(bool f) { on_error_throw_exception_ = f; }
 
     /// Enable auto sync on each command that can modify the Defs state in the server
@@ -189,9 +191,18 @@ public:
     /// @node The default value is set to 2.
     void set_connection_attempts(unsigned int attempts);
 
-    /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    /// Will attempt to connect to the server a number of times. If this fails it will
-    /// try the next server, and so on until a timeout period is reached.
+    ///
+    /// @brief Invokes a command parsed from arguments and resets the previous server error code.
+    ///
+    /// Connection attempts continue across configured endpoints until the request succeeds or times out.
+    ///
+    /// @param[in] cl Command-line tokens representing one request.
+    /// @return Zero on success or one on failure when throwing is disabled.
+    /// @throws ecf::CodedError for an unclassified or unknown server error when throwing is enabled.
+    /// @throws ecf::FileHandlingError for a recognised file error when throwing is enabled.
+    /// @throws ecf::GroupError for grouped child failures when throwing is enabled.
+    /// @throws std::runtime_error for local failures when throwing is enabled.
+    ///
     int invoke(const CommandLine& cl) const;
     int invoke(const std::string& arg) const;
     int invoke(const std::vector<std::string>& args) const;
@@ -439,6 +450,17 @@ public:
                 bool date    = false,
                 bool time    = false) const;
 
+    ///
+    /// @brief Retrieves a server file and resets the previous error code even if request construction fails.
+    ///
+    /// @param[in] absNodePath Absolute path of the requested node.
+    /// @param[in] fileType Requested server file type.
+    /// @param[in] max_lines Maximum number of lines to return, encoded as a decimal string.
+    /// @return Zero on success or one on failure when throwing is disabled.
+    /// @throws ecf::FileHandlingError for confirmed absence or an empty manual when throwing is enabled.
+    /// @throws ecf::CodedError for other server failures when throwing is enabled.
+    /// @throws std::runtime_error for local validation and other failures when throwing is enabled.
+    ///
     int file(const std::string& absNodePath, const std::string& fileType, const std::string& max_lines = "10000") const;
 
     int plug(const std::string& sourcePath, const std::string& destPath) const;
@@ -531,8 +553,17 @@ private:
      */
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
-    /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    int invoke(const Cmd_ptr&) const; // assumes clients of Cmd_ptr constructor has caught exceptions
+    ///
+    /// @brief Invokes a preconstructed command and resets the previous server error code.
+    ///
+    /// @param[in] command Preconstructed request; construction failures must be handled by the caller.
+    /// @return Zero on success or one on failure when throwing is disabled.
+    /// @throws ecf::CodedError for an unclassified or unknown server error when throwing is enabled.
+    /// @throws ecf::FileHandlingError for a recognised file error when throwing is enabled.
+    /// @throws ecf::GroupError for grouped child failures when throwing is enabled.
+    /// @throws std::runtime_error for local failures when throwing is enabled.
+    ///
+    int invoke(const Cmd_ptr& command) const;
 
     int do_invoke_cmd(Cmd_ptr) const;
 

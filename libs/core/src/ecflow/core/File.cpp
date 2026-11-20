@@ -10,6 +10,7 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/FileFailure.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Str.hpp"
@@ -624,8 +625,10 @@ std::string File::diff(const std::string& file,
     return std::string{};
 }
 
-std::string
-File::backwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn) {
+std::string File::backwardSearch(const std::string& rootPath,
+                                 const std::string& nodePath,
+                                 const std::string& fileExtn,
+                                 bool* all_absent) {
     // Do a backward search of rootPath + nodePath
     // If task path is of the form /suite/family/family2/task, then we keep
     // on consuming the first path token this should leave:
@@ -668,8 +671,14 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
                 cout << " backwardSearch Node " << nodePath << " the path " << combinedPath << " DOEST NOT EXIST\n";
             }
 #endif
+            if (all_absent && !ecf::file_is_absent(combinedPath)) {
+                *all_absent = false;
+            }
         }
         catch (fs::filesystem_error& e) {
+            if (all_absent) {
+                *all_absent = false;
+            }
 #ifdef DEBUG_TASK_LOCATION
             std::cout << "Task::backwardSearch Caught exception for fs::exists('" << combinedPath << "')\n"
                       << e.what() << "\n";
@@ -690,12 +699,18 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
         std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
         return result;
     }
+    if (all_absent && !ecf::file_is_absent(ecf_filePath.string())) {
+        *all_absent = false;
+    }
 
     // failed to find file via backward search
     return std::string{};
 }
 
-std::string File::forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn) {
+std::string File::forwardSearch(const std::string& rootPath,
+                                const std::string& nodePath,
+                                const std::string& fileExtn,
+                                bool* all_absent) {
     /// Do a forward search of rootPath + nodePath + fileExtn
     /// If task path if of the form /suite/family/family2/task, then we keep
     /// on consuming the last path token this should leave:
@@ -738,8 +753,14 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
                 cout << " forwardSearch Node " << nodePath << " the path " << combinedPath << " DOEST NOT EXIST\n";
             }
 #endif
+            if (all_absent && !ecf::file_is_absent(combinedPath)) {
+                *all_absent = false;
+            }
         }
         catch (fs::filesystem_error& e) {
+            if (all_absent) {
+                *all_absent = false;
+            }
 #ifdef DEBUG_TASK_LOCATION
             std::cout << "Task::forwardSearch Caught exception for fs::exists('" << combinedPath << "')\n"
                       << e.what() << "\n";
@@ -768,8 +789,14 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
             std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
             return result;
         }
+        if (all_absent && !ecf::file_is_absent(ecf_filePath.string())) {
+            *all_absent = false;
+        }
     }
     catch (fs::filesystem_error& e) {
+        if (all_absent) {
+            *all_absent = false;
+        }
 #ifdef DEBUG_TASK_LOCATION
         std::cout << "Task::forwardSearch Caught exception for root_path fs::exists('" << ecf_filePath << "')\n"
                   << e.what() << "\n";

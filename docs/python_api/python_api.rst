@@ -135,6 +135,11 @@ Client-Server API
 =================
 
 The Client-Server API provides the capability of communicating with the server.
+Server failures expose numeric codes through ``CodedError.code()`` and, for
+grouped requests, ordered ``GroupError.entries()``. The module constants
+``UNCLASSIFIED`` (0), ``FILE_UNAVAILABLE`` (1), and ``EMPTY_CONTENT`` (2)
+name the published codes. Zero still denotes a failure when an exception
+carries it; local connection failures need not have a server code.
 
 
 .. toctree::
@@ -142,6 +147,10 @@ The Client-Server API provides the capability of communicating with the server.
    :glob:
 
    reference/Client
+   reference/CodedError
+   reference/EmptyContentError
+   reference/FileHandlingError
+   reference/GroupError
 
 
 .. contents::

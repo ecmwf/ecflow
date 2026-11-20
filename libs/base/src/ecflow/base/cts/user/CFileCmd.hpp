@@ -43,6 +43,12 @@ public:
 private:
     static const char* arg(); // used for argument parsing
 
+    ///
+    /// @copydoc ClientToServerCmd::doHandleRequest
+    ///
+    /// Confirmed absence after applicable file fallbacks throws ecf::FileHandlingError.
+    /// Empty suite or family manuals can throw ecf::EmptyContentError; other failures retain their existing text.
+    ///
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 

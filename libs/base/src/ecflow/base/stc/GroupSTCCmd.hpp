@@ -16,6 +16,12 @@ public:
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
 
+    ///
+    /// @brief Appends a reply, snapshotting errors before a preallocated reply is reused.
+    ///
+    /// @param[in] childCmd Non-null child reply; error children are copied, other replies remain shared.
+    /// @throws std::bad_alloc if appending or copying the child fails.
+    ///
     void addChild(const STC_Cmd_ptr& childCmd);
     const std::vector<STC_Cmd_ptr>& cmdVec() const { return cmdVec_; }
 

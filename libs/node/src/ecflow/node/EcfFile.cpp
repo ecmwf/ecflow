@@ -15,7 +15,9 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/FileFailure.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/JobsParam.hpp"
@@ -116,9 +118,13 @@ void EcfFile::manual(std::string& theManual) {
     std::string error_msg;
     EcfFile::Type file_type = (node_->isSubmittable()) ? EcfFile::SCRIPT : EcfFile::MANUAL;
     if (!open_script_file(script_path_or_cmd_, file_type, lines, error_msg)) {
-        throw std::runtime_error(MESSAGE("EcfFile::manual: For node " << node_->debugNodePath()
-                                                                      << ", failed to open file " << script_path_or_cmd_
-                                                                      << " : " << error_msg));
+        auto message = MESSAGE("EcfFile::manual: For node " << node_->debugNodePath() << ", failed to open file "
+                                                            << script_path_or_cmd_ << " : " << error_msg);
+        if (script_origin_ != ECF_FETCH_CMD && script_origin_ != ECF_SCRIPT_CMD &&
+            ecf::file_is_absent(script_path_or_cmd_)) {
+            throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+        }
+        throw std::runtime_error(message);
     }
 
     // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
@@ -227,9 +233,13 @@ std::string EcfFile::ecf_file_origin_dump() const {
 void EcfFile::script(std::string& theScript) const {
     if (script_origin_ == EcfFile::ECF_SCRIPT) {
         if (!File::open(script_path_or_cmd_, theScript)) {
-            throw std::runtime_error(MESSAGE("EcfFile::script: Could not open script for task/alias "
-                                             << node_->absNodePath() << " at path " << script_path_or_cmd_ << " ("
-                                             << strerror(errno) << ")"));
+            auto message = MESSAGE("EcfFile::script: Could not open script for task/alias "
+                                   << node_->absNodePath() << " at path " << script_path_or_cmd_ << " ("
+                                   << strerror(errno) << ")");
+            if (ecf::file_is_absent(script_path_or_cmd_)) {
+                throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+            }
+            throw std::runtime_error(message);
         }
         return;
     }
@@ -239,8 +249,13 @@ void EcfFile::script(std::string& theScript) const {
     lines.push_back(ecf_file_origin_dump());
     std::string error_msg;
     if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines, error_msg)) {
-        throw std::runtime_error(MESSAGE("EcfFile::script: Could not open script for task/alias "
-                                         << node_->absNodePath() << " using command " << script_path_or_cmd_));
+        auto message = MESSAGE("EcfFile::script: Could not open script for task/alias "
+                               << node_->absNodePath() << " using command " << script_path_or_cmd_);
+        if (script_origin_ != ECF_FETCH_CMD && script_origin_ != ECF_SCRIPT_CMD &&
+            ecf::file_is_absent(script_path_or_cmd_)) {
+            throw ecf::FileHandlingError(message, ecf::ErrorCode::FILE_UNAVAILABLE);
+        }
+        throw std::runtime_error(message);
     }
     vector_to_string(lines, theScript);
 }

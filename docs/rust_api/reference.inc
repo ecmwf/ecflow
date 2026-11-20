@@ -454,6 +454,7 @@ Nodes
    The last ``max_lines`` lines of a file of the node: its ``script``,
    ``job``, ``jobout`` (the job's output), ``manual``, or the output of its
    ``kill`` or ``stat`` command.
+   A failed server reply exposes its raw code through :ref:`Error::code <rust_error_code>`.
 
 .. _rust_client_plug:
 
@@ -1009,6 +1010,54 @@ ssl_supported
 
    Whether the client library was built with OpenSSL support.
 
+UNCLASSIFIED
+------------
+
+.. _rust_unclassified:
+
+.. describe:: pub const UNCLASSIFIED: i32 = 0
+
+   An unclassified server failure. Zero is still an error, not success.
+
+FILE_UNAVAILABLE
+----------------
+
+.. _rust_file_unavailable:
+
+.. describe:: pub const FILE_UNAVAILABLE: i32 = 1
+
+   The requested file was confirmed absent after applicable fallbacks.
+
+EMPTY_CONTENT
+-------------
+
+.. _rust_empty_content:
+
+.. describe:: pub const EMPTY_CONTENT: i32 = 2
+
+   A manual file was found but had no usable content.
+
+GroupErrorEntry
+---------------
+
+.. _rust_grouperrorentry:
+
+.. describe:: pub struct GroupErrorEntry
+
+   A failed child of a grouped server reply, in reply order.
+
+.. _rust_grouperrorentry_code:
+
+.. describe:: pub const fn code(&self) -> i32
+
+   The raw numeric server code, including zero or an unknown future value.
+
+.. _rust_grouperrorentry_message:
+
+.. describe:: pub fn message(&self) -> &str
+
+   The unformatted server diagnostic.
+
 Failure
 -------
 
@@ -1108,6 +1157,25 @@ Error
 .. describe:: pub fn message(&self) -> &str
 
    The message ecFlow reported.
+
+.. _rust_error_code:
+
+.. describe:: pub const fn code(&self) -> Option<i32>
+
+   The raw code of a single server failure, including zero or unknown values.
+   ``None`` means no classified server reply (for example a local or transport failure).
+
+.. _rust_error_server_message:
+
+.. describe:: pub fn server_message(&self) -> Option<&str>
+
+   The unformatted diagnostic of a single server failure.
+
+.. _rust_error_group_errors:
+
+.. describe:: pub fn group_errors(&self) -> Option<&[GroupErrorEntry]>
+
+   Ordered failed children of a group; ``None`` for a single or local failure.
 
 Result
 ------

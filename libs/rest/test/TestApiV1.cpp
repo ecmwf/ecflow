@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <fstream>
 #include <memory>
 #include <random>
 #include <stdexcept>
@@ -14,6 +15,9 @@
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
 #include "ecflow/base/Stats.hpp"
+#include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
@@ -1016,7 +1020,10 @@ BOOST_AUTO_TEST_CASE(test_node_info) {
     });
 
     // Check that can handle non-existent node returns 404
-    handle_response(request("get", "/v1/suites/suiteX/nonexistent/info"), HttpStatusCode::client_error_not_found);
+    auto missing_node =
+        handle_response(request("get", "/v1/suites/suiteX/nonexistent/info"), HttpStatusCode::client_error_not_found);
+    auto missing_node_body = ojson::parse(missing_node.body);
+    BOOST_CHECK(!missing_node_body.contains("error_code")); // REST-local node lookup
 
     // Check that filter=[0] returns the first element as an object
     //      n.b. the filter query parameter is a generic functionality, applied to all endpoints
@@ -2023,7 +2030,35 @@ BOOST_AUTO_TEST_CASE(test_aviso, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 BOOST_AUTO_TEST_CASE(test_output, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     ECF_NAME_THIS_TEST();
 
-    handle_response(request("get", "/v1/suites/test/a/a/output"), HttpStatusCode::client_error_not_found);
+    auto response =
+        handle_response(request("get", "/v1/suites/test/a/a/output"), HttpStatusCode::client_error_not_found);
+    auto body = ojson::parse(response.body);
+    BOOST_REQUIRE(body.contains("error_code"));
+    BOOST_CHECK_EQUAL(body["error_code"].get<int>(), static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE));
+    BOOST_CHECK_EQUAL(body["code"].get<int>(), 404);
+}
+
+BOOST_AUTO_TEST_CASE(test_output_keeps_optional_kill_and_status,
+                     *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
+    ECF_NAME_THIS_TEST();
+
+    auto jobout = fs::path(ecf::environment::get("ECF_HOME")) / "rest_optional.jobout";
+    std::ofstream(jobout) << "job output\n";
+    ojson variable = {{"type", "variable"}, {"name", "ECF_JOBOUT"}, {"value", jobout.string()}};
+    handle_response(request("post", "/v1/suites/test/a/a/attributes", variable.dump(), API_KEY),
+                    HttpStatusCode::success_created);
+
+    auto response = handle_response(request("get", "/v1/suites/test/a/a/output"));
+    auto body     = ojson::parse(response.body);
+    BOOST_CHECK(body["job_output"].get<std::string>().find("job output") != std::string::npos);
+    BOOST_CHECK_EQUAL(body["kill_output"].get<std::string>(), "");
+    BOOST_CHECK_EQUAL(body["status_output"].get<std::string>(), "");
+    BOOST_CHECK(!body.contains("error_code"));
+
+    handle_response(
+        request("delete", "/v1/suites/test/a/a/attributes", R"({"type":"variable","name":"ECF_JOBOUT"})", API_KEY),
+        HttpStatusCode::success_no_content);
+    fs::remove(jobout);
 }
 
 // SCRIPT
@@ -2031,7 +2066,22 @@ BOOST_AUTO_TEST_CASE(test_output, *boost::unit_test::depends_on("S_Http/T_ApiV1/
 BOOST_AUTO_TEST_CASE(test_script, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     ECF_NAME_THIS_TEST();
 
-    handle_response(request("get", "/v1/suites/test/a/a/script"), HttpStatusCode::client_error_not_found);
+    auto response =
+        handle_response(request("get", "/v1/suites/test/a/a/script"), HttpStatusCode::client_error_not_found);
+    auto body = ojson::parse(response.body);
+    BOOST_REQUIRE(body.contains("error_code"));
+    BOOST_CHECK_EQUAL(body["error_code"].get<int>(), static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE));
+
+    auto unknown =
+        handle_response(request("get", "/v1/suites/test/no-such-task/script"), HttpStatusCode::client_error_not_found);
+    auto unknown_body = ojson::parse(unknown.body);
+    BOOST_CHECK(!unknown_body.contains("error_code")); // rejected by the REST router, not the ecFlow server
+
+    auto missing_node =
+        handle_response(request("get", "/v1/suites/test/nosuchtask/script"), HttpStatusCode::client_error_not_found);
+    auto missing_node_body = ojson::parse(missing_node.body);
+    BOOST_REQUIRE(missing_node_body.contains("error_code"));
+    BOOST_CHECK_EQUAL(missing_node_body["error_code"].get<int>(), static_cast<int>(ecf::ErrorCode::UNCLASSIFIED));
 }
 
 // DELETE FAMILY
@@ -2046,6 +2096,11 @@ BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_
 
     handle_response(request("delete", "/v1/suites/test/definition", "", API_KEY), HttpStatusCode::success_no_content);
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
+    auto missing      = handle_response(request("delete", "/v1/suites/test/definition", "", API_KEY),
+                                   HttpStatusCode::client_error_not_found);
+    auto missing_body = ojson::parse(missing.body);
+    BOOST_REQUIRE(missing_body.contains("error_code"));
+    BOOST_CHECK_EQUAL(missing_body["error_code"].get<int>(), static_cast<int>(ecf::ErrorCode::UNCLASSIFIED));
 }
 
 BOOST_AUTO_TEST_CASE(test_server_status_reports_an_absent_protocol_as_null) {

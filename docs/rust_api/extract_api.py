@@ -47,6 +47,7 @@ FIRST = ["Client"]
 GROUP = re.compile(r"^// =+ (.+?) =+$")
 TYPE = re.compile(r"^(pub )?(struct|enum) (\w+)")
 ALIAS = re.compile(r"^pub type (\w+).*;$")
+CONSTANT = re.compile(r"^pub const (\w+): .+;$")
 IMPL = re.compile(r"^impl (\w+) \{$")
 FUNCTION = re.compile(r"^pub (const )?fn (\w+)")
 VARIANT = re.compile(r"^(\w+),$")
@@ -107,6 +108,8 @@ def parse(path, only):
                 members = items.get(match.group(1), (None, None, None))[2]
                 is_enum, group = False, None
             elif only is None and (match := ALIAS.match(text)):
+                items[match.group(1)] = (text.rstrip(";"), doc, [])
+            elif only is None and (match := CONSTANT.match(text)):
                 items[match.group(1)] = (text.rstrip(";"), doc, [])
             elif only is None and not indent and (match := FUNCTION.match(text)):
                 items[match.group(2)] = (signature(lines, number), doc, [])

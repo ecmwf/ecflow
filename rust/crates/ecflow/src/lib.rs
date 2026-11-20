@@ -6,7 +6,7 @@
 //! Provides:
 //! - [`Client`] - connection configuration, server probes and control, node
 //!   commands, child (task) commands and definitions as text
-//! - [`Error`] - with the [`Failure`] class ecFlow diagnosed
+//! - [`Error`] - with the [`Failure`] class and any machine-readable server error
 //!
 //! ```no_run
 //! use ecflow::Client;
@@ -22,4 +22,6 @@ pub mod error;
 
 pub use client::{CheckPtMode, Client, DefsStyle, NodeOrder, NodeState, ssl_supported, version};
 pub use ecflow_sys::Zombie;
-pub use error::{Error, Failure, Result};
+pub use error::{
+    EMPTY_CONTENT, Error, FILE_UNAVAILABLE, Failure, GroupErrorEntry, Result, UNCLASSIFIED,
+};

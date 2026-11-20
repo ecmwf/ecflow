@@ -74,6 +74,11 @@ private:
     bool setup_user_authentification(AbstractClientEnv&) override;
     void setup_user_authentification() override;
 
+    ///
+    /// @copydoc ClientToServerCmd::doHandleRequest
+    ///
+    /// Coded child failures retain their numeric classification in independent response snapshots.
+    ///
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     void cleanup() override; // cleanup all children
 

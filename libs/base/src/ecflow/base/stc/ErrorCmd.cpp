@@ -16,7 +16,15 @@ ErrorCmd::ErrorCmd(const std::string& errorMsg) {
     init(errorMsg);
 }
 
-void ErrorCmd::init(const std::string& errorMsg) {
+ErrorCmd::ErrorCmd(const std::string& errorMsg, ecf::ErrorCode code) {
+    init(errorMsg, code);
+}
+
+ErrorCmd::ErrorCmd(const std::string& errorMsg, int code) {
+    init(errorMsg, code);
+}
+
+void ErrorCmd::init(const std::string& errorMsg, int code) {
     // #ifdef DEBUG
     // std::cout << ErrorCmd::init " << errorMsg << "\n";
     // LogToCout toCoutAsWell;
@@ -24,6 +32,7 @@ void ErrorCmd::init(const std::string& errorMsg) {
 
     LOG_ASSERT(!errorMsg.empty(), "");
     error_msg_ = errorMsg;
+    code_      = code;
 
     // Log the error, Remove any "/n" as the log file will add this automatically
     size_t pos = error_msg_.rfind("\n");
@@ -62,9 +71,15 @@ bool ErrorCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
     else {
         ss += "Server reply: ";
         ss += error_msg_;
+        if (server_reply.group_reply()) {
+            server_reply.add_group_error(code_, error_msg_);
+        }
+        else {
+            server_reply.set_server_error(code_, error_msg_);
+        }
     }
     ss += "\n";
-    server_reply.set_error_msg(server_reply.get_error_msg() + ss); // append in-case multiple errors from group cmd
+    server_reply.get_error_msg() += ss; // append in-case multiple errors from group cmd without discarding its code
     return false;
 }
 

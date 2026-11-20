@@ -9,8 +9,10 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/FileFailure.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/MaskCredentials.hpp"
 #include "ecflow/core/Passwd.hpp"
@@ -342,6 +344,8 @@ EcfFile Submittable::locatedEcfFile() const {
     //           <root-path>/task.ecf
 
     std::string reasonEcfFileNotFound;
+    bool absence_confirmed     = true;
+    bool invalid_root          = false;
     std::string theAbsNodePath = absNodePath();
     std::string ecf_home;
     findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
@@ -364,6 +368,7 @@ EcfFile Submittable::locatedEcfFile() const {
         return EcfFile(const_cast<Submittable*>(this), genvar_ecfscript.value(), EcfFile::ECF_SCRIPT);
     }
     else {
+        absence_confirmed &= ecf::file_is_absent(genvar_ecfscript.value());
         reasonEcfFileNotFound += "   ECF_SCRIPT(";
         reasonEcfFileNotFound += genvar_ecfscript.value();
         reasonEcfFileNotFound += ") does not exist:\n";
@@ -431,10 +436,12 @@ EcfFile Submittable::locatedEcfFile() const {
             // Alias/.usr) file
             std::string searchResult;
             if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+                searchResult =
+                    File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension(), &absence_confirmed);
             }
             else {
-                searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+                searchResult =
+                    File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension(), &absence_confirmed);
             }
             if (searchResult.empty()) {
                 reasonEcfFileNotFound += "   Search of directory ECF_FILES(";
@@ -460,10 +467,12 @@ EcfFile Submittable::locatedEcfFile() const {
                 // file
                 std::string searchResult;
                 if (file_search_algo == EcfFile::PRUNE_ROOT) {
-                    searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+                    searchResult = File::backwardSearch(
+                        ecf_filesDirectory, theAbsNodePath, script_extension(), &absence_confirmed);
                 }
                 else {
-                    searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+                    searchResult =
+                        File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension(), &absence_confirmed);
                 }
                 if (searchResult.empty()) {
                     reasonEcfFileNotFound += MESSAGE("   Search of directory ECF_FILES(variable substituted)("
@@ -474,6 +483,7 @@ EcfFile Submittable::locatedEcfFile() const {
                 }
             }
             else {
+                invalid_root = true;
                 std::ostringstream ss;
                 ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
                 if (original_ecf_filesDirectory != ecf_filesDirectory) {
@@ -496,10 +506,10 @@ EcfFile Submittable::locatedEcfFile() const {
         // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr) file
         std::string searchResult;
         if (file_search_algo == EcfFile::PRUNE_ROOT) {
-            searchResult = File::backwardSearch(ecf_home, theAbsNodePath, script_extension());
+            searchResult = File::backwardSearch(ecf_home, theAbsNodePath, script_extension(), &absence_confirmed);
         }
         else {
-            searchResult = File::forwardSearch(ecf_home, theAbsNodePath, script_extension());
+            searchResult = File::forwardSearch(ecf_home, theAbsNodePath, script_extension(), &absence_confirmed);
         }
         if (searchResult.empty()) {
             reasonEcfFileNotFound += "   Search of directory ECF_HOME(";
@@ -517,6 +527,7 @@ EcfFile Submittable::locatedEcfFile() const {
         }
     }
     else {
+        invalid_root = true;
         reasonEcfFileNotFound += "   Directory ECF_HOME(";
         reasonEcfFileNotFound += ecf_home;
         reasonEcfFileNotFound += ") does not exist:\n";
@@ -527,6 +538,9 @@ EcfFile Submittable::locatedEcfFile() const {
     error_msg += theAbsNodePath;
     error_msg += " cannot be found:\n";
     error_msg += reasonEcfFileNotFound;
+    if (absence_confirmed && !invalid_root) {
+        throw ecf::FileHandlingError(error_msg, ecf::ErrorCode::FILE_UNAVAILABLE);
+    }
     throw std::runtime_error(error_msg);
 }
 

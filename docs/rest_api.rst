@@ -18,6 +18,27 @@ REST API
 .. caution::
   ecFlow's REST API is experimental, and its details are subject to change. The documentation reflects its current operation.
 
+Error responses
+===============
+
+Errors raised by a matched REST endpoint have a JSON body with ``code``
+(the HTTP status), ``message`` (the existing diagnostic), ``path`` and
+``method``. A nonempty request body is also returned as ``body``. An unmatched
+route instead returns ``path`` and ``status``. The optional integer
+``error_code`` appears only
+when an ecFlow server reply supplied a machine-readable classification; it is
+not an HTTP status. A value of 0 means an unclassified server failure, not
+success. Unknown numeric values are preserved. Router-local and transport
+failures omit ``error_code``.
+
+A confirmed missing server file uses ``error_code`` 1 (``FILE_UNAVAILABLE``)
+and HTTP 404. ``EMPTY_CONTENT`` (2) is available to ecFlow clients but no
+current REST route requests manuals.
+Other HTTP 404 responses, including an unknown REST route or node, do not
+necessarily mean a file is missing. The node-output response still treats
+missing kill and status output as optional and returns an empty string for
+``kill_output`` or ``status_output`` respectively.
+
 Compilation
 ===========
 

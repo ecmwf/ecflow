@@ -96,8 +96,16 @@ STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd(AbstractServer* as) {
 }
 
 STC_Cmd_ptr PreAllocatedReply::error_cmd(const std::string& error_msg) {
+    return error_cmd(error_msg, ecf::ErrorCode::UNCLASSIFIED);
+}
+
+STC_Cmd_ptr PreAllocatedReply::error_cmd(const std::string& error_msg, ecf::ErrorCode code) {
+    return error_cmd(error_msg, static_cast<int>(code));
+}
+
+STC_Cmd_ptr PreAllocatedReply::error_cmd(const std::string& error_msg, int code) {
     auto* cmd = dynamic_cast<ErrorCmd*>(error_cmd_.get());
-    cmd->init(error_msg);
+    cmd->init(error_msg, code);
     return error_cmd_;
 }
 

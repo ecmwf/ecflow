@@ -45,6 +45,7 @@
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
@@ -107,6 +108,36 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
 }
 
 } // namespace ecf
+
+namespace {
+
+///
+/// @brief Converts the most recent reply into a compatible exception without inventing a local error code.
+///
+/// @param[in] reply Reply containing a formatted diagnostic and optional server classification.
+/// @throws ecf::GroupError for grouped child failures.
+/// @throws ecf::FileHandlingError for recognised file failures.
+/// @throws ecf::CodedError for unclassified or unknown server codes.
+/// @throws std::runtime_error for failures without a server error code.
+///
+[[noreturn]] void throw_reply_error(const ServerReply& reply) {
+    if (reply.group_reply() && !reply.group_errors().empty()) {
+        throw ecf::GroupError(reply.error_msg(), reply.group_errors());
+    }
+    if (reply.has_error_code()) {
+        if (reply.error_code() == static_cast<int>(ecf::ErrorCode::FILE_UNAVAILABLE)) {
+            throw ecf::FileHandlingError(
+                reply.error_msg(), ecf::ErrorCode::FILE_UNAVAILABLE, reply.raw_error_message());
+        }
+        if (reply.error_code() == static_cast<int>(ecf::ErrorCode::EMPTY_CONTENT)) {
+            throw ecf::EmptyContentError(reply.error_msg(), reply.raw_error_message());
+        }
+        throw ecf::CodedError(reply.error_msg(), reply.error_code(), reply.raw_error_message());
+    }
+    throw std::runtime_error(reply.error_msg());
+}
+
+} // namespace
 
 // ==================================================================================
 // class ClientInvoker
@@ -310,6 +341,7 @@ int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) co
 }
 
 int ClientInvoker::invoke(const CommandLine& cl) const {
+    server_reply_.clear_error_codes();
     // Enable logging of request, and allow logging of round trip time.
     // RequestLogger must be placed *before* RoundTripRecorder.
     RequestLogger request_logger(this);
@@ -346,7 +378,7 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
-        throw std::runtime_error(server_reply_.error_msg());
+        throw_reply_error(server_reply_);
     }
     return res;
 }
@@ -361,6 +393,7 @@ int ClientInvoker::invoke(const std::vector<std::string>& args) const {
 }
 
 int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
+    server_reply_.clear_error_codes();
     // assumes clients of Cmd_ptr constructor has caught exceptions
 
     // Allow request to be logged & allow logging of round trip time, Hence must be placed *before* RoundTripRecorder
@@ -380,7 +413,7 @@ int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
-        throw std::runtime_error(server_reply_.error_msg());
+        throw_reply_error(server_reply_);
     }
     return res;
 }
@@ -687,6 +720,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                 catch (std::exception& e) {
                     // *Some kind of connection error*: fall through and try again. Avoid this message when pinging,
                     // i.e. to see if server is alive.
+                    server_reply_.clear_error_codes();
                     if (clientEnv_.debug()) {
                         std::cerr << TimeStamp::now() << "ClientInvoker: Connection error: (" << e.what() << ")"
                                   << std::endl;
@@ -1574,6 +1608,7 @@ int ClientInvoker::freeDep(const std::string& absNodePath, bool trigger, bool al
 int ClientInvoker::file(const std::string& absNodePath,
                         const std::string& fileType,
                         const std::string& max_lines) const {
+    server_reply_.clear_error_codes();
     if (testInterface_) {
         return invoke(CtsApi::file(absNodePath, fileType, max_lines));
     }

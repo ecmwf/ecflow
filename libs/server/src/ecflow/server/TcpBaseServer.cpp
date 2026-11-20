@@ -42,6 +42,7 @@
 #include "ecflow/base/cts/user/ShowCmd.hpp"          // required to enforce cereal registration
 #include "ecflow/base/cts/user/ZombieCmd.hpp"        // required to enforce cereal registration
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/ErrorCode.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ListeningSocket.hpp"
@@ -74,6 +75,9 @@ void TcpBaseServer::handle_request() {
         // Service the in bound request, handling the request will populate the outbound_response_
         // Note:: Handle request will first authenticate
         outbound_response_.set_cmd(inbound_request_.handleRequest(server_));
+    }
+    catch (const ecf::CodedError& e) {
+        outbound_response_.set_cmd(PreAllocatedReply::error_cmd(e.what(), e.code()));
     }
     catch (std::exception& e) {
         outbound_response_.set_cmd(PreAllocatedReply::error_cmd(e.what()));

@@ -63,9 +63,15 @@ public:
     static const std::string& FREE_JOBS_PASSWORD();
     static const std::string& DUMMY_PROCESS_OR_REMOTE_ID();
 
-    // returns the corresponding .ecf file.
-    // i.e if the ecf file is missing or empty std::runtime_error is thrown
-    // For dummy tasks, i.e tasks with no .ecf file user should add ECF_DUMMY_TASK variable
+    ///
+    /// @brief Locates a task script using generated, command-backed and directory fallbacks.
+    ///
+    /// Dummy tasks without a script require the ECF_DUMMY_TASK variable.
+    ///
+    /// @return Located script descriptor with its origin and lookup algorithm.
+    /// @throws ecf::FileHandlingError if every configured candidate is confirmed absent.
+    /// @throws std::runtime_error if a configured root or command fails for another reason.
+    ///
     EcfFile locatedEcfFile() const;
     virtual const std::string& script_extension() const = 0;
 

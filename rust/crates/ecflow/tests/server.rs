@@ -9,23 +9,38 @@
 
 use std::net::TcpListener;
 use std::process::{Child, Command, Stdio};
+use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 
 use ecflow::{CheckPtMode, Client, DefsStyle, Failure, NodeOrder, NodeState, Zombie};
 
 struct Server {
+    _port_guard: MutexGuard<'static, ()>,
     process: Child,
     port: u16,
     home: tempfile::TempDir,
+    http: bool,
 }
 
 impl Server {
     fn start() -> Option<Self> {
+        Self::start_with_http(false)
+    }
+
+    fn start_with_http(http: bool) -> Option<Self> {
         let executable = std::env::var_os("ECFLOW_SERVER")?;
+        // Both real-server tests select from the same port range. Keep the
+        // chosen port reserved until this server has exited.
+        static PORT_GUARD: Mutex<()> = Mutex::new(());
+        let port_guard = PORT_GUARD.lock().expect("server port lock");
         let home = tempfile::tempdir().expect("temporary ECF_HOME");
         let port = free_port();
-        let process = Command::new(executable)
-            .arg(format!("--port={port}"))
+        let mut command = Command::new(executable);
+        command.arg(format!("--port={port}"));
+        if http {
+            command.arg("--http");
+        }
+        let process = command
             .env("ECF_HOME", home.path())
             .env("ECF_PORT", port.to_string())
             .current_dir(home.path())
@@ -34,14 +49,19 @@ impl Server {
             .spawn()
             .expect("start ecflow_server");
         Some(Self {
+            _port_guard: port_guard,
             process,
             port,
             home,
+            http,
         })
     }
 
     fn client(&self) -> Client {
         let mut client = Client::with_host_port("localhost", self.port).expect("create client");
+        if self.http {
+            client.enable_http();
+        }
         client.set_connect_timeout(Duration::from_secs(5));
         client.set_retry_connection_period(Duration::from_millis(500));
         client.set_connection_attempts(2);
@@ -102,6 +122,46 @@ fn round_trip() {
     assert_ne!(client.stats().expect("stats"), "");
 
     client.load_defs_text(DEFS, true).expect("load defs");
+    let missing_file = client
+        .get_file("/rust_test/t1", "kill", 100)
+        .expect_err("missing kill output");
+    assert_eq!(missing_file.code(), Some(ecflow::FILE_UNAVAILABLE));
+    assert!(
+        missing_file
+            .server_message()
+            .is_some_and(|m| m.contains("kill output"))
+    );
+    assert_eq!(missing_file.failure(), Failure::None);
+    assert!(missing_file.group_errors().is_none());
+
+    let unknown_node = client
+        .get_file("/missing_node", "jobout", 100)
+        .expect_err("unknown node");
+    assert_eq!(unknown_node.code(), Some(ecflow::UNCLASSIFIED));
+    assert!(
+        unknown_node
+            .server_message()
+            .is_some_and(|m| m.contains("Cannot find node"))
+    );
+
+    let grouped = client
+        .group("file /rust_test/t1 kill; file /missing_node job")
+        .expect_err("group with two failing children");
+    let entries = grouped.group_errors().expect("grouped server failures");
+    assert_eq!(entries.len(), 2);
+    assert_eq!(entries[0].code(), ecflow::FILE_UNAVAILABLE);
+    assert_eq!(entries[1].code(), ecflow::UNCLASSIFIED);
+    assert!(entries[0].message().contains("kill output"));
+    assert!(grouped.code().is_none());
+    assert!(grouped.server_message().is_none());
+
+    client.ping().expect("successful request after errors");
+    let invalid = client
+        .get_file("/rust_test/t1", "not-a-file-type", 100)
+        .expect_err("local file type validation");
+    assert_eq!(invalid.code(), None);
+    assert!(invalid.group_errors().is_none());
+
     let defs = client.get_defs_text(DefsStyle::Defs).expect("get defs");
     assert!(defs.contains("suite rust_test"), "{defs}");
 
@@ -176,6 +236,27 @@ fn round_trip() {
     client.resume(["/rust_test"]).expect("resume");
     handle_dropped_with_client(&server, &mut client);
     server_commands(&mut client);
+}
+
+#[test]
+fn http_server_error_codes() {
+    let Some(server) = Server::start_with_http(true) else {
+        eprintln!("skipped: set ECFLOW_SERVER to an ecflow_server executable");
+        return;
+    };
+    let mut client = server.client();
+    client
+        .load_defs_text(DEFS, true)
+        .expect("load defs over HTTP");
+    let missing = client
+        .get_file("/rust_test/t1", "kill", 100)
+        .expect_err("missing kill output over HTTP command transport");
+    assert_eq!(
+        missing.code(),
+        Some(ecflow::FILE_UNAVAILABLE),
+        "{missing:?}"
+    );
+    assert!(missing.server_message().is_some());
 }
 
 /// A handle registered by a client is gone from the server once that client
@@ -364,4 +445,6 @@ fn connection_refused_is_diagnosed() {
 
     let error = client.ping().expect_err("nothing listens");
     assert_eq!(error.failure(), Failure::ConnectionRefused, "{error}");
+    assert_eq!(error.code(), None);
+    assert!(error.group_errors().is_none());
 }
