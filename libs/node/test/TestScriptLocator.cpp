@@ -504,6 +504,116 @@ BOOST_AUTO_TEST_CASE(test_search_over_a_hand_built_lookup) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_manual_found_in_ecf_files_and_in_ecf_home) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    tree.suite->addVariable(Variable("ECF_HOME", scripts.dir("home")));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.dir("files")));
+    const auto in_files = scripts.add("files/family.man");
+    const auto in_home  = scripts.add("home/suite/family.man");
+
+    const NodeVariableLookup lookup(*tree.family);
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family", lookup), in_files);
+    const auto home = locate_manual_in_ecf_home("/suite/family", lookup);
+    BOOST_CHECK(home.has_value());
+    BOOST_CHECK_EQUAL(home.value_or("<no value>"), in_home);
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_not_found_in_existing_directories) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    tree.suite->addVariable(Variable("ECF_HOME", scripts.dir("home")));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.dir("files")));
+
+    const NodeVariableLookup lookup(*tree.suite);
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite", lookup), "");
+    const auto home = locate_manual_in_ecf_home("/suite", lookup);
+    BOOST_CHECK(home.has_value()); // ECF_HOME exists: the server then tries to read an empty path
+    BOOST_CHECK_EQUAL(home.value_or("<no value>"), "");
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_directories_that_do_not_exist) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    tree.suite->addVariable(Variable("ECF_HOME", scripts.root() + "/missing_home"));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.root() + "/missing_files"));
+    scripts.add("missing_files_is_not_a_directory/family.man");
+
+    const NodeVariableLookup lookup(*tree.family);
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family", lookup), "");
+    BOOST_CHECK(!locate_manual_in_ecf_home("/suite/family", lookup).has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_directories_that_cannot_be_examined) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    const auto loop = scripts.root() + "/loop";
+    fs::create_symlink("loop", loop);
+    tree.suite->addVariable(Variable("ECF_HOME", loop));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.dir("files")));
+    const auto in_files = scripts.add("files/family.man");
+
+    // The search of ECF_FILES does not examine ECF_HOME; the search of ECF_HOME fails, as in the server
+    const NodeVariableLookup lookup(*tree.family);
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family", lookup), in_files);
+    BOOST_CHECK_THROW(locate_manual_in_ecf_home("/suite/family", lookup), fs::filesystem_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_is_searched_by_pruning_the_root_only) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    family_ptr sub = tree.family->add_family("sub");
+    tree.suite->addVariable(Variable("ECF_HOME", scripts.dir("home")));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.dir("files")));
+    tree.suite->addVariable(Variable("ECF_FILES_LOOKUP", "prune_leaf"));
+    scripts.add("files/suite/sub.man"); // found only by pruning the leaf
+    const auto in_files = scripts.add("files/sub.man");
+
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family/sub", NodeVariableLookup(*sub)), in_files);
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_directories_are_read_from_user_variables) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    Tree tree;
+    tree.suite->addVariable(Variable("ECF_HOME", scripts.dir("home")));
+    tree.suite->addVariable(Variable("ECF_FILES", scripts.dir("files")));
+    tree.family->addRepeat(Repeat(RepeatString("ECF_FILES", {scripts.dir("elsewhere")})));
+    scripts.add("elsewhere/family.man");
+    const auto in_files = scripts.add("files/family.man");
+
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family", NodeVariableLookup(*tree.family)), in_files);
+    tree.family->update_generated_variables();
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite/family", MapVariableLookup::from_node(*tree.family)),
+                      in_files);
+}
+
+BOOST_AUTO_TEST_CASE(test_manual_over_a_hand_built_lookup) {
+    ECF_NAME_THIS_TEST();
+
+    Scripts scripts;
+    const auto in_home = scripts.add("home/suite.man");
+    MapVariableLookup lookup({{"ECF_HOME", "/nowhere"}, {"ECF_FILES", scripts.root() + "/home"}},
+                             {},
+                             {{"ECF_HOME", scripts.root() + "/home"}});
+
+    BOOST_CHECK_EQUAL(locate_manual_in_ecf_files("/suite", lookup), "");
+    const auto home = locate_manual_in_ecf_home("/suite", lookup);
+    BOOST_CHECK(home.has_value());
+    BOOST_CHECK_EQUAL(home.value_or("<no value>"), in_home);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

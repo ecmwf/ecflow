@@ -18,7 +18,9 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/ScriptLocator.hpp"
 #include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/VariableLookup.hpp"
 
 using namespace ecf;
 
@@ -273,27 +275,19 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
         if (file_ == CFileCmd::MANUAL) {
             // The only valid option for Suite or Family is Manual
 
-            // First look for .man files in ECF_FILES and then ECF_HOME
-            std::string ecf_files;
-            node->findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_files);
-            if (!ecf_files.empty() && fs::is_directory(ecf_files)) {
-
-                std::string manFile = File::backwardSearch(ecf_files, node->absNodePath(), File::MAN_EXTN());
-                if (!manFile.empty()) {
-                    EcfFile the_file(node.get(), manFile);
-                    the_file.manual(
-                        fileContents); // pre-process & extract manual: will throw std::runtime_error for errors
-                }
+            // First look for .man files in ECF_FILES and then ECF_HOME; see ecf::locate_manual_in_ecf_files
+            const ecf::NodeVariableLookup lookup(*node);
+            const auto in_ecf_files = ecf::locate_manual_in_ecf_files(node->absNodePath(), lookup);
+            if (!in_ecf_files.empty()) {
+                EcfFile the_file(node.get(), in_ecf_files);
+                the_file.manual(fileContents); // pre-process & extract manual: will throw std::runtime_error for errors
             }
 
             if (fileContents.empty()) {
                 // Try under ECF_HOME
-                std::string ecf_home;
-                node->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
-                if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
-
-                    std::string manFile = File::backwardSearch(ecf_home, node->absNodePath(), File::MAN_EXTN());
-                    EcfFile the_file(node.get(), manFile);
+                const auto in_ecf_home = ecf::locate_manual_in_ecf_home(node->absNodePath(), lookup);
+                if (in_ecf_home) {
+                    EcfFile the_file(node.get(), *in_ecf_home);
                     the_file.manual(
                         fileContents); // pre-process & extract manual: will throw std::runtime_error for errors
                 }

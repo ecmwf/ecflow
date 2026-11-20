@@ -170,4 +170,22 @@ locate_script(const std::string& abs_node_path, const std::string& extension, co
     throw std::runtime_error(error_msg);
 }
 
+std::string locate_manual_in_ecf_files(const std::string& abs_node_path, const VariableLookup& lookup) {
+    std::string ecf_files;
+    lookup.find_user(ecf::environment::ECF_FILES, ecf_files);
+    if (!ecf_files.empty() && fs::is_directory(ecf_files)) {
+        return File::backwardSearch(ecf_files, abs_node_path, File::MAN_EXTN());
+    }
+    return {};
+}
+
+std::optional<std::string> locate_manual_in_ecf_home(const std::string& abs_node_path, const VariableLookup& lookup) {
+    std::string ecf_home;
+    lookup.find_user(ecf::environment::ECF_HOME, ecf_home);
+    if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
+        return File::backwardSearch(ecf_home, abs_node_path, File::MAN_EXTN());
+    }
+    return std::nullopt;
+}
+
 } // namespace ecf

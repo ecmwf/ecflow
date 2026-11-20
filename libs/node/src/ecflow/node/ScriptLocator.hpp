@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include "ecflow/node/EcfFile.hpp"
@@ -57,5 +58,35 @@ struct ScriptLocation
 ///
 ScriptLocation
 locate_script(const std::string& abs_node_path, const std::string& extension, const VariableLookup& lookup);
+
+///
+/// @brief Searches ECF_FILES for the manual (`.man` file) of a family or a suite, as the server does first.
+///
+/// The server reads the manual found here. When none is found, or when it gives an empty manual, and only then, the
+/// server searches ECF_HOME, as locate_manual_in_ecf_home does; a caller follows the same order, so that ECF_HOME is
+/// not examined when this manual is used. ECF_FILES is read with VariableLookup::find_user and used without variable
+/// substitution; the search prunes the root of the node path (ECF_FILES_LOOKUP is not used).
+///
+/// @param[in] abs_node_path The absolute path of the family or the suite, such as /suite/family.
+/// @param[in] lookup The variables as seen from the node.
+/// @return The path of the manual; empty when ECF_FILES is not defined, is not a directory or holds no manual.
+/// @throws std::filesystem::filesystem_error when ECF_FILES cannot be examined, as in the server.
+///
+std::string locate_manual_in_ecf_files(const std::string& abs_node_path, const VariableLookup& lookup);
+
+///
+/// @brief Searches ECF_HOME for the manual (`.man` file) of a family or a suite, as the server does second.
+///
+/// See locate_manual_in_ecf_files for the order. ECF_HOME is read with VariableLookup::find_user and used without
+/// variable substitution; the search prunes the root of the node path.
+///
+/// @param[in] abs_node_path The absolute path of the family or the suite, such as /suite/family.
+/// @param[in] lookup The variables as seen from the node.
+/// @return The path of the manual; empty when ECF_HOME is a directory that holds no manual, in which case the server
+///         tries to read an empty path and fails; no value when ECF_HOME is not defined or is not a directory, in
+///         which case the server reports that there is no manual.
+/// @throws std::filesystem::filesystem_error when ECF_HOME cannot be examined, as in the server.
+///
+std::optional<std::string> locate_manual_in_ecf_home(const std::string& abs_node_path, const VariableLookup& lookup);
 
 } // namespace ecf
