@@ -1163,6 +1163,24 @@ std::vector<std::string> CtsApi::query(const std::string& query_type,
 const char* CtsApi::queryArg() {
     return "query";
 }
+
+std::vector<std::string>
+CtsApi::permissions(const std::string& operation, const std::string& path, const std::string& value, bool json) {
+    std::vector<std::string> retVec{std::string("--") + permissionsArg() + "=" + operation, path};
+    if (!value.empty()) {
+        retVec.push_back(value);
+    }
+    if (json) {
+        retVec.push_back(std::string("--") + permissions_format_arg() + "=json");
+    }
+    return retVec;
+}
+const char* CtsApi::permissionsArg() {
+    return "permissions";
+}
+const char* CtsApi::permissions_format_arg() {
+    return "fmt";
+}
 const char* CtsApi::query_evaluate_arg() {
     return "evaluate";
 }

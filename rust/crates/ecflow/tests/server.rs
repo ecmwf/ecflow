@@ -5,9 +5,11 @@
 //!
 //! Runs when `ECFLOW_SERVER` names an `ecflow_server` executable; the server
 //! is started on a free port with a temporary `ECF_HOME` and stopped at the
-//! end.
+//! end. Without it, the test is skipped, unless `ECFLOW_TEST_REQUIRE_SERVER`
+//! is set, in which case it fails.
 
-use std::net::TcpListener;
+mod common;
+
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
@@ -17,13 +19,15 @@ struct Server {
     process: Child,
     port: u16,
     home: tempfile::TempDir,
+    _lock: common::PortLock,
 }
 
 impl Server {
     fn start() -> Option<Self> {
         let executable = std::env::var_os("ECFLOW_SERVER")?;
         let home = tempfile::tempdir().expect("temporary ECF_HOME");
-        let port = free_port();
+        let lock = common::PortLock::reserve(common::PORTS);
+        let port = lock.port();
         let process = Command::new(executable)
             .arg(format!("--port={port}"))
             .env("ECF_HOME", home.path())
@@ -37,6 +41,7 @@ impl Server {
             process,
             port,
             home,
+            _lock: lock,
         })
     }
 
@@ -58,14 +63,6 @@ impl Server {
     }
 }
 
-/// A free port in the range the server accepts (1024 to 49151), which
-/// excludes the ephemeral ports the system would hand out.
-fn free_port() -> u16 {
-    (3141..49151)
-        .find(|port| TcpListener::bind(("127.0.0.1", *port)).is_ok())
-        .expect("a free port")
-}
-
 impl Drop for Server {
     fn drop(&mut self) {
         let _ = self.process.kill();
@@ -85,6 +82,10 @@ endsuite
 #[test]
 fn round_trip() {
     let Some(server) = Server::start() else {
+        assert!(
+            std::env::var_os("ECFLOW_TEST_REQUIRE_SERVER").is_none(),
+            "ECFLOW_TEST_REQUIRE_SERVER is set, but ECFLOW_SERVER names no ecflow_server executable"
+        );
         eprintln!("skipped: set ECFLOW_SERVER to an ecflow_server executable");
         return;
     };
@@ -352,7 +353,7 @@ fn server_commands(client: &mut Client) {
 
 #[test]
 fn connection_refused_is_diagnosed() {
-    let port = TcpListener::bind("127.0.0.1:0")
+    let port = std::net::TcpListener::bind("127.0.0.1:0")
         .expect("bind a free port")
         .local_addr()
         .expect("local address")

@@ -24,6 +24,10 @@ public:
 
     void init(const std::string& s) { str_ = s; }
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override {
+        return ecf::ReplyFiltering::None;
+    } // free text: log, edit history, file content, why (D5.20, D5.21, D5.28)
     bool equals(ServerToClientCmd*) const override;
     const std::string& get_string() const override { return str_; }
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;

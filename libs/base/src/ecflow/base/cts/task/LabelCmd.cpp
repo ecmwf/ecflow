@@ -36,8 +36,8 @@ ecf::authentication_t LabelCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t LabelCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t LabelCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 void LabelCmd::print(std::string& os) const {

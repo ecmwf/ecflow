@@ -6,6 +6,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
@@ -17,6 +18,7 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -420,6 +422,22 @@ void Node::addAutoCancel(const ecf::AutoCancelAttr& ac) {
     }
     auto_cancel_     = std::make_unique<ecf::AutoCancelAttr>(ac);
     state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::add_permissions(const ecf::Permissions& permissions) {
+    if (permissions_) {
+        throw std::runtime_error(MESSAGE(
+            "Node::add_permissions: A node can only have one permissions attribute, see node " << debugNodePath()));
+    }
+    permissions_     = std::make_unique<ecf::Permissions>(permissions);
+    state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
+}
+
+void Node::set_permissions(const ecf::Permissions* permissions) {
+    permissions_     = permissions ? std::make_unique<ecf::Permissions>(*permissions) : nullptr;
+    state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void Node::add_autoarchive(const ecf::AutoArchiveAttr& aa) {

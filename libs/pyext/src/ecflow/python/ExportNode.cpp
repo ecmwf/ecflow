@@ -22,6 +22,7 @@
 #include "ecflow/python/ExportCollections.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
+#include "ecflow/python/PermissionsUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 
@@ -1324,6 +1325,43 @@ const ecf::LateAttr* Node_get_late(node_ptr self) {
 }
 
 ///
+/// @brief Adds the Permissions attribute to the node.
+///
+/// @param self The node.
+/// @param value The attribute: a Permissions object, a string in either textual form, or a list of entries.
+/// @return The node, to allow chaining.
+/// @throws std::runtime_error when the value is invalid, or the node already has a Permissions attribute.
+///
+node_ptr Node_add_permissions(node_ptr self, const py::object& value) {
+    self->add_permissions(PermissionsUtil::from(value));
+    return self;
+}
+
+///
+/// @brief Returns a copy of the Permissions attribute of the node.
+///
+/// @param self The node.
+/// @return The attribute, or None when the node has none.
+///
+py::object Node_get_permissions(node_ptr self) {
+    if (const auto* permissions = self->permissions(); permissions) {
+        return py::cast(*permissions);
+    }
+    return py::none();
+}
+
+///
+/// @brief Removes the Permissions attribute of the node; a node without one is left unchanged.
+///
+/// @param self The node.
+///
+void Node_delete_permissions(node_ptr self) {
+    if (self->permissions()) {
+        self->set_permissions(nullptr);
+    }
+}
+
+///
 /// @brief Return a pointer to the auto-archive attribute of the node, or nullptr if not set.
 ///
 /// @param self The node.
@@ -1500,6 +1538,10 @@ void export_Node(py::module& m) {
              py::arg("relative"),
              py::arg("idle") = false)
         .def("add_autoarchive", &Node_add_autoarchive_3)
+
+        .def("add_permissions", &Node_add_permissions, py::arg("value"), DefsDoc::add_permissions_doc())
+        .def("get_permissions", &Node_get_permissions, DefsDoc::get_permissions_doc())
+        .def("delete_permissions", &Node_delete_permissions, DefsDoc::delete_permissions_doc())
 
         .def("add_autorestore", &Node_add_autorestore, DefsDoc::add_autorestore_doc())
         .def("add_autorestore", &Node_add_autorestore1)

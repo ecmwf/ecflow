@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
@@ -22,8 +23,10 @@
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/move_peer.hpp"
 
 using namespace ecf;
@@ -69,6 +72,7 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs) {
         copy(rhs);
         order_state_change_no_      = 0;
         add_remove_state_change_no_ = Ecf::incr_state_change_no();
+        ecf::Visibility::structure_changed();
     }
     return *this;
 }
@@ -227,7 +231,9 @@ void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<ChildrenMemento>(nodes_));
+        // The children the requester can read, without the nodes it cannot read below them
+        const auto* visibility = changes.visibility();
+        comp->add(std::make_shared<ChildrenMemento>(visibility ? visibility->project(nodes_) : nodes_));
     }
     // Create OrderMemento to signal reordering of children
     else if (order_state_change_no_ > changes.client_state_change_no()) {
@@ -235,10 +241,16 @@ void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
 
+        // The order names the children the requester can read only
         std::vector<std::string> order_vec;
-        order_vec.reserve(nodes_.size());
-        for (const auto& n : nodes_) {
-            order_vec.push_back(n->name());
+        if (const auto* visibility = changes.visibility(); visibility) {
+            order_vec = visibility->names(nodes_);
+        }
+        else {
+            order_vec.reserve(nodes_.size());
+            for (const auto& n : nodes_) {
+                order_vec.push_back(n->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
@@ -309,9 +321,11 @@ void NodeContainer::collateChanges(DefsDelta& changes) const {
         return;
     }
 
-    // Traversal to children
+    // Traversal to the children the requester can read
     for (const auto& n : nodes_) {
-        n->collateChanges(changes);
+        if (!changes.hides(*n)) {
+            n->collateChanges(changes);
+        }
     }
 }
 
@@ -544,6 +558,7 @@ NState::State NodeContainer::computedState(Node::TraverseType traverseType) cons
 
 void NodeContainer::force_sync() {
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 node_ptr NodeContainer::removeChild(Node* child) {
@@ -554,6 +569,7 @@ node_ptr NodeContainer::removeChild(Node* child) {
             child->set_parent(nullptr); // must set to NULL, allows it to be re-added to different parent
             nodes_.erase(nodes_.begin() + t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return node;
         }
     }
@@ -682,6 +698,7 @@ void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
         nodes_.insert(nodes_.begin() + position, t);
     }
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
@@ -698,6 +715,7 @@ void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
         nodes_.insert(nodes_.begin() + position, f);
     }
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
+    ecf::Visibility::structure_changed();
 }
 
 void NodeContainer::addFamily(const family_ptr& f, size_t position) {
@@ -1148,7 +1166,8 @@ void NodeContainer::archive() {
 
     std::vector<node_ptr>().swap(nodes_);                      // reclaim vector memory
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-    std::string msg             = " autoarchive ";
+    ecf::Visibility::structure_changed();
+    std::string msg = " autoarchive ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 }
@@ -1173,14 +1192,14 @@ void NodeContainer::restore_on_begin_or_requeue() {
 
     // Node::requeue(...) will clear ecf::Flag::RESTORED, set in restore()
     try {
-        restore();
+        restore(true, RestoreTrigger::Automatic);
     }
     catch (std::exception& e) {
         log(Log::ERR, MESSAGE("NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what()));
     }
 }
 
-void NodeContainer::restore() {
+void NodeContainer::restore(bool remove_archive, RestoreTrigger trigger) {
     if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
         throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
                                          << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set"));
@@ -1215,10 +1234,29 @@ void NodeContainer::restore() {
                                          << " is not a container(suite/family)"));
     }
 
+    // The restoration policy of Permissions attributes (D3.5, D3.6) applies to explicit and automatic restores; the
+    // source of a plug is restored as archived, having been validated where it goes
+    Defs* owner = defs();
+    std::optional<ecf::PermissionsChange> permissions;
+    if (owner && trigger != RestoreTrigger::Transfer) {
+        permissions.emplace(*owner);
+        std::vector<node_ptr> archived_children;
+        archived_node_container->immediateChildren(archived_children);
+        permissions->prepare_restore(archived_children, *this, trigger == RestoreTrigger::Requested);
+    }
+
     swap(*archived_node_container);                            // swap the children, and set parent pointers
     get_flag().clear(ecf::Flag::ARCHIVED);                     // clear flag archived
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
+    ecf::Visibility::structure_changed();
+    if (permissions) {
+        permissions->complete_restore(*this);
+    }
+
+    if (!remove_archive) {
+        return; // a copy: the archive remains for the original
+    }
 
     std::string msg = " autorestore ";
     msg += debugNodePath(); // inform user via log
@@ -1315,6 +1353,7 @@ bool NodeContainer::doDeleteChild(Node* child) {
             child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
             nodes_.erase(t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             set_most_significant_state_up_node_tree();
             return true;
         }
@@ -1353,3 +1392,17 @@ void NodeContainer::serialize(Archive& ar, std::uint32_t const version) {
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeContainer);
+
+void NodeContainer::retain_children_of_copy(const std::vector<bool>& keep) {
+    if (keep.size() != nodes_.size()) {
+        throw std::logic_error("NodeContainer::retain_children_of_copy: one flag per element expected");
+    }
+    decltype(nodes_) kept;
+    kept.reserve(nodes_.size());
+    for (std::size_t i = 0; i < nodes_.size(); ++i) {
+        if (keep[i]) {
+            kept.push_back(nodes_[i]);
+        }
+    }
+    nodes_.swap(kept);
+}

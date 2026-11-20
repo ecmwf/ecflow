@@ -4,6 +4,7 @@
 #include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -16,6 +17,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
@@ -112,8 +114,19 @@ ecf::authentication_t LoadDefsCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t LoadDefsCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t LoadDefsCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
+}
+
+defs_ptr LoadDefsCmd::definitions() const {
+    if (!parsed_ && !defs_.empty()) {
+        std::string errMsg, warningMsg;
+        auto defs = Defs::create();
+        if (defs->restore_from_string(defs_, errMsg, warningMsg)) {
+            parsed_ = defs;
+        }
+    }
+    return parsed_;
 }
 
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
@@ -122,22 +135,56 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
 
     if (!defs_.empty()) {
 
-        // Parse the string and load the defs file into memory.
+        // Parse the string and load the defs file into memory, unless the authorisation already did
         std::string errMsg, warningMsg;
-        defs_ptr defs = Defs::create();
-        if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
-            throw std::runtime_error(
-                MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
+        defs_ptr defs = std::exchange(parsed_, nullptr);
+        if (!defs) {
+            defs = Defs::create();
+            if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
+                throw std::runtime_error(MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file "
+                                                 << defs_filename_ << " : " << errMsg));
+            }
         }
 
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
         ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
+
+        // The server attribute is set only by the configuration file and --permissions (D4.12)
+        if (defs->server_state().permissions()) {
+            throw std::runtime_error("LoadDefsCmd::doHandleRequest : the definitions carry a server Permissions "
+                                     "attribute, which is set only by the server configuration file and "
+                                     "--permissions update /");
+        }
+
+        // In Permissions mode, without --force, a suite already loaded refuses the whole load, before anything
+        // changes: otherwise the suites before it would be loaded without the records of their attributes (R4.4).
+        // Without a server attribute, no suite carries attributes, and loading stays as it was.
+        if (!force_ && as->defs()->server_state().permissions()) {
+            for (const auto& suite : defs->suites()) {
+                if (as->defs()->findSuite(suite->name())) {
+                    throw std::runtime_error("Add Suite failed: A Suite of name '" + suite->name() +
+                                             "' already exists");
+                }
+            }
+        }
+
+        // The attributes brought are validated where each suite goes (R4.5), before anything changes
+        std::vector<ecf::PermissionsChange> permissions;
+        permissions.reserve(defs->suites().size());
+        for (const auto& suite : defs->suites()) {
+            ecf::check_permissions_entries(*suite, as->limits().permissions_entries); // R11.10
+            permissions.emplace_back(*as->defs());
+            permissions.back().validate_transfer(*suite, nullptr);
+        }
 
         // After the updateDefs, defs will be left with NO suites.
         // Cannot really used defs after this point
         // *NOTE* Externs are not persisted. Hence calling check() will report
         // all errors, references are not resolved.
         as->updateDefs(defs, force_);
+        for (const auto& change : permissions) {
+            change.log(identity().username().value() + "@" + hostname());
+        }
 
         LOG_ASSERT(defs->suites().size() == 0, "Expected suites to be transferred to server defs");
     }

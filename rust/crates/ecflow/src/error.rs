@@ -31,6 +31,9 @@ pub enum Failure {
     UndecodableReply,
     /// The peer answered, refusing the request.
     RejectedRequest,
+    /// The server answered, denying the request to the requester: its
+    /// authorisation does not allow it.
+    PermissionDenied,
     /// A failure that none of the other values describes.
     Other,
 }
@@ -49,6 +52,7 @@ impl From<ecflow_sys::ConnectionFailure> for Failure {
             Bridge::CertificateRejected => Self::CertificateRejected,
             Bridge::UndecodableReply => Self::UndecodableReply,
             Bridge::RejectedRequest => Self::RejectedRequest,
+            Bridge::PermissionDenied => Self::PermissionDenied,
             _ => Self::Other,
         }
     }

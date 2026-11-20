@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 import socket
 from socket import gethostname
 import subprocess
@@ -8,6 +9,7 @@ import os, sys, fnmatch
 import datetime
 import time
 import shutil  # used to remove directory tree
+import tempfile
 import platform  # for python version info
 import inspect
 import pathlib
@@ -679,6 +681,207 @@ class Server(object):
             if not debugging():
                 clean_up_server(str(self.the_port))
                 clean_up_data(str(self.the_port))
+        return False
+
+
+# ===============================================================================
+class PermissionsServer(object):
+    """Runs a server configured for tests of Permissions attributes, and creates
+    clients issuing requests under several identities.
+
+    The server runs in a directory of its own, from a configuration file
+    <host>.<port>.ecf.cfg holding the given server Permissions attribute, if any.
+    Every identity, a (user, password) pair, is listed in both password files of the
+    server, which therefore authenticate no other user, the user running the test
+    included. Clients read their passwords from a client-side password file, named by
+    ECF_CUSTOM_PASSWD while the server runs.
+
+    The environment variables read by servers and clients are cleared on entry, before
+    the port is reserved, and restored on exit. On exit, and when the start fails, the
+    server is stopped: terminated under the administrator's identity once it is known
+    to be the server answering on the port, and killed otherwise, or when it does not
+    exit within a bounded wait."""
+
+    # Upper bound, in seconds, of the wait for the started server to answer, and to exit
+    start_timeout = 60
+    stop_timeout = 30
+
+    _cleared = [
+        "ECF_HOME",
+        "ECF_PORT",
+        "ECF_LOG",
+        "ECF_CHECK",
+        "ECF_CHECKOLD",
+        "ECF_PASSWD",
+        "ECF_CUSTOM_PASSWD",
+        "ECF_LISTS",
+        "ECF_SSL",
+        "ECF_USER",
+        "ECF_HOST",
+        "ECF_HOST_PROTOCOL",
+        "ECF_PASSWORD",
+        "ECF_TIMEOUT",
+        "ECF_CONNECT_TIMEOUT",
+    ]
+
+    # Bounds, in seconds, of each request of the clients, set while the server runs
+    request_timeout = "20"
+    connect_timeout = "5"
+
+    def __init__(self, administrator, users=(), permissions=None, fixed_port=None):
+        """administrator and users are (user, password) pairs; permissions is the JSON
+        form of the server attribute, or None; fixed_port, for tests of the harness
+        itself, is a port used instead of a reserved one, neither locked nor released"""
+        self.administrator = administrator
+        self.users = list(users)
+        self.permissions = permissions
+        self.the_port = None
+        self.directory = None
+        self._process = None
+        self._owned = False
+        self._saved = {}
+        self._lock = EcfPortLock()
+        self._fixed_port = fixed_port
+
+    def home(self):
+        return os.path.join(self.directory, "home")
+
+    def client(self, user):
+        """Returns a client issuing requests as the given user, with the password the
+        harness lists for that user; a user not listed has no password, and is
+        refused by the server"""
+        ci = ecf.Client("localhost", self.the_port)
+        ci.set_connection_attempts(1)
+        ci.set_retry_connection_period(0)
+        ci.set_user_name(user)
+        return ci
+
+    def admin_client(self):
+        return self.client(self.administrator[0])
+
+    def _identities(self):
+        return [self.administrator] + self.users
+
+    def _write_passwords(self, path, hosts):
+        with open(path, "w") as f:
+            f.write("4.5.0\n")
+            for user, password in self._identities():
+                for host in hosts:
+                    f.write(
+                        user + " " + host + " " + self.the_port + " " + password + "\n"
+                    )
+
+    def __enter__(self):
+        self._saved = {n: os.environ.pop(n) for n in self._cleared if n in os.environ}
+        try:
+            if self._fixed_port is not None:
+                self.the_port = str(self._fixed_port)
+            else:
+                seed_port = int(os.getenv("ECF_FREE_PORT", "3154"))
+                self.the_port = self._lock.find_free_port(seed_port)
+            self.directory = tempfile.mkdtemp(prefix="permissions_server_")
+            os.makedirs(self.home())
+            host = gethostname()
+            for name in ("ecf.passwd", "ecf.custom_passwd"):
+                self._write_passwords(
+                    os.path.join(self.home(), host + "." + self.the_port + "." + name),
+                    [host, "localhost"],
+                )
+            server = {"variables": {"ECF_HOME": "home", "ECF_LOG": "server.log",
+                                    "ECF_CHECKMODE": "CHECK_NEVER"}}
+            if self.permissions is not None:
+                server["permissions"] = self.permissions
+            with open(
+                os.path.join(self.directory, host + "." + self.the_port + ".ecf.cfg"), "w"
+            ) as f:
+                json.dump({"version": 1, "ecflow": {"server": server}}, f)
+
+            self._process = subprocess.Popen(
+                [ecf.File.find_server(), "--port=" + self.the_port],
+                cwd=self.directory,
+                env=dict(os.environ),
+            )
+
+            # Clients find their passwords in a file of their own
+            client_file = os.path.join(self.directory, "client.custom_passwd")
+            self._write_passwords(client_file, ["localhost", host])
+            os.environ["ECF_CUSTOM_PASSWD"] = client_file
+            os.environ["ECF_TIMEOUT"] = self.request_timeout
+            os.environ["ECF_CONNECT_TIMEOUT"] = self.connect_timeout
+
+            self._wait_for_own_server()
+            self._owned = True
+        except BaseException:
+            self._stop(kill=True)
+            raise
+        return self
+
+    def _wait_for_own_server(self):
+        probe = self.admin_client()
+        deadline = time.monotonic() + self.start_timeout
+        while time.monotonic() < deadline:
+            if self._process.poll() is not None:
+                raise RuntimeError(
+                    "Server on port " + self.the_port + " exited with code "
+                    + str(self._process.returncode)
+                )
+            try:
+                probe.sync_local()
+            except RuntimeError:
+                time.sleep(0.2)
+                continue
+            # Only the server started has this home, and knows the administrator
+            home = next(
+                v.value() for v in probe.get_defs().server_variables
+                if v.name() == "ECF_HOME"
+            )
+            if os.path.realpath(home) != os.path.realpath(self.home()):
+                raise RuntimeError("Another server answers on port " + self.the_port)
+            return
+        raise RuntimeError(
+            "No server answered on port " + self.the_port + " within "
+            + str(self.start_timeout) + " s"
+        )
+
+    def _stop(self, kill):
+        """Stops the server: terminated under the administrator's identity unless kill
+        is set or the server is not known to be the own one; killed otherwise, or when
+        it does not exit in time. A request is sent only while the own process runs
+        (poll() reaps it otherwise), so a server started since on the port is never
+        sent one. Releases the port, and restores the environment."""
+        try:
+            if self._process is not None and self._process.poll() is None:
+                if not kill and self._owned:
+                    try:
+                        self.admin_client().terminate_server()
+                    except RuntimeError:
+                        kill = True
+                if kill or not self._owned:
+                    self._process.kill()
+                try:
+                    self._process.wait(timeout=self.stop_timeout)
+                except subprocess.TimeoutExpired:
+                    self._process.kill()
+                    self._process.wait()
+        finally:
+            self._process = None
+            if self.the_port is not None and self._fixed_port is None:
+                self._lock.remove(self.the_port)
+            for name in self._cleared:
+                os.environ.pop(name, None)
+            os.environ.update(self._saved)
+            if self.directory is not None:
+                shutil.rmtree(self.directory, ignore_errors=True)
+
+    def stop(self):
+        """Stops the server now; returns whether it terminated on request"""
+        killed_before = self._process is None
+        process = self._process
+        self._stop(kill=False)
+        return not killed_before and process.returncode == 0
+
+    def __exit__(self, exctype, value, tb):
+        self._stop(kill=False)
         return False
 
 

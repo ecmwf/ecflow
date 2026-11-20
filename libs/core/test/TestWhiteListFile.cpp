@@ -8,6 +8,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/User.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -815,6 +816,53 @@ BOOST_AUTO_TEST_CASE(test_white_list_access_rules_with_server_user) {
         const std::vector<std::string> expected{login + " = read/write"};
         BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
     }
+}
+
+///
+/// @brief Verifies that a white list file holding a user name outside the model is rejected, naming the line and the
+///        reason, while '-' (read only) and '*' (every user) remain the syntax of the file.
+///
+BOOST_AUTO_TEST_CASE(test_white_list_rejects_invalid_user_names) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::test::scaffold::AutomaticTestFile;
+    using ecf::test::scaffold::WithTestFile;
+
+    struct Case
+    {
+        std::string line;
+        std::string reason;
+    };
+    for (const auto& [line, reason] : std::vector<Case>{{"-", "empty"},
+                                                        {"--bob", "starts with '-'"},
+                                                        {"--bob /s", "starts with '-'"},
+                                                        {"al:ice", "':'"},
+                                                        {"al;ice /s", "';'"},
+                                                        {"al,ice", "','"},
+                                                        {"-al\x7fice", "control"},
+                                                        {"al\xe3\x80\x80ice /s", "white space"},
+                                                        {"al\xc3", "UTF-8"},
+                                                        {"/al:ice", "':'"},     // a token alone is a user
+                                                        {"-/al:ice", "':'"}}) { //
+        WithTestFile file(AutomaticTestFile{"invalid.lists"}, "4.4.14\n# a comment\nbob\n" + line + "\n");
+        WhiteListFile whitelist;
+        std::string error;
+        BOOST_CHECK_MESSAGE(!whitelist.load(file.path().string(), error), "accepted: " << printable_user_name(line));
+        BOOST_CHECK_MESSAGE(error.find(file.path().string()) != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find("line 4") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find("invalid user name") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find(reason) != std::string::npos, error);
+    }
+
+    // '-' and '*' are syntax; a name holding '*' with other characters is a name, not every user
+    WithTestFile file(AutomaticTestFile{"valid.lists"}, "4.4.14\n-*\nbob\n-carol /s\n*dave /x\njos\xc3\xa9\n");
+    WhiteListFile whitelist;
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(whitelist.load(file.path().string(), error), error);
+    BOOST_CHECK(whitelist.verify_read_access("anyone", "/x"));
+    BOOST_CHECK(whitelist.verify_write_access("*dave", "/x"));
+    BOOST_CHECK(!whitelist.verify_write_access("anyone", "/x"));
+    BOOST_CHECK(whitelist.verify_write_access("jos\xc3\xa9", "/x"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -3,18 +3,25 @@
 
 #include "ecflow/server/BaseServer.hpp" // Must come before boost/serialization headers.
 
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
+#include "ecflow/attribute/Permissions.hpp"
+#include "ecflow/base/Authorisation.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Operations.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/service/Registry.hpp"
@@ -78,6 +85,10 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
         // No check pt files loaded, update defs, with server state
         update_defs_server_state(); // works on def_
     }
+    if (!apply_server_permissions()) {
+        throw ServerEnvironmentException("Cannot start server: " + unconfigured_permissions_message());
+    }
+    log_permissions_summary();
 
     /// Setup globals used to detect incremental changes to the definition
     Ecf::set_server(true);
@@ -136,6 +147,14 @@ bool BaseServer::load_check_pt_file_on_startup() {
     bool backup_checkpt_failed = false;
     std::string backup_checkpt_error;
     if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed, &backup_checkpt_error)) {
+        if (checkpt_failed) {
+            // The backup may carry older, wider permissions (R11.12)
+            log(Log::WAR,
+                "Started from the backup checkpoint " + serverEnv_.oldCheckPtFilename() + ", the checkpoint " +
+                    serverEnv_.checkPtFilename() + " having been rejected (" + checkpt_error +
+                    "); the backup may carry older Permissions attributes, granting more than those of the rejected "
+                    "checkpoint");
+        }
         return true;
     }
 
@@ -166,6 +185,14 @@ void BaseServer::loadCheckPtFile() {
 
     bool backup_checkpt_failed = false;
     if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(), backup_checkpt_failed)) {
+        if (checkpt_failed) {
+            // The backup may carry older, wider permissions (R11.12)
+            log(Log::WAR,
+                "Restored from the backup checkpoint " + serverEnv_.oldCheckPtFilename() + ", the checkpoint " +
+                    serverEnv_.checkPtFilename() +
+                    " having been rejected; the backup may carry older Permissions attributes, granting more than "
+                    "those of the rejected checkpoint");
+        }
         return;
     }
     if (backup_checkpt_failed) {
@@ -202,7 +229,19 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed,
             if (!fs::is_regular_file(filename)) {
                 throw std::runtime_error("Checkpoint path is not a regular file");
             }
-            defs_->restore(filename);   // this can throw
+            defs_->restore(filename); // this can throw
+            // Every Permissions attribute is checked, under the server attribute in force: invalid content is a
+            // failure, never dropped (R3.5, D11.4)
+            try {
+                ecf::PermissionsChange(*defs_).check_definitions(serverEnv_.permissions());
+            }
+            catch (const ecf::InvalidPermissions& e) {
+                std::ifstream file(filename);
+                const auto line = ecf::line_of_permissions(file, e.path());
+                throw std::runtime_error(std::string("invalid Permissions attributes in ") + filename + ": " +
+                                         e.what() +
+                                         (line > 0 ? " (line number " + std::to_string(line) + ")" : std::string()));
+            }
             defs_->handle_migration();  // handle any migration of checkpt file.
             update_defs_server_state(); // works on def_
             LOG(Log::MSG,
@@ -340,7 +379,103 @@ void BaseServer::restore_defs_from_checkpt() {
         throw std::runtime_error("Cannot restore from checkpt the server suites must be deleted first");
     }
 
-    loadCheckPtFile();
+    // The server attribute in force afterwards is that of the checkpoint, or else that of the configuration file
+    defs_->server_state().clear_permissions();
+    try {
+        loadCheckPtFile();
+    }
+    catch (...) {
+        // Whatever failed, the configured attribute stays in force
+        (void)apply_server_permissions();
+        throw;
+    }
+    if (!apply_server_permissions()) {
+        // The server stays as configured: without a server attribute, and without the refused definitions
+        discard_failed_restore();
+        update_defs_server_state();
+        (void)apply_server_permissions();
+        throw std::runtime_error("Cannot restore from checkpt: " + unconfigured_permissions_message());
+    }
+    log_permissions_summary();
+}
+
+bool BaseServer::apply_server_permissions() {
+    const auto* configured = serverEnv_.permissions();
+    if (defs_->server_state().permissions()) {
+        if (!configured) {
+            return false;
+        }
+        permissions_source_ = "checkpoint";
+        return true;
+    }
+    if (configured) {
+        defs_->server_state().set_permissions(*configured);
+        permissions_source_ = "configuration file";
+    }
+    else {
+        permissions_source_ = "none";
+    }
+    return true;
+}
+
+std::string BaseServer::unconfigured_permissions_message() const {
+    return "the checkpoint carries a server Permissions attribute, but the configuration file " +
+           ecf::Host{}.prefix_host_and_port(serverEnv_.the_port(), Ecf::CONFIG_FILE()) +
+           " sets none (/ecflow/server/permissions); remove the Permissions attributes from the checkpoint "
+           "files, or configure a server attribute";
+}
+
+void BaseServer::log_permissions_summary() const {
+    // At most this many sticky users are named
+    constexpr std::size_t max_named = 10;
+
+    const auto* server = defs_->server_state().permissions();
+    std::vector<std::string> sticky;
+    if (server) {
+        for (const auto& entry : server->entries()) {
+            if (entry.sticky) {
+                sticky.push_back(entry.user);
+            }
+        }
+    }
+    std::string named;
+    for (std::size_t i = 0; i < sticky.size() && i < max_named; ++i) {
+        named += (i == 0 ? "" : ", ") + sticky[i];
+    }
+    if (sticky.size() > max_named) {
+        named += ", ... (" + std::to_string(sticky.size() - max_named) + " more)";
+    }
+
+    // The mode in force, which the white list alone does not tell (D5.17)
+    std::string mode = "unrestricted";
+    switch (ecf::authorisation_mode(*this)) {
+        case ecf::AuthorisationMode::Permissions:
+            mode = serverEnv_.audit_only() ? "permissions (audit only)" : "permissions";
+            break;
+        case ecf::AuthorisationMode::WhiteList:
+            mode = "whitelist";
+            break;
+        case ecf::AuthorisationMode::Unrestricted:
+            break;
+    }
+
+    // Without a server attribute, no node carries one (D2.20): the tree is not walked
+    std::size_t nodes = 0;
+    if (server) {
+        for (const auto* node : ecf::get_all_nodes(static_cast<const Defs&>(*defs_))) {
+            nodes += node->permissions() ? 1 : 0;
+        }
+    }
+
+    for (const auto& line :
+         std::vector<std::string>{"Permissions:",
+                                  "  Mode = " + mode,
+                                  "  Source = " + permissions_source_,
+                                  "  Users = " + std::to_string(server ? server->entries().size() : 0),
+                                  "  Sticky users = " + (sticky.empty() ? "none" : named),
+                                  "  Nodes with permissions = " + std::to_string(nodes)}) {
+        ecf::log(Log::MSG, line);
+    }
 }
 
 void BaseServer::nodeTreeStateChanged() {
@@ -469,7 +604,11 @@ bool BaseServer::reloadWhiteListFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
         std::cout << "   BaseServer::reloadWhiteListFile" << std::endl;
     }
-    return serverEnv_.reloadWhiteListFile(errorMsg);
+    if (!serverEnv_.reloadWhiteListFile(errorMsg)) {
+        return false;
+    }
+    log_permissions_summary();
+    return true;
 }
 
 bool BaseServer::lock(const std::string& user) {

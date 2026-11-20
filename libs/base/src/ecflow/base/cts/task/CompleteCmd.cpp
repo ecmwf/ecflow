@@ -45,8 +45,8 @@ ecf::authentication_t CompleteCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CompleteCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CompleteCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 STC_Cmd_ptr CompleteCmd::doHandleRequest(AbstractServer* as) const {

@@ -44,6 +44,7 @@ The values are written as follows:
   command line, a leading ``+`` is also accepted.
 - **Text:** any characters; leading and trailing spaces are removed in ``server_environment.cfg``.
 - **Switch:** a command-line option without a value, e.g. ``--http``; giving it sets the setting.
+- **JSON:** in ``<host>.<port>.ecf.cfg`` only, a JSON array, checked as the value it stands for.
 
 Settings
 ========
@@ -234,6 +235,36 @@ Settings
      - no
      - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/log/commands/enabled``: ``true`` records the spawned
        commands in the log, see :ref:`ecflow_log_file_commands`
+   * - Server Permissions attribute
+     - none
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/permissions``: the JSON form of the server
+       Permissions attribute, see :ref:`permissions_attribute_server`
+   * - Audit-only authorisation
+     - disabled
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/authorisation/audit_only``: ``true`` logs the
+       requests the Permissions attributes deny, and executes them, except reads (role ``r``), which are always
+       enforced, see :ref:`permissions_attribute_audit`
+   * - Limits on the inputs
+     - none
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/limits/request_size``,
+       ``/ecflow/server/limits/permissions_entries`` and ``/ecflow/server/limits/handles_per_user``: positive
+       integers, ``0`` for no limit, see :ref:`permissions_attribute_limits`
+   * - Ignore the whitelist
+     - disabled
+     - no
+     - no
+     - no
+     - only in ``<host>.<port>.ecf.cfg``, as ``/ecflow/server/whitelist/ignore``: ``true`` neither loads nor
+       reloads the :ref:`whitelist <ecflow_white_list_file>`, see :ref:`permissions_attribute_modes`
 
 Notes:
 

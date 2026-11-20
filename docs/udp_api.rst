@@ -92,6 +92,14 @@ ecFlow UDP forwards basic authentication information, as part of the request, to
 where the authentication takes place considering the available mechanisms (e.g whitelist files,
 password based authentication).
 
+On a server using :ref:`Permissions attributes <permissions_attribute>`:
+
+- the task requests (with the headers ``task_rid``, ``task_password`` and ``task_try_no``) are not subject to the
+  roles of users, as for every task request (see :ref:`permissions_attribute_modes`);
+- the user requests (with the headers ``user_name`` and ``user_password``: ``alter_meter``, ``alter_label`` and
+  ``alter_event``) are forwarded as ``ecflow_client --alter change``, and require the role ``w`` at the node (see
+  :ref:`permissions_attribute_commands`).
+
 
 ecFlow UDP Requests
 ===================

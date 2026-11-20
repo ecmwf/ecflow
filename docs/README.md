@@ -79,7 +79,9 @@ Two consequences follow:
 - A new `ecflow_client` command or option is added to `client_api/help.json`'s
   `commands`/`options` array and is then picked up automatically (reachable via
   `--help=summary` / `--help=option`); an optional long description can be added
-  under `client_api/desc/<name>.description`.
+  under `client_api/desc/<name>.description`. Every command also states, in its
+  `permissions` array, the roles it requires when the server uses Permissions
+  attributes, per variant; `--help=<command>` and the generated page render them.
 - A new suite-definition-file item (a node type or attribute) is added to
   `client_api/help.json`'s `definitions` array and is then picked up automatically
   (reachable via `--help=definition` and `--help=defs/<name>`).

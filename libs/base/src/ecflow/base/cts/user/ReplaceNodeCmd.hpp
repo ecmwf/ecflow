@@ -17,6 +17,36 @@ public:
     bool createNodesAsNeeded() const { return createNodesAsNeeded_; }
     bool force() const { return force_; }
 
+    ///
+    /// @brief Returns the definitions the command carries, parsed on first use and kept for the request.
+    ///
+    /// The authorisation reads them before the command runs, which then uses them instead of parsing again.
+    ///
+    /// @return The definitions; nullptr when they cannot be parsed, the command then reporting the error.
+    ///
+    defs_ptr client_definitions() const;
+
+    ///
+    /// @brief Identifies the nodes concerned by a replace, as Defs::replaceChild determines them.
+    ///
+    struct Target
+    {
+        node_ptr existing; ///< The node of the server at the path, if any
+        const Node*
+            imported{};  ///< The subtree imported: the client node, or its topmost ancestor missing on the server
+        node_ptr parent; ///< The node of the server under which the subtree goes; null for a suite
+    };
+
+    ///
+    /// @brief Returns the nodes concerned by the replace of a node.
+    ///
+    /// @param[in] server The definitions of the server
+    /// @param[in] client_node The node at the path, in the client definitions
+    /// @param[in] create Whether missing parents are created
+    /// @return The nodes; when the node exists, imported is the client node and parent that of the existing node.
+    ///
+    static Target target(const Defs& server, const node_ptr& client_node, bool create);
+
     bool isWrite() const override { return true; }
     time_duration_t timeout() const override { return std::chrono::seconds{300}; }
     using UserCmd::print;
@@ -25,7 +55,7 @@ public:
     bool equals(ClientToServerCmd*) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     const char* theArg() const override { return arg(); }
     void addOption(boost::program_options::options_description& desc) const override;
@@ -39,13 +69,17 @@ private:
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
-    void cleanup() override { std::string{}.swap(clientDefs_); } /// run in the server, after command send to client
+    void cleanup() override { /// run in the server, after command send to client
+        std::string{}.swap(clientDefs_);
+        parsed_.reset();
+    }
 
     bool createNodesAsNeeded_{false};
     bool force_{false};
     std::string pathToNode_;
     std::string path_to_defs_; // Can be empty if defs loaded in memory via python api
     std::string clientDefs_;
+    mutable defs_ptr parsed_; // the client definitions, once parsed; not serialised
 
     friend class cereal::access;
     template <class Archive>

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "topics": [
     {
       "name": "all",
@@ -32,6 +32,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "AbortCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Mark task as aborted. For use in the '.ecf' script file *only*",
       "description": [
         "Mark task as aborted. For use in the '.ecf' script file *only*",
@@ -64,6 +71,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "AlterCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "node",
+          "note": "the server for '/'"
+        }
+      ],
       "summary": "Alter the node according to the options.",
       "description": [
         "Alter the node according to the options.",
@@ -128,6 +142,9 @@
         "",
         " * For both aviso and mirror, the special value \"reload\" forces reloading the configuration.",
         "   This is typically useful after updating variables used to configure these kind of attributes.",
+        "",
+        " * The Permissions attribute is not changed by --alter: use --permissions (create, update,",
+        "   delete), which requires the role p.",
         "",
         " * Updating an aviso attribute replaces it, starting from the revision given by --revision (0 when",
         "   omitted, i.e. only the notifications published after the update are considered). To continue",
@@ -235,6 +252,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "node"
+        }
+      ],
       "summary": "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).",
       "description": [
         "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).",
@@ -281,6 +304,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "BeginCmd",
+      "permissions": [
+        {
+          "roles": "o",
+          "at": "server"
+        }
+      ],
       "summary": "Begin playing the definition in the server.",
       "description": [
         "Begin playing the definition in the server.",
@@ -306,6 +335,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "each suite added also requires r; only the creator of a handle can change it"
+        }
+      ],
       "summary": "Add a set of suites, to an existing handle.",
       "description": [
         "Add a set of suites, to an existing handle.",
@@ -333,6 +369,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "only the creator of a handle can change it"
+        }
+      ],
       "summary": "Change an existing handle so that new suites can be added automatically.",
       "description": [
         "Change an existing handle so that new suites can be added automatically.",
@@ -359,6 +402,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "only the creator of a handle can drop it"
+        }
+      ],
       "summary": "Drop/de-register the client handle.",
       "description": [
         "Drop/de-register the client handle.",
@@ -383,6 +433,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "drops the handles of the requester only"
+        }
+      ],
       "summary": "Drop/de-register all handles associated with the given user.",
       "description": [
         "Drop/de-register all handles associated with the given user.",
@@ -408,6 +465,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "each suite registered also requires r; replacing an existing handle requires being its creator"
+        }
+      ],
       "summary": "Register interest in a set of suites.",
       "description": [
         "Register interest in a set of suites.",
@@ -445,6 +509,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "only the creator of a handle can change it"
+        }
+      ],
       "summary": "Remove a set of suites, from an existing handle.",
       "description": [
         "Remove a set of suites, from an existing handle.",
@@ -472,6 +543,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ClientHandleCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server",
+          "note": "lists the handles of the requester, and the suites readable"
+        }
+      ],
       "summary": "Shows all the client handles, and the suites they reference",
       "description": ["Shows all the client handles, and the suites they reference"]
     },
@@ -480,6 +558,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "variant": "_all_",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "<path>",
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Checks the expression and limits in the server. Will also check trigger references.",
       "description": [
         "Checks the expression and limits in the server. Will also check trigger references.",
@@ -500,6 +590,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node",
+          "note": "the server without a path"
+        }
+      ],
       "summary": "Test hierarchical Job generation only, for chosen Node.",
       "description": [
         "Test hierarchical Job generation only, for chosen Node.",
@@ -514,6 +611,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CheckPtCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Forces the definition file in the server to be written to disk *or* allow mode,",
       "description": [
         "Forces the definition file in the server to be written to disk *or* allow mode,",
@@ -561,6 +664,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "CompleteCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Mark task as complete. For use in the '.ecf' script file *only*",
       "description": [
         "Mark task as complete. For use in the '.ecf' script file *only*",
@@ -595,6 +705,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Disables debug output from the server",
       "description": ["Disables debug output from the server"]
     },
@@ -603,6 +719,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Enables debug output from the server",
       "description": ["Enables debug output from the server"]
     },
@@ -611,6 +733,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "DeleteCmd",
+      "permissions": [
+        {
+          "variant": "a suite, or all suites",
+          "roles": "o",
+          "at": "server"
+        },
+        {
+          "variant": "a node below a suite",
+          "roles": "w",
+          "at": "node"
+        }
+      ],
       "summary": "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.",
       "description": [
         "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.",
@@ -640,6 +774,19 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "variant": "clear",
+          "roles": "w",
+          "at": "server"
+        },
+        {
+          "variant": "<path>",
+          "roles": "r",
+          "at": "server",
+          "note": "the history is returned unfiltered"
+        }
+      ],
       "summary": "Returns the edit history associated with a Node.",
       "description": [
         "Returns the edit history associated with a Node.",
@@ -656,6 +803,23 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "EditScriptCmd",
+      "permissions": [
+        {
+          "variant": "edit, pre_process, pre_process_file",
+          "roles": "r",
+          "at": "node"
+        },
+        {
+          "variant": "submit, submit_file",
+          "roles": "x",
+          "at": "node"
+        },
+        {
+          "variant": "submit_file with create_alias",
+          "roles": "wx",
+          "at": "node"
+        }
+      ],
       "summary": "Allows user to edit, pre-process and submit the script.",
       "description": [
         "Allows user to edit, pre-process and submit the script.",
@@ -733,6 +897,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "EventCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Change event. For use in the '.ecf' script file *only*",
       "description": [
         "Change event. For use in the '.ecf' script file *only*",
@@ -774,6 +945,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CFileCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]",
       "description": [
         "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]",
@@ -801,6 +978,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ForceCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Force a node to a given state, or set its event.",
       "description": [
         "Force a node to a given state, or set its event.",
@@ -883,6 +1066,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Force dependency evaluation. Used for DEBUG only.",
       "description": ["Force dependency evaluation. Used for DEBUG only."]
     },
@@ -891,6 +1080,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "FreeDepCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Free dependencies for a node. Defaults to triggers",
       "description": [
         "Free dependencies for a node. Defaults to triggers",
@@ -924,6 +1119,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "variant": "without a path",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "with a path",
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Get the suite definition or node tree in form that is re-parse able",
       "description": [
         "Get the suite definition or node tree in form that is re-parse able",
@@ -942,6 +1149,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "variant": "without a path",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "with a path",
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Get state data. For the whole suite definition or individual nodes.",
       "description": [
         "Get state data. For the whole suite definition or individual nodes.",
@@ -960,6 +1179,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "GroupCTSCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "each command of the group requires its own roles, checked just before it runs"
+        }
+      ],
       "summary": "Allows a series of ';' separated commands to be grouped and executed as one.",
       "description": [
         "Allows a series of ';' separated commands to be grouped and executed as one.",
@@ -990,6 +1216,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Stop server communication with jobs, and new job scheduling.",
       "description": [
         "Stop server communication with jobs, and new job scheduling.",
@@ -1019,6 +1251,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "InitCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Mark task as started(active). For use in the '.ecf' script file *only*",
       "description": [
         "Mark task as started(active). For use in the '.ecf' script file *only*",
@@ -1062,6 +1301,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node",
+          "note": "the server without a path"
+        }
+      ],
       "summary": "Job submission for chosen Node *based* on dependencies.",
       "description": [
         "Job submission for chosen Node *based* on dependencies.",
@@ -1077,6 +1323,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Kills the job associated with the node.",
       "description": [
         "Kills the job associated with the node.",
@@ -1097,6 +1349,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "LabelCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Change Label. For use in the '.ecf' script file *only*",
       "description": [
         "Change Label. For use in the '.ecf' script file *only*",
@@ -1135,6 +1394,22 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "LoadDefsCmd",
+      "permissions": [
+        {
+          "roles": "o",
+          "at": "server"
+        },
+        {
+          "variant": "definitions carrying server variables",
+          "roles": "w",
+          "at": "server"
+        },
+        {
+          "variant": "a suite carrying Permissions attributes, or overwriting (--force) one that carries them",
+          "roles": "p",
+          "at": "node"
+        }
+      ],
       "summary": "Check and load definition or checkpoint file into server.",
       "description": [
         "Check and load definition or checkpoint file into server.",
@@ -1168,6 +1443,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "LogCmd",
+      "permissions": [
+        {
+          "variant": "get, path",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "clear, flush, new",
+          "roles": "l",
+          "at": "server"
+        }
+      ],
       "summary": "Get, clear, flush or create a new log file.",
       "description": [
         "Get, clear, flush or create a new log file.",
@@ -1217,6 +1504,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "MeterCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Change meter. For use in the '.ecf' script file *only*",
       "description": [
         "Change meter. For use in the '.ecf' script file *only*",
@@ -1256,6 +1550,18 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "variant": "without a path",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "with a path",
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Used to print state of the definition returned from the server to standard output.",
       "description": [
         "Used to print state of the definition returned from the server to standard output.",
@@ -1283,6 +1589,20 @@
       "kind": "user",
       "visibility": "internal",
       "implementation": "MoveCmd",
+      "permissions": [
+        {
+          "variant": "a node",
+          "roles": "wp",
+          "at": "node",
+          "note": "checked by the receiving server, at the destination"
+        },
+        {
+          "variant": "a whole suite",
+          "roles": "o",
+          "at": "server",
+          "note": "and p at the suite when it carries Permissions attributes"
+        }
+      ],
       "summary": "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api.",
       "description": ["The move command is an internal cmd, Called by the plug cmd. Does not appear on public api."]
     },
@@ -1291,6 +1611,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "LogMessageCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Writes the input string to the log file.",
       "description": [
         "Writes the input string to the log file.",
@@ -1310,6 +1636,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CSyncCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns true if state of server definition changed.",
       "description": [
         "Returns true if state of server definition changed.",
@@ -1324,6 +1656,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "OrderNodeCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "node"
+        }
+      ],
       "summary": "Re-orders the nodes held by the server",
       "description": [
         "Re-orders the nodes held by the server",
@@ -1360,10 +1698,83 @@
       ]
     },
     {
+      "name": "permissions",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "PermissionsCmd",
+      "permissions": [
+        {
+          "variant": "read, effective",
+          "roles": "r",
+          "at": "node",
+          "note": "the server for '/'"
+        },
+        {
+          "variant": "create, update, delete",
+          "roles": "p",
+          "at": "node",
+          "note": "the server for '/'"
+        }
+      ],
+      "summary": "Read or change the Permissions attribute of a node, or of the server",
+      "description": [
+        "Read or change the Permissions attribute of a node, or of the server",
+        "",
+        "The operations act on the whole list of the attribute, at exactly one path;",
+        "'/' addresses the server attribute.",
+        "",
+        "Argument(s):",
+        "",
+        "    --permissions <operation> <path> [<value>] [--fmt cli|json]",
+        "",
+        "Operations:",
+        "",
+        "    create     Give the node an attribute, holding <value>; fails when the node already has one",
+        "    read       Print the attribute of the node; fails when the node has none",
+        "    update     Replace the attribute of the node with <value>; fails when the node has none",
+        "    delete     Remove the attribute of the node, which then inherits from above;",
+        "               fails when the node has none",
+        "    effective  Print the effective roles of the user named by <value> at the path;",
+        "               the requester when <value> is omitted",
+        "",
+        "The value of create and update is a list of entries, either in the command-line form",
+        "(e.g. alice:rwxp,bob:r) or in the JSON form",
+        "(e.g. '[{\"user\": \"alice\", \"permissions\": \"rwxp\"}]').",
+        "",
+        "--fmt selects the format of what read and effective print: cli (the default) or json.",
+        "",
+        "This command can fail because:",
+        "- the path names no node",
+        "- at the server ('/'), create and delete always fail: the server attribute is configured",
+        "  at start-up, in the server configuration file",
+        "- the value is invalid, or names a user not listed above the node",
+        "- on a server without a server attribute, node attributes cannot be created, and effective",
+        "  fails: the server does not use Permissions attributes",
+        "- the change would leave a node, or the server, without any user holding p",
+        "",
+        "After a change, the clients receiving the nodes concerned (every client, for a change of",
+        "the server attribute) synchronise fully at their next request.",
+        "",
+        "Usage:",
+        "",
+        "    --permissions create /s alice:rwxp,bob:r",
+        "    --permissions read /s --fmt json",
+        "    --permissions effective /s/f bob",
+        "    --permissions update / admin:rwxlops,alice:rwxp,bob:r"
+      ]
+    },
+    {
       "name": "ping",
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "every user, listed or not; in whitelist mode, read access"
+        }
+      ],
       "summary": "Check if server is running on given host/port. Result reported to standard output.",
       "description": [
         "Check if server is running on given host/port. Result reported to standard output.",
@@ -1383,6 +1794,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PlugCmd",
+      "permissions": [
+        {
+          "roles": "wp",
+          "at": "node",
+          "note": "the source and the destination; a destination on another server is checked there: w and p, or o (and p when it carries Permissions attributes) for a whole suite"
+        }
+      ],
       "summary": "Plug command is used to move nodes.",
       "description": [
         "Plug command is used to move nodes.",
@@ -1416,6 +1834,13 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "QueryCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "node",
+          "note": "the server for '/:name'"
+        }
+      ],
       "summary": "Query the status of attributes",
       "description": [
         "Query the status of attributes",
@@ -1503,6 +1928,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "QueueCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "QueueCmd. For use in the '.ecf' script file *only*",
       "description": [
         "QueueCmd. For use in the '.ecf' script file *only*",
@@ -1579,6 +2011,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Reload the server custom password file.",
       "description": [
         "Reload the server custom password file.",
@@ -1637,6 +2075,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Reload the server password file.",
       "description": [
         "Reload the server password file.",
@@ -1695,6 +2139,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Reload the white list file.",
       "description": [
         "Reload the white list file.",
@@ -1745,6 +2195,24 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ReplaceNodeCmd",
+      "permissions": [
+        {
+          "variant": "a node",
+          "roles": "w",
+          "at": "node",
+          "note": "for a node created, its closest existing ancestor"
+        },
+        {
+          "variant": "a suite, or creating one",
+          "roles": "o",
+          "at": "server"
+        },
+        {
+          "variant": "bringing or replacing Permissions attributes",
+          "roles": "p",
+          "at": "node"
+        }
+      ],
       "summary": "Replaces a node in the server, with the given path",
       "description": [
         "Replaces a node in the server, with the given path",
@@ -1792,6 +2260,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "RequeueNodeCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Re-queues the specified node(s)",
       "description": [
         "Re-queues the specified node(s)",
@@ -1850,6 +2324,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Start job scheduling, communication with jobs, and respond to all requests.",
       "description": [
         "Start job scheduling, communication with jobs, and respond to all requests.",
@@ -1868,6 +2348,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "wp",
+          "at": "node"
+        }
+      ],
       "summary": "Manually restore archived nodes.",
       "description": [
         "Manually restore archived nodes.",
@@ -1906,6 +2392,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Ask the server to load the definition from an check pt file.",
       "description": [
         "Ask the server to load the definition from an check pt file.",
@@ -1918,6 +2410,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Resume the given node. This allows job generation for the given node, or any child node.",
       "description": [
         "Resume the given node. This allows job generation for the given node, or any child node.",
@@ -1933,6 +2431,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "RunNodeCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Run the task, ignoring triggers, limits, suspended, time or date dependencies",
       "description": [
         "Run the task, ignoring triggers, limits, suspended, time or date dependencies.",
@@ -1996,6 +2500,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Generates gnuplot files that show the server load graphically.",
       "description": [
         "Generates gnuplot files that show the server load graphically.",
@@ -2041,6 +2551,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ServerVersionCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the version number of the server",
       "description": [
         "Returns the version number of the server",
@@ -2056,6 +2572,12 @@
       "kind": "user",
       "visibility": "group-only",
       "implementation": "ShowCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Used to print state of the definition returned from the server to standard output.",
       "description": [
         "Used to print state of the definition returned from the server to standard output.",
@@ -2105,6 +2627,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Stop server from scheduling new jobs.",
       "description": [
         "Stop server from scheduling new jobs.",
@@ -2133,6 +2661,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the server statistics as a string.",
       "description": ["Returns the server statistics as a string."]
     },
@@ -2141,6 +2675,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Resets the server statistics.",
       "description": ["Resets the server statistics."]
     },
@@ -2149,6 +2689,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the server statistics as a struct and string. For test use only.",
       "description": ["Returns the server statistics as a struct and string. For test use only."]
     },
@@ -2157,6 +2703,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Shows the status of a job associated with a task, in %ECF_JOB%.stat file",
       "description": [
         "Shows the status of a job associated with a task, in %ECF_JOB%.stat file",
@@ -2185,6 +2737,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the list of suites, in the order defined in the server.",
       "description": ["Returns the list of suites, in the order defined in the server."]
     },
@@ -2193,6 +2751,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "PathsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "node"
+        }
+      ],
       "summary": "Suspend the given node. This prevents job generation for the given node, or any child node.",
       "description": [
         "Suspend the given node. This prevents job generation for the given node, or any child node.",
@@ -2208,6 +2772,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CSyncCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Incrementally synchronise the local definition with the one in the server.",
       "description": [
         "Incrementally synchronise the local definition with the one in the server.",
@@ -2223,6 +2793,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CSyncCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Incrementally synchronise the local definition with the one in the server.",
       "description": [
         "Incrementally synchronise the local definition with the one in the server.",
@@ -2239,6 +2815,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CSyncCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the full definition from the server.",
       "description": [
         "Returns the full definition from the server.",
@@ -2251,6 +2833,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "x",
+          "at": "server"
+        }
+      ],
       "summary": "Terminate the server.",
       "description": [
         "Terminate the server.",
@@ -2270,6 +2858,13 @@
       "kind": "task",
       "visibility": "public",
       "implementation": "CtsWaitCmd",
+      "permissions": [
+        {
+          "roles": "none",
+          "at": "none",
+          "note": "task requests are never subject to the authorisation of users"
+        }
+      ],
       "summary": "Evaluates an expression, and block while the expression is false.",
       "description": [
         "Evaluates an expression, and block while the expression is false.",
@@ -2297,6 +2892,18 @@
       "kind": "user",
       "visibility": "group-only",
       "implementation": "CtsNodeCmd",
+      "permissions": [
+        {
+          "variant": "without a path",
+          "roles": "r",
+          "at": "server"
+        },
+        {
+          "variant": "with a path",
+          "roles": "r",
+          "at": "node"
+        }
+      ],
       "summary": "Show the reason why a node is not running.",
       "description": [
         "Show the reason why a node is not running.",
@@ -2318,6 +2925,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
+      "permissions": [
+        {
+          "roles": "r",
+          "at": "server"
+        }
+      ],
       "summary": "Returns the list of zombies from the server.",
       "description": [
         "Returns the list of zombies from the server.",
@@ -2329,6 +2942,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and sets to adopt.",
       "description": [
         "Locates the task in the servers list of zombies, and sets to adopt.",
@@ -2347,6 +2966,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and sets flags to block it.",
       "description": [
         "Locates the task in the servers list of zombies, and sets flags to block it.",
@@ -2366,6 +2991,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and sets to fail.",
       "description": [
         "Locates the task in the servers list of zombies, and sets to fail.",
@@ -2386,6 +3017,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and sets to fob.",
       "description": [
         "Locates the task in the servers list of zombies, and sets to fob.",
@@ -2406,6 +3043,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and sets flags to kill",
       "description": [
         "Locates the task in the servers list of zombies, and sets flags to kill",
@@ -2425,6 +3068,12 @@
       "kind": "user",
       "visibility": "public",
       "implementation": "ZombieCmd",
+      "permissions": [
+        {
+          "roles": "w",
+          "at": "server"
+        }
+      ],
       "summary": "Locates the task in the servers list of zombies, and removes it.",
       "description": [
         "Locates the task in the servers list of zombies, and removes it.",
@@ -3390,6 +4039,28 @@
         "Examples",
         "  mirror --name operationsX --remote_path /s1/f1/t1 --ssl",
         "  mirror --name operationsY --remote_path /s1/f1/t2 --remote_host %ECF_MIRROR_REMOTE_HOST% --polling 20 --remote_port %ECF_MIRROR_REMOTE_PORT% --ssl"
+      ]
+    },
+    {
+      "name": "permissions",
+      "kind": "attribute",
+      "attaches_to": "Node (Suite, Family, Task, and Alias)",
+      "summary": "Grants roles on the node to the users it lists.",
+      "description": [
+        "Grants roles on the node to the users it lists. A node holds at most one permissions attribute.",
+        "",
+        "Syntax",
+        "  permissions <json>",
+        "",
+        "Parameters",
+        "  json",
+        "      A non-empty JSON list of objects, each with exactly the strings \"user\" and",
+        "      \"permissions\": a user name, and the letters of the roles granted (r read,",
+        "      w write, x execute, l log, o owner, p permissions), with s for a sticky entry.",
+        "",
+        "Examples",
+        "  permissions [{\"user\": \"alice\", \"permissions\": \"rwxops\"}, {\"user\": \"bob\", \"permissions\": \"r\"}]",
+        "  permissions [{\"user\":\"carol\",\"permissions\":\"rx\"}]   # carol may read and run"
       ]
     },
     {

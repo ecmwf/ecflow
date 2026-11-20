@@ -18,6 +18,15 @@ public:
     bool is_custom_user() const { return cu_; }
 
     void setup_user_authentification(const std::string& user, const std::string& passwd) override;
+
+    ///
+    /// @brief Gives the command the credentials of an authenticated identity, its kind (custom user or not) included.
+    ///
+    /// Used by a server forwarding a request on behalf of its requester (e.g. the move of a plug to another server).
+    ///
+    /// @param[in] identity The identity; a user or a custom user, holding its password
+    ///
+    void setup_user_authentification(const ecf::Identity& identity);
     bool setup_user_authentification(AbstractClientEnv&) override;
     void setup_user_authentification() override;
 

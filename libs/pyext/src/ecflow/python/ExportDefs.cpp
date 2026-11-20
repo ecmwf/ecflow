@@ -15,6 +15,7 @@
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/ExportCollections.hpp"
 #include "ecflow/python/GlossaryDoc.hpp"
+#include "ecflow/python/PermissionsUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/simulator/Simulator.hpp"
@@ -564,6 +565,14 @@ void export_Defs(py::module& m) {
              "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
 
         .def("check", &Defs_check, DefsDoc::check())
+
+        .def(
+            "check_permissions",
+            [](const Defs& self, const py::object& server) {
+                return PermissionsUtil::check(self, PermissionsUtil::from(server));
+            },
+            py::arg("server"),
+            DefsDoc::check_permissions_doc())
 
         .def("simulate", &Defs_simulate, DefsDoc::simulate())
 

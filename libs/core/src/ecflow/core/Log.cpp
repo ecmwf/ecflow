@@ -61,6 +61,22 @@ bool Log::log(Log::LogType lt, const std::string& message) {
     return true;
 }
 
+bool Log::log_flushed(Log::LogType lt, const std::string& message) {
+    std::scoped_lock lock(mx_);
+
+    create_logimpl();
+
+    if (!logImpl_->log(lt, message) || !logImpl_->flush_checked()) {
+        // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
+        log_error_ = handle_write_failure();
+
+        (void)logImpl_->log(Log::ERR, log_error_);
+        (void)logImpl_->log(lt, message);
+        return false;
+    }
+    return true;
+}
+
 void Log::cache_time_stamp() {
     std::scoped_lock lock(mx_);
 
@@ -205,6 +221,13 @@ std::string Log::handle_write_failure() {
     return msg;
 }
 
+bool log_flushed(Log::LogType lt, const std::string& message) {
+    if (Log::instance()) {
+        return Log::instance()->log_flushed(lt, message);
+    }
+    return log(lt, message);
+}
+
 bool log(Log::LogType lt, const std::string& message) {
     if (Log::instance()) {
         return Log::instance()->log(lt, message);
@@ -325,6 +348,12 @@ bool LogImpl::log(Log::LogType lt, const std::string& message) {
             file_ << log_type_and_time_stamp_ << lines[i] << '\n';
         }
     }
+    return file_.good();
+}
+
+bool LogImpl::flush_checked() {
+    file_.flush();
+    count_ = 0;
     return file_.good();
 }
 

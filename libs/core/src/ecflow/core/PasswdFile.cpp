@@ -8,6 +8,7 @@
 #include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/User.hpp"
@@ -38,7 +39,8 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
     }
 
     std::vector<std::string> lines;
-    if (!File::splitFileIntoLines(passwd_file_, lines, true /* ignore empty lines */)) {
+    // Empty lines are kept, so that the index of a line gives its number in the file
+    if (!File::splitFileIntoLines(passwd_file_, lines, false /* keep empty lines */)) {
         errorMsg += "Could not open file specified by ECF_PASSWD/ECF_CUSTOM_PASSWD ";
         errorMsg += passwd_file_;
         errorMsg += " (";
@@ -87,6 +89,12 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
             continue;
         }
         else {
+            // Every user name follows the user name model; a file holding another is rejected as a whole
+            if (std::string error; !is_valid_user_name(lineTokens[0], error)) {
+                errorMsg += MESSAGE("ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << ", line " << i + 1
+                                                                         << ": invalid " << error << "\n");
+                return false;
+            }
             if (!add_user(lineTokens, errorMsg)) {
                 errorMsg += theLine;
                 return false;

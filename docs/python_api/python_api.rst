@@ -54,6 +54,7 @@ The state of the elements of a suite definition can be set using the Client-serv
    reference/Node
    reference/NodeContainer
    reference/PartExpression
+   reference/Permissions
    reference/Queue
    reference/Repeat
    reference/RepeatDate
@@ -142,6 +143,7 @@ The Client-Server API provides the capability of communicating with the server.
    :glob:
 
    reference/Client
+   reference/PermissionDenied
 
 
 .. contents::

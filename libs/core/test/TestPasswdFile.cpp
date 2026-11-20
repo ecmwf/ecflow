@@ -6,6 +6,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -172,6 +173,51 @@ BOOST_AUTO_TEST_CASE(test_passwd) {
     expected_passwds.emplace_back("tom", "host3", "3143", PasswordEncryption::encrypt("x12ggg", "tom"));
 
     BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds(), "expected passwords to match");
+}
+
+///
+/// @brief Verifies that a password file holding a user name outside the model is rejected, naming the line and the
+///        reason, and that a valid file loads.
+///
+BOOST_AUTO_TEST_CASE(test_passwd_file_rejects_invalid_user_names) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::test::scaffold::AutomaticTestFile;
+    using ecf::test::scaffold::WithTestFile;
+
+    struct Case
+    {
+        std::string user;
+        std::string reason;
+    };
+    for (const auto& [user, reason] : std::vector<Case>{{"-alice", "starts with '-'"},
+                                                        {"*", "'*'"},
+                                                        {"al:ice", "':'"},
+                                                        {"al,ice", "','"},
+                                                        {"al;ice", "';'"},
+                                                        {"al\x01ice", "control"},
+                                                        {"al\xc2\xa0ice", "white space"},
+                                                        {"al\xffice", "UTF-8"}}) {
+        const std::string& name = user;
+        WithTestFile file(AutomaticTestFile{"invalid.passwd"},
+                          "4.5.0\n# a comment\nbob host 3141 bob_secret\n" + name + " host 3141 secret\n");
+        PasswdFile passwd;
+        std::string error;
+        BOOST_CHECK_MESSAGE(!passwd.load(file.path().string(), false, error),
+                            "accepted: " << printable_user_name(name));
+        BOOST_CHECK_MESSAGE(error.find(file.path().string()) != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find("line 4") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find("invalid user name") != std::string::npos, error);
+        BOOST_CHECK_MESSAGE(error.find(reason) != std::string::npos, error);
+    }
+
+    // The passwords are encrypted with the user name as salt: recent C libraries (e.g. libxcrypt) refuse a salt
+    // holding any character outside [./0-9A-Za-z], so the valid names below stay within these characters
+    WithTestFile file(AutomaticTestFile{"valid.passwd"},
+                      "4.5.0\nbob host 3141 bob_secret\nJose.2 host 3141 secret\nb0b/x host 3141 s\n");
+    PasswdFile passwd;
+    std::string error;
+    BOOST_CHECK_MESSAGE(passwd.load(file.path().string(), false, error), error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

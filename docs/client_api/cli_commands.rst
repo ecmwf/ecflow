@@ -175,6 +175,10 @@ Commands
       - :term:`user command`
       - Re-orders the nodes held by the server
 
+    * - :ref:`permissions_cli`
+      - :term:`user command`
+      - Read or change the Permissions attribute of a node, or of the server
+
     * - :ref:`ping_cli`
       - :term:`user command`
       - Check if server is running on given host/port. Result reported to standard output.
@@ -368,6 +372,7 @@ Commands
     msg <api/msg.rst>
     news <api/news.rst>
     order <api/order.rst>
+    permissions <api/permissions.rst>
     ping <api/ping.rst>
     plug <api/plug.rst>
     query <api/query.rst>

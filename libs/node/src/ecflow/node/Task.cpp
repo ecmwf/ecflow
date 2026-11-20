@@ -22,6 +22,7 @@
 #include "ecflow/node/NodeTreeVisitor.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/TaskScriptGenerator.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/move_peer.hpp"
 
 // #define DEBUG_TASK_LOCATION 1
@@ -72,6 +73,7 @@ Task& Task::operator=(const Task& rhs) {
         order_state_change_no_      = 0;
         alias_change_no_            = 0;
         add_remove_state_change_no_ = Ecf::incr_state_change_no();
+        ecf::Visibility::structure_changed();
     }
     return *this;
 }
@@ -228,6 +230,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
 
     alias_change_no_            = Ecf::incr_state_change_no();
     add_remove_state_change_no_ = alias_change_no_;
+    ecf::Visibility::structure_changed();
     return alias;
 }
 
@@ -541,6 +544,7 @@ node_ptr Task::removeChild(Node* child) {
             node_ptr node = std::dynamic_pointer_cast<Alias>(aliases_[t]);
             aliases_.erase(aliases_.begin() + t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return node;
         }
     }
@@ -559,6 +563,7 @@ bool Task::doDeleteChild(Node* child) {
             }
             aliases_.erase(t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            ecf::Visibility::structure_changed();
             return true;
         }
     }
@@ -742,17 +747,25 @@ void Task::collateChanges(DefsDelta& changes) const {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
-        comp->add(std::make_shared<AliasChildrenMemento>(aliases_));
+        // The aliases the requester can read
+        const auto* visibility = changes.visibility();
+        comp->add(std::make_shared<AliasChildrenMemento>(visibility ? visibility->project(aliases_) : aliases_));
     }
     // Create OrderMemento to signal reordering of aliases
     else if (order_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
+        // The order names the aliases the requester can read only
         std::vector<std::string> order_vec;
-        order_vec.reserve(aliases_.size());
-        for (auto& alias : aliases_) {
-            order_vec.push_back(alias->name());
+        if (const auto* visibility = changes.visibility(); visibility) {
+            order_vec = visibility->names(aliases_);
+        }
+        else {
+            order_vec.reserve(aliases_.size());
+            for (auto& alias : aliases_) {
+                order_vec.push_back(alias->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
@@ -768,9 +781,11 @@ void Task::collateChanges(DefsDelta& changes) const {
     // ** base class will add compound memento into changes.
     Submittable::incremental_changes(changes, comp);
 
-    // Traversal to children
+    // Traversal to the aliases the requester can read
     for (auto& alias : aliases_) {
-        alias->collateChanges(changes);
+        if (!changes.hides(*alias)) {
+            alias->collateChanges(changes);
+        }
     }
 }
 
@@ -866,3 +881,17 @@ void Task::serialize(Archive& ar, std::uint32_t const version) {
 
 CEREAL_TEMPLATE_SPECIALIZE_V(Task);
 CEREAL_REGISTER_TYPE(Task)
+
+void Task::retain_aliases_of_copy(const std::vector<bool>& keep) {
+    if (keep.size() != aliases_.size()) {
+        throw std::logic_error("Task::retain_aliases_of_copy: one flag per element expected");
+    }
+    decltype(aliases_) kept;
+    kept.reserve(aliases_.size());
+    for (std::size_t i = 0; i < aliases_.size(); ++i) {
+        if (keep[i]) {
+            kept.push_back(aliases_[i]);
+        }
+    }
+    aliases_.swap(kept);
+}

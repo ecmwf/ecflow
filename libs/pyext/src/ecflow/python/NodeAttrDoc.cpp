@@ -532,6 +532,118 @@ const char* NodeAttrDoc::autoarchive_doc() {
            "i.e node is idle\n";
 }
 
+const char* NodeAttrDoc::permissions_doc() {
+    return "Grants roles on a :term:`node` to the users it lists\n\n"
+           "A node carries at most one Permissions attribute. Each entry names a user and the letters of the roles\n"
+           "granted: r (read), w (write), x (execute), l (log), o (owner), p (permissions), and the flag s (sticky).\n"
+           "The attribute takes effect only on a server that has a server Permissions attribute.\n"
+           "See :ref:`permissions_attribute` for the meaning of each role.\n"
+           "\nConstructor::\n\n"
+           "   Permissions(value)\n"
+           "      value: one of\n"
+           "         - a string in the command-line form, e.g. 'alice:rwxs,bob:r'\n"
+           "         - a string in the JSON form, e.g. '[{\"user\": \"alice\", \"permissions\": \"rwxs\"}]'\n"
+           "         - a list or tuple of entries, e.g. ['alice:rwxs', 'bob:r']\n"
+           "         - a Permissions object, which is copied\n\n"
+           "Exceptions:\n\n"
+           "- Raises RuntimeError for an invalid value: no entry, an invalid user name, a user listed twice,\n"
+           "  an unknown or repeated letter, or an entry granting no role\n"
+           "- Raises TypeError for a value of any other type, or a list or tuple holding an item that is not a\n"
+           "  string\n"
+           "\nMethods:\n\n"
+           "- entries(): the entries, each a string <user>:<letters>, sorted by user\n"
+           "- roles(user): the letters of the roles granted to a user, or None\n"
+           "- sticky(user): whether the entry of a user is sticky\n"
+           "- to_cli(), to_json(): the command-line and JSON forms\n"
+           "- add_to(nodes, replace=False): adds the attribute to a set of nodes, all or none\n\n"
+           "Permissions objects compare equal when they hold the same entries, and can be hashed and copied.\n"
+           "repr() returns an expression that recreates the object, e.g. \"Permissions('bob:r')\".\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   p = Permissions('alice:rwxp,bob:r')\n"
+           "   p.entries()        # ['alice:rwxp', 'bob:r']\n"
+           "   p.roles('bob')     # 'r'\n"
+           "   str(p)             # 'permissions [{\"user\": \"alice\", ...}]', the line in a definition file\n"
+           "   s = Suite('s', p, Family('f', Permissions('bob:r')))\n"
+           "   s.get_permissions() == p   # True\n";
+}
+
+const char* NodeAttrDoc::permissions_add_to_doc() {
+    return "Adds the attribute to each node of a sequence, all or none\n\n"
+           "::\n\n"
+           "   None add_to(nodes, replace=False)\n"
+           "      nodes  : an iterable of nodes\n"
+           "      replace: when True, replaces the attribute of the nodes that already carry one\n\n"
+           "Exceptions:\n\n"
+           "- Raises TypeError when an item is not a node\n"
+           "- Raises RuntimeError, when replace is False, if a node already carries a Permissions attribute\n\n"
+           "Nothing changes when an exception is raised.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   Permissions('alice:rx').add_to(defs.get_all_tasks())\n";
+}
+
+const char* NodeAttrDoc::permissions_entries_doc() {
+    return "Returns the entries of the attribute\n\n"
+           "::\n\n"
+           "   list entries()\n\n"
+           "Returns a list of strings <user>:<letters>, sorted by user name; the letter s marks a sticky entry.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   Permissions('bob:r,alice:rwxs').entries()   # ['alice:rwxs', 'bob:r']\n";
+}
+
+const char* NodeAttrDoc::permissions_roles_doc() {
+    return "Returns the letters of the roles the attribute grants to a user\n\n"
+           "::\n\n"
+           "   string roles(\n"
+           "      string user : The user name\n"
+           "   )\n\n"
+           "Returns the letters in canonical order (r, w, x, l, o, p), without the sticky flag, or None when the\n"
+           "attribute does not list the user. The roles a user actually holds at a node also depend on the\n"
+           "attributes above it: see :py:meth:`ecflow.Client.effective_permissions`.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   p = Permissions('alice:rwxs,bob:r')\n"
+           "   p.roles('alice')   # 'rwx'\n"
+           "   p.roles('carol')   # None\n";
+}
+
+const char* NodeAttrDoc::permissions_sticky_doc() {
+    return "Returns whether the entry of a user is sticky\n\n"
+           "::\n\n"
+           "   bool sticky(\n"
+           "      string user : The user name\n"
+           "   )\n\n"
+           "Returns True when the attribute lists the user with the flag s; False otherwise, including when the\n"
+           "user is not listed.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   Permissions('alice:rwxs,bob:r').sticky('alice')   # True\n";
+}
+
+const char* NodeAttrDoc::permissions_to_cli_doc() {
+    return "Returns the command-line form of the attribute\n\n"
+           "::\n\n"
+           "   string to_cli()\n\n"
+           "Returns the entries separated by commas, sorted by user, as accepted by the constructor and by\n"
+           "ecflow_client --permissions.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   Permissions(['bob:r', 'alice:rwxs']).to_cli()   # 'alice:rwxs,bob:r'\n";
+}
+
+const char* NodeAttrDoc::permissions_to_json_doc() {
+    return "Returns the JSON form of the attribute, as written in definition files\n\n"
+           "::\n\n"
+           "   string to_json()\n\n"
+           "Returns a compact JSON array of objects with the keys user and permissions, sorted by user, as accepted\n"
+           "by the constructor.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   Permissions('bob:r').to_json()   # '[{\"permissions\":\"r\",\"user\":\"bob\"}]'\n";
+}
+
 const char* NodeAttrDoc::autorestore_doc() {
     return "Provides a way to automatically restore a previously archived node\n\n"
            "This is required when dealing with super large suite/families, they can be archived off, and then restored "

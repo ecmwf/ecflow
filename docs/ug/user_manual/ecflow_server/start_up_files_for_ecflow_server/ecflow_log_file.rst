@@ -286,6 +286,31 @@ Each block is written again after a successful reload:
   ``--reloadcustompasswdfile``;
 - ``Authorisation``: of the :ref:`whitelist <ecflow_white_list_file>`, with ``ecflow_client --reloadwsfile``.
 
+Once the checkpoint is loaded, at start-up and after ``ecflow_client --restore_from_checkpt``, and after a reload of
+the whitelist, the server also summarises the :ref:`Permissions attributes <permissions_attribute>` in force:
+
+.. code-block:: text
+
+  MSG:[12:00:00 18.10.2026] Permissions:
+  MSG:[12:00:00 18.10.2026]   Mode = permissions
+  MSG:[12:00:00 18.10.2026]   Source = checkpoint
+  MSG:[12:00:00 18.10.2026]   Users = 3
+  MSG:[12:00:00 18.10.2026]   Sticky users = admin, ops
+  MSG:[12:00:00 18.10.2026]   Nodes with permissions = 12
+
+The block lists:
+
+- ``Mode``: the :ref:`authorisation mode <permissions_attribute_modes>` in force: ``permissions`` (a server
+  attribute applies, and the whitelist is not used), ``whitelist`` or ``unrestricted``; the ``Authorisation`` block
+  above describes the whitelist only;
+- ``Source``: where the server attribute in force comes from: ``configuration file``, ``checkpoint`` (which
+  overrides the configuration file), or ``none``;
+- ``Users``: the number of users listed by the server attribute;
+- ``Sticky users``: the users holding a sticky entry in the server attribute, at most ten, or ``none``;
+- ``Nodes with permissions``: the number of nodes carrying an attribute.
+
+The attributes themselves are never logged.
+
 The authentication block lists:
 
 - ``ECF_PASSWD``, ``ECF_CUSTOM_PASSWD``: the password files, by absolute path, ``loaded`` or ``absent``; without a
@@ -297,8 +322,7 @@ The authorisation block lists:
 - ``Mode``: the permissions applied:
 
   - ``whitelist``:   those of the whitelist file;
-  - ``nodes``:       those of the nodes, given by ``ECF_PERMISSIONS``; without a whitelist file, and where no node
-    defines permissions, all users have read/write access.
+  - ``unrestricted``: none; without a whitelist file, all users have read/write access.
 
 - ``ECF_LISTS``: the whitelist file, by absolute path, ``loaded`` or ``absent``.
 - ``Users``: only with a whitelist, the access of each user, one ``<user> = <access>`` entry per user, ordered by
@@ -313,6 +337,30 @@ Notes:
 - A whitelist without users grants read/write access to all users: ``* = read/write (no users specified)``.
 - With ``--debug``, the start-up lines, from the start time on, and the authentication and authorisation blocks are
   also written to the standard output, with the same content.
+
+.. _ecflow_log_file_denials:
+
+Denied requests
+---------------
+
+When a request is denied, by the authentication or the authorisation, the server writes one ``ERR`` line for every
+refusal, holding the message also returned to the client:
+
+.. code-block:: text
+
+  ERR:[12:00:00 18.10.2026] Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions (role x required at /s/f) [--suspend /s/f :bob@client.host]
+
+The line holds:
+
+- the reason: for the authorisation, the role missing and where, with Permissions attributes (``role x required at
+  /s/f``), or the access missing and where, with the whitelist (``write access required at /s/f``);
+- between brackets, the request with its arguments, followed by the user and the host the request comes from: the
+  user is authenticated for a denial by the authorisation, and only claimed for a refusal by the authentication; the
+  host is given by the client in both cases.
+
+A line break inside the request is replaced by a space, so that each refusal holds one line. Other control characters
+are written as ``<U+XXXX>``, and bytes that are not valid UTF-8 as ``<0xXX>``, e.g. for a user name outside the
+:ref:`user name model <user_names>`.
 
 .. _ecflow_log_file_commands:
 

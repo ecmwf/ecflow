@@ -13,16 +13,19 @@
 ///
 
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/asio.hpp>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/ServerLimits.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/core/cfg/Configuration.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
@@ -107,6 +110,27 @@ public:
     /// @return True when the spawn, context and termination records of the commands are written; false by default.
     ///
     bool log_commands() const { return log_commands_; }
+
+    ///
+    /// @brief Returns whether the configuration ignores the white list file (/ecflow/server/whitelist/ignore).
+    ///
+    /// @return True when the white list file is neither loaded nor reloaded.
+    ///
+    bool ignores_whitelist() const { return ignore_whitelist_; }
+
+    ///
+    /// @brief Returns whether the configuration selects the audit-only mode (/ecflow/server/authorisation/audit_only).
+    ///
+    /// @return True when the requests the Permissions attributes deny are logged and executed, rather than refused.
+    ///
+    bool audit_only() const { return audit_only_; }
+
+    ///
+    /// @brief Returns the limits on the inputs of the server (/ecflow/server/limits).
+    ///
+    /// @return The limits; 0 stands for no limit.
+    ///
+    const ecf::ServerLimits& limits() const { return limits_; }
 
     /// Whenever we save the checkpt, we time how long this takes.
     /// For very large definition the time can be significant and start to interfere with
@@ -194,6 +218,13 @@ public:
 
     ecf::AuthenticationService& authentication() { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const { return authentication_service_; }
+
+    ///
+    /// @brief Returns the server Permissions attribute given by the configuration file.
+    ///
+    /// @return The attribute, or nullptr when the configuration file gives none.
+    ///
+    const ecf::Permissions* permissions() const { return permissions_ ? &*permissions_ : nullptr; }
 
     ecf::AuthorisationService& authorisation() { return authorisation_service_; }
     const ecf::AuthorisationService& authorisation() const { return authorisation_service_; }
@@ -303,8 +334,8 @@ private:
     ///
     /// @brief Logs the authorisation in force: its mode, the whitelist file, and the access of each user.
     ///
-    /// The mode is `whitelist` once a whitelist file is loaded, and `nodes` otherwise, i.e. the permissions of the
-    /// nodes apply.
+    /// The mode is `whitelist` once a whitelist file is loaded, and `unrestricted` otherwise. A server Permissions
+    /// attribute, when configured, takes precedence: the mode in force is then logged in the Permissions summary.
     ///
     void log_authorisation() const;
 
@@ -362,6 +393,9 @@ private:
     int ecf_task_threshold_; ///< Effective signed millisecond threshold, validated before updating the profiler.
     bool jobGeneration_;     // used in debug/test mode only
     bool log_commands_{false};
+    bool ignore_whitelist_{false};
+    bool audit_only_{false};
+    ecf::ServerLimits limits_;
     ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;
@@ -388,6 +422,7 @@ private:
     mutable bool access_loaded_{false}; ///< Whether valid() loaded the authentication and authorisation
     mutable ecf::AuthenticationService authentication_service_;
     mutable ecf::AuthorisationService authorisation_service_;
+    std::optional<ecf::Permissions> permissions_; // the server attribute of the configuration file, if any
 
 #ifdef ECF_OPENSSL
     ecf::Openssl ssl_;

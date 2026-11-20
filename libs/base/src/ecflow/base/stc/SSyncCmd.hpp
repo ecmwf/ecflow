@@ -39,6 +39,8 @@ public:
           incremental_changes_(0) {}
 
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::NodeContent; }
     bool equals(ServerToClientCmd*) const override;
 
     // Client side functions:
@@ -56,17 +58,32 @@ private:
               unsigned int client_modify_change_no,
               bool full_sync,
               bool sync_suite_clock,
-              AbstractServer* as);
+              AbstractServer* as,
+              const ecf::Visibility* visibility = nullptr);
 
     /// For use when doing a full sync
     void init(unsigned int client_handle, AbstractServer* as);
 
     void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
-    void full_sync(unsigned int client_handle, AbstractServer* as);
+    void full_sync(unsigned int client_handle, AbstractServer* as, const ecf::Visibility* visibility);
     void cleanup() override; /// run in the server, after command sent to client
 
 private:
+    std::shared_ptr<const std::string> cached_; // server side: the entry of the cache sent with full_defs_
     bool full_defs_{false};
+
+public:
+    ///
+    /// @brief Returns whether the reply is a full synchronisation rather than incremental changes.
+    ///
+    /// A full synchronisation carries either the whole definitions or, for a client handle, the definitions of its
+    /// suites; the client classifies the reply the same way (ServerReply::full_sync).
+    ///
+    /// @return True for a full synchronisation.
+    ///
+    [[nodiscard]] bool full_sync() const { return full_defs_ || !server_defs_.empty(); }
+
+private:
     DefsDelta incremental_changes_;
     std::string server_defs_;                // for returning a subset of the suites
     std::string full_server_defs_as_string_; // semi-persisted, i.e on load & not on saving, used to return cached defs
@@ -85,10 +102,10 @@ private:
            CEREAL_NVP(server_defs_)); // large scale changes, if non zero handle, a small subset of the suites
 
         // when full_defs_ is set 'server_defs_' will be empty.
-        if (Archive::is_saving::value) {
+        if constexpr (Archive::is_saving::value) {
             // Avoid copying the string. As this could be very large
-            if (full_defs_) {
-                ar& DefsCache::full_server_defs_as_string_;
+            if (full_defs_ && cached_) {
+                ar(*cached_);
             }
             else {
                 ar & full_server_defs_as_string_;

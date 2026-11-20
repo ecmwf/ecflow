@@ -55,6 +55,32 @@ protected:
     void run() override;
     void reset();
 
+    ///
+    /// @brief Registers, with a new handle, the suites of the filter that the user can read, or a dummy suite when
+    ///        there is none, after the registration of the whole filter was denied (R6.4).
+    ///
+    /// @throws std::runtime_error when a request fails.
+    ///
+    void registerReadableSuites();
+
+    ///
+    /// @brief Registers the suites with a new handle, after dropping the current handle and those left behind by
+    ///        failed registrations (R6.4).
+    ///
+    /// @param[in] suites The suites registered
+    /// @throws std::runtime_error, or ecf::PermissionDenied, when the registration fails; the handles that could not
+    ///         be dropped are kept, to be dropped before the next registration.
+    ///
+    void registerSuites(const std::vector<std::string>& suites);
+
+    ///
+    /// @brief Drops the handles kept by registerSuites(), without synchronising.
+    ///
+    /// The handles that the server no longer lists among those of the user (--ch_suites) are forgotten; a handle
+    /// whose drop fails, and every handle when the listing fails, is kept.
+    ///
+    void dropOrphanedHandles();
+
 private:
     void attach();
     void attach(defs_ptr d);
@@ -78,6 +104,7 @@ private:
     bool rescanNeed_{false};
     bool hasSuiteFilter_{false};
     std::vector<std::string> filteredSuites_;
+    std::vector<int> orphanedHandles_; // handles left on the server by failed registrations (R6.4)
     bool autoAddNewSuites_{false};
     int maxLineNum_{-1};
     bool initialResetDone_{false};

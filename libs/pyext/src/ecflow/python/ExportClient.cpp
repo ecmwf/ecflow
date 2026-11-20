@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <algorithm> // for std::transform
+#include <iterator>
 
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
@@ -15,6 +17,7 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/python/ClientDoc.hpp"
+#include "ecflow/python/PermissionsUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 
@@ -102,6 +105,33 @@ const std::string& ClientInvoker_query(ClientInvoker* self,
                                        bool evaluate) {
     self->query(query_type, path_to_attribute, attribute, evaluate);
     return self->get_string();
+}
+
+///
+/// @brief Adds a Permissions attribute to a node, or changes that of a node or of the server (--permissions).
+///
+/// @param self The client invoker.
+/// @param operation Either "create" or "update".
+/// @param path The absolute path of the node, or "/" for the server attribute (update only).
+/// @param value The attribute: a Permissions object, a string in either textual form, or a list of entries.
+///
+void ClientInvoker_change_permissions(ClientInvoker* self,
+                                      const std::string& operation,
+                                      const std::string& path,
+                                      const py::object& value) {
+    self->permissions(operation, path, PermissionsUtil::from(value).to_json(), false);
+}
+
+///
+/// @brief Returns the Permissions attribute of a node, or of the server (--permissions read).
+///
+/// @param self The client invoker.
+/// @param path The absolute path of the node, or "/" for the server attribute.
+/// @return The attribute.
+///
+ecf::Permissions ClientInvoker_get_permissions(ClientInvoker* self, const std::string& path) {
+    self->permissions("read", path, "", true);
+    return ecf::Permissions::parse_json(self->get_string());
 }
 
 ///
@@ -772,6 +802,30 @@ void ClientInvoker_alter(ClientInvoker* self,
 }
 
 ///
+/// @brief Check, with `--check`, that the nodes named by a list of paths exist, before a request given the list.
+///
+/// Notes:
+///
+/// - The path `/` names the server, which `--check` does not know, and is left out.
+/// - When no other path remains, nothing is checked, since `--check` without paths checks the whole definitions.
+/// - `--check` stops at the first node whose expressions are in error, without checking the paths after it; a missing
+///   path after such a node is then not detected before the request.
+///
+/// @param self The client invoker.
+/// @param paths The absolute paths given to the request.
+/// @throws std::runtime_error when a node does not exist (with the message of `--check`), or when the server refuses
+///         the check (under Permissions, the check needs the role r at every node).
+///
+void check_nodes_exist(ClientInvoker* self, const std::vector<std::string>& paths) {
+    std::vector<std::string> nodes;
+    std::copy_if(
+        paths.begin(), paths.end(), std::back_inserter(nodes), [](const std::string& path) { return path != "/"; });
+    if (!nodes.empty()) {
+        self->check(nodes);
+    }
+}
+
+///
 /// @brief Alter an attribute on all nodes in the given list of paths.
 ///
 /// @param self The client invoker.
@@ -789,7 +843,7 @@ void ClientInvoker_alter_s(ClientInvoker* self,
                            const std::string& value = "") {
     std::vector<std::string> paths;
     py_list_to_str_vec(list, paths);
-    self->check(paths);
+    check_nodes_exist(self, paths);
     self->alter(paths, alterType, attrType, name, value);
 }
 
@@ -822,7 +876,7 @@ void ClientInvoker_alter_sort_s(ClientInvoker* self,
                                 bool recursive = true) {
     std::vector<std::string> paths;
     py_list_to_str_vec(list, paths);
-    self->check(paths);
+    check_nodes_exist(self, paths);
     self->alter_sort(paths, attribute_name, recursive);
 }
 
@@ -1041,6 +1095,9 @@ void ClientInvoker_enable_ssl(ClientInvoker* self) {
 } // namespace
 
 void export_Client(py::module& m) {
+    // A request denied by the authorisation of the server; a RuntimeError, as every other refused request
+    py::register_exception<ecf::PermissionDenied>(m, "PermissionDenied", PyExc_RuntimeError).attr("__doc__") =
+        ClientDoc::permission_denied();
 
     static const char* ClientInvoker_version_doc = "Returns the current client version";
 
@@ -1048,7 +1105,9 @@ void export_Client(py::module& m) {
         "Returns the server version, can throw for old servers, that did not implement this request.";
 
     static const char* ClientInvoker_set_user_name_doc =
-        "Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd";
+        "Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd.\n"
+        "The name follows the user name model (valid UTF-8; no white space, control character, '#', ',', ':' or ';'; "
+        "not starting with '-'; not '*'): a request under another name raises RuntimeError, before anything is sent.";
 
     static const char* ClientInvoker_get_host_doc =
         "Returns the host, assume set_host_port() has been set, otherwise return localhost";
@@ -1254,6 +1313,42 @@ void export_Client(py::module& m) {
              ClientDoc::get_file())
 
         .def("plug", &ClientInvoker::plug, ClientDoc::plug())
+
+        .def(
+            "create_permissions",
+            [](ClientInvoker* self, const std::string& path, const py::object& value) {
+                ClientInvoker_change_permissions(self, "create", path, value);
+            },
+            py::arg("path"),
+            py::arg("value"),
+            ClientDoc::create_permissions())
+
+        .def("get_permissions", &ClientInvoker_get_permissions, py::arg("path"), ClientDoc::get_permissions())
+
+        .def(
+            "update_permissions",
+            [](ClientInvoker* self, const std::string& path, const py::object& value) {
+                ClientInvoker_change_permissions(self, "update", path, value);
+            },
+            py::arg("path"),
+            py::arg("value"),
+            ClientDoc::update_permissions())
+
+        .def(
+            "delete_permissions",
+            [](ClientInvoker* self, const std::string& path) { self->permissions("delete", path, "", false); },
+            py::arg("path"),
+            ClientDoc::delete_permissions())
+
+        .def(
+            "effective_permissions",
+            [](ClientInvoker* self, const std::string& path, const std::string& user) {
+                self->permissions("effective", path, user, false);
+                return self->get_string();
+            },
+            py::arg("path"),
+            py::arg("user") = "",
+            ClientDoc::effective_permissions())
 
         .def("query",
              &ClientInvoker_query,

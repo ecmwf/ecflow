@@ -5,6 +5,9 @@
 
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 class AbstractServer;
+namespace ecf {
+class Visibility;
+}
 
 //================================================================================
 // Paired with CtsCmd(SUITES)
@@ -16,8 +19,16 @@ public:
     SSuitesCmd()
         : ServerToClientCmd() {}
 
-    void init(AbstractServer* as);
+    ///
+    /// @brief Builds the reply in the server: the names of the suites the requester can read.
+    ///
+    /// @param[in] as The server
+    /// @param[in] visibility The nodes the requester can read; every node when null
+    ///
+    void init(AbstractServer* as, const ecf::Visibility* visibility = nullptr);
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override { return ecf::ReplyFiltering::Listing; }
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
     void cleanup() override {

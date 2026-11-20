@@ -9,6 +9,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -98,6 +99,7 @@ Node::Node(const Node& rhs)
       auto_cancel_((rhs.auto_cancel_) ? new AutoCancelAttr(*rhs.auto_cancel_) : nullptr),
       auto_archive_((rhs.auto_archive_) ? new AutoArchiveAttr(*rhs.auto_archive_) : nullptr),
       auto_restore_((rhs.auto_restore_) ? new AutoRestoreAttr(*rhs.auto_restore_) : nullptr),
+      permissions_((rhs.permissions_) ? new ecf::Permissions(*rhs.permissions_) : nullptr),
       suspended_(rhs.suspended_) {
     inLimitMgr_.set_node(this);
     if (misc_attrs_) {
@@ -223,6 +225,7 @@ Node& Node::operator=(const Node& rhs) {
         if (rhs.auto_restore_) {
             auto_restore_ = std::make_unique<AutoRestoreAttr>(*rhs.auto_restore_);
         }
+        permissions_ = (rhs.permissions_) ? std::make_unique<ecf::Permissions>(*rhs.permissions_) : nullptr;
 
         repeat_     = rhs.repeat_;
         inLimitMgr_ = rhs.inLimitMgr_;
@@ -2232,6 +2235,17 @@ bool Node::operator==(const Node& rhs) const {
         return false;
     }
 
+    // Compared before auto_restore_, whose equality ends the comparison
+    if (static_cast<bool>(permissions_) != static_cast<bool>(rhs.permissions_) ||
+        (permissions_ && !(*permissions_ == *rhs.permissions_))) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  permissions_ differ " << debugNodePath() << "\n";
+        }
+#endif
+        return false;
+    }
+
     if (auto_restore_ && rhs.auto_restore_) {
         if (*auto_restore_ == *rhs.auto_restore_) {
             return true;
@@ -3033,6 +3047,12 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, auto_cancel_, [this]() { return auto_cancel_.get(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, auto_archive_, [this]() { return auto_archive_.get(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this]() { return auto_restore_.get(); }); // conditionally save
+    // Must remain the last member: a reader that does not know it then reads the other members unchanged. A node read
+    // from an archive without the attribute has none, whatever it held before.
+    if (Archive::is_loading::value) {
+        permissions_.reset();
+    }
+    CEREAL_OPTIONAL_NVP(ar, permissions_, [this]() { return permissions_.get(); }); // conditionally save
 
     if (Archive::is_loading::value) {
         if (auto_restore_) {

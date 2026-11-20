@@ -106,9 +106,11 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       # Headers
       test/Certificate.hpp
       test/InvokeServer.hpp
+      test/RestService.hpp
       test/TokenFile.hpp
       # Sources
       test/TestApiV1.cpp
+      test/TestRestService.cpp
       test/TestHttp_main.cpp # test entry point
     )
 
@@ -132,6 +134,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         ecflow_all
         test_scaffold
         test_harness.base
+        test_harness.client
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       DEPENDS
@@ -161,6 +164,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         ecflow_all
         test_scaffold
         test_harness.base
+        test_harness.client
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       DEPENDS

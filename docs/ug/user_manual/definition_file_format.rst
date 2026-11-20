@@ -237,9 +237,13 @@ is a comment with no effect on parsing — a visual "end of file" marker.
 
 .. note::
 
-   What is deliberately **absent** from ``DEFS``-style output: a ``defs_state`` header line, and any
-   server-wide ``edit`` variables. Both exist only in ``STATE``/``MIGRATE``/``NET`` output — see
-   :ref:`ch-scope`.
+   What is deliberately **absent** from ``DEFS``-style output:
+
+   - a ``defs_state`` header line;
+   - any server-wide ``edit`` variables;
+   - the server ``permissions`` attribute.
+
+   These exist only in ``STATE``/``MIGRATE``/``NET`` output — see :ref:`ch-scope` and :ref:`state-server-permissions`.
 
 .. _ch-node-hierarchy:
 
@@ -264,7 +268,8 @@ The *Definition* represents the whole file. Think of it as the root node that ho
 declarations and zero-or-more suites. It has no explicit opening/closing keyword — it *is* everything in the file.
 
 When generating ``STATE``/``MIGRATE``/``NET`` output, it also carries a :ref:`state-header` header, server variables,
-and optionally ``history`` lines, all before any suites.
+the server ``permissions`` attribute (when the server has one), and optionally ``history`` lines, all before any
+suites.
 
 .. _node-suite:
 
@@ -364,6 +369,8 @@ The following table shows where each keyword may legally appear.
      - Keywords
    * - Defs
      - - ``extern``
+       - ``permissions`` (the server attribute, in ``STATE``/``MIGRATE``/``NET`` output only; see
+         :ref:`state-server-permissions`)
    * - Suite
      - - ``clock``
        - ``endclock``
@@ -392,6 +399,7 @@ The following table shows where each keyword may legally appear.
        - ``autocancel``
        - ``autoarchive``
        - ``autorestore``
+       - ``permissions``
        - ``zombie``
        - ``verify``
        - ``queue``
@@ -432,6 +440,7 @@ Canonical attribute emission order
          > autocancel
          > autoarchive
          > autorestore
+         > permissions
          > zombie
          > verify
          > queue
@@ -452,6 +461,8 @@ The following entries are ordered alphabetically, for ease of random-access look
 
    All examples in this section were extracted from ecflow's own parser test fixtures
    (``libs/node/test/parser/data/good_defs/<keyword>/``) or derived from the writer source itself.
+   These fixtures are parsed on their own, without a server: the checks made when a definition is loaded into a
+   server (e.g. those of ``permissions``) do not apply to them.
 
 .. _attr-autoarchive:
 
@@ -1303,6 +1314,56 @@ This allows other local nodes to be triggered by a remote node's completion.
     mirror --name operationsX --remote_path /s1/f1/t1 --ssl
     mirror --name operationsY --remote_path /s1/f1/t2 --remote_host %ECF_MIRROR_REMOTE_HOST% --polling 20 --remote_port %ECF_MIRROR_REMOTE_PORT% --ssl
 
+.. _attr-permissions:
+
+permissions
+-----------
+
+Grants roles on the node to the users it lists (see :ref:`permissions_attribute`). A node holds at most one
+``permissions`` attribute.
+
+**Attaches to:** Node (Suite, Family, Task, and Alias)
+
+**Syntax**
+
+.. code-block:: shell
+
+    permissions <json>
+
+**Parameters**
+
+   json
+      A non-empty JSON list of objects, each with exactly two strings:
+
+      - ``user``: a user name (see :ref:`permissions_attribute_users`);
+      - ``permissions``: the letters of the roles granted, with ``s`` to make the entry sticky.
+
+**Examples**
+
+.. code-block:: shell
+
+    permissions [{"user": "alice", "permissions": "rwxops"}, {"user": "bob", "permissions": "r"}]
+    permissions [{"user":"carol","permissions":"rx"}]   # carol may read and run
+
+**Notes**
+
+- The value is validated when read; the definition is invalid when:
+
+  - the JSON form is malformed, or the list is empty;
+  - an entry does not hold exactly the two strings ``user`` and ``permissions``;
+  - a letter is unknown or repeated, or an entry grants no role (only ``s``);
+  - a user is listed twice, or a user name is invalid.
+
+- At the top level, outside any suite, the keyword denotes the server attribute: it is read only from
+  ``STATE``/``MIGRATE``/``NET`` content, at most once, and a definition (``DEFS``) holding it is rejected (see
+  :ref:`state-server-permissions`).
+- When the definition is loaded into a server, the attributes are checked against the server attribute (see
+  :ref:`permissions_attribute_changes`): on a server without one, the definition is rejected, and each user named
+  must be listed above the node.
+- The attribute is written in the JSON form, without white space, with the entries sorted by user, the members of
+  each entry in the order ``permissions``, ``user``, and the letters in the order ``r w x l o p s``, e.g.
+  ``permissions [{"permissions":"rwxops","user":"alice"},{"permissions":"r","user":"bob"}]``.
+
 .. _attr-queue:
 
 queue
@@ -1653,6 +1714,8 @@ representative cross-section of the grammar above.
 
     suite forecast_pipeline
 
+      # the users named must be listed by the server attribute of the server loading the definition
+      permissions [{"user": "msops", "permissions": "rwxp"}, {"user": "monitor", "permissions": "r"}]
       edit ECF_HOME '/home/msops/ecflow_home'
       edit ECF_INCLUDE '/home/msops/include'
       edit STREAM 'oper'
@@ -1742,7 +1805,7 @@ The formal grammar of a definition file is as follows.
 
     node_attr       : variable | trigger | complete | repeat | limit | inlimit | label
                     : | meter | event | late | defstatus | autocancel | autoarchive
-                    : | autorestore | zombie | verify | queue | generic | aviso | mirror | cron
+                    : | autorestore | zombie | verify | queue | generic | aviso | mirror | cron | permissions
                     : | time_dep                                    -- time/today/date/day: family/task/alias only, not suite
     time_dep        : time | today | date | day
 
@@ -1784,6 +1847,10 @@ The formal grammar of a definition file is as follows.
     mirror          : "mirror" >> "--name" >> identifier >> "--remote_path" >> string
                     : >> *( "--remote_host" >> string | "--remote_port" >> string | "--polling" >> string
                     :     | "--ssl" | "--remote_auth" >> string | "--reason" >> string | "--propagate" )
+    permissions     : "permissions" >> jsonlist                  -- at most one per node; see the permissions attribute
+    jsonlist        : "[" >> permission >> *( "," >> permission ) >> "]"  -- JSON, on one line, white space allowed
+    permission      : "{" >> "\"user\"" >> ":" >> jsonstring >> "," >> "\"permissions\"" >> ":" >> jsonstring >> "}"
+                    :                                               -- members in any order; letters r w x l o p s
     cron            : "cron" >> *( ("-w" >> weekday_list) | ("-d" >> dom_list) | ("-m" >> month_list) ) >> timeseries
     time            : "time" >> !"+" >> timeseries
     today           : "today" >> !"+" >> timeseries
@@ -1847,6 +1914,11 @@ purely to save time and disk space when storing large trees.
      - MIGRATE
      - NET
    * - ``defs_state`` header + server variables
+     - —
+     - ✅
+     - ✅
+     - ✅
+   * - server ``permissions`` attribute (when the server has one)
      - —
      - ✅
      - ✅
@@ -1970,6 +2042,27 @@ written:
 
     This list will include ecflow generated server-level default variables
     (``ECF_MICRO``, ``ECF_HOME``, ``ECF_JOB_CMD``, ``ECF_HOST``, …).
+
+.. _state-server-permissions:
+
+Server permissions
+~~~~~~~~~~~~~~~~~~
+
+When the server has a :ref:`server Permissions attribute <permissions_attribute_server>`, a ``permissions`` line
+follows the server variables, before any ``history`` line, in the same JSON form as the node attribute (see
+:ref:`attr-permissions`):
+
+.. code-block:: shell
+
+    permissions [{"permissions":"rwxlops","user":"admin"},{"permissions":"r","user":"alice"}]
+
+Notes:
+
+- The line appears only in ``STATE``, ``MIGRATE`` and ``NET`` output (checkpoints, and the definitions sent to
+  clients), never in ``DEFS`` output.
+- It is read at the top level, outside any suite, only from such content; a definition file (``DEFS``) holding it is
+  rejected, since definitions cannot set the server attribute.
+- The content holds at most one such line; a second one is rejected.
 
 Server state comment
 ~~~~~~~~~~~~~~~~~~~~

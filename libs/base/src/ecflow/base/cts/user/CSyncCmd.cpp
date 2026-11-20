@@ -12,6 +12,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -89,8 +90,8 @@ ecf::authentication_t CSyncCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CSyncCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CSyncCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 const char* CSyncCmd::theArg() const {
@@ -124,14 +125,21 @@ void CSyncCmd::do_log(AbstractServer* as) const {
     ClientToServerCmd::do_log(as);
 }
 
+STC_Cmd_ptr CSyncCmd::observed(STC_Cmd_ptr reply, AbstractServer* as) const {
+    if (const auto* sync = dynamic_cast<const SSyncCmd*>(reply.get()); sync) {
+        as->sync_reply_built(sync->full_sync(), request_context());
+    }
+    return reply;
+}
+
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
     // If no defs not loaded, SSyncCmd and SNewsCmd do nothing. This is a valid state, hence do not error for this
     // request
     switch (api_) {
         case CSyncCmd::NEWS: {
             as->update_stats().news_++;
-            auto reply =
-                PreAllocatedReply::news_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            auto reply = PreAllocatedReply::news_cmd(
+                client_handle_, client_state_change_no_, client_modify_change_no_, request_context());
 
             // Log the command together with the outcome, as a single record
             std::string ss;
@@ -146,21 +154,25 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
         }
         case CSyncCmd::SYNC: {
             as->update_stats().sync_++;
-            return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            return observed(PreAllocatedReply::sync_cmd(
+                                client_handle_, client_state_change_no_, client_modify_change_no_, request_context()),
+                            as);
         }
         case CSyncCmd::SYNC_FULL: {
             as->update_stats().sync_full_++;
-            return PreAllocatedReply::sync_full_cmd(client_handle_, as);
+            return observed(PreAllocatedReply::sync_full_cmd(client_handle_, request_context()), as);
         }
         case CSyncCmd::SYNC_CLOCK: {
             as->update_stats().sync_clock_++;
-            return PreAllocatedReply::sync_clock_cmd(
-                client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            return observed(PreAllocatedReply::sync_clock_cmd(
+                                client_handle_, client_state_change_no_, client_modify_change_no_, request_context()),
+                            as);
         }
     }
 
     // should never get here:
-    return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+    return PreAllocatedReply::sync_cmd(
+        client_handle_, client_state_change_no_, client_modify_change_no_, request_context());
 }
 
 void CSyncCmd::addOption(boost::program_options::options_description& desc) const {

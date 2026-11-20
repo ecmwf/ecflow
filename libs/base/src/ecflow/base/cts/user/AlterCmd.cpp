@@ -257,8 +257,8 @@ ecf::authentication_t AlterCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t AlterCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t AlterCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 void AlterCmd::alter_and_attr_type(std::string& alter_type, std::string& attr_type) const {

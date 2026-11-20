@@ -11,6 +11,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 //=====================================================================================
@@ -21,10 +22,17 @@ SNodeCmd::SNodeCmd(AbstractServer* as, node_ptr node) {
     init(as, std::move(node));
 }
 
-void SNodeCmd::init(AbstractServer* as, const node_ptr& node) {
+void SNodeCmd::init(AbstractServer* as, const node_ptr& node, const ecf::Visibility* visibility) {
     the_node_str_.clear();
+    if (node.get() && visibility && !visibility->readable(*node)) {
+        // A node the requester cannot read is never sent; the authorisation already refuses a read lacking r, in
+        // every mode (audit-only included), and this check guards the reply itself
+        throw std::runtime_error("The node " + node->absNodePath() + " is not readable");
+    }
     if (node.get()) {
-        the_node_str_ = ecf::as_string(node, PrintStyle::NET);
+        auto ctx       = ecf::FormatContext::make_for(PrintStyle::NET);
+        ctx.visibility = visibility;
+        the_node_str_  = ecf::as_string(node, ctx);
     }
 }
 

@@ -394,6 +394,22 @@ BOOST_AUTO_TEST_CASE(test_a_refused_request_is_not_reported_as_a_failure_to_comm
     BOOST_CHECK_MESSAGE(explanation.find("Cannot communicate") == std::string::npos, explanation);
 }
 
+BOOST_AUTO_TEST_CASE(test_a_denied_request_is_not_reported_as_a_failure_to_communicate) {
+    ECF_NAME_THIS_TEST();
+
+    ConnectionDiagnosis diagnosis;
+    diagnosis.client_protocol = Protocol::Plain;
+    diagnosis.failure         = ConnectionFailure::PermissionDenied;
+    diagnosis.host            = "hostname";
+    diagnosis.port            = "3141";
+
+    const std::string explanation = ecf::explain(diagnosis);
+
+    BOOST_CHECK_MESSAGE(explanation.rfind("Permission denied: ", 0) == 0, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("Cannot communicate") == std::string::npos, explanation);
+    BOOST_CHECK_MESSAGE(explanation.find("denying the request") != std::string::npos, explanation);
+}
+
 BOOST_AUTO_TEST_CASE(test_the_low_level_detail_is_carried_into_the_explanation) {
     ECF_NAME_THIS_TEST();
 

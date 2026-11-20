@@ -40,6 +40,7 @@ public:
         GENVAR,
         AVISO,
         MIRROR,
+        PERMISSIONS,
         BADATTRIBUTE
     };
 

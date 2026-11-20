@@ -21,6 +21,10 @@ class GroupCTSCmd;
 ///////////////////////////////////////////////////////////////////////////////////
 // Client->Server cmd's
 ///////////////////////////////////////////////////////////////////////////////////
+namespace ecf {
+class RequestContext;
+}
+
 class ClientToServerCmd {
 public:
     ///
@@ -58,7 +62,18 @@ public:
     [[nodiscard]] ecf::Identity& identity() const { return identity_; }
 
     [[nodiscard]] virtual ecf::authorisation_t authenticate(AbstractServer& server) const = 0;
-    [[nodiscard]] virtual ecf::authorisation_t authorise(AbstractServer& server) const    = 0;
+
+    ///
+    /// @brief Decides whether the request is allowed, by the roles its command requires (see AuthorisationDetails.hpp).
+    ///
+    /// Called by the server after authentication, through ecf::is_authorised; every command specialises the decision
+    /// for its targets, in the authorisation mode in force (Permissions, whitelist or unrestricted).
+    ///
+    /// @param[in] context The context of the request: the identity of the requester and the server
+    /// @return Success when the request is allowed; otherwise a failure holding the reason.
+    /// @throws std::exception when the permissions cannot be evaluated; the caller refuses the request (R11.7).
+    ///
+    [[nodiscard]] virtual ecf::authorisation_t authorise(const ecf::RequestContext& context) const = 0;
 
     /**
      *  Evaluates the preconditions of the command, thus acting as a command customisation point.
@@ -81,9 +96,33 @@ public:
     /// Called by the _server_ to service the client depending on the Command
     /// The server will pass itself down via the AbstractServer
     /// The returned Server to Client  command is sent back to the client
-    /// Uses template pattern, it first authenticates request and then calls
-    /// doHandleRequest. This function can throw exceptions. std::runtime_error
-    STC_Cmd_ptr handleRequest(AbstractServer*) const;
+    /// Uses template pattern: it checks the preconditions and then calls doHandleRequest. It neither authenticates
+    /// nor authorises the request: the caller (ClientToServerRequest) does both before calling it. This function can
+    /// throw exceptions. std::runtime_error
+    ///
+    /// @brief Handles the request, in a context created from the identity of the command.
+    ///
+    /// @param[in] as The server
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr handleRequest(AbstractServer* as) const;
+
+    ///
+    /// @brief Handles the request in the given context, which the command can reach through request_context().
+    ///
+    /// @param[in] as The server
+    /// @param[in] context The context of the request; it must outlive the call
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr handleRequest(AbstractServer* as, const ecf::RequestContext& context) const;
+
+    ///
+    /// @brief Returns the context of the request being handled.
+    ///
+    /// @return The context, valid during handleRequest() only.
+    /// @throws std::logic_error when no request is being handled.
+    ///
+    [[nodiscard]] const ecf::RequestContext& request_context() const;
 
     /// After handleRequest() has run, this function can be used reclaim memory
     virtual void cleanup() {}
@@ -107,7 +146,8 @@ public:
     /// A command can be read only command or write only command
     /// A read only command will not change the state of the suites in the server
     /// A write only command can modify the state of suite in the server
-    /// Used by the server for authentication since only write only users are allowed to edit.
+    /// Used by the server for checkpointing and statistics; the access a command requires follows the roles of its
+    /// command (see authorise()), not this classification.
     virtual bool isWrite() const { return false; /* returning false means read only */ }
 
     /// Some read only commands under exceptional situation can modify the DEFS.
@@ -195,6 +235,15 @@ protected:
     /// called by handleRequest, part of the template pattern
     virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const = 0;
 
+    ///
+    /// @brief Calls doHandleRequest() in the given context, as a command of a group does with the context of the group.
+    ///
+    /// @param[in] as The server
+    /// @param[in] context The context of the request; it must outlive the call
+    /// @return The reply.
+    ///
+    STC_Cmd_ptr doHandleRequestIn(AbstractServer* as, const ecf::RequestContext& context) const;
+
     virtual bool validate() const { return true; }
 
     // /// return true if authentication succeeds, false and STC_Cmd_ptr to return otherwise
@@ -245,6 +294,7 @@ private:
     std::string cl_host_; // The host where the client was called
 
     mutable ecf::Identity identity_ = ecf::Identity::make_none(); // The identity of the user who issued the command
+    mutable const ecf::RequestContext* context_{nullptr};         // The context of the request being handled
 
 private:
     friend class cereal::access;

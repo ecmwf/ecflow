@@ -10,12 +10,14 @@
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Gnuplot.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -170,8 +172,8 @@ ecf::authentication_t CtsCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CtsCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CtsCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 bool CtsCmd::isWrite() const {
@@ -332,7 +334,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES: {
             as->update_stats().zombie_get_++;
-            return PreAllocatedReply::zombie_get_cmd(as);
+            return PreAllocatedReply::zombie_get_cmd(request_context());
         }
 
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: {
@@ -397,7 +399,15 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         case CtsCmd::STATS: {
             as->update_stats().stats_++;
             as->stats().update_for_serialisation();
-            as->stats().no_of_suites_ = as->defs()->suites().size();
+            ecf::update_authorisation_statistics(*as);
+            // The number of suites counts those the requester can read (R5.2)
+            const auto visibility     = request_context().visibility();
+            as->stats().no_of_suites_ = 0;
+            for (const auto& suite : as->defs()->suites()) {
+                if (!visibility->stops_at(*suite)) {
+                    ++as->stats().no_of_suites_;
+                }
+            }
             std::ostringstream ss;
             as->stats().show(ss); // ECFLOW-880, allow stats to be changed in server, by only returning string
             return PreAllocatedReply::string_cmd(ss.str());
@@ -408,14 +418,14 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         // added to Stats::serialize() must be appended last, behind a class version guard.
         case CtsCmd::STATS_SERVER: {
             as->update_stats().stats_++;
-            return PreAllocatedReply::stats_cmd(as);
+            return PreAllocatedReply::stats_cmd(request_context());
         }
         case CtsCmd::STATS_RESET:
             as->update_stats().reset();
             break; // we could have done as->update_stats().stats_++, to honor reset, we dont
         case CtsCmd::SUITES:
             as->update_stats().suites_++;
-            return PreAllocatedReply::suites_cmd(as);
+            return PreAllocatedReply::suites_cmd(request_context());
         case CtsCmd::DEBUG_SERVER_ON:
             as->update_stats().debug_server_on_++;
             as->debug_server_on();

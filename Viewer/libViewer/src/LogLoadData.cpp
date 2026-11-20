@@ -216,6 +216,8 @@ void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& subReq) {
           << "--news="
           << "order"
           << "--order="
+          << "permissions"
+          << "--permissions="
           << "ping"
           << "--ping "
           << "plug"

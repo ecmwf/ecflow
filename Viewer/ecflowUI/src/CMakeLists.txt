@@ -11,6 +11,7 @@ set(viewer_srcs
   ActionHandler.hpp
   AddLabelDialog.hpp
   AddModelColumnDialog.hpp
+  AddPermissionsDialog.hpp
   Animation.hpp
   AstCollateVNodesVisitor.hpp
   AttributeEditor.hpp
@@ -70,6 +71,7 @@ set(viewer_srcs
   JobItemWidget.hpp
   JobStatusItemWidget.hpp
   LabelEditor.hpp
+  PermissionsEditor.hpp
   LimitEditor.hpp
   LineEdit.hpp
   LogProvider.hpp
@@ -145,6 +147,7 @@ set(viewer_srcs
   ServerListSyncWidget.hpp
   ServerLoadItemWidget.hpp
   ServerObserver.hpp
+  ServerPermissionsDialog.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp
   SessionAutoSave.hpp
@@ -210,6 +213,7 @@ set(viewer_srcs
   VAutoCancelAttr.hpp
   VAutoRestoreAttr.hpp
   VAvisoAttr.hpp
+  VPermissionsAttr.hpp
   VConfig.hpp
   VConfigLoader.hpp
   VDateAttr.hpp
@@ -295,6 +299,7 @@ set(viewer_srcs
   ActionHandler.cpp
   AddLabelDialog.cpp
   AddModelColumnDialog.cpp
+  AddPermissionsDialog.cpp
   Animation.cpp
   AstCollateVNodesVisitor.cpp
   AttributeEditor.cpp
@@ -353,6 +358,7 @@ set(viewer_srcs
   JobItemWidget.cpp
   JobStatusItemWidget.cpp
   LabelEditor.cpp
+  PermissionsEditor.cpp
   LimitEditor.cpp
   LineEdit.cpp
   LogProvider.cpp
@@ -424,6 +430,7 @@ set(viewer_srcs
   ServerListDialog.cpp
   ServerListSyncWidget.cpp
   ServerLoadItemWidget.cpp
+  ServerPermissionsDialog.cpp
   ServerSettingsItemWidget.cpp
   SessionAutoSave.cpp
   SessionDialog.cpp
@@ -489,6 +496,7 @@ set(viewer_srcs
   VAutoCancelAttr.cpp
   VAutoRestoreAttr.cpp
   VAvisoAttr.cpp
+  VPermissionsAttr.cpp
   VConfig.cpp
   VConfigLoader.cpp
   VDateAttr.cpp
@@ -564,6 +572,7 @@ set(viewer_moc_files
   ActionHandler.hpp
   AddLabelDialog.hpp
   AddModelColumnDialog.hpp
+  AddPermissionsDialog.hpp
   Animation.hpp
   AttributeEditor.hpp
   CaseSensitiveButton.hpp
@@ -597,6 +606,7 @@ set(viewer_moc_files
   InputEventLog.hpp
   JobStatusItemWidget.hpp
   LabelEditor.hpp
+  PermissionsEditor.hpp
   LimitEditor.hpp
   LineEdit.hpp
   LogProvider.hpp
@@ -643,6 +653,7 @@ set(viewer_moc_files
   ServerHandler.hpp
   ServerListDialog.hpp
   ServerListSyncWidget.hpp
+  ServerPermissionsDialog.hpp
   SessionAutoSave.hpp
   ServerSettingsItemWidget.hpp
   SessionDialog.hpp
@@ -724,6 +735,7 @@ set(viewer_wrap_ui_files
   HtmlItemWidget.ui
   InfoPanel.ui
   LabelEditorWidget.ui
+  PermissionsEditorWidget.ui
   LimitEditorWidget.ui
   MainWindow.ui
   MessageItemWidget.ui

@@ -40,6 +40,7 @@
     - Node
     - NodeContainer
     - PartExpression
+    - Permissions
     - Queue
     - Repeat
     - RepeatDate
@@ -89,6 +90,7 @@
     The Client-Server API provides the capability of communicating with the server.
   items:
     - Client
+    - PermissionDenied
 - common:
   title: Common API
   intro: |

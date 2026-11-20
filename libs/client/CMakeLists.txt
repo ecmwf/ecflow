@@ -88,6 +88,40 @@ ecflow_add_test(
   FORMAT
 )
 
+# The scripts generating the command reference (docs/client_api): the roles of each command, the validation of the
+# manifest, and the parity of the generated help with ecflow_client --help
+ecflow_add_test(
+  TARGET
+    py3_u_client_api_docs
+  LABELS
+    unit python nightly fast
+  TYPE PYTHON
+  ARGS
+    -m pytest ${ecflow_SOURCE_DIR}/docs/client_api/test_client_api.py -v -p no:cacheprovider
+  ENVIRONMENT
+    ECFLOW_CLIENT=$<TARGET_FILE:ecflow_client>
+  TEST_DEPENDS
+    u_base
+  CONDITION
+    ENABLE_TESTS
+)
+
+# Every user command class registered by the client is documented in command_internals.rst, mapped by build.py, and
+# round-tripped by TestRequest.cpp
+ecflow_add_test(
+  TARGET
+    py3_u_client_api_coverage
+  LABELS
+    unit python nightly fast
+  TYPE PYTHON
+  ARGS
+    -m pytest ${ecflow_SOURCE_DIR}/docs/client_api/test_command_coverage.py -v -p no:cacheprovider
+  ENVIRONMENT
+    ECFLOW_SOURCE_DIR=${ecflow_SOURCE_DIR}
+  CONDITION
+    ENABLE_TESTS
+)
+
 # ================================================================================
 # TEST (Integration) - requires server to be running
 
@@ -102,6 +136,21 @@ if (ENABLE_SERVER)
     test/TestConnectionDiagnosisAgainstServer.cpp
     test/TestCheckPtDefsCmd.cpp
     test/TestCustomUser.cpp
+    test/TestPermissionsBenchmarkHelpers.cpp
+    test/TestPermissionsAcceptance.cpp
+    test/TestPermissionsCommand.cpp
+    test/TestPermissionsTransfers.cpp
+    test/TestPermissionsAudit.cpp
+    test/TestPermissionsAuthorisation.cpp
+    test/TestPermissionsDenial.cpp
+    test/TestPermissionsNodeRoles.cpp
+    test/TestPermissionsRoles.cpp
+    test/TestPermissionsStartup.cpp
+    test/TestPermissionsStats.cpp
+    test/TestPermissionsFiltering.cpp
+    test/TestPermissionsHarness.cpp
+    test/TestPermissionsLifecycle.cpp
+    test/TestPermissionsLimits.cpp
     test/TestGroupCmd.cpp
     test/TestJobOutlivesServer.cpp
     test/TestLoadDefsCmd.cpp
@@ -112,6 +161,7 @@ if (ENABLE_SERVER)
     test/TestServerAndLifeCycle.cpp
     test/TestServerLoad.cpp
     test/TestSignalSIGTERM.cpp
+    test/TestUserNameModelAgainstServer.cpp
     test/TestWhiteListFile.cpp
   )
 endif()
@@ -196,6 +246,33 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
+    CONDITION
+      ENABLE_TESTS
+    FORMAT
+  )
+
+  #
+  # Benchmark of the Permissions attributes; the results are printed and written to permissions_benchmark.json
+  #
+  ecflow_add_test(
+    TARGET
+      p_permissions
+    LABELS
+      performance
+      manual # run on request, see the parameters in the source
+    SOURCES
+      # Sources
+      test/TestPermissionsBenchmark.cpp
+      test/TestPermissionsBenchmark_main.cpp # test entry point
+    LIBS
+      ecflow_all
+      test_scaffold
+      test_harness.base
+      test_harness.client
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     CONDITION
       ENABLE_TESTS
     FORMAT

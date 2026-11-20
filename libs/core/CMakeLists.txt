@@ -47,6 +47,7 @@ set(test_srcs
   test/TestCfgConfiguration.cpp
   test/TestCfgEnvReader.cpp
   test/TestCfgJsonReader.cpp
+  test/TestCfgJsonValue.cpp
   test/TestCfgMapper.cpp
   test/TestCfgServerCatalogue.cpp
   test/TestChrono.cpp
@@ -82,6 +83,7 @@ set(test_srcs
   test/TestStringSplitter.cpp
   test/TestTimeSeries.cpp
   test/TestTimeSlot.cpp
+  test/TestUserNameModel.cpp
   test/TestVersion.cpp
   test/TestVersioning.cpp
   test/TestWhiteListFile.cpp

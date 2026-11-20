@@ -17,6 +17,10 @@ public:
     const std::vector<std::string>& get_string_vec() const { return vec_; }
 
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override {
+        return ecf::ReplyFiltering::None;
+    } // free text, as SStringCmd
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
     void cleanup() override {

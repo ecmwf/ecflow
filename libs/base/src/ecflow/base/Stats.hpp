@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <deque>
+#include <map>
 #include <string>
 
 #include "ecflow/core/CheckPt.hpp"
@@ -45,6 +47,30 @@ struct Stats
     /// the case for a server predating the reporting of the protocol
     ///
     std::string protocol_designation() const;
+
+    ///
+    /// @brief Counts a request refused by the authorisation (R12.5).
+    ///
+    /// @param[in] command The option naming the command, e.g. "--suspend"
+    ///
+    void record_denial(const std::string& command) { ++denials_[command]; }
+
+    ///
+    /// @brief Counts a request executed, in audit-only mode, although the Permissions attributes deny it (R12.5).
+    ///
+    /// @param[in] command The option naming the command, e.g. "--suspend"
+    ///
+    void record_audited(const std::string& command) { ++audited_[command]; }
+
+    ///
+    /// @brief Counts a reply whose content is filtered for its requester, and the time taken to build it (R12.5).
+    ///
+    /// @param[in] microseconds The time taken to select the readable nodes and build the reply
+    ///
+    void record_filtered_reply(std::uint64_t microseconds) {
+        ++filtered_replies_;
+        filtering_time_us_ += microseconds;
+    }
 
     void update() { request_count_++; }
     void update_stats(int poll_interval);
@@ -147,6 +173,14 @@ struct Stats
     unsigned int stats_{0};
     unsigned int check_{0};
     unsigned int query_{0};
+
+    // Authorisation (R12.5); serialised from version 4
+    std::string authorisation_mode_;              ///< permissions, permissions (audit only), whitelist, unrestricted
+    std::map<std::string, unsigned int> denials_; ///< requests refused, per command
+    std::map<std::string, unsigned int> audited_; ///< requests executed although denied (audit only), per command
+    unsigned int filtered_replies_{0};            ///< replies whose content is filtered for their requester
+    std::uint64_t filtering_time_us_{0};          ///< time taken to build the filtered replies, in microseconds
+    unsigned int readable_sets_{0};               ///< full definitions cached, one per set of readable nodes
 
     std::unique_ptr<ecf::resources::ProcessMeter> process_meter_;
 
@@ -258,7 +292,15 @@ private:
         if (version > 2) {
             ar & ECF_SSL_CERTIFICATE_;
         }
+        if (version > 3) {
+            ar & authorisation_mode_;
+            ar & denials_;
+            ar & audited_;
+            ar & filtered_replies_;
+            ar & filtering_time_us_;
+            ar & readable_sets_;
+        }
     }
 };
 
-CEREAL_CLASS_VERSION(Stats, 3)
+CEREAL_CLASS_VERSION(Stats, 4)

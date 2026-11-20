@@ -106,6 +106,19 @@ public:
     static std::optional<std::string> description_for(const std::string& name);
 
     ///
+    /// @brief Returns the roles a command requires, rendered as shown by `--help=<command>` (D6.3).
+    ///
+    /// The text opens with a heading, then lists one line per entry of the command's
+    /// "permissions" array: its variant (when given), the roles (letters joined by "and",
+    /// or "none"), where they are checked, and its note in parentheses. User commands end
+    /// with how the roles map to the whitelist.
+    ///
+    /// @param name Exact command name, e.g. "suspend".
+    /// @return The rendered text, without a trailing newline, or std::nullopt if @p name
+    ///         is not a command (options have no roles).
+    ///
+    static std::optional<std::string> roles_for(const std::string& name);
+
     /// @brief Returns the one-line summary registered for a definition-file item.
     ///
     /// Parallel to @ref summary_for, but resolved only against @ref find_definition_item,

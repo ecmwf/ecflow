@@ -17,7 +17,11 @@ The default internal name of the password file is **ecf.passwd**, hence
 the server will by default look for the password of name
 **<host>.<port>.ecf.passwd**.
 
-The format of the file is the same for both client and server. 
+The format of the file is the same for both client and server.
+
+Every user name follows the :ref:`user name model <user_names>`. A file holding a name outside the model is rejected
+as a whole, naming the file, the line and the reason: the server does not start, or the reload fails and the previous
+content stays in force.
 
 .. warning::
 

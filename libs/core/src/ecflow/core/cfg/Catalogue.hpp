@@ -20,7 +20,8 @@ namespace ecf::cfg {
 enum class Type {
     Boolean, ///< `bool`
     Integer, ///< `std::int64_t`
-    Text     ///< `std::string`
+    Text,    ///< `std::string`
+    Json     ///< Json: a JSON array or object
 };
 
 ///
@@ -211,7 +212,9 @@ public:
     ///
     ///   - Integer: a decimal integer, optionally preceded by `-`, without spaces or other characters;
     ///   - Boolean: exactly `true` or `false`;
-    ///   - Text:    the text, unchanged.
+    ///   - Text:    the text, unchanged;
+    ///   - Json:    a JSON array or object, parsed strictly (no duplicate key, comment or trailing content) and
+    ///              held as compact JSON text (see to_compact_json()).
     ///
     /// The resulting value then passes the check of the setting.
     ///

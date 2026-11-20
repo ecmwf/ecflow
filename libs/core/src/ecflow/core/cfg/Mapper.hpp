@@ -23,14 +23,15 @@ namespace ecf::cfg {
 ///   - every other value is placed at the path naming its setting in the file (Names::ecf_cfg), e.g.
 ///     `/ecflow/server/variables/ECF_PORT` for `ecflow.server.variables@ECF_PORT`.
 ///
-/// The paths of the nodes of the tree, as JSON Pointers, are compared with the names of the settings.
+/// The paths of the nodes of the tree, as JSON Pointers, are compared with the names of the settings. The value of a
+/// Json setting, an array or an object, is held as compact JSON text (see to_compact_json()).
 ///
 /// The mapper refuses the following, naming the origin and the path in the tree:
 ///
 ///   - a missing or unsupported version;
 ///   - a member that names no setting of the catalogue, including settings without a name in the file;
-///   - a value that does not have the native type of its setting (integer, boolean, or string),
-///     or does not pass the check of its setting;
+///   - a value that does not have the native type of its setting (integer, boolean, string, or, for a Json
+///     setting, an array or an object), or does not pass the check of its setting;
 ///   - a value other than an object where the catalogue expects an object.
 ///
 class Mapper {

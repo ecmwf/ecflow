@@ -1,0 +1,17 @@
+
+The CLI command :code:`permissions` reads and changes, at run time, the
+:term:`permissions` attribute of a node, or the attribute of the server
+(the path :code:`/`).
+
+The command acts on the whole list of one attribute, at exactly one path:
+
+ - :code:`create`, :code:`update` and :code:`delete` change the attribute, and require the role :code:`p`
+ - :code:`read` prints the attribute, and :code:`effective` the roles a user holds at the path; both require the role :code:`r`
+
+.. code-block:: shell
+
+    ecflow_client --permissions create /suite alice:rwxp,bob:r
+    ecflow_client --permissions effective /suite/family bob
+
+The rules of the attribute are described in :ref:`permissions_attribute`,
+and the validation of every change in :ref:`permissions_attribute_changes`.

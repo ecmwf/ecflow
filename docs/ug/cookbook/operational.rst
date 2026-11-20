@@ -53,7 +53,9 @@ For a maintainable operational suite, we recommend to:
   "Read Output an other files from disk when possible") to get the
   best expected behaviour.
 
-* use ecf.list file to restrict access to the server for read-write or read only access
+* use ecf.list file to restrict access to the server for read-write or read only access; for access per suite,
+  family or task, use the :term:`permissions` attribute instead (see
+  :ref:`how_to_control_access_with_the_permissions_attribute`)
 
   .. code-block:: shell
 

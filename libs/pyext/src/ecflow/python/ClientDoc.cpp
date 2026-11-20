@@ -983,6 +983,121 @@ const char* ClientDoc::get_file() {
            "       print(str(e))\n";
 }
 
+const char* ClientDoc::permission_denied() {
+    return "Raised by a :py:class:`ecflow.Client` request that the server denies\n\n"
+           "The server denies a request when the user does not hold the role the request requires (see\n"
+           ":ref:`permissions_attribute_commands`), or, without Permissions attributes, when the white list file\n"
+           "does not grant the access. The message names the reason, the request and the user.\n\n"
+           "PermissionDenied derives from RuntimeError: the code catching RuntimeError catches it too.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   try:\n"
+           "       ci.suspend('/s/f')\n"
+           "   except PermissionDenied as e:\n"
+           "       print('denied:', e)  # ... Insufficient permissions (role x required at /s/f) ...\n"
+           "   except RuntimeError as e:\n"
+           "       print('failed:', e)\n";
+}
+
+const char* ClientDoc::create_permissions() {
+    return "Adds a :term:`permissions` attribute to a node on the server (ecflow_client --permissions create)\n\n"
+           "Requires the role p at the node. The change is validated as every change of Permissions\n"
+           "attributes: the entries name only users listed above the node, and the change leaves a user able to\n"
+           "change the attributes (role p) wherever one could before.\n\n"
+           "::\n\n"
+           "   None create_permissions(\n"
+           "      string path : Absolute path of the node\n"
+           "      value       : Permissions object, string in the command-line or JSON form, or list or tuple of\n"
+           "                    entries\n"
+           "   )\n\n"
+           "Exceptions:\n\n"
+           "- Raises PermissionDenied when the user does not hold the role p at the node\n"
+           "- Raises RuntimeError when the value is invalid, the node already has a Permissions attribute,\n"
+           "  the server has no server Permissions attribute, or the change is rejected\n"
+           "- Raises TypeError when the value is of another type\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   ci.create_permissions('/s', Permissions('alice:rwxp,bob:r'))\n";
+}
+
+const char* ClientDoc::get_permissions() {
+    return "Returns the :term:`permissions` attribute of a node, or of the server (ecflow_client --permissions "
+           "read)\n\n"
+           "Requires the role r at the node, or at server level for '/'.\n\n"
+           "::\n\n"
+           "   Permissions get_permissions(\n"
+           "      string path : Absolute path of the node, or '/' for the server attribute\n"
+           "   )\n\n"
+           "Exceptions:\n\n"
+           "- Raises PermissionDenied when the user does not hold the role r\n"
+           "- Raises RuntimeError when the node does not exist, or has no Permissions attribute\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   print(ci.get_permissions('/s').entries())\n";
+}
+
+const char* ClientDoc::update_permissions() {
+    return "Changes the :term:`permissions` attribute of a node, or of the server (ecflow_client --permissions "
+           "update)\n\n"
+           "Requires the role p at the node, or at server level for '/'. Entries of the nodes below that name users\n"
+           "no longer listed above them are removed.\n\n"
+           "::\n\n"
+           "   None update_permissions(\n"
+           "      string path : Absolute path of the node, or '/' for the server attribute\n"
+           "      value       : Permissions object, string in the command-line or JSON form, or list or tuple of\n"
+           "                    entries\n"
+           "   )\n\n"
+           "Exceptions:\n\n"
+           "- Raises PermissionDenied when the user does not hold the role p\n"
+           "- Raises RuntimeError when the value is invalid, the node has no Permissions attribute,\n"
+           "  or the change is rejected\n"
+           "- Raises TypeError when the value is of another type\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   ci.update_permissions('/s', 'alice:rwxp,bob:rw')\n";
+}
+
+const char* ClientDoc::delete_permissions() {
+    return "Removes the :term:`permissions` attribute of a node (ecflow_client --permissions delete)\n\n"
+           "Requires the role p at the node. The server attribute cannot be removed at run time.\n\n"
+           "::\n\n"
+           "   None delete_permissions(\n"
+           "      string path : Absolute path of the node\n"
+           "   )\n\n"
+           "Exceptions:\n\n"
+           "- Raises PermissionDenied when the user does not hold the role p at the node\n"
+           "- Raises RuntimeError when the node does not exist, has no Permissions attribute, or the change is\n"
+           "  rejected\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   ci.delete_permissions('/s/f')   # /s/f now inherits its roles from /s\n";
+}
+
+const char* ClientDoc::effective_permissions() {
+    return "Returns the roles a user holds at a node (ecflow_client --permissions effective)\n\n"
+           "Requires the role r at the node.\n\n"
+           "::\n\n"
+           "   string effective_permissions(\n"
+           "      string path : Absolute path of the node, or '/' for the server level\n"
+           "      string user : The user; by default, the user issuing the request\n"
+           "   )\n\n"
+           "Returns the letters of the roles held, e.g. 'rwx', or an empty string when the user holds none.\n\n"
+           "Exceptions:\n\n"
+           "- Raises PermissionDenied when the user issuing the request does not hold the role r at the node\n"
+           "- Raises RuntimeError when the node does not exist, or the server does not use Permissions\n"
+           "  attributes (it has no server Permissions attribute)\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   ci = Client()\n"
+           "   if 'x' in ci.effective_permissions('/s/f/t'):\n"
+           "       ci.requeue('/s/f/t')\n";
+}
+
 const char* ClientDoc::plug() {
     return "Plug command is used to move :term:`node`\\ s\n\n"
            "The destination node can be on another :term:`ecflow_server`.\n"
@@ -1145,9 +1260,17 @@ const char* ClientDoc::alter() {
            "          The new/updated value for the attribute.\n"
            "   )\n"
            "\n"
+           "The :term:`permissions` attribute is not changed by alter: use\n"
+           ":py:meth:`ecflow.Client.create_permissions`, :py:meth:`ecflow.Client.update_permissions` and\n"
+           ":py:meth:`ecflow.Client.delete_permissions`, which require the role p.\n"
+           "\n"
            "This function will raise exceptions because:\n"
            "\n"
            "- A provided path does not exist.\n"
+           "  Given a list, the paths other than ``/`` are first checked with ``check``, which raises for a\n"
+           "  missing path, so that nothing is altered. ``check`` stops at the first node whose expressions are\n"
+           "  in error, without checking the paths after it. With Permissions attributes, this check requires\n"
+           "  the role r at each of these nodes. The same applies to ``sort_attributes`` given a list.\n"
            "- A provided value cannot be parsed\n"
            "- A provided value is invalid or out of range\n"
            "\n"

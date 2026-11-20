@@ -812,7 +812,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_refused_news_leaves_log_well_formed) {
 
     const std::string accepted_news_record = "--news=0 0 0 :alice@" + host.value();
     const std::string refused_news_bob     = "Command not accepted, due to: Authorisation (user) failed, due to: "
-                                             "Insufficient permissions [--news=0 0 0 :bob@" +
+                                             "Insufficient permissions (read access required at /) [--news=0 0 0 :bob@" +
                                          host.value() + "]";
     const std::string refused_news_charlie = "Command not accepted, due to: Authentication (user) failed, due to: "
                                              "Incorrect credentials detected [--news=0 0 0 :charlie@" +

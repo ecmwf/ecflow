@@ -7,15 +7,35 @@
 
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 ZombieGetCmd::ZombieGetCmd(AbstractServer* as) {
     init(as);
 }
 
 // called in the server
-void ZombieGetCmd::init(AbstractServer* as) {
+void ZombieGetCmd::init(AbstractServer* as, const ecf::Visibility* visibility) {
     zombies_.clear();
     as->zombie_ctrl().get(zombies_);
+    if (!visibility) {
+        return;
+    }
+    const auto defs = as->defs();
+    std::vector<Zombie> readable;
+    for (const auto& zombie : zombies_) {
+        // The task, or its closest existing ancestor below the server
+        std::string path = zombie.path_to_task();
+        node_ptr node;
+        while (!path.empty() && !(node = defs->findAbsNode(path))) {
+            const auto slash = path.rfind('/');
+            path             = (slash == std::string::npos || slash == 0) ? std::string{} : path.substr(0, slash);
+        }
+        if (node && visibility->readable(*node)) {
+            readable.push_back(zombie);
+        }
+    }
+    zombies_.swap(readable);
 }
 
 bool ZombieGetCmd::equals(ServerToClientCmd* rhs) const {

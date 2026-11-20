@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
+#include <nlohmann/json.hpp>
 
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
@@ -235,6 +237,105 @@ BOOST_AUTO_TEST_CASE(is_able_to_preserve_selected_certificate_when_serialised) {
 
     BOOST_CHECK_EQUAL(restored.ECF_SSL_, saved.ECF_SSL_);
     BOOST_CHECK_EQUAL(restored.ECF_SSL_CERTIFICATE_, saved.ECF_SSL_CERTIFICATE_);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_report_authorisation) {
+    ECF_NAME_THIS_TEST();
+
+    // R12.5: the mode, the denials per command, and the cost of per-requester content
+    Stats stats;
+    stats.authorisation_mode_ = "permissions";
+    stats.record_denial("--suspend");
+    stats.record_denial("--suspend");
+    stats.record_denial("--resume");
+    stats.record_audited("--kill");
+    stats.record_filtered_reply(1500);
+    stats.record_filtered_reply(500);
+    stats.readable_sets_ = 3;
+
+    std::ostringstream os;
+    stats.show(os);
+    const std::string report = os.str();
+    BOOST_CHECK(report.find("Authorisation\n") != std::string::npos);
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Mode"), "permissions");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Denied --suspend"), "2");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Denied --resume"), "1");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Audited --kill"), "1");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Filtered replies"), "2");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Filtering time"), "2.000 (ms)");
+    BOOST_CHECK_EQUAL(extract_report_value(report, "Readable sets cached"), "3");
+
+    // Without a mode (e.g. an older server), the section is absent
+    std::ostringstream none;
+    Stats{}.show(none);
+    BOOST_CHECK(none.str().find("Authorisation\n") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_preserve_authorisation_when_serialised_and_reset) {
+    ECF_NAME_THIS_TEST();
+
+    Stats saved;
+    saved.authorisation_mode_ = "permissions (audit only)";
+    saved.record_denial("--suspend");
+    saved.record_audited("--kill");
+    saved.record_filtered_reply(42);
+    saved.readable_sets_ = 2;
+
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+    Stats restored;
+    ecf::restore_from_string(archive_data, restored);
+    BOOST_CHECK_EQUAL(restored.authorisation_mode_, saved.authorisation_mode_);
+    BOOST_CHECK(restored.denials_ == saved.denials_);
+    BOOST_CHECK(restored.audited_ == saved.audited_);
+    BOOST_CHECK_EQUAL(restored.filtered_replies_, 1U);
+    BOOST_CHECK_EQUAL(restored.filtering_time_us_, 42U);
+    BOOST_CHECK_EQUAL(restored.readable_sets_, 2U);
+
+    // A copy keeps them; a reset clears the counters, not the mode
+    Stats copy(saved);
+    BOOST_CHECK(copy.denials_ == saved.denials_);
+    BOOST_CHECK_EQUAL(copy.filtering_time_us_, 42U);
+    copy.reset();
+    BOOST_CHECK(copy.denials_.empty());
+    BOOST_CHECK(copy.audited_.empty());
+    BOOST_CHECK_EQUAL(copy.filtered_replies_, 0U);
+    BOOST_CHECK_EQUAL(copy.filtering_time_us_, 0U);
+    BOOST_CHECK_EQUAL(copy.authorisation_mode_, saved.authorisation_mode_);
+}
+
+BOOST_AUTO_TEST_CASE(is_able_to_read_statistics_of_an_older_server) {
+    ECF_NAME_THIS_TEST();
+
+    // A server predating version 4 sends version 3, without the authorisation members, which are then left empty
+    Stats saved;
+    saved.protocol_            = ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Ssl).value();
+    saved.ECF_SSL_CERTIFICATE_ = "found shared certificate: server.crt";
+    saved.authorisation_mode_  = "permissions";
+    saved.record_denial("--suspend");
+    std::string archive_data;
+    ecf::save_as_string(archive_data, saved);
+
+    auto archive = nlohmann::ordered_json::parse(archive_data);
+    auto& object = archive.begin().value();
+    BOOST_REQUIRE_EQUAL(object.at("cereal_class_version").get<int>(), 4);
+    object["cereal_class_version"] = 3;
+    for (int i = 0; i < 6; ++i) { // the six members of version 4, written last
+        auto last = object.end();
+        object.erase(std::prev(last).key());
+    }
+
+    Stats restored;
+    ecf::restore_from_string(archive.dump(), restored);
+    BOOST_CHECK_EQUAL(restored.protocol_, saved.protocol_);
+    BOOST_CHECK_EQUAL(restored.ECF_SSL_CERTIFICATE_, saved.ECF_SSL_CERTIFICATE_);
+    BOOST_CHECK(restored.authorisation_mode_.empty());
+    BOOST_CHECK(restored.denials_.empty());
+
+    // ... and its report has no Authorisation section
+    std::ostringstream os;
+    restored.show(os);
+    BOOST_CHECK(os.str().find("Authorisation\n") == std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

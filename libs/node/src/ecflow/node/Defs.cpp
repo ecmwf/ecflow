@@ -31,6 +31,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/move_peer.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
@@ -78,6 +79,12 @@ void Defs::copy_defs_state_only(const defs_ptr& server_defs) {
     server_state().set_state(server_defs->server_state().get_state());
     server_state().set_user_variables(server_defs->server_state().user_variables());
     server_state().set_server_variables(server_defs->server_state().server_variables());
+    if (const auto* permissions = server_defs->server_state().permissions(); permissions) {
+        server_state().set_permissions(*permissions);
+    }
+    else {
+        server_state().clear_permissions();
+    }
 }
 
 Defs& Defs::operator=(const Defs& rhs) {
@@ -633,24 +640,36 @@ void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
     }
 }
 
-void Defs::check_suite_can_begin(const suite_ptr& suite) const {
+void Defs::check_suite_can_begin(const suite_ptr& suite, const ecf::Visibility* visibility) const {
     NState::State suiteState = suite->state();
     if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
         int count  = 0;
+        int hidden = 0;
         auto tasks = ecf::get_all_tasks(*this);
         std::ostringstream ss;
         for (auto& task : tasks) {
             if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
-                ss << "   " << task->absNodePath() << "\n";
+                if (!visibility || visibility->readable(*task)) {
+                    ss << "   " << task->absNodePath() << "\n";
+                }
+                else {
+                    ++hidden; // a task the requester cannot read is counted, not named (R5.2)
+                }
                 count++;
             }
         }
+        if (hidden > 0) {
+            ss << "   (" << hidden << " not readable)\n";
+        }
         /// allow suite to begin even its aborted provide no tasks in active or submitted states
         if (count > 0) {
+            // A suite the requester cannot read is neither named nor described (R5.2)
+            const bool readable = !visibility || visibility->readable(*suite);
+            const std::string described =
+                readable ? suite->name() + "(computed state=" + NState::toString(suiteState) + ")" : "(not readable)";
             throw std::runtime_error(
                 MESSAGE("Begin failed as suite "
-                        << suite->name() << "(computed state=" << NState::toString(suiteState)
-                        << ") can only begin if its in UNKNOWN or COMPLETE state\n"
+                        << described << " can only begin if its in UNKNOWN or COMPLETE state\n"
                         << "Found " << count << " tasks with state 'active' or 'submitted'\n"
                         << ss.str()
                         << "Use the force argument to bypass this check, at the risk of creating zombies\n"));
@@ -1278,6 +1297,10 @@ void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
 }
 
 void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
+    write_to_string(os, p_style, nullptr);
+}
+
+void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style, const ecf::Visibility* visibility) const {
     // Set up the output, pre-allocating space based on previous runs (if available)
     os.clear();
     if (print_cache_ > 0) {
@@ -1287,7 +1310,8 @@ void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
         os.reserve(4096);
     }
 
-    auto ctx = ecf::FormatContext::make_for(p_style);
+    auto ctx       = ecf::FormatContext::make_for(p_style);
+    ctx.visibility = visibility;
     ecf::write_t(os, *this, ctx);
 
     // Store the size of the output, for future use
@@ -1601,7 +1625,7 @@ std::string Defs::toString() const {
 // Memento functions
 void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_changes) const {
     // Collate any small scale changes to the defs
-    collate_defs_changes_only(incremental_changes);
+    collate_defs_changes_only(client_handle, incremental_changes);
 
     if (0 == client_handle) {
         // small scale changes. Collate changes over all suites.
@@ -1613,7 +1637,9 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
             //   *IF* node/attribute change no > client_state_change_no
             //   *THEN*
             //       Create a memento, and store in incremental_changes_
-            s->collateChanges(incremental_changes);
+            if (!incremental_changes.hides(*s)) {
+                s->collateChanges(incremental_changes);
+            }
         }
     }
     else {
@@ -1627,15 +1653,31 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
     }
 }
 
-void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
+void Defs::collate_defs_changes_only(unsigned int client_handle, DefsDelta& incremental_changes) const {
     // ************************************************************************************************
     // determine if defs state changed. make sure this is in sync with defs_only_max_state_change_no()
     // ************************************************************************************************
 
     compound_memento_ptr comp;
 
-    // Create StateMemento to signal a change in state change of the Defs
-    if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
+    // Create StateMemento to signal a change in state change of the Defs; for a requester who cannot read every node,
+    // the state is aggregated from the readable suites it receives (those of its handle, if any), and is sent
+    // whenever one of them changed, since its aggregate can change while the state of the Defs does not
+    if (const auto* visibility = incremental_changes.visibility(); visibility) {
+        const auto received = client_handle == 0 ? suiteVec_ : client_suite_mgr_.loaded_suites(client_handle);
+        bool changed        = state_.state_change_no() > incremental_changes.client_state_change_no();
+        for (const auto& s : received) {
+            changed = changed || (!incremental_changes.hides(*s) &&
+                                  s->state_change_no() > incremental_changes.client_state_change_no());
+        }
+        if (changed) {
+            if (!comp.get()) {
+                comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
+            }
+            comp->add(std::make_shared<StateMemento>(visibility->root_state(*this, received)));
+        }
+    }
+    else if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
@@ -1647,10 +1689,16 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
+        // The order names the suites the requester can read only
         std::vector<std::string> order;
-        order.reserve(suiteVec_.size());
-        for (const auto& i : suiteVec_) {
-            order.push_back(i->name());
+        if (const auto* visibility = incremental_changes.visibility(); visibility) {
+            order = visibility->names(suiteVec_);
+        }
+        else {
+            order.reserve(suiteVec_.size());
+            for (const auto& i : suiteVec_) {
+                order.push_back(i->name());
+            }
         }
         comp->add(std::make_shared<OrderMemento>(order));
     }
@@ -1683,6 +1731,10 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     if (comp.get()) {
         incremental_changes.add(comp);
     }
+}
+
+void Defs::server_modified() {
+    server_modify_change_no_ = Ecf::incr_modify_change_no();
 }
 
 unsigned int Defs::defs_only_max_state_change_no() const {

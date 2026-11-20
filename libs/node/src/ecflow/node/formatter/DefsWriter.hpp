@@ -9,6 +9,7 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
@@ -20,6 +21,7 @@
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/Visibility.hpp"
 #include "ecflow/node/formatter/Format.hpp"
 
 namespace ecf {
@@ -75,6 +77,22 @@ struct FormatContext
 {
     Style style;
     Format format;
+
+    ///
+    /// @brief The nodes to write, when only some are: a node the visibility rejects is skipped with its subtree.
+    ///
+    /// The node written first (e.g. the node of a request) is written whatever the visibility; only the nodes below
+    /// it, and the suites of definitions, are checked. Every node is written when there is no visibility.
+    ///
+    const Visibility* visibility = nullptr;
+
+    ///
+    /// @brief Returns whether a node met below a node written is to be written.
+    ///
+    /// @param[in] node The node, whose parent (or whose definitions, for a suite) is written
+    /// @return True when there is no visibility, or the visibility does not stop at the node.
+    ///
+    [[nodiscard]] bool writes(const Node& node) const { return visibility == nullptr || !visibility->stops_at(node); }
 
     static FormatContext make_for(PrintStyle::Type_t style) {
         switch (style) {
@@ -980,6 +998,18 @@ struct Writer<AutoArchiveAttr, Stream>
     }
 
     static void writeln(Stream& output, const AutoArchiveAttr& item) { item.write(output.buf); }
+};
+
+template <typename Stream>
+struct Writer<Permissions, Stream>
+{
+    static void write(Stream& output, const Permissions& item, FormatContext& ctx) {
+        Indent l1(ctx);
+        output << l1;
+        output << "permissions ";
+        output << item.to_json();
+        output << "\n";
+    }
 };
 
 template <typename Stream>
@@ -1923,11 +1953,15 @@ struct Writer<Task, Stream>
         // Although Aliases are not printed, they can part of _checkpoint_ files.
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             Indent l2(ctx);
+            bool written = false;
             for (auto alias : item.aliases()) {
-                Writer<Alias, Stream>::write(output, *alias, ctx);
+                if (ctx.writes(*alias)) {
+                    Writer<Alias, Stream>::write(output, *alias, ctx);
+                    written = true;
+                }
             }
             Indent l3(ctx);
-            if (!item.aliases().empty()) {
+            if (written) {
                 l3.write(output);
                 output << "endalias";
                 output << "\n";
@@ -2096,6 +2130,9 @@ struct Writer<Node, Stream>
         if (auto a = item.get_autorestore(); a) {
             Writer<AutoRestoreAttr, Stream>::write(output, *a, ctx);
         }
+        if (auto a = item.permissions(); a) {
+            Writer<Permissions, Stream>::write(output, *a, ctx);
+        }
 
         if (auto a = item.get_misc_attrs(); a) {
             for (const auto& zombie : a->zombies()) {
@@ -2121,6 +2158,9 @@ struct Writer<NodeContainer, Stream>
         // taken from NodeContainer::print(std::string& os) const
 
         for (const auto& node : item.children()) {
+            if (!ctx.writes(*node)) {
+                continue;
+            }
 
             // Note: here we must use dynamic_cast to determine the type of the node
             // This is because we are using a templated Writer, and we need to call the correct
@@ -2230,7 +2270,9 @@ struct Writer<Defs, Stream>
 
         // Write the children (i.e. suites)
         for (const auto& s : item.suites()) {
-            Writer<Suite, Stream>::write(output, *s, ctx);
+            if (ctx.writes(*s)) {
+                Writer<Suite, Stream>::write(output, *s, ctx);
+            }
         }
 
         // Write footer
@@ -2250,9 +2292,11 @@ private:
         output << "defs_state ";
         output << PrintStyle::to_string(ctx.style.selected());
 
-        if (item.state() != NState::UNKNOWN) {
+        // The state of the root, aggregated from the suites the requester can read
+        if (const auto state = ctx.visibility ? ctx.visibility->root_state(item, item.suites()) : item.state();
+            state != NState::UNKNOWN) {
             output << " state>:";
-            output << NState::toString(item.state());
+            output << NState::toString(state);
         } // make <state> is unique
         if (auto flag = item.get_flag(); flag.flag() != 0) {
             output << " flag:";
@@ -2286,6 +2330,11 @@ private:
         for (const auto& variable : item.server_state().server_variables()) {
             using writer_t = Writer<Variable, Stream>;
             writer_t::write(output, variable, ctx, writer_t::empty, writer_t::server_variable_suffix);
+        }
+
+        // Write the server Permissions attribute; read back by PermissionsParser at the top level of a state file
+        if (const auto* permissions = item.server_state().permissions(); permissions) {
+            Writer<Permissions, Stream>::write(output, *permissions, ctx);
         }
 
         // READ by Defs::read_history()

@@ -7,6 +7,7 @@ set(test_srcs
   # Sources
   test/TestAdd.cpp
   test/TestAlias.cpp
+  test/TestArchivedNodes.cpp
   test/TestAssignmentOperator.cpp
   test/TestAvisoAttr.cpp
   test/TestChangeMgrSingleton.cpp
@@ -14,6 +15,7 @@ set(test_srcs
   test/TestCopyConstructor.cpp
   test/TestDefStatus.cpp
   test/TestDefs.cpp
+  test/TestEffectivePermissions.cpp
   test/TestEcfFile.cpp
   test/TestEcfFileLocator.cpp
   test/TestEnviromentSubstitution.cpp
@@ -42,6 +44,10 @@ set(test_srcs
   test/TestNode_main.cpp # test entry point
   test/TestOperations.cpp
   test/TestOrder.cpp
+  test/TestPermissionsAttr.cpp
+  test/TestPermissionsChange.cpp
+  test/TestPermissionsRestore.cpp
+  test/TestServerPermissions.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp
@@ -57,6 +63,7 @@ set(test_srcs
   test/TestVariableInheritance.cpp
   test/TestVariableSubstitution.cpp
   test/TestVariableSubstitutionDefs.cpp
+  test/TestVisibility.cpp
   test/TestZombies.cpp
 )
 

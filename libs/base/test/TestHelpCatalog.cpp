@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 // SPDX-License-Identifier: Apache-2.0
 
+#include <regex>
+#include <string>
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/HelpCatalog.hpp"
@@ -20,7 +23,7 @@ BOOST_AUTO_TEST_CASE(test_manifest_parses_and_has_expected_top_level_shape) {
     const nlohmann::json& manifest = ecf::HelpCatalog::manifest();
 
     BOOST_REQUIRE(manifest.is_object());
-    BOOST_CHECK_EQUAL(manifest.at("schema_version").get<int>(), 1);
+    BOOST_CHECK_EQUAL(manifest.at("schema_version").get<int>(), 2);
     BOOST_CHECK(manifest.at("topics").is_array());
     BOOST_CHECK(manifest.at("commands").is_array());
     BOOST_CHECK(manifest.at("options").is_array());
@@ -202,6 +205,66 @@ BOOST_AUTO_TEST_CASE(test_description_for_joins_lines_with_newline) {
 
     // A blank line between paragraphs is stored as an empty element and reappears as "\n\n".
     BOOST_CHECK(actual->find("\n\n") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_every_command_documents_its_roles) {
+    ECF_NAME_THIS_TEST();
+
+    // D6.3: every command, and every variant listed, states the roles it requires
+    const std::regex roles{"none|[rwxlop]+"};
+    for (const auto& command : ecf::HelpCatalog::manifest().at("commands")) {
+        const auto name = command.at("name").get<std::string>();
+        BOOST_TEST_CONTEXT("command " << name) {
+            BOOST_REQUIRE(command.contains("permissions"));
+            const auto& entries = command.at("permissions");
+            BOOST_REQUIRE(entries.is_array());
+            BOOST_CHECK(!entries.empty());
+            for (const auto& entry : entries) {
+                const auto value = entry.at("roles").get<std::string>();
+                BOOST_CHECK(std::regex_match(value, roles));
+                const auto at = entry.at("at").get<std::string>();
+                BOOST_CHECK(at == "server" || at == "node" || at == "none");
+                BOOST_CHECK_EQUAL(value == "none", at == "none");
+            }
+            if (command.at("kind") == "task") {
+                BOOST_CHECK_EQUAL(entries.size(), 1U);
+                BOOST_CHECK_EQUAL(entries.front().at("roles").get<std::string>(), "none");
+            }
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_roles_for_renders_the_roles_of_a_command) {
+    ECF_NAME_THIS_TEST();
+
+    std::optional<std::string> suspend = ecf::HelpCatalog::roles_for("suspend");
+    BOOST_REQUIRE(suspend.has_value());
+    BOOST_CHECK_EQUAL(*suspend,
+                      "Roles required, when the server uses Permissions attributes:\n"
+                      "\n"
+                      "    x at each node addressed\n"
+                      "\n"
+                      "In whitelist mode, r requires read access, and the other roles write access.");
+
+    std::optional<std::string> log = ecf::HelpCatalog::roles_for("log");
+    BOOST_REQUIRE(log.has_value());
+    BOOST_CHECK(log->find("    get, path: r at the server\n") != std::string::npos);
+    BOOST_CHECK(log->find("    clear, flush, new: l at the server\n") != std::string::npos);
+
+    std::optional<std::string> restore = ecf::HelpCatalog::roles_for("restore");
+    BOOST_REQUIRE(restore.has_value());
+    BOOST_CHECK(restore->find("    w and p at each node addressed") != std::string::npos);
+
+    std::optional<std::string> abort = ecf::HelpCatalog::roles_for("abort");
+    BOOST_REQUIRE(abort.has_value());
+    BOOST_CHECK_EQUAL(*abort,
+                      "Roles required, when the server uses Permissions attributes:\n"
+                      "\n"
+                      "    none (task requests are never subject to the authorisation of users)");
+
+    // Options are not commands: they have no roles
+    BOOST_CHECK(!ecf::HelpCatalog::roles_for("host").has_value());
+    BOOST_CHECK(!ecf::HelpCatalog::roles_for("no-such-command").has_value());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

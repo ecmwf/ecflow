@@ -40,7 +40,7 @@ public:
     time_duration_t timeout() const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     const char* theArg() const override;
     void addOption(boost::program_options::options_description& desc) const override;
@@ -58,6 +58,9 @@ private:
     void do_log(AbstractServer*) const override;
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+
+    // Reports a synchronisation reply to the server, which tests observe (see AbstractServer::sync_reply_built)
+    STC_Cmd_ptr observed(STC_Cmd_ptr reply, AbstractServer* as) const;
 
     Api api_{SYNC};
     mutable int client_handle_{0};

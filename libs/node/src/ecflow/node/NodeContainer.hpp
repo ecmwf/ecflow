@@ -93,6 +93,16 @@ public:
 
     NState::State computedState(Node::TraverseType) const override;
 
+    ///
+    /// @brief Keeps, in a detached copy, only the children marked, recording no change.
+    ///
+    /// For copies of nodes sent to a client without the nodes it cannot read; never for the nodes of a server.
+    ///
+    /// @param[in] keep One flag per child, in the order of the children
+    /// @throws std::logic_error when the number of flags differs from the number of children.
+    ///
+    void retain_children_of_copy(const std::vector<bool>& keep);
+
     node_ptr removeChild(Node* child) override;
     bool addChild(const node_ptr& child, size_t position = std::numeric_limits<std::size_t>::max()) override;
     bool isAddChildOk(Node* child, std::string& errorMsg) const override;
@@ -107,7 +117,33 @@ public:
 
     bool has_archive() const override;
     void archive();
-    void restore();
+
+    ///
+    /// @brief Identifies what triggers the restore of an archived container, for the Permissions attributes it brings.
+    ///
+    enum class RestoreTrigger {
+        Requested, ///< An explicit restore (--restore, a plug among siblings): the restoration policy applies (D3.5,
+                   ///< D3.6)
+        Automatic, ///< Autorestore, or a restore during begin or requeue: the restoration policy applies (D3.5, D3.6)
+        Transfer   ///< The source of a plug under another parent, already validated where it goes: restored as archived
+    };
+
+    ///
+    /// @brief Restores the children of an archived container from its archive file.
+    ///
+    /// @param[in] remove_archive When true (the default), the archive file is removed and the restore is logged;
+    ///            when false, the archive file and the log are left untouched, e.g. to restore a copy of the container
+    ///            while the archive must remain for the original
+    /// @param[in] trigger What triggers the restore; an explicit and an automatic restore differ only for the
+    ///            Permissions attributes restored on a server without a server attribute (D3.6)
+    /// @throws std::runtime_error when the container is not archived, has children, or the archive cannot be read;
+    ///         and for an explicit restore of Permissions attributes on a server without a server attribute.
+    ///
+    /// The restoration policy of Permissions attributes (ecf::PermissionsChange::prepare_restore() and
+    /// complete_restore()) applies to explicit and automatic restores of the definitions; a transfer, and a copy
+    /// outside any definitions, are restored as archived.
+    ///
+    void restore(bool remove_archive = true, RestoreTrigger trigger = RestoreTrigger::Requested);
     void remove_archived_files();     // used in delete
     std::string archive_path() const; // can throw if ECF_HOME not defined
 

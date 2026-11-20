@@ -3,19 +3,13 @@
 
 #include "ecflow/server/AuthorisationService.hpp"
 
+#include <variant>
+
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
-#include "ecflow/node/NodePathAlgorithms.hpp"
 
 namespace ecf {
-
-///
-/// NodeRules represent permissions derived from the nodes themselves (based on ECF_PERMISSIONS permissions)
-///
-struct NodeRules
-{
-};
 
 ///
 /// WhiteListRules represent permissions define by a white list file
@@ -38,12 +32,10 @@ struct AuthorisationService::Impl
 {
     Impl()
         : permissions_(Unrestricted{}) {}
-    explicit Impl(NodeRules&& rules)
-        : permissions_(std::move(rules)) {}
     explicit Impl(WhiteListRules&& rules)
         : permissions_(std::move(rules)) {}
 
-    std::variant<Unrestricted, NodeRules, WhiteListRules> permissions_;
+    std::variant<Unrestricted, WhiteListRules> permissions_;
 };
 
 AuthorisationService::AuthorisationService() = default;
@@ -67,6 +59,10 @@ AuthorisationService& AuthorisationService::operator=(AuthorisationService&& rhs
 
 bool AuthorisationService::good() const {
     return impl_ != nullptr;
+}
+
+bool AuthorisationService::uses_whitelist() const {
+    return impl_ != nullptr && std::holds_alternative<WhiteListRules>(impl_->permissions_);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
@@ -109,51 +105,14 @@ bool AuthorisationService::allows(const Identity& identity,
                             else {
                                 allowed = false;
                             }
-                        },
-                        [&server, &identity, &paths, &allowed](const NodeRules& rules) {
-                            for (auto&& path : paths) {
-
-                                struct Visitor
-                                {
-                                    void handle(const Defs& defs) {
-                                        auto p      = defs.server_state().permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-                                    void handle(const Node& s) {
-                                        auto p      = s.permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-
-                                    void not_found() { permissions = Permissions::make_empty(); }
-
-                                    Permissions permissions = Permissions::make_empty();
-                                };
-
-                                auto d = server.defs();
-                                auto p = Path::make(path).value();
-                                auto v = Visitor{};
-
-                                ecf::visit(*d, p, v);
-
-                                if (v.permissions.is_empty()) {
-                                    allowed = true;
-                                }
-                                else if (v.permissions.allows(identity.username().value())) {
-                                    allowed = true;
-                                }
-                                else {
-                                    allowed = false;
-                                    break;
-                                }
-                            }
                         }},
                impl_->permissions_);
 
     return allowed;
 }
 
-AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
-    return result_t::success(AuthorisationService(std::make_unique<Impl>(NodeRules{})));
+AuthorisationService::result_t AuthorisationService::make_unrestricted() {
+    return result_t::success(AuthorisationService(std::make_unique<Impl>()));
 }
 
 AuthorisationService::result_t AuthorisationService::load_permissions_from_whitelist(const WhiteListFile& whitelist) {

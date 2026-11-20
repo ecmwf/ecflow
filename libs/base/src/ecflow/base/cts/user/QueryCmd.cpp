@@ -11,6 +11,7 @@
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/HelpCatalog.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -19,6 +20,7 @@
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Visibility.hpp"
 
 using namespace ecf;
 
@@ -71,8 +73,8 @@ ecf::authentication_t QueryCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t QueryCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {
@@ -209,6 +211,15 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
                                          << " is only valid with query type 'variable', but found: " << query_type_));
     }
 
+    // A node the requester cannot read is never queried; the authorisation already refuses a read lacking r, in every
+    // mode (audit-only included), and this check guards the reply itself
+    if (const auto path = ecf::implementation::node_path_of(path_to_attribute_); path != "/") {
+        const auto visibility = request_context().visibility();
+        if (const auto node = defs->findAbsNode(path); node && visibility->applies() && !visibility->readable(*node)) {
+            throw std::runtime_error("The node " + path + " is not readable");
+        }
+    }
+
     if (query_type_ == "state") {
         return doHandleQueryForState(defs);
     }
@@ -257,7 +268,9 @@ node_ptr QueryCmd::find_node_for_query(Defs* defs) const {
 
 STC_Cmd_ptr QueryCmd::doHandleQueryForState(Defs* defs) const {
     if (path_to_attribute_ == "/") {
-        return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
+        // The state of the root, aggregated from the suites the requester can read
+        const auto visibility = request_context().visibility();
+        return PreAllocatedReply::string_cmd(NState::toString(visibility->root_state(*defs, defs->suites())));
     }
     node_ptr node = find_node(defs, path_to_attribute_);
     return PreAllocatedReply::string_cmd(NState::toString(node->state()));

@@ -1,0 +1,13 @@
+# Each user named by the attribute of a suite must be listed by the server attribute when the definition is loaded
+suite team_a
+  permissions [{"user": "alice", "permissions": "rwxops"}, {"user": "bob", "permissions": "r"}, {"user": "carol", "permissions": "rx"}]
+  family f
+    permissions [{"user":"carol","permissions":"rx"}]   # carol may read and run
+    task t
+  endfamily
+  family g
+    permissions [{"user": "alice", "permissions": "rwxp"}, {"user": "bob", "permissions": "rs"}]
+    task t
+      permissions [{"user": "alice", "permissions": "rx"}]
+  endfamily
+endsuite

@@ -70,6 +70,21 @@ public:
     const ecf::ConnectionDiagnosis& connection_diagnosis() const { return diagnosis_; }
 
     ///
+    /// @brief Returns the failure class of the most recent request, and forgets it.
+    ///
+    /// A caller that classifies each error it catches reads the class once, so that an error raised later without a
+    /// request (e.g. an invalid argument, refused before anything is sent) is not given the class of an earlier
+    /// request.
+    ///
+    /// @return The failure class; ConnectionFailure::None when there is none, or when it was already taken.
+    ///
+    ecf::ConnectionFailure take_connection_failure() const {
+        const auto failure = diagnosis_.failure;
+        diagnosis_.failure = ecf::ConnectionFailure::None;
+        return failure;
+    }
+
+    ///
     /// @brief Determines which protocol the configured server endpoint appears to speak, and
     ///        records the outcome in the diagnosis of the most recent request.
     ///
@@ -442,6 +457,23 @@ public:
     int file(const std::string& absNodePath, const std::string& fileType, const std::string& max_lines = "10000") const;
 
     int plug(const std::string& sourcePath, const std::string& destPath) const;
+
+    ///
+    /// @brief Reads or changes the Permissions attribute of a node, or of the server (--permissions).
+    ///
+    /// @param[in] operation One of create, read, update, delete or effective
+    /// @param[in] path The path of a node, or "/" for the server
+    /// @param[in] value The attribute for create and update (command-line or JSON form), the user for effective
+    ///            (the requester when empty); empty for read and delete
+    /// @param[in] json When true, read and effective return the JSON form instead of the command-line form
+    /// @return 0 on success, the value returned by read and effective being available via get_string(); 1 on failure,
+    ///         when the client does not throw on error (see set_throw_on_error()).
+    /// @throws ecf::PermissionDenied when the server refuses the request by its authorisation, and the client throws
+    ///         on error.
+    /// @throws std::runtime_error for any other failure, the invalid arguments included, when the client throws on
+    ///         error.
+    ///
+    int permissions(const std::string& operation, const std::string& path, const std::string& value, bool json);
 
     ///
     /// @brief Queries an attribute (state, event, meter, variable, trigger expression, ...) on the server.

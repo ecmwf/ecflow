@@ -48,6 +48,13 @@ public:
     /// Get the underlying socket. Used for making a connection or for accepting
     /// an incoming connection.
     ssl_socket::lowest_layer_type& socket_ll() { return socket_.lowest_layer(); }
+
+    ///
+    /// @brief Sets the largest in-bound data accepted; larger data is refused, unread, with a message_size error.
+    ///
+    /// @param[in] bytes The limit, in bytes; 0 for no limit (the default)
+    ///
+    void set_max_inbound_size(std::size_t bytes) { max_inbound_size_ = bytes; }
     ssl_socket& socket() { return socket_; }
 
     /// Asynchronously write a data structure to the socket.
@@ -155,6 +162,16 @@ private:
                 return;
             }
 
+            // A request larger than the limit of the server is refused, unread (R11.10)
+            if (max_inbound_size_ > 0 && inbound_data_size > max_inbound_size_) {
+                std::string err = "ssl_connection::handle_read_header: the request of " +
+                                  std::to_string(inbound_data_size) + " bytes exceeds the limit of " +
+                                  std::to_string(max_inbound_size_) + " bytes (/ecflow/server/limits/request_size)";
+                log_error(err.c_str());
+                handler(boost::asio::error::message_size);
+                return;
+            }
+
             // Start an asynchronous call to receive the data.
             inbound_data_.resize(inbound_data_size);
             boost::asio::async_read(
@@ -210,6 +227,7 @@ private:
     enum { header_length = 8 };                      /// The size of a fixed length header.
     std::array<char, header_length> inbound_header_; /// Holds an in-bound header.
     std::vector<char> inbound_data_;                 /// Holds the in-bound data.
+    std::size_t max_inbound_size_{0};                /// The largest in-bound data accepted, in bytes; 0 for no limit.
 };
 
 using ssl_connection_ptr = std::shared_ptr<ssl_connection>;

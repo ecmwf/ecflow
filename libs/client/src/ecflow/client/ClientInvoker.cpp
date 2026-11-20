@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/Client.hpp"
+#include "ecflow/base/PermissionDenied.hpp"
 #include "ecflow/base/ServerProtocolProbe.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
@@ -35,16 +36,20 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/cts/user/RunNodeCmd.hpp"
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
 #include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/Identity.hpp"
+#include "ecflow/core/User.hpp"
 
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
@@ -340,12 +345,20 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
 
     int res = do_invoke_cmd(cts_cmd);
 
+    // A denial is a failure of its own kind
+    if (res == 1 && server_reply_.permission_denied()) {
+        diagnosis_.failure = ecf::ConnectionFailure::PermissionDenied;
+    }
+
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
     // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
+        if (server_reply_.permission_denied()) {
+            throw ecf::PermissionDenied(server_reply_.error_msg());
+        }
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;
@@ -374,12 +387,20 @@ int ClientInvoker::invoke(const Cmd_ptr& cts_cmd) const {
 
     int res = do_invoke_cmd(cts_cmd);
 
+    // A denial is a failure of its own kind
+    if (res == 1 && server_reply_.permission_denied()) {
+        diagnosis_.failure = ecf::ConnectionFailure::PermissionDenied;
+    }
+
     // Every request converges here, including the paths that give up before a reply is handled.
     // Mirroring the diagnosis onto the reply keeps the two views identical, so that a caller
     // handed only the reply -- the ecFlow UI, for one -- sees the same failure as the invoker.
     server_reply_.set_diagnosis(diagnosis_);
 
     if (res == 1 && on_error_throw_exception_) {
+        if (server_reply_.permission_denied()) {
+            throw ecf::PermissionDenied(server_reply_.error_msg());
+        }
         throw std::runtime_error(server_reply_.error_msg());
     }
     return res;
@@ -417,6 +438,20 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                   // contact server
     }
     assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
+
+    // The user name of a request follows the user name model (D2.23); an invalid name is refused before anything is
+    // sent. The name is the one given (ECF_USER, --user, set_user_name()), else the login name
+    if (dynamic_cast<const UserCmd*>(cts_cmd.get()) != nullptr) {
+        const auto& given = clientEnv_.get_user_name();
+        const auto name   = given.empty() ? ecf::get_login_name() : given;
+        if (std::string error; !ecf::is_valid_user_name(name, error)) {
+            // The outcome of a previous request does not carry over to this one, which is never sent
+            server_reply_.clear_for_invoke(cli());
+            diagnosis_.clear();
+            server_reply_.set_error_msg(failed_request_prefix(*cts_cmd) + "invalid " + error);
+            return 1;
+        }
+    }
 
     // Add support for AUTO sync(using the group command), used by GUI and python *ONLY*
     // only add to group those commands that actually update the defs
@@ -1612,6 +1647,30 @@ int ClientInvoker::query(const std::string& query_type,
     }
     return invoke(
         std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path(), evaluate));
+}
+
+int ClientInvoker::permissions(const std::string& operation,
+                               const std::string& path,
+                               const std::string& value,
+                               bool json) {
+    if (testInterface_) {
+        return invoke(CtsApi::permissions(operation, path, value, json));
+    }
+    try {
+        server_reply_.clear_for_invoke(cli()); // no state of an earlier request remains
+        diagnosis_.clear();
+        server_reply_.set_diagnosis(diagnosis_);
+        PermissionsCmd::check_arguments(operation, path, value);
+    }
+    catch (const std::exception& e) {
+        server_reply_.set_error_msg(e.what());
+        if (on_error_throw_exception_) {
+            throw std::runtime_error(e.what());
+        }
+        return 1;
+    }
+    return invoke(std::make_shared<PermissionsCmd>(
+        operation, path, value, json ? PermissionsCmd::Format::Json : PermissionsCmd::Format::Cli));
 }
 
 // ======================================================================================================

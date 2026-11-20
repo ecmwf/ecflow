@@ -74,6 +74,11 @@ There are further options in the **Refresh** menu, allowing you to
 **refresh** or **reset** all servers in the current tab or just the
 currently selected server.
 
+On a server using :ref:`Permissions attributes <permissions_attribute>`, the server can refuse the refresh itself,
+when the user no longer holds the role ``r`` at server level. The server is then shown as lost, with the reason,
+and its tree is cleared; ecFlowUI synchronises in full once access returns (see
+:ref:`viewing_and_editing_permissions`).
+
 .. image:: /_static/ecflow_ui/communication_with_ecflow_servers/image2.png
    :width: 4.64569in
    :height: 1.2211in

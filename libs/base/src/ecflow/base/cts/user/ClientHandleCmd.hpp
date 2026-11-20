@@ -39,6 +39,20 @@ public:
     Api api() const { return api_; }
     const std::string& drop_user() const { return drop_user_; }
 
+    ///
+    /// @brief Returns the handle the command addresses (DROP, ADD, REMOVE, AUTO_ADD), or 0.
+    ///
+    /// @return The handle.
+    ///
+    int client_handle() const { return client_handle_; }
+
+    ///
+    /// @brief Returns the names of the suites the command registers or adds (REGISTER, ADD, REMOVE), or none.
+    ///
+    /// @return The suite names, as given.
+    ///
+    const std::vector<std::string>& suites() const { return suites_; }
+
     bool cmd_updates_defs() const override;
     using UserCmd::print;
     void print(std::string&) const override;
@@ -46,7 +60,7 @@ public:
     bool equals(ClientToServerCmd*) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     const char* theArg() const override;
     void addOption(boost::program_options::options_description& desc) const override;

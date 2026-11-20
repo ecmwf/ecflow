@@ -45,6 +45,7 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    how_to_use_ecFlow_with_http
    how_to_setup_ecFlow_with_https_authentication
    how_to_log_the_commands_spawned_by_the_server
+   how_to_control_access_with_the_permissions_attribute
 
 **Experimental Recipes**
 

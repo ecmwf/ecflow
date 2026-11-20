@@ -59,6 +59,48 @@ public:
     static const char* ch_auto_add();
     static const char* get_file();
     static const char* plug();
+
+    ///
+    /// @brief Returns the docstring of the exception PermissionDenied, raised by a request the server denies.
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* permission_denied();
+
+    ///
+    /// @brief Returns the docstring of Client.create_permissions (--permissions create).
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* create_permissions();
+
+    ///
+    /// @brief Returns the docstring of Client.get_permissions (--permissions read).
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* get_permissions();
+
+    ///
+    /// @brief Returns the docstring of Client.update_permissions (--permissions update).
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* update_permissions();
+
+    ///
+    /// @brief Returns the docstring of Client.delete_permissions (--permissions delete).
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* delete_permissions();
+
+    ///
+    /// @brief Returns the docstring of Client.effective_permissions (--permissions effective).
+    ///
+    /// @return The docstring, a static string.
+    ///
+    static const char* effective_permissions();
     static const char* query();
     static const char* alter();
     static const char* force_state();

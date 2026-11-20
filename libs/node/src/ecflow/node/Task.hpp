@@ -42,6 +42,16 @@ public:
 
     /// return list of aliases held by this task
     const std::vector<alias_ptr>& aliases() const { return aliases_; }
+
+    ///
+    /// @brief Keeps, in a detached copy, only the aliases marked, recording no change.
+    ///
+    /// For copies of tasks sent to a client without the aliases it cannot read; never for the nodes of a server.
+    ///
+    /// @param[in] keep One flag per alias, in the order of the aliases
+    /// @throws std::logic_error when the number of flags differs from the number of aliases.
+    ///
+    void retain_aliases_of_copy(const std::vector<bool>& keep);
     void immediateChildren(std::vector<node_ptr>&) const override;
 
     /// Overidden from Submittable

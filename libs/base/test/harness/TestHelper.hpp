@@ -46,6 +46,21 @@ public:
         return std::string();
     }
 
+    ///
+    /// @brief Handles a request issued by the given user, returning the reply.
+    ///
+    /// @param[in] server The server handling the request
+    /// @param[in] theCmd The command, a user command
+    /// @param[in] user The user issuing the request, without a password
+    /// @return The reply, which may report an error.
+    ///
+    static STC_Cmd_ptr invokeRequestAs(AbstractServer* server, Cmd_ptr theCmd, const std::string& user) {
+        theCmd->setup_user_authentification(user, "");
+        ClientToServerRequest cmd_request;
+        cmd_request.set_cmd(theCmd);
+        return cmd_request.handleRequest(server);
+    }
+
     static std::string invokeRequest(AbstractServer* server, Cmd_ptr theCmd, bool check_change_numbers = true) {
 
         // Check that state change happens

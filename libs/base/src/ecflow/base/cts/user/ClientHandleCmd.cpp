@@ -13,6 +13,7 @@
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
@@ -113,8 +114,8 @@ ecf::authentication_t ClientHandleCmd::authenticate(AbstractServer& server) cons
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t ClientHandleCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t ClientHandleCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 const char* ClientHandleCmd::theArg() const {
@@ -162,8 +163,29 @@ bool ClientHandleCmd::cmd_updates_defs() const {
 STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().ch_cmd_++;
 
+    // The requester, as authenticated, owns the handles it creates, and drops its own handles (D10.7); the user named
+    // in the request is used only when no identity was established
+    const auto& requester = identity().username().value().empty() ? user() : identity().username().value();
+
     switch (api_) {
         case ClientHandleCmd::REGISTER: {
+
+            // The number of handles of each user is limited (R11.10); a handle replaced is not a new one
+            if (const auto limit = as->limits().handles_per_user; limit > 0) {
+                std::size_t held = 0;
+                for (const auto& handle : as->defs()->client_suite_mgr().clientSuites()) {
+                    if (handle.user() == requester && static_cast<int>(handle.handle()) != client_handle_) {
+                        ++held;
+                    }
+                }
+                if (held >= limit) {
+                    throw std::runtime_error("ClientHandleCmd: " + requester + " already holds " +
+                                             std::to_string(held) + " client handles, the limit of " +
+                                             std::to_string(limit) +
+                                             " client handles per user of the server "
+                                             "(/ecflow/server/limits/handles_per_user)");
+                }
+            }
 
             // If existing handle is non zero drop it first
             if (client_handle_ != 0) {
@@ -171,7 +193,7 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
             }
 
             unsigned int client_handle =
-                as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_, suites_, user());
+                as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_, suites_, requester);
             // #ifdef DEBUG
             //  	   LOG(Log::DBG,as->defs()->client_suite_mgr().dump_max_change_no());
             // #endif
@@ -201,15 +223,19 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         case ClientHandleCmd::DROP_USER: {
+            // A user named as the argument follows the user name model (R2.8)
+            if (std::string error; !drop_user_.empty() && !ecf::is_valid_user_name(drop_user_, error)) {
+                throw std::runtime_error("ClientHandleCmd: invalid " + error);
+            }
             // will throw if no users handles dropped
             if (drop_user_.empty()) {
-                as->defs()->client_suite_mgr().remove_client_suites(user());
+                as->defs()->client_suite_mgr().remove_client_suites(requester);
             }
             else {
                 as->defs()->client_suite_mgr().remove_client_suites(drop_user_);
             }
 
-            if (drop_user_.empty() || drop_user_ == user()) {
+            if (drop_user_.empty() || drop_user_ == requester) {
 
                 // If this command is part of a group command, let the following sync command, know about the new handle
                 // So it return the defs with the right set of suites.
@@ -241,7 +267,7 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         case ClientHandleCmd::SUITES: {
-            return PreAllocatedReply::client_handle_suites_cmd(as);
+            return PreAllocatedReply::client_handle_suites_cmd(request_context());
         }
 
         default:
@@ -360,7 +386,10 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::DROP_USER: {
             std::string the_user_to_drop = vm[theArg()].as<std::string>();
-            cmd                          = std::make_shared<ClientHandleCmd>(the_user_to_drop);
+            if (std::string error; !the_user_to_drop.empty() && !ecf::is_valid_user_name(the_user_to_drop, error)) {
+                throw std::runtime_error("ClientHandleCmd: invalid " + error);
+            }
+            cmd = std::make_shared<ClientHandleCmd>(the_user_to_drop);
             break;
         }
 

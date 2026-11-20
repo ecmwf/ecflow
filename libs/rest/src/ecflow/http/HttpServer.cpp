@@ -11,6 +11,8 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/http/Api.hpp"
+#include "ecflow/http/DefsStorage.hpp"
+#include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/Options.hpp"
 
@@ -143,6 +145,21 @@ void apply_listeners(httplib::Server& http_server) {
 
         return ss.str();
     };
+
+    // Against a server using Permissions, every request is refused, whatever its route (D6.6)
+    http_server.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res) {
+        if (!server_uses_permissions()) {
+            return httplib::Server::HandlerResponse::Unhandled;
+        }
+        const ojson j = {{"code", HttpStatusCode::client_error_forbidden},
+                         {"message", permissions_refusal()},
+                         {"path", req.path},
+                         {"method", req.method}};
+        res.set_content(j.dump(), "application/json");
+        res.status = HttpStatusCode::client_error_forbidden;
+        res.set_header("Access-Control-Allow-Origin", "*");
+        return httplib::Server::HandlerResponse::Handled;
+    });
 
     http_server.set_exception_handler([](const httplib::Request& req, httplib::Response& res, std::exception_ptr ep) {
         try {

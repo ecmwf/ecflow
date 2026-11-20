@@ -24,8 +24,9 @@
 ///   enough because of file caching. This matters for tests, which clear and copy the log file between runs, and
 ///   for the log server, which reads the file while the server writes it.
 ///
-/// There is a single writer, Log::log, which always writes complete, terminated records. Nothing can leave a line
-/// open, so a record can never be glued onto a previous one.
+/// There are two writers, Log::log and Log::log_flushed (which also flushes the stream and reports whether the record
+/// reached the file); both hold the lock and always write complete, terminated records. Nothing can leave a line open,
+/// so a record can never be glued onto a previous one.
 ///
 
 #include <fstream>
@@ -131,6 +132,19 @@ public:
     ///         written, and the original record has been written again.
     ///
     bool log(LogType, const std::string& message);
+
+    ///
+    /// @brief Writes a record and flushes the stream, reporting whether both succeeded.
+    ///
+    /// Used where a record must be known to be written before acting on it (e.g. the audit-only mode, R12.3): a
+    /// buffered write can succeed while the flush that follows fails (e.g. on a full file system).
+    ///
+    /// @param[in] lt      The record marker.
+    /// @param[in] message The record body; may span several lines.
+    /// @return true when the record was written and the stream flushed; false otherwise, in which case the failure is
+    ///         described by log_error(), as for log().
+    ///
+    [[nodiscard]] bool log_flushed(LogType lt, const std::string& message);
 
     ///
     /// @brief Sets the time stamp reused by subsequent MSG, LOG and OTH records to the current time.
@@ -367,6 +381,13 @@ public:
     void flush();
 
     ///
+    /// @brief Flushes the stream, whatever has been written since the last flush.
+    ///
+    /// @return true when the stream is good after the flush.
+    ///
+    [[nodiscard]] bool flush_checked();
+
+    ///
     /// @brief Returns the underlying stream, for error diagnosis.
     ///
     /// @return The output stream.
@@ -427,6 +448,15 @@ private:
 /// @return The result of Log::log, or true when no Log instance exists.
 ///
 bool log(Log::LogType, const std::string& message);
+
+///
+/// @brief Writes a record to the log and flushes it, through Log::log_flushed.
+///
+/// @param[in] lt      The record marker.
+/// @param[in] message The record body.
+/// @return The result of Log::log_flushed, or true when no Log instance exists.
+///
+[[nodiscard]] bool log_flushed(Log::LogType lt, const std::string& message);
 
 ///
 /// @brief Reports a failed assertion and terminates the process when a log exists.

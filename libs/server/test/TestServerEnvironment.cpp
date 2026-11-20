@@ -16,6 +16,7 @@
 #include <boost/scope_exit.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "MockServer.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -31,6 +32,7 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/node/Suite.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
@@ -3219,7 +3221,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_from_whitelist) 
 }
 
 ///
-/// @brief Verifies that the log states the authorisation in force without a whitelist: the permissions of the nodes.
+/// @brief Verifies that the log states the authorisation in force without a whitelist: no restriction.
 ///
 BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelist) {
     ECF_NAME_THIS_TEST();
@@ -3233,10 +3235,37 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_without_whitelis
     BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
 
     const std::vector<std::string> expected{
-        "Mode = nodes",
+        "Mode = unrestricted",
         "ECF_LISTS (" + (fs::current_path() / (Host{}.name() + ".3144.ecf.lists")).string() + ") = absent"};
     const auto actual = last_block("Authorisation:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that, without a whitelist, a variable named PERMISSIONS restricts no user, at server level or on a
+///        node.
+///
+BOOST_AUTO_TEST_CASE(test_server_environment_ignores_permissions_variable) {
+    ECF_NAME_THIS_TEST();
+
+    auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+    IsolatedServerStartup isolation;
+    fs::current_path(directory.path());
+
+    ServerEnvironment serverEnv({"ServerEnvironment", "--port=3144"});
+    std::string error;
+    BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+
+    auto defs = Defs::create();
+    defs->server_state().add_or_update_user_variables("PERMISSIONS", "alice");
+    defs->add_suite("s")->addVariable(Variable("PERMISSIONS", "alice"));
+    MockServer server(defs);
+
+    const auto bob = ecf::Identity::make_user("bob", "");
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "read"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "write"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "/s", "read"));
+    BOOST_CHECK(serverEnv.authorisation().allows(bob, server, "/s", "write"));
 }
 
 ///
@@ -3264,6 +3293,99 @@ BOOST_AUTO_TEST_CASE(test_server_environment_logs_authorisation_after_reload) {
     expected.insert(expected.end(), users.begin(), users.end());
     const auto actual = last_block("Authorisation:");
     BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), expected.begin(), expected.end());
+}
+
+///
+/// @brief Verifies that the server attribute is read from the configuration file, and absent otherwise.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions) {
+    ECF_NAME_THIS_TEST();
+
+    check_server_with_file(
+        WithConfigurationFile{
+            std::nullopt,
+            "3141",
+            configuration_document(
+                "",
+                R"("permissions": [{"user": "bob", "permissions": "r"}, {"user": "alice", "permissions": "rwxlops"}])")},
+        [](const ServerEnvironment& serverEnv) {
+            BOOST_REQUIRE(serverEnv.permissions() != nullptr);
+            BOOST_CHECK_EQUAL(serverEnv.permissions()->to_cli(), "alice:rwxlops,bob:r");
+        });
+
+    check_server_with_file(WithConfigurationFile{std::nullopt, "3141", configuration_document(R"("ECF_URL": "x")")},
+                           [](const ServerEnvironment& serverEnv) { BOOST_CHECK(serverEnv.permissions() == nullptr); });
+}
+
+///
+/// @brief Verifies that the configuration can ignore the white list file (D12.2): it is neither loaded at start-up nor
+///        reloaded, and the log says so.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_ignores_whitelist) {
+    ECF_NAME_THIS_TEST();
+
+    auto lists_directory = ecf::test::scaffold::MakeDirectory{}.create();
+    const auto lists     = lists_directory.path() / "ecf.lists";
+    std::ofstream(lists) << "4.5.0\n-bob\n";
+    const std::string variables = R"("ECF_LISTS": ")" + lists.string() + R"(")";
+
+    for (const bool ignore : {true, false}) {
+        BOOST_TEST_CONTEXT("ignore: " << ignore) {
+            auto directory = ecf::test::scaffold::MakeDirectory{}.create();
+            IsolatedServerStartup isolation;
+            std::list<WithTestEnvironmentVariable> overrides;
+            prepare_configuration_file(
+                directory.path(),
+                WithConfigurationFile{std::nullopt,
+                                      "3141",
+                                      configuration_document(variables,
+                                                             ignore ? R"("whitelist": {"ignore": true})"
+                                                                    : R"("whitelist": {"ignore": false})")},
+                overrides);
+
+            ServerEnvironment serverEnv(std::vector<std::string>{"ServerEnvironment"});
+            std::string error;
+            BOOST_REQUIRE_MESSAGE(serverEnv.valid(error), error);
+            BOOST_CHECK_EQUAL(serverEnv.authorisation().uses_whitelist(), !ignore);
+
+            const auto block = last_block("Authorisation:");
+            BOOST_REQUIRE_GE(block.size(), 2U);
+            if (ignore) {
+                BOOST_CHECK_EQUAL(block[0], "Mode = unrestricted");
+                BOOST_CHECK_EQUAL(block[1], "ECF_LISTS (" + lists.string() + ") = ignored");
+                BOOST_CHECK(!serverEnv.reloadWhiteListFile(error));
+                BOOST_CHECK_MESSAGE(error.find("/ecflow/server/whitelist/ignore") != std::string::npos, error);
+                BOOST_CHECK(!serverEnv.authorisation().uses_whitelist());
+            }
+            else {
+                BOOST_CHECK_EQUAL(block[0], "Mode = whitelist");
+                BOOST_CHECK(serverEnv.reloadWhiteListFile(error));
+            }
+        }
+    }
+}
+
+///
+/// @brief Verifies that an invalid server attribute in the configuration file stops the start-up, naming the setting.
+///
+BOOST_AUTO_TEST_CASE(test_server_configuration_file_permissions_refused) {
+    ECF_NAME_THIS_TEST();
+
+    const std::vector<std::pair<std::string, std::string>> cases{
+        {R"("permissions": "alice:r")", "/ecflow/server/permissions: expected an array or an object, not a string"},
+        {R"("permissions": [])", "/ecflow/server/permissions: Invalid Permissions: no entry"},
+        {R"("permissions": {"user": "alice", "permissions": "r"})",
+         "/ecflow/server/permissions: Invalid Permissions: the JSON form is not a list"},
+        {R"("permissions": [{"user": "alice", "permissions": "rq"}])",
+         "/ecflow/server/permissions: Invalid Permissions: unknown letter 'q'"},
+        {R"("permissions": [{"user": "*", "permissions": "r"}])", "/ecflow/server/permissions: Invalid Permissions:"},
+    };
+    for (const auto& [options, expected] : cases) {
+        BOOST_TEST_CONTEXT("options: " << options) {
+            check_server_refused_with_file(
+                WithConfigurationFile{std::nullopt, "3141", configuration_document("", options)}, expected);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

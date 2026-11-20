@@ -24,6 +24,8 @@ const char* type_name(Type type) {
             return "an integer";
         case Type::Text:
             return "a string";
+        case Type::Json:
+            return "an array or an object";
     }
     return "a value";
 }
@@ -51,6 +53,11 @@ std::optional<Value> value_of(const CTree& tree, Type type) {
         case Type::Text:
             if (const auto* s = std::get_if<std::string>(&node)) {
                 return Value(std::in_place_type<std::string>, *s);
+            }
+            break;
+        case Type::Json:
+            if (std::holds_alternative<CTree::Sequence>(node) || std::holds_alternative<CTree::Mapping>(node)) {
+                return Value(Json{to_compact_json(tree)});
             }
             break;
     }

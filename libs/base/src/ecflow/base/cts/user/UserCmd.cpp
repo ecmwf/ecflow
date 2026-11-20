@@ -137,6 +137,13 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
     }
 }
 
+void UserCmd::setup_user_authentification(const ecf::Identity& identity) {
+    user_ = identity.username().value();
+    pswd_ = identity.password().value();
+    cu_   = identity.is_custom();
+    set_identity(identity);
+}
+
 bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv) {
     // A Custom user is one where:
     //   o/ ECF_USER environment used

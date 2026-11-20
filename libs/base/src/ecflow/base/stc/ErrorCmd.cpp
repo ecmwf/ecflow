@@ -12,11 +12,12 @@
 
 using namespace ecf;
 
-ErrorCmd::ErrorCmd(const std::string& errorMsg) {
-    init(errorMsg);
+ErrorCmd::ErrorCmd(const std::string& errorMsg, Kind kind) {
+    init(errorMsg, kind);
 }
 
-void ErrorCmd::init(const std::string& errorMsg) {
+void ErrorCmd::init(const std::string& errorMsg, Kind kind) {
+    kind_ = kind;
     // #ifdef DEBUG
     // std::cout << ErrorCmd::init " << errorMsg << "\n";
     // LogToCout toCoutAsWell;
@@ -30,7 +31,7 @@ void ErrorCmd::init(const std::string& errorMsg) {
     if (pos != std::string::npos) {
         error_msg_.erase(error_msg_.begin() + pos);
     }
-    ecf::log(Log::ERR, error_msg_); // will automatically add end of line
+    ecf::log(Log::ERR, error_msg_); // will automatically add end of line; denials included (D5.29)
 }
 
 std::string ErrorCmd::print() const {
@@ -42,12 +43,17 @@ std::string ErrorCmd::print() const {
 }
 
 bool ErrorCmd::equals(ServerToClientCmd* rhs) const {
-    return (dynamic_cast<ErrorCmd*>(rhs)) ? ServerToClientCmd::equals(rhs) : false;
+    auto* the_rhs = dynamic_cast<ErrorCmd*>(rhs);
+    return the_rhs ? (kind_ == the_rhs->kind_ && ServerToClientCmd::equals(rhs)) : false;
 }
 
 bool ErrorCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
     if (debug) {
         std::cout << "  ErrorCmd::handle_server_response " << error_msg_ << "\n";
+    }
+
+    if (kind_ == Kind::PermissionDenied) {
+        server_reply.set_permission_denied(true);
     }
 
     std::string ss = failed_request_prefix(*cts_cmd);

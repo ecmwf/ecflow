@@ -83,8 +83,9 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent)
         errPix_    = QPixmap(QPixmap::fromImage(img));
     }
 
-    avisoPixId_  = IconProvider::add(":/viewer/aviso.svg", "aviso");
-    mirrorPixId_ = IconProvider::add(":/viewer/remote.svg", "mirror");
+    avisoPixId_       = IconProvider::add(":/viewer/aviso.svg", "aviso");
+    mirrorPixId_      = IconProvider::add(":/viewer/remote.svg", "mirror");
+    permissionsPixId_ = IconProvider::add(":/viewer/permissions.svg", "permissions");
 
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0, 0);
@@ -124,6 +125,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent)
     attrRenderers_["label"]       = &NodeViewDelegate::renderLabel;
     attrRenderers_["aviso"]       = &NodeViewDelegate::renderAviso;
     attrRenderers_["mirror"]      = &NodeViewDelegate::renderMirror;
+    attrRenderers_["permissions"] = &NodeViewDelegate::renderPermissions;
     attrRenderers_["event"]       = &NodeViewDelegate::renderEvent;
     attrRenderers_["var"]         = &NodeViewDelegate::renderVar;
     attrRenderers_["genvar"]      = &NodeViewDelegate::renderGenvar;
@@ -677,6 +679,81 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
     }
 
     size = QSize(totalWidth, labelHeight(multiCnt + 1));
+}
+
+void NodeViewDelegate::renderPermissions(QPainter* painter,
+                                         QStringList data,
+                                         const QStyleOptionViewItem& option,
+                                         QSize& size,
+                                         [[maybe_unused]] const QColor& fg) const {
+    int totalWidth = 0;
+    size           = QSize(totalWidth, attrBox_->fullHeight);
+
+    // The data are the type name, the value in the command-line form and the users
+    if (data.count() < 2) {
+        return;
+    }
+
+    const QString name = "permissions:";
+    const QString val  = data.at(1);
+
+    bool selected = option.state & QStyle::State_Selected;
+
+    // The border rect (its width is adjusted below)
+    QRect contRect = option.rect.adjusted(attrBox_->leftMargin,
+                                          attrBox_->topMargin + attrBox_->topPadding,
+                                          0,
+                                          -attrBox_->bottomMargin - attrBox_->bottomPadding);
+
+    // The icon
+    auto pix      = IconProvider::pixmapToHeight(permissionsPixId_, contRect.height());
+    QRect pixRect = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+    pixRect.setWidth(pix.width());
+
+    // The name
+    QFont nameFont = attrFont_;
+    nameFont.setBold(true);
+    QFontMetrics nameMetrics(nameFont);
+    QRect nameRect = contRect;
+    nameRect.setX(pixRect.x() + pixRect.width() + attrBox_->spacing);
+    nameRect.setWidth(ViewerUtil::textWidth(nameMetrics, name));
+
+    // The value
+    QFont valFont = attrFont_;
+    QFontMetrics valMetrics(valFont);
+    QRect valRect = nameRect;
+    valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
+    valRect.setWidth(ViewerUtil::textWidth(valMetrics, val));
+
+    // Define clipping
+    int rightPos           = valRect.x() + valRect.width() + attrBox_->rightPadding + attrBox_->rightMargin;
+    totalWidth             = rightPos - option.rect.left();
+    const bool setClipRect = rightPos > option.rect.right();
+    if (setClipRect) {
+        painter->save();
+        painter->setClipRect(option.rect);
+    }
+
+    painter->drawPixmap(pixRect, pix);
+
+    painter->setPen(Qt::black);
+    painter->setFont(nameFont);
+    painter->drawText(attrBox_->adjustTextRect(nameRect), Qt::AlignLeft | Qt::AlignVCenter, name);
+
+    painter->setFont(valFont);
+    painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+
+    if (selected && drawAttrSelectionRect_) {
+        QRect sr = option.rect;
+        sr.setWidth(rightPos - sr.x());
+        renderSelectionRect(painter, attrBox_->adjustSelectionRect(sr));
+    }
+
+    if (setClipRect) {
+        painter->restore();
+    }
+
+    size.setWidth(totalWidth);
 }
 
 void NodeViewDelegate::renderAviso(QPainter* painter,

@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/RequestContext.hpp"
 #include "ecflow/base/cts/EditHistoryMgr.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
@@ -43,6 +44,41 @@ bool ClientToServerCmd::equals(ClientToServerCmd* rhs) const {
 }
 
 STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const {
+    if (context_) {
+        return handleRequest(as, *context_);
+    }
+    const ecf::RequestContext context(identity_, *as);
+    return handleRequest(as, context);
+}
+
+STC_Cmd_ptr ClientToServerCmd::doHandleRequestIn(AbstractServer* as, const ecf::RequestContext& context) const {
+    struct Scope
+    {
+        const ecf::RequestContext*& slot;
+        const ecf::RequestContext* previous;
+        ~Scope() { slot = previous; }
+    } scope{context_, context_};
+    context_ = &context;
+    return doHandleRequest(as);
+}
+
+const ecf::RequestContext& ClientToServerCmd::request_context() const {
+    if (!context_) {
+        throw std::logic_error("ClientToServerCmd::request_context: no request is being handled");
+    }
+    return *context_;
+}
+
+STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as, const ecf::RequestContext& context) const {
+    // The context is that of this request only
+    struct Scope
+    {
+        const ecf::RequestContext*& slot;
+        const ecf::RequestContext* previous;
+        ~Scope() { slot = previous; }
+    } scope{context_, context_};
+    context_ = &context;
+
     // Allow creating of new time stamp, when *not* in a command. i.e during node tree traversal in server
     CmdContext cmdContext;
 

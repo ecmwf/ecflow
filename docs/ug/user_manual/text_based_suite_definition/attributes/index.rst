@@ -19,4 +19,5 @@ nodes in a suite.
    edit_add_variable
    extern
    late
+   permissions
    repeat_for_loop

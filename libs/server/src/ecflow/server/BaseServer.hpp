@@ -71,6 +71,30 @@ public:
     ///
     bool restore_from_checkpt(const std::string& filename, bool& failed, std::string* diagnostic = nullptr);
     void update_defs_server_state();
+
+    ///
+    /// @brief Applies the server Permissions attribute to the definitions just restored or created.
+    ///
+    /// The attribute of a restored checkpoint overrides that of the configuration file; without one, the attribute
+    /// of the configuration file applies.
+    ///
+    /// @return False when the definitions carry a server attribute while the configuration file has none, in which
+    ///         case the definitions are left unchanged; true otherwise.
+    ///
+    bool apply_server_permissions();
+
+    ///
+    /// @brief Returns the diagnostic of definitions carrying a server attribute that the configuration file lacks.
+    ///
+    /// @return The diagnostic.
+    ///
+    std::string unconfigured_permissions_message() const;
+
+    ///
+    /// @brief Logs a bounded summary of the Permissions attributes in force, never the attributes themselves.
+    ///
+    void log_permissions_summary() const;
+
     void set_server_state(SState::State);
 
     /// AbstractServer functions
@@ -98,6 +122,10 @@ public:
 
     ecf::AuthorisationService& authorisation() override { return serverEnv_.authorisation(); }
     const ecf::AuthorisationService& authorisation() const override { return serverEnv_.authorisation(); }
+
+    bool audit_only() const override { return serverEnv_.audit_only(); }
+
+    ecf::ServerLimits limits() const override { return serverEnv_.limits(); }
 
     bool lock(const std::string& user) override;
     void unlock() override;
@@ -129,6 +157,7 @@ protected:
     friend class CheckPtSaver;
 
     SState::State serverState_;
+    std::string permissions_source_{"none"};                  // where the server attribute in force comes from
     SState::State server_state_to_preserve_{SState::RUNNING}; // preserve state over plug cmd ECFLOW-1606
 
     ServerEnvironment& serverEnv_;

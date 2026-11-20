@@ -199,120 +199,24 @@ refined against a working Troika deployment, and the host names and SSH options 
 Access permissions
 ------------------
 
-Because the reverse proxy authenticates every request and forwards the authenticated identity to the
-server (through the ``X-Auth-Username`` header), the server can enforce per-user access controls on
-the suite nodes. These controls are expressed through the :code:`ECF_PERMISSIONS` variable.
+The reverse proxy authenticates every request and forwards the authenticated identity to the server
+(through the ``X-Auth-Username`` header). The server then authorises user commands as follows:
 
-The value of :code:`ECF_PERMISSIONS` is a comma-separated list of ``<user>:<rights>`` entries. The
-rights of each entry are a combination of the following characters (case-insensitive, spaces
-ignored):
+- with a server :ref:`Permissions attribute <permissions_attribute>`, each user has the roles the
+  attributes grant, and the white list file is not used;
+- otherwise, with a white list file (:code:`ECF_LISTS`), each user has the read or read/write access the
+  file grants;
+- otherwise, every authenticated user has full access.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 10 15 75
+Variables do not control access: a variable named :code:`PERMISSIONS` or :code:`ECF_PERMISSIONS` is an
+ordinary variable, with no effect on authorisation.
 
-   * - Character
-     - Right
-     - Meaning
-   * - ``r``
-     - read
-     - Read nodes and their attributes.
-   * - ``w``
-     - write
-     - Modify nodes and their attributes.
-   * - ``x``
-     - execute
-     - Execute commands on nodes (for example, run a task).
-   * - ``o``
-     - owner
-     - Load new suites onto the server.
-   * - ``s``
-     - sticky
-     - Prevent the rights of this entry from being restricted lower in the node hierarchy.
+See also :ref:`how_to_control_access_with_the_permissions_attribute_two_teams`, for two teams sharing a server.
 
-For example, granting ``alice`` full access to a suite, ``bob`` read-only access, and ``charlie``
-read/write access:
-
-.. code-block:: shell
-
-   edit ECF_PERMISSIONS 'alice:rwx,bob:r,charlie:rw'
-
-The variable is evaluated hierarchically, starting from the server and descending to the node being
-accessed. Each level folds its own :code:`ECF_PERMISSIONS` value into an *active set* of
-``<user>:<rights>`` entries, and the command is accepted only if the active set at the target node
-grants the required right to the requesting user:
-
-- the server-level :code:`ECF_PERMISSIONS` establishes the initial active set;
-
-- at a suite (the root node), the suite's entries *supersede* the active set: every *sticky* entry
-  of the active set is kept, every entry listed on the suite is added (replacing any non-sticky
-  entry for the same user), and every remaining *non-sticky* entry is dropped. This allows a suite
-  to add users that the server level did not mention;
-
-- at a family or task, the node's entries *restrict* the active set: every *sticky* entry is kept,
-  every non-sticky entry whose user is listed on the node is narrowed to the rights present in
-  *both* the active set and the node's entry, and every non-sticky entry whose user is *not* listed
-  on the node is dropped. Users listed on the node that were not already active are ignored, so
-  that a user can never gain, on a lower node, a right that a higher node does not already grant.
-  A family or task without :code:`ECF_PERMISSIONS` leaves the active set unchanged;
-
-- a right marked *sticky* (``s``) is preserved regardless of the entries defined on lower nodes,
-  which is useful for server-level rights that must not be weakened by a suite.
-
-.. warning::
-
-   Two consequences of the rules above are easy to overlook, and both have been verified against
-   the implementation:
-
-   - **The suite level supersedes even when the suite defines no** :code:`ECF_PERMISSIONS`. The
-     suite's (empty) entry list replaces the active set, so *every non-sticky server-level entry is
-     dropped* on every suite that does not list the user again. A server-level entry such as
-     ``ops:rw`` therefore grants ``ops`` the server-level operations only (those evaluated at
-     ``/``, such as loading definitions or querying the server), and grants nothing on any suite
-     unless that suite lists ``ops`` explicitly. Server-level entries that are meant to apply
-     everywhere, typically the administrators, **must be marked sticky** (for example,
-     ``admin:rwxos``).
-
-   - **An active set that becomes empty is treated as "no rules", and no rules means everything is
-     allowed.** This is the same backward-compatible rule that applies when the server has no
-     :code:`ECF_PERMISSIONS` at all, but it also triggers when the restriction step drops the last
-     remaining entry. For example, with the server defining ``ops:rw``, a suite defining
-     ``alice:rw``, and a family below it defining ``bob:r`` (``bob`` not being active above), the
-     family's active set is empty, and *every* user, including users never mentioned anywhere, is
-     allowed every operation on that family and its descendants. Until this is addressed in the
-     implementation, keep at least one sticky entry at server level, so that the active set can
-     never become empty.
-
-When several users require different rights on the same node, list them as additional
-comma-separated entries.
-
-.. implementation::
-
-   This behaviour follows the node access-control model introduced on the ``feature/node_acl``
-   branch (see ``libs/node/src/ecflow/node/permissions/``). The relevant details are:
-
-   - the node variable name is ``ECF_PERMISSIONS`` (``ecf::environment::ECF_PERMISSIONS``); an
-     invalid value on a node causes the corresponding permissions to be treated as empty (on a
-     suite, this drops every non-sticky entry, exactly as if the variable were absent; on a family
-     or task, it leaves the active set unchanged), whereas an invalid value at server level
-     prevents the server from starting;
-
-   - the supersede and restrict steps are implemented by ``Permissions::combine_supersede()`` and
-     ``Permissions::combine_override()`` (``libs/node/src/ecflow/node/permissions/Permissions.cpp``),
-     driven along the node path by ``permissions_at()`` in ``ActivePermissions.cpp``; the two
-     consequences highlighted above are covered by the ``t1_*`` and ``t2_*`` cases in
-     ``libs/node/test/TestPermissions.cpp``;
-
-   - the server selects its authorisation source by precedence: a valid white list file
-     (``ECF_LISTS``) takes priority; otherwise, if a server-level ``ECF_PERMISSIONS`` is defined and
-     valid, node-based authorisation is used; otherwise, access is *unrestricted* (everything is
-     allowed, for backward compatibility);
-
-   - therefore, node-based ``ECF_PERMISSIONS`` on suites and tasks only takes effect when a
-     server-level ``ECF_PERMISSIONS`` is set and no white list file is in force.
-
-   Whether the multi-tenant reference environment enables node-based authorisation (rather than a
-   white list file) is **TBC**.
+The image currently running in the reference environment is an earlier development build, which
+enforces node permissions given by an :code:`ECF_PERMISSIONS` variable (see
+:ref:`multi_tenant_reference_environment`); released versions of ecFlow do not. How the environment
+restricts access once it runs a released version is **TBC**.
 
 Interaction with the white list and password files
 ----------------------------------------------------
@@ -327,7 +231,7 @@ is expected to use:
 
 - Authentication, via the reverse proxy and Auth-o-tron, for all requests;
 
-- Authorisation, via node-based :code:`ECF_PERMISSIONS`.
+- Authorisation: **TBC** (see `Access permissions`_).
 
 Regardless, the interaction between the password and white list files and the HTTPS/Auth-o-tron path
 is not uniform, and is stated explicitly here to avoid a natural but incorrect assumption that both
@@ -337,9 +241,8 @@ are simply superseded by the reverse proxy.
 
    The mechanics of this interaction, i.e. which files are consulted, and when, are established below
    and verified against the code. What remains **TBC**, and needs further discussion, is whether
-   relying solely on the reverse proxy for authentication and solely on node-based
-   :code:`ECF_PERMISSIONS` for authorisation, without a white list file as a second line of defence, is
-   the intended security posture for this environment.
+   relying solely on the reverse proxy for authentication, without any authorisation, is the intended
+   security posture for this environment.
 
 - **The password files are bypassed.**
 
@@ -347,9 +250,9 @@ are simply superseded by the reverse proxy.
   the ``Authorization`` or ``X-Auth-Username`` headers set  by Auth-o-tron), the server treats the request
   as already authenticated and does not check it against :code:`ECF_PASSWD` or :code:`ECF_CUSTOM_PASSWD`.
 
-- **The white list file is not bypassed.** Authorisation is a separate step from authentication, and
-  the white list file (:code:`ECF_LISTS`), if configured, continues to be consulted for read/write
-  access regardless of how the identity was established.
+- **Authorisation is not bypassed.** Authorisation is a separate step from authentication: the
+  Permissions attributes, when a server attribute is configured, or otherwise the white list file
+  (:code:`ECF_LISTS`), if configured, decide the access regardless of how the identity was established.
 
 .. implementation::
 
@@ -369,8 +272,7 @@ are simply superseded by the reverse proxy.
      ``identity.username()``. It is therefore fully active over HTTPS.
 
    The reference environment's ecFlow server is not currently started with an :code:`ECF_LISTS` file
-   (see above); should one be introduced later, the :code:`ECF_PERMISSIONS` examples above would stop
-   taking effect until that file is removed, or made invalid, on the server.
+   (see above).
 
 Client executable location
 --------------------------
@@ -520,8 +422,8 @@ The corresponding trailer uses the same variables:
    server at all. This means a task script's :code:`.ecflowapirc` credentials are checked, exactly like
    an interactive user's, before the child command is even delivered to ecFlow.
 
-   What does *not* happen, once a child command reaches the server, is authorisation against
-   :code:`ECF_PERMISSIONS` or the white list file: as described in `Access permissions`_, ecFlow's
+   What does *not* happen, once a child command reaches the server, is authorisation against the
+   white list file: as described in `Access permissions`_, ecFlow's
    authorisation rules are simply not evaluated for child commands, so the rights attached to the
    task's identity are irrelevant to whether the specific command is accepted. Instead, the server
    accepts or rejects the command by matching :code:`ECF_PASS` (the task's password) and
@@ -530,7 +432,7 @@ The corresponding trailer uses the same variables:
    proxy.
 
    In short: the reverse proxy authenticates every request uniformly, task commands included; ecFlow's
-   own :code:`ECF_PERMISSIONS`-based authorisation, by contrast, is specific to interactive commands
+   own authorisation, by contrast, is specific to interactive commands
    and simply does not apply to child commands.
 
 .. implementation::
@@ -574,10 +476,9 @@ The following points remain to be confirmed before this note can be considered c
 
 - the exact Troika command lines, the destination host convention, and the per-tenant configuration file naming scheme (see `Job management commands`_);
 
-- the concrete rights each tenant requires for interactive access via node-based ``ECF_PERMISSIONS``
-  (``ECF_PERMISSIONS`` does not affect the child commands issued by task scripts, see the note in
-  `Task script changes`_), and whether relying solely on the reverse proxy and ``ECF_PERMISSIONS``,
-  without a white list file, is the intended security posture (see
+- the access each tenant requires for interactive commands (authorisation does not apply to the
+  child commands issued by task scripts, see the note in `Task script changes`_), and whether relying
+  solely on the reverse proxy, without a white list file, is the intended security posture (see
   `Interaction with the white list and password files`_);
 
 - the mechanism for provisioning ``ecflowapirc`` to every job, since all commands, task and

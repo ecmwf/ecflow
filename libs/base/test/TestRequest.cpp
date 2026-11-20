@@ -22,6 +22,7 @@
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/cts/user/CtsNodeCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/EditScriptCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/FreeDepCmd.hpp"
@@ -31,6 +32,7 @@
 #include "ecflow/base/cts/user/LogMessageCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PermissionsCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
@@ -225,6 +227,11 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TIME, "+12:00")));
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TIME, "+10:00 20:00 00:30")));
     cmd_vec.push_back(Cmd_ptr(new AlterCmd("/suiteName/t1", AlterCmd::ADD_TODAY, "10:00 20:00 00:30")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("create", "/suiteName", "alice:rwxp,bob:r")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("read", "/suiteName", "", PermissionsCmd::Format::Json)));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("update", "/", "admin:rwxlops,alice:r,bob:r")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("delete", "/suiteName/t1")));
+    cmd_vec.push_back(Cmd_ptr(new PermissionsCmd("effective", "/suiteName/t1", "bob")));
     cmd_vec.push_back(Cmd_ptr(new PlugCmd()));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("event", "/suiteName/t1", "event", "")));
     cmd_vec.push_back(Cmd_ptr(new QueryCmd("variable", "/suiteName/t1", "var", "", false)));
@@ -319,6 +326,9 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     BOOST_CHECK_MESSAGE(theGroupCmd->terminate_cmd(), "Expected terminate_cmd() to return true");
     BOOST_CHECK_MESSAGE(theGroupCmd->group_cmd(), "Expected group_cmd() to return true");
     cmd_vec.push_back(theGroupCmd);
+
+    // Last, since it deletes the suite the commands above address
+    cmd_vec.push_back(Cmd_ptr(new DeleteCmd("/EmptySuite", true)));
 
     // Server --> Client commands
     stc_cmd_vec.push_back(STC_Cmd_ptr(new ErrorCmd("The error")));

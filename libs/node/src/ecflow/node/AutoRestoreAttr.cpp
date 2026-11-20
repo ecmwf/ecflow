@@ -62,7 +62,7 @@ void AutoRestoreAttr::do_autorestore() {
         NodeContainer* nc = referenceNode->isNodeContainer();
         if (nc) {
             try {
-                nc->restore();
+                nc->restore(true, NodeContainer::RestoreTrigger::Automatic);
             }
             catch (std::exception& e) {
                 log(Log::ERR,

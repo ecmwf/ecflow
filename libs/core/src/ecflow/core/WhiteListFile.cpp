@@ -14,6 +14,7 @@
 #include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/User.hpp"
 
@@ -263,6 +264,14 @@ bool WhiteListFile::verify_path_access(const std::string& user,
 
 namespace {
 
+// A line of a white list, with the file holding it (the white list, or a file it includes) and its number there
+struct Line
+{
+    std::string text;
+    std::string file;
+    std::size_t number;
+};
+
 template <typename F>
 void iterate_lines_of(const std::string& file, F f) {
     std::ifstream infile(file, std::ios::in);
@@ -274,7 +283,9 @@ void iterate_lines_of(const std::string& file, F f) {
     }
 
     std::string line;
+    std::size_t number = 0;
     while (std::getline(infile, line)) {
+        ++number;
 
         // 1. Process #included file
         std::regex re(" *#include *<([^>]*)> *(#.*)?");
@@ -286,14 +297,14 @@ void iterate_lines_of(const std::string& file, F f) {
         }
 
         // 2. Process line
-        f(line);
+        f(Line{line, file, number});
     }
 }
 
-bool load_whitelist_file(const std::string& file, std::vector<std::string>& lines, bool ignore_empty_lines) {
+bool load_whitelist_file(const std::string& file, std::vector<Line>& lines, bool ignore_empty_lines) {
     try {
-        iterate_lines_of(file, [&lines, ignore_empty_lines](const std::string& line) {
-            if (ignore_empty_lines && line.empty()) {
+        iterate_lines_of(file, [&lines, ignore_empty_lines](const Line& line) {
+            if (ignore_empty_lines && line.text.empty()) {
                 // ignore empty lines
             }
             else {
@@ -303,6 +314,27 @@ bool load_whitelist_file(const std::string& file, std::vector<std::string>& line
     }
     catch (const std::runtime_error& e) {
         return false;
+    }
+    return true;
+}
+
+// Checks every user name of a line against the user name model; '-' (read only) and '*' (every user) are the syntax
+// of the file, not part of a name
+bool valid_user_names(const std::vector<std::string>& tokens, std::string& error_msg) {
+    for (auto token : tokens) {
+        if (tokens.size() > 1 && !token.empty() && token[0] == '/') {
+            continue; // paths, which follow a user; a token alone is a user, as add_user() reads it
+        }
+        if (!token.empty() && token[0] == '-') {
+            token.erase(token.begin());
+        }
+        if (token == "*") {
+            continue;
+        }
+        if (std::string error; !is_valid_user_name(token, error)) {
+            error_msg = "invalid " + error;
+            return false;
+        }
     }
     return true;
 }
@@ -318,7 +350,7 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
     users_with_read_access_.clear();
     users_with_write_access_.clear();
 
-    std::vector<std::string> lines;
+    std::vector<Line> lines;
     if (!load_whitelist_file(white_list_file_, lines, true /* ignore empty lines */)) {
         errorMsg += "Could not open invalid file specified by ECF_LISTS ";
         errorMsg += white_list_file_;
@@ -329,18 +361,17 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
     }
 
     bool foundVersionNumber = false; // can read from version 4.4.5 onwards
-    size_t lines_size       = lines.size();
-    for (size_t i = 0; i < lines_size; ++i) {
+    for (const auto& line : lines) {
 
-        if (lines[i].empty()) {
+        if (line.text.empty()) {
             continue;
         }
 
         // ignore/remove all comments
-        if (lines[i][0] == '#') {
+        if (line.text[0] == '#') {
             continue;
         }
-        std::string theLine                = lines[i];
+        std::string theLine                = line.text;
         std::string::size_type comment_pos = theLine.find("#");
         if (comment_pos != std::string::npos) {
             theLine.erase(comment_pos);
@@ -357,17 +388,19 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
         if (!foundVersionNumber) {
 
             if (!validateVersionNumber(lineTokens[0], errorMsg)) {
-                errorMsg += MESSAGE(" " << i + 1 << ": " << lines[i] << "\n"
-                                        << "for ECF_LISTS file " << white_list_file_ << "\n");
+                errorMsg += MESSAGE(" " << line.number << ": " << line.text << "\n"
+                                        << "for ECF_LISTS file " << line.file << "\n");
                 return false;
             }
             foundVersionNumber = true;
             continue;
         }
-        else {
-            if (!add_user(lineTokens, errorMsg)) {
-                return false;
-            }
+
+        // Every user name follows the user name model; a file holding another is rejected as a whole
+        std::string error;
+        if (!valid_user_names(lineTokens, error) || !add_user(lineTokens, error)) {
+            errorMsg += MESSAGE("ECF_LISTS file " << line.file << ", line " << line.number << ": " << error << "\n");
+            return false;
         }
     }
 
@@ -577,7 +610,7 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
                 user = tok; // user =  <name> || *
             }
         }
-        else if (tok[0] == '*') {
+        else if (tok == "*") {
             // all user have read/write access for a given set of suites ?
             if (!user.empty()) {
                 error_msg = "Can only have one user per line, first user:";

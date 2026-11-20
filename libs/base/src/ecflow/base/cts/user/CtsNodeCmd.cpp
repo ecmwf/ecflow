@@ -91,8 +91,8 @@ ecf::authentication_t CtsNodeCmd::authenticate(AbstractServer& server) const {
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t CtsNodeCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t CtsNodeCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
 }
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
@@ -190,11 +190,11 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
             as->update_stats().get_defs_++;
             if (absNodePath_.empty()) {
                 // with migrate we need to get edit history.
-                return PreAllocatedReply::defs_cmd(as, (api_ == MIGRATE)); // if true, save edit history
+                return PreAllocatedReply::defs_cmd(request_context(), (api_ == MIGRATE)); // if true, save edit history
             }
             // however a request for a particular node that is not there is treated as an error
             node_ptr theNodeToReturn = find_node(defs, absNodePath_);
-            return PreAllocatedReply::node_cmd(as, theNodeToReturn);
+            return PreAllocatedReply::node_cmd(request_context(), theNodeToReturn);
         }
 
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {

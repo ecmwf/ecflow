@@ -165,6 +165,7 @@ static SimpleLoader<VAttributeType> loader("attribute");
 #include "VLimiterAttr.hpp"
 #include "VMeterAttr.hpp"
 #include "VMirrorAttr.hpp"
+#include "VPermissionsAttr.hpp"
 #include "VQueueAttr.hpp"
 #include "VRepeatAttr.hpp"
 #include "VTimeAttr.hpp"
@@ -176,6 +177,7 @@ static VMeterAttrType meterAttType;
 static VEventAttrType eventAttrType;
 static VAvisoAttrType avisoAttrType;
 static VMirrorAttrType mirrorAttrType;
+static VPermissionsAttrType permissionsAttrType;
 static VLimitAttrType limitAttrType;
 static VLimiterAttrType limiterAttrType;
 static VRepeatAttrType repeatAttrType;

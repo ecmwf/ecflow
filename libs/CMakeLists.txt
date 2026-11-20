@@ -81,6 +81,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.hpp
   attribute/src/ecflow/attribute/LateAttr.hpp
   attribute/src/ecflow/attribute/NodeAttr.hpp
+  attribute/src/ecflow/attribute/Permissions.hpp
   attribute/src/ecflow/attribute/QueueAttr.hpp
   attribute/src/ecflow/attribute/RepeatAttr.hpp
   attribute/src/ecflow/attribute/RepeatRange.hpp
@@ -100,6 +101,7 @@ set(srcs
   attribute/src/ecflow/attribute/GenericAttr.cpp
   attribute/src/ecflow/attribute/LateAttr.cpp
   attribute/src/ecflow/attribute/NodeAttr.cpp
+  attribute/src/ecflow/attribute/Permissions.cpp
   attribute/src/ecflow/attribute/QueueAttr.cpp
   attribute/src/ecflow/attribute/RepeatAttr.cpp
   attribute/src/ecflow/attribute/TimeAttr.cpp
@@ -132,6 +134,8 @@ set(srcs
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerProtocolProbe.hpp
   base/src/ecflow/base/ServerReply.hpp
+  base/src/ecflow/base/PermissionDenied.hpp
+  base/src/ecflow/base/RequestContext.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
   base/src/ecflow/base/WhyCmd.hpp
@@ -171,6 +175,7 @@ set(srcs
   base/src/ecflow/base/cts/user/MoveCmd.hpp
   base/src/ecflow/base/cts/user/OrderNodeCmd.hpp
   base/src/ecflow/base/cts/user/PathsCmd.hpp
+  base/src/ecflow/base/cts/user/PermissionsCmd.hpp
   base/src/ecflow/base/cts/user/PlugCmd.hpp
   base/src/ecflow/base/cts/user/QueryCmd.hpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
@@ -214,6 +219,7 @@ set(srcs
   base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerProtocolProbe.cpp
   base/src/ecflow/base/ServerReply.cpp
+  base/src/ecflow/base/RequestContext.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
@@ -254,6 +260,7 @@ set(srcs
   base/src/ecflow/base/cts/user/MoveCmd.cpp
   base/src/ecflow/base/cts/user/OrderNodeCmd.cpp
   base/src/ecflow/base/cts/user/PathsCmd.cpp
+  base/src/ecflow/base/cts/user/PermissionsCmd.cpp
   base/src/ecflow/base/cts/user/PlugCmd.cpp
   base/src/ecflow/base/cts/user/QueryCmd.cpp
   base/src/ecflow/base/cts/user/ReplaceNodeCmd.cpp
@@ -344,6 +351,7 @@ set(srcs
   core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
+  core/src/ecflow/core/ServerLimits.hpp
   core/src/ecflow/core/Stl.hpp
   core/src/ecflow/core/Str.hpp
   core/src/ecflow/core/StringSplitter.hpp
@@ -391,6 +399,7 @@ set(srcs
   core/src/ecflow/core/NState.cpp
   core/src/ecflow/core/NodePath.cpp
   core/src/ecflow/core/Passwd.cpp
+  core/src/ecflow/core/Identity.cpp
   core/src/ecflow/core/PasswdFile.cpp
   core/src/ecflow/core/Pid.cpp
   core/src/ecflow/core/PrintStyle.cpp
@@ -422,12 +431,15 @@ set(srcs
   node/src/ecflow/node/Alias.hpp
   node/src/ecflow/node/Aspect.hpp
   node/src/ecflow/node/Attr.hpp
+  node/src/ecflow/node/ArchivedNodes.hpp
   node/src/ecflow/node/AutoRestoreAttr.hpp
   node/src/ecflow/node/AvisoAttr.hpp
   node/src/ecflow/node/ClientSuiteMgr.hpp
   node/src/ecflow/node/ClientSuites.hpp
   node/src/ecflow/node/CmdContext.hpp
   node/src/ecflow/node/Defs.hpp
+  node/src/ecflow/node/EffectivePermissions.hpp
+  node/src/ecflow/node/PermissionsChange.hpp
   node/src/ecflow/node/DefsDelta.hpp
   node/src/ecflow/node/DefsTreeVisitor.hpp
   node/src/ecflow/node/EcfFile.hpp
@@ -458,7 +470,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
-  node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
@@ -468,6 +479,7 @@ set(srcs
   node/src/ecflow/node/System.hpp
   node/src/ecflow/node/Task.hpp
   node/src/ecflow/node/TaskScriptGenerator.hpp
+  node/src/ecflow/node/Visibility.hpp
   node/src/ecflow/node/move_peer.hpp
   node/src/ecflow/node/formatter/AvisoFormatter.hpp
   node/src/ecflow/node/formatter/DefsWriter.hpp
@@ -496,6 +508,7 @@ set(srcs
   node/src/ecflow/node/parser/LimitParser.hpp
   node/src/ecflow/node/parser/MeterParser.hpp
   node/src/ecflow/node/parser/MirrorParser.hpp
+  node/src/ecflow/node/parser/PermissionsParser.hpp
   node/src/ecflow/node/parser/Parser.hpp
   node/src/ecflow/node/parser/QueueParser.hpp
   node/src/ecflow/node/parser/RepeatParser.hpp
@@ -508,12 +521,15 @@ set(srcs
   # Node -- Sources
   node/src/ecflow/node/Alias.cpp
   node/src/ecflow/node/Attr.cpp
+  node/src/ecflow/node/ArchivedNodes.cpp
   node/src/ecflow/node/AutoRestoreAttr.cpp
   node/src/ecflow/node/AvisoAttr.cpp
   node/src/ecflow/node/ClientSuiteMgr.cpp
   node/src/ecflow/node/ClientSuites.cpp
   node/src/ecflow/node/CmdContext.cpp
   node/src/ecflow/node/Defs.cpp
+  node/src/ecflow/node/EffectivePermissions.cpp
+  node/src/ecflow/node/PermissionsChange.cpp
   node/src/ecflow/node/DefsDelta.cpp
   node/src/ecflow/node/EcfFile.cpp
   node/src/ecflow/node/ExprAst.cpp
@@ -544,7 +560,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
-  node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
@@ -554,6 +569,7 @@ set(srcs
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp
   node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/Visibility.cpp
   node/src/ecflow/node/formatter/DefsWriter.cpp
   node/src/ecflow/node/parser/AutoArchiveParser.cpp
   node/src/ecflow/node/parser/AutoCancelParser.cpp
@@ -577,6 +593,7 @@ set(srcs
   node/src/ecflow/node/parser/LimitParser.cpp
   node/src/ecflow/node/parser/MeterParser.cpp
   node/src/ecflow/node/parser/MirrorParser.cpp
+  node/src/ecflow/node/parser/PermissionsParser.cpp
   node/src/ecflow/node/parser/Parser.cpp
   node/src/ecflow/node/parser/QueueParser.cpp
   node/src/ecflow/node/parser/RepeatParser.cpp

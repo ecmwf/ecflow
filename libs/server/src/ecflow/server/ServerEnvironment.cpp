@@ -8,6 +8,7 @@
 #include <optional>
 #include <vector>
 
+#include "ecflow/attribute/Permissions.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -220,8 +221,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = ss.str();
         return false;
     }
-    // The permissions of the nodes apply, unless replaced by those of a whitelist file
-    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
+    // Access is unrestricted, unless restricted by a whitelist file
+    if (auto result = AuthorisationService::make_unrestricted(); result.ok()) {
         authorisation_service_ = result.value();
     }
 
@@ -233,8 +234,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     log_authentication();
 
     // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
-    // user is free to access the server.
-    if (ecf_white_list_file_.empty() || !fs::exists(ecf_white_list_file_)) {
+    // user is free to access the server. The configuration may also ignore it.
+    if (ignore_whitelist_ || ecf_white_list_file_.empty() || !fs::exists(ecf_white_list_file_)) {
         log_authorisation();
         return true;
     }
@@ -302,6 +303,10 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
         std::cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
                   << fs::current_path().string() << ")\n";
     }
+    if (ignore_whitelist_) {
+        errorMsg += "The ECF_LISTS file is ignored by the configuration (/ecflow/server/whitelist/ignore)";
+        return false;
+    }
     if (ecf_white_list_file_.empty()) {
         errorMsg += "The ECF_LISTS file ";
         errorMsg += ecf_white_list_file_;
@@ -362,16 +367,17 @@ std::vector<std::string> ServerEnvironment::authentication_lines() const {
 }
 
 std::vector<std::string> ServerEnvironment::authorisation_lines() const {
-    // The whitelist, once loaded, replaces the permissions of the nodes
+    // The whitelist, once loaded, restricts access; without it, access is unrestricted
     const bool whitelist = !white_list_file_.path().empty();
 
-    std::vector<std::string> lines{"Authorisation:", std::string("  Mode = ") + (whitelist ? "whitelist" : "nodes")};
+    std::vector<std::string> lines{"Authorisation:",
+                                   std::string("  Mode = ") + (whitelist ? "whitelist" : "unrestricted")};
     if (ecf_white_list_file_.empty()) {
         lines.emplace_back("  ECF_LISTS = not set");
     }
     else {
         lines.push_back("  ECF_LISTS (" + fs::absolute(ecf_white_list_file_).lexically_normal().string() +
-                        ") = " + (whitelist ? "loaded" : "absent"));
+                        ") = " + (ignore_whitelist_ ? "ignored" : (whitelist ? "loaded" : "absent")));
     }
     if (whitelist) {
         lines.emplace_back("  Users:");
@@ -466,30 +472,38 @@ void ServerEnvironment::resolve(const ecf::cfg::Configuration& configuration, st
     auto option = [&configuration](const char* path) {
         return std::get<bool>(*configuration.get(ecf::cfg::Key::for_option(path)));
     };
+    auto limit = [&configuration](const char* path) {
+        return static_cast<std::size_t>(std::get<std::int64_t>(*configuration.get(ecf::cfg::Key::for_option(path))));
+    };
     auto text    = [&value](const char* name) { return std::get<std::string>(value(name)); };
     auto integer = [&value](const char* name) { return static_cast<int>(std::get<std::int64_t>(value(name))); };
 
-    ecfHome_                 = text("ECF_HOME");
-    serverPort_              = integer("ECF_PORT");
-    ecf_checkpt_file_        = text("ECF_CHECK");
-    ecf_backup_checkpt_file_ = text("ECF_CHECKOLD");
-    log_file_name            = text("ECF_LOG");
-    checkPtInterval_         = integer("ECF_CHECKINTERVAL");
-    submitJobsInterval_      = integer("ECF_INTERVAL");
-    ecf_cmd_                 = text("ECF_JOB_CMD");
-    killCmd_                 = text("ECF_KILL_CMD");
-    statusCmd_               = text("ECF_STATUS_CMD");
-    checkCmd_                = text("ECF_CHECK_CMD");
-    urlCmd_                  = text("ECF_URL_CMD");
-    urlBase_                 = text("ECF_URL_BASE");
-    url_                     = text("ECF_URL");
-    ecf_micro_               = text("ECF_MICRODEF");
-    ecf_white_list_file_     = text("ECF_LISTS");
-    ecf_task_threshold_      = integer("ECF_TASK_THRESHOLD");
-    ecf_prune_node_log_      = integer("ECF_PRUNE_NODE_LOG");
-    debug_                   = std::get<bool>(value("ECF_DEBUG_SERVER"));
-    jobGeneration_           = option("ecflow.server.job_generation");
-    log_commands_            = option("ecflow.server.log.commands.enabled");
+    ecfHome_                    = text("ECF_HOME");
+    serverPort_                 = integer("ECF_PORT");
+    ecf_checkpt_file_           = text("ECF_CHECK");
+    ecf_backup_checkpt_file_    = text("ECF_CHECKOLD");
+    log_file_name               = text("ECF_LOG");
+    checkPtInterval_            = integer("ECF_CHECKINTERVAL");
+    submitJobsInterval_         = integer("ECF_INTERVAL");
+    ecf_cmd_                    = text("ECF_JOB_CMD");
+    killCmd_                    = text("ECF_KILL_CMD");
+    statusCmd_                  = text("ECF_STATUS_CMD");
+    checkCmd_                   = text("ECF_CHECK_CMD");
+    urlCmd_                     = text("ECF_URL_CMD");
+    urlBase_                    = text("ECF_URL_BASE");
+    url_                        = text("ECF_URL");
+    ecf_micro_                  = text("ECF_MICRODEF");
+    ecf_white_list_file_        = text("ECF_LISTS");
+    ecf_task_threshold_         = integer("ECF_TASK_THRESHOLD");
+    ecf_prune_node_log_         = integer("ECF_PRUNE_NODE_LOG");
+    debug_                      = std::get<bool>(value("ECF_DEBUG_SERVER"));
+    jobGeneration_              = option("ecflow.server.job_generation");
+    log_commands_               = option("ecflow.server.log.commands.enabled");
+    ignore_whitelist_           = option("ecflow.server.whitelist.ignore");
+    audit_only_                 = option("ecflow.server.authorisation.audit_only");
+    limits_.request_size        = limit("ecflow.server.limits.request_size");
+    limits_.permissions_entries = limit("ecflow.server.limits.permissions_entries");
+    limits_.handles_per_user    = limit("ecflow.server.limits.handles_per_user");
     if (option("ecflow.server.http")) {
         protocol_ = ecf::Protocol::Http;
     }
@@ -613,6 +627,18 @@ ecf::cfg::Configuration ServerEnvironment::read_configuration(const ServerOption
     if (const auto found = ecf_cfg.entries.find(variable("ECF_PORT")); found != ecf_cfg.entries.end()) {
         if (const auto value = std::to_string(std::get<std::int64_t>(found->second)); value != port) {
             throw refuse("ECF_PORT", value, "port", port);
+        }
+    }
+
+    // The server Permissions attribute is checked as the value it stands for
+    permissions_.reset();
+    if (const auto found = ecf_cfg.entries.find(ecf::cfg::Key::for_option("ecflow.server.permissions"));
+        found != ecf_cfg.entries.end()) {
+        try {
+            permissions_ = ecf::Permissions::parse_json(std::get<ecf::cfg::Json>(found->second).text);
+        }
+        catch (const std::runtime_error& e) {
+            throw ecf::cfg::ConfigurationError(file + ": /ecflow/server/permissions: " + e.what());
         }
     }
 

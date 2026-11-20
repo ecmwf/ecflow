@@ -9,17 +9,26 @@ set(test_srcs
   test/TestAlterCmdRepeat.cpp
   test/TestArchiveAndRestoreCmd.cpp
   test/TestBase_main.cpp # test entry point
+  test/TestClassification.cpp
   test/TestClientHandleCmd.cpp
   test/TestClientOptionsParser.cpp
   test/TestCmd.cpp
   test/TestConnectionDiagnosis.cpp
   test/TestConnectionDiagnosisAgainstPeers.cpp
   test/TestDeleteNodeCmd.cpp
+  test/TestAuthorisationModes.cpp
+  test/TestDenial.cpp
+  test/TestMockServerIdentity.cpp
   test/TestForceCmd.cpp
+  test/TestFiltering.cpp
   test/TestFreeDepCmd.cpp
+  test/TestHandleFiltering.cpp
+  test/TestPermissionsChangeSync.cpp
   test/TestHelpCatalog.cpp
+  test/TestIncrementalFiltering.cpp
   test/TestInLimitAndLimit.cpp
   test/TestInLimitParsing.cpp
+  test/TestListingFiltering.cpp
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
   test/TestPermissions.cpp
@@ -35,6 +44,7 @@ set(test_srcs
   test/TestSSyncCmdOrder.cpp
   test/TestSSyncCmd_CH1.cpp
   test/TestStatsCmd.cpp
+  test/TestUserNameAuthentication.cpp
 )
 
 ecflow_add_test(

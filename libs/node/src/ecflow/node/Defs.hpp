@@ -36,6 +36,7 @@ class access;
 namespace ecf {
 class NodeTreeVisitor;
 class CalendarUpdateParams;
+class Visibility;
 } // namespace ecf
 
 class Defs {
@@ -171,8 +172,15 @@ public:
     /// Reset the begin state. **** ONLY to be used for test ********
     void reset_begin();
 
-    /// throws runtime_error if suite cant begin
-    void check_suite_can_begin(const suite_ptr&) const;
+    ///
+    /// @brief Refuses to begin a suite whose tasks are active or submitted.
+    ///
+    /// @param[in] suite The suite
+    /// @param[in] visibility The nodes the requester can read; every node when null. The error names only the tasks
+    ///            the requester can read, and counts the others (R5.2)
+    /// @throws std::runtime_error when the suite cannot begin.
+    ///
+    void check_suite_can_begin(const suite_ptr& suite, const ecf::Visibility* visibility = nullptr) const;
 
     /// Will requeue all suites. Current used in test only
     void requeue();
@@ -302,6 +310,15 @@ public:
      */
     void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
 
+    ///
+    /// @brief Writes the suites and nodes a user can read to a string, using the given print style.
+    ///
+    /// @param[out] os The output string buffer
+    /// @param[in] st The print style
+    /// @param[in] visibility The nodes the user can read; every node when null
+    ///
+    void write_to_string(std::string& os, PrintStyle::Type_t st, const ecf::Visibility* visibility) const;
+
     /**
      * @brief Write the defs to a file at the given path.
      *
@@ -365,6 +382,21 @@ public:
     void set_modify_change_no(modify_change_no_t x) { modify_change_no_ = x; }
     unsigned int modify_change_no() const { return modify_change_no_; }
 
+    ///
+    /// @brief Records a modify change of the server itself: a change of the server Permissions attribute (D3.7).
+    ///
+    /// Clients using a handle compare this number too, so that they perform a full synchronisation, whatever the
+    /// suites of their handle.
+    ///
+    void server_modified();
+
+    ///
+    /// @brief Returns the modify change number of the server itself (see server_modified()).
+    ///
+    /// @return The number; 0 until the first change.
+    ///
+    unsigned int server_modify_change_no() const { return server_modify_change_no_; }
+
     ClientSuiteMgr& client_suite_mgr() { return client_suite_mgr_; }
 
     // Provided for python interface
@@ -391,7 +423,7 @@ private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
 
 private:
-    void collate_defs_changes_only(DefsDelta&) const;
+    void collate_defs_changes_only(unsigned int client_handle, DefsDelta&) const;
     void setupDefaultEnv();
 
     /**
@@ -443,6 +475,7 @@ private:
     modify_change_no_t modify_change_no_{0};
     calendar_count_t updateCalendarCount_{0};
     order_state_change_no_t order_state_change_no_{0}; // *NOT* persisted
+    modify_change_no_t server_modify_change_no_{0};    // *NOT* persisted, only used on the server side
     unsigned int ecf_prune_node_log_{0};               // *NOT* persisted, only used on the server side
     NState state_;                                     // state & change_no, i,e attribute changed
     ServerState server_;

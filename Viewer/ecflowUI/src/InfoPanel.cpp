@@ -678,6 +678,12 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server) {
 }
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server) {
+    // The user lost read access to the server (R6.4): whatever the panel shows of it is discarded, frozen or not
+    if (info_ && info_->server() == server && server->isAccessDenied()) {
+        clear();
+        return;
+    }
+
     if (frozen()) {
         return;
     }

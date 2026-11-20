@@ -271,3 +271,12 @@ std::string ClientSuiteMgr::dump() const {
     }
     return ss.str();
 }
+
+std::vector<suite_ptr> ClientSuiteMgr::loaded_suites(unsigned int client_handle) const {
+    for (const auto& client_suites : clientSuites_) {
+        if (client_suites.handle() == client_handle) {
+            return client_suites.loaded_suites();
+        }
+    }
+    return {};
+}

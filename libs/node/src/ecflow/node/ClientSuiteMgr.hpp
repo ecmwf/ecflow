@@ -87,6 +87,14 @@ public:
     /// returns the list of suites associated with a handle, Used by ecFlowview
     void suites(unsigned int client_handle, std::vector<std::string>& names) const;
 
+    ///
+    /// @brief Returns the suites of a handle that exist in the definitions, in their order.
+    ///
+    /// @param[in] client_handle The handle
+    /// @return The suites; none when the handle does not exist.
+    ///
+    std::vector<suite_ptr> loaded_suites(unsigned int client_handle) const;
+
     /// A suite has been added to the definition.
     /// If the suite was previously registered *UPDATE* its suite_ptr
     /// Otherwise if any ClientSuites registered for automatic inclusion of new suite, add them in

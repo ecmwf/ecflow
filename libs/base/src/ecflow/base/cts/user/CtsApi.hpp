@@ -216,6 +216,18 @@ public:
                                           const std::string& attribute,
                                           bool evaluate = false);
 
+    ///
+    /// @brief Returns the tokens of the command --permissions.
+    ///
+    /// @param[in] operation One of create, read, update, delete or effective
+    /// @param[in] path The path of a node, or "/" for the server
+    /// @param[in] value The attribute for create and update, the user for effective; omitted when empty
+    /// @param[in] json When true, appends --fmt=json, selecting the JSON form of the values returned
+    /// @return The tokens, starting with "--permissions=<operation>".
+    ///
+    static std::vector<std::string>
+    permissions(const std::string& operation, const std::string& path, const std::string& value, bool json);
+
     // Only to be used in Cmd
     static const char* server_version_arg();
     static const char* statsArg();
@@ -286,6 +298,15 @@ public:
     static const char* alterArg();
     static const char* edit_script_arg();
     static const char* queryArg();
+    static const char* permissionsArg();
+
+    ///
+    /// @brief Returns the name of the --fmt option, a modifier of --permissions selecting the format of the values
+    ///        returned: cli (the default) or json.
+    ///
+    /// @return The name of the option.
+    ///
+    static const char* permissions_format_arg();
 
     ///
     /// @brief Returns the name of the --evaluate option, a modifier of --query that is only valid with query

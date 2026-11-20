@@ -401,6 +401,77 @@ std::vector<Setting> server_settings() {
                 std::nullopt,                          // env
                 std::nullopt                           // cli
             }),
+
+        // Neither load nor reload the white list file (ECF_LISTS)
+        Setting(
+            Key::for_option("ecflow.server.whitelist.ignore"),
+            Type::Boolean,
+            Value{false},
+            Names{
+                std::nullopt,                          // env_cfg
+                "/ecflow/server/whitelist/ignore",     // ecf_cfg
+                std::nullopt,                          // env
+                std::nullopt                           // cli
+            }),
+
+        // Execute, and log, the requests the Permissions attributes deny (audit-only mode)
+        Setting(
+            Key::for_option("ecflow.server.authorisation.audit_only"),
+            Type::Boolean,
+            Value{false},
+            Names{
+                std::nullopt,                                // env_cfg
+                "/ecflow/server/authorisation/audit_only",   // ecf_cfg
+                std::nullopt,                                // env
+                std::nullopt                                 // cli
+            }),
+
+        // Limits on the inputs of the server (R11.10); 0 for no limit
+        Setting(
+            Key::for_option("ecflow.server.limits.request_size"),
+            Type::Integer,
+            Value{std::int64_t{0}},
+            Names{
+                std::nullopt,                                // env_cfg
+                "/ecflow/server/limits/request_size",        // ecf_cfg
+                std::nullopt,                                // env
+                std::nullopt                                 // cli
+            },
+            checks::range(0, int_max)),
+        Setting(
+            Key::for_option("ecflow.server.limits.permissions_entries"),
+            Type::Integer,
+            Value{std::int64_t{0}},
+            Names{
+                std::nullopt,                                // env_cfg
+                "/ecflow/server/limits/permissions_entries", // ecf_cfg
+                std::nullopt,                                // env
+                std::nullopt                                 // cli
+            },
+            checks::range(0, int_max)),
+        Setting(
+            Key::for_option("ecflow.server.limits.handles_per_user"),
+            Type::Integer,
+            Value{std::int64_t{0}},
+            Names{
+                std::nullopt,                                // env_cfg
+                "/ecflow/server/limits/handles_per_user",    // ecf_cfg
+                std::nullopt,                                // env
+                std::nullopt                                 // cli
+            },
+            checks::range(0, int_max)),
+
+        // The server Permissions attribute, as its JSON form; validated by the server
+        Setting(
+            Key::for_option("ecflow.server.permissions"),
+            Type::Json,
+            std::nullopt,
+            Names{
+                std::nullopt,                          // env_cfg
+                "/ecflow/server/permissions",          // ecf_cfg
+                std::nullopt,                          // env
+                std::nullopt                           // cli
+            }),
     };
     // clang-format on
 }

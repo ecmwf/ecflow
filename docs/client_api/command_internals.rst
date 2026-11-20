@@ -1504,6 +1504,8 @@ largest. The commands below are listed alphabetically.
      - Change a node's position among its siblings.
    * - `PathsCmd`_
      - Node operations (suspend, resume, kill, status, check, archive, and so on).
+   * - `PermissionsCmd`_
+     - Read or change the Permissions attribute of a node, or of the server.
    * - `PlugCmd`_
      - Move a node subtree to a new parent, possibly on another server.
    * - `QueryCmd`_
@@ -1672,6 +1674,9 @@ carried by ``flag_type_``, and ``flag_`` selects set (``true``) versus clear (``
 
              * For both aviso and mirror, the special value "reload" forces reloading the configuration.
                This is typically useful after updating variables used to configure these kind of attributes.
+
+             * The Permissions attribute is not changed by --alter: use --permissions (create, update,
+               delete), which requires the role p.
 
              * Updating an aviso attribute replaces it, starting from the revision given by --revision (0 when
                omitted, i.e. only the notifications published after the update are considered). To continue
@@ -5195,6 +5200,266 @@ targets by ``paths_``:
                       "cereal_class_version": 0,
                       "value0": { "cereal_class_version": 0 },
                       "str_": "..."
+                    }
+                  }
+                }
+              }
+            }
+
+.. _proto_PermissionsCmd:
+
+PermissionsCmd
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :stub-columns: 1
+   :widths: 20 80
+
+   * - Type
+     - User command
+   * - C++ class
+     - ``.../libs/base/src/ecflow/base/cts/user/PermissionsCmd.hpp``
+   * - Action
+     - ``--permissions``
+   * - Parameters
+     - - ``arg1`` (operation): one of ``create``, ``read``, ``update``, ``delete`` or ``effective``
+         (``operation_``).
+       - ``arg2`` (path): the node, or ``/`` for the server attribute (``path_``).
+       - ``arg3`` (value, optional): the attribute, in the command-line or JSON form, for ``create`` and
+         ``update``; the user, for ``effective`` (the requester when empty); empty otherwise (``value_``).
+       - ``--fmt`` (optional): the format of what ``read`` and ``effective`` return, ``cli`` (``0``, the
+         default) or ``json`` (``1``) (``format_``).
+   * - Environment variables
+     - - ``ECF_USER`` (optional): overrides the authenticated user name.
+
+Reads or changes the :ref:`Permissions attribute <permissions_attribute>` of one node, or of the server, as a
+whole list. The operation is carried by ``operation_``, a string:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 50 14 20
+
+   * - ``operation_``
+     - Description
+     - Role
+     - Reply
+   * - ``create``
+     - Give the node an attribute; always refused at ``/``.
+     - ``p``
+     - ``StcCmd`` (OK)
+   * - ``read``
+     - Return the attribute of the node, or of the server at ``/``.
+     - ``r``
+     - string
+   * - ``update``
+     - Replace the attribute of the node, or of the server at ``/``.
+     - ``p``
+     - ``StcCmd`` (OK)
+   * - ``delete``
+     - Remove the attribute of the node; always refused at ``/``.
+     - ``p``
+     - ``StcCmd`` (OK)
+   * - ``effective``
+     - Return the roles a user holds at the path, e.g. ``rwx``; empty when the user holds none.
+     - ``r``
+     - string
+
+Each role is required at the node addressed, or at server level for ``/`` (see
+:ref:`permissions_attribute_commands`). A change is validated as a whole by the server, and applied completely or
+not at all (see :ref:`permissions_attribute_changes`).
+
+.. tabs::
+
+    .. tab:: Usage
+
+        .. code-block:: shell
+
+            ecflow_client --permissions create /suite alice:rwxp,bob:r,operator:rwxp
+            ecflow_client --permissions read /suite --fmt json
+            ecflow_client --permissions effective /suite/family bob
+
+    .. tab:: Help
+
+        Verbatim ``ecflow_client --permissions`` output (the common environment-variable footer is
+        omitted):
+
+        .. code-block:: none
+
+            permissions
+            -----------
+
+            Read or change the Permissions attribute of a node, or of the server
+
+            The operations act on the whole list of the attribute, at exactly one path;
+            '/' addresses the server attribute.
+
+            Argument(s):
+
+                --permissions <operation> <path> [<value>] [--fmt cli|json]
+
+            Operations:
+
+                create     Give the node an attribute, holding <value>; fails when the node already has one
+                read       Print the attribute of the node; fails when the node has none
+                update     Replace the attribute of the node with <value>; fails when the node has none
+                delete     Remove the attribute of the node, which then inherits from above;
+                           fails when the node has none
+                effective  Print the effective roles of the user named by <value> at the path;
+                           the requester when <value> is omitted
+
+            The value of create and update is a list of entries, either in the command-line form
+            (e.g. alice:rwxp,bob:r) or in the JSON form
+            (e.g. '[{"user": "alice", "permissions": "rwxp"}]').
+
+            --fmt selects the format of what read and effective print: cli (the default) or json.
+
+            This command can fail because:
+            - the path names no node
+            - at the server ('/'), create and delete always fail: the server attribute is configured
+              at start-up, in the server configuration file
+            - the value is invalid, or names a user not listed above the node
+            - on a server without a server attribute, node attributes cannot be created, and effective
+              fails: the server does not use Permissions attributes
+            - the change would leave a node, or the server, without any user holding p
+
+            After a change, the clients receiving the nodes concerned (every client, for a change of
+            the server attribute) synchronise fully at their next request.
+
+            Usage:
+
+                --permissions create /s alice:rwxp,bob:r
+                --permissions read /s --fmt json
+                --permissions effective /s/f bob
+                --permissions update / admin:rwxlops,alice:rwxp,bob:r
+
+    .. tab:: Request
+
+        ``--permissions create /suite alice:rwxp,bob:r,operator:rwxp``:
+
+        .. code-block:: json
+
+            {
+              "21ClientToServerRequest": {
+                "cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "PermissionsCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": {
+                        "cereal_class_version": 0,
+                        "value0": {
+                          "cereal_class_version": 0,
+                          "cl_host_": "host.example.com"
+                        },
+                        "user_": "operator"
+                      },
+                      "operation_": "create",
+                      "path_": "/suite",
+                      "value_": "alice:rwxp,bob:r,operator:rwxp",
+                      "format_": 0
+                    }
+                  }
+                }
+              }
+            }
+
+        ``--permissions effective /suite/family bob`` differs in ``operation_``, ``path_`` and ``value_``;
+        ``--fmt json`` sets ``format_`` to ``1``:
+
+        .. code-block:: json
+
+            {
+              "21ClientToServerRequest": {
+                "cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "PermissionsCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": {
+                        "cereal_class_version": 0,
+                        "value0": {
+                          "cereal_class_version": 0,
+                          "cl_host_": "host.example.com"
+                        },
+                        "user_": "operator"
+                      },
+                      "operation_": "effective",
+                      "path_": "/suite/family",
+                      "value_": "bob",
+                      "format_": 0
+                    }
+                  }
+                }
+              }
+            }
+
+    .. tab:: Reply
+
+        ``create``, ``update`` and ``delete`` return the generic ``StcCmd`` reply with ``api_`` equal to
+        ``0``:
+
+        .. code-block:: json
+
+            {
+              "22ServerToClientResponse": {
+                "stc_cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "StcCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": { "cereal_class_version": 0 },
+                      "api_": 0
+                    }
+                  }
+                }
+              }
+            }
+
+        ``read`` and ``effective`` return an ``SStringCmd`` whose ``str_`` field holds the result, here of
+        ``--permissions read /suite --fmt json``:
+
+        .. code-block:: json
+
+            {
+              "22ServerToClientResponse": {
+                "stc_cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "SStringCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": { "cereal_class_version": 0 },
+                      "str_": "[{\"permissions\":\"rwxp\",\"user\":\"alice\"},{\"permissions\":\"r\",\"user\":\"bob\"},{\"permissions\":\"rwxp\",\"user\":\"operator\"}]"
+                    }
+                  }
+                }
+              }
+            }
+
+        A request refused by the authorisation returns an ``ErrorCmd`` whose ``kind_`` is ``1``
+        (``PermissionDenied``); the field is written only for a denial:
+
+        .. code-block:: json
+
+            {
+              "22ServerToClientResponse": {
+                "stc_cmd_": {
+                  "polymorphic_id": 2147483649,
+                  "polymorphic_name": "ErrorCmd",
+                  "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                      "cereal_class_version": 0,
+                      "value0": { "cereal_class_version": 0 },
+                      "error_msg_": "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions (role p required at /suite) [--permissions=update /suite alice:rwxp,bob:rx :operator@host.example.com]",
+                      "kind_": 1
                     }
                   }
                 }

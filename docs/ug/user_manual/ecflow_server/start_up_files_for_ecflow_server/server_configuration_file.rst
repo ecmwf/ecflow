@@ -121,6 +121,10 @@ For example:
       }
     }
 
+The ``permissions`` member holds the server Permissions attribute, in its JSON form, a list of entries such as
+``{"user": "admin", "permissions": "rwxlops"}``; without it, the server sets no server attribute. See
+:ref:`permissions_attribute_server`.
+
 The settings, their defaults and their accepted values are listed in :ref:`server_configuration`.
 
 Values
@@ -131,6 +135,7 @@ Each value has the native JSON type of its setting:
 - **Integer:** a JSON integer, e.g. ``300``; not a string, nor a number with a fraction or an exponent.
 - **Text:** a JSON string, e.g. ``"server.log"``.
 - **Boolean:** ``true`` or ``false``, e.g. for ``ECF_DEBUG_SERVER`` and the options.
+- **JSON:** a JSON array, for ``permissions``.
 
 The file can also state the host and the port of its server, which must then match its name:
 

@@ -10,7 +10,6 @@ import json
 import pathlib
 import sys
 
-import jsonschema
 
 
 def load_json(path: pathlib.Path):
@@ -19,6 +18,9 @@ def load_json(path: pathlib.Path):
 
 
 def check_schema(manifest, schema):
+    # Imported here, so that the cross-reference checks, and the scripts importing this module, run without it
+    import jsonschema
+
     validator_cls = jsonschema.validators.validator_for(schema)
     validator_cls.check_schema(schema)
     validator = validator_cls(schema)
@@ -84,6 +86,14 @@ def check_cross_references(manifest):
             problems.append(
                 f"environment variable '{variable['name']}' overridable_by unknown global-option '{overridable_by}'"
             )
+
+    # Roles (D6.3): none is never checked anywhere, and task commands are never subject to authorisation.
+    for command in manifest.get("commands", []):
+        for entry in command.get("permissions", []):
+            if (entry.get("roles") == "none") != (entry.get("at") == "none"):
+                problems.append(f"command '{command['name']}' pairs roles '{entry.get('roles')}' with at '{entry.get('at')}'")
+        if command.get("kind") == "task" and [entry.get("roles") for entry in command.get("permissions", [])] != ["none"]:
+            problems.append(f"task command '{command['name']}' must require no role")
 
     # A description holds one line per array element; no element may contain an embedded newline.
     for kind, entries in (

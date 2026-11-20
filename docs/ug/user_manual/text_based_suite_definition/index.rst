@@ -38,6 +38,8 @@ system hierarchy (see :numref:`Table %s<suite_def_analogy_table>`).
      - Text signal (not part of the file system)
    * - Dependency
      - Soft link (can span file systems)
+   * - Permissions
+     - Access permissions (owner, group and other modes, or an access control list)
 
 
 Normally a suite is defined using a file, or via the python API.

@@ -70,4 +70,15 @@ private:
     Node node_;
 };
 
+///
+/// @brief Writes a node of the tree as compact JSON text.
+///
+/// The members of mappings keep their document order; no white space is written outside strings, and strings are
+/// written as UTF-8.
+///
+/// @param[in] tree The node written, with its descendants
+/// @return The JSON text, e.g. `[{"user":"alice"}]`.
+///
+[[nodiscard]] std::string to_compact_json(const CTree& tree);
+
 } // namespace ecf::cfg

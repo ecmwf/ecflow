@@ -491,6 +491,9 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
             os << ecf::HelpCatalog::not_provided << "\n\n";
         }
         if (!CommandFilter::is_option(od->long_name())) {
+            if (std::optional<std::string> roles = ecf::HelpCatalog::roles_for(od->long_name())) {
+                os << *roles << "\n\n";
+            }
             os << client_env_description();
             if (ecf::Child::valid_child_cmd(od->long_name())) {
                 os << "\n";

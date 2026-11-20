@@ -32,6 +32,7 @@
 #include "ecflow/node/parser/LimitParser.hpp"
 #include "ecflow/node/parser/MeterParser.hpp"
 #include "ecflow/node/parser/MirrorParser.hpp"
+#include "ecflow/node/parser/PermissionsParser.hpp"
 #include "ecflow/node/parser/QueueParser.hpp"
 #include "ecflow/node/parser/RepeatParser.hpp"
 #include "ecflow/node/parser/TimeParser.hpp"
@@ -79,6 +80,7 @@ public:
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
+        addParser(new PermissionsParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -176,6 +178,7 @@ public:
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
+        addParser(new PermissionsParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -281,6 +284,7 @@ public:
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
+        addParser(new PermissionsParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -405,6 +409,7 @@ public:
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
         addParser(new MirrorParser(p));
+        addParser(new PermissionsParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -474,6 +479,7 @@ DefsParser::DefsParser(DefsStructureParser* p)
     addParser(new SuiteParser(p));
     addParser(new VariableParser(p, true));
     addParser(new ExternParser(p));
+    addParser(new PermissionsParser(p)); // the server attribute, in state files only
 
     // for defs stat only
     addParser(new DefsStateParser(p));

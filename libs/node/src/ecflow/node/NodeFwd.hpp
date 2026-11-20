@@ -40,6 +40,7 @@ class LateAttr;
 class AutoCancelAttr;
 class AutoArchiveAttr;
 class AutoRestoreAttr;
+class Permissions;
 } // namespace ecf
 
 using memento_ptr          = std::shared_ptr<Memento>;

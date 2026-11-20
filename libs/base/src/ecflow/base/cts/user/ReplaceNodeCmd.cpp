@@ -4,6 +4,7 @@
 #include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
@@ -12,6 +13,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
+#include "ecflow/node/PermissionsChange.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
@@ -113,8 +115,41 @@ ecf::authentication_t ReplaceNodeCmd::authenticate(AbstractServer& server) const
     return implementation::do_authenticate(*this, server);
 }
 
-ecf::authorisation_t ReplaceNodeCmd::authorise(AbstractServer& server) const {
-    return implementation::do_authorise(*this, server);
+ecf::authorisation_t ReplaceNodeCmd::authorise(const ecf::RequestContext& context) const {
+    return implementation::do_authorise(*this, context);
+}
+
+defs_ptr ReplaceNodeCmd::client_definitions() const {
+    if (!parsed_ && !clientDefs_.empty()) {
+        std::string errMsg, warningMsg;
+        auto defs = Defs::create();
+        if (defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
+            parsed_ = defs;
+        }
+    }
+    return parsed_;
+}
+
+ReplaceNodeCmd::Target ReplaceNodeCmd::target(const Defs& server, const node_ptr& client_node, bool create) {
+    Target result;
+    result.existing = server.findAbsNode(client_node->absNodePath());
+    result.imported = client_node.get();
+    if (result.existing) {
+        if (Node* parent = result.existing->parent(); parent) {
+            result.parent = server.findAbsNode(parent->absNodePath());
+        }
+        return result;
+    }
+    if (create) {
+        for (const Node* parent = result.imported->parent(); parent != nullptr; parent = parent->parent()) {
+            result.parent = server.findAbsNode(parent->absNodePath());
+            if (result.parent) {
+                break;
+            }
+            result.imported = parent;
+        }
+    }
+    return result;
 }
 
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
@@ -122,13 +157,28 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
     Defs* defs = as->defs().get();
 
+    // Parsed by the authorisation, or here
     std::string errMsg, warningMsg;
-    defs_ptr client_defs = Defs::create();
-    if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
-        throw std::runtime_error(
-            MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
+    defs_ptr client_defs = std::exchange(parsed_, nullptr);
+    if (!client_defs) {
+        client_defs = Defs::create();
+        if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
+            throw std::runtime_error(
+                MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
+        }
     }
 
+    // The attributes brought are validated where the subtree goes (R4.5), before anything changes
+    ecf::PermissionsChange permissions(*defs);
+    if (const auto client_node = client_defs->findAbsNode(pathToNode_); client_node) {
+        const auto where = target(*defs, client_node, createNodesAsNeeded_);
+        if (where.existing || createNodesAsNeeded_) {
+            ecf::check_permissions_entries(*where.imported, as->limits().permissions_entries); // R11.10
+            permissions.validate_transfer(*where.imported, where.parent.get());
+        }
+    }
+
+    // Zombies only once the replace is accepted
     if (force_) {
         node_ptr node = defs->findAbsNode(pathToNode_);
         as->zombie_ctrl().add_user_zombies(node.get(), CtsApi::replace_arg());
@@ -140,6 +190,7 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     if (!client_node_to_add) {
         throw std::runtime_error(errorMsg);
     }
+    permissions.log(identity().username().value() + "@" + hostname());
 
     // ECFLOW-835, flag node as changed, before check for trigger expressions.
     add_node_for_edit_history(defs, pathToNode_);

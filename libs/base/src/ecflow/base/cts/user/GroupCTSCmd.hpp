@@ -56,7 +56,7 @@ public:
     bool equals(ClientToServerCmd*) const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
-    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(const ecf::RequestContext& context) const override;
 
     void addChild(const Cmd_ptr& childCmd);
     const std::vector<Cmd_ptr>& cmdVec() const { return cmdVec_; }

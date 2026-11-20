@@ -19,6 +19,10 @@ public:
     void init(const std::string& s) { log_file_path_ = s; }
     const std::string& log_file_path() const { return log_file_path_; }
     std::string print() const override;
+    /// @copydoc ServerToClientCmd::filtering
+    [[nodiscard]] ecf::ReplyFiltering filtering() const override {
+        return ecf::ReplyFiltering::None;
+    } // the server log (D5.28)
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
     void cleanup() override { std::string{}.swap(log_file_path_); } /// run in the server, after command send to client

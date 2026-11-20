@@ -99,6 +99,14 @@ authenticates it with the available mechanisms (e.g. white list files, password 
 
 ``enable_ssl()`` selects the SSL transport and locates the certificate as described in :ref:`open_ssl`.
 
+On a server using :ref:`Permissions attributes <permissions_attribute>`, each request is then authorised by the
+roles the authenticated user holds:
+
+- a denied request fails with an error whose ``failure()`` is
+  :ref:`Failure::PermissionDenied <rust_failure_permissiondenied>`;
+- the methods ``create_permissions``, ``read_permissions``, ``update_permissions``, ``delete_permissions`` and
+  ``effective_permissions`` read and change the attributes (see :ref:`permissions_attribute_rust`).
+
 API Documentation
 =================
 

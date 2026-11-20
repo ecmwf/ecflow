@@ -163,8 +163,11 @@ impl Client {
     }
 
     /// Attach the failure class ecFlow diagnosed for the request that just threw.
+    ///
+    /// The class is taken in every case, so that it is never attached to a later error raised without a request.
     fn diagnose<T>(&self, result: std::result::Result<T, Exception>) -> Result<T> {
-        result.map_err(|e| Error::new(Failure::from(self.inner.last_failure()), e.what()))
+        let failure = Failure::from(self.inner.take_failure());
+        result.map_err(|e| Error::new(failure, e.what()))
     }
 
     // ==================== Connection configuration ====================
@@ -190,6 +193,10 @@ impl Client {
     }
 
     /// Override the user name from `ECF_USER`.
+    ///
+    /// The name follows the user name model (valid UTF-8; no white space,
+    /// control character, `#`, `,`, `:` or `;`; not starting with `-`; not
+    /// `*`): a request under another name fails before anything is sent.
     pub fn set_user_name(&mut self, user: &str) {
         let_cxx_string!(user = user);
         self.inner.pin_mut().set_user_name(&user);
@@ -246,7 +253,10 @@ impl Client {
     /// it does.
     pub fn wait_for_server_reply(&mut self, timeout: Duration) -> bool {
         let seconds = i32::try_from(timeout.as_secs()).unwrap_or(i32::MAX);
-        self.inner.wait_for_server_reply(seconds)
+        let answered = self.inner.wait_for_server_reply(seconds);
+        // The failures of the pings are not reported: they must not be attached to a later error
+        let _ = self.inner.take_failure();
+        answered
     }
 
     /// The path of the certificate used for SSL. Fails when built without
@@ -720,6 +730,10 @@ impl Client {
     /// `value`: either a plain value, which becomes the current value, or
     /// options applied together, as for `ecflow_client --alter change repeat`,
     /// such as `"--begin 20260101 --end 20261231 --current 20260115"`.
+    ///
+    /// The Permissions attribute is not changed by `alter`: use
+    /// [`Client::create_permissions`], [`Client::update_permissions`] and
+    /// [`Client::delete_permissions`], which require the role `p`.
     pub fn alter<I, S>(
         &mut self,
         paths: I,
@@ -760,6 +774,84 @@ impl Client {
             self.inner
                 .alter_sort(&strings(paths), &attribute, recursive),
         )
+    }
+
+    // ==================== Permissions ====================
+
+    /// Add a Permissions attribute to the node (`--permissions create`).
+    /// `value` lists the roles of each user, in the command-line form, such
+    /// as `alice:rwxp,bob:r`, or the JSON form, such as
+    /// `[{"user": "alice", "permissions": "rwxp"}]`.
+    ///
+    /// Requires the role `p` at the node; fails with
+    /// [`Failure::PermissionDenied`] otherwise. Fails when the value is
+    /// invalid, when the node already has an attribute, when the server has no
+    /// server Permissions attribute, or when the change is rejected: an entry
+    /// naming a user not listed above the node, or a node left without a user
+    /// holding `p`.
+    pub fn create_permissions(&mut self, path: &str, value: &str) -> Result<()> {
+        self.permissions("create", path, value, false).map(|_| ())
+    }
+
+    /// The Permissions attribute of the node, or of the server for `/`
+    /// (`--permissions read`), in the JSON form: a list of objects with the
+    /// keys `permissions` (the letters of the roles, and `s` for a sticky
+    /// entry) and `user`, sorted by user, such as
+    /// `[{"permissions":"rwxp","user":"alice"},{"permissions":"r","user":"bob"}]`.
+    ///
+    /// Requires the role `r` at the node; fails when the node has no
+    /// attribute.
+    pub fn read_permissions(&mut self, path: &str) -> Result<String> {
+        self.permissions("read", path, "", true)
+    }
+
+    /// Replace the Permissions attribute of the node, or of the server for
+    /// `/` (`--permissions update`); `value` is as for
+    /// [`Client::create_permissions`]. Entries of the nodes below naming users
+    /// no longer listed above them are removed.
+    ///
+    /// Requires the role `p` at the node; fails when the node has no
+    /// attribute, or when the change is rejected.
+    pub fn update_permissions(&mut self, path: &str, value: &str) -> Result<()> {
+        self.permissions("update", path, value, false).map(|_| ())
+    }
+
+    /// Remove the Permissions attribute of the node
+    /// (`--permissions delete`); the server attribute cannot be removed at
+    /// run time.
+    ///
+    /// Requires the role `p` at the node; fails when the node has no
+    /// attribute, or when the change is rejected.
+    pub fn delete_permissions(&mut self, path: &str) -> Result<()> {
+        self.permissions("delete", path, "", false).map(|_| ())
+    }
+
+    /// The letters of the roles `user` holds at the node, the requester's
+    /// with `None` (`--permissions effective`), such as `rwx`; empty when the
+    /// user holds none.
+    ///
+    /// Requires the role `r` at the node. Fails when the server does not use
+    /// Permissions attributes (it has no server attribute).
+    pub fn effective_permissions(&mut self, path: &str, user: Option<&str>) -> Result<String> {
+        self.permissions("effective", path, user.unwrap_or_default(), false)
+    }
+
+    fn permissions(
+        &mut self,
+        operation: &str,
+        path: &str,
+        value: &str,
+        json: bool,
+    ) -> Result<String> {
+        let_cxx_string!(operation = operation);
+        let_cxx_string!(path = path);
+        let_cxx_string!(value = value);
+        let result = self
+            .inner
+            .pin_mut()
+            .permissions(&operation, &path, &value, json);
+        self.diagnose(result)?;
+        Ok(self.inner.get_string().to_string())
     }
 
     // ==================== Zombies ====================
