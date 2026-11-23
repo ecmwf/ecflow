@@ -1,0 +1,8 @@
+{# SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
+   SPDX-License-Identifier: Apache-2.0 #}
+{% extends "ci-infrastructure/rust-bindings-runner.sh.j2" %}
+{# ecflow-sys has no system mode; its default features build ecflow with SSL. #}
+{% block cargo_features %}{% endblock %}
+{% block set_environment %}
+export BOOST_ROOT=/usr
+{% endblock %}

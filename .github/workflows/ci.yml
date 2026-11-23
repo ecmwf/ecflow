@@ -1,19 +1,18 @@
 # SPDX-FileCopyrightText: 2009- European Centre for Medium-Range Weather Forecasts (ECMWF)
 # SPDX-License-Identifier: Apache-2.0
 
+# GENERATED FILE - DO NOT EDIT.
+# Regenerate via the ci-infrastructure-generate CLI.
+# Source of truth: each repo's .ci/manifest.toml.
 name: CI
 
 on:
   push:
-    branches: [develop, main]
-    paths-ignore:
-      - ".cd/**"
-      - ".github/cd-config.yml"
+    branches: [develop, master, main]
+    paths-ignore: [".cd/**", .github/cd-config.yml]
   pull_request:
     types: [opened, reopened, synchronize]
-    paths-ignore:
-      - ".cd/**"
-      - ".github/cd-config.yml"
+    paths-ignore: [".cd/**", .github/cd-config.yml]
   workflow_dispatch:
   schedule:
     - cron: "22 0 * * *"
@@ -21,6 +20,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   ARTIFACT_POLL_INTERVAL: ${{ vars.ARTIFACT_POLL_INTERVAL || '60' }}
@@ -30,9 +32,6 @@ env:
   SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-permissions:
-  contents: read
 
 jobs:
   ci-approval:
@@ -49,34 +48,53 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: ecmwf/ci-infrastructure/actions/pre-commit@main
 
   resolve:
-    name: resolve + wait-build
     needs: ci-approval
     runs-on: ubuntu-latest
     outputs:
-      build-matrix: ${{ steps.r.outputs.matrix-build }}
-      build-hpc-matrix: ${{ steps.r.outputs.matrix-build-hpc }}
+      matrices: ${{ steps.r.outputs.json }}
+      dispatch-plans: ${{ steps.r.outputs.dispatch-plans }}
     steps:
       - id: mint
-        uses: actions/create-github-app-token@v3
+        uses: ecmwf/ci-infrastructure/actions/mint-token@main
         with:
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
+          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          permissions: contents:read actions:read
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - id: r
         uses: ecmwf/ci-infrastructure/actions/resolve-deps@main
         with:
-          matrix: build,build-hpc
+          matrix: build,build-hpc,rust
           token: ${{ steps.mint.outputs.token }}
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          app-private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-      - uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
+          rebuild-missing: 'true'
+      - name: Wait for the deps of build, rust
+        if: steps.r.outputs.dispatch-plans == '[]'
+        uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
         with:
-          matrix: ${{ steps.r.outputs.matrix-build }}
+          matrix: ${{ steps.r.outputs.json }}
+          kinds: build,rust
           token: ${{ steps.mint.outputs.token }}
+    name: resolve + wait-build
+
+  rebuild-producers:
+    needs: [ci-approval, resolve]
+    runs-on: ubuntu-latest
+    steps:
+      - if: needs.resolve.outputs.dispatch-plans != '' && needs.resolve.outputs.dispatch-plans != '[]'
+        uses: ecmwf/ci-infrastructure/actions/dispatch-producers@main
+        with:
+          dispatch-plans: ${{ needs.resolve.outputs.dispatch-plans }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          client-id: ${{ secrets.CI_DISPATCHER_APP_CLIENT_ID }}
+          app-private-key: ${{ secrets.CI_DISPATCHER_APP_PRIVATE_KEY }}
 
   hpc-gate:
     needs: ci-approval
@@ -90,49 +108,154 @@ jobs:
         uses: ecmwf/ci-infrastructure/actions/hpc-gate@main
 
   wait-build-hpc:
-    needs: [ci-approval, resolve, hpc-gate]
+    needs: [ci-approval, resolve, rebuild-producers, hpc-gate]
     if: needs.hpc-gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - id: mint
-        uses: actions/create-github-app-token@v3
+        uses: ecmwf/ci-infrastructure/actions/mint-token@main
         with:
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-      - uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
+          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          permissions: contents:read actions:read
+      - name: Wait for the deps of build-hpc
+        uses: ecmwf/ci-infrastructure/actions/wait-for-deps@main
         with:
-          matrix: ${{ needs.resolve.outputs.build-hpc-matrix }}
+          matrix: ${{ needs.resolve.outputs.matrices }}
+          kinds: build-hpc
           token: ${{ steps.mint.outputs.token }}
 
   build:
-    needs: [ci-approval, pre-commit, resolve]
-    name: ${{ matrix.name || matrix.platform }}
+    needs: [ci-approval, resolve, rebuild-producers, pre-commit]
+    name: build+test (${{ matrix._resolved['job-name'] }})
     runs-on: ${{ matrix['runs-on'] }}
     container:
       image: ${{ matrix.container || '' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.resolve.outputs.build-matrix) }}
+      matrix: ${{ fromJSON(needs.resolve.outputs.matrices).build }}
     steps:
       - name: Announce image
         uses: ecmwf/ci-infrastructure/actions/announce-image@main
       - id: mint
-        uses: actions/create-github-app-token@v3
+        uses: ecmwf/ci-infrastructure/actions/mint-token@main
         with:
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
+          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          permissions: contents:read actions:read
       - uses: actions/checkout@v6
-
+        with:
+          persist-credentials: false
       - name: Fetch resolved deps
         id: deps
         uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
         with:
           deps-json: ${{ toJSON(matrix._resolved.deps) }}
           token: ${{ steps.mint.outputs.token }}
+      - name: Print dependency table
+        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
+        with:
+          resolved: ${{ toJSON(matrix._resolved) }}
+      - name: Build
+        id: build
+        uses: ecmwf/ci-infrastructure/actions/run-job-script@main
+        with:
+          job-script: ${{ matrix.job-script }}
+          matrix-leg: ${{ toJSON(matrix) }}
+          package: ecflow
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+      - name: Publish
+        uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
+        with:
+          install-path: ${{ steps.build.outputs.install-path }}
+          artifact-name: ${{ matrix._resolved['own-artifact-name'] }}
 
-      - name: Build ecflow
+  build-hpc:
+    needs: [ci-approval, resolve, rebuild-producers, pre-commit, hpc-gate, wait-build-hpc]
+    if: needs.hpc-gate.outputs.run == 'true'
+    name: build-hpc (${{ matrix._resolved['job-name'] }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container || '' }}
+      credentials:
+        username: ${{ secrets.ECCR_PULL_ROBOT_NAME }}
+        password: ${{ secrets.ECCR_PULL_ROBOT_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.matrices).build-hpc }}
+    steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
+      - id: mint
+        uses: ecmwf/ci-infrastructure/actions/mint-token@main
+        with:
+          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          permissions: contents:read actions:read
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Fetch resolved deps
+        id: deps
+        uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
+        with:
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          token: ${{ steps.mint.outputs.token }}
+          stage-only: 'true'
+      - name: Print dependency table
+        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
+        with:
+          resolved: ${{ toJSON(matrix._resolved) }}
+          own-source: ''
+      - name: Build on HPC
+        id: build
+        uses: ecmwf/ci-infrastructure/actions/build-on-hpc@main
+        with:
+          site: ${{ matrix.site }}
+          job-script: ${{ matrix.job-script }}
+          matrix-leg: ${{ toJSON(matrix) }}
+          artifact-name: ${{ matrix._resolved['own-artifact-name'] }}
+          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
+          work-dir: ${{ vars.HPC_CI_WORK_DIR }}
+          remote-work-dir: ${{ vars.HPC_CI_REMOTE_WORK_DIR }}
+          troika-user: ${{ secrets.HPC_CI_SSH_USER }}
+
+  rust:
+    needs: [ci-approval, resolve, rebuild-producers, pre-commit]
+    name: rust (${{ matrix._resolved['job-name'] }})
+    runs-on: ${{ matrix['runs-on'] }}
+    container:
+      image: ${{ matrix.container || '' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.matrices).rust }}
+    steps:
+      - name: Announce image
+        uses: ecmwf/ci-infrastructure/actions/announce-image@main
+      - id: mint
+        uses: ecmwf/ci-infrastructure/actions/mint-token@main
+        with:
+          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
+          repositories: ecbuild,ecflow,stack-dependencies
+          permissions: contents:read actions:read
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Fetch resolved deps
+        id: deps
+        uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
+        with:
+          deps-json: ${{ toJSON(matrix._resolved.deps) }}
+          token: ${{ steps.mint.outputs.token }}
+      - name: Print dependency table
+        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
+        with:
+          resolved: ${{ toJSON(matrix._resolved) }}
+      - name: Run
         id: build
         uses: ecmwf/ci-infrastructure/actions/run-job-script@main
         with:
@@ -141,121 +264,9 @@ jobs:
           package: ecflow
           cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
 
-      - name: Publish ecflow
-        uses: ecmwf/ci-infrastructure/actions/publish-artifact@main
-        with:
-          install-path: ${{ steps.build.outputs.install-path }}
-          artifact-name: ${{ matrix._resolved.own-artifact-name }}
-
-      # The Rust bindings in rust/ build ecflow themselves with the resolved
-      # ecbuild and the image's Boost, and run their server round trip against
-      # the ecflow_server built above.
-      - name: Set up Rust
-        if: ${{ matrix.platform == 'ubuntu-24.04' }}
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - name: Check Rust formatting
-        if: ${{ matrix.platform == 'ubuntu-24.04' }}
-        working-directory: rust
-        run: cargo fmt --all --check
-
-      - name: Build and lint Rust bindings
-        if: ${{ matrix.platform == 'ubuntu-24.04' }}
-        working-directory: rust
-        env:
-          CC: ${{ matrix.c-compiler }}
-          CXX: ${{ matrix.cxx-compiler }}
-          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
-          BOOST_ROOT: /usr
-        run: cargo clippy --workspace --all-targets -- -D warnings
-
-      - name: Build Rust documentation
-        if: ${{ matrix.platform == 'ubuntu-24.04' }}
-        working-directory: rust
-        env:
-          CC: ${{ matrix.c-compiler }}
-          CXX: ${{ matrix.cxx-compiler }}
-          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
-          BOOST_ROOT: /usr
-          RUSTDOCFLAGS: -D warnings
-        run: cargo doc --workspace --no-deps
-
-      - name: Test Rust bindings
-        if: ${{ matrix.platform == 'ubuntu-24.04' }}
-        working-directory: rust
-        env:
-          CC: ${{ matrix.c-compiler }}
-          CXX: ${{ matrix.cxx-compiler }}
-          CMAKE_PREFIX_PATH: ${{ steps.deps.outputs.cmake-prefix-path }}
-          BOOST_ROOT: /usr
-          ECFLOW_SERVER: ${{ steps.build.outputs.build-dir }}/bin/ecflow_server
-        run: cargo test --workspace
-
-      - name: Print dependency table
-        if: always()
-        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
-        with:
-          resolved: ${{ toJSON(matrix._resolved) }}
-
-  build-hpc:
-    needs: [ci-approval, pre-commit, resolve, wait-build-hpc]
-    name: ${{ matrix.name || matrix.platform }}
-    runs-on: ${{ matrix['runs-on'] }}
-    container:
-      image: ${{ matrix.container }}
-      credentials:
-        username: ${{ secrets.ECCR_PULL_ROBOT_NAME }}
-        password: ${{ secrets.ECCR_PULL_ROBOT_TOKEN }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.resolve.outputs.build-hpc-matrix) }}
-    steps:
-      - name: Announce image
-        uses: ecmwf/ci-infrastructure/actions/announce-image@main
-      - id: mint
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ secrets.CI_PERMISSIONS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_PERMISSIONS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-      - uses: actions/checkout@v6
-
-      - name: Fetch resolved deps
-        id: deps
-        uses: ecmwf/ci-infrastructure/actions/fetch-deps@main
-        with:
-          deps-json: ${{ toJSON(matrix._resolved.deps) }}
-          token: ${{ steps.mint.outputs.token }}
-          # Stage the dep prefixes for shipment without installing anything
-          # here: they are consumed on the compute node, not in this container.
-          install-python-deps: 'false'
-
-      - name: Build ecflow on HPC
-        id: build
-        uses: ecmwf/ci-infrastructure/actions/build-on-hpc@main
-        with:
-          site: ${{ matrix.site }}
-          job-script: ${{ matrix.job-script }}
-          # The render context for the .j2 recipe: the toolchain this leg declares.
-          matrix-leg: ${{ toJSON(matrix) }}
-          artifact-name: ${{ matrix._resolved.own-artifact-name }}
-          cmake-prefix-path: ${{ steps.deps.outputs.cmake-prefix-path }}
-          work-dir: ${{ vars.HPC_CI_WORK_DIR }}
-          remote-work-dir: ${{ vars.HPC_CI_REMOTE_WORK_DIR }}
-          troika-user: ${{ secrets.HPC_CI_SSH_USER }}
-
-      - name: Print dependency table
-        if: always()
-        uses: ecmwf/ci-infrastructure/actions/print-dep-table@main
-        with:
-          resolved: ${{ toJSON(matrix._resolved) }}
-          own-source: ${{ steps.build.outputs.cache-hit == 'true' && 'artifact' || 'built' }}
-
   collect-result-hpc:
     name: collect HPC results
-    if: always() && needs.hpc-gate.outputs.run == 'true'
+    if: always() && needs['hpc-gate'].outputs.run == 'true'
     needs: [ci-approval, hpc-gate, wait-build-hpc, build-hpc]
     runs-on: ubuntu-latest
     permissions:
@@ -269,7 +280,7 @@ jobs:
   ci-result:
     name: collect results
     if: always()
-    needs: [ci-approval, hpc-gate, pre-commit, resolve, build]
+    needs: [ci-approval, hpc-gate, pre-commit, resolve, build, rust]
     runs-on: ubuntu-latest
     permissions:
       statuses: write
