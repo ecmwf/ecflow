@@ -128,7 +128,7 @@ jobs:
       - id: mint
         uses: ecmwf/ci-infrastructure/actions/mint-token@main
         with:
-          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          client-id: ${{ vars.CI_READER_APP_CLIENT_ID }}
           private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
           repositories: ecbuild,ecflow,stack-dependencies
           permissions: contents:read actions:read
@@ -163,7 +163,7 @@ jobs:
         with:
           dispatch-plans: ${{ needs.resolve.outputs.dispatch-plans }}
           repositories: ecbuild,ecflow,stack-dependencies
-          client-id: ${{ secrets.CI_DISPATCHER_APP_CLIENT_ID }}
+          client-id: ${{ vars.CI_DISPATCHER_APP_CLIENT_ID }}
           app-private-key: ${{ secrets.CI_DISPATCHER_APP_PRIVATE_KEY }}
 
   ecflow__build:
@@ -180,7 +180,7 @@ jobs:
       - id: mint
         uses: ecmwf/ci-infrastructure/actions/mint-token@main
         with:
-          client-id: ${{ secrets.CI_READER_APP_CLIENT_ID }}
+          client-id: ${{ vars.CI_READER_APP_CLIENT_ID }}
           private-key: ${{ secrets.CI_READER_APP_PRIVATE_KEY }}
           repositories: ecbuild,ecflow,stack-dependencies
           permissions: contents:read actions:read
@@ -223,7 +223,7 @@ jobs:
       - id: report
         uses: ecmwf/ci-infrastructure/actions/report-check-runs@main
         with:
-          client-id: ${{ secrets.CI_REPORTER_APP_CLIENT_ID }}
+          client-id: ${{ vars.CI_REPORTER_APP_CLIENT_ID }}
           private-key: ${{ secrets.CI_REPORTER_APP_PRIVATE_KEY }}
           head-repo: ${{ inputs.from-repo }}
           head-sha: ${{ inputs.from-sha }}
@@ -240,7 +240,7 @@ jobs:
     steps:
       - uses: ecmwf/ci-infrastructure/actions/report-check-runs@main
         with:
-          client-id: ${{ secrets.CI_REPORTER_APP_CLIENT_ID }}
+          client-id: ${{ vars.CI_REPORTER_APP_CLIENT_ID }}
           private-key: ${{ secrets.CI_REPORTER_APP_PRIVATE_KEY }}
           head-repo: ${{ inputs.from-repo }}
           head-sha: ${{ inputs.from-sha }}
