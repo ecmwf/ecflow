@@ -17,24 +17,25 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - almalinux-9.7
-          - almalinux-10.1
-          - alpine-3.23
+          - almalinux-9.9
+          - almalinux-10.3
+          - arch-20261122
+          - alpine-3.24
           - debian-11.11
-          - debian-12.12
-          - debian-13.2
-          - fedora-37
-          - fedora-42
+          - debian-12.15
+          - debian-13.8
+          - fedora-45
           - opensuse-tumbleweed
           - ubuntu-22.04
           - ubuntu-24.04
+          - ubuntu-26.04
 
         preset:
           - linux.gcc.all.release
           - linux.clang.all.release
         jobs: [ 4 ]
         exclude:
-          - os: almalinux-9.7
+          - os: almalinux-9.9
             preset: linux.clang.all.release
             # This combination is not supported, as Clang fails to compile Chrono.hpp which does #include <boost/date_time/local_time/conversion.hpp
             # and ends up with the following error:
@@ -92,13 +93,13 @@ jobs:
       #    when the test tries to read the output of thea subprocess, complaining that the file descriptor is not valid.
 
       - name: Test ecflow (default)
-        if: ${{ matrix.os != 'alpine-3.23' && matrix.os != 'opensuse-tumbleweed' }}
+        if: ${{ matrix.os != 'alpine-3.24' && matrix.os != 'opensuse-tumbleweed' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
 
       - name: Test ecflow (specific to Alpine)
-        if: ${{ matrix.os == 'alpine-3.23' }}
+        if: ${{ matrix.os == 'alpine-3.24' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E s_foolproof -j ${{ matrix.jobs }}

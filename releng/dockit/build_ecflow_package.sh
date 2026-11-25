@@ -31,7 +31,7 @@ set -o pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 
-DOCKER_IMAGE="marcosbento/lumen:debian-13.7"
+DOCKER_IMAGE="marcosbento/lumen:debian-13.8"
 
 SANDBOX_DIR="${PWD}/build_ecflow_package.sandbox"
 # By default, each package is copied into the directory named after it (e.g. ecflow-server/, ecflow-ui/), which
